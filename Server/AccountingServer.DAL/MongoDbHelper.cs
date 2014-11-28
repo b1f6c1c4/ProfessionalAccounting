@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AccountingServer.Entities;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -82,7 +80,7 @@ namespace AccountingServer.DAL
         {
             var voucher = new Voucher { ID = doc["_id"].AsObjectId.Wrap() };
             if (doc.Contains("date"))
-                voucher.Date = doc["date"].AsDateTime;
+                voucher.Date = doc["date"].AsLocalTime;
             voucher.Type = VoucherType.Ordinal;
             if (doc.Contains("special"))
                 switch (doc["special"].AsString)
@@ -112,6 +110,7 @@ namespace AccountingServer.DAL
                 var details = new VoucherDetail[ddocs.Count];
                 for (var i = 0; i < ddocs.Count; i++)
                     details[i] = ddocs[i].AsBsonDocument.ToVoucherDetail();
+                voucher.Details = details;
             }
             if (doc.Contains("remark"))
                 voucher.Remark = doc["remark"].AsString;
@@ -164,7 +163,9 @@ namespace AccountingServer.DAL
             }
         }
 
-        protected IMongoQuery GetQuery(Voucher filter)
+        private static IMongoQuery GetUniqueQuery(Voucher voucher) { return Query.EQ("_id", voucher.ID.UnWrap()); }
+
+        private static IMongoQuery GetQuery(Voucher filter)
         {
             var lst = new List<IMongoQuery>();
 
@@ -198,7 +199,7 @@ namespace AccountingServer.DAL
             return lst.Any() ? Query.And(lst) : Query.Null;
         }
 
-        protected IMongoQuery GetQuery(VoucherDetail filter)
+        private static IMongoQuery GetQuery(VoucherDetail filter)
         {
             var lst = new List<IMongoQuery>();
 
@@ -216,7 +217,7 @@ namespace AccountingServer.DAL
             return lst.Any() ? Query.And(lst) : Query.Null;
         }
 
-        protected static bool IsMatch(VoucherDetail filter, VoucherDetail voucherDetail)
+        private static bool IsMatch(VoucherDetail filter, VoucherDetail voucherDetail)
         {
             if (filter.ID != null)
                 if (filter.ID != voucherDetail.ID)
@@ -239,6 +240,7 @@ namespace AccountingServer.DAL
             if (filter.Remark != null)
                 if (filter.Remark != voucherDetail.Remark)
                     return false;
+            return true;
         }
 
         public Voucher SelectVoucher(IObjectID id)
@@ -268,6 +270,12 @@ namespace AccountingServer.DAL
         {
             var result = m_Vouchers.Remove(GetQuery(filter));
             return result.Response["n"].AsInt32;
+        }
+
+        public bool UpdateVoucher(Voucher entity)
+        {
+            var result = m_Vouchers.Update(GetUniqueQuery(entity), new UpdateDocument(entity.ToBsonDocument()));
+            return result.Ok;
         }
 
         public VoucherDetail SelectDetail(IObjectID id)
@@ -303,19 +311,33 @@ namespace AccountingServer.DAL
             v.Details.CopyTo(d, 0);
             d[v.Details.Length] = entity;
 
-            var result = m_Vouchers.Update(Query.EQ("_id", v.ID.UnWrap()), new UpdateDocument(v.ToBsonDocument()));
+            var result = m_Vouchers.Update(GetUniqueQuery(v), new UpdateDocument(v.ToBsonDocument()));
             return result.Ok;
         }
-        public int DeleteDetails(VoucherDetail filter) { throw new NotImplementedException(); }
-        public DbAsset SelectAsset(Guid id) { throw new NotImplementedException(); }
-        public IEnumerable<DbAsset> SelectAssets(DbAsset filter) { throw new NotImplementedException(); }
-        public bool InsertAsset(DbAsset entity) { throw new NotImplementedException(); }
-        public int DeleteAssets(DbAsset filter) { throw new NotImplementedException(); }
-        public IEnumerable<VoucherDetail> GetXBalances(VoucherDetail filter, bool noCarry = false, int? sID = null, int? eID = null, int dir = 0) { throw new NotImplementedException(); }
-        public void Depreciate() { throw new NotImplementedException(); }
-        public void Carry() { throw new NotImplementedException(); }
-        public IEnumerable<DailyBalance> GetDailyBalance(decimal title, string remark, int dir = 0) { throw new NotImplementedException(); }
-        public IEnumerable<DailyBalance> GetDailyXBalance(decimal title, int dir = 0) { throw new NotImplementedException(); }
-        public string GetFixedAssetName(Guid id) { throw new NotImplementedException(); }
+
+        public int DeleteDetails(VoucherDetail filter)
+        {
+            var count = 0;
+            var v = SelectVouchersWithDetail(filter);
+            foreach (var voucher in v)
+            {
+                voucher.Details = voucher.Details.Where(d => !IsMatch(filter, d)).ToArray();
+                var result = m_Vouchers.Update(GetUniqueQuery(voucher), new UpdateDocument(voucher.ToBsonDocument()));
+                if (result.Ok)
+                    count++;
+            }
+            return count;
+        }
+
+        //public DbAsset SelectAsset(Guid id) { throw new NotImplementedException(); }
+        //public IEnumerable<DbAsset> SelectAssets(DbAsset filter) { throw new NotImplementedException(); }
+        //public bool InsertAsset(DbAsset entity) { throw new NotImplementedException(); }
+        //public int DeleteAssets(DbAsset filter) { throw new NotImplementedException(); }
+        //public IEnumerable<VoucherDetail> GetXBalances(VoucherDetail filter, bool noCarry = false, int? sID = null, int? eID = null, int dir = 0) { throw new NotImplementedException(); }
+        //public void Depreciate() { throw new NotImplementedException(); }
+        //public void Carry() { throw new NotImplementedException(); }
+        //public IEnumerable<DailyBalance> GetDailyBalance(decimal title, string remark, int dir = 0) { throw new NotImplementedException(); }
+        //public IEnumerable<DailyBalance> GetDailyXBalance(decimal title, int dir = 0) { throw new NotImplementedException(); }
+        //public string GetFixedAssetName(Guid id) { throw new NotImplementedException(); }
     }
 }

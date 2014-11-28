@@ -132,260 +132,260 @@ namespace AccountingServer
 
             chart1.Legends[0].Font = new Font("Microsoft YaHei Mono", 28, GraphicsUnit.Pixel);
 
-            GatherData(startDate, endDate);
+            //GatherData(startDate, endDate);
 
             chart1.ChartAreas.ResumeUpdates();
         }
 
-        private void GatherData(DateTime startDate, DateTime endDate)
-        {
-            chart1.Series.Clear();
+        //private void GatherData(DateTime startDate, DateTime endDate)
+        //{
+        //    chart1.Series.Clear();
 
-            Func<string, IEnumerable<decimal>, string, Series> action = (str, titles, ch) =>
-                                                                        {
-                                                                            var s = chart1.Series.Add(str);
-                                                                            s.ChartType = SeriesChartType.StackedArea;
-                                                                            s.ChartArea = ch;
-                                                                            var balance = m_BHelper.GetDailyBalance(
-                                                                                                                    titles,
-                                                                                                                    null,
-                                                                                                                    startDate,
-                                                                                                                    endDate);
-                                                                            for (var dt = startDate;
-                                                                                 dt <= endDate;
-                                                                                 dt = dt.AddDays(1))
-                                                                                s.Points.AddXY(dt, balance[dt]);
-                                                                            return s;
-                                                                        };
+        //    Func<string, IEnumerable<decimal>, string, Series> action = (str, titles, ch) =>
+        //                                                                {
+        //                                                                    var s = chart1.Series.Add(str);
+        //                                                                    s.ChartType = SeriesChartType.StackedArea;
+        //                                                                    s.ChartArea = ch;
+        //                                                                    var balance = m_BHelper.GetDailyBalance(
+        //                                                                                                            titles,
+        //                                                                                                            null,
+        //                                                                                                            startDate,
+        //                                                                                                            endDate);
+        //                                                                    for (var dt = startDate;
+        //                                                                         dt <= endDate;
+        //                                                                         dt = dt.AddDays(1))
+        //                                                                        s.Points.AddXY(dt, balance[dt]);
+        //                                                                    return s;
+        //                                                                };
 
-            action("学生卡", new[] {(decimal)1012.05}, "生活资产").Color = Color.LightSkyBlue;
-            action("现金", new[] { (decimal)1001.00 }, "生活资产").Color = Color.PaleVioletRed;
-            action("公交卡", new[] { (decimal)1012.01 }, "生活资产").Color = Color.BlueViolet;
-            action("借记卡", new[] { (decimal)1002.00 }, "生活资产").Color = Color.Chartreuse;
+        //    action("学生卡", new[] {(decimal)1012.05}, "生活资产").Color = Color.LightSkyBlue;
+        //    action("现金", new[] { (decimal)1001.00 }, "生活资产").Color = Color.PaleVioletRed;
+        //    action("公交卡", new[] { (decimal)1012.01 }, "生活资产").Color = Color.BlueViolet;
+        //    action("借记卡", new[] { (decimal)1002.00 }, "生活资产").Color = Color.Chartreuse;
 
-            Func<string, string, IEnumerable<decimal>, Series> actionT = (str, rmk, titles) =>
-                                                                         {
-                                                                             var s = chart1.Series.Add(str);
-                                                                             s.ChartType = SeriesChartType.StackedArea;
-                                                                             s.ChartArea = "投资资产";
-                                                                             var balance = m_BHelper.GetDailyBalance(
-                                                                                                                     titles,
-                                                                                                                     rmk,
-                                                                                                                     startDate,
-                                                                                                                     endDate);
-                                                                             for (var dt = startDate;
-                                                                                  dt <= endDate;
-                                                                                  dt = dt.AddDays(1))
-                                                                                 s.Points.AddXY(dt, balance[dt]);
-                                                                             return s;
-                                                                         };
-            actionT("存出投资款", null, new[] {(decimal)1012.04}).Color = Color.Maroon;
-            actionT("中银活期宝", "中银活期宝", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.SpringGreen;
-            actionT("广发基金天天红", "广发基金天天红", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.GreenYellow;
-            actionT("余额宝", "余额宝", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.MediumSpringGreen;
-            actionT("民生加银理财月度1027期", "民生加银理财月度1027期", new[] { (decimal)1101.01, (decimal)1101.02 }).Color = Color.Indigo;
-            actionT("中银优选", "中银优选", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.DarkOrange;
-            actionT("中银增利", "中银增利", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.DarkMagenta;
-            actionT("中银纯债C", "中银纯债C", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.DarkOrchid;
-            actionT("定存宝A", "定存宝A", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.Navy;
-            actionT("月息通 YAD14I3000", "月息通 YAD14I3000", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.Olive;
-            actionT("富盈人生第34期", "富盈人生第34期", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.MidnightBlue;
-            actionT("贵金属", null, new[] {(decimal)1441.00}).Color = Color.Gold;
+        //    Func<string, string, IEnumerable<decimal>, Series> actionT = (str, rmk, titles) =>
+        //                                                                 {
+        //                                                                     var s = chart1.Series.Add(str);
+        //                                                                     s.ChartType = SeriesChartType.StackedArea;
+        //                                                                     s.ChartArea = "投资资产";
+        //                                                                     var balance = m_BHelper.GetDailyBalance(
+        //                                                                                                             titles,
+        //                                                                                                             rmk,
+        //                                                                                                             startDate,
+        //                                                                                                             endDate);
+        //                                                                     for (var dt = startDate;
+        //                                                                          dt <= endDate;
+        //                                                                          dt = dt.AddDays(1))
+        //                                                                         s.Points.AddXY(dt, balance[dt]);
+        //                                                                     return s;
+        //                                                                 };
+        //    actionT("存出投资款", null, new[] {(decimal)1012.04}).Color = Color.Maroon;
+        //    actionT("中银活期宝", "中银活期宝", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.SpringGreen;
+        //    actionT("广发基金天天红", "广发基金天天红", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.GreenYellow;
+        //    actionT("余额宝", "余额宝", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.MediumSpringGreen;
+        //    actionT("民生加银理财月度1027期", "民生加银理财月度1027期", new[] { (decimal)1101.01, (decimal)1101.02 }).Color = Color.Indigo;
+        //    actionT("中银优选", "中银优选", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.DarkOrange;
+        //    actionT("中银增利", "中银增利", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.DarkMagenta;
+        //    actionT("中银纯债C", "中银纯债C", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.DarkOrchid;
+        //    actionT("定存宝A", "定存宝A", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.Navy;
+        //    actionT("月息通 YAD14I3000", "月息通 YAD14I3000", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.Olive;
+        //    actionT("富盈人生第34期", "富盈人生第34期", new[] {(decimal)1101.01, (decimal)1101.02}).Color = Color.MidnightBlue;
+        //    actionT("贵金属", null, new[] {(decimal)1441.00}).Color = Color.Gold;
 
-            {
-                var s = chart1.Series.Add("固定资产和无形资产");
-                s.ChartType = SeriesChartType.StackedArea;
-                s.ChartArea = "其他资产";
-                s.Color = Color.BlueViolet;
-                var balance = m_BHelper.GetDailyBalance(
-                                                        new[]
-                                                            {
-                                                                (decimal)1601.00, (decimal)1602.00, (decimal)1603.00,
-                                                                (decimal)1701.00, (decimal)1702.00, (decimal)1703.00
-                                                            },
-                                                        null,
-                                                        startDate,
-                                                        endDate);
-                for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
-                    s.Points.AddXY(dt, balance[dt]);
-            }
-            action(
-                   "原材料等",
-                   new[] {(decimal)1403.00, (decimal)1405.00, (decimal)1412.00, (decimal)1604.00, (decimal)1605.00},
-                   "其他资产").Color = Color.DarkViolet;
-            action(
-                   "其他（含应收）",
-                   new[] {(decimal)1012.03, (decimal)1122.00, (decimal)1221.00, (decimal)1511.00},
-                   "其他资产").Color = Color.MediumVioletRed;
-            action("其他（含预付）", new[] {(decimal)1123.00, (decimal)1606.00, (decimal)1901.00}, "其他资产").Color = Color.Violet;
+        //    {
+        //        var s = chart1.Series.Add("固定资产和无形资产");
+        //        s.ChartType = SeriesChartType.StackedArea;
+        //        s.ChartArea = "其他资产";
+        //        s.Color = Color.BlueViolet;
+        //        var balance = m_BHelper.GetDailyBalance(
+        //                                                new[]
+        //                                                    {
+        //                                                        (decimal)1601.00, (decimal)1602.00, (decimal)1603.00,
+        //                                                        (decimal)1701.00, (decimal)1702.00, (decimal)1703.00
+        //                                                    },
+        //                                                null,
+        //                                                startDate,
+        //                                                endDate);
+        //        for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+        //            s.Points.AddXY(dt, balance[dt]);
+        //    }
+        //    action(
+        //           "原材料等",
+        //           new[] {(decimal)1403.00, (decimal)1405.00, (decimal)1412.00, (decimal)1604.00, (decimal)1605.00},
+        //           "其他资产").Color = Color.DarkViolet;
+        //    action(
+        //           "其他（含应收）",
+        //           new[] {(decimal)1012.03, (decimal)1122.00, (decimal)1221.00, (decimal)1511.00},
+        //           "其他资产").Color = Color.MediumVioletRed;
+        //    action("其他（含预付）", new[] {(decimal)1123.00, (decimal)1606.00, (decimal)1901.00}, "其他资产").Color = Color.Violet;
 
 
-            var balance1 = m_BHelper.GetDailyBalance(new[] {(decimal)6602.03}, null, startDate, endDate, 1);
-            var balance2 = m_BHelper.GetDailyBalance(new[] {(decimal)6602.06}, "食品", startDate, endDate, 1);
-            var balance3 = m_BHelper.GetDailyBalance(new[] {(decimal)6602.01}, "水费", startDate, endDate, 1);
-            var balance4 = m_BHelper.GetDailyBalance(new[] {(decimal)6602.06}, null, startDate, endDate, 1);
-            var balance5 = m_BHelper.GetDailyBalance(
-                                                     new[] {(decimal)6401.00, (decimal)6402.00},
-                                                     null,
-                                                     startDate,
-                                                     endDate,
-                                                     1);
-            var balance6 =
-                m_BHelper.GetDailyBalance(
-                                          new[]
-                                              {
-                                                  (decimal)6602.01, (decimal)6602.02, (decimal)6602.04, (decimal)6602.05,
-                                                  (decimal)6602.08, (decimal)6602.09, (decimal)6602.10, (decimal)6602.99,
-                                                  (decimal)6603.00, (decimal)6711.08, (decimal)6711.09, (decimal)6711.10
-                                              },
-                                          null,
-                                          startDate,
-                                          endDate,
-                                          1);
-            var balance7 = m_BHelper.GetDailyBalance(
-                                                     new[] {(decimal)1601.00, (decimal)1701.00},
-                                                     null,
-                                                     startDate,
-                                                     endDate,
-                                                     1);
-            var balance8 = m_BHelper.GetDailyBalance(
-                                                     new[] {(decimal)1403.00, (decimal)1405.00, (decimal)1605.00},
-                                                     null,
-                                                     startDate,
-                                                     endDate,
-                                                     1);
+        //    var balance1 = m_BHelper.GetDailyBalance(new[] {(decimal)6602.03}, null, startDate, endDate, 1);
+        //    var balance2 = m_BHelper.GetDailyBalance(new[] {(decimal)6602.06}, "食品", startDate, endDate, 1);
+        //    var balance3 = m_BHelper.GetDailyBalance(new[] {(decimal)6602.01}, "水费", startDate, endDate, 1);
+        //    var balance4 = m_BHelper.GetDailyBalance(new[] {(decimal)6602.06}, null, startDate, endDate, 1);
+        //    var balance5 = m_BHelper.GetDailyBalance(
+        //                                             new[] {(decimal)6401.00, (decimal)6402.00},
+        //                                             null,
+        //                                             startDate,
+        //                                             endDate,
+        //                                             1);
+        //    var balance6 =
+        //        m_BHelper.GetDailyBalance(
+        //                                  new[]
+        //                                      {
+        //                                          (decimal)6602.01, (decimal)6602.02, (decimal)6602.04, (decimal)6602.05,
+        //                                          (decimal)6602.08, (decimal)6602.09, (decimal)6602.10, (decimal)6602.99,
+        //                                          (decimal)6603.00, (decimal)6711.08, (decimal)6711.09, (decimal)6711.10
+        //                                      },
+        //                                  null,
+        //                                  startDate,
+        //                                  endDate,
+        //                                  1);
+        //    var balance7 = m_BHelper.GetDailyBalance(
+        //                                             new[] {(decimal)1601.00, (decimal)1701.00},
+        //                                             null,
+        //                                             startDate,
+        //                                             endDate,
+        //                                             1);
+        //    var balance8 = m_BHelper.GetDailyBalance(
+        //                                             new[] {(decimal)1403.00, (decimal)1405.00, (decimal)1605.00},
+        //                                             null,
+        //                                             startDate,
+        //                                             endDate,
+        //                                             1);
 
-            var max1 = (decimal)1000;
-            for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
-            {
-                var t = (balance1[dt] - balance1[startDate]) + (balance4[dt] - balance4[startDate]) +
-                        (balance5[dt] - balance5[startDate]) + (balance6[dt] - balance6[startDate]);
-                if (t > max1)
-                    max1 = t;
-            }
-            chart1.ChartAreas["生活费用"].AxisY.Maximum = 200.0 * Math.Ceiling((double)max1 / 200.0);
+        //    var max1 = (decimal)1000;
+        //    for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+        //    {
+        //        var t = (balance1[dt] - balance1[startDate]) + (balance4[dt] - balance4[startDate]) +
+        //                (balance5[dt] - balance5[startDate]) + (balance6[dt] - balance6[startDate]);
+        //        if (t > max1)
+        //            max1 = t;
+        //    }
+        //    chart1.ChartAreas["生活费用"].AxisY.Maximum = 200.0 * Math.Ceiling((double)max1 / 200.0);
 
-            {
-                var s = chart1.Series.Add("餐费与食品");
-                s.ChartType = SeriesChartType.StackedArea;
-                s.ChartArea = "生活费用";
-                s.Color = Color.Brown;
-                s.Color = Color.FromArgb(200, s.Color);
-                for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
-                    s.Points.AddXY(
-                                   dt,
-                                   (balance1[dt] - balance1[startDate])
-                                   + (balance2[dt] - balance2[startDate]));
-            }
-            {
-                var s = chart1.Series.Add("水费与其他福利费");
-                s.ChartType = SeriesChartType.StackedArea;
-                s.ChartArea = "生活费用";
-                s.Color = Color.CornflowerBlue;
-                s.Color = Color.FromArgb(200, s.Color);
-                for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
-                    s.Points.AddXY(
-                                   dt,
-                                   (balance3[dt] - balance3[startDate])
-                                   + (balance4[dt] - balance4[startDate])
-                                   - (balance2[dt] - balance2[startDate]));
-            }
-            {
-                var s = chart1.Series.Add("主营其他业务成本");
-                s.ChartType = SeriesChartType.StackedArea;
-                s.ChartArea = "生活费用";
-                s.Color = Color.Chocolate;
-                s.Color = Color.FromArgb(200, s.Color);
-                for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
-                    s.Points.AddXY(dt, (balance5[dt] - balance5[startDate]));
-            }
-            {
-                var s = chart1.Series.Add("其他非折旧费用");
-                s.ChartType = SeriesChartType.StackedArea;
-                s.ChartArea = "生活费用";
-                s.Color = Color.Coral;
-                s.Color = Color.FromArgb(200, s.Color);
-                for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
-                    s.Points.AddXY(
-                                   dt,
-                                   (balance6[dt] - balance6[startDate])
-                                   - (balance3[dt] - balance3[startDate]));
-            }
+        //    {
+        //        var s = chart1.Series.Add("餐费与食品");
+        //        s.ChartType = SeriesChartType.StackedArea;
+        //        s.ChartArea = "生活费用";
+        //        s.Color = Color.Brown;
+        //        s.Color = Color.FromArgb(200, s.Color);
+        //        for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+        //            s.Points.AddXY(
+        //                           dt,
+        //                           (balance1[dt] - balance1[startDate])
+        //                           + (balance2[dt] - balance2[startDate]));
+        //    }
+        //    {
+        //        var s = chart1.Series.Add("水费与其他福利费");
+        //        s.ChartType = SeriesChartType.StackedArea;
+        //        s.ChartArea = "生活费用";
+        //        s.Color = Color.CornflowerBlue;
+        //        s.Color = Color.FromArgb(200, s.Color);
+        //        for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+        //            s.Points.AddXY(
+        //                           dt,
+        //                           (balance3[dt] - balance3[startDate])
+        //                           + (balance4[dt] - balance4[startDate])
+        //                           - (balance2[dt] - balance2[startDate]));
+        //    }
+        //    {
+        //        var s = chart1.Series.Add("主营其他业务成本");
+        //        s.ChartType = SeriesChartType.StackedArea;
+        //        s.ChartArea = "生活费用";
+        //        s.Color = Color.Chocolate;
+        //        s.Color = Color.FromArgb(200, s.Color);
+        //        for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+        //            s.Points.AddXY(dt, (balance5[dt] - balance5[startDate]));
+        //    }
+        //    {
+        //        var s = chart1.Series.Add("其他非折旧费用");
+        //        s.ChartType = SeriesChartType.StackedArea;
+        //        s.ChartArea = "生活费用";
+        //        s.Color = Color.Coral;
+        //        s.Color = Color.FromArgb(200, s.Color);
+        //        for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+        //            s.Points.AddXY(
+        //                           dt,
+        //                           (balance6[dt] - balance6[startDate])
+        //                           - (balance3[dt] - balance3[startDate]));
+        //    }
 
-            var max2 = (decimal)1000;
-            for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
-            {
-                var t = (balance8[dt] - balance8[startDate]) + (balance7[dt] - balance7[startDate]);
-                if (t > max2)
-                    max2 = t;
-            }
-            chart1.ChartAreas["其他费用"].AxisY.Maximum = 200.0 * Math.Ceiling((double)max2 / 200.0);
+        //    var max2 = (decimal)1000;
+        //    for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+        //    {
+        //        var t = (balance8[dt] - balance8[startDate]) + (balance7[dt] - balance7[startDate]);
+        //        if (t > max2)
+        //            max2 = t;
+        //    }
+        //    chart1.ChartAreas["其他费用"].AxisY.Maximum = 200.0 * Math.Ceiling((double)max2 / 200.0);
 
-            {
-                var s = chart1.Series.Add("购置原材料");
-                s.ChartType = SeriesChartType.StackedArea;
-                s.ChartArea = "其他费用";
-                s.Color = Color.Fuchsia;
-                s.Color = Color.FromArgb(200, s.Color);
-                for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
-                    s.Points.AddXY(dt, (balance8[dt] - balance8[startDate]));
-            }
-            {
-                var s = chart1.Series.Add("购置资产");
-                s.ChartType = SeriesChartType.StackedArea;
-                s.ChartArea = "其他费用";
-                s.Color = Color.Orchid;
-                s.Color = Color.FromArgb(200, s.Color);
-                for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
-                    s.Points.AddXY(dt, (balance7[dt] - balance7[startDate]));
-            }
+        //    {
+        //        var s = chart1.Series.Add("购置原材料");
+        //        s.ChartType = SeriesChartType.StackedArea;
+        //        s.ChartArea = "其他费用";
+        //        s.Color = Color.Fuchsia;
+        //        s.Color = Color.FromArgb(200, s.Color);
+        //        for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+        //            s.Points.AddXY(dt, (balance8[dt] - balance8[startDate]));
+        //    }
+        //    {
+        //        var s = chart1.Series.Add("购置资产");
+        //        s.ChartType = SeriesChartType.StackedArea;
+        //        s.ChartArea = "其他费用";
+        //        s.Color = Color.Orchid;
+        //        s.Color = Color.FromArgb(200, s.Color);
+        //        for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+        //            s.Points.AddXY(dt, (balance7[dt] - balance7[startDate]));
+        //    }
 
-            var balance9 = m_BHelper.GetDailyBalance(
-                                                    new[]
-                                                            {
-                                                                (decimal)2001.00, (decimal)2202.00, (decimal)2203.00,
-                                                                (decimal)2211.00, (decimal)2221.05, (decimal)2241.00
-                                                            },
-                                                    null,
-                                                    startDate,
-                                                    endDate);
-            var balance10 = m_BHelper.GetDailyBalance(new[] { (decimal)2241.01 }, null, startDate, endDate);
+        //    var balance9 = m_BHelper.GetDailyBalance(
+        //                                            new[]
+        //                                                    {
+        //                                                        (decimal)2001.00, (decimal)2202.00, (decimal)2203.00,
+        //                                                        (decimal)2211.00, (decimal)2221.05, (decimal)2241.00
+        //                                                    },
+        //                                            null,
+        //                                            startDate,
+        //                                            endDate);
+        //    var balance10 = m_BHelper.GetDailyBalance(new[] { (decimal)2241.01 }, null, startDate, endDate);
 
-            var max3 = (decimal)2000;
-            for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
-            {
-                var t = -balance9[dt] - balance10[dt];
-                if (t > max3)
-                    max3 = t;
-            }
-            chart1.ChartAreas["负债"].AxisY.Maximum = 500.0 * Math.Ceiling((double)max3 / 500.0);
+        //    var max3 = (decimal)2000;
+        //    for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+        //    {
+        //        var t = -balance9[dt] - balance10[dt];
+        //        if (t > max3)
+        //            max3 = t;
+        //    }
+        //    chart1.ChartAreas["负债"].AxisY.Maximum = 500.0 * Math.Ceiling((double)max3 / 500.0);
 
-            {
-                var s = chart1.Series.Add("其他");
-                s.ChartType = SeriesChartType.StackedArea;
-                s.ChartArea = "负债";
-                s.Color = Color.Orange;
-                s.Color = Color.FromArgb(200, s.Color);
-                for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
-                    s.Points.AddXY(dt, -balance9[dt]);
-            }
-            {
-                var s = chart1.Series.Add("信用卡");
-                s.ChartType = SeriesChartType.StackedArea;
-                s.ChartArea = "负债";
-                s.Color = Color.OrangeRed;
-                s.Color = Color.FromArgb(200, s.Color);
-                for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
-                    s.Points.AddXY(dt, -balance10[dt]);
-            }
-        }
+        //    {
+        //        var s = chart1.Series.Add("其他");
+        //        s.ChartType = SeriesChartType.StackedArea;
+        //        s.ChartArea = "负债";
+        //        s.Color = Color.Orange;
+        //        s.Color = Color.FromArgb(200, s.Color);
+        //        for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+        //            s.Points.AddXY(dt, -balance9[dt]);
+        //    }
+        //    {
+        //        var s = chart1.Series.Add("信用卡");
+        //        s.ChartType = SeriesChartType.StackedArea;
+        //        s.ChartArea = "负债";
+        //        s.Color = Color.OrangeRed;
+        //        s.Color = Color.FromArgb(200, s.Color);
+        //        for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+        //            s.Points.AddXY(dt, -balance10[dt]);
+        //    }
+        //}
 
         private void frmMain_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.F5)
             {
                 chart1.Series.SuspendUpdates();
-                GatherData(startDate, endDate);
+                //GatherData(startDate, endDate);
                 chart1.Series.ResumeUpdates();
             }
             else if (e.KeyCode == Keys.R)

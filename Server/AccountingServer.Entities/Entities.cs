@@ -39,40 +39,40 @@ namespace AccountingServer.Entities
         public string Remark { get; set; }
     }
 
-    public interface IAssetItem
-    {
+    //public interface IAssetItem
+    //{
         
-    }
+    //}
 
-    public struct Depreciate : IAssetItem
-    {
-        public DateTime? Date { get; set; }
-        public double? Fund { get; set; }
-    }
-    public struct Devalue : IAssetItem
-    {
-        public DateTime? Date { get; set; }
-        public double? Fund { get; set; }
-    }
+    //public struct Depreciate : IAssetItem
+    //{
+    //    public DateTime? Date { get; set; }
+    //    public double? Fund { get; set; }
+    //}
+    //public struct Devalue : IAssetItem
+    //{
+    //    public DateTime? Date { get; set; }
+    //    public double? Fund { get; set; }
+    //}
 
-    public class DbAsset
-    {
-        public Guid ID { get; set; }
-        public string Name { get; set; }
-        public DateTime? Date { get; set; }
-        public double? Value { get; set; }
-        public int? Life { get; set; }
-        public double? Salvge { get; set; }
-        public int? Title { get; set; }
-        public IAssetItem[] Schedule { get; set; }
-    }
+    //public class DbAsset
+    //{
+    //    public Guid ID { get; set; }
+    //    public string Name { get; set; }
+    //    public DateTime? Date { get; set; }
+    //    public double? Value { get; set; }
+    //    public int? Life { get; set; }
+    //    public double? Salvge { get; set; }
+    //    public int? Title { get; set; }
+    //    public IAssetItem[] Schedule { get; set; }
+    //}
 
-    public class DailyBalance
-    {
-        public DateTime? Date { get; set; }
-        public int Title { get; set; }
-        public int? SubTitle { get; set; }
-        public string Content { get; set; }
-        public double Balance { get; set; }
-    }
+    //public class DailyBalance
+    //{
+    //    public DateTime? Date { get; set; }
+    //    public int Title { get; set; }
+    //    public int? SubTitle { get; set; }
+    //    public string Content { get; set; }
+    //    public double Balance { get; set; }
+    //}
 }
