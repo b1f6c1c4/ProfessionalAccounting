@@ -1,0 +1,14 @@
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting\obj\iPhoneSimulator\Debug\ProfessionalAccounting.csprojResolveAssemblyReference.cache
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting\bin\iPhoneSimulator\Debug\ProAccount.exe
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting\bin\iPhoneSimulator\Debug\ProAccount.pdb
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting\bin\iPhoneSimulator\Debug\ProAccount.BLL.dll
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting\bin\iPhoneSimulator\Debug\ProAccount.Entities.dll
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting\bin\iPhoneSimulator\Debug\ProAccount.DAL.dll
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting\bin\iPhoneSimulator\Debug\ProAccount.BLL.pdb
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting\bin\iPhoneSimulator\Debug\ProAccount.BLL.dll.mdb
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting\bin\iPhoneSimulator\Debug\ProAccount.Entities.pdb
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting\bin\iPhoneSimulator\Debug\ProAccount.Entities.dll.mdb
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting\bin\iPhoneSimulator\Debug\ProAccount.DAL.pdb
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting\bin\iPhoneSimulator\Debug\ProAccount.DAL.dll.mdb
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting\obj\iPhoneSimulator\Debug\ProAccount.exe
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting\obj\iPhoneSimulator\Debug\ProAccount.pdb

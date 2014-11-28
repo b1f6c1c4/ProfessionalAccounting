@@ -1,0 +1,5 @@
+D:\tjzh\Programs\ProfessionalAccounting\Client\ZXing.Net\obj\Debug\zxing.monotouch.csprojResolveAssemblyReference.cache
+D:\tjzh\Programs\ProfessionalAccounting\Build\Debug\zxing.monotouch.dll
+D:\tjzh\Programs\ProfessionalAccounting\Build\Debug\zxing.monotouch.pdb
+D:\tjzh\Programs\ProfessionalAccounting\Client\ZXing.Net\obj\Debug\zxing.monotouch.dll
+D:\tjzh\Programs\ProfessionalAccounting\Client\ZXing.Net\obj\Debug\zxing.monotouch.pdb

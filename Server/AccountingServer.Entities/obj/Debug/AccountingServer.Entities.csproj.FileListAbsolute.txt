@@ -1,0 +1,10 @@
+D:\tjzh\Programs\ProfessionalAccounting\AccountingServer.Entities\bin\Debug\AccountingServer.Entities.dll
+D:\tjzh\Programs\ProfessionalAccounting\AccountingServer.Entities\bin\Debug\AccountingServer.Entities.pdb
+D:\tjzh\Programs\ProfessionalAccounting\AccountingServer.Entities\obj\Debug\AccountingServer.Entities.dll
+D:\tjzh\Programs\ProfessionalAccounting\AccountingServer.Entities\obj\Debug\AccountingServer.Entities.pdb
+D:\tjzh\Programs\ProfessionalAccounting\AccountingServer.Entities\obj\Debug\AccountingServer.Entities.csprojResolveAssemblyReference.cache
+D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer.Entities\bin\Debug\AccountingServer.Entities.dll
+D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer.Entities\bin\Debug\AccountingServer.Entities.pdb
+D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer.Entities\obj\Debug\AccountingServer.Entities.csprojResolveAssemblyReference.cache
+D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer.Entities\obj\Debug\AccountingServer.Entities.dll
+D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer.Entities\obj\Debug\AccountingServer.Entities.pdb

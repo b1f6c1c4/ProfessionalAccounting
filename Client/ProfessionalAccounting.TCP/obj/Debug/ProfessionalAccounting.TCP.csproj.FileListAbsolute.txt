@@ -1,0 +1,16 @@
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.TCP\bin\iPhone\Debug\ProfessionalAccounting.TCP.dll
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.TCP\bin\iPhone\Debug\ProfessionalAccounting.TCP.pdb
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.TCP\obj\Debug\ProfessionalAccounting.TCP.dll
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.TCP\obj\Debug\ProfessionalAccounting.TCP.pdb
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.TCP\bin\iPhone\Debug\ProAccount.Entities.dll
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.TCP\bin\iPhone\Debug\ProAccount.Entities.pdb
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.TCP\bin\iPhone\Debug\ProAccount.Entities.dll.mdb
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.TCP\obj\Debug\ProfessionalAccounting.TCP.csprojResolveAssemblyReference.cache
+D:\tjzh\Programs\ProfessionalAccounting\Client\ProfessionalAccounting.TCP\bin\iPhone\Debug\ProfessionalAccounting.TCP.dll
+D:\tjzh\Programs\ProfessionalAccounting\Client\ProfessionalAccounting.TCP\bin\iPhone\Debug\ProfessionalAccounting.TCP.pdb
+D:\tjzh\Programs\ProfessionalAccounting\Client\ProfessionalAccounting.TCP\bin\iPhone\Debug\ProAccount.Entities.dll
+D:\tjzh\Programs\ProfessionalAccounting\Client\ProfessionalAccounting.TCP\bin\iPhone\Debug\ProAccount.Entities.pdb
+D:\tjzh\Programs\ProfessionalAccounting\Client\ProfessionalAccounting.TCP\bin\iPhone\Debug\ProAccount.Entities.dll.mdb
+D:\tjzh\Programs\ProfessionalAccounting\Client\ProfessionalAccounting.TCP\obj\Debug\ProfessionalAccounting.TCP.csprojResolveAssemblyReference.cache
+D:\tjzh\Programs\ProfessionalAccounting\Client\ProfessionalAccounting.TCP\obj\Debug\ProfessionalAccounting.TCP.dll
+D:\tjzh\Programs\ProfessionalAccounting\Client\ProfessionalAccounting.TCP\obj\Debug\ProfessionalAccounting.TCP.pdb

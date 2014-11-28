@@ -1,0 +1,10 @@
+D:\tjzh\Programs\ProfessionalAccounting\AccountingServer.TCP\bin\Debug\AccountingServer.TCP.dll
+D:\tjzh\Programs\ProfessionalAccounting\AccountingServer.TCP\bin\Debug\AccountingServer.TCP.pdb
+D:\tjzh\Programs\ProfessionalAccounting\AccountingServer.TCP\obj\Debug\AccountingServer.TCP.csprojResolveAssemblyReference.cache
+D:\tjzh\Programs\ProfessionalAccounting\AccountingServer.TCP\obj\Debug\AccountingServer.TCP.dll
+D:\tjzh\Programs\ProfessionalAccounting\AccountingServer.TCP\obj\Debug\AccountingServer.TCP.pdb
+D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer.TCP\bin\Debug\AccountingServer.TCP.dll
+D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer.TCP\bin\Debug\AccountingServer.TCP.pdb
+D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer.TCP\obj\Debug\AccountingServer.TCP.csprojResolveAssemblyReference.cache
+D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer.TCP\obj\Debug\AccountingServer.TCP.dll
+D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer.TCP\obj\Debug\AccountingServer.TCP.pdb
