@@ -17,3 +17,7 @@ D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer\obj\Debug\Accoun
 D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer\obj\Debug\AccountingServer.pdb
 D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer\bin\Debug\zxing.dll
 D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer\obj\Debug\AccountingServer.csproj.ResolveComReference.cache
+C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\Server\AccountingServer\bin\Debug\AccountingServer.exe.config
+C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\Server\AccountingServer\obj\Debug\AccountingServer.csproj.ResolveComReference.cache
+C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\Server\AccountingServer\obj\Debug\AccountingServer.exe
+C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\Server\AccountingServer\obj\Debug\AccountingServer.pdb

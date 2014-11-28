@@ -41,3 +41,7 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+*.cache
+*.cache
+Server/AccountingServer/obj/Debug/AccountingServer.csproj.FileListAbsolute.txt
