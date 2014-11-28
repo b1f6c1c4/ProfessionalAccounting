@@ -1,0 +1,16 @@
+﻿source\iTunesArtwork
+source\iTunesArtwork@2x
+source\Resources\Icon-Small-40@2x.png
+source\Resources\Icon-Small.png
+source\Resources\Icon-Small@2x.png
+source\Resources\Icon.png
+source\Resources\Icon@2x.png
+source\ZXing\AVCaptureScannerView.cs
+source\ZXing\AVCaptureScannerViewController.cs
+source\ZXing\CameraResolution.cs
+source\ZXing\IMobileBarcodeScanner.cs
+source\ZXing\IScannerViewController.cs
+source\ZXing\MobileBarcodeScanner.cs
+source\ZXing\MobileBarcodeScanningOptions.cs
+source\ZXing\Performance.cs
+source\ZXing\ZXingDefaultOverlayView.cs

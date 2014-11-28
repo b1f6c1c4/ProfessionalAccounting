@@ -1,0 +1,5 @@
+D:\tjzh\Programs\ProfessionalAccounting\Client\ZXing.Net.Mobile\obj\classic\iPhone\Debug\ZXing.Net.Mobile.iOS-Classic.csprojResolveAssemblyReference.cache
+D:\tjzh\Programs\ProfessionalAccounting\Build\ios\classic\Debug\ZXing.Net.Mobile.dll
+D:\tjzh\Programs\ProfessionalAccounting\Build\ios\classic\Debug\ZXing.Net.Mobile.pdb
+D:\tjzh\Programs\ProfessionalAccounting\Client\ZXing.Net.Mobile\obj\classic\iPhone\Debug\ZXing.Net.Mobile.dll
+D:\tjzh\Programs\ProfessionalAccounting\Client\ZXing.Net.Mobile\obj\classic\iPhone\Debug\ZXing.Net.Mobile.pdb

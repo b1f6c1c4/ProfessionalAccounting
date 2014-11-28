@@ -1,0 +1,5 @@
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.BLL\bin\iPhone\Release\ProfessionalAccounting.BLL.dll
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.BLL\bin\iPhone\Release\ProfessionalAccounting.DAL.dll
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.BLL\bin\iPhone\Release\ProfessionalAccounting.Entities.dll
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.BLL\obj\Release\ProfessionalAccounting.BLL.csprojResolveAssemblyReference.cache
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.BLL\obj\Release\ProfessionalAccounting.BLL.dll

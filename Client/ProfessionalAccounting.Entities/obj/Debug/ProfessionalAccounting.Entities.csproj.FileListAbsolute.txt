@@ -1,0 +1,9 @@
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.Entities\bin\iPhone\Debug\ProAccount.Entities.dll
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.Entities\bin\iPhone\Debug\ProAccount.Entities.pdb
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.Entities\obj\Debug\ProAccount.Entities.dll
+D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.Entities\obj\Debug\ProAccount.Entities.pdb
+D:\tjzh\Programs\ProfessionalAccounting\Client\ProfessionalAccounting.Entities\bin\iPhone\Debug\ProAccount.Entities.dll
+D:\tjzh\Programs\ProfessionalAccounting\Client\ProfessionalAccounting.Entities\bin\iPhone\Debug\ProAccount.Entities.pdb
+D:\tjzh\Programs\ProfessionalAccounting\Client\ProfessionalAccounting.Entities\obj\Debug\ProfessionalAccounting.Entities.csprojResolveAssemblyReference.cache
+D:\tjzh\Programs\ProfessionalAccounting\Client\ProfessionalAccounting.Entities\obj\Debug\ProAccount.Entities.dll
+D:\tjzh\Programs\ProfessionalAccounting\Client\ProfessionalAccounting.Entities\obj\Debug\ProAccount.Entities.pdb

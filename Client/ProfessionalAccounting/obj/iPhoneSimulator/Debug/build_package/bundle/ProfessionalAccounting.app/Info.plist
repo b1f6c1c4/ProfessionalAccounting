@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>Professional Accounting</string>
+	<key>CFBundleIdentifier</key>
+	<string>6TK88F96JR.b1f6c1c4.ProfessionalAccounting</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>UIDeviceFamily</key>
+	<array>
+		<integer>1</integer>
+	</array>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>MinimumOSVersion</key>
+	<string>7.0</string>
+	<key>NSMainNibFile</key>
+	<string></string>
+	<key>CFBundleIconFiles</key>
+	<array>
+		<string>Icon@2x.png</string>
+		<string>Icon.png</string>
+		<string>Icon-60@2x.png</string>
+		<string>Default-568h@2x.png</string>
+		<string>Icon-Small@2x.png</string>
+		<string>Icon-Small.png</string>
+		<string>Icon-Small-40@2x.png</string>
+	</array>
+	<key>NSMainNibFile~ipad</key>
+	<string></string>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array/>
+	<key>CFBundleExecutable</key>
+	<string>ProfessionalAccounting</string>
+</dict>
+</plist>
