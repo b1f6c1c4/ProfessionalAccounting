@@ -1,54 +1,23 @@
-# Windows image file caches
 Thumbs.db
 ehthumbs.db
 
-# Folder config file
 Desktop.ini
 
-# Recycle Bin used on file shares
 $RECYCLE.BIN/
 
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
-
-# =========================
-# Operating System Files
-# =========================
-
-# OSX
-# =========================
-
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Icon must end with two \r
-Icon
-# Thumbnails
-._*
-
-# Files that might appear on external disk
-.Spotlight-V100
-.Trashes
-
-# Directories potentially created on remote AFP share
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
-
-*.cache
-Server/AccountingServer/obj/Debug/AccountingServer.csproj.FileListAbsolute.txt
 *.suo
-*.dll
-*.pdb
-*.dll
-*.pdb
-*.xml
 *.cache
-Server/AccountingServer.DAL.UnitTest/obj/Debug/AccountingServer.DAL.UnitTest.csproj.FileListAbsolute.txt
-Server/AccountingServer.DAL/obj/Debug/AccountingServer.DAL.csproj.FileListAbsolute.txt
+Server/AccountingServer/bin/
+Server/AccountingServer/obj/
+Server/AccountingServer.BLL/bin/
+Server/AccountingServer.BLL/obj/
+Server/AccountingServer.DAL/bin/
+Server/AccountingServer.DAL/obj/
+Server/AccountingServer.DAL.UnitTest/bin/
+Server/AccountingServer.DAL.UnitTest/obj/
+Server/AccountingServer.TCP/bin/
+Server/AccountingServer.TCP/obj/
+Server/AccountingServer.Entities/bin/
+Server/AccountingServer.Entities/obj/
+Server/ModelingProject1/bin/
+Server/ModelingProject1/obj/
