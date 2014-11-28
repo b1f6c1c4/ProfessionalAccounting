@@ -53,8 +53,12 @@ namespace AccountingServer.DAL
                         break;
                 }
             if (voucher.Details != null)
+            {
+                var arr = new BsonArray(voucher.Details.Length);
                 foreach (var detail in voucher.Details)
-                    doc.Add(detail.ToBsonDocument());
+                    arr.Add(detail.ToBsonDocument());
+                doc.Add("detail", arr);
+            }
             if (voucher.Remark != null)
                 doc.Add("remark", voucher.Remark);
 
@@ -77,10 +81,10 @@ namespace AccountingServer.DAL
         public static Voucher ToVoucher(this BsonDocument doc)
         {
             var voucher = new Voucher { ID = doc["_id"].AsObjectId.Wrap() };
-            if (!doc["date"].IsBsonNull)
+            if (doc.Contains("date"))
                 voucher.Date = doc["date"].AsDateTime;
             voucher.Type = VoucherType.Ordinal;
-            if (!doc["special"].IsBsonNull)
+            if (doc.Contains("special"))
                 switch (doc["special"].AsString)
                 {
                     case "amorz":
@@ -102,7 +106,7 @@ namespace AccountingServer.DAL
                         voucher.Type = VoucherType.Uncertain;
                         break;
                 }
-            if (!doc["detail"].IsBsonNull)
+            if (doc.Contains("detail"))
             {
                 var ddocs = doc["detail"].AsBsonArray;
                 var details = new VoucherDetail[ddocs.Count];
@@ -110,7 +114,7 @@ namespace AccountingServer.DAL
                     details[i] = ddocs[i].AsBsonDocument.ToVoucherDetail();
                 
             }
-            if (!doc["remark"].IsBsonNull)
+            if (doc.Contains("remark"))
                 voucher.Remark = doc["remark"].AsString;
 
             return voucher;
@@ -119,15 +123,15 @@ namespace AccountingServer.DAL
         public static VoucherDetail ToVoucherDetail(this BsonDocument ddoc)
         {
             var detail = new VoucherDetail();
-            if (!ddoc["title"].IsBsonNull)
+            if (ddoc.Contains("title"))
                 detail.Title = ddoc["title"].AsInt32;
-            if (!ddoc["subtitle"].IsBsonNull)
+            if (ddoc.Contains("subtitle"))
                 detail.SubTitle = ddoc["subtitle"].AsInt32;
-            if (!ddoc["content"].IsBsonNull)
+            if (ddoc.Contains("content"))
                 detail.Content = ddoc["content"].AsString;
-            if (!ddoc["fund"].IsBsonNull)
+            if (ddoc.Contains("fund"))
                 detail.Fund = ddoc["fund"].AsDouble;
-            if (!ddoc["remark"].IsBsonNull)
+            if (ddoc.Contains("remark"))
                 detail.Remark = ddoc["remark"].AsString;
             return detail;
         }
@@ -135,11 +139,11 @@ namespace AccountingServer.DAL
     
     public class MongoDbHelper : IDbHelper
     {
-        private MongoClient m_Client;
+        private readonly MongoClient m_Client;
         private MongoServer m_Server;
-        private MongoDatabase m_Db;
+        private readonly MongoDatabase m_Db;
 
-        private MongoCollection m_Vouchers;
+        private readonly MongoCollection m_Vouchers;
 
         public MongoDbHelper()
         {
@@ -161,6 +165,15 @@ namespace AccountingServer.DAL
             }
         }
 
+        protected IMongoQuery GetQuery(Voucher filter)
+        {
+            var lst = new List<IMongoQuery>();
+            //TODO
+            if (lst.Any())
+                return Query.And(lst);
+            return Query.Null;
+        }
+
         public Voucher SelectVoucher(IObjectID id)
         {
             return m_Vouchers.FindOneByIdAs<BsonDocument>(id.UnWrap()).ToVoucher();
@@ -168,13 +181,25 @@ namespace AccountingServer.DAL
 
         public IEnumerable<Voucher> SelectVouchers(Voucher filter)
         {
-            var lst = new List<IMongoQuery>();
 
-            return m_Vouchers.FindAs<BsonDocument>(Query.And(lst)).Select(d => d.ToVoucher());
+            return m_Vouchers.FindAs<BsonDocument>(GetQuery(filter)).Select(d => d.ToVoucher());
         }
         public int SelectVouchersCount(Voucher filter) { throw new NotImplementedException(); }
-        public bool InsertVoucher(Voucher entity) { throw new NotImplementedException(); }
-        public int DeleteVouchers(Voucher filter) { throw new NotImplementedException(); }
+
+        public bool InsertVoucher(Voucher entity)
+        {
+            if (entity.ID == null)
+                entity.ID = ObjectId.GenerateNewId().Wrap();
+            var result = m_Vouchers.Insert(entity.ToBsonDocument());
+            return result.Ok;
+        }
+
+        public int DeleteVouchers(Voucher filter)
+        {
+            var result = m_Vouchers.Remove(GetQuery(filter));
+            return result.Response["n"].AsInt32;
+        }
+
         public VoucherDetail SelectDetail(IObjectID id) { throw new NotImplementedException(); }
         public IEnumerable<Voucher> SelectItemsWithDetail(VoucherDetail filter) { throw new NotImplementedException(); }
         public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter) { throw new NotImplementedException(); }

@@ -44,3 +44,11 @@ Temporary Items
 *.cache
 Server/AccountingServer/obj/Debug/AccountingServer.csproj.FileListAbsolute.txt
 *.suo
+*.dll
+*.pdb
+*.dll
+*.pdb
+*.xml
+*.cache
+Server/AccountingServer.DAL.UnitTest/obj/Debug/AccountingServer.DAL.UnitTest.csproj.FileListAbsolute.txt
+Server/AccountingServer.DAL/obj/Debug/AccountingServer.DAL.csproj.FileListAbsolute.txt
