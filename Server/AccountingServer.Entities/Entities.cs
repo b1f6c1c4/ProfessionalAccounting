@@ -2,7 +2,7 @@ using System;
 
 namespace AccountingServer.Entities
 {
-    public enum ItemType
+    public enum VoucherType
     {
         Ordinal,
         Carry,
@@ -18,16 +18,16 @@ namespace AccountingServer.Entities
         
     }
 
-    public class DbItem
+    public class Voucher
     {
         public IObjectID ID { get; set; }
         public DateTime? Date { get; set; }
         public string Remark { get; set; }
-        public DbDetail[] Details { get; set; }
-        public ItemType? Type { get; set; }
+        public VoucherDetail[] Details { get; set; }
+        public VoucherType? Type { get; set; }
     }
 
-    public class DbDetail
+    public class VoucherDetail
     {
         public IObjectID ID { get; set; }
 
