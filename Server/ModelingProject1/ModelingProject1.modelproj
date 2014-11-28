@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{40547211-bf9a-48e3-97f7-56ce030edd18}</ProjectGuid>
+    <ArchitectureToolsVersion>2.0.0.0</ArchitectureToolsVersion>
+    <Name>ModelingProject1</Name>
+    <RootNamespace>ModelingProject1</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(VSToolsPath)\ArchitectureTools\Microsoft.VisualStudio.TeamArchitect.ModelingProject.targets" Condition="'$(VSToolsPath)' != ''" />
+  <ItemGroup>
+    <Folder Include="ModelDefinition\" />
+    <Content Include="Db.txt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="ModelDefinition\ModelingProject1.uml">
+      <SubType>Content</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AccountingServer.BLL\AccountingServer.BLL.csproj">
+      <Name>AccountingServer.BLL</Name>
+      <Project>{4f938d5a-6b22-4150-a74c-8203fdf1d215}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\AccountingServer.DAL\AccountingServer.DAL.csproj">
+      <Name>AccountingServer.DAL</Name>
+      <Project>{2cab5dc7-a5a8-47a4-9d46-bfe2a474bb48}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj">
+      <Name>AccountingServer.Entities</Name>
+      <Project>{7246deb7-bda2-49d8-9490-3ed074219106}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\AccountingServer.TCP\AccountingServer.TCP.csproj">
+      <Name>AccountingServer.TCP</Name>
+      <Project>{c3e7dd8b-88fc-4df2-ac1a-52f1c825e9c3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\AccountingServer\AccountingServer.csproj">
+      <Name>AccountingServer</Name>
+      <Project>{28c2edb0-ce1e-473e-9ca6-70e29a1408a4}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Validate Include="LayerDiagram1.layerdiagram">
+      <SubType>Content</SubType>
+    </Validate>
+    <Validate Include="LayerDiagram1.layerdiagram.layout">
+      <SubType>Content</SubType>
+      <DependentUpon>LayerDiagram1.layerdiagram</DependentUpon>
+    </Validate>
+    <Validate Include="LayerDiagram1.layerdiagram.suppressions">
+      <SubType>Content</SubType>
+      <DependentUpon>LayerDiagram1.layerdiagram</DependentUpon>
+    </Validate>
+  </ItemGroup>
+</Project>

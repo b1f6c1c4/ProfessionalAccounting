@@ -1,0 +1,81 @@
+原则：不再区分每日的顺序
+
+db.voucher:
+{
+	"date":new Date("2014-11-28"),
+	"detail":
+		[
+			{
+				"title":1101,
+				"subtitle":01,
+				"content":"中银活期宝",
+				"fund":0.1
+			},
+			{
+				"title":9999,
+				"subtitle":01,
+				"content":"中银活期宝",
+				"fund":0.1,
+				"remark":null
+			}
+		],
+	"remark":null
+}
+{
+	"date":new Date("2014-11-28"),
+	"special":"carry", // dep, dev, amor
+	"detail":
+		[
+			{
+				"title":1101,
+				"fund":0.1
+			}
+		]
+}
+
+db.asset:
+{
+	"name":"..",
+	"date":new Date("2014-11-28"),
+	"value":1000,
+	"salvge":0.05,
+	"life":3,
+	"title":1601,
+	"schedule":
+		[
+			{
+				"voucher":.....
+				"date":new Date("2014-09-30"),
+				"dep":100.0
+			}
+			{
+				"voucher":.....
+				"date":new Date("2014-09-30"),
+				"dev":100.0
+			}
+		]
+}
+db.inventory:
+db.amortization:
+{
+	"orig":
+		{
+			"title":9999,
+			"subtitle":1,
+			"content":null
+		}
+	"dest":
+		{
+			"title":9999,
+			"subtitle":1,
+			"content":null
+		}
+	"schedule":
+		[
+			{
+			"voucher":.....
+			"date":new Date("2014-09-30"),
+			"fund":100.0
+			}
+		]
+}

@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layerModel xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" xmlns:dm1="http://schemas.microsoft.com/dsltools/SimpleShapesModel" dslVersion="1.0.0.0" Id="09c029a1-ff88-4e32-b4b4-2cf6ac93a42c" xmlns="http://schemas.microsoft.com/VisualStudio/TeamArchitect/LayerDesigner">
+  <layers>
+    <layer Id="3f214257-5a3e-46a0-97d8-815698b59a87" name="AccountingServer.Entities">
+      <references>
+        <reference Id="83c83657-9e6b-4aef-9884-adf705203657" name="AccountingServer.Entities">
+          <ArtifactNode Label="AccountingServer.Entities" Category="CodeSchema_Project" Id="(Assembly=&quot;$(PersonalUri)/GitHub/ProfessionalAccounting/Server/AccountingServer.Entities/AccountingServer.Entities.csproj&quot;)" />
+          <ExpandedNode Id="(Assembly=AccountingServer.Entities)" Label="AccountingServer.Entities.dll" Category="CodeSchema_Assembly">
+            <Category Ref="FileSystem.Category.FileOfType.dll" />
+            <LinkCategory Ref="Produces" />
+            <LinkCategory Ref="Represents" />
+          </ExpandedNode>
+        </reference>
+      </references>
+    </layer>
+    <layer Id="ad2428c9-a227-4023-9c77-f290f445382f" name="AccountingServer.DAL">
+      <dependencyToLayers>
+        <dependencyFromLayerToLayer Id="74e4fd99-8ab5-41c1-ad64-9d5156967e30" direction="Forward">
+          <layerMoniker Id="3f214257-5a3e-46a0-97d8-815698b59a87" />
+        </dependencyFromLayerToLayer>
+      </dependencyToLayers>
+      <references>
+        <reference Id="3aab7265-8bff-418b-bedb-49f348c8f1bc" name="AccountingServer.DAL">
+          <ArtifactNode Label="AccountingServer.DAL" Category="CodeSchema_Project" Id="(Assembly=&quot;$(PersonalUri)/GitHub/ProfessionalAccounting/Server/AccountingServer.DAL/AccountingServer.DAL.csproj&quot;)" />
+          <ExpandedNode Id="(Assembly=AccountingServer.DAL)" Label="AccountingServer.DAL.dll" Category="CodeSchema_Assembly">
+            <Category Ref="FileSystem.Category.FileOfType.dll" />
+            <LinkCategory Ref="Produces" />
+            <LinkCategory Ref="Represents" />
+          </ExpandedNode>
+        </reference>
+      </references>
+    </layer>
+    <layer Id="6cfbbe53-c4fc-423a-9dd6-b872bf1f7f1a" name="AccountingServer.BLL">
+      <dependencyToLayers>
+        <dependencyFromLayerToLayer Id="2df3882f-2193-43c1-a39f-70e5c3390d4b" direction="Forward">
+          <layerMoniker Id="ad2428c9-a227-4023-9c77-f290f445382f" />
+        </dependencyFromLayerToLayer>
+        <dependencyFromLayerToLayer Id="82ba64b4-e37d-43eb-b40b-741a8e2efc73" direction="Forward">
+          <layerMoniker Id="3f214257-5a3e-46a0-97d8-815698b59a87" />
+        </dependencyFromLayerToLayer>
+        <dependencyFromLayerToLayer Id="ffef1bc7-0791-4540-8001-199b64eec51a" direction="Forward">
+          <layerMoniker Id="4d42615f-aa74-4d87-9b32-ee1d8a9c6d1a" />
+        </dependencyFromLayerToLayer>
+      </dependencyToLayers>
+      <references>
+        <reference Id="32e7e41d-042c-4277-bad2-5645ecac81bf" name="AccountingServer.BLL">
+          <ArtifactNode Label="AccountingServer.BLL" Category="CodeSchema_Project" Id="(Assembly=&quot;$(PersonalUri)/GitHub/ProfessionalAccounting/Server/AccountingServer.BLL/AccountingServer.BLL.csproj&quot;)" />
+          <ExpandedNode Id="(Assembly=AccountingServer.BLL)" Label="AccountingServer.BLL.dll" Category="CodeSchema_Assembly">
+            <Category Ref="FileSystem.Category.FileOfType.dll" />
+            <LinkCategory Ref="Produces" />
+            <LinkCategory Ref="Represents" />
+          </ExpandedNode>
+        </reference>
+      </references>
+    </layer>
+    <layer Id="5fb53e60-389e-42d7-ae53-fcbeaf9425c2" name="AccountingServer">
+      <dependencyToLayers>
+        <dependencyFromLayerToLayer Id="c6d9ae7e-a8dd-4a91-a099-d82f86395e76" direction="Forward">
+          <layerMoniker Id="3f214257-5a3e-46a0-97d8-815698b59a87" />
+        </dependencyFromLayerToLayer>
+        <dependencyFromLayerToLayer Id="ada98237-7ced-4fb4-a604-d80df9e78328" direction="Forward">
+          <layerMoniker Id="6cfbbe53-c4fc-423a-9dd6-b872bf1f7f1a" />
+        </dependencyFromLayerToLayer>
+      </dependencyToLayers>
+      <references>
+        <reference Id="06625f1c-acbc-4882-b139-d0c716286e08" name="AccountingServer">
+          <ArtifactNode Label="AccountingServer" Category="CodeSchema_Project" Id="(Assembly=&quot;$(PersonalUri)/GitHub/ProfessionalAccounting/Server/AccountingServer/AccountingServer.csproj&quot;)" />
+          <ExpandedNode Id="(Assembly=AccountingServer)" Label="AccountingServer.exe" Category="CodeSchema_Assembly">
+            <Category Ref="FileSystem.Category.FileOfType.exe" />
+            <LinkCategory Ref="Produces" />
+            <LinkCategory Ref="Represents" />
+          </ExpandedNode>
+        </reference>
+      </references>
+    </layer>
+    <layer Id="4d42615f-aa74-4d87-9b32-ee1d8a9c6d1a" name="AccountingServer.TCP">
+      <references>
+        <reference Id="64608d06-68bd-49e6-bbe6-fb7aaeca1fd4" name="AccountingServer.TCP">
+          <ArtifactNode Label="AccountingServer.TCP" Category="CodeSchema_Project" Id="(Assembly=&quot;$(PersonalUri)/GitHub/ProfessionalAccounting/Server/AccountingServer.TCP/AccountingServer.TCP.csproj&quot;)" />
+          <ExpandedNode Id="(Assembly=AccountingServer.TCP)" Label="AccountingServer.TCP.dll" Category="CodeSchema_Assembly">
+            <Category Ref="FileSystem.Category.FileOfType.dll" />
+            <LinkCategory Ref="Produces" />
+            <LinkCategory Ref="Represents" />
+          </ExpandedNode>
+        </reference>
+      </references>
+    </layer>
+  </layers>
+</layerModel>
