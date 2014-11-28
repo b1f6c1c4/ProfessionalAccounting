@@ -12,3 +12,16 @@ D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer.DAL\bin\Debug\Ac
 D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer.DAL\obj\Debug\AccountingServer.DAL.csprojResolveAssemblyReference.cache
 D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer.DAL\obj\Debug\AccountingServer.DAL.dll
 D:\tjzh\Programs\ProfessionalAccounting\Server\AccountingServer.DAL\obj\Debug\AccountingServer.DAL.pdb
+C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\Server\AccountingServer.DAL\obj\Debug\AccountingServer.DAL.csprojResolveAssemblyReference.cache
+C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\Server\AccountingServer.DAL\obj\Debug\AccountingServer.DAL.dll
+C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\Server\AccountingServer.DAL\bin\Debug\AccountingServer.DAL.dll
+C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\Server\AccountingServer.DAL\bin\Debug\AccountingServer.DAL.pdb
+C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\Server\AccountingServer.DAL\bin\Debug\AccountingServer.Entities.dll
+C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\Server\AccountingServer.DAL\bin\Debug\MongoDB.Bson.dll
+C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\Server\AccountingServer.DAL\bin\Debug\MongoDB.Driver.dll
+C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\Server\AccountingServer.DAL\bin\Debug\AccountingServer.Entities.pdb
+C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\Server\AccountingServer.DAL\bin\Debug\MongoDB.Bson.pdb
+C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\Server\AccountingServer.DAL\bin\Debug\MongoDB.Bson.xml
+C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\Server\AccountingServer.DAL\bin\Debug\MongoDB.Driver.pdb
+C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\Server\AccountingServer.DAL\bin\Debug\MongoDB.Driver.xml
+C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\Server\AccountingServer.DAL\obj\Debug\AccountingServer.DAL.pdb
