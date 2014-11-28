@@ -50,8 +50,18 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="UnitTest1.cs" />
+    <Compile Include="MongoDbTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AccountingServer.DAL\AccountingServer.DAL.csproj">
+      <Project>{2cab5dc7-a5a8-47a4-9d46-bfe2a474bb48}</Project>
+      <Name>AccountingServer.DAL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj">
+      <Project>{7246deb7-bda2-49d8-9490-3ed074219106}</Project>
+      <Name>AccountingServer.Entities</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
