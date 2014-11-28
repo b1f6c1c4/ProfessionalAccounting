@@ -45,3 +45,4 @@ Temporary Items
 *.cache
 *.cache
 Server/AccountingServer/obj/Debug/AccountingServer.csproj.FileListAbsolute.txt
+*.suo
