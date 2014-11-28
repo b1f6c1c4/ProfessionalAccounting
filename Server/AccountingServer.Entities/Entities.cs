@@ -2,60 +2,77 @@ using System;
 
 namespace AccountingServer.Entities
 {
-    public class DbTitle
+    public enum ItemType
     {
-        public decimal? ID { get; set; }
-        public string Name { get; set; }
-        public decimal? H_ID { get; set; }
-        public int? TLevel { get; set; }
+        Ordinal,
+        Carry,
+        Amortization,
+        Depreciation,
+        Devalue,
+        AnnualCarry,
+        Uncertain
+    }
 
-        public decimal? Balance { get; set; }
-        public decimal? ABalance { get; set; }
+    public interface IObjectID
+    {
+        
     }
 
     public class DbItem
     {
-        public int? ID { get; set; }
-        public DateTime? DT { get; set; }
+        public IObjectID ID { get; set; }
+        public DateTime? Date { get; set; }
         public string Remark { get; set; }
+        public DbDetail[] Details { get; set; }
+        public ItemType? Type { get; set; }
     }
 
     public class DbDetail
     {
-        public int? Item { get; set; }
-        public decimal? Title { get; set; }
-        public decimal? Fund { get; set; }
+        public IObjectID ID { get; set; }
+
+        public IObjectID Item { get; set; }
+        public int? Title { get; set; }
+        public int? SubTitle { get; set; }
+        public string Content { get; set; }
+        public double? Fund { get; set; }
         public string Remark { get; set; }
     }
 
-    public class DbFixedAsset
+    public interface IAssetItem
     {
-        public string ID { get; set; }
-        public string Name { get; set; }
-        public DateTime? DT { get; set; }
-        public decimal? Value { get; set; }
-        public decimal? XValue { get; set; }
-        public int? DepreciableLife { get; set; }
-        public decimal? Salvge { get; set; }
-        public decimal? Title { get; set; }
-
-        public decimal? DepreciatedValue1 { get; set; }
-        public decimal? DepreciatedValue2 { get; set; }
+        
     }
 
-    public class DbShortcut
+    public struct Depreciate : IAssetItem
     {
-        public int? ID { get; set; }
+        public DateTime? Date { get; set; }
+        public double? Fund { get; set; }
+    }
+    public struct Devalue : IAssetItem
+    {
+        public DateTime? Date { get; set; }
+        public double? Fund { get; set; }
+    }
+
+    public class DbAsset
+    {
+        public Guid ID { get; set; }
         public string Name { get; set; }
-        public string Path { get; set; }
-        public decimal? Balance { get; set; }
+        public DateTime? Date { get; set; }
+        public double? Value { get; set; }
+        public int? Life { get; set; }
+        public double? Salvge { get; set; }
+        public int? Title { get; set; }
+        public IAssetItem[] Schedule { get; set; }
     }
 
     public class DailyBalance
     {
-        public DateTime? DT { get; set; }
-        public decimal Title { get; set; }
-        public string Remark { get; set; }
-        public decimal Balance { get; set; }
+        public DateTime? Date { get; set; }
+        public int Title { get; set; }
+        public int? SubTitle { get; set; }
+        public string Content { get; set; }
+        public double Balance { get; set; }
     }
 }
