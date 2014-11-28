@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.BLL", "Acc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer", "AccountingServer\AccountingServer.csproj", "{28C2EDB0-CE1E-473E-9CA6-70E29A1408A4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.DAL.UnitTest", "AccountingServer.DAL.UnitTest\AccountingServer.DAL.UnitTest.csproj", "{B1AB5807-B9AC-4E70-9568-6C91329BCDB2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{28C2EDB0-CE1E-473E-9CA6-70E29A1408A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28C2EDB0-CE1E-473E-9CA6-70E29A1408A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28C2EDB0-CE1E-473E-9CA6-70E29A1408A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1AB5807-B9AC-4E70-9568-6C91329BCDB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1AB5807-B9AC-4E70-9568-6C91329BCDB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1AB5807-B9AC-4E70-9568-6C91329BCDB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1AB5807-B9AC-4E70-9568-6C91329BCDB2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
