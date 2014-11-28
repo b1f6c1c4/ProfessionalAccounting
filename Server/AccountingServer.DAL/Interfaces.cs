@@ -11,6 +11,7 @@ namespace AccountingServer.DAL
         long SelectVouchersCount(Voucher filter);
         bool InsertVoucher(Voucher entity);
         int DeleteVouchers(Voucher filter);
+        bool UpdateVoucher(Voucher entity);
 
         VoucherDetail SelectDetail(IObjectID id);
         IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter);
@@ -20,17 +21,17 @@ namespace AccountingServer.DAL
         int DeleteDetails(VoucherDetail filter);
 
 
-        DbAsset SelectAsset(Guid id);
-        IEnumerable<DbAsset> SelectAssets(DbAsset filter);
-        bool InsertAsset(DbAsset entity);
-        int DeleteAssets(DbAsset filter);
+        //DbAsset SelectAsset(Guid id);
+        //IEnumerable<DbAsset> SelectAssets(DbAsset filter);
+        //bool InsertAsset(DbAsset entity);
+        //int DeleteAssets(DbAsset filter);
 
 
-        IEnumerable<VoucherDetail> GetXBalances(VoucherDetail filter, bool noCarry = false, int? sID = null, int? eID = null, int dir = 0);
-        void Depreciate();
-        void Carry();
-        IEnumerable<DailyBalance> GetDailyBalance(decimal title, string remark, int dir = 0);
-        IEnumerable<DailyBalance> GetDailyXBalance(decimal title, int dir = 0);
-        string GetFixedAssetName(Guid id);
+        //IEnumerable<VoucherDetail> GetXBalances(VoucherDetail filter, bool noCarry = false, int? sID = null, int? eID = null, int dir = 0);
+        //void Depreciate();
+        //void Carry();
+        //IEnumerable<DailyBalance> GetDailyBalance(decimal title, string remark, int dir = 0);
+        //IEnumerable<DailyBalance> GetDailyXBalance(decimal title, int dir = 0);
+        //string GetFixedAssetName(Guid id);
     }
 }

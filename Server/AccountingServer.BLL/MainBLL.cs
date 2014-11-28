@@ -84,16 +84,16 @@ namespace AccountingServer.BLL
 
             m_Tcp.Write("ClearBalances");
 
-            Action<string, string, decimal?> action =
+            Action<string, string, double?> action =
                 (s, d, f) => m_Tcp.Write(String.Format("{0}={1}={2}", s, d, f.AsCurrency()));
 
-            action("库存现金", "1001.00", m_BHelper.GetBalance((decimal)1001.00));
-            action("学生卡", "1012.05", m_BHelper.GetBalance((decimal)1012.05));
+            action("库存现金", "1001.00", m_BHelper.GetBalance(1001, 00));
+            action("学生卡", "1012.05", m_BHelper.GetBalance(1012, 05));
             foreach (var s in new[] { "3593", "5184", "9767" })
-                action("借记卡" + s, s, m_BHelper.GetBalance((decimal)1002.00, s));
-            action("贷记卡6439", "2241.01", -m_BHelper.GetBalance((decimal)2241.01, "6439"));
-            action("公交卡", "1012.01", m_BHelper.GetBalance((decimal)1012.01, ""));
-            action("公交卡1476", "1012.01", m_BHelper.GetBalance((decimal)1012.01, "1476"));
+                action("借记卡" + s, s, m_BHelper.GetBalance(1002, 00, s));
+            action("贷记卡6439", "2241.01", -m_BHelper.GetBalance(2241, 01, "6439"));
+            action("公交卡", "1012.01", m_BHelper.GetBalance(1012, 01, ""));
+            action("公交卡1476", "1012.01", m_BHelper.GetBalance(1012, 01, "1476"));
             foreach (
                 var s in
                     new[]
@@ -105,38 +105,38 @@ namespace AccountingServer.BLL
                 action(
                        s,
                        s,
-                       m_BHelper.GetBalance((decimal)1101.01, s) +
-                       m_BHelper.GetBalance(new DbTitle {ID = (decimal)1101.02}, s));
+                       m_BHelper.GetBalance(1101, 01, s) +
+                       m_BHelper.GetBalance(1101, 02, s));
 
-            Action<string, decimal?, bool> actionGroup =
+            Action<string, int?, bool> actionGroup =
                 (s, d, b) =>
                 {
-                    foreach (var detail in m_BHelper.GetXBalances(title: d))
-                    {
-                        var id = m_BHelper.SelectDetails(
-                                                         new DbDetail
-                                                             {
-                                                                 Title = detail.Title,
-                                                                 Remark = detail.Remark
-                                                             }).Last().Item;
-                        m_Tcp.Write(
-                                    String.Format(
-                                                  "{0}={1}={2}",
-                                                  String.Format(
-                                                                "{0:0.####}元{1}-{2}",
-                                                                b ? detail.Fund : -detail.Fund,
-                                                                s,
-                                                                m_BHelper.SelectItem(id.Value).DT.AsDT()),
-                                                  detail.Remark,
-                                                  detail.Remark));
-                    }
+                    //foreach (var detail in m_BHelper.GetXBalances(title: d))
+                    //{
+                    //    var id = m_BHelper.SelectDetails(
+                    //                                     new VoucherDetail
+                    //                                         {
+                    //                                             Title = detail.Title,
+                    //                                             Content = detail.Content
+                    //                                         }).Last().Item;
+                    //    m_Tcp.Write(
+                    //                String.Format(
+                    //                              "{0}={1}={2}",
+                    //                              String.Format(
+                    //                                            "{0:0.####}元{1}-{2}",
+                    //                                            b ? detail.Fund : -detail.Fund,
+                    //                                            s,
+                    //                                            m_BHelper.SelectItem(id.Value).Date.AsDate()),
+                    //                              detail.Content,
+                    //                              detail.Content));
+                    //}
                 };
-            actionGroup("预付", (decimal)1123.00, true);
-            actionGroup("应付", (decimal)2202.00, false);
-            actionGroup("其他应收", (decimal)1221.00, true);
-            actionGroup("其他应付", (decimal)2241.00, false);
-            actionGroup("原材料", (decimal)1403.00, true);
-            actionGroup("库存商品", (decimal)1405.00, true);
+            actionGroup("预付", 1123, true);
+            actionGroup("应付", 2202, false);
+            actionGroup("其他应收", 1221, true);
+            actionGroup("其他应付", 2241, false);
+            actionGroup("原材料", 1403, true);
+            actionGroup("库存商品", 1405, true);
 
             m_Tcp.Write("FINISHED");
         }
