@@ -8,14 +8,14 @@ namespace AccountingServer.DAL
     {
         Voucher SelectVoucher(IObjectID id);
         IEnumerable<Voucher> SelectVouchers(Voucher filter);
-        int SelectVouchersCount(Voucher filter);
+        long SelectVouchersCount(Voucher filter);
         bool InsertVoucher(Voucher entity);
         int DeleteVouchers(Voucher filter);
 
         VoucherDetail SelectDetail(IObjectID id);
-        IEnumerable<Voucher> SelectItemsWithDetail(VoucherDetail filter);
+        IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter);
         IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter);
-        int SelectDetailsCount(VoucherDetail filter);
+        long SelectDetailsCount(VoucherDetail filter);
         bool InsertDetail(VoucherDetail entity);
         int DeleteDetails(VoucherDetail filter);
 

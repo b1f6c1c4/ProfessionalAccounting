@@ -74,7 +74,7 @@ namespace AccountingServer.DAL
                 val.Add("content", detail.Content);
             val.Add("fund", detail.Fund);
             if (detail.Remark != null)
-                val.Add("content", detail.Remark);
+                val.Add("remark", detail.Remark);
             return val;
         }
 
@@ -112,7 +112,6 @@ namespace AccountingServer.DAL
                 var details = new VoucherDetail[ddocs.Count];
                 for (var i = 0; i < ddocs.Count; i++)
                     details[i] = ddocs[i].AsBsonDocument.ToVoucherDetail();
-                
             }
             if (doc.Contains("remark"))
                 voucher.Remark = doc["remark"].AsString;
@@ -168,10 +167,78 @@ namespace AccountingServer.DAL
         protected IMongoQuery GetQuery(Voucher filter)
         {
             var lst = new List<IMongoQuery>();
-            //TODO
-            if (lst.Any())
-                return Query.And(lst);
-            return Query.Null;
+
+            if (filter.Date != null)
+                lst.Add(Query.EQ("date", filter.Date));
+            if (filter.Type != null)
+                switch (filter.Type)
+                {
+                    case VoucherType.Amortization:
+                        lst.Add(Query.EQ("special", "amorz"));
+                        break;
+                    case VoucherType.AnnualCarry:
+                        lst.Add(Query.EQ("special", "acarry"));
+                        break;
+                    case VoucherType.Carry:
+                        lst.Add(Query.EQ("special", "carry"));
+                        break;
+                    case VoucherType.Depreciation:
+                        lst.Add(Query.EQ("special", "dep"));
+                        break;
+                    case VoucherType.Devalue:
+                        lst.Add(Query.EQ("special", "dev"));
+                        break;
+                    case VoucherType.Uncertain:
+                        lst.Add(Query.EQ("special", "unc"));
+                        break;
+                }
+            if (filter.Remark != null)
+                lst.Add(Query.EQ("remark", filter.Remark));
+
+            return lst.Any() ? Query.And(lst) : Query.Null;
+        }
+
+        protected IMongoQuery GetQuery(VoucherDetail filter)
+        {
+            var lst = new List<IMongoQuery>();
+
+            if (filter.Title != null)
+                lst.Add(Query.EQ("title", filter.Title));
+            if (filter.SubTitle != null)
+                lst.Add(Query.EQ("subtitle", filter.SubTitle));
+            if (filter.Content != null)
+                lst.Add(Query.EQ("content", filter.Content));
+            if (filter.Remark != null)
+                lst.Add(Query.EQ("remark", filter.Remark));
+            if (filter.Fund != null)
+                lst.Add(Query.EQ("fund", filter.Fund));
+
+            return lst.Any() ? Query.And(lst) : Query.Null;
+        }
+
+        protected static bool IsMatch(VoucherDetail filter, VoucherDetail voucherDetail)
+        {
+            if (filter.ID != null)
+                if (filter.ID != voucherDetail.ID)
+                    return false;
+            if (filter.Item != null)
+                if (filter.Item != voucherDetail.Item)
+                    return false;
+            if (filter.Title != null)
+                if (filter.Title != voucherDetail.Title)
+                    return false;
+            if (filter.SubTitle != null)
+                if (filter.SubTitle != voucherDetail.SubTitle)
+                    return false;
+            if (filter.Content != null)
+                if (filter.Content != voucherDetail.Content)
+                    return false;
+            if (filter.Fund != null)
+                if (filter.Fund != voucherDetail.Fund)
+                    return false;
+            if (filter.Remark != null)
+                if (filter.Remark != voucherDetail.Remark)
+                    return false;
         }
 
         public Voucher SelectVoucher(IObjectID id)
@@ -181,10 +248,13 @@ namespace AccountingServer.DAL
 
         public IEnumerable<Voucher> SelectVouchers(Voucher filter)
         {
-
             return m_Vouchers.FindAs<BsonDocument>(GetQuery(filter)).Select(d => d.ToVoucher());
         }
-        public int SelectVouchersCount(Voucher filter) { throw new NotImplementedException(); }
+
+        public long SelectVouchersCount(Voucher filter)
+        {
+            return m_Vouchers.Count(GetQuery(filter));
+        }
 
         public bool InsertVoucher(Voucher entity)
         {
@@ -200,11 +270,42 @@ namespace AccountingServer.DAL
             return result.Response["n"].AsInt32;
         }
 
-        public VoucherDetail SelectDetail(IObjectID id) { throw new NotImplementedException(); }
-        public IEnumerable<Voucher> SelectItemsWithDetail(VoucherDetail filter) { throw new NotImplementedException(); }
-        public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter) { throw new NotImplementedException(); }
-        public int SelectDetailsCount(VoucherDetail filter) { throw new NotImplementedException(); }
-        public bool InsertDetail(VoucherDetail entity) { throw new NotImplementedException(); }
+        public VoucherDetail SelectDetail(IObjectID id)
+        {
+            return
+                m_Vouchers.FindOneAs<BsonDocument>(Query.ElemMatch("detail", Query.EQ("_id", id.UnWrap())))
+                          .ToVoucher()
+                          .Details.Single(d => d.ID == id);
+        }
+
+        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter)
+        {
+            return filter.Item != null
+                       ? new[] { SelectVoucher(filter.Item) }
+                       : m_Vouchers.FindAs<BsonDocument>(Query.ElemMatch("detail", GetQuery(filter)))
+                                   .Select(d => d.ToVoucher());
+        }
+
+        public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter)
+        {
+            return SelectVouchersWithDetail(filter).SelectMany(v => v.Details).Where(d => IsMatch(filter, d));
+        }
+
+        public long SelectDetailsCount(VoucherDetail filter)
+        {
+            return SelectVouchersWithDetail(filter).SelectMany(v => v.Details).Where(d => IsMatch(filter, d)).LongCount();
+        }
+
+        public bool InsertDetail(VoucherDetail entity)
+        {
+            var v = SelectVoucher(entity.Item);
+            var d = new VoucherDetail[v.Details.Length + 1];
+            v.Details.CopyTo(d, 0);
+            d[v.Details.Length] = entity;
+
+            var result = m_Vouchers.Update(Query.EQ("_id", v.ID.UnWrap()), new UpdateDocument(v.ToBsonDocument()));
+            return result.Ok;
+        }
         public int DeleteDetails(VoucherDetail filter) { throw new NotImplementedException(); }
         public DbAsset SelectAsset(Guid id) { throw new NotImplementedException(); }
         public IEnumerable<DbAsset> SelectAssets(DbAsset filter) { throw new NotImplementedException(); }
