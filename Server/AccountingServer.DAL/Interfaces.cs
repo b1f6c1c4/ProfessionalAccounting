@@ -13,8 +13,8 @@ namespace AccountingServer.DAL
         int DeleteVouchers(Voucher filter);
         bool UpdateVoucher(Voucher entity);
 
-        VoucherDetail SelectDetail(IObjectID id);
         IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter);
+        IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> dFilters);
         IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter);
         long SelectDetailsCount(VoucherDetail filter);
         bool InsertDetail(VoucherDetail entity);

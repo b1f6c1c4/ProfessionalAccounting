@@ -63,6 +63,7 @@ namespace AccountingServer.DAL
             return doc;
         }
 
+
         public static BsonDocument ToBsonDocument(this VoucherDetail detail)
         {
             var val = new BsonDocument { { "title", detail.Title } };
@@ -80,7 +81,7 @@ namespace AccountingServer.DAL
         {
             var voucher = new Voucher { ID = doc["_id"].AsObjectId.Wrap() };
             if (doc.Contains("date"))
-                voucher.Date = doc["date"].AsLocalTime;
+                voucher.Date = doc["date"].IsBsonNull ? (DateTime?)null : doc["date"].AsLocalTime;
             voucher.Type = VoucherType.Ordinal;
             if (doc.Contains("special"))
                 switch (doc["special"].AsString)
@@ -216,33 +217,7 @@ namespace AccountingServer.DAL
 
             return lst.Any() ? Query.And(lst) : Query.Null;
         }
-
-        private static bool IsMatch(VoucherDetail filter, VoucherDetail voucherDetail)
-        {
-            if (filter.ID != null)
-                if (filter.ID != voucherDetail.ID)
-                    return false;
-            if (filter.Item != null)
-                if (filter.Item != voucherDetail.Item)
-                    return false;
-            if (filter.Title != null)
-                if (filter.Title != voucherDetail.Title)
-                    return false;
-            if (filter.SubTitle != null)
-                if (filter.SubTitle != voucherDetail.SubTitle)
-                    return false;
-            if (filter.Content != null)
-                if (filter.Content != voucherDetail.Content)
-                    return false;
-            if (filter.Fund != null)
-                if (filter.Fund != voucherDetail.Fund)
-                    return false;
-            if (filter.Remark != null)
-                if (filter.Remark != voucherDetail.Remark)
-                    return false;
-            return true;
-        }
-
+        
         public Voucher SelectVoucher(IObjectID id)
         {
             return m_Vouchers.FindOneByIdAs<BsonDocument>(id.UnWrap()).ToVoucher();
@@ -277,15 +252,7 @@ namespace AccountingServer.DAL
             var result = m_Vouchers.Update(GetUniqueQuery(entity), new UpdateDocument(entity.ToBsonDocument()));
             return result.Ok;
         }
-
-        public VoucherDetail SelectDetail(IObjectID id)
-        {
-            return
-                m_Vouchers.FindOneAs<BsonDocument>(Query.ElemMatch("detail", Query.EQ("_id", id.UnWrap())))
-                          .ToVoucher()
-                          .Details.Single(d => d.ID == id);
-        }
-
+        
         public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter)
         {
             return filter.Item != null
@@ -293,15 +260,30 @@ namespace AccountingServer.DAL
                        : m_Vouchers.FindAs<BsonDocument>(Query.ElemMatch("detail", GetQuery(filter)))
                                    .Select(d => d.ToVoucher());
         }
+        public IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> filters)
+        {
+            return filters.Where(filter => filter.Item != null).Select(filter => SelectVoucher(filter.Item))
+                          .Concat(
+                                  m_Vouchers.FindAs<BsonDocument>(
+                                                                  Query.Or(
+                                                                           filters.Where(filter => filter.Item == null)
+                                                                                  .Select(
+                                                                                          filter =>
+                                                                                          Query.ElemMatch(
+                                                                                                          "detail",
+                                                                                                          GetQuery(
+                                                                                                                   filter)))))
+                                            .Select(d => d.ToVoucher()));
+        }
 
         public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter)
         {
-            return SelectVouchersWithDetail(filter).SelectMany(v => v.Details).Where(d => IsMatch(filter, d));
+            return SelectVouchersWithDetail(filter).SelectMany(v => v.Details).Where(d => d.IsMatch(filter));
         }
 
         public long SelectDetailsCount(VoucherDetail filter)
         {
-            return SelectVouchersWithDetail(filter).SelectMany(v => v.Details).Where(d => IsMatch(filter, d)).LongCount();
+            return SelectVouchersWithDetail(filter).SelectMany(v => v.Details).Where(d => d.IsMatch(filter)).LongCount();
         }
 
         public bool InsertDetail(VoucherDetail entity)
@@ -321,7 +303,7 @@ namespace AccountingServer.DAL
             var v = SelectVouchersWithDetail(filter);
             foreach (var voucher in v)
             {
-                voucher.Details = voucher.Details.Where(d => !IsMatch(filter, d)).ToArray();
+                voucher.Details = voucher.Details.Where(d => !d.IsMatch(filter)).ToArray();
                 var result = m_Vouchers.Update(GetUniqueQuery(voucher), new UpdateDocument(voucher.ToBsonDocument()));
                 if (result.Ok)
                     count++;
