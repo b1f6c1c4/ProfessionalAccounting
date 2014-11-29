@@ -77,7 +77,7 @@ namespace AccountingServer.DAL
             }
         }
 
-        public Voucher SelectVoucher(IObjectID id) { throw new NotImplementedException(); }
+        public Voucher SelectVoucher(string id) { throw new NotImplementedException(); }
 
         public IEnumerable<Voucher> SelectVouchers(Voucher filter)
         {
@@ -103,7 +103,7 @@ namespace AccountingServer.DAL
 
         public long SelectVouchersCount(Voucher filter) { throw new NotImplementedException(); }
         public bool InsertVoucher(Voucher entity) { throw new NotImplementedException(); }
-        public bool DeleteVoucher(IObjectID id) { throw new NotImplementedException(); }
+        public bool DeleteVoucher(string id) { throw new NotImplementedException(); }
         public int DeleteVouchers(Voucher filter) { throw new NotImplementedException(); }
         public bool UpdateVoucher(Voucher entity) { throw new NotImplementedException(); }
         public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter) { throw new NotImplementedException(); }

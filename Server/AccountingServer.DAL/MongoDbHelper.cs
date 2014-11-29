@@ -8,25 +8,11 @@ using MongoDB.Driver.Builders;
 
 namespace AccountingServer.DAL
 {
-    internal class ObjectIdWrapper : IObjectID
-    {
-        internal ObjectId ID;
-
-        public override string ToString() { return ID.ToString(); }
-        public IObjectID Parse(string str) { return ObjectId.Parse(str).Wrap(); }
-    }
-
     internal static class BsonHelper
     {
-        public static IObjectID Wrap(this ObjectId id) { return new ObjectIdWrapper { ID = id }; }
+        public static string Wrap(this ObjectId id) { return id.ToString(); }
 
-        public static ObjectId UnWrap(this IObjectID id)
-        {
-            var idWrapper = id as ObjectIdWrapper;
-            if (idWrapper == null)
-                throw new InvalidOperationException();
-            return idWrapper.ID;
-        }
+        public static ObjectId UnWrap(this string id) { return ObjectId.Parse(id); }
 
         public static BsonDocument ToBsonDocument(this Voucher voucher)
         {
@@ -167,7 +153,7 @@ namespace AccountingServer.DAL
             }
         }
 
-        private static IMongoQuery GetUniqueQuery(IObjectID id) { return Query.EQ("_id", id.UnWrap()); }
+        private static IMongoQuery GetUniqueQuery(string id) { return Query.EQ("_id", id.UnWrap()); }
         private static IMongoQuery GetUniqueQuery(Voucher voucher) { return GetUniqueQuery(voucher.ID); }
 
         private static IMongoQuery GetQuery(Voucher filter)
@@ -222,7 +208,7 @@ namespace AccountingServer.DAL
             return lst.Any() ? Query.And(lst) : Query.Null;
         }
         
-        public Voucher SelectVoucher(IObjectID id)
+        public Voucher SelectVoucher(string id)
         {
             return m_Vouchers.FindOneByIdAs<BsonDocument>(id.UnWrap()).ToVoucher();
         }
@@ -245,7 +231,7 @@ namespace AccountingServer.DAL
             return result.Ok;
         }
 
-        public bool DeleteVoucher(IObjectID id)
+        public bool DeleteVoucher(string id)
         {
             var result = m_Vouchers.Remove(GetUniqueQuery(id));
             return result.Ok;

@@ -503,15 +503,15 @@ namespace AccountingServer
         {
             sb.AppendLine("new Voucher");
             sb.AppendLine("    {{");
-            sb.AppendFormat("        ID = _Parse({0})" + Environment.NewLine, ProcessString(voucher.ID.ToString()));
+            sb.AppendFormat("        ID = {0}" + Environment.NewLine, ProcessString(voucher.ID));
             if (voucher.Date.HasValue)
                 sb.AppendFormat("        Date = DateTime.Parse(\"{0:yyyy-MM-dd}\")," + Environment.NewLine, voucher.Date);
             else
-                sb.AppendLine("        Date = null\"),");
-            if (voucher.Type != VoucherType.Ordinal)
+                sb.AppendLine("        Date = null\",");
+            if ((voucher.Type ?? VoucherType.Ordinal) != VoucherType.Ordinal)
                 sb.AppendFormat("        Type = VoucherType.{0}," + Environment.NewLine, voucher.Type);
             if (voucher.Remark != null)
-            sb.AppendFormat("        Remark = {0}" + Environment.NewLine, ProcessString(voucher.Remark));
+                sb.AppendFormat("        Remark = {0}" + Environment.NewLine, ProcessString(voucher.Remark));
             sb.AppendLine("        Details = new[]");
             sb.AppendLine("                        {");
             var flag = false;
@@ -552,9 +552,6 @@ namespace AccountingServer
             sb.AppendLine("{");
             sb.AppendLine("    public static class VoucherCreator");
             sb.AppendLine("    {");
-            sb.AppendLine("        private static IObjectID _Parse(string str)");
-            sb.AppendLine("        {");
-            sb.AppendLine("        }");
             sb.AppendLine("        public static Voucher GetVoucher()");
             sb.AppendLine("        {");
             sb.AppendFormat("            return {0};" + Environment.NewLine, str);

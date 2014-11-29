@@ -12,16 +12,10 @@ namespace AccountingServer.Entities
         AnnualCarry,
         Uncertain
     }
-
-    public interface IObjectID
-    {
-        string ToString();
-        IObjectID Parse(string str);
-    }
-
+    
     public class Voucher
     {
-        public IObjectID ID { get; set; }
+        public string ID { get; set; }
         public DateTime? Date { get; set; }
         public string Remark { get; set; }
         public VoucherDetail[] Details { get; set; }
@@ -30,7 +24,7 @@ namespace AccountingServer.Entities
 
     public class VoucherDetail
     {
-        public IObjectID Item { get; set; }
+        public string Item { get; set; }
         public int? Title { get; set; }
         public int? SubTitle { get; set; }
         public string Content { get; set; }
