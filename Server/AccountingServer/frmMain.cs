@@ -1,25 +1,16 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
-using Microsoft.Office.Interop.Excel;
-using Action = System.Action;
-using ChartArea = System.Windows.Forms.DataVisualization.Charting.ChartArea;
-using Font = System.Drawing.Font;
-using Rectangle = System.Drawing.Rectangle;
-using Series = System.Windows.Forms.DataVisualization.Charting.Series;
+using Microsoft.CSharp;
 
 namespace AccountingServer
 {
@@ -450,7 +441,10 @@ namespace AccountingServer
                     chart1.ChartAreas["生活资产"].AxisY.Maximum = m_Toggle21 ? 1000 : 7000;
                     break;
                 case Keys.C:
-                    FetchFromInfo().ContinueWith(t => Analyze(t.Result));
+                    THUInfo.FetchFromInfo().ContinueWith(t => THUInfo.Analyze(t.Result));
+                    break;
+                case Keys.X:
+                    m_BHelper.CopyDb();
                     break;
                 case Keys.Space:
                     pictureBox1.Visible ^= true;
@@ -472,120 +466,125 @@ namespace AccountingServer
             }
         }
 
-        private static async Task<Stream> FetchFromInfo()
+        private void textBox1_KeyUp(object sender, KeyEventArgs e)
         {
-            var cookie = new CookieContainer();
+            if (e.KeyCode == Keys.Escape)
             {
-                var req = WebRequest.Create(@"http://info.tsinghua.edu.cn/") as HttpWebRequest;
-
-                Debug.Assert(req != null, "req != null");
-
-                req.KeepAlive = false;
-                req.Method = "GET";
-                req.CookieContainer = cookie;
-                req.Accept = "text/html, application/xhtml+xml, */*";
-                req.ContentType = "application/x-www-form-urlencoded";
-                req.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; Touch; rv:11.0) like Gecko";
-                req.Credentials = CredentialCache.DefaultCredentials;
-                req.AllowAutoRedirect = false;
-                var res = await req.GetResponseAsync();
-                var responseStream = res.GetResponseStream();
-                if (responseStream != null)
-                    Debug.Print(SaveTempFile(responseStream));
-                //using (var sr = new StreamReader(responseStream, Encoding.GetEncoding("GB2312")))
-                //    Debug.Print(sr.ReadToEnd());
+                textBox1.SelectionStart = 0;
+                textBox1.SelectionLength = textBox1.TextLength;
+                return;
             }
+            if (e.Shift &&
+                e.KeyCode == Keys.Enter)
             {
-                var buf =
-                    Encoding.GetEncoding("GB2312").GetBytes("redirect=NO&userName=2014010914&password=&x=5&y=5");
-                var req = WebRequest.Create(@"https://info.tsinghua.edu.cn:443/Login") as HttpWebRequest;
-
-                Debug.Assert(req != null, "req != null");
-
-                req.KeepAlive = false;
-                req.Method = "POST";
-                req.ContentLength = buf.Length;
-                req.GetRequestStream().Write(buf, 0, buf.Length);
-                req.GetRequestStream().Flush();
-                req.CookieContainer = cookie;
-                req.Referer = @"http://info.tsinghua.edu.cn/";
-                req.Accept = "text/html, application/xhtml+xml, */*";
-                req.ContentType = "application/x-www-form-urlencoded";
-                req.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; Touch; rv:11.0) like Gecko";
-                req.Credentials = CredentialCache.DefaultCredentials;
-                req.AllowAutoRedirect = false;
-                var res = await req.GetResponseAsync();
-                var responseStream = res.GetResponseStream();
-                if (responseStream != null)
-                    using (var sr = new StreamReader(responseStream, Encoding.GetEncoding("GB2312")))
-                        Debug.Print(sr.ReadToEnd());
-            }
-            return null;
-            {
-                var buf = Encoding.GetEncoding("GB2312").GetBytes("begindate=&enddate=&transtype=&dept=");
-                var req = WebRequest.Create(@"http://ecard.tsinghua.edu.cn/user/ExDetailsDown.do?") as HttpWebRequest;
-
-                Debug.Assert(req != null, "req != null");
-
-                req.KeepAlive = false;
-                req.Method = "POST";
-                req.ContentLength = buf.Length;
-                req.GetRequestStream().Write(buf, 0, buf.Length);
-                req.CookieContainer = cookie;
-                req.Accept = "text/html, application/xhtml+xml, */*";
-                req.ContentType = "application/x-www-form-urlencoded";
-                req.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; Touch; rv:11.0) like Gecko";
-                req.Credentials = CredentialCache.DefaultCredentials;
-                req.AllowAutoRedirect = false;
-                req.Referer = @"http://ecard.tsinghua.edu.cn/user/UserExDetails.do?dir=jump&currentPage=1";
-
-                var res = await req.GetResponseAsync();
-                return res.GetResponseStream();
-            }
-        }
-
-        private void Analyze(Stream stream)
-        {
-            return;
-            var tempFileName = SaveTempFile(stream);
-
-            var excel = new ApplicationClass();
-            excel.Workbooks.Add(true);
-            excel.Visible = true;
-            excel.Workbooks.Open(
-                                 tempFileName,
-                                 Missing.Value,
-                                 Missing.Value,
-                                 Missing.Value,
-                                 Missing.Value,
-                                 Missing.Value,
-                                 Missing.Value,
-                                 Missing.Value,
-                                 Missing.Value,
-                                 Missing.Value,
-                                 Missing.Value,
-                                 Missing.Value,
-                                 Missing.Value,
-                                 Missing.Value,
-                                 Missing.Value);
-        }
-
-        private static string SaveTempFile(Stream stream)
-        {
-            var buf = new byte[1024];
-            var tempFileName = Path.GetTempPath() + Path.GetRandomFileName() + ".xls";
-            using (var s = File.OpenWrite(tempFileName))
-            {
-                var length = stream.Read(buf, 0, 1024);
-                while (length > 0)
-                {
-                    s.Write(buf, 0, length);
-                    length = stream.Read(buf, 0, 1024);
+                /*var id = textBox1.GetLineFromCharIndex(textBox1.SelectionStart);
+                var s = textBox1.Lines[id];
+                while (s == "" &&
+                       id > 0)
+                    s = textBox1.Lines[--id];*/
+                //if (s == ".")
+                /*{
+                    var sb = new StringBuilder();
+                    foreach (var voucher in m_BHelper.SelectVouchers(new Voucher { Date = DateTime.Now.Date }))
+                        PresentVoucher(voucher, sb);
+                    textBox1.AppendText(sb.ToString());
                 }
-
-                s.Flush();
+                else*/
+                {
+                    var sb = new StringBuilder();
+                    var voucher = ParseVoucher(textBox1.Text);
+                    PresentVoucher(voucher,sb);
+                    textBox1.AppendText("/*"+sb.ToString() + "*/");
+                }
             }
-            return tempFileName;
+        }
+
+        private void PresentVoucher(Voucher voucher, StringBuilder sb)
+        {
+            sb.AppendLine("new Voucher");
+            sb.AppendLine("    {{");
+            sb.AppendFormat("        ID = _Parse({0})" + Environment.NewLine, ProcessString(voucher.ID.ToString()));
+            if (voucher.Date.HasValue)
+                sb.AppendFormat("        Date = DateTime.Parse(\"{0:yyyy-MM-dd}\")," + Environment.NewLine, voucher.Date);
+            else
+                sb.AppendLine("        Date = null\"),");
+            if (voucher.Type != VoucherType.Ordinal)
+                sb.AppendFormat("        Type = VoucherType.{0}," + Environment.NewLine, voucher.Type);
+            if (voucher.Remark != null)
+            sb.AppendFormat("        Remark = {0}" + Environment.NewLine, ProcessString(voucher.Remark));
+            sb.AppendLine("        Details = new[]");
+            sb.AppendLine("                        {");
+            var flag = false;
+            foreach (var detail in voucher.Details)
+            {
+                if (flag)
+                    sb.AppendLine(",");
+                sb.Append("                            new VoucherDetail { ");
+                sb.AppendFormat("Title = {0:0}", detail.Title);
+                if (detail.SubTitle.HasValue)
+                    sb.AppendFormat(", SubTitle = {0:00}", detail.SubTitle);
+                if (detail.Content != null)
+                    sb.AppendFormat(", Content = {0}", ProcessString(detail.Content));
+                if (detail.Fund.HasValue)
+                    sb.AppendFormat(", Fund = {0}", detail.Fund);
+                if (detail.Remark != null)
+                    sb.AppendFormat(", Remark = {0}", ProcessString(detail.Remark));
+                sb.Append(" }");
+                flag = true;
+            }
+            sb.AppendLine(Environment.NewLine + "                        }" + Environment.NewLine + "    }");
+            sb.AppendLine();
+        }
+
+        private Voucher ParseVoucher(string str)
+        {
+            var provider = new CSharpCodeProvider();
+            var paras = new CompilerParameters
+                            {
+                                GenerateExecutable = false,
+                                GenerateInMemory = true,
+                                ReferencedAssemblies = { "AccountingServer.Entities.dll" }
+                            };
+            var sb = new StringBuilder();
+            sb.AppendLine("using System;");
+            sb.AppendLine("using AccountingServer.Entities;");
+            sb.AppendLine("namespace AccountingServer.Dynamic");
+            sb.AppendLine("{");
+            sb.AppendLine("    public static class VoucherCreator");
+            sb.AppendLine("    {");
+            sb.AppendLine("        private static IObjectID _Parse(string str)");
+            sb.AppendLine("        {");
+            sb.AppendLine("        }");
+            sb.AppendLine("        public static Voucher GetVoucher()");
+            sb.AppendLine("        {");
+            sb.AppendFormat("            return {0};" + Environment.NewLine, str);
+            sb.AppendLine("        }");
+            sb.AppendLine("    }");
+            sb.AppendLine("}");
+            var result = provider.CompileAssemblyFromSource(paras, sb.ToString());
+            var resultAssembly = result.CompiledAssembly;
+            return
+                (Voucher)
+                resultAssembly.GetType("AccountingServer.Dynamic.VoucherCreator")
+                              .GetMethod("GetVoucher")
+                              .Invoke(null, null);
+        }
+
+        private static string ProcessString(string s)
+        {
+            s = s.Replace("\\", "\\\\");
+            s = s.Replace("\"", "\\\"");
+            return "\"" + s + "\"";
+        }
+
+        private void textBox1_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (ModifierKeys.HasFlag(Keys.Control) &&
+                e.Delta != 0)
+                textBox1.Font = new Font(
+                    "Microsoft YaHei Mono",
+                    textBox1.Font.Size +
+                    e.Delta / 12F);
         }
     }
 }

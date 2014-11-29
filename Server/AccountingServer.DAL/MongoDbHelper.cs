@@ -11,6 +11,9 @@ namespace AccountingServer.DAL
     internal class ObjectIdWrapper : IObjectID
     {
         internal ObjectId ID;
+
+        public override string ToString() { return ID.ToString(); }
+        public IObjectID Parse(string str) { return ObjectId.Parse(str).Wrap(); }
     }
 
     internal static class BsonHelper
@@ -164,7 +167,8 @@ namespace AccountingServer.DAL
             }
         }
 
-        private static IMongoQuery GetUniqueQuery(Voucher voucher) { return Query.EQ("_id", voucher.ID.UnWrap()); }
+        private static IMongoQuery GetUniqueQuery(IObjectID id) { return Query.EQ("_id", id.UnWrap()); }
+        private static IMongoQuery GetUniqueQuery(Voucher voucher) { return GetUniqueQuery(voucher.ID); }
 
         private static IMongoQuery GetQuery(Voucher filter)
         {
@@ -238,6 +242,12 @@ namespace AccountingServer.DAL
             if (entity.ID == null)
                 entity.ID = ObjectId.GenerateNewId().Wrap();
             var result = m_Vouchers.Insert(entity.ToBsonDocument());
+            return result.Ok;
+        }
+
+        public bool DeleteVoucher(IObjectID id)
+        {
+            var result = m_Vouchers.Remove(GetUniqueQuery(id));
             return result.Ok;
         }
 

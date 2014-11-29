@@ -1,0 +1,27 @@
+﻿所有命令以SHIFT+ENTER结束
+
+检索某一范围内所有Voucher：
+[]					不作限制
+.					今日
+..					本周
+0					本月
+-1					上月
+@0					本财月
+@-1					上个财月
+yyyyMMdd			某日
+yyyyMM				某月
+[yyyyMMdd yyyyMMdd]	某两日之间
+
+检索关于某一Content的所有Voucher:
+'' []				不限日期
+'' [.]				今日
+'' [..]				本周
+
+命令修饰：
+~`					按Title，SubTitle，Content分类汇总总额并制作报表
+
+快速编辑：
+\					Upsert
+
+数据呈现：
+

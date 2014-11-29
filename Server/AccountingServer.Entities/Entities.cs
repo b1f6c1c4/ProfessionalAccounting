@@ -15,7 +15,8 @@ namespace AccountingServer.Entities
 
     public interface IObjectID
     {
-        
+        string ToString();
+        IObjectID Parse(string str);
     }
 
     public class Voucher
