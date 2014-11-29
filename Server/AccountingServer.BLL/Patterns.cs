@@ -53,12 +53,12 @@ namespace AccountingServer.BLL
     {
         [Pattern(Name = "食堂",
             TextPattern = "{0} {1}元学生卡 {2}食堂",
-            UI = "Date[日期],E[金额;人民币元;;NP],O[食堂;观畴园;紫荆园;桃李园;清青比萨;清青快餐;清青休闲;玉树园;闻馨园;听涛园;丁香园;芝兰园]")]
+            UI = "Date[日期],E[金额;人民币元;;NP],O[食堂;观畴园;紫荆园;桃李园;清青比萨;清青快餐;清青休闲;清青时代;玉树园;闻馨园;听涛园;丁香园;芝兰园]")]
         public static void 清华食堂(string result, BHelper helper)
         {
             var sp = result.Split(',');
             var fund = sp[1].AsCurrency();
-            var remarks = new[] { "观畴园", "紫荆园", "桃李园", "清青比萨", "清青快餐", "清青休闲", "玉树园", "闻馨园", "听涛园", "丁香园", "芝兰园" };
+            var remarks = new[] { "观畴园", "紫荆园", "桃李园", "清青比萨", "清青快餐", "清青休闲", "清青时代", "玉树园", "闻馨园", "听涛园", "丁香园", "芝兰园" };
             helper.InsertVoucher(
                                  new Voucher
                                      {
@@ -85,7 +85,7 @@ namespace AccountingServer.BLL
         }
 
         [Pattern(Name = "福利", TextPattern = "{0} {1}元{2} {3}福利{4}",
-            UI = "Date[日期],E[付款金额;人民币元;2.4;NP],O[支付;6439;7064;1476;现金],E[实际金额;人民币元;3;NP],E[类型;食品/生活用品/理发/...;食品;]")]
+            UI = "Date[日期],E[付款金额;人民币元;2.4;NP],O[支付;6439;7064;现金],E[实际金额;人民币元;3;NP],E[类型;食品/生活用品/理发/...;食品;]")]
         public static void 福利(string result, BHelper helper)
         {
             var sp = result.Split(',');
@@ -101,9 +101,6 @@ namespace AccountingServer.BLL
                     credit = new VoucherDetail { Title = 1012, SubTitle = 01, Content = "7064", Fund = fund };
                     break;
                 case "2":
-                    credit = new VoucherDetail { Title = 1012, SubTitle = 01, Content = "1476", Fund = fund };
-                    break;
-                case "3":
                     credit = new VoucherDetail { Title = 1001, Content = "", Fund = fund };
                     break;
                 default:
@@ -141,8 +138,7 @@ namespace AccountingServer.BLL
                 double? fund;
                 if (sp[id + 1].StartsWith(":"))
                 {
-                    var orig = helper.GetBalance(1101, 01, content, dt) +
-                               helper.GetBalance(1101, 02, content, dt);
+                    var orig = helper.GetBalance(new Balance { Title = 1101, Content = content, Date = dt });
                     fund = sp[id + 1].Substring(1).AsCurrency() - orig;
                     if (fund == 0)
                         continue;
@@ -192,94 +188,32 @@ namespace AccountingServer.BLL
                                          });
             }
         }
-
-        [Pattern(Name = "交易性金融资产收益", TextPattern = "{0} {1}元交易性金融资产{2}",
-            UI = "Date[日期],E[金额;人民币元;;NP],O[名称;广发基金天天红;余额宝;中银活期宝;中银增利;中银优选;中银纯债C]")]
-        public static void 交易性金融资产(string result, BHelper helper)
-        {
-            var sp = result.Split(',');
-            var dt = sp[0].AsDate();
-
-            var remarks = new[] {"广发基金天天红", "余额宝", "中银活期宝", "中银增利", "中银优选", "中银纯债C"};
-            var content = remarks[Convert.ToInt32(sp[2])];
-
-            int title, subTitle;
-            switch (sp[2])
-            {
-                case "1":
-                case "2":
-                case "3":
-                    title = 6101;
-                    subTitle = 01;
-                    break;
-                default:
-                    title = 6111;
-                    subTitle = 02;
-                    break;
-            }
-
-            double? fund;
-            if (sp[1].StartsWith(":"))
-            {
-                var orig = helper.GetBalance(1101, 01, content, dt) +
-                           helper.GetBalance(1101, 02, content, dt);
-                fund = sp[1].Substring(1).AsCurrency() - orig;
-            }
-            else
-            {
-                fund = sp[1].AsCurrency();
-            }
-
-            helper.InsertVoucher(
-                                 new Voucher
-                                     {
-                                         Date = dt,
-                                         Details =
-                                             new[]
-                                                 {
-                                                     new VoucherDetail
-                                                         {
-                                                             Title = 1101,
-                                                             SubTitle = 02,
-                                                             Content = content,
-                                                             Fund = fund
-                                                         },
-                                                     new VoucherDetail
-                                                         {
-                                                             Title = title,
-                                                             SubTitle = subTitle,
-                                                             Content = content,
-                                                             Fund = -fund
-                                                         }
-                                                 }
-                                     });
-        }
-
+        
         [Pattern(Name = "洗澡/洗衣/水费", TextPattern = "{0} {1}元{2}", UI = "Date[日期],E[金额;人民币元;2.5;NP],O[项目;洗澡;洗衣;水费]")]
         public static void 洗澡洗衣用水(string result, BHelper helper)
         {
             var sp = result.Split(',');
             var dt = sp[0].AsDate();
 
-            string remarkD, remarkC;
+            string contentD, contentC;
             int? titleD, subTitleD;
             switch (sp[2])
             {
                 case "0":
-                    remarkC = "洗澡卡";
-                    remarkD = "洗澡";
+                    contentC = "洗澡卡";
+                    contentD = "洗澡";
                     titleD = 6602;
                     subTitleD = 06;
                     break;
                 case "1":
-                    remarkC = "洗衣卡";
-                    remarkD = "洗衣";
+                    contentC = "洗衣卡";
+                    contentD = "洗衣";
                     titleD = 6602;
                     subTitleD = 06;
                     break;
                 case "2":
-                    remarkC = "学生卡小钱包";
-                    remarkD = "水费";
+                    contentC = "学生卡小钱包";
+                    contentD = "水费";
                     titleD = 6602;
                     subTitleD = 01;
                     break;
@@ -290,7 +224,7 @@ namespace AccountingServer.BLL
             double? fund;
             if (sp[1].StartsWith(":"))
             {
-                var orig = helper.GetBalance(1123, 00, remarkC, dt);
+                var orig = helper.GetBalance(new Balance { Title = 1123, Content = contentC, Date = dt });
                 fund = orig - sp[1].Substring(1).AsCurrency();
             }
             else
@@ -305,12 +239,12 @@ namespace AccountingServer.BLL
                                          Details =
                                              new[]
                                                  {
-                                                     new VoucherDetail { Title = 1123, Content = remarkC, Fund = -fund },
+                                                     new VoucherDetail { Title = 1123, Content = contentC, Fund = -fund },
                                                      new VoucherDetail
                                                          {
                                                              Title = titleD,
                                                              SubTitle = subTitleD,
-                                                             Content = remarkD,
+                                                             Content = contentD,
                                                              Fund = fund
                                                          }
                                                  }
