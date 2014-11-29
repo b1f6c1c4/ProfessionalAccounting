@@ -6,11 +6,11 @@ namespace AccountingServer.DAL
 {
     public interface IDbHelper : IDisposable
     {
-        Voucher SelectVoucher(IObjectID id);
+        Voucher SelectVoucher(string id);
         IEnumerable<Voucher> SelectVouchers(Voucher filter);
         long SelectVouchersCount(Voucher filter);
         bool InsertVoucher(Voucher entity);
-        bool DeleteVoucher(IObjectID id);
+        bool DeleteVoucher(string id);
         int DeleteVouchers(Voucher filter);
         bool UpdateVoucher(Voucher entity);
 

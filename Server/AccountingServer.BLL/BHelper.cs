@@ -398,7 +398,7 @@ namespace AccountingServer.BLL
 
         //public IEnumerable<DbTitle> SelectTitles(DbTitle entity) { return m_Db.SelectTitles(entity); }
         public long SelectVouchersCount(Voucher entity) { return m_Db.SelectVouchersCount(entity); }
-        public Voucher SelectVoucher(IObjectID id) { return m_Db.SelectVoucher(id); }
+        public Voucher SelectVoucher(string id) { return m_Db.SelectVoucher(id); }
         public IEnumerable<Voucher> SelectVouchers(Voucher entity) { return m_Db.SelectVouchers(entity); }
 
         public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail entity)
