@@ -29,8 +29,6 @@ namespace AccountingServer.Entities
 
     public class VoucherDetail
     {
-        public IObjectID ID { get; set; }
-
         public IObjectID Item { get; set; }
         public int? Title { get; set; }
         public int? SubTitle { get; set; }
@@ -67,12 +65,12 @@ namespace AccountingServer.Entities
     //    public IAssetItem[] Schedule { get; set; }
     //}
 
-    //public class DailyBalance
-    //{
-    //    public DateTime? Date { get; set; }
-    //    public int Title { get; set; }
-    //    public int? SubTitle { get; set; }
-    //    public string Content { get; set; }
-    //    public double Balance { get; set; }
-    //}
+    public class Balance
+    {
+        public DateTime? Date { get; set; }
+        public int? Title { get; set; }
+        public int? SubTitle { get; set; }
+        public string Content { get; set; }
+        public double Fund { get; set; }
+    }
 }
