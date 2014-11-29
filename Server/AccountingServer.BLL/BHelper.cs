@@ -17,11 +17,15 @@ namespace AccountingServer.BLL
         private IDbHelper m_Db;
         //private string m_DbName;
 
+        private IDbHelper m_OldDb;
+
         //private Dictionary<double, string> m_Titles;
 
         public void Connect(string un, string pw)
         {
             m_Db = new MongoDbHelper();
+
+            m_OldDb = new SqlDbHelper(un, pw);
             //m_DbName = un;
             //GetTitles();
         }
@@ -30,6 +34,57 @@ namespace AccountingServer.BLL
         {
             m_Db.Dispose();
             m_Db = null;
+
+            m_OldDb.Dispose();
+            m_OldDb = null;
+        }
+
+        public void CopyDb()
+        {
+            m_Db.DeleteVouchers(new Voucher { Date = DateTime.Parse("2013-09-30") });
+            m_Db.InsertVoucher(
+                               new Voucher
+                                   {
+                                       Date = null,
+                                       Type = VoucherType.Ordinal,
+                                       Details = m_OldDb.SelectDetails(new VoucherDetail { Remark = "1" })
+                                                        .Where(d => d.Title != 4001)
+                                                        .Concat(
+                                                                m_OldDb.SelectDetails(
+                                                                                      new VoucherDetail { Remark = "4" }))
+                                                        .Concat(
+                                                                m_OldDb.SelectDetails(
+                                                                                      new VoucherDetail { Remark = "5" }))
+                                                        .Concat(
+                                                                m_OldDb.SelectDetails(
+                                                                                      new VoucherDetail { Remark = "6" }))
+                                                        .Concat(
+                                                                new[]
+                                                                    {
+                                                                        new VoucherDetail
+                                                                            {
+                                                                                Title = 4101,
+                                                                                Fund = 33422.3724
+                                                                            }
+                                                                    })
+                                                        .GroupBy(
+                                                                 d =>
+                                                                 new VoucherDetail
+                                                                     {
+                                                                         Title = d.Title,
+                                                                         SubTitle = d.SubTitle,
+                                                                         Content = d.Content
+                                                                     },
+                                                                 (vd, ds) =>
+                                                                 new VoucherDetail
+                                                                     {
+                                                                         Title = vd.Title,
+                                                                         SubTitle = vd.SubTitle,
+                                                                         Content = vd.Content,
+                                                                         Fund = ds.Sum(d => d.Fund)
+                                                                     })
+                                                        .ToArray()
+                                   });
         }
 
         //public bool IsCarry(Voucher entity) { return m_Db.SelectDetails(entity).Any(d => d.Title == FullYearProfit); }
@@ -105,14 +160,26 @@ namespace AccountingServer.BLL
                                     });
         }
 
-        private static IEnumerable<Balance> ProcessDailyBalance(DateTime startDate, DateTime endDate, List<Balance> resx, Comparison<DateTime?> comparison)
+        private static int CompareDate(DateTime? b1Date, DateTime? b2Date)
+        {
+            if (b1Date.HasValue &&
+                b2Date.HasValue)
+                return b1Date.Value.CompareTo(b2Date.Value);
+            if (b1Date.HasValue)
+                return 1;
+            if (b2Date.HasValue)
+                return -1;
+            return 0;
+        }
+
+        private static IEnumerable<Balance> ProcessDailyBalance(DateTime startDate, DateTime endDate, List<Balance> resx)
         {
             var id = 0;
             var fund = 0D;
             for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
             {
                 while (id < resx.Count &&
-                       comparison(resx[id].Date, dt) < 0)
+                       CompareDate(resx[id].Date, dt) < 0)
                     fund += resx[id++].Fund;
                 if (id < resx.Count)
                     fund += resx[id++].Fund;
@@ -134,15 +201,7 @@ namespace AccountingServer.BLL
                                   SubTitle = filter.SubTitle,
                                   Content = filter.Content
                               };
-            Comparison<DateTime?> comparison = (b1Date, b2Date) =>
-                                               b1Date.HasValue && b2Date.HasValue
-                                                   ? b1Date.Value.CompareTo(b1Date.Value)
-                                                   : b1Date.HasValue //&& !b2Date.HasValue
-                                                         ? 1
-                                                         : b2Date.HasValue //&& !b1Date.HasValue
-                                                               ? -1
-                                                               : 0;
-            var res = m_Db.SelectVouchersWithDetail(dFilter).Where(v => comparison(v.Date, endDate) <= 0);
+            var res = m_Db.SelectVouchersWithDetail(dFilter).Where(v => CompareDate(v.Date, endDate) <= 0);
             var resx = res.GroupBy(
                                    v => v.Date,
                                    (dt, vs) =>
@@ -159,8 +218,8 @@ namespace AccountingServer.BLL
                                                  .Sum(d => d.Fund)
                                                  .Value
                                        }).ToList();
-            resx.Sort((b1, b2) => comparison(b1.Date, b2.Date));
-            return ProcessDailyBalance(startDate, endDate, resx, comparison);
+            resx.Sort((b1, b2) => CompareDate(b1.Date, b2.Date));
+            return ProcessDailyBalance(startDate, endDate, resx);
         }
 
         public IEnumerable<Balance> GetDailyBalance(IEnumerable<Balance> filters, DateTime startDate, DateTime endDate,
@@ -176,15 +235,7 @@ namespace AccountingServer.BLL
                                        Content = filter.Content
                                    });
 
-            Comparison<DateTime?> comparison = (b1Date, b2Date) =>
-                                               b1Date.HasValue && b2Date.HasValue
-                                                   ? b1Date.Value.CompareTo(b1Date.Value)
-                                                   : b1Date.HasValue //&& !b2Date.HasValue
-                                                         ? 1
-                                                         : b2Date.HasValue //&& !b1Date.HasValue
-                                                               ? -1
-                                                               : 0;
-            var res = m_Db.SelectVouchersWithDetail(dFilters).Where(v => comparison(v.Date, endDate) <= 0);
+            var res = m_Db.SelectVouchersWithDetail(dFilters).Where(v => CompareDate(v.Date, endDate) <= 0);
             var resx = res.GroupBy(
                                    v => v.Date,
                                    (dt, vs) =>
@@ -196,13 +247,13 @@ namespace AccountingServer.BLL
                                            //Content = filter.Content,
                                            Fund =
                                                vs.SelectMany(v => v.Details)
-                                                 .Where(d => dFilters.Any(filter => d.IsMatch(filter)))
+                                                 .Where(d => dFilters.Any(d.IsMatch))
                                                  .Where(d => dir == 0 || (dir > 0 ? d.Fund > 0 : d.Fund < 0))
                                                  .Sum(d => d.Fund)
                                                  .Value
                                        }).ToList();
-            resx.Sort((b1, b2) => comparison(b1.Date, b2.Date));
-            return ProcessDailyBalance(startDate, endDate, resx, comparison);
+            resx.Sort((b1, b2) => CompareDate(b1.Date, b2.Date));
+            return ProcessDailyBalance(startDate, endDate, resx);
         }
 
         public IEnumerable<IEnumerable<Balance>> GetBalancesAcrossContent(Balance filter)

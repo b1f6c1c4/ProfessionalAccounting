@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SqlDbHelper.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="MongoDbHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -10,6 +10,7 @@ namespace AccountingServer.DAL
         IEnumerable<Voucher> SelectVouchers(Voucher filter);
         long SelectVouchersCount(Voucher filter);
         bool InsertVoucher(Voucher entity);
+        bool DeleteVoucher(IObjectID id);
         int DeleteVouchers(Voucher filter);
         bool UpdateVoucher(Voucher entity);
 
