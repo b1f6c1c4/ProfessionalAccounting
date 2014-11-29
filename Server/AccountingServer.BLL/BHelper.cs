@@ -41,54 +41,207 @@ namespace AccountingServer.BLL
             //return m_Db.SelectDetails(new VoucherDetail {Content = entity.ID.ToString()}).Sum(d => d.Fund.Value);
         }
 
-        public double GetBalance(int? title, int? subTitle, string content = null, DateTime? dt = null)
-        {
-            var lstx = m_Db.SelectVouchers(new Voucher());
-            if (dt.HasValue)
-                lstx = lstx.Where(i => i.Date <= dt);
-            var lst = lstx.Select(i => i.ID).ToList();
-            return m_Db.SelectDetails(new VoucherDetail {Title = title, Content = content})
-                       .Where(d => lst.Contains(d.Item))
-                       .Sum(d => d.Fund.Value);
-        }
-        
-        //public Dictionary<DateTime, double> GetDailyBalance(IEnumerable<double> titles, string content,
-        //                                                     DateTime startDate, DateTime endDate, int dir = 0)
+        //public double GetBalance(int? title, int? subTitle, string content = null, DateTime? dt = null)
         //{
-        //    var dic = new Dictionary<DateTime, double>();
-        //    var balance = (double)0;
-        //    var dt = startDate;
-        //    var lst = titles.SelectMany(title => m_Db.GetDailyBalance(title, content, dir)).ToList();
-        //    lst.Sort(
-        //             (d1, d2) =>
-        //             d1.Date.HasValue && d2.Date.HasValue
-        //                 ? d1.Date.Value.CompareTo(d2.Date.Value)
-        //                 : d1.Date.HasValue ? 1 : d2.Date.HasValue ? -1 : 0);
-        //    foreach (var daily in lst)
-        //    {
-        //        if (!daily.Date.HasValue ||
-        //            daily.Date < startDate)
-        //        {
-        //            balance += daily.Balance;
-        //            continue;
-        //        }
-        //        if (daily.Date > endDate)
-        //            break;
-        //        while (dt < daily.Date.Value)
-        //        {
-        //            dic.Add(dt, balance);
-        //            dt = dt.AddDays(1);
-        //        }
-        //        balance += daily.Balance;
-        //    }
-        //    while (dt <= endDate)
-        //    {
-        //        dic.Add(dt, balance);
-        //        dt = dt.AddDays(1);
-        //    }
-        //    dic.Add(dt, balance);
-        //    return dic;
+        //    var lstx = m_Db.SelectVouchers(new Voucher());
+        //    if (dt.HasValue)
+        //        lstx = lstx.Where(i => i.Date <= dt);
+        //    var lst = lstx.Select(i => i.ID).ToList();
+        //    return m_Db.SelectDetails(new VoucherDetail {Title = title, Content = content})
+        //               .Where(d => lst.Contains(d.Item))
+        //               .Sum(d => d.Fund.Value);
         //}
+
+        public double GetBalance(Balance filter)
+        {
+            var dFilter = new VoucherDetail
+                              {
+                                  Title = filter.Title,
+                                  SubTitle = filter.SubTitle,
+                                  Content = filter.Content
+                              };
+            var res = m_Db.SelectVouchersWithDetail(dFilter);
+            if (filter.Date.HasValue)
+                res = res.Where(v => v.Date <= filter.Date);
+            filter.Fund = res.SelectMany(v => v.Details).Where(d => d.IsMatch(dFilter)).Sum(d => d.Fund.Value);
+            return filter.Fund;
+        }
+
+        public double GetFinalBalance(Balance filter)
+        {
+            var dFilter = new VoucherDetail
+                              {
+                                  Title = filter.Title,
+                                  SubTitle = filter.SubTitle,
+                                  Content = filter.Content
+                              };
+            filter.Fund = m_Db.SelectDetails(dFilter).Sum(d => d.Fund.Value);
+            return filter.Fund;
+        }
+
+        public IEnumerable<Balance> GetBalances(Balance filter)
+        {
+            var dFilter = new VoucherDetail
+                              {
+                                  Title = filter.Title,
+                                  SubTitle = filter.SubTitle,
+                                  Content = filter.Content
+                              };
+            return m_Db.SelectVouchersWithDetail(dFilter)
+                       .GroupBy(
+                                v => v.Date,
+                                (dt, vs) =>
+                                new Balance
+                                    {
+                                        Date = dt,
+                                        Title = filter.Title,
+                                        SubTitle = filter.SubTitle,
+                                        Content = filter.Content,
+                                        Fund =
+                                            vs.SelectMany(v => v.Details)
+                                              .Where(d => d.IsMatch(dFilter))
+                                              .Sum(d => d.Fund)
+                                              .Value
+                                    });
+        }
+
+        private static IEnumerable<Balance> ProcessDailyBalance(DateTime startDate, DateTime endDate, List<Balance> resx, Comparison<DateTime?> comparison)
+        {
+            var id = 0;
+            var fund = 0D;
+            for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+            {
+                while (id < resx.Count &&
+                       comparison(resx[id].Date, dt) < 0)
+                    fund += resx[id++].Fund;
+                if (id < resx.Count)
+                    fund += resx[id++].Fund;
+
+                yield return
+                    new Balance
+                        {
+                            Date = dt,
+                            Fund = fund
+                        };
+            }
+        }
+
+        public IEnumerable<Balance> GetDailyBalance(Balance filter, DateTime startDate, DateTime endDate, int dir = 0)
+        {
+            var dFilter = new VoucherDetail
+                              {
+                                  Title = filter.Title,
+                                  SubTitle = filter.SubTitle,
+                                  Content = filter.Content
+                              };
+            Comparison<DateTime?> comparison = (b1Date, b2Date) =>
+                                               b1Date.HasValue && b2Date.HasValue
+                                                   ? b1Date.Value.CompareTo(b1Date.Value)
+                                                   : b1Date.HasValue //&& !b2Date.HasValue
+                                                         ? 1
+                                                         : b2Date.HasValue //&& !b1Date.HasValue
+                                                               ? -1
+                                                               : 0;
+            var res = m_Db.SelectVouchersWithDetail(dFilter).Where(v => comparison(v.Date, endDate) <= 0);
+            var resx = res.GroupBy(
+                                   v => v.Date,
+                                   (dt, vs) =>
+                                   new Balance
+                                       {
+                                           Date = dt,
+                                           //Title = filter.Title,
+                                           //SubTitle = filter.SubTitle,
+                                           //Content = filter.Content,
+                                           Fund =
+                                               vs.SelectMany(v => v.Details)
+                                                 .Where(d => d.IsMatch(dFilter))
+                                                 .Where(d => dir == 0 || (dir > 0 ? d.Fund > 0 : d.Fund < 0))
+                                                 .Sum(d => d.Fund)
+                                                 .Value
+                                       }).ToList();
+            resx.Sort((b1, b2) => comparison(b1.Date, b2.Date));
+            return ProcessDailyBalance(startDate, endDate, resx, comparison);
+        }
+
+        public IEnumerable<Balance> GetDailyBalance(IEnumerable<Balance> filters, DateTime startDate, DateTime endDate,
+                                                    int dir = 0)
+        {
+            var dFilters =
+                filters.Select(
+                               filter =>
+                               new VoucherDetail
+                                   {
+                                       Title = filter.Title,
+                                       SubTitle = filter.SubTitle,
+                                       Content = filter.Content
+                                   });
+
+            Comparison<DateTime?> comparison = (b1Date, b2Date) =>
+                                               b1Date.HasValue && b2Date.HasValue
+                                                   ? b1Date.Value.CompareTo(b1Date.Value)
+                                                   : b1Date.HasValue //&& !b2Date.HasValue
+                                                         ? 1
+                                                         : b2Date.HasValue //&& !b1Date.HasValue
+                                                               ? -1
+                                                               : 0;
+            var res = m_Db.SelectVouchersWithDetail(dFilters).Where(v => comparison(v.Date, endDate) <= 0);
+            var resx = res.GroupBy(
+                                   v => v.Date,
+                                   (dt, vs) =>
+                                   new Balance
+                                       {
+                                           Date = dt,
+                                           //Title = filter.Title,
+                                           //SubTitle = filter.SubTitle,
+                                           //Content = filter.Content,
+                                           Fund =
+                                               vs.SelectMany(v => v.Details)
+                                                 .Where(d => dFilters.Any(filter => d.IsMatch(filter)))
+                                                 .Where(d => dir == 0 || (dir > 0 ? d.Fund > 0 : d.Fund < 0))
+                                                 .Sum(d => d.Fund)
+                                                 .Value
+                                       }).ToList();
+            resx.Sort((b1, b2) => comparison(b1.Date, b2.Date));
+            return ProcessDailyBalance(startDate, endDate, resx, comparison);
+        }
+
+        public IEnumerable<IEnumerable<Balance>> GetBalancesAcrossContent(Balance filter)
+        {
+            var dFilter = new VoucherDetail { Title = filter.Title, SubTitle = filter.SubTitle };
+            return m_Db.SelectVouchersWithDetail(dFilter)
+                       .GroupBy(
+                                v => v.Date,
+                                (dt, vs) =>
+                                vs.SelectMany(v => v.Details)
+                                  .Where(d => d.IsMatch(dFilter))
+                                  .GroupBy(
+                                           d => d.Content,
+                                           (c, ds) =>
+                                           new Balance
+                                               {
+                                                   Date = dt,
+                                                   Title = filter.Title,
+                                                   SubTitle = filter.SubTitle,
+                                                   Content = c,
+                                                   Fund = ds.Sum(d => d.Fund).Value
+                                               }));
+        }
+
+        public IEnumerable<Balance> GetFinalBalancesAcrossContent(Balance filter)
+        {
+            var dFilter = new VoucherDetail { Title = filter.Title, SubTitle = filter.SubTitle };
+            return m_Db.SelectDetails(dFilter)
+                       .GroupBy(
+                                d => d.Content,
+                                (c, ds) =>
+                                new Balance
+                                    {
+                                        Title = filter.Title,
+                                        SubTitle = filter.SubTitle,
+                                        Content = c,
+                                        Fund = ds.Sum(d => d.Fund).Value
+                                    });
+        }
 
         //public double GetABalance(DbTitle entity)
         //{
@@ -196,7 +349,12 @@ namespace AccountingServer.BLL
         public long SelectVouchersCount(Voucher entity) { return m_Db.SelectVouchersCount(entity); }
         public Voucher SelectVoucher(IObjectID id) { return m_Db.SelectVoucher(id); }
         public IEnumerable<Voucher> SelectVouchers(Voucher entity) { return m_Db.SelectVouchers(entity); }
-        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail entity) { return m_Db.SelectVouchersWithDetail(entity); }
+
+        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail entity)
+        {
+            return m_Db.SelectVouchersWithDetail(entity);
+        }
+
         //public IEnumerable<VoucherDetail> SelectDetails(Voucher entity) { return m_Db.SelectDetails(entity); }
         public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail entity) { return m_Db.SelectDetails(entity); }
         public long SelectDetailsCount(VoucherDetail entity) { return m_Db.SelectDetailsCount(entity); }
@@ -282,7 +440,7 @@ namespace AccountingServer.BLL
             //var lst = m_Db.SelectDetails(item)
             var lst = item.Details
                           .GroupBy(
-                                   d => new VoucherDetail {Title = d.Title, Content = d.Content},
+                                   d => new VoucherDetail { Title = d.Title, Content = d.Content },
                                    (key, grp) =>
                                    {
                                        key.Item = item.ID;

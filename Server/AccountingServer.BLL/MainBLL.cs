@@ -87,13 +87,24 @@ namespace AccountingServer.BLL
             Action<string, string, double?> action =
                 (s, d, f) => m_Tcp.Write(String.Format("{0}={1}={2}", s, d, f.AsCurrency()));
 
-            action("库存现金", "1001.00", m_BHelper.GetBalance(1001, 00));
-            action("学生卡", "1012.05", m_BHelper.GetBalance(1012, 05));
+            action("库存现金", "1001.00", m_BHelper.GetFinalBalance(new Balance { Title = 1001 }));
+            action(
+                   "学生卡",
+                   "1012.05",
+                   m_BHelper.GetFinalBalance(new Balance { Title = 1012, SubTitle = 05 }));
             foreach (var s in new[] { "3593", "5184", "9767" })
-                action("借记卡" + s, s, m_BHelper.GetBalance(1002, 00, s));
-            action("贷记卡6439", "2241.01", -m_BHelper.GetBalance(2241, 01, "6439"));
-            action("公交卡", "1012.01", m_BHelper.GetBalance(1012, 01, ""));
-            action("公交卡1476", "1012.01", m_BHelper.GetBalance(1012, 01, "1476"));
+                action(
+                       "借记卡" + s,
+                       s,
+                       m_BHelper.GetFinalBalance(new Balance { Title = 1002, Content = s }));
+            action(
+                   "贷记卡6439",
+                   "2241.01",
+                   -m_BHelper.GetFinalBalance(new Balance { Title = 2241, SubTitle = 01, Content = "6439" }));
+            action(
+                   "公交卡",
+                   "1012.01",
+                   m_BHelper.GetFinalBalance(new Balance { Title = 1012, SubTitle = 01, Content = "7094" }));
             foreach (
                 var s in
                     new[]
@@ -105,31 +116,56 @@ namespace AccountingServer.BLL
                 action(
                        s,
                        s,
-                       m_BHelper.GetBalance(1101, 01, s) +
-                       m_BHelper.GetBalance(1101, 02, s));
+                       m_BHelper.GetFinalBalance(new Balance { Title = 1101, Content = s }));
 
             Action<string, int?, bool> actionGroup =
-                (s, d, b) =>
+                (description, title, b) =>
                 {
-                    //foreach (var detail in m_BHelper.GetXBalances(title: d))
-                    //{
-                    //    var id = m_BHelper.SelectDetails(
-                    //                                     new VoucherDetail
-                    //                                         {
-                    //                                             Title = detail.Title,
-                    //                                             Content = detail.Content
-                    //                                         }).Last().Item;
-                    //    m_Tcp.Write(
-                    //                String.Format(
-                    //                              "{0}={1}={2}",
-                    //                              String.Format(
-                    //                                            "{0:0.####}元{1}-{2}",
-                    //                                            b ? detail.Fund : -detail.Fund,
-                    //                                            s,
-                    //                                            m_BHelper.SelectItem(id.Value).Date.AsDate()),
-                    //                              detail.Content,
-                    //                              detail.Content));
-                    //}
+                    var filter = new VoucherDetail { Title = title };
+                    var balances = m_BHelper.SelectVouchersWithDetail(filter)
+                                            .SelectMany(
+                                                        v =>
+                                                        v.Details.Select(
+                                                                         d =>
+                                                                         new Tuple<DateTime?, VoucherDetail>(v.Date, d)))
+                                            .Where(d => d.Item2.IsMatch(filter))
+                                            .GroupBy(
+                                                     d => d.Item2.Content,
+                                                     (c, ds) =>
+                                                     {
+                                                         var lst = ds as IList<Tuple<DateTime?, VoucherDetail>> ??
+                                                                   ds.ToList();
+                                                         var max =
+                                                             lst.Max(
+                                                                     d =>
+                                                                     d.Item1.HasValue
+                                                                         ? d.Item1.Value.Ticks
+                                                                         : (long?)null);
+                                                         return new Balance
+                                                                    {
+                                                                        Date =
+                                                                            max.HasValue
+                                                                                ? new DateTime(max.Value)
+                                                                                : (DateTime?)null,
+                                                                        Title = filter.Title,
+                                                                        SubTitle = filter.SubTitle,
+                                                                        Content = c,
+                                                                        Fund = lst.Sum(d => d.Item2.Fund).Value
+                                                                    };
+                                                     });
+                    foreach (var balance in balances)
+                    {
+                        m_Tcp.Write(
+                                    String.Format(
+                                                  "{0}={1}={2}",
+                                                  String.Format(
+                                                                "{0:0.####}元{1}-{2}",
+                                                                b ? balance.Fund : -balance.Fund,
+                                                                description,
+                                                                balance.Date.AsDate()),
+                                                  balance.Content,
+                                                  balance.Content));
+                    }
                 };
             actionGroup("预付", 1123, true);
             actionGroup("应付", 2202, false);
