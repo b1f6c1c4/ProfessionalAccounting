@@ -50,15 +50,16 @@ namespace AccountingServer
             // 
             // tabControl1
             // 
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(1361, 789);
             this.tabControl1.TabIndex = 2;
+            this.tabControl1.TabStop = false;
             // 
             // tabPage1
             // 
@@ -68,7 +69,7 @@ namespace AccountingServer
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(1353, 757);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "财政月月度决算";
+            this.tabPage1.Text = "图";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // chart1
@@ -87,6 +88,7 @@ namespace AccountingServer
             this.chart1.Series.Add(series1);
             this.chart1.Size = new System.Drawing.Size(1347, 751);
             this.chart1.TabIndex = 1;
+            this.chart1.TabStop = false;
             this.chart1.Text = "chart1";
             // 
             // tabPage2
@@ -130,6 +132,8 @@ namespace AccountingServer
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.textBox1.Size = new System.Drawing.Size(1347, 751);
             this.textBox1.TabIndex = 2;
+            this.textBox1.TabStop = false;
+            this.textBox1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
             this.textBox1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyUp);
             this.textBox1.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.textBox1_MouseWheel);
             // 

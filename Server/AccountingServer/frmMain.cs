@@ -130,35 +130,82 @@ namespace AccountingServer
             }
         }
 
+        private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!ModifierKeys.HasFlag(Keys.Shift) && ! ModifierKeys.HasFlag(Keys.Control))
+                return;
+            if ((e.KeyChar == '\r' || e.KeyChar == '\n'))
+                e.Handled = true;
+        }
+
         private void textBox1_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Control && e.KeyCode == Keys.A)
+            if (e.KeyCode == Keys.Escape)
             {
                 textBox1.SelectionStart = 0;
                 textBox1.SelectionLength = textBox1.Text.Length;
                 return;
             }
-            if (e.Shift &&
+            if (e.Control && e.Shift &&
                 e.KeyCode == Keys.Enter)
             {
-                var id = textBox1.GetLineFromCharIndex(textBox1.SelectionStart) - 1;
-                textBox1.AppendText(m_Console.Execute(textBox1.Lines[id]));
-                //
-                //var s = textBox1.Lines[id];
-                //var sb = new StringBuilder();
-                ////foreach (var voucher in )
-                ////    PresentVoucher(voucher, sb);
-                //textBox1.SelectedText = sb.ToString();
-                //else
-                //{
-                //    var sb = new StringBuilder();
-                //    var voucher = ParseVoucher(textBox1.Text);
-                //    PresentVoucher(voucher,sb);
-                //    textBox1.AppendText("/*"+sb.ToString() + "*/");
-                //}
+                var id = textBox1.SelectionStart + textBox1.SelectionLength;
+                do
+                {
+                    id = textBox1.Text.LastIndexOf("new Voucher", id, StringComparison.Ordinal);
+                    if (id == -1)
+                        return;
+                } while (textBox1.Text.Substring(id, 17) == "new VoucherDetail");
+                var nested = 0;
+                var flag = false;
+                var i = id + 11;
+                for (; i < textBox1.Text.Length; i++)
+                    if (textBox1.Text[i] == '{')
+                    {
+                        nested++;
+                        flag = true;
+                    }
+                    else if (textBox1.Text[i] == '}')
+                        if (--nested == 0 && flag)
+                            break;
+                if (!flag)
+                    return;
+
+                try
+                {
+                    var s = textBox1.Text.Substring(id, i - id + 1);
+                    var result = m_Console.ExecuteUpsert(s);
+                    textBox1.Text = textBox1.Text.Remove(id, i - id + 1).Insert(id, result);
+                    textBox1.SelectionStart = id;
+                    textBox1.SelectionLength = result.Length;
+                }
+                catch (Exception exception)
+                {
+                    textBox1.SelectionStart = id;
+                    textBox1.SelectionLength = i - id + 1;
+                    textBox1.Text = textBox1.Text.Insert(i, exception.ToString());
+                }
+
+                textBox1.ScrollToCaret();
+                return;
+            }
+            if (e.Control &&
+                e.KeyCode == Keys.Enter)
+            {
+                var sid = textBox1.SelectionStart;
+                var id = textBox1.GetLineFromCharIndex(sid);
+                try
+                {
+                    var result = m_Console.Execute(textBox1.Lines[id]);
+                    textBox1.Text = textBox1.Text.Insert(sid, Environment.NewLine + result);
+                }
+                catch (Exception exception)
+                {
+                    textBox1.Text = textBox1.Text.Insert(sid, Environment.NewLine + exception.ToString());
+                }
+                textBox1.SelectionStart = sid;
             }
         }
-
 
 
         private void textBox1_MouseWheel(object sender, MouseEventArgs e)
