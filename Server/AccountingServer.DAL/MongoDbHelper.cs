@@ -8,12 +8,30 @@ using MongoDB.Driver.Builders;
 
 namespace AccountingServer.DAL
 {
+    /// <summary>
+    /// Bson与实体之间的转换
+    /// </summary>
     internal static class BsonHelper
     {
+        /// <summary>
+        /// 将ObjectId编号转换为字符串编号
+        /// </summary>
+        /// <param name="id">ObjectId编号</param>
+        /// <returns>字符串编号</returns>
         public static string Wrap(this ObjectId id) { return id.ToString(); }
 
+        /// <summary>
+        /// 将字符串编号转换为ObjectId编号
+        /// </summary>
+        /// <param name="id">字符串编号</param>
+        /// <returns>ObjectId编号</returns>
         public static ObjectId UnWrap(this string id) { return ObjectId.Parse(id); }
 
+        /// <summary>
+        /// 将记账凭证转换为Bson
+        /// </summary>
+        /// <param name="voucher">记账凭证</param>
+        /// <returns>Bson</returns>
         public static BsonDocument ToBsonDocument(this Voucher voucher)
         {
             var doc = new BsonDocument { { "date", voucher.Date } };
@@ -52,7 +70,11 @@ namespace AccountingServer.DAL
             return doc;
         }
 
-
+        /// <summary>
+        /// 将细目转换为Bson
+        /// </summary>
+        /// <param name="detail">细目</param>
+        /// <returns>Bson</returns>
         public static BsonDocument ToBsonDocument(this VoucherDetail detail)
         {
             var val = new BsonDocument { { "title", detail.Title } };
@@ -66,8 +88,16 @@ namespace AccountingServer.DAL
             return val;
         }
 
+        /// <summary>
+        /// 从Bson还原记账凭证
+        /// </summary>
+        /// <param name="doc">Bson</param>
+        /// <returns>记账凭证，若<paramref name="doc"/>为null则为null</returns>
         public static Voucher ToVoucher(this BsonDocument doc)
         {
+            if (doc == null)
+                return null;
+
             var voucher = new Voucher { ID = doc["_id"].AsObjectId.Wrap() };
             if (doc.Contains("date"))
                 voucher.Date = doc["date"].IsBsonNull ? (DateTime?)null : doc["date"].AsLocalTime;
@@ -108,6 +138,11 @@ namespace AccountingServer.DAL
             return voucher;
         }
 
+        /// <summary>
+        /// 从Bson还原细目
+        /// </summary>
+        /// <param name="ddoc">Bson</param>
+        /// <returns>细目</returns>
         public static VoucherDetail ToVoucherDetail(this BsonDocument ddoc)
         {
             var detail = new VoucherDetail();
@@ -125,14 +160,32 @@ namespace AccountingServer.DAL
         }
     }
     
+    /// <summary>
+    /// MongoDb数据访问类
+    /// </summary>
     public class MongoDbHelper : IDbHelper
     {
+        /// <summary>
+        /// MongoDb客户端
+        /// </summary>
         private readonly MongoClient m_Client;
+        /// <summary>
+        /// MongoDb服务器
+        /// </summary>
         private MongoServer m_Server;
+        /// <summary>
+        /// MongoDb数据库
+        /// </summary>
         private readonly MongoDatabase m_Db;
 
+        /// <summary>
+        /// 记账凭证集合
+        /// </summary>
         private readonly MongoCollection m_Vouchers;
 
+        /// <summary>
+        /// 连接到服务器
+        /// </summary>
         public MongoDbHelper()
         {
             m_Client = new MongoClient("mongodb://localhost");
@@ -144,6 +197,9 @@ namespace AccountingServer.DAL
             m_Server.Connect();
         }
 
+        /// <summary>
+        /// 从服务器断开
+        /// </summary>
         public void Dispose()
         {
             if (m_Server != null)
@@ -153,9 +209,23 @@ namespace AccountingServer.DAL
             }
         }
 
+        /// <summary>
+        /// 按编号唯一查询
+        /// </summary>
+        /// <param name="id">编号</param>
+        /// <returns>Bson查询</returns>
         private static IMongoQuery GetUniqueQuery(string id) { return Query.EQ("_id", id.UnWrap()); }
+        /// <summary>
+        /// 按记账凭证的编号唯一查询
+        /// </summary>
+        /// <param name="voucher">记账凭证</param>
+        /// <returns>Bson查询</returns>
         private static IMongoQuery GetUniqueQuery(Voucher voucher) { return GetUniqueQuery(voucher.ID); }
-
+        /// <summary>
+        /// 按过滤器查询
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>Bson查询</returns>
         private static IMongoQuery GetQuery(Voucher filter)
         {
             var lst = new List<IMongoQuery>();
@@ -189,7 +259,11 @@ namespace AccountingServer.DAL
 
             return lst.Any() ? Query.And(lst) : Query.Null;
         }
-
+        /// <summary>
+        /// 按细目过滤器查询
+        /// </summary>
+        /// <param name="filter">细目过滤器</param>
+        /// <returns>Bson查询</returns>
         private static IMongoQuery GetQuery(VoucherDetail filter)
         {
             var lst = new List<IMongoQuery>();
@@ -207,7 +281,7 @@ namespace AccountingServer.DAL
 
             return lst.Any() ? Query.And(lst) : Query.Null;
         }
-        
+
         public Voucher SelectVoucher(string id)
         {
             return m_Vouchers.FindOneByIdAs<BsonDocument>(id.UnWrap()).ToVoucher();
