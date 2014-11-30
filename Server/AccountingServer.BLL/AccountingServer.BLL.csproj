@@ -43,12 +43,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BExtensionHelper.cs" />
-    <Compile Include="BHelper.cs" />
+    <Compile Include="DataFormatter.cs" />
+    <Compile Include="Accountant.cs" />
     <Compile Include="MobileComm.cs" />
     <Compile Include="MobilePatterns.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Report.cs" />
+    <Compile Include="ReimbursementReport.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AccountingServer.DAL\AccountingServer.DAL.csproj">

@@ -10,7 +10,7 @@ namespace AccountingServer.BLL
     /// <summary>
     /// 基本会计业务处理类
     /// </summary>
-    public class BHelper
+    public class Accountant
     {
         /// <summary>
         /// 本年利润

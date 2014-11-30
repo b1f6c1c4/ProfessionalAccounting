@@ -15,15 +15,15 @@ namespace AccountingServer.BLL
         private bool m_Parsing;
         private int m_SucceedCount;
         private ITcpHelper m_Tcp;
-        private BHelper m_BHelper;
+        private Accountant m_Accountant;
 
         private static readonly IEnumerable<MethodInfo> Patterns =
             typeof(MobilePatterns).GetMethods(BindingFlags.Public | BindingFlags.Static);
 
-        public void Connect(BHelper helper, Action<IPEndPoint> connected, Action<string> received,
+        public void Connect(Accountant helper, Action<IPEndPoint> connected, Action<string> received,
                                    Action<IPEndPoint> disconnected)
         {
-            m_BHelper = helper;
+            m_Accountant = helper;
             m_Tcp = new TcpHelper();
             m_Tcp.ClientConnected += ep =>
                                      {
@@ -87,24 +87,24 @@ namespace AccountingServer.BLL
             Action<string, string, double?> action =
                 (s, d, f) => m_Tcp.Write(String.Format("{0}={1}={2}", s, d, f.AsCurrency()));
 
-            action("库存现金", "1001.00", m_BHelper.GetFinalBalance(new Balance { Title = 1001 }));
+            action("库存现金", "1001.00", m_Accountant.GetFinalBalance(new Balance { Title = 1001 }));
             action(
                    "学生卡",
                    "1012.05",
-                   m_BHelper.GetFinalBalance(new Balance { Title = 1012, SubTitle = 05 }));
+                   m_Accountant.GetFinalBalance(new Balance { Title = 1012, SubTitle = 05 }));
             foreach (var s in new[] { "3593", "5184", "9767" })
                 action(
                        "借记卡" + s,
                        s,
-                       m_BHelper.GetFinalBalance(new Balance { Title = 1002, Content = s }));
+                       m_Accountant.GetFinalBalance(new Balance { Title = 1002, Content = s }));
             action(
                    "贷记卡6439",
                    "2241.01",
-                   -m_BHelper.GetFinalBalance(new Balance { Title = 2241, SubTitle = 01, Content = "6439" }));
+                   -m_Accountant.GetFinalBalance(new Balance { Title = 2241, SubTitle = 01, Content = "6439" }));
             action(
                    "公交卡",
                    "1012.01",
-                   m_BHelper.GetFinalBalance(new Balance { Title = 1012, SubTitle = 01, Content = "7094" }));
+                   m_Accountant.GetFinalBalance(new Balance { Title = 1012, SubTitle = 01, Content = "7094" }));
             foreach (
                 var s in
                     new[]
@@ -116,13 +116,13 @@ namespace AccountingServer.BLL
                 action(
                        s,
                        s,
-                       m_BHelper.GetFinalBalance(new Balance { Title = 1101, Content = s }));
+                       m_Accountant.GetFinalBalance(new Balance { Title = 1101, Content = s }));
 
             Action<string, int?, bool> actionGroup =
                 (description, title, b) =>
                 {
                     var filter = new VoucherDetail { Title = title };
-                    var balances = m_BHelper.SelectVouchersWithDetail(filter)
+                    var balances = m_Accountant.SelectVouchersWithDetail(filter)
                                             .SelectMany(
                                                         v =>
                                                         v.Details.Select(
@@ -185,7 +185,7 @@ namespace AccountingServer.BLL
                                     where GetPatternAttr(pattern).Name == sp[0]
                                     select pattern)
             {
-                pattern.Invoke(null, new object[] {sp[1], m_BHelper});
+                pattern.Invoke(null, new object[] {sp[1], m_Accountant});
                 break;
             }
         }
