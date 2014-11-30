@@ -218,6 +218,24 @@ namespace AccountingServer.DAL
             return m_Vouchers.FindAs<BsonDocument>(GetQuery(filter)).Select(d => d.ToVoucher());
         }
 
+        public IEnumerable<Voucher> SelectVouchers(DateTime? startDate, DateTime? endDate)
+        {
+            if (startDate.HasValue &&
+                endDate.HasValue)
+                return
+                    m_Vouchers.FindAs<BsonDocument>(Query.And(Query.GTE("date", startDate), Query.LTE("date", endDate)))
+                              .Select(d => d.ToVoucher());
+            if (startDate.HasValue)
+                return
+                    m_Vouchers.FindAs<BsonDocument>(Query.GTE("date", startDate))
+                              .Select(d => d.ToVoucher());
+            if (endDate.HasValue)
+                return
+                    m_Vouchers.FindAs<BsonDocument>(Query.Or(Query.EQ("date", null), Query.LTE("date", endDate)))
+                              .Select(d => d.ToVoucher());
+            return m_Vouchers.FindAs<BsonDocument>(Query.EQ("date", null)).Select(d => d.ToVoucher());
+        }
+
         public long SelectVouchersCount(Voucher filter)
         {
             return m_Vouchers.Count(GetQuery(filter));
