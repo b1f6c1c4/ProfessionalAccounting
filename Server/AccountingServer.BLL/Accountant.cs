@@ -371,6 +371,14 @@ namespace AccountingServer.BLL
         public IEnumerable<Voucher> SelectVouchers(Voucher filter, DateTime? startDate, DateTime? endDate) { return m_Db.SelectVouchers(filter, startDate, endDate); }
 
         /// <summary>
+        /// 添加或替换记账凭证
+        /// <para>不能改变记账凭证的编号</para>
+        /// </summary>
+        /// <param name="entity">新记账凭证</param>
+        /// <returns>是否成功</returns>
+        public bool UpdateVoucher(Voucher entity) { return m_Db.UpdateVoucher(entity); }
+
+        /// <summary>
         /// 按细目过滤器查找记账凭证
         /// </summary>
         /// <param name="filter">细目过滤器</param>
