@@ -8,7 +8,8 @@ using Microsoft.Office.Interop.Excel;
 
 namespace AccountingServer
 {
-    public static class THUInfo {
+    public static class THUInfo
+    {
         public static async Task<Stream> FetchFromInfo()
         {
             var cookie = new CookieContainer();

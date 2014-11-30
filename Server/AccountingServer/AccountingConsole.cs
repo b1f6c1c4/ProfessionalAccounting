@@ -20,7 +20,7 @@ namespace AccountingServer
         public AccountingConsole(Accountant helper) { m_Accountant = helper; }
 
         /// <summary>
-        /// 更新或添加记账凭证
+        ///     更新或添加记账凭证
         /// </summary>
         /// <param name="code"></param>
         /// <returns></returns>
@@ -33,11 +33,8 @@ namespace AccountingServer
                 if (!m_Accountant.InsertVoucher(voucher))
                     throw new Exception();
             }
-            else
-            {
-                if (!m_Accountant.UpdateVoucher(voucher))
-                    throw new Exception();
-            }
+            else if (!m_Accountant.UpdateVoucher(voucher))
+                throw new Exception();
 
             return PresentVoucher(voucher);
         }
@@ -61,23 +58,23 @@ namespace AccountingServer
                                            new Balance { Title = d.Title, Content = d.Content },
                                            (b, bs) =>
                                            new Balance
-                                           {
-                                               Title = b.Title,
-                                               Content = b.Content,
-                                               Fund = bs.Sum(d => d.Fund.Value)
-                                           },
+                                               {
+                                                   Title = b.Title,
+                                                   Content = b.Content,
+                                                   Fund = bs.Sum(d => d.Fund.Value)
+                                               },
                                            new BalanceEqualityComparer());
                     var tsc = !s.EndsWith("!``") ? tscX.Where(d => Math.Abs(d.Fund) > 1e-12).ToList() : tscX.ToList();
                     tsc.Sort(new BalanceComparer());
                     var tX = tsc.GroupBy(
-                                        d => d.Title,
-                                        (b, bs) =>
-                                        new Balance
-                                        {
-                                            Title = b,
-                                            Fund = bs.Sum(d => d.Fund)
-                                        },
-                                        EqualityComparer<int?>.Default);
+                                         d => d.Title,
+                                         (b, bs) =>
+                                         new Balance
+                                             {
+                                                 Title = b,
+                                                 Fund = bs.Sum(d => d.Fund)
+                                             },
+                                         EqualityComparer<int?>.Default);
                     var t = !s.EndsWith("``") ? tX.Where(d => Math.Abs(d.Fund) > 1e-12).ToList() : tX.ToList();
 
                     return PresentSubtotal(t, tsc);
@@ -125,7 +122,7 @@ namespace AccountingServer
                     return PresentSubtotal(t, ts, tsc);
                 }
             }
-            
+
             {
                 var sb = new StringBuilder();
                 foreach (var voucher in ExecuteQuery(s))
@@ -258,7 +255,7 @@ namespace AccountingServer
         }
 
         /// <summary>
-        /// 解析检索表达式
+        ///     解析检索表达式
         /// </summary>
         /// <param name="s">检索表达式</param>
         /// <param name="dateQuery">日期表达式</param>
@@ -314,7 +311,8 @@ namespace AccountingServer
         /// <param name="endDate">截止日期，<c>null</c>表示不限最大日期</param>
         /// <param name="nullable"><paramref name="startDate" />和<paramref name="endDate" />均为<c>null</c>时，表示是否只包含无日期</param>
         /// <returns>是否是合法的检索表达式</returns>
-        private static bool ParseVoucherQuery(string sOrig, out DateTime? startDate, out DateTime? endDate, out bool nullable)
+        private static bool ParseVoucherQuery(string sOrig, out DateTime? startDate, out DateTime? endDate,
+                                              out bool nullable)
         {
             nullable = false;
 
@@ -457,7 +455,7 @@ namespace AccountingServer
             sb.AppendLine();
             if (voucher.Date.HasValue)
             {
-                sb.AppendFormat("    Date = DateTime.Parse(\"{0:yyyy-MM-dd}\"),",voucher.Date);
+                sb.AppendFormat("    Date = DateTime.Parse(\"{0:yyyy-MM-dd}\"),", voucher.Date);
                 sb.AppendLine();
             }
             else

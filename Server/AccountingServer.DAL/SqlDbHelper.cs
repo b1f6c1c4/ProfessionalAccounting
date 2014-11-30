@@ -11,7 +11,7 @@ namespace AccountingServer.DAL
     {
         private SqlConnection m_Conn;
         private readonly string m_ConnStr;
-        private string m_Schema;
+        private readonly string m_Schema;
 
         public SqlDbHelper(string un, string pw)
         {
@@ -95,23 +95,44 @@ namespace AccountingServer.DAL
                 while (reader.Read())
                     yield return
                         new Voucher
-                        {
-                            Date = reader.GetDateSafe(1),
-                            Remark = reader.GetInt32Safe(0).ToString() //reader.GetStringSafe(2)
-                        };
+                            {
+                                Date = reader.GetDateSafe(1),
+                                Remark = reader.GetInt32Safe(0).ToString() //reader.GetStringSafe(2)
+                            };
         }
 
-        public IEnumerable<Voucher> SelectVouchers(Voucher filter, DateTime? startDate, DateTime? endDate) { throw new NotImplementedException(); }
+        public IEnumerable<Voucher> SelectVouchers(Voucher filter, DateTime? startDate, DateTime? endDate)
+        {
+            throw new NotImplementedException();
+        }
 
         public long SelectVouchersCount(Voucher filter) { throw new NotImplementedException(); }
         public bool InsertVoucher(Voucher entity) { throw new NotImplementedException(); }
         public bool DeleteVoucher(string id) { throw new NotImplementedException(); }
         public int DeleteVouchers(Voucher filter) { throw new NotImplementedException(); }
         public bool UpdateVoucher(Voucher entity) { throw new NotImplementedException(); }
-        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter) { throw new NotImplementedException(); }
-        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter, DateTime? startDate, DateTime? endDate) { throw new NotImplementedException(); }
-        public IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> dFilters) { throw new NotImplementedException(); }
-        public IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> filters, DateTime? startDate, DateTime? endDate) { throw new NotImplementedException(); }
+
+        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter, DateTime? startDate,
+                                                             DateTime? endDate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> dFilters)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> filters, DateTime? startDate,
+                                                             DateTime? endDate)
+        {
+            throw new NotImplementedException();
+        }
 
         public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter)
         {
@@ -142,7 +163,10 @@ namespace AccountingServer.DAL
                 }
         }
 
-        public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter, DateTime? startDate, DateTime? endDate) { throw new NotImplementedException(); }
+        public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter, DateTime? startDate, DateTime? endDate)
+        {
+            throw new NotImplementedException();
+        }
 
         public long SelectDetailsCount(VoucherDetail filter) { throw new NotImplementedException(); }
         public bool InsertDetail(VoucherDetail entity) { throw new NotImplementedException(); }
@@ -181,7 +205,6 @@ namespace AccountingServer.DAL
                             Title = reader.GetDecimalSafe(7)
                         };
         }*/
-
     }
 
     public static class SqlDbHelpExtension
@@ -222,4 +245,3 @@ namespace AccountingServer.DAL
         }
     }
 }
-

@@ -3,7 +3,6 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows.Forms;
 using AccountingServer.BLL;
 using AccountingServer.Chart;
@@ -42,29 +41,29 @@ namespace AccountingServer
             m_Mobile = new MobileComm();
 
             m_Mobile.Connect(
-                            m_Accountant,
-                            ep => SetCaption(String.Format("AccountingServer-{0}", ep.ToString())),
-                            ep => { },
-                            ep =>
-                            {
-                                SetCaption("AccountingServer");
-                                MessageBox.Show(String.Format("与{0}的数据传输完毕！", ep.ToString()), @"数据传输");
-                            });
+                             m_Accountant,
+                             ep => SetCaption(String.Format("AccountingServer-{0}", ep.ToString())),
+                             ep => { },
+                             ep =>
+                             {
+                                 SetCaption("AccountingServer");
+                                 MessageBox.Show(String.Format("与{0}的数据传输完毕！", ep.ToString()), @"数据传输");
+                             });
 
-            m_Console=new AccountingConsole(m_Accountant);
+            m_Console = new AccountingConsole(m_Accountant);
 
             var curDate = DateTime.Now.Date;
-            DateTime startDate = new DateTime(curDate.Year, curDate.Month - (curDate.Day >= 20 ? 0 : 1), 19);
-            DateTime endDate = startDate.AddMonths(1);
+            var startDate = new DateTime(curDate.Year, curDate.Month - (curDate.Day >= 20 ? 0 : 1), 19);
+            var endDate = startDate.AddMonths(1);
 
             m_Charts = new AccountingChart[]
                            {
-                               new 投资资产(m_Accountant, startDate, endDate, curDate) ,
-                               new 生活资产(m_Accountant, startDate, endDate, curDate) , 
-                               new 其他资产(m_Accountant, startDate, endDate, curDate) , 
-                               new 生活费用(m_Accountant, startDate, endDate, curDate) , 
-                               new 其他费用(m_Accountant, startDate, endDate, curDate) , 
-                               new 负债(m_Accountant, startDate, endDate, curDate) 
+                               new 投资资产(m_Accountant, startDate, endDate, curDate),
+                               new 生活资产(m_Accountant, startDate, endDate, curDate),
+                               new 其他资产(m_Accountant, startDate, endDate, curDate),
+                               new 生活费用(m_Accountant, startDate, endDate, curDate),
+                               new 其他费用(m_Accountant, startDate, endDate, curDate),
+                               new 负债(m_Accountant, startDate, endDate, curDate)
                            };
 
             chart1.ChartAreas.SuspendUpdates();
@@ -72,7 +71,7 @@ namespace AccountingServer
             chart1.ChartAreas.Clear();
             foreach (var chart in m_Charts)
                 chart1.ChartAreas.Add(chart.Setup());
-            
+
             chart1.Legends[0].Font = new Font("Microsoft YaHei Mono", 12, GraphicsUnit.Pixel);
 
             GatherData();
@@ -132,7 +131,8 @@ namespace AccountingServer
 
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (!ModifierKeys.HasFlag(Keys.Shift) && ! ModifierKeys.HasFlag(Keys.Control))
+            if (!ModifierKeys.HasFlag(Keys.Shift) &&
+                ! ModifierKeys.HasFlag(Keys.Control))
                 return;
             if ((e.KeyChar == '\r' || e.KeyChar == '\n'))
                 e.Handled = true;
@@ -146,7 +146,8 @@ namespace AccountingServer
                 textBox1.SelectionLength = textBox1.Text.Length;
                 return;
             }
-            if (e.Control && e.Shift &&
+            if (e.Control &&
+                e.Shift &&
                 e.KeyCode == Keys.Enter)
             {
                 var id = textBox1.SelectionStart + textBox1.SelectionLength;
@@ -201,7 +202,7 @@ namespace AccountingServer
                 }
                 catch (Exception exception)
                 {
-                    textBox1.Text = textBox1.Text.Insert(sid, Environment.NewLine + exception.ToString());
+                    textBox1.Text = textBox1.Text.Insert(sid, Environment.NewLine + exception);
                 }
                 textBox1.SelectionStart = sid;
             }
