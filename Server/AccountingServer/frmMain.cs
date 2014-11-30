@@ -158,19 +158,13 @@ namespace AccountingServer
                         return;
                 } while (textBox1.Text.Substring(id, 17) == "new VoucherDetail");
                 var nested = 0;
-                var flag = false;
                 var i = id + 11;
                 for (; i < textBox1.Text.Length; i++)
                     if (textBox1.Text[i] == '{')
-                    {
                         nested++;
-                        flag = true;
-                    }
                     else if (textBox1.Text[i] == '}')
-                        if (--nested == 0 && flag)
+                        if (--nested == 0)
                             break;
-                if (!flag)
-                    return;
 
                 try
                 {
