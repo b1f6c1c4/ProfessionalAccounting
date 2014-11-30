@@ -14,11 +14,11 @@ namespace AccountingServer.Chart
         private DateTime m_StartDate;
         private DateTime m_EndDate;
 
-        protected readonly BHelper BHelper;
+        protected readonly Accountant Accountant;
 
-        public AccountingChart(BHelper helper, DateTime startDate, DateTime endDate, DateTime curDate)
+        public AccountingChart(Accountant helper, DateTime startDate, DateTime endDate, DateTime curDate)
         {
-            BHelper = helper;
+            Accountant = helper;
             StartDate = startDate;
             EndDate = endDate;
             CurDate = curDate;
@@ -60,7 +60,7 @@ namespace AccountingServer.Chart
 
     internal sealed class 投资资产 : AccountingChart
     {
-        public 投资资产(BHelper helper, DateTime startDate, DateTime endDate, DateTime curDate)
+        public 投资资产(Accountant helper, DateTime startDate, DateTime endDate, DateTime curDate)
             : base(helper, startDate, endDate, curDate) { }
         public override ChartArea Setup()
         {
@@ -72,7 +72,7 @@ namespace AccountingServer.Chart
         private Series Gather(string content, Balance filter, Color color)
         {
             var s = new Series(content) { ChartType = SeriesChartType.StackedArea, ChartArea = "投资资产" };
-            var balances = BHelper.GetDailyBalance(filter, StartDate, EndDate);
+            var balances = Accountant.GetDailyBalance(filter, StartDate, EndDate);
             foreach (var balance in balances)
                 s.Points.AddXY(balance.Date.Value, balance.Fund);
             s.Color = color;
@@ -98,7 +98,7 @@ namespace AccountingServer.Chart
 
     internal sealed class 生活资产 : AccountingChart
     {
-        public 生活资产(BHelper helper, DateTime startDate, DateTime endDate, DateTime curDate)
+        public 生活资产(Accountant helper, DateTime startDate, DateTime endDate, DateTime curDate)
             : base(helper, startDate, endDate, curDate) { }
 
         public override ChartArea Setup()
@@ -115,7 +115,7 @@ namespace AccountingServer.Chart
         private Series Gather生活资产(string content, Balance filter, Color color)
         {
             var s = new Series(content) { ChartType = SeriesChartType.StackedArea, ChartArea = "生活资产" };
-            var balances = BHelper.GetDailyBalance(filter, StartDate, EndDate);
+            var balances = Accountant.GetDailyBalance(filter, StartDate, EndDate);
             foreach (var balance in balances)
                 s.Points.AddXY(balance.Date.Value, balance.Fund);
             s.Color = color;
@@ -132,7 +132,7 @@ namespace AccountingServer.Chart
 
     internal sealed class 其他资产 : AccountingChart
     {
-        public 其他资产(BHelper helper, DateTime startDate, DateTime endDate, DateTime curDate)
+        public 其他资产(Accountant helper, DateTime startDate, DateTime endDate, DateTime curDate)
             : base(helper, startDate, endDate, curDate) { }
         public override ChartArea Setup()
         {
@@ -150,7 +150,7 @@ namespace AccountingServer.Chart
         private Series Gather(string content, IEnumerable<Balance> filters, Color color)
         {
             var s = new Series(content) { ChartType = SeriesChartType.StackedArea, ChartArea = "其他资产" };
-            var balances = BHelper.GetDailyBalance(filters, StartDate, EndDate);
+            var balances = Accountant.GetDailyBalance(filters, StartDate, EndDate);
             foreach (var balance in balances)
                 s.Points.AddXY(balance.Date.Value, balance.Fund);
             s.Color = color;
@@ -205,7 +205,7 @@ namespace AccountingServer.Chart
     
     internal sealed class 生活费用 : AccountingChart
     {
-        public 生活费用(BHelper helper, DateTime startDate, DateTime endDate, DateTime curDate)
+        public 生活费用(Accountant helper, DateTime startDate, DateTime endDate, DateTime curDate)
             : base(helper, startDate, endDate, curDate) { }
         public override ChartArea Setup()
         {
@@ -218,28 +218,28 @@ namespace AccountingServer.Chart
         public override IEnumerable<Series> Gather()
         {
             var balance1 =
-                BHelper.GetDailyBalance(new Balance { Title = 6602, SubTitle = 03 }, StartDate, EndDate, 1).ToArray();
+                Accountant.GetDailyBalance(new Balance { Title = 6602, SubTitle = 03 }, StartDate, EndDate, 1).ToArray();
             var balance2 =
-                BHelper.GetDailyBalance(
+                Accountant.GetDailyBalance(
                                           new Balance { Title = 6602, SubTitle = 06, Content = "食品" },
                                           StartDate,
                                           EndDate,
                                           1).ToArray();
             var balance3 =
-                BHelper.GetDailyBalance(
+                Accountant.GetDailyBalance(
                                           new Balance { Title = 6602, SubTitle = 01, Content = "水费" },
                                           StartDate,
                                           EndDate,
                                           1).ToArray();
             var balance4 =
-                BHelper.GetDailyBalance(new Balance { Title = 6602, SubTitle = 06 }, StartDate, EndDate, 1).ToArray();
-            var balance5 = BHelper.GetDailyBalance(
+                Accountant.GetDailyBalance(new Balance { Title = 6602, SubTitle = 06 }, StartDate, EndDate, 1).ToArray();
+            var balance5 = Accountant.GetDailyBalance(
                                                      new[] { new Balance { Title = 6401 }, new Balance { Title = 6402 } },
                                                      StartDate,
                                                      EndDate,
                                                      1).ToArray();
             var balance6 =
-                BHelper.GetDailyBalance(
+                Accountant.GetDailyBalance(
                                           new[]
                                               {
                                                   new Balance { Title = 6602, SubTitle = 01 },
@@ -324,7 +324,7 @@ namespace AccountingServer.Chart
     
     internal sealed class 其他费用 : AccountingChart
     {
-        public 其他费用(BHelper helper, DateTime startDate, DateTime endDate, DateTime curDate)
+        public 其他费用(Accountant helper, DateTime startDate, DateTime endDate, DateTime curDate)
             : base(helper, startDate, endDate, curDate) { }
         public override ChartArea Setup()
         {
@@ -339,12 +339,12 @@ namespace AccountingServer.Chart
         }
         public override IEnumerable<Series> Gather()
         {
-            var balance7 = BHelper.GetDailyBalance(
+            var balance7 = Accountant.GetDailyBalance(
                                                      new[] { new Balance { Title = 1601 }, new Balance { Title = 1701 } },
                                                      StartDate,
                                                      EndDate,
                                                      1).ToArray();
-            var balance8 = BHelper.GetDailyBalance(
+            var balance8 = Accountant.GetDailyBalance(
                                                      new[]
                                                          {
                                                              new Balance { Title = 1403 }, new Balance { Title = 1405 },
@@ -388,7 +388,7 @@ namespace AccountingServer.Chart
     
     internal sealed class 负债 : AccountingChart
     {
-        public 负债(BHelper helper, DateTime startDate, DateTime endDate, DateTime curDate)
+        public 负债(Accountant helper, DateTime startDate, DateTime endDate, DateTime curDate)
             : base(helper, startDate, endDate, curDate) { }
         public override ChartArea Setup()
         {
@@ -404,7 +404,7 @@ namespace AccountingServer.Chart
 
         public override IEnumerable<Series> Gather()
         {
-            var balance9 = BHelper.GetDailyBalance(
+            var balance9 = Accountant.GetDailyBalance(
                                                      new[]
                                                          {
                                                              new Balance { Title = 2001 }, new Balance { Title = 2202 },
@@ -415,7 +415,7 @@ namespace AccountingServer.Chart
                                                      StartDate,
                                                      EndDate).ToArray();
             var balance10 =
-                BHelper.GetDailyBalance(new Balance { Title = 2241, SubTitle = 01 }, StartDate, EndDate).ToArray();
+                Accountant.GetDailyBalance(new Balance { Title = 2241, SubTitle = 01 }, StartDate, EndDate).ToArray();
 
             {
                 var s = new Series("其他")
