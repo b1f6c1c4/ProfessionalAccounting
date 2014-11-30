@@ -228,6 +228,9 @@ namespace AccountingServer.DAL
         /// <returns>Bson查询</returns>
         private static IMongoQuery GetQuery(Voucher filter)
         {
+            if (filter == null)
+                return Query.Null;
+
             var lst = new List<IMongoQuery>();
 
             if (filter.Date != null)
@@ -259,6 +262,26 @@ namespace AccountingServer.DAL
 
             return lst.Any() ? Query.And(lst) : Query.Null;
         }
+
+        /// <summary>
+        /// 按日期查询
+        /// <para>若<paramref name="startDate"/>和<paramref name="endDate"/>均为<c>null</c>，则返回所有无日期的记账凭证</para>
+        /// </summary>
+        /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
+        /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
+        /// <returns>Bson查询</returns>
+        public static IMongoQuery GetQuery(DateTime? startDate, DateTime? endDate)
+        {
+            if (startDate.HasValue &&
+                endDate.HasValue)
+                return Query.And(Query.GTE("date", startDate), Query.LTE("date", endDate));
+            if (startDate.HasValue)
+                return Query.GTE("date", startDate);
+            if (endDate.HasValue)
+                return Query.Or(Query.EQ("date", null), Query.LTE("date", endDate));
+            return Query.EQ("date", null);
+        }
+
         /// <summary>
         /// 按细目过滤器查询
         /// </summary>
@@ -292,22 +315,11 @@ namespace AccountingServer.DAL
             return m_Vouchers.FindAs<BsonDocument>(GetQuery(filter)).Select(d => d.ToVoucher());
         }
 
-        public IEnumerable<Voucher> SelectVouchers(DateTime? startDate, DateTime? endDate)
+        public IEnumerable<Voucher> SelectVouchers(Voucher filter, DateTime? startDate, DateTime? endDate)
         {
-            if (startDate.HasValue &&
-                endDate.HasValue)
-                return
-                    m_Vouchers.FindAs<BsonDocument>(Query.And(Query.GTE("date", startDate), Query.LTE("date", endDate)))
-                              .Select(d => d.ToVoucher());
-            if (startDate.HasValue)
-                return
-                    m_Vouchers.FindAs<BsonDocument>(Query.GTE("date", startDate))
-                              .Select(d => d.ToVoucher());
-            if (endDate.HasValue)
-                return
-                    m_Vouchers.FindAs<BsonDocument>(Query.Or(Query.EQ("date", null), Query.LTE("date", endDate)))
-                              .Select(d => d.ToVoucher());
-            return m_Vouchers.FindAs<BsonDocument>(Query.EQ("date", null)).Select(d => d.ToVoucher());
+            return
+                m_Vouchers.FindAs<BsonDocument>(Query.And(GetQuery(filter), GetQuery(startDate, endDate)))
+                          .Select(d => d.ToVoucher());
         }
 
         public long SelectVouchersCount(Voucher filter)
@@ -348,6 +360,19 @@ namespace AccountingServer.DAL
                        : m_Vouchers.FindAs<BsonDocument>(Query.ElemMatch("detail", GetQuery(filter)))
                                    .Select(d => d.ToVoucher());
         }
+
+        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter, DateTime? startDate,
+                                                             DateTime? endDate)
+        {
+            return filter.Item != null
+                       ? new[] { SelectVoucher(filter.Item) }
+                       : m_Vouchers.FindAs<BsonDocument>(
+                                                         Query.And(
+                                                                   GetQuery(startDate, endDate),
+                                                                   Query.ElemMatch("detail", GetQuery(filter))))
+                                   .Select(d => d.ToVoucher());
+        }
+
         public IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> filters)
         {
             return filters.Where(filter => filter.Item != null).Select(filter => SelectVoucher(filter.Item))
@@ -361,6 +386,28 @@ namespace AccountingServer.DAL
                                                                                                           "detail",
                                                                                                           GetQuery(
                                                                                                                    filter)))))
+                                            .Select(d => d.ToVoucher()));
+        }
+
+        public IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> filters, DateTime? startDate,
+                                                             DateTime? endDate)
+        {
+            return filters.Where(filter => filter.Item != null).Select(filter => SelectVoucher(filter.Item))
+                          .Concat(
+                                  m_Vouchers.FindAs<BsonDocument>(
+                                                                  Query.And(
+                                                                            GetQuery(startDate, endDate),
+                                                                            Query.Or(
+                                                                                     filters.Where(
+                                                                                                   filter =>
+                                                                                                   filter.Item == null)
+                                                                                            .Select(
+                                                                                                    filter =>
+                                                                                                    Query.ElemMatch(
+                                                                                                                    "detail",
+                                                                                                                    GetQuery
+                                                                                                                        (
+                                                                                                                         filter))))))
                                             .Select(d => d.ToVoucher()));
         }
 
