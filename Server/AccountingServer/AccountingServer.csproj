@@ -45,6 +45,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccountingConsole.cs" />
+    <Compile Include="Chart\AccountingChart.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
     </Compile>
