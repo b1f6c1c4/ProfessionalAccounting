@@ -6,30 +6,42 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.BLL
 {
+    /// <summary>
+    /// 基本会计业务处理类
+    /// </summary>
     public class BHelper
     {
+        /// <summary>
+        /// 本年利润
+        /// </summary>
         public const int FullYearProfit = 4103;
-        public const int FixedAsset = 6601;
-        public const int FixedAssetDepreciation = 6602;
-        public const int FixedAssetImpairment = 6603;
+        /// <summary>
+        /// 费用
+        /// </summary>
         public const int Cost = 5000;
 
+        /// <summary>
+        /// 数据库访问
+        /// </summary>
         private IDbHelper m_Db;
-        //private string m_DbName;
 
         private IDbHelper m_OldDb;
 
-        //private Dictionary<double, string> m_Titles;
-
+        /// <summary>
+        /// 连接数据库
+        /// </summary>
+        /// <param name="un">用户名</param>
+        /// <param name="pw">密码</param>
         public void Connect(string un, string pw)
         {
             m_Db = new MongoDbHelper();
 
             m_OldDb = new SqlDbHelper(un, pw);
-            //m_DbName = un;
-            //GetTitles();
         }
 
+        /// <summary>
+        /// 断开数据库连接
+        /// </summary>
         public void Disconnect()
         {
             m_Db.Dispose();
@@ -89,24 +101,22 @@ namespace AccountingServer.BLL
 
         //public bool IsCarry(Voucher entity) { return m_Db.SelectDetails(entity).Any(d => d.Title == FullYearProfit); }
 
+        /// <summary>
+        /// 检查记账凭证借贷方数额是否相等
+        /// </summary>
+        /// <param name="entity">记账凭证</param>
+        /// <returns>借方比贷方多出数</returns>
         public double IsBalanced(Voucher entity)
         {
             // ReSharper disable once PossibleInvalidOperationException
             return entity.Details.Sum(d => d.Fund.Value);
-            //return m_Db.SelectDetails(new VoucherDetail {Content = entity.ID.ToString()}).Sum(d => d.Fund.Value);
         }
 
-        //public double GetBalance(int? title, int? subTitle, string content = null, DateTime? dt = null)
-        //{
-        //    var lstx = m_Db.SelectVouchers(new Voucher());
-        //    if (dt.HasValue)
-        //        lstx = lstx.Where(i => i.Date <= dt);
-        //    var lst = lstx.Select(i => i.ID).ToList();
-        //    return m_Db.SelectDetails(new VoucherDetail {Title = title, Content = content})
-        //               .Where(d => lst.Contains(d.Item))
-        //               .Sum(d => d.Fund.Value);
-        //}
-
+        /// <summary>
+        /// 按日期、科目、内容计算余额
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>余额，借方为正，贷方为负</returns>
         public double GetBalance(Balance filter)
         {
             var dFilter = new VoucherDetail
@@ -122,6 +132,11 @@ namespace AccountingServer.BLL
             return filter.Fund;
         }
 
+        /// <summary>
+        /// 按科目、内容计算余额
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>余额，借方为正，贷方为负</returns>
         public double GetFinalBalance(Balance filter)
         {
             var dFilter = new VoucherDetail
@@ -134,6 +149,11 @@ namespace AccountingServer.BLL
             return filter.Fund;
         }
 
+        /// <summary>
+        /// 按科目、内容计算每日金额
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>每日金额，借方为正，贷方为负</returns>
         public IEnumerable<Balance> GetBalances(Balance filter)
         {
             var dFilter = new VoucherDetail
@@ -160,6 +180,12 @@ namespace AccountingServer.BLL
                                     });
         }
 
+        /// <summary>
+        /// 比较两日期（可以为无日期）的早晚
+        /// </summary>
+        /// <param name="b1Date">第一个日期</param>
+        /// <param name="b2Date">第二个日期</param>
+        /// <returns>相等为0，第一个早为-1，第二个早为1（无日期按无穷长时间以前考虑）</returns>
         private static int CompareDate(DateTime? b1Date, DateTime? b2Date)
         {
             if (b1Date.HasValue &&
@@ -172,7 +198,14 @@ namespace AccountingServer.BLL
             return 0;
         }
 
-        private static IEnumerable<Balance> ProcessDailyBalance(DateTime startDate, DateTime endDate, List<Balance> resx)
+        /// <summary>
+        /// 累加每日金额得到每日余额
+        /// </summary>
+        /// <param name="startDate">开始累加的日期</param>
+        /// <param name="endDate">停止累加的日期</param>
+        /// <param name="resx">每日金额</param>
+        /// <returns>每日余额</returns>
+        private static IEnumerable<Balance> ProcessDailyBalance(DateTime startDate, DateTime endDate, IReadOnlyList<Balance> resx)
         {
             var id = 0;
             var fund = 0D;
@@ -193,6 +226,14 @@ namespace AccountingServer.BLL
             }
         }
 
+        /// <summary>
+        /// 按科目、内容计算每日余额
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <param name="startDate">开始日期</param>
+        /// <param name="endDate">截止日期</param>
+        /// <param name="dir">0表示同时考虑借贷方，大于0表示只考虑借方，小于0表示只考虑贷方</param>
+        /// <returns>每日余额，借方为正，贷方为负</returns>
         public IEnumerable<Balance> GetDailyBalance(Balance filter, DateTime startDate, DateTime endDate, int dir = 0)
         {
             var dFilter = new VoucherDetail
@@ -222,6 +263,14 @@ namespace AccountingServer.BLL
             return ProcessDailyBalance(startDate, endDate, resx);
         }
 
+        /// <summary>
+        /// 按科目、内容计算每日总余额
+        /// </summary>
+        /// <param name="filters">过滤器</param>
+        /// <param name="startDate">开始日期</param>
+        /// <param name="endDate">截止日期</param>
+        /// <param name="dir">0表示同时考虑借贷方，大于0表示只考虑借方，小于0表示只考虑贷方</param>
+        /// <returns>每日总余额，借方为正，贷方为负</returns>
         public IEnumerable<Balance> GetDailyBalance(IEnumerable<Balance> filters, DateTime startDate, DateTime endDate,
                                                     int dir = 0)
         {
@@ -256,6 +305,11 @@ namespace AccountingServer.BLL
             return ProcessDailyBalance(startDate, endDate, resx);
         }
 
+        /// <summary>
+        /// 按日期、科目计算各内容金额
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>各内容每日金额，借方为正，贷方为负</returns>
         public IEnumerable<IEnumerable<Balance>> GetBalancesAcrossContent(Balance filter)
         {
             var dFilter = new VoucherDetail { Title = filter.Title, SubTitle = filter.SubTitle };
@@ -278,6 +332,11 @@ namespace AccountingServer.BLL
                                                }));
         }
 
+        /// <summary>
+        /// 按科目计算各内容余额
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>各内容余额，借方为正，贷方为负</returns>
         public IEnumerable<Balance> GetFinalBalancesAcrossContent(Balance filter)
         {
             var dFilter = new VoucherDetail { Title = filter.Title, SubTitle = filter.SubTitle };
@@ -293,66 +352,6 @@ namespace AccountingServer.BLL
                                         Fund = ds.Sum(d => d.Fund).Value
                                     });
         }
-
-        //public double GetABalance(DbTitle entity)
-        //{
-        //    entity.ABalance = GetBalance(entity);
-        //    foreach (var t in m_Db.SelectTitles(new DbTitle {H_ID = entity.ID}))
-        //        entity.ABalance += GetABalance(t);
-        //    return entity.ABalance.Value;
-        //}
-
-        //private double GetABalance(DbTitle entity, ref IList<DbTitle> titles)
-        //{
-        //    entity.ABalance = GetBalance(entity);
-        //    foreach (var t in m_Db.SelectTitles(new DbTitle {H_ID = entity.ID}))
-        //        entity.ABalance += GetABalance(t, ref titles);
-        //    return entity.ABalance.Value;
-        //}
-
-        //public double GetABalance(DbTitle entity, out List<DbTitle> titles, bool cascadeReturn)
-        //{
-        //    entity.ABalance = GetBalance(entity);
-        //    IList<DbTitle> tl = new List<DbTitle>();
-        //    foreach (var t in m_Db.SelectTitles(new DbTitle {H_ID = entity.ID}))
-        //    {
-        //        tl.Add(t);
-        //        if (cascadeReturn)
-        //            entity.ABalance += GetABalance(t, ref tl);
-        //        else
-        //            entity.ABalance += GetABalance(t);
-        //    }
-        //    titles = tl as List<DbTitle>;
-        //    return entity.ABalance.Value;
-        //}
-
-        //public IEnumerable<VoucherDetail> GetXBalances(DbTitle entity = null, bool withZero = false, bool noCarry = false, int? sID = null, int? eID = null)
-        //{
-        //    var detail = entity == null ? new VoucherDetail() : new VoucherDetail {Title = entity.ID};
-        //    var lst = m_Db.GetXBalances(detail, noCarry, sID, eID);
-        //    return withZero ? lst : lst.Where(d => d.Fund != 0);
-        //}
-
-        //public IEnumerable<VoucherDetail> GetXBalances(int? title = null, bool withZero = false, bool noCarry = false, int? sID = null, int? eID = null)
-        //{
-        //    var detail = title == null ? new VoucherDetail() : new VoucherDetail {Title = title};
-        //    var lst = m_Db.GetXBalances(detail, noCarry, sID, eID);
-        //    return withZero ? lst : lst.Where(d => d.Fund != 0);
-        //}
-
-        //public IEnumerable<VoucherDetail> GetXBalancesD(int? title = null, int dir = 0, bool noCarry = false,
-        //                                           int? sID = null, int? eID = null)
-        //{
-        //    var detail = title == null ? new VoucherDetail() : new VoucherDetail { Title = title };
-        //    var lst = m_Db.GetXBalances(detail, noCarry, sID, eID, dir);
-        //    return lst;
-        //}
-
-        //public VoucherDetail GetXBalances(VoucherDetail entity, bool noCarry = false, int? sID = null, int? eID = null)
-        //{
-        //    var lst = m_Db.GetXBalances(entity, noCarry, sID, eID);
-        //    return lst.Single();
-        //}
 
         //private void GetTitles()
         //{
@@ -394,22 +393,55 @@ namespace AccountingServer.BLL
         //    return cnt;
         //}
 
-        //private static bool IsToCarry(double id) { return id >= Cost; }
-
-        //public IEnumerable<DbTitle> SelectTitles(DbTitle entity) { return m_Db.SelectTitles(entity); }
-        public long SelectVouchersCount(Voucher entity) { return m_Db.SelectVouchersCount(entity); }
+        /// <summary>
+        /// 按过滤器查找记账凭证并记数
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>匹配过滤器的记账凭证总数</returns>
+        public long SelectVouchersCount(Voucher filter) { return m_Db.SelectVouchersCount(filter); }
+        /// <summary>
+        /// 按编号查找记账凭证
+        /// </summary>
+        /// <param name="id">编号</param>
+        /// <returns>记账凭证，如果没有则为null</returns>
         public Voucher SelectVoucher(string id) { return m_Db.SelectVoucher(id); }
-        public IEnumerable<Voucher> SelectVouchers(Voucher entity) { return m_Db.SelectVouchers(entity); }
+        /// <summary>
+        /// 按过滤器查找记账凭证
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>匹配过滤器的记账凭证</returns>
+        public IEnumerable<Voucher> SelectVouchers(Voucher filter) { return m_Db.SelectVouchers(filter); }
+        /// <summary>
+        /// 按日期查找记账凭证
+        /// <para>若<paramref name="startDate"/>和<paramref name="endDate"/>均为null，则返回所有无日期的记账凭证</para>
+        /// </summary>
+        /// <param name="startDate">开始日期，若为null表示不检查最小日期，无日期亦可</param>
+        /// <param name="endDate">截止日期，若为null表示不检查最大日期</param>
+        /// <returns>指定日期的记账凭证</returns>
         public IEnumerable<Voucher> SelectVouchers(DateTime? startDate, DateTime? endDate) { return m_Db.SelectVouchers(startDate, endDate); }
 
+        /// <summary>
+        /// 按细目过滤器查找记账凭证
+        /// </summary>
+        /// <param name="filter">细目过滤器</param>
+        /// <returns>任一细目匹配过滤器的记账凭证</returns>
         public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail entity)
         {
             return m_Db.SelectVouchersWithDetail(entity);
         }
 
-        //public IEnumerable<VoucherDetail> SelectDetails(Voucher entity) { return m_Db.SelectDetails(entity); }
-        public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail entity) { return m_Db.SelectDetails(entity); }
-        public long SelectDetailsCount(VoucherDetail entity) { return m_Db.SelectDetailsCount(entity); }
+        /// <summary>
+        /// 按细目过滤器查找细目
+        /// </summary>
+        /// <param name="filter">细目过滤器</param>
+        /// <returns>匹配过滤器的细目</returns>
+        public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter) { return m_Db.SelectDetails(filter); }
+        /// <summary>
+        /// 按细目过滤器查找细目并记数
+        /// </summary>
+        /// <param name="filter">细目过滤器</param>
+        /// <returns>匹配过滤器的细目总数</returns>
+        public long SelectDetailsCount(VoucherDetail filter) { return m_Db.SelectDetailsCount(filter); }
 
         //public IEnumerable<DbFixedAsset> SelectFixedAssets(DbFixedAsset entity)
         //{
@@ -440,42 +472,33 @@ namespace AccountingServer.BLL
         //    }
         //}
 
-        public bool InsertVoucher(Voucher item)
+        /// <summary>
+        /// 添加记账凭证
+        /// <para>若<paramref name="entity"/>没有指定编号，则添加成功后会自动给<paramref name="entity"/>添加编号</para>
+        /// </summary>
+        /// <param name="entity">记账凭证</param>
+        /// <returns>是否成功</returns>
+        public bool InsertVoucher(Voucher entity)
         {
-            //if (item.ID.HasValue)
-            //    if (m_Db.SelectVouchers(new Voucher {ID = item.ID}).Any())
-            //        m_Db.DeltaItemsFrom(item.ID.Value);
-            return m_Db.InsertVoucher(item);
+            return m_Db.InsertVoucher(entity);
         }
 
-        //public bool InsertVoucher(Voucher item, IEnumerable<VoucherDetail> details)
-        //{
-        //    if (!InsertVoucher(item))
-        //        return false;
-        //    var flag = true;
-        //    foreach (var detail in details)
-        //    {
-        //        detail.Item = item.ID;
-        //        flag &= m_Db.InsertDetail(detail);
-        //    }
-        //    return flag;
-        //}
-
-        public bool InsertDetail(VoucherDetail entity) { return m_Db.InsertDetail(entity); }
-
-        public int DeleteVouchers(Voucher entity)
+        /// <summary>
+        /// 按过滤器删除记账凭证
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>已删除的记账凭证总数</returns>
+        public int DeleteVouchers(Voucher filter)
         {
-            //var count = 0;
-            //foreach (var i in m_Db.SelectVouchers(entity))
-            //{
-            //    count += m_Db.DeleteItems(new Voucher {ID = i.ID});
-            //    m_Db.SelectDetails(i);
-            //}
-            //return count;
-            return m_Db.DeleteVouchers(entity);
+            return m_Db.DeleteVouchers(filter);
         }
 
-        public int DeleteDetails(VoucherDetail entity) { return m_Db.DeleteDetails(entity); }
+        /// <summary>
+        /// 按过滤器删除细目
+        /// </summary>
+        /// <param name="filter">细目过滤器</param>
+        /// <returns>已删除的细目总数</returns>
+        public int DeleteDetails(VoucherDetail filter) { return m_Db.DeleteDetails(filter); }
 
         //public bool InsertFixedAsset(DbFixedAsset entity) { return m_Db.InsertFixedAsset(entity); }
         //public int DeleteFixedAssets(DbFixedAsset entity) { return m_Db.DeleteFixedAssets(entity); }
@@ -487,24 +510,25 @@ namespace AccountingServer.BLL
         //public bool InsertTitle(DbTitle entity) { return m_Db.InsertTitle(entity); }
         //public int DeleteTitles(DbTitle entity) { return m_Db.DeleteTitles(entity); }
 
-        public void Shrink(Voucher item)
+        /// <summary>
+        /// 合并记账凭证上相同的细目
+        /// </summary>
+        /// <param name="voucher">记账凭证</param>
+        public void Shrink(Voucher voucher)
         {
-            //var lst = m_Db.SelectDetails(item)
-            var lst = item.Details
-                          .GroupBy(
-                                   d => new VoucherDetail { Title = d.Title, Content = d.Content },
-                                   (key, grp) =>
-                                   {
-                                       key.Item = item.ID;
-                                       key.Fund =
-                                           grp.Sum(
-                                                   d =>
-                                                   d.Fund);
-                                       return key;
-                                   });
-            m_Db.DeleteDetails(item);
-            foreach (var detail in lst)
-                m_Db.InsertDetail(detail);
+            voucher.Details = voucher.Details
+                                     .GroupBy(
+                                              d => new VoucherDetail { Title = d.Title, Content = d.Content },
+                                              (key, grp) =>
+                                              {
+                                                  key.Item = voucher.ID;
+                                                  key.Fund =
+                                                      grp.Sum(
+                                                              d =>
+                                                              d.Fund);
+                                                  return key;
+                                              }).ToArray();
+            m_Db.UpdateVoucher(voucher);
         }
 
         //public void GetFixedAssetDetail(DbFixedAsset entity, DateTime? dt = null)
@@ -517,16 +541,28 @@ namespace AccountingServer.BLL
         //    entity.XValue = fa + faD + faI;
         //}
 
+        /// <summary>
+        /// 折旧
+        /// </summary>
         public void Depreciate()
         {
-            //TODO: Depreciate
+            throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// 期末结转
+        /// </summary>
         public void Carry()
         {
-            //TODO: Carry
+            throw new NotImplementedException();
         }
 
-        //public int GetIDFromDate(DateTime date) { return m_Db.GetIDFromDate(date); }
+        /// <summary>
+        /// 摊销
+        /// </summary>
+        public void Amortization()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
