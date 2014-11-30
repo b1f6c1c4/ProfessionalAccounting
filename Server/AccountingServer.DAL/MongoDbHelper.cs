@@ -75,7 +75,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="detail">细目</param>
         /// <returns>Bson</returns>
-        public static BsonDocument ToBsonDocument(this VoucherDetail detail)
+        private static BsonDocument ToBsonDocument(this VoucherDetail detail)
         {
             var val = new BsonDocument { { "title", detail.Title } };
             if (detail.SubTitle.HasValue)
@@ -143,7 +143,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="ddoc">Bson</param>
         /// <returns>细目</returns>
-        public static VoucherDetail ToVoucherDetail(this BsonDocument ddoc)
+        private static VoucherDetail ToVoucherDetail(this BsonDocument ddoc)
         {
             var detail = new VoucherDetail();
             if (ddoc.Contains("title"))
@@ -270,7 +270,7 @@ namespace AccountingServer.DAL
         /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
         /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
         /// <returns>Bson查询</returns>
-        public static IMongoQuery GetQuery(DateTime? startDate, DateTime? endDate)
+        private static IMongoQuery GetQuery(DateTime? startDate, DateTime? endDate)
         {
             if (startDate.HasValue &&
                 endDate.HasValue)
@@ -289,6 +289,9 @@ namespace AccountingServer.DAL
         /// <returns>Bson查询</returns>
         private static IMongoQuery GetQuery(VoucherDetail filter)
         {
+            if (filter == null)
+                return Query.Null;
+
             var lst = new List<IMongoQuery>();
 
             if (filter.Title != null)
@@ -355,22 +358,30 @@ namespace AccountingServer.DAL
         
         public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter)
         {
-            return filter.Item != null
-                       ? new[] { SelectVoucher(filter.Item) }
-                       : m_Vouchers.FindAs<BsonDocument>(Query.ElemMatch("detail", GetQuery(filter)))
-                                   .Select(d => d.ToVoucher());
+            if (filter.Item != null)
+                return new[] { SelectVoucher(filter.Item) };
+            
+            var queryFilter = GetQuery(filter);
+            var query = queryFilter != Query.Null ? Query.ElemMatch("detail", queryFilter) : Query.Null;
+
+            return m_Vouchers.FindAs<BsonDocument>(query)
+                                 .Select(d => d.ToVoucher());
         }
 
         public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter, DateTime? startDate,
                                                              DateTime? endDate)
         {
-            return filter.Item != null
-                       ? new[] { SelectVoucher(filter.Item) }
-                       : m_Vouchers.FindAs<BsonDocument>(
-                                                         Query.And(
-                                                                   GetQuery(startDate, endDate),
-                                                                   Query.ElemMatch("detail", GetQuery(filter))))
-                                   .Select(d => d.ToVoucher());
+            if (filter.Item != null)
+                return new[] { SelectVoucher(filter.Item) };
+
+            var queryFilter = GetQuery(filter);
+            var query = queryFilter != Query.Null
+                            ? Query.And(
+                                        GetQuery(startDate, endDate),
+                                        Query.ElemMatch("detail", queryFilter))
+                            : GetQuery(startDate, endDate);
+
+            return m_Vouchers.FindAs<BsonDocument>(query).Select(d => d.ToVoucher());
         }
 
         public IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> filters)
@@ -380,12 +391,12 @@ namespace AccountingServer.DAL
                                   m_Vouchers.FindAs<BsonDocument>(
                                                                   Query.Or(
                                                                            filters.Where(filter => filter.Item == null)
+                                                                                  .Select(GetQuery)
+                                                                                  .Where(query => query != Query.Null)
                                                                                   .Select(
-                                                                                          filter =>
-                                                                                          Query.ElemMatch(
-                                                                                                          "detail",
-                                                                                                          GetQuery(
-                                                                                                                   filter)))))
+                                                                                          query => Query.ElemMatch(
+                                                                                                                   "detail",
+                                                                                                                   query))))
                                             .Select(d => d.ToVoucher()));
         }
 
@@ -401,13 +412,15 @@ namespace AccountingServer.DAL
                                                                                      filters.Where(
                                                                                                    filter =>
                                                                                                    filter.Item == null)
+                                                                                            .Select(GetQuery)
+                                                                                            .Where(
+                                                                                                   query =>
+                                                                                                   query != Query.Null)
                                                                                             .Select(
-                                                                                                    filter =>
+                                                                                                    query =>
                                                                                                     Query.ElemMatch(
                                                                                                                     "detail",
-                                                                                                                    GetQuery
-                                                                                                                        (
-                                                                                                                         filter))))))
+                                                                                                                    query)))))
                                             .Select(d => d.ToVoucher()));
         }
 

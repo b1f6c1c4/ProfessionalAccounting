@@ -71,7 +71,24 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="detail">细目</param>
         /// <returns>名称</returns>
-        public static string GetTitleName(VoucherDetail detail) { return GetTitleName(detail.Title, detail.SubTitle); }
+        public static string GetTitleName(VoucherDetail detail)
+        {
+            return detail.SubTitle.HasValue
+                       ? GetTitleName(detail.Title) + "-" + GetTitleName(detail.Title, detail.SubTitle)
+                       : GetTitleName(detail.Title);
+        }
+
+        /// <summary>
+        /// 返回余额对应的会计科目名称
+        /// </summary>
+        /// <param name="balance">余额</param>
+        /// <returns>名称</returns>
+        public static string GetTitleName(Balance balance)
+        {
+            return balance.SubTitle.HasValue
+                       ? GetTitleName(balance.Title) + "-" + GetTitleName(balance.Title, balance.SubTitle)
+                       : GetTitleName(balance.Title);
+        }
 
         /// <summary>
         /// 检查记账凭证借贷方数额是否相等
@@ -147,8 +164,7 @@ namespace AccountingServer.BLL
                                         Fund =
                                             vs.SelectMany(v => v.Details)
                                               .Where(d => d.IsMatch(dFilter))
-                                              .Sum(d => d.Fund)
-                                              .Value
+                                              .Sum(d => d.Fund.Value)
                                     });
         }
 
@@ -228,8 +244,7 @@ namespace AccountingServer.BLL
                                                vs.SelectMany(v => v.Details)
                                                  .Where(d => d.IsMatch(dFilter))
                                                  .Where(d => dir == 0 || (dir > 0 ? d.Fund > 0 : d.Fund < 0))
-                                                 .Sum(d => d.Fund)
-                                                 .Value
+                                                 .Sum(d => d.Fund.Value)
                                        }).ToList();
             resx.Sort((b1, b2) => CompareDate(b1.Date, b2.Date));
             return ProcessDailyBalance(startDate, endDate, resx);
@@ -254,7 +269,7 @@ namespace AccountingServer.BLL
                                        Title = filter.Title,
                                        SubTitle = filter.SubTitle,
                                        Content = filter.Content
-                                   });
+                                   }).ToArray();
 
             var res = m_Db.SelectVouchersWithDetail(dFilters).Where(v => CompareDate(v.Date, endDate) <= 0);
             var resx = res.GroupBy(
@@ -270,8 +285,7 @@ namespace AccountingServer.BLL
                                                vs.SelectMany(v => v.Details)
                                                  .Where(d => dFilters.Any(d.IsMatch))
                                                  .Where(d => dir == 0 || (dir > 0 ? d.Fund > 0 : d.Fund < 0))
-                                                 .Sum(d => d.Fund)
-                                                 .Value
+                                                 .Sum(d => d.Fund.Value)
                                        }).ToList();
             resx.Sort((b1, b2) => CompareDate(b1.Date, b2.Date));
             return ProcessDailyBalance(startDate, endDate, resx);
@@ -300,7 +314,7 @@ namespace AccountingServer.BLL
                                                    Title = filter.Title,
                                                    SubTitle = filter.SubTitle,
                                                    Content = c,
-                                                   Fund = ds.Sum(d => d.Fund).Value
+                                                   Fund = ds.Sum(d => d.Fund.Value)
                                                }));
         }
 
@@ -321,7 +335,7 @@ namespace AccountingServer.BLL
                                         Title = filter.Title,
                                         SubTitle = filter.SubTitle,
                                         Content = c,
-                                        Fund = ds.Sum(d => d.Fund).Value
+                                        Fund = ds.Sum(d => d.Fund.Value)
                                     });
         }
         
