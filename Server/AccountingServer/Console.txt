@@ -1,6 +1,6 @@
-﻿所有命令以SHIFT+ENTER结束
+﻿财月：上月20-本月19
 
-财月：上月20-本月19
+检索类命令以Ctrl+Enter结束
 
 检索某一范围内所有Voucher：不引起歧义的情况下，可以省略[]
 []					不作限制
@@ -27,11 +27,17 @@ T100101 []			限制科目
 
 
 命令修饰：
-~`					按Title，SubTitle，Content分类汇总总额并制作报表
-~R					生成报表
+`					按Title，SubTitle，Content分类汇总总额并制作报表（不含0）
+``					按Title，SubTitle，Content分类汇总总额并制作报表（含0）
+!`					按Title，Content分类汇总总额并制作报表（不含0）
+!``					按Title，Content分类汇总总额并制作报表（含0）
+R					生成报表
 
-快速编辑：
-\					Upsert
+编辑器：
+Alt+A			模糊检索光标位置科目名称为编号
+
+编辑：
+Ctrl+Shift+Enter			Upsert
 
 数据呈现：C#表达式
 
