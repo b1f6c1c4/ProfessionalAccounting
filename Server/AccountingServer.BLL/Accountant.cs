@@ -324,68 +324,60 @@ namespace AccountingServer.BLL
                                         Fund = ds.Sum(d => d.Fund).Value
                                     });
         }
-
         
-        //public string GetFixedAssetName(Guid id)
-        //{
-        //    return m_Db.GetFixedAssetName(id);
-        //}
-
-        //public double Carry(DateTime? date)
-        //{
-        //    var dt = date ?? DateTime.Now.Date;
-        //    var cnt = (double)0;
-        //    // ReSharper disable once PossibleInvalidOperationException
-        //    var lst = m_Db.SelectTitles(new DbTitle()).Where(t => IsToCarry(t.ID.Value));
-        //    var titles = lst as IList<DbTitle> ?? lst.ToList();
-        //    if (!titles.Any())
-        //        return 0;
-        //    var item = new Voucher {Date = dt};
-        //    foreach (var t in titles)
-        //    {
-        //        var b = GetBalance(t, null, dt);
-        //        m_Db.InsertDetail(new VoucherDetail {Item = item.ID, Title = t.ID, Fund = -b});
-        //        cnt += b;
-        //    }
-        //    m_Db.InsertDetail(new VoucherDetail {Item = item.ID, Title = FullYearProfit, Fund = cnt});
-        //    return cnt;
-        //}
-
         /// <summary>
         /// 按过滤器查找记账凭证并记数
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>匹配过滤器的记账凭证总数</returns>
         public long SelectVouchersCount(Voucher filter) { return m_Db.SelectVouchersCount(filter); }
+
         /// <summary>
         /// 按编号查找记账凭证
         /// </summary>
         /// <param name="id">编号</param>
         /// <returns>记账凭证，如果没有则为null</returns>
         public Voucher SelectVoucher(string id) { return m_Db.SelectVoucher(id); }
+
         /// <summary>
         /// 按过滤器查找记账凭证
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>匹配过滤器的记账凭证</returns>
         public IEnumerable<Voucher> SelectVouchers(Voucher filter) { return m_Db.SelectVouchers(filter); }
+
         /// <summary>
-        /// 按日期查找记账凭证
+        /// 按过滤器和日期查找记账凭证
         /// <para>若<paramref name="startDate"/>和<paramref name="endDate"/>均为<c>null</c>，则返回所有无日期的记账凭证</para>
         /// </summary>
+        /// <param name="filter">过滤器</param>
         /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
         /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
-        /// <returns>指定日期的记账凭证</returns>
-        public IEnumerable<Voucher> SelectVouchers(DateTime? startDate, DateTime? endDate) { return m_Db.SelectVouchers(startDate, endDate); }
+        /// <returns>指定日期匹配过滤器的记账凭证</returns>
+        public IEnumerable<Voucher> SelectVouchers(Voucher filter, DateTime? startDate, DateTime? endDate) { return m_Db.SelectVouchers(filter, startDate, endDate); }
 
         /// <summary>
         /// 按细目过滤器查找记账凭证
         /// </summary>
         /// <param name="filter">细目过滤器</param>
         /// <returns>任一细目匹配过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail entity)
+        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter)
         {
-            return m_Db.SelectVouchersWithDetail(entity);
+            return m_Db.SelectVouchersWithDetail(filter);
+        }
+
+        /// <summary>
+        /// 按过滤器和细目过滤器查找记账凭证
+        /// <para>若<paramref name="startDate"/>和<paramref name="endDate"/>均为<c>null</c>，则返回所有无日期的记账凭证</para>
+        /// </summary>
+        /// <param name="filter">细目过滤器</param>
+        /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
+        /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
+        /// <returns>指定日期任一细目匹配过滤器的记账凭证</returns>
+        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter,
+                                                              DateTime? startDate, DateTime? endDate)
+        {
+            return m_Db.SelectVouchersWithDetail(filter, startDate, endDate);
         }
 
         /// <summary>
@@ -400,36 +392,7 @@ namespace AccountingServer.BLL
         /// <param name="filter">细目过滤器</param>
         /// <returns>匹配过滤器的细目总数</returns>
         public long SelectDetailsCount(VoucherDetail filter) { return m_Db.SelectDetailsCount(filter); }
-
-        //public IEnumerable<DbFixedAsset> SelectFixedAssets(DbFixedAsset entity)
-        //{
-        //    return m_Db.SelectFixedAssets(entity);
-        //}
-
-        //public IEnumerable<DbShortcut> SelectShortcuts()
-        //{
-        //    foreach (var shortcut in m_Db.SelectShortcuts(new DbShortcut()))
-        //    {
-        //        var xpath = Regex.Split(shortcut.Path, @",(?=(?:[^']*'[^']*')*[^']*$)");
-        //        shortcut.Balance = 0;
-        //        foreach (var path in xpath)
-        //        {
-        //            var paths = path.Split(new[] {'/'});
-        //            if (paths.Last().StartsWith("T"))
-        //                shortcut.Balance += GetABalance(new DbTitle {ID = Convert.ToDecimal(paths.Last().Substring(1))});
-        //            if (paths.Last().StartsWith("R"))
-        //                shortcut.Balance +=
-        //                    GetXBalances(
-        //                                 new VoucherDetail
-        //                                     {
-        //                                         Title = Convert.ToDecimal(paths[paths.Length - 2].Substring(1)),
-        //                                         Content = paths.Last().Substring(2, paths.Last().Length - 3)
-        //                                     }).Fund;
-        //        }
-        //        yield return shortcut;
-        //    }
-        //}
-
+        
         /// <summary>
         /// 添加记账凭证
         /// <para>若<paramref name="entity"/>没有指定编号，则添加成功后会自动给<paramref name="entity"/>添加编号</para>
@@ -488,16 +451,6 @@ namespace AccountingServer.BLL
                                               }).ToArray();
             m_Db.UpdateVoucher(voucher);
         }
-
-        //public void GetFixedAssetDetail(DbFixedAsset entity, DateTime? dt = null)
-        //{
-        //    var fa = GetBalance(new DbTitle {ID = FixedAsset}, entity.ID, dt);
-        //    var faD = GetBalance(new DbTitle {ID = FixedAssetDepreciation}, entity.ID, dt);
-        //    var faI = GetBalance(new DbTitle {ID = FixedAssetImpairment}, entity.ID, dt);
-        //    entity.DepreciatedValue1 = -faD;
-        //    entity.DepreciatedValue2 = -faI;
-        //    entity.XValue = fa + faD + faI;
-        //}
 
         /// <summary>
         /// 折旧

@@ -101,7 +101,7 @@ namespace AccountingServer.DAL
                         };
         }
 
-        public IEnumerable<Voucher> SelectVouchers(DateTime? startDate, DateTime? endDate) { throw new NotImplementedException(); }
+        public IEnumerable<Voucher> SelectVouchers(Voucher filter, DateTime? startDate, DateTime? endDate) { throw new NotImplementedException(); }
 
         public long SelectVouchersCount(Voucher filter) { throw new NotImplementedException(); }
         public bool InsertVoucher(Voucher entity) { throw new NotImplementedException(); }
@@ -109,7 +109,9 @@ namespace AccountingServer.DAL
         public int DeleteVouchers(Voucher filter) { throw new NotImplementedException(); }
         public bool UpdateVoucher(Voucher entity) { throw new NotImplementedException(); }
         public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter) { throw new NotImplementedException(); }
+        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter, DateTime? startDate, DateTime? endDate) { throw new NotImplementedException(); }
         public IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> dFilters) { throw new NotImplementedException(); }
+        public IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> filters, DateTime? startDate, DateTime? endDate) { throw new NotImplementedException(); }
 
         public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter)
         {

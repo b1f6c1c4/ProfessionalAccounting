@@ -22,13 +22,14 @@ namespace AccountingServer.DAL
         /// <returns>匹配过滤器的记账凭证</returns>
         IEnumerable<Voucher> SelectVouchers(Voucher filter);
         /// <summary>
-        /// 按日期查找记账凭证
+        /// 按过滤器和日期查找记账凭证
         /// <para>若<paramref name="startDate"/>和<paramref name="endDate"/>均为<c>null</c>，则返回所有无日期的记账凭证</para>
         /// </summary>
+        /// <param name="filter">过滤器</param>
         /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
         /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
-        /// <returns>指定日期的记账凭证</returns>
-        IEnumerable<Voucher> SelectVouchers(DateTime? startDate, DateTime? endDate);
+        /// <returns>指定日期匹配过滤器的记账凭证</returns>
+        IEnumerable<Voucher> SelectVouchers(Voucher filter, DateTime? startDate, DateTime? endDate);
         /// <summary>
         /// 按过滤器查找记账凭证并记数
         /// </summary>
@@ -69,11 +70,29 @@ namespace AccountingServer.DAL
         /// <returns>任一细目匹配过滤器的记账凭证</returns>
         IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter);
         /// <summary>
+        /// 按过滤器和细目过滤器查找记账凭证
+        /// <para>若<paramref name="startDate"/>和<paramref name="endDate"/>均为<c>null</c>，则返回所有无日期的记账凭证</para>
+        /// </summary>
+        /// <param name="filter">细目过滤器</param>
+        /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
+        /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
+        /// <returns>指定日期任一细目匹配过滤器的记账凭证</returns>
+        IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter, DateTime? startDate, DateTime? endDate);
+        /// <summary>
         /// 按细目过滤器查找记账凭证
         /// </summary>
-        /// <param name="dFilters">细目过滤器</param>
+        /// <param name="filters">细目过滤器</param>
         /// <returns>任一细目匹配任一过滤器的记账凭证</returns>
-        IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> dFilters);
+        IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> filters);
+        /// <summary>
+        /// 按过滤器和细目过滤器查找记账凭证
+        /// <para>若<paramref name="startDate"/>和<paramref name="endDate"/>均为<c>null</c>，则返回所有无日期的记账凭证</para>
+        /// </summary>
+        /// <param name="filters">细目过滤器</param>
+        /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
+        /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
+        /// <returns>指定日期任一细目匹配任一过滤器的记账凭证</returns>
+        IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> filters, DateTime? startDate, DateTime? endDate);
         /// <summary>
         /// 按细目过滤器查找细目
         /// </summary>
