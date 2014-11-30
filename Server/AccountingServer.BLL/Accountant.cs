@@ -28,7 +28,7 @@ namespace AccountingServer.BLL
         /// </summary>
         private IDbHelper m_Db;
 
-        private IDbHelper m_OldDb;
+        //private IDbHelper m_OldDb;
 
         /// <summary>
         /// 连接数据库
@@ -39,7 +39,7 @@ namespace AccountingServer.BLL
         {
             m_Db = new MongoDbHelper();
 
-            m_OldDb = new SqlDbHelper(un, pw);
+            //m_OldDb = new SqlDbHelper(un, pw);
         }
 
         /// <summary>
@@ -50,56 +50,8 @@ namespace AccountingServer.BLL
             m_Db.Dispose();
             m_Db = null;
 
-            m_OldDb.Dispose();
-            m_OldDb = null;
-        }
-
-        public void CopyDb()
-        {
-            m_Db.DeleteVouchers(new Voucher { Date = DateTime.Parse("2013-09-30") });
-            m_Db.InsertVoucher(
-                               new Voucher
-                                   {
-                                       Date = null,
-                                       Type = VoucherType.Ordinal,
-                                       Details = m_OldDb.SelectDetails(new VoucherDetail { Remark = "1" })
-                                                        .Where(d => d.Title != 4001)
-                                                        .Concat(
-                                                                m_OldDb.SelectDetails(
-                                                                                      new VoucherDetail { Remark = "4" }))
-                                                        .Concat(
-                                                                m_OldDb.SelectDetails(
-                                                                                      new VoucherDetail { Remark = "5" }))
-                                                        .Concat(
-                                                                m_OldDb.SelectDetails(
-                                                                                      new VoucherDetail { Remark = "6" }))
-                                                        .Concat(
-                                                                new[]
-                                                                    {
-                                                                        new VoucherDetail
-                                                                            {
-                                                                                Title = 4101,
-                                                                                Fund = 33422.3724
-                                                                            }
-                                                                    })
-                                                        .GroupBy(
-                                                                 d =>
-                                                                 new VoucherDetail
-                                                                     {
-                                                                         Title = d.Title,
-                                                                         SubTitle = d.SubTitle,
-                                                                         Content = d.Content
-                                                                     },
-                                                                 (vd, ds) =>
-                                                                 new VoucherDetail
-                                                                     {
-                                                                         Title = vd.Title,
-                                                                         SubTitle = vd.SubTitle,
-                                                                         Content = vd.Content,
-                                                                         Fund = ds.Sum(d => d.Fund)
-                                                                     })
-                                                        .ToArray()
-                                   });
+            //m_OldDb.Dispose();
+            //m_OldDb = null;
         }
 
         /// <summary>
@@ -113,6 +65,13 @@ namespace AccountingServer.BLL
             var mgr = new ResourceManager("AccountingServer.BLL.AccountTitle", Assembly.GetExecutingAssembly());
             return mgr.GetString(String.Format("T{0:0000}{1:00}", title, subtitle));
         }
+
+        /// <summary>
+        /// 返回细目对应的会计科目名称
+        /// </summary>
+        /// <param name="detail">细目</param>
+        /// <returns>名称</returns>
+        public static string GetTitleName(VoucherDetail detail) { return GetTitleName(detail.Title, detail.SubTitle); }
 
         /// <summary>
         /// 检查记账凭证借贷方数额是否相等
@@ -366,21 +325,7 @@ namespace AccountingServer.BLL
                                     });
         }
 
-        //private void GetTitles()
-        //{
-        //    m_Titles = new Dictionary<double, string>();
-        //    foreach (var title in m_Db.SelectTitles(new DbTitle()))
-        //        if (title.ID != null)
-        //            m_Titles.Add(title.ID.Value, title.Name);
-        //}
-
-        //public string GetTitleName(double? id)
-        //{
-        //    if (id.HasValue)
-        //        if (m_Titles.ContainsKey(id.Value))
-        //            return m_Titles[id.Value];
-        //    return null;
-        //}
+        
         //public string GetFixedAssetName(Guid id)
         //{
         //    return m_Db.GetFixedAssetName(id);
