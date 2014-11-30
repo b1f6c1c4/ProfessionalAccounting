@@ -10,17 +10,17 @@ using ZXing.QrCode;
 
 namespace AccountingServer.BLL
 {
-    public static class MainBLL
+    public class MobileComm
     {
-        private static bool m_Parsing;
-        private static int m_SucceedCount;
-        private static ITcpHelper m_Tcp;
-        private static BHelper m_BHelper;
+        private bool m_Parsing;
+        private int m_SucceedCount;
+        private ITcpHelper m_Tcp;
+        private BHelper m_BHelper;
 
         private static readonly IEnumerable<MethodInfo> Patterns =
-            typeof(Patterns).GetMethods(BindingFlags.Public | BindingFlags.Static);
+            typeof(MobilePatterns).GetMethods(BindingFlags.Public | BindingFlags.Static);
 
-        public static void Connect(BHelper helper, Action<IPEndPoint> connected, Action<string> received,
+        public void Connect(BHelper helper, Action<IPEndPoint> connected, Action<string> received,
                                    Action<IPEndPoint> disconnected)
         {
             m_BHelper = helper;
@@ -58,7 +58,7 @@ namespace AccountingServer.BLL
             m_Tcp.ClientDisconnected += ep => disconnected(ep);
         }
 
-        public static System.Drawing.Bitmap GetQRCode(int w,int h)
+        public System.Drawing.Bitmap GetQRCode(int w,int h)
         {
             var str = m_Tcp.IPEndPointString;
 
@@ -68,9 +68,9 @@ namespace AccountingServer.BLL
             return bqw.Write(matrix);
         }
 
-        public static void Disconnect() { m_Tcp.Disconnect(); }
+        public void Disconnect() { m_Tcp.Disconnect(); }
 
-        public static void SendAllData()
+        public void SendAllData()
         {
             m_Tcp.Write(String.Format("ClearDatas{0:0}", m_SucceedCount));
 
@@ -178,7 +178,7 @@ namespace AccountingServer.BLL
         }
 
 
-        private static void ParseData(string str)
+        private void ParseData(string str)
         {
             var sp = str.Split(new[] {','}, 2);
             foreach (var pattern in from pattern in Patterns
@@ -190,7 +190,7 @@ namespace AccountingServer.BLL
             }
         }
 
-        private static PatternAttribute GetPatternAttr(MemberInfo pattern)
+        private PatternAttribute GetPatternAttr(MemberInfo pattern)
         {
             var attr =
                 (PatternAttribute)
@@ -198,6 +198,6 @@ namespace AccountingServer.BLL
             return attr;
         }
 
-        public static void Stop() { m_Tcp.Stop(); }
+        public void Stop() { m_Tcp.Stop(); }
     }
 }
