@@ -6,8 +6,17 @@ using System.Threading.Tasks;
 
 namespace AccountingServer.Entities
 {
+    /// <summary>
+    /// 判断实体是否符合过滤器
+    /// </summary>
     public static class MatchHelper
     {
+        /// <summary>
+        /// 判断细目是否符合过滤器
+        /// </summary>
+        /// <param name="voucherDetail">细目</param>
+        /// <param name="filter">过滤器</param>
+        /// <returns>是否符合</returns>
         public static bool IsMatch(this VoucherDetail voucherDetail, VoucherDetail filter)
         {
             if (filter.Item != null)
