@@ -56,9 +56,9 @@ namespace AccountingServer.TCP
 
             m_Listener = new TcpListener(IPAddress.Any, Port);
             m_Listener.Start(10);
-            m_ReadThread = new Thread(Read) {IsBackground = true, Name = "Read"};
+            m_ReadThread = new Thread(Read) { IsBackground = true, Name = "Read" };
             m_ReadThread.Start();
-            m_ListenThread = new Thread(Listen) {IsBackground = true, Name = "Listen"};
+            m_ListenThread = new Thread(Listen) { IsBackground = true, Name = "Listen" };
             m_ListenThread.Start();
         }
 
@@ -119,7 +119,7 @@ namespace AccountingServer.TCP
                 var ipai =
                     n.GetIPProperties()
                      .UnicastAddresses.First(a => a.Address.AddressFamily == AddressFamily.InterNetwork);
-                
+
                 //var ipe = Dns.GetHostEntry(Dns.GetHostName());
                 //var ipa = ipe.AddressList[1];
                 return String.Format("{0}:{1:#}", ipai.Address, Port);
@@ -207,7 +207,7 @@ namespace AccountingServer.TCP
                     m_Client = null;
                     OnClientDisconnected(m_EndPoint);
 
-                    m_ListenThread = new Thread(Listen) {IsBackground = true, Name = "Listen"};
+                    m_ListenThread = new Thread(Listen) { IsBackground = true, Name = "Listen" };
                     m_ListenThread.Start();
                 }
         }

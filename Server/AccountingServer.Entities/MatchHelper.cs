@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AccountingServer.Entities
 {
     /// <summary>
-    /// 判断实体是否符合过滤器
+    ///     判断实体是否符合过滤器
     /// </summary>
     public static class MatchHelper
     {
         /// <summary>
-        /// 判断细目是否符合过滤器
+        ///     判断细目是否符合过滤器
         /// </summary>
         /// <param name="voucherDetail">细目</param>
         /// <param name="filter">过滤器</param>
@@ -29,7 +25,6 @@ namespace AccountingServer.Entities
                 if (filter.SubTitle != voucherDetail.SubTitle)
                     return false;
             if (filter.Content != null)
-            {
                 if (filter.Content == String.Empty)
                 {
                     if (!String.IsNullOrEmpty(voucherDetail.Content))
@@ -37,12 +32,10 @@ namespace AccountingServer.Entities
                 }
                 else if (filter.Content != voucherDetail.Content)
                     return false;
-            }
             if (filter.Fund != null)
                 if (filter.Fund != voucherDetail.Fund)
                     return false;
             if (filter.Remark != null)
-            {
                 if (filter.Remark == String.Empty)
                 {
                     if (!String.IsNullOrEmpty(voucherDetail.Remark))
@@ -50,7 +43,6 @@ namespace AccountingServer.Entities
                 }
                 else if (filter.Remark != voucherDetail.Remark)
                     return false;
-            }
             return true;
         }
     }

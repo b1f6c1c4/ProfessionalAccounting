@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -10,28 +9,29 @@ using AccountingServer.Entities;
 namespace AccountingServer.BLL
 {
     /// <summary>
-    /// 基本会计业务处理类
+    ///     基本会计业务处理类
     /// </summary>
     public class Accountant
     {
         /// <summary>
-        /// 本年利润
+        ///     本年利润
         /// </summary>
         public const int FullYearProfit = 4103;
+
         /// <summary>
-        /// 费用
+        ///     费用
         /// </summary>
         public const int Cost = 5000;
 
         /// <summary>
-        /// 数据库访问
+        ///     数据库访问
         /// </summary>
         private IDbHelper m_Db;
 
         //private IDbHelper m_OldDb;
 
         /// <summary>
-        /// 连接数据库
+        ///     连接数据库
         /// </summary>
         /// <param name="un">用户名</param>
         /// <param name="pw">密码</param>
@@ -43,7 +43,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 断开数据库连接
+        ///     断开数据库连接
         /// </summary>
         public void Disconnect()
         {
@@ -55,7 +55,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 返回编号对应的会计科目名称
+        ///     返回编号对应的会计科目名称
         /// </summary>
         /// <param name="title">一级科目编号</param>
         /// <param name="subtitle">二级科目编号</param>
@@ -67,7 +67,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 返回细目对应的会计科目名称
+        ///     返回细目对应的会计科目名称
         /// </summary>
         /// <param name="detail">细目</param>
         /// <returns>名称</returns>
@@ -79,7 +79,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 返回余额对应的会计科目名称
+        ///     返回余额对应的会计科目名称
         /// </summary>
         /// <param name="balance">余额</param>
         /// <returns>名称</returns>
@@ -91,7 +91,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 检查记账凭证借贷方数额是否相等
+        ///     检查记账凭证借贷方数额是否相等
         /// </summary>
         /// <param name="entity">记账凭证</param>
         /// <returns>借方比贷方多出数</returns>
@@ -102,7 +102,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 按日期、科目、内容计算余额
+        ///     按日期、科目、内容计算余额
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>余额，借方为正，贷方为负</returns>
@@ -122,7 +122,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 按科目、内容计算余额
+        ///     按科目、内容计算余额
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>余额，借方为正，贷方为负</returns>
@@ -139,7 +139,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 按科目、内容计算每日金额
+        ///     按科目、内容计算每日金额
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>每日金额，借方为正，贷方为负</returns>
@@ -169,7 +169,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 比较两日期（可以为无日期）的早晚
+        ///     比较两日期（可以为无日期）的早晚
         /// </summary>
         /// <param name="b1Date">第一个日期</param>
         /// <param name="b2Date">第二个日期</param>
@@ -187,13 +187,14 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 累加每日金额得到每日余额
+        ///     累加每日金额得到每日余额
         /// </summary>
         /// <param name="startDate">开始累加的日期</param>
         /// <param name="endDate">停止累加的日期</param>
         /// <param name="resx">每日金额</param>
         /// <returns>每日余额</returns>
-        private static IEnumerable<Balance> ProcessDailyBalance(DateTime startDate, DateTime endDate, IReadOnlyList<Balance> resx)
+        private static IEnumerable<Balance> ProcessDailyBalance(DateTime startDate, DateTime endDate,
+                                                                IReadOnlyList<Balance> resx)
         {
             var id = 0;
             var fund = 0D;
@@ -215,7 +216,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 按科目、内容计算每日余额
+        ///     按科目、内容计算每日余额
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <param name="startDate">开始日期</param>
@@ -251,7 +252,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 按科目、内容计算每日总余额
+        ///     按科目、内容计算每日总余额
         /// </summary>
         /// <param name="filters">过滤器</param>
         /// <param name="startDate">开始日期</param>
@@ -292,7 +293,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 按日期、科目计算各内容金额
+        ///     按日期、科目计算各内容金额
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>各内容每日金额，借方为正，贷方为负</returns>
@@ -319,7 +320,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 按科目计算各内容余额
+        ///     按科目计算各内容余额
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>各内容余额，借方为正，贷方为负</returns>
@@ -338,48 +339,63 @@ namespace AccountingServer.BLL
                                         Fund = ds.Sum(d => d.Fund.Value)
                                     });
         }
-        
+
         /// <summary>
-        /// 按过滤器查找记账凭证并记数
+        ///     按过滤器查找记账凭证并记数
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>匹配过滤器的记账凭证总数</returns>
-        public long SelectVouchersCount(Voucher filter) { return m_Db.SelectVouchersCount(filter); }
+        public long SelectVouchersCount(Voucher filter)
+        {
+            return m_Db.SelectVouchersCount(filter);
+        }
 
         /// <summary>
-        /// 按编号查找记账凭证
+        ///     按编号查找记账凭证
         /// </summary>
         /// <param name="id">编号</param>
         /// <returns>记账凭证，如果没有则为null</returns>
-        public Voucher SelectVoucher(string id) { return m_Db.SelectVoucher(id); }
+        public Voucher SelectVoucher(string id)
+        {
+            return m_Db.SelectVoucher(id);
+        }
 
         /// <summary>
-        /// 按过滤器查找记账凭证
+        ///     按过滤器查找记账凭证
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>匹配过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> SelectVouchers(Voucher filter) { return m_Db.SelectVouchers(filter); }
+        public IEnumerable<Voucher> SelectVouchers(Voucher filter)
+        {
+            return m_Db.SelectVouchers(filter);
+        }
 
         /// <summary>
-        /// 按过滤器和日期查找记账凭证
-        /// <para>若<paramref name="startDate"/>和<paramref name="endDate"/>均为<c>null</c>，则返回所有无日期的记账凭证</para>
+        ///     按过滤器和日期查找记账凭证
+        ///     <para>若<paramref name="startDate" />和<paramref name="endDate" />均为<c>null</c>，则返回所有无日期的记账凭证</para>
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
         /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
         /// <returns>指定日期匹配过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> SelectVouchers(Voucher filter, DateTime? startDate, DateTime? endDate) { return m_Db.SelectVouchers(filter, startDate, endDate); }
+        public IEnumerable<Voucher> SelectVouchers(Voucher filter, DateTime? startDate, DateTime? endDate)
+        {
+            return m_Db.SelectVouchers(filter, startDate, endDate);
+        }
 
         /// <summary>
-        /// 添加或替换记账凭证
-        /// <para>不能改变记账凭证的编号</para>
+        ///     添加或替换记账凭证
+        ///     <para>不能改变记账凭证的编号</para>
         /// </summary>
         /// <param name="entity">新记账凭证</param>
         /// <returns>是否成功</returns>
-        public bool UpdateVoucher(Voucher entity) { return m_Db.UpdateVoucher(entity); }
+        public bool UpdateVoucher(Voucher entity)
+        {
+            return m_Db.UpdateVoucher(entity);
+        }
 
         /// <summary>
-        /// 按细目过滤器查找记账凭证
+        ///     按细目过滤器查找记账凭证
         /// </summary>
         /// <param name="filter">细目过滤器</param>
         /// <returns>任一细目匹配过滤器的记账凭证</returns>
@@ -389,48 +405,56 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 按过滤器和细目过滤器查找记账凭证
-        /// <para>若<paramref name="startDate"/>和<paramref name="endDate"/>均为<c>null</c>，则返回所有无日期的记账凭证</para>
+        ///     按过滤器和细目过滤器查找记账凭证
+        ///     <para>若<paramref name="startDate" />和<paramref name="endDate" />均为<c>null</c>，则返回所有无日期的记账凭证</para>
         /// </summary>
         /// <param name="filter">细目过滤器</param>
         /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
         /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
         /// <returns>指定日期任一细目匹配过滤器的记账凭证</returns>
         public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter,
-                                                              DateTime? startDate, DateTime? endDate)
+                                                             DateTime? startDate, DateTime? endDate)
         {
             return m_Db.SelectVouchersWithDetail(filter, startDate, endDate);
         }
 
         /// <summary>
-        /// 按细目过滤器查找细目
+        ///     按细目过滤器查找细目
         /// </summary>
         /// <param name="filter">细目过滤器</param>
         /// <returns>匹配过滤器的细目</returns>
-        public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter) { return m_Db.SelectDetails(filter); }
+        public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter)
+        {
+            return m_Db.SelectDetails(filter);
+        }
+
         /// <summary>
-        /// 按过滤器和细目过滤器查找细目
-        /// <para>若<paramref name="startDate"/>和<paramref name="endDate"/>均为<c>null</c>，则返回所有无日期的记账凭证</para>
+        ///     按过滤器和细目过滤器查找细目
+        ///     <para>若<paramref name="startDate" />和<paramref name="endDate" />均为<c>null</c>，则返回所有无日期的记账凭证</para>
         /// </summary>
         /// <param name="filter">细目过滤器</param>
         /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
         /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
         /// <returns>指定日期匹配过滤器的细目</returns>
         public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter,
-                                                              DateTime? startDate, DateTime? endDate)
+                                                        DateTime? startDate, DateTime? endDate)
         {
             return m_Db.SelectDetails(filter, startDate, endDate);
         }
+
         /// <summary>
-        /// 按细目过滤器查找细目并记数
+        ///     按细目过滤器查找细目并记数
         /// </summary>
         /// <param name="filter">细目过滤器</param>
         /// <returns>匹配过滤器的细目总数</returns>
-        public long SelectDetailsCount(VoucherDetail filter) { return m_Db.SelectDetailsCount(filter); }
-        
+        public long SelectDetailsCount(VoucherDetail filter)
+        {
+            return m_Db.SelectDetailsCount(filter);
+        }
+
         /// <summary>
-        /// 添加记账凭证
-        /// <para>若<paramref name="entity"/>没有指定编号，则添加成功后会自动给<paramref name="entity"/>添加编号</para>
+        ///     添加记账凭证
+        ///     <para>若<paramref name="entity" />没有指定编号，则添加成功后会自动给<paramref name="entity" />添加编号</para>
         /// </summary>
         /// <param name="entity">记账凭证</param>
         /// <returns>是否成功</returns>
@@ -440,7 +464,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 按过滤器删除记账凭证
+        ///     按过滤器删除记账凭证
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>已删除的记账凭证总数</returns>
@@ -450,11 +474,14 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 按过滤器删除细目
+        ///     按过滤器删除细目
         /// </summary>
         /// <param name="filter">细目过滤器</param>
         /// <returns>已删除的细目总数</returns>
-        public int DeleteDetails(VoucherDetail filter) { return m_Db.DeleteDetails(filter); }
+        public int DeleteDetails(VoucherDetail filter)
+        {
+            return m_Db.DeleteDetails(filter);
+        }
 
         //public bool InsertFixedAsset(DbFixedAsset entity) { return m_Db.InsertFixedAsset(entity); }
         //public int DeleteFixedAssets(DbFixedAsset entity) { return m_Db.DeleteFixedAssets(entity); }
@@ -467,7 +494,7 @@ namespace AccountingServer.BLL
         //public int DeleteTitles(DbTitle entity) { return m_Db.DeleteTitles(entity); }
 
         /// <summary>
-        /// 合并记账凭证上相同的细目
+        ///     合并记账凭证上相同的细目
         /// </summary>
         /// <param name="voucher">记账凭证</param>
         public void Shrink(Voucher voucher)
@@ -488,7 +515,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 折旧
+        ///     折旧
         /// </summary>
         public void Depreciate()
         {
@@ -496,7 +523,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 期末结转
+        ///     期末结转
         /// </summary>
         public void Carry()
         {
@@ -504,7 +531,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        /// 摊销
+        ///     摊销
         /// </summary>
         public void Amortization()
         {

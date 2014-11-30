@@ -4,101 +4,116 @@ using System.Collections.Generic;
 namespace AccountingServer.Entities
 {
     /// <summary>
-    /// 记账凭证的类别
+    ///     记账凭证的类别
     /// </summary>
     public enum VoucherType
     {
         /// <summary>
-        /// 普通记账凭证
+        ///     普通记账凭证
         /// </summary>
         Ordinal,
+
         /// <summary>
-        /// 期末结转记账凭证
+        ///     期末结转记账凭证
         /// </summary>
         Carry,
+
         /// <summary>
-        /// 摊销记账凭证
+        ///     摊销记账凭证
         /// </summary>
         Amortization,
+
         /// <summary>
-        /// 折旧记账凭证
+        ///     折旧记账凭证
         /// </summary>
         Depreciation,
+
         /// <summary>
-        /// 减值记账凭证
+        ///     减值记账凭证
         /// </summary>
         Devalue,
+
         /// <summary>
-        /// 年度结转记账凭证
+        ///     年度结转记账凭证
         /// </summary>
         AnnualCarry,
+
         /// <summary>
-        /// 不准确记账凭证
+        ///     不准确记账凭证
         /// </summary>
         Uncertain
     }
-    
+
     /// <summary>
-    /// 记账凭证
+    ///     记账凭证
     /// </summary>
     public class Voucher
     {
         /// <summary>
-        /// 编号
+        ///     编号
         /// </summary>
         public string ID { get; set; }
+
         /// <summary>
-        /// 日期，若为<c>null</c>表示无日期
+        ///     日期，若为<c>null</c>表示无日期
         /// </summary>
         public DateTime? Date { get; set; }
+
         /// <summary>
-        /// 备注
+        ///     备注
         /// </summary>
         public string Remark { get; set; }
+
         /// <summary>
-        /// 细目
+        ///     细目
         /// </summary>
         public VoucherDetail[] Details { get; set; }
+
         /// <summary>
-        /// 类别
+        ///     类别
         /// </summary>
         public VoucherType? Type { get; set; }
     }
 
     /// <summary>
-    /// 细目
+    ///     细目
     /// </summary>
     public class VoucherDetail
     {
         /// <summary>
-        /// 所属记账凭证编号
+        ///     所属记账凭证编号
         /// </summary>
         public string Item { get; set; }
+
         /// <summary>
-        /// 会计科目一级科目代码
+        ///     会计科目一级科目代码
         /// </summary>
         public int? Title { get; set; }
+
         /// <summary>
-        /// 会计科目二级科目代码，若为<c>null</c>表示无二级科目
+        ///     会计科目二级科目代码，若为<c>null</c>表示无二级科目
         /// </summary>
         public int? SubTitle { get; set; }
+
         /// <summary>
-        /// 内容
+        ///     内容
         /// </summary>
         public string Content { get; set; }
+
         /// <summary>
-        /// 金额
+        ///     金额
         /// </summary>
         public double? Fund { get; set; }
+
         /// <summary>
-        /// 备注
+        ///     备注
         /// </summary>
         public string Remark { get; set; }
     }
 
     //public interface IAssetItem
     //{
-        
+
     //}
 
     //public struct Depreciate : IAssetItem
@@ -125,28 +140,32 @@ namespace AccountingServer.Entities
     //}
 
     /// <summary>
-    /// 余额表项目
+    ///     余额表项目
     /// </summary>
     public class Balance
     {
         /// <summary>
-        /// 日期
+        ///     日期
         /// </summary>
         public DateTime? Date { get; set; }
+
         /// <summary>
-        /// 一级科目编号
+        ///     一级科目编号
         /// </summary>
         public int? Title { get; set; }
+
         /// <summary>
-        /// 二级科目编号
+        ///     二级科目编号
         /// </summary>
         public int? SubTitle { get; set; }
+
         /// <summary>
-        /// 内容
+        ///     内容
         /// </summary>
         public string Content { get; set; }
+
         /// <summary>
-        /// 余额
+        ///     余额
         /// </summary>
         public double Fund { get; set; }
     }
@@ -166,6 +185,7 @@ namespace AccountingServer.Entities
             return t ^ (s << 3) ^ c;
         }
     }
+
     public class BalanceComparer : Comparer<Balance>
     {
         public override int Compare(Balance x, Balance y)

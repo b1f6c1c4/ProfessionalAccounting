@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -21,7 +22,7 @@ namespace AccountingServer.BLL
             typeof(MobilePatterns).GetMethods(BindingFlags.Public | BindingFlags.Static);
 
         public void Connect(Accountant helper, Action<IPEndPoint> connected, Action<string> received,
-                                   Action<IPEndPoint> disconnected)
+                            Action<IPEndPoint> disconnected)
         {
             m_Accountant = helper;
             m_Tcp = new TcpHelper();
@@ -58,7 +59,7 @@ namespace AccountingServer.BLL
             m_Tcp.ClientDisconnected += ep => disconnected(ep);
         }
 
-        public System.Drawing.Bitmap GetQRCode(int w,int h)
+        public Bitmap GetQRCode(int w, int h)
         {
             var str = m_Tcp.IPEndPointString;
 
@@ -123,38 +124,39 @@ namespace AccountingServer.BLL
                 {
                     var filter = new VoucherDetail { Title = title };
                     var balances = m_Accountant.SelectVouchersWithDetail(filter)
-                                            .SelectMany(
-                                                        v =>
-                                                        v.Details.Select(
-                                                                         d =>
-                                                                         new Tuple<DateTime?, VoucherDetail>(v.Date, d)))
-                                            .Where(d => d.Item2.IsMatch(filter))
-                                            .GroupBy(
-                                                     d => d.Item2.Content,
-                                                     (c, ds) =>
-                                                     {
-                                                         var lst = ds as IList<Tuple<DateTime?, VoucherDetail>> ??
-                                                                   ds.ToList();
-                                                         var max =
-                                                             lst.Max(
-                                                                     d =>
-                                                                     d.Item1.HasValue
-                                                                         ? d.Item1.Value.Ticks
-                                                                         : (long?)null);
-                                                         return new Balance
-                                                                    {
-                                                                        Date =
-                                                                            max.HasValue
-                                                                                ? new DateTime(max.Value)
-                                                                                : (DateTime?)null,
-                                                                        Title = filter.Title,
-                                                                        SubTitle = filter.SubTitle,
-                                                                        Content = c,
-                                                                        Fund = lst.Sum(d => d.Item2.Fund).Value
-                                                                    };
-                                                     });
+                                               .SelectMany(
+                                                           v =>
+                                                           v.Details.Select(
+                                                                            d =>
+                                                                            new Tuple<DateTime?, VoucherDetail>(
+                                                                                v.Date,
+                                                                                d)))
+                                               .Where(d => d.Item2.IsMatch(filter))
+                                               .GroupBy(
+                                                        d => d.Item2.Content,
+                                                        (c, ds) =>
+                                                        {
+                                                            var lst = ds as IList<Tuple<DateTime?, VoucherDetail>> ??
+                                                                      ds.ToList();
+                                                            var max =
+                                                                lst.Max(
+                                                                        d =>
+                                                                        d.Item1.HasValue
+                                                                            ? d.Item1.Value.Ticks
+                                                                            : (long?)null);
+                                                            return new Balance
+                                                                       {
+                                                                           Date =
+                                                                               max.HasValue
+                                                                                   ? new DateTime(max.Value)
+                                                                                   : (DateTime?)null,
+                                                                           Title = filter.Title,
+                                                                           SubTitle = filter.SubTitle,
+                                                                           Content = c,
+                                                                           Fund = lst.Sum(d => d.Item2.Fund).Value
+                                                                       };
+                                                        });
                     foreach (var balance in balances)
-                    {
                         m_Tcp.Write(
                                     String.Format(
                                                   "{0}={1}={2}",
@@ -165,7 +167,6 @@ namespace AccountingServer.BLL
                                                                 balance.Date.AsDate()),
                                                   balance.Content,
                                                   balance.Content));
-                    }
                 };
             actionGroup("预付", 1123, true);
             actionGroup("应付", 2202, false);
@@ -180,12 +181,12 @@ namespace AccountingServer.BLL
 
         private void ParseData(string str)
         {
-            var sp = str.Split(new[] {','}, 2);
+            var sp = str.Split(new[] { ',' }, 2);
             foreach (var pattern in from pattern in Patterns
                                     where GetPatternAttr(pattern).Name == sp[0]
                                     select pattern)
             {
-                pattern.Invoke(null, new object[] {sp[1], m_Accountant});
+                pattern.Invoke(null, new object[] { sp[1], m_Accountant });
                 break;
             }
         }

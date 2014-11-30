@@ -10,51 +10,17 @@ namespace AccountingServer.DAL.UnitTest
     {
         private readonly MongoDbHelper m_MongoDb;
 
-        public MongoDbTest()
-        {
-            m_MongoDb = new MongoDbHelper();
-        }
+        public MongoDbTest() { m_MongoDb = new MongoDbHelper(); }
 
         [TestMethod]
         public void Vouchers()
         {
             var voucher1 = new Voucher
-            {
-                Date = DateTime.Now,
-                Type = VoucherType.Ordinal,
-                Details =
-                    new[]
-                                          {
-                                              new VoucherDetail
-                                                  {
-                                                      Title = 1001,
-                                                      Fund = -48
-                                                  },
-                                              new VoucherDetail
-                                                  {
-                                                      Title = 6602,
-                                                      SubTitle = 3,
-                                                      Fund = 48,
-                                                      Content = "庆丰包子铺"
-                                                  }
-                                          }
-            };
-            m_MongoDb.DeleteVouchers(new Voucher());
-            m_MongoDb.InsertVoucher(voucher1);
-            var res = m_MongoDb.SelectVouchers(new Voucher()).ToArray();
-            Assert.AreEqual(1, res.Length);
-            Assert.AreEqual(voucher1.Date.Value.Ticks, res[0].Date.Value.Ticks, 100000);
-        }
-
-        [TestMethod]
-        public void VoucherDetails()
-        {
-            var voucher1 = new Voucher
-            {
-                Date = DateTime.Now,
-                Type = VoucherType.Ordinal,
-                Details =
-                    new[]
+                               {
+                                   Date = DateTime.Now,
+                                   Type = VoucherType.Ordinal,
+                                   Details =
+                                       new[]
                                            {
                                                new VoucherDetail
                                                    {
@@ -69,7 +35,38 @@ namespace AccountingServer.DAL.UnitTest
                                                        Content = "庆丰包子铺"
                                                    }
                                            }
-            };
+                               };
+            m_MongoDb.DeleteVouchers(new Voucher());
+            m_MongoDb.InsertVoucher(voucher1);
+            var res = m_MongoDb.SelectVouchers(new Voucher()).ToArray();
+            Assert.AreEqual(1, res.Length);
+            Assert.AreEqual(voucher1.Date.Value.Ticks, res[0].Date.Value.Ticks, 100000);
+        }
+
+        [TestMethod]
+        public void VoucherDetails()
+        {
+            var voucher1 = new Voucher
+                               {
+                                   Date = DateTime.Now,
+                                   Type = VoucherType.Ordinal,
+                                   Details =
+                                       new[]
+                                           {
+                                               new VoucherDetail
+                                                   {
+                                                       Title = 1001,
+                                                       Fund = -48
+                                                   },
+                                               new VoucherDetail
+                                                   {
+                                                       Title = 6602,
+                                                       SubTitle = 3,
+                                                       Fund = 48,
+                                                       Content = "庆丰包子铺"
+                                                   }
+                                           }
+                               };
             var voucher2 = new Voucher
                                {
                                    Date = DateTime.Now,
