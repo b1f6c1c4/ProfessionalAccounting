@@ -166,4 +166,52 @@ namespace AccountingServer.Entities
             return t ^ (s << 3) ^ c;
         }
     }
+    public class BalanceComparer : Comparer<Balance>
+    {
+        public override int Compare(Balance x, Balance y)
+        {
+            if (x != null &&
+                y != null)
+            {
+                if (x.Title.HasValue &&
+                    y.Title.HasValue)
+                {
+                    if (x.Title < y.Title)
+                        return -1;
+                    if (x.Title > y.Title)
+                        return 1;
+                }
+                else if (x.Title.HasValue)
+                    return 1;
+                else if (y.Title.HasValue)
+                    return -1;
+
+                if (x.SubTitle.HasValue &&
+                    y.SubTitle.HasValue)
+                {
+                    if (x.SubTitle < y.SubTitle)
+                        return -1;
+                    if (x.SubTitle > y.SubTitle)
+                        return 1;
+                }
+                else if (x.SubTitle.HasValue)
+                    return 1;
+                else if (y.SubTitle.HasValue)
+                    return -1;
+
+                if (x.Content != null &&
+                    y.Content != null)
+                    return String.Compare(x.Content, y.Content, StringComparison.Ordinal);
+                if (x.Content != null)
+                    return 1;
+                if (y.Content != null)
+                    return -1;
+            }
+            if (x != null)
+                return -1;
+            if (y != null)
+                return 1;
+            return 0;
+        }
+    }
 }
