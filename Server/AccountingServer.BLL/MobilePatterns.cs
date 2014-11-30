@@ -4,28 +4,33 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.BLL
 {
+    /// <summary>
+    /// 模板特性
+    /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
     public class PatternAttribute : Attribute
     {
+        /// <summary>
+        /// 静态图形界面
+        /// </summary>
         private string m_UI;
 
         /// <summary>
-        ///     显示在添加页的名称
+        /// 显示在添加页的名称
         /// </summary>
         /// <returns>名称</returns>
         public string Name { get; set; }
 
         /// <summary>
-        ///     显示在记录页的名称
+        /// 显示在记录页的名称
         /// </summary>
         /// <returns>格式化字符串</returns>
         public string TextPattern { get; set; }
 
         /// <summary>
-        ///     序列化的UI
-        /// </summary>
-        /// <returns>
-        ///     逗号分隔的列表：
+        /// 获取图形界面
+        /// <para>
+        ///     图形界面序列化为一个逗号分隔的列表，每一项对应一个单元格，类型有：
         ///     <list type="bullet">
         ///         <item>
         ///             <description>E[$1;$2;$3;$4]：文本输入，标题$1，提示$2，默认$3，类型$4（空或者NP）</description>
@@ -43,14 +48,27 @@ namespace AccountingServer.BLL
         ///             <description>Date[$1]：日期选择，标题$1</description>
         ///         </item>
         ///     </list>
-        /// </returns>
+        /// </para>
+        /// </summary>
+        /// <returns>序列化的图形界面</returns>
         public string UI { get { return m_UI ?? UIFunc(); } set { m_UI = value; } }
 
-        public Func<string> UIFunc { private get; set; }
+        /// <summary>
+        /// 动态图形界面
+        /// </summary>
+        private Func<string> UIFunc { get; set; }
     }
 
-    public static class Patterns
+    /// <summary>
+    /// 模板
+    /// </summary>
+    public static class MobilePatterns
     {
+        /// <summary>
+        /// 食堂
+        /// </summary>
+        /// <param name="result">序列化的数据</param>
+        /// <param name="helper">会计业务处理类</param>
         [Pattern(Name = "食堂",
             TextPattern = "{0} {1}元学生卡 {2}食堂",
             UI = "Date[日期],E[金额;人民币元;;NP],O[食堂;观畴园;紫荆园;桃李园;清青比萨;清青快餐;清青休闲;清青时代;玉树园;闻馨园;听涛园;丁香园;芝兰园]")]
@@ -84,6 +102,11 @@ namespace AccountingServer.BLL
                                      });
         }
 
+        /// <summary>
+        /// 各种福利费
+        /// </summary>
+        /// <param name="result">序列化的数据</param>
+        /// <param name="helper">会计业务处理类</param>
         [Pattern(Name = "福利", TextPattern = "{0} {1}元{2} {3}福利{4}",
             UI = "Date[日期],E[付款金额;人民币元;2.4;NP],O[支付;6439;7064;现金],E[实际金额;人民币元;3;NP],E[类型;食品/生活用品/理发/...;食品;]")]
         public static void 福利(string result, BHelper helper)
@@ -119,11 +142,15 @@ namespace AccountingServer.BLL
             }
             helper.InsertVoucher(new Voucher { Date = sp[0].AsDate(), Details = dbDetails });
         }
-
-
-        [Pattern(Name = "交易性金融资产收益组合", TextPattern = "{0} 交易性金融资产组合",
+        
+        /// <summary>
+        /// 金融工具
+        /// </summary>
+        /// <param name="result">序列化的数据</param>
+        /// <param name="helper">会计业务处理类</param>
+        [Pattern(Name = "金融工具", TextPattern = "{0} 金融工具",
             UI = "Date[日期],E[广发天天红;人民币元;;NP],E[余额宝;人民币元;;NP],E[中银活期宝;人民币元;;NP],E[中银增利;人民币元;;NP],E[中银优选;人民币元;;NP],E[中银纯债C;人民币元;;NP]")]
-        public static void 交易性金融资产组合(string result, BHelper helper)
+        public static void 金融工具(string result, BHelper helper)
         {
             var sp = result.Split(',');
             var dt = sp[0].AsDate();
@@ -188,7 +215,12 @@ namespace AccountingServer.BLL
                                          });
             }
         }
-        
+
+        /// <summary>
+        /// 洗澡、洗衣、水费
+        /// </summary>
+        /// <param name="result">序列化的数据</param>
+        /// <param name="helper">会计业务处理类</param>
         [Pattern(Name = "洗澡/洗衣/水费", TextPattern = "{0} {1}元{2}", UI = "Date[日期],E[金额;人民币元;2.5;NP],O[项目;洗澡;洗衣;水费]")]
         public static void 洗澡洗衣用水(string result, BHelper helper)
         {
@@ -251,6 +283,11 @@ namespace AccountingServer.BLL
                                      });
         }
 
+        /// <summary>
+        /// 交通费
+        /// </summary>
+        /// <param name="result">序列化的数据</param>
+        /// <param name="helper">会计业务处理类</param>
         [Pattern(Name = "出行", TextPattern = "{0} {1}元{2} 出行{3}",
             UI = "Date[日期],E[金额;人民币元;;NP],O[支付;7064;1476;6439;现金],E[工具;.+路/地铁/出租车;地铁;]")]
         public static void 出行(string result, BHelper helper)
@@ -294,6 +331,11 @@ namespace AccountingServer.BLL
                                      });
         }
 
+        /// <summary>
+        /// 餐费
+        /// </summary>
+        /// <param name="result">序列化的数据</param>
+        /// <param name="helper">会计业务处理类</param>
         [Pattern(Name = "餐饮", TextPattern = "{0} {1}元{2} 餐饮{3}", UI = "Date[日期],E[金额;人民币元;;NP],O[支付;6439;现金],E[名称;;;]")]
         public static void 餐饮(string result, BHelper helper)
         {
@@ -330,7 +372,11 @@ namespace AccountingServer.BLL
                                      });
         }
 
-
+        /// <summary>
+        /// 借记卡存取现金
+        /// </summary>
+        /// <param name="result">序列化的数据</param>
+        /// <param name="helper">会计业务处理类</param>
         [Pattern(Name = "存取现金",
             TextPattern = "{0} {1}元{2} 现金",
             UI = "Date[日期],E[金额;人民币元；支取为正;;NP],O[银行卡;5184;3593;9767]")]
@@ -357,6 +403,11 @@ namespace AccountingServer.BLL
                                      });
         }
 
+        /// <summary>
+        /// 上级拨入资金
+        /// </summary>
+        /// <param name="result">序列化的数据</param>
+        /// <param name="helper">会计业务处理类</param>
         [Pattern(Name = "上级拨入", TextPattern = "{0} {1}元上级拨入 {2}",
             UI = "Date[日期],E[金额;人民币元;;NP],O[方式;5184;3593;9767;现金;6439]")]
         public static void 上级拨入(string result, BHelper helper)
@@ -403,6 +454,11 @@ namespace AccountingServer.BLL
                                      });
         }
 
+        /// <summary>
+        /// 自定义
+        /// </summary>
+        /// <param name="result">序列化的数据</param>
+        /// <param name="helper">会计业务处理类</param>
         [Pattern(Name = "（自定义）", TextPattern = "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9}",
             UI = "Date[日期]" +
                  ",E[科目;科目代码;;NP],E[备注;或三级科目;;],E[金额;人民币元;;NP]" +
@@ -428,8 +484,13 @@ namespace AccountingServer.BLL
             helper.InsertVoucher(new Voucher { Date = sp[0].AsDate(), Details = dbDetails.ToArray() });
         }
 
-        [Pattern(Name = "（周末）学费摊销", TextPattern = "{0} 108.6957元学费", UI = "Date[日期]")]
-        public static void 学费(string result, BHelper helper)
+        /// <summary>
+        /// 期末摊销
+        /// </summary>
+        /// <param name="result">序列化的数据</param>
+        /// <param name="helper">会计业务处理类</param>
+        [Pattern(Name = "（期末摊销）", TextPattern = "{0} 期末摊销", UI = "Date[日期]")]
+        public static void 期末摊销(string result, BHelper helper)
         {
             helper.InsertVoucher(
                                  new Voucher
@@ -454,13 +515,23 @@ namespace AccountingServer.BLL
                                      });
         }
 
-        [Pattern(Name = "（周末）折旧与摊销", TextPattern = "折旧与摊销", UI = "")]
+        /// <summary>
+        /// 折旧
+        /// </summary>
+        /// <param name="result">序列化的数据</param>
+        /// <param name="helper">会计业务处理类</param>
+        [Pattern(Name = "（期末折旧）", TextPattern = "折旧", UI = "")]
         public static void 折旧(string result, BHelper helper)
         {
             helper.Depreciate();
         }
 
-        [Pattern(Name = "（周末）结转", TextPattern = "结转", UI = "")]
+        /// <summary>
+        /// 结转
+        /// </summary>
+        /// <param name="result">序列化的数据</param>
+        /// <param name="helper">会计业务处理类</param>
+        [Pattern(Name = "（期末结转）", TextPattern = "结转", UI = "")]
         public static void 结转(string result, BHelper helper)
         {
             helper.Carry();

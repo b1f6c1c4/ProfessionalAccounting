@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.DAL;
@@ -99,7 +100,16 @@ namespace AccountingServer.BLL
                                    });
         }
 
-        //public bool IsCarry(Voucher entity) { return m_Db.SelectDetails(entity).Any(d => d.Title == FullYearProfit); }
+        /// <summary>
+        /// 返回编号对应的会计科目名称
+        /// </summary>
+        /// <param name="title">一级科目编号</param>
+        /// <param name="subtitle">二级科目编号</param>
+        /// <returns>名称</returns>
+        public static string GetTitleName(int? title, int? subtitle = null)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// 检查记账凭证借贷方数额是否相等
@@ -561,6 +571,11 @@ namespace AccountingServer.BLL
         /// 摊销
         /// </summary>
         public void Amortization()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Balance> GetBalancesAcrossContent(Balance filter, DateTime? startDate, DateTime? endDate)
         {
             throw new NotImplementedException();
         }
