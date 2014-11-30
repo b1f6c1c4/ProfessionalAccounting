@@ -18,7 +18,9 @@ namespace AccountingServer
 {
     public partial class frmMain : Form
     {
-        private readonly BHelper m_BHelper;
+        private readonly Accountant m_Accountant;
+        private MobileComm m_Mobile;
+
         private DateTime startDate;
         private DateTime endDate;
         private bool m_Toggle21;
@@ -44,10 +46,13 @@ namespace AccountingServer
             SetProcessDPIAware();
             WindowState = FormWindowState.Maximized;
 
-            m_BHelper = new BHelper();
-            m_BHelper.Connect("b1f6c1c4", "142857");
-            MainBLL.Connect(
-                            m_BHelper,
+            m_Accountant = new Accountant();
+            m_Accountant.Connect("b1f6c1c4", "142857");
+
+            m_Mobile = new MobileComm();
+
+            m_Mobile.Connect(
+                            m_Accountant,
                             ep => SetCaption(String.Format("AccountingServer-{0}", ep.ToString())),
                             ep => { },
                             ep =>
@@ -56,7 +61,7 @@ namespace AccountingServer
                                 MessageBox.Show(String.Format("与{0}的数据传输完毕！", ep.ToString()), @"数据传输");
                             });
 
-            m_Console=new AccountingConsole(m_BHelper);
+            m_Console=new AccountingConsole(m_Accountant);
 
             var curDate = DateTime.Now.Date;
             startDate = new DateTime(curDate.Year, curDate.Month - (curDate.Day >= 20 ? 0 : 1), 19);
@@ -64,12 +69,12 @@ namespace AccountingServer
 
             m_Charts = new AccountingChart[]
                            {
-                               new 投资资产(m_BHelper, startDate, endDate, curDate) ,
-                               new 生活资产(m_BHelper, startDate, endDate, curDate) , 
-                               new 其他资产(m_BHelper, startDate, endDate, curDate) , 
-                               new 生活费用(m_BHelper, startDate, endDate, curDate) , 
-                               new 其他费用(m_BHelper, startDate, endDate, curDate) , 
-                               new 负债(m_BHelper, startDate, endDate, curDate) 
+                               new 投资资产(m_Accountant, startDate, endDate, curDate) ,
+                               new 生活资产(m_Accountant, startDate, endDate, curDate) , 
+                               new 其他资产(m_Accountant, startDate, endDate, curDate) , 
+                               new 生活费用(m_Accountant, startDate, endDate, curDate) , 
+                               new 其他费用(m_Accountant, startDate, endDate, curDate) , 
+                               new 负债(m_Accountant, startDate, endDate, curDate) 
                            };
 
             chart1.ChartAreas.SuspendUpdates();
@@ -105,7 +110,7 @@ namespace AccountingServer
                     break;
                 case Keys.F2:
                     {
-                        var qrCode = MainBLL.GetQRCode(pictureBox1.Width / 8, pictureBox1.Height / 8);
+                        var qrCode = m_Mobile.GetQRCode(pictureBox1.Width / 8, pictureBox1.Height / 8);
                         var bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
                         var g = Graphics.FromImage(bitmap);
                         g.InterpolationMode = InterpolationMode.NearestNeighbor;
@@ -121,6 +126,7 @@ namespace AccountingServer
                     break;
                 case Keys.F3:
                     tabControl1.SelectTab(tabPage3);
+                    textBox1.AppendText(m_Console.PresentVoucher(m_Console.ParseVoucherQuery("..").FirstOrDefault()));
                     break;
                     //case Keys.T:
                     //    m_Toggle21 ^= true;
@@ -130,7 +136,7 @@ namespace AccountingServer
                     //    THUInfo.FetchFromInfo().ContinueWith(t => THUInfo.Analyze(t.Result));
                     //    break;
                     //case Keys.X:
-                    //    m_BHelper.CopyDb();
+                    //    m_Accountant.CopyDb();
                     //    break;
             }
         }
