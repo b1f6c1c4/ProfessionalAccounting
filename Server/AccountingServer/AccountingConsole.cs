@@ -2,6 +2,7 @@
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
@@ -18,7 +19,90 @@ namespace AccountingServer
 
         public AccountingConsole(Accountant helper) { m_Accountant = helper; }
 
-        public IEnumerable<Voucher> Parse(string s)
+        /// <summary>
+        ///     执行表达式
+        /// </summary>
+        /// <param name="s">表达式</param>
+        /// <returns>执行结果</returns>
+        public string Execute(string s)
+        {
+            s = s.Trim();
+            if (s.EndsWith("`")) //分类汇总
+            {
+                var res = ExecuteQuery(s.Substring(0, s.Length - 1));
+                var tsc = res.SelectMany(v => v.Details)
+                             .GroupBy(
+                                      d =>
+                                      new Balance { Title = d.Title, SubTitle = d.SubTitle, Content = d.Content },
+                                      (b, bs) =>
+                                      new Balance
+                                          {
+                                              Title = b.Title,
+                                              SubTitle = b.SubTitle,
+                                              Content = b.Content,
+                                              Fund = bs.Sum(d => d.Fund.Value)
+                                          },
+                                      new BalanceEqualityComparer()).ToList();
+                var ts = tsc.GroupBy(
+                                     d =>
+                                     new Balance { Title = d.Title, SubTitle = d.SubTitle },
+                                     (b, bs) =>
+                                     new Balance
+                                         {
+                                             Title = b.Title,
+                                             SubTitle = b.SubTitle,
+                                             Fund = bs.Sum(d => d.Fund)
+                                         },
+                                      new BalanceEqualityComparer()).ToList();
+                var t = ts.GroupBy(
+                                    d => d.Title,
+                                    (b, bs) =>
+                                    new Balance
+                                        {
+                                            Title = b,
+                                            Fund = bs.Sum(d => d.Fund)
+                                        },
+                                    EqualityComparer<int?>.Default).ToList();
+
+                var sb = new StringBuilder();
+                foreach (var balanceT in t)
+                {
+                    var copiedT = balanceT;
+                    sb.AppendFormat("{0}-{1}:{2}", copiedT.Title.AsTitle(), Accountant.GetTitleName(copiedT.Title), copiedT.Fund.AsCurrency());
+                    sb.AppendLine();
+                    foreach (var balanceS in ts.Where(sx => sx.Title == copiedT.Title))
+                    {
+                        var copiedS = balanceS;
+                        sb.AppendFormat(
+                                        "  {0}-{1}:{2}",
+                                        copiedS.SubTitle.HasValue ? copiedS.SubTitle.AsSubTitle() : "  ",
+                                        Accountant.GetTitleName(copiedS),
+                                        copiedS.Fund.AsCurrency());
+                        sb.AppendLine();
+                        foreach (var balanceC in tsc.Where(
+                                                          cx => cx.Title == copiedS.Title
+                                                                && cx.SubTitle == copiedS.SubTitle))
+                        {
+                            var copiedC = balanceC;
+                            sb.AppendFormat(
+                                            "        {0}:{1}",
+                                            copiedC.Content,
+                                            copiedC.Fund.AsCurrency());
+                            sb.AppendLine();
+                        }
+                    }
+                }
+                return sb.ToString();
+            }
+            return String.Empty;
+        }
+
+        /// <summary>
+        ///     执行检索表达式
+        /// </summary>
+        /// <param name="s">检索表达式</param>
+        /// <returns>检索结果，若表达式无效则为<c>null</c></returns>
+        public IEnumerable<Voucher> ExecuteQuery(string s)
         {
             var detail = new VoucherDetail();
             s = s.Trim();
@@ -66,14 +150,14 @@ namespace AccountingServer
         }
 
         /// <summary>
-        ///     解析检索表达式
+        ///     解析日期检索表达式
         /// </summary>
-        /// <param name="sOrig">检索表达式</param>
+        /// <param name="sOrig">日期检索表达式</param>
         /// <param name="startDate">开始日期，<c>null</c>表示不限最小日期并且包含无日期</param>
         /// <param name="endDate">截止日期，<c>null</c>表示不限最大日期</param>
         /// <param name="nullable"><paramref name="startDate" />和<paramref name="endDate" />均为<c>null</c>时，表示是否只包含无日期</param>
         /// <returns>是否是合法的检索表达式</returns>
-        public bool ParseVoucherQuery(string sOrig, out DateTime? startDate, out DateTime? endDate, out bool nullable)
+        private static bool ParseVoucherQuery(string sOrig, out DateTime? startDate, out DateTime? endDate, out bool nullable)
         {
             nullable = false;
 
@@ -139,7 +223,7 @@ namespace AccountingServer
             DateTime dt;
             if (DateTime.TryParseExact(s, "yyyyMMdd", null, DateTimeStyles.AssumeLocal, out dt))
             {
-                startDate = DateTime.Now.Date;
+                startDate = dt;
                 endDate = startDate;
                 return true;
             }
@@ -202,30 +286,11 @@ namespace AccountingServer
         }
 
         /// <summary>
-        ///     解析检索表达式并以此检索记账凭证
-        /// </summary>
-        /// <param name="s">检索表达式</param>
-        /// <returns>记账凭证，若检索表达式无效则为<c>null</c></returns>
-        public IEnumerable<Voucher> ParseVoucherQuery(string s)
-        {
-            DateTime? startDate, endDate;
-            bool nullable;
-            if (!ParseVoucherQuery(s, out startDate, out endDate, out nullable))
-                return null;
-
-            if (startDate.HasValue ||
-                endDate.HasValue ||
-                nullable)
-                return m_Accountant.SelectVouchers(null, startDate, endDate);
-            return m_Accountant.SelectVouchers(new Voucher());
-        }
-
-        /// <summary>
         ///     将记账凭证用C#书写
         /// </summary>
         /// <param name="voucher">记账凭证</param>
         /// <returns>C#表达式</returns>
-        public string PresentVoucher(Voucher voucher)
+        private static string PresentVoucher(Voucher voucher)
         {
             var sb = new StringBuilder();
             sb.AppendLine("new Voucher");
@@ -257,12 +322,11 @@ namespace AccountingServer
                 sb.AppendFormat("Title = {0:0}, ", detail.Title);
                 if (detail.SubTitle.HasValue)
                     sb.AppendFormat(
-                                    "SubTitle = {0:00},    // {1}-{2}",
+                                    "SubTitle = {0:00},    // {1}",
                                     detail.SubTitle,
-                                    Accountant.GetTitleName(detail.Title),
                                     Accountant.GetTitleName(detail));
                 else
-                    sb.AppendFormat("                  // {0}", Accountant.GetTitleName(detail.Title));
+                    sb.AppendFormat("                  // {0}", Accountant.GetTitleName(detail));
                 sb.AppendLine();
                 sb.Append("                                                ");
                 if (detail.Content != null)
@@ -286,7 +350,7 @@ namespace AccountingServer
         /// </summary>
         /// <param name="str">C#表达式</param>
         /// <returns>记账凭证</returns>
-        public Voucher ParseVoucher(string str)
+        private static Voucher ParseVoucher(string str)
         {
             var provider = new CSharpCodeProvider();
             var paras = new CompilerParameters

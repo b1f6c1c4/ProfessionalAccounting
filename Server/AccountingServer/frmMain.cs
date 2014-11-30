@@ -116,8 +116,6 @@ namespace AccountingServer
                     break;
                 case Keys.F3:
                     tabControl1.SelectTab(tabPage3);
-                    foreach (var s in m_Console.Parse("T660203 [..]").Select(m_Console.PresentVoucher))
-                    textBox1.AppendText(s);
                     break;
                     //case Keys.T:
                     //    m_Toggle21 ^= true;
@@ -143,12 +141,14 @@ namespace AccountingServer
             if (e.Shift &&
                 e.KeyCode == Keys.Enter)
             {
-                var id = textBox1.GetLineFromCharIndex(textBox1.SelectionStart)-1;
-                var s = textBox1.Lines[id];
-                var sb = new StringBuilder();
-                //foreach (var voucher in )
-                //    PresentVoucher(voucher, sb);
-                textBox1.SelectedText = sb.ToString();
+                var id = textBox1.GetLineFromCharIndex(textBox1.SelectionStart) - 1;
+                textBox1.AppendText(m_Console.Execute(textBox1.Lines[id]));
+                //
+                //var s = textBox1.Lines[id];
+                //var sb = new StringBuilder();
+                ////foreach (var voucher in )
+                ////    PresentVoucher(voucher, sb);
+                //textBox1.SelectedText = sb.ToString();
                 //else
                 //{
                 //    var sb = new StringBuilder();
