@@ -1,35 +1,25 @@
 ﻿using System;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-using System.Windows.Forms.DataVisualization.Charting;
 using AccountingServer.BLL;
 using AccountingServer.Chart;
-using AccountingServer.Entities;
-using Microsoft.CSharp;
 
 namespace AccountingServer
 {
     public partial class frmMain : Form
     {
         private readonly Accountant m_Accountant;
-        private MobileComm m_Mobile;
+        private readonly MobileComm m_Mobile;
 
-        private DateTime startDate;
-        private DateTime endDate;
-        private bool m_Toggle21;
-
-        private AccountingConsole m_Console;
-        private AccountingChart[] m_Charts;
+        private readonly AccountingConsole m_Console;
+        private readonly AccountingChart[] m_Charts;
 
         [DllImport("user32.dll")]
-        internal static extern bool SetProcessDPIAware();
+        private static extern bool SetProcessDPIAware();
 
         //private delegate void SetCaptionDelegate(string str);
         private void SetCaption(string str)
@@ -64,8 +54,8 @@ namespace AccountingServer
             m_Console=new AccountingConsole(m_Accountant);
 
             var curDate = DateTime.Now.Date;
-            startDate = new DateTime(curDate.Year, curDate.Month - (curDate.Day >= 20 ? 0 : 1), 19);
-            endDate = startDate.AddMonths(1);
+            DateTime startDate = new DateTime(curDate.Year, curDate.Month - (curDate.Day >= 20 ? 0 : 1), 19);
+            DateTime endDate = startDate.AddMonths(1);
 
             m_Charts = new AccountingChart[]
                            {
@@ -83,7 +73,7 @@ namespace AccountingServer
             foreach (var chart in m_Charts)
                 chart1.ChartAreas.Add(chart.Setup());
             
-            chart1.Legends[0].Font = new Font("Microsoft YaHei Mono", 28, GraphicsUnit.Pixel);
+            chart1.Legends[0].Font = new Font("Microsoft YaHei Mono", 12, GraphicsUnit.Pixel);
 
             GatherData();
 
@@ -126,7 +116,8 @@ namespace AccountingServer
                     break;
                 case Keys.F3:
                     tabControl1.SelectTab(tabPage3);
-                    textBox1.AppendText(m_Console.PresentVoucher(m_Console.ParseVoucherQuery("..").FirstOrDefault()));
+                    foreach (var s in m_Console.Parse("T660203 [..]").Select(m_Console.PresentVoucher))
+                    textBox1.AppendText(s);
                     break;
                     //case Keys.T:
                     //    m_Toggle21 ^= true;
@@ -177,7 +168,7 @@ namespace AccountingServer
                 textBox1.Font = new Font(
                     "Microsoft YaHei Mono",
                     textBox1.Font.Size +
-                    e.Delta / 12F);
+                    e.Delta / 18F);
         }
     }
 }

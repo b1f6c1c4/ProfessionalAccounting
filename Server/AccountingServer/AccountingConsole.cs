@@ -2,9 +2,7 @@
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using Microsoft.CSharp;
@@ -14,27 +12,75 @@ namespace AccountingServer
     internal class AccountingConsole
     {
         /// <summary>
-        /// 会计业务处理类
+        ///     会计业务处理类
         /// </summary>
         private readonly Accountant m_Accountant;
 
         public AccountingConsole(Accountant helper) { m_Accountant = helper; }
 
+        public IEnumerable<Voucher> Parse(string s)
+        {
+            var detail = new VoucherDetail();
+            s = s.Trim();
+            string dateQ;
+            if (s.StartsWith("T"))
+            {
+                var id1 = s.IndexOf("'", StringComparison.Ordinal);
+                if (id1 > 0)
+                {
+                    var id2 = s.LastIndexOf("'", StringComparison.Ordinal);
+                    detail.Content = s.Substring(id1 + 1, id2 - id1 - 1);
+                    dateQ = s.Substring(id2);
+                }
+                else
+                {
+                    id1 = s.IndexOf("[", StringComparison.Ordinal);
+                    dateQ = s.Substring(id1);
+                }
+                detail.Title = Convert.ToInt32(s.Substring(1, 4));
+
+                if (id1 > 4)
+                    detail.SubTitle = Convert.ToInt32(s.Substring(5, Math.Min(2, id1 - 4)));
+                else
+                    detail.SubTitle = null;
+            }
+            else if (s.StartsWith("'"))
+            {
+                var id2 = s.LastIndexOf("'", StringComparison.Ordinal);
+                detail.Content = s.Substring(1, id2 - 1);
+                dateQ = s.Substring(id2);
+            }
+            else
+                dateQ = s;
+
+            DateTime? startDate, endDate;
+            bool nullable;
+            if (!ParseVoucherQuery(dateQ, out startDate, out endDate, out nullable))
+                return null;
+
+            if (startDate.HasValue ||
+                endDate.HasValue ||
+                nullable)
+                return m_Accountant.SelectVouchersWithDetail(detail, startDate, endDate);
+            return m_Accountant.SelectVouchersWithDetail(detail);
+        }
+
         /// <summary>
-        /// 解析检索表达式
+        ///     解析检索表达式
         /// </summary>
         /// <param name="sOrig">检索表达式</param>
-        /// <param name="startDate">开始日期，<c>null</c>表示不限最小日期</param>
+        /// <param name="startDate">开始日期，<c>null</c>表示不限最小日期并且包含无日期</param>
         /// <param name="endDate">截止日期，<c>null</c>表示不限最大日期</param>
-        /// <param name="nullable">是否包含无日期（若<paramref name="startDate"/>和<paramref name="endDate"/>均为<c>null</c>，则表示是否只包含无日期）</param>
+        /// <param name="nullable"><paramref name="startDate" />和<paramref name="endDate" />均为<c>null</c>时，表示是否只包含无日期</param>
         /// <returns>是否是合法的检索表达式</returns>
-        internal bool ParseVoucherQuery(string sOrig, out DateTime? startDate, out DateTime? endDate, out bool nullable)
+        public bool ParseVoucherQuery(string sOrig, out DateTime? startDate, out DateTime? endDate, out bool nullable)
         {
+            nullable = false;
+
             if (sOrig == "[]")
             {
                 startDate = null;
                 endDate = null;
-                nullable = false;
                 return true;
             }
 
@@ -44,7 +90,6 @@ namespace AccountingServer
             {
                 startDate = DateTime.Now.Date;
                 endDate = startDate;
-                nullable = false;
                 return true;
             }
 
@@ -56,7 +101,6 @@ namespace AccountingServer
                     dayOfWeek = 7;
                 startDate = date.AddDays(1 - dayOfWeek);
                 endDate = startDate.Value.AddDays(6);
-                nullable = false;
                 return true;
             }
 
@@ -65,7 +109,6 @@ namespace AccountingServer
                 var date = DateTime.Now.Date;
                 startDate = date.Day <= 19 ? date.AddMonths(-1).AddDays(20 - date.Day) : date.AddDays(19 - date.Day);
                 endDate = startDate.Value.AddMonths(1).AddDays(-1);
-                nullable = false;
                 return true;
             }
 
@@ -74,7 +117,6 @@ namespace AccountingServer
                 var date = DateTime.Now.Date.AddMonths(-1);
                 startDate = date.Day <= 19 ? date.AddMonths(-1).AddDays(20 - date.Day) : date.AddDays(19 - date.Day);
                 endDate = startDate.Value.AddMonths(1).AddDays(-1);
-                nullable = false;
                 return true;
             }
 
@@ -83,7 +125,6 @@ namespace AccountingServer
                 var date = DateTime.Now.Date;
                 startDate = date.AddDays(1 - date.Day);
                 endDate = startDate.Value.AddMonths(1).AddDays(-1);
-                nullable = false;
                 return true;
             }
 
@@ -92,17 +133,14 @@ namespace AccountingServer
                 var date = DateTime.Now.Date.AddMonths(-1);
                 startDate = date.AddDays(1 - date.Day);
                 endDate = startDate.Value.AddMonths(1).AddDays(-1);
-                nullable = false;
                 return true;
             }
 
             DateTime dt;
             if (DateTime.TryParseExact(s, "yyyyMMdd", null, DateTimeStyles.AssumeLocal, out dt))
             {
-
                 startDate = DateTime.Now.Date;
                 endDate = startDate;
-                nullable = false;
                 return true;
             }
 
@@ -110,7 +148,6 @@ namespace AccountingServer
             {
                 startDate = dt.AddMonths(-1).AddDays(1);
                 endDate = dt;
-                nullable = false;
                 return true;
             }
 
@@ -118,7 +155,6 @@ namespace AccountingServer
             {
                 startDate = dt;
                 endDate = dt.AddMonths(1).AddDays(-1);
-                nullable = false;
                 return true;
             }
 
@@ -132,7 +168,6 @@ namespace AccountingServer
                 {
                     startDate = dt;
                     endDate = dt2;
-                    nullable = false;
                     return true;
                 }
             }
@@ -144,17 +179,15 @@ namespace AccountingServer
                     {
                         startDate = dt;
                         endDate = null;
-                        nullable = false;
                     }
                     else
                     {
                         startDate = null;
                         endDate = dt;
-                        nullable = true;
                     }
                     return true;
                 }
-                if (sp[0]=="null")
+                if (sp[0] == "null")
                 {
                     startDate = null;
                     endDate = null;
@@ -165,12 +198,11 @@ namespace AccountingServer
 
             startDate = null;
             endDate = null;
-            nullable = false;
             return false;
         }
 
         /// <summary>
-        /// 解析检索表达式并以此检索记账凭证
+        ///     解析检索表达式并以此检索记账凭证
         /// </summary>
         /// <param name="s">检索表达式</param>
         /// <returns>记账凭证，若检索表达式无效则为<c>null</c></returns>
@@ -180,12 +212,16 @@ namespace AccountingServer
             bool nullable;
             if (!ParseVoucherQuery(s, out startDate, out endDate, out nullable))
                 return null;
-            
-            return m_Accountant.SelectVouchers(startDate, endDate);
+
+            if (startDate.HasValue ||
+                endDate.HasValue ||
+                nullable)
+                return m_Accountant.SelectVouchers(null, startDate, endDate);
+            return m_Accountant.SelectVouchers(new Voucher());
         }
 
         /// <summary>
-        /// 将记账凭证用C#书写
+        ///     将记账凭证用C#书写
         /// </summary>
         /// <param name="voucher">记账凭证</param>
         /// <returns>C#表达式</returns>
@@ -194,30 +230,40 @@ namespace AccountingServer
             var sb = new StringBuilder();
             sb.AppendLine("new Voucher");
             sb.AppendLine("    {");
-            sb.AppendFormat("        ID = {0}," + Environment.NewLine, ProcessString(voucher.ID));
+            sb.AppendFormat("        ID = {0},", ProcessString(voucher.ID));
+            sb.AppendLine();
             if (voucher.Date.HasValue)
-                sb.AppendFormat("        Date = DateTime.Parse(\"{0:yyyy-MM-dd}\")," + Environment.NewLine, voucher.Date);
+            {
+                sb.AppendFormat("        Date = DateTime.Parse(\"{0:yyyy-MM-dd}\"),",voucher.Date);
+                sb.AppendLine();
+            }
             else
                 sb.AppendLine("        Date = null\",");
             if ((voucher.Type ?? VoucherType.Ordinal) != VoucherType.Ordinal)
-                sb.AppendFormat("        Type = VoucherType.{0}," + Environment.NewLine, voucher.Type);
+            {
+                sb.AppendFormat("        Type = VoucherType.{0},", voucher.Type);
+                sb.AppendLine();
+            }
             if (voucher.Remark != null)
-                sb.AppendFormat("        Remark = {0}," + Environment.NewLine, ProcessString(voucher.Remark));
+            {
+                sb.AppendFormat("        Remark = {0},", ProcessString(voucher.Remark));
+                sb.AppendLine();
+            }
             sb.AppendLine("        Details = new[]");
             sb.AppendLine("                        {");
-            var flag = false;
             foreach (var detail in voucher.Details)
             {
-                if (flag)
-                    sb.AppendLine(",");
                 sb.Append("                            new VoucherDetail { ");
                 sb.AppendFormat("Title = {0:0}, ", detail.Title);
                 if (detail.SubTitle.HasValue)
                     sb.AppendFormat(
-                                    "SubTitle = {0:00}, // {1}-{2}" + Environment.NewLine,
+                                    "SubTitle = {0:00},    // {1}-{2}",
                                     detail.SubTitle,
                                     Accountant.GetTitleName(detail.Title),
                                     Accountant.GetTitleName(detail));
+                else
+                    sb.AppendFormat("                  // {0}", Accountant.GetTitleName(detail.Title));
+                sb.AppendLine();
                 sb.Append("                                                ");
                 if (detail.Content != null)
                     sb.AppendFormat("Content = {0}, ", ProcessString(detail.Content));
@@ -225,16 +271,18 @@ namespace AccountingServer
                     sb.AppendFormat("Fund = {0}", detail.Fund);
                 if (detail.Remark != null)
                     sb.AppendFormat(", Remark = {0}", ProcessString(detail.Remark));
-                sb.AppendLine(" }");
-                flag = true;
+                sb.AppendLine(" },");
+                sb.AppendLine();
             }
-            sb.AppendLine(Environment.NewLine + "                        }" + Environment.NewLine + "    }");
+            sb.AppendLine();
+            sb.AppendLine("                        }");
+            sb.AppendLine("    }");
             sb.AppendLine();
             return sb.ToString();
         }
 
         /// <summary>
-        /// 从C#表达式中取得记账凭证
+        ///     从C#表达式中取得记账凭证
         /// </summary>
         /// <param name="str">C#表达式</param>
         /// <returns>记账凭证</returns>
@@ -242,11 +290,11 @@ namespace AccountingServer
         {
             var provider = new CSharpCodeProvider();
             var paras = new CompilerParameters
-            {
-                GenerateExecutable = false,
-                GenerateInMemory = true,
-                ReferencedAssemblies = { "AccountingServer.Entities.dll" }
-            };
+                            {
+                                GenerateExecutable = false,
+                                GenerateInMemory = true,
+                                ReferencedAssemblies = { "AccountingServer.Entities.dll" }
+                            };
             var sb = new StringBuilder();
             sb.AppendLine("using System;");
             sb.AppendLine("using AccountingServer.Entities;");
@@ -270,7 +318,7 @@ namespace AccountingServer
         }
 
         /// <summary>
-        /// 转义字符串
+        ///     转义字符串
         /// </summary>
         /// <param name="s">待转义的字符串</param>
         /// <returns>转义后的字符串</returns>
@@ -283,6 +331,5 @@ namespace AccountingServer
             s = s.Replace("\"", "\\\"");
             return "\"" + s + "\"";
         }
-
     }
 }
