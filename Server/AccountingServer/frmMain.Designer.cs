@@ -30,9 +30,9 @@ namespace AccountingServer
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
@@ -73,18 +73,18 @@ namespace AccountingServer
             // 
             // chart1
             // 
-            chartArea1.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea1);
+            chartArea2.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea2);
             this.chart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            legend1.Name = "Legend1";
-            this.chart1.Legends.Add(legend1);
+            legend2.Name = "Legend1";
+            this.chart1.Legends.Add(legend2);
             this.chart1.Location = new System.Drawing.Point(3, 3);
             this.chart1.Name = "chart1";
             this.chart1.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.None;
-            series1.ChartArea = "ChartArea1";
-            series1.Legend = "Legend1";
-            series1.Name = "Series1";
-            this.chart1.Series.Add(series1);
+            series2.ChartArea = "ChartArea1";
+            series2.Legend = "Legend1";
+            series2.Name = "Series1";
+            this.chart1.Series.Add(series2);
             this.chart1.Size = new System.Drawing.Size(1347, 751);
             this.chart1.TabIndex = 1;
             this.chart1.Text = "chart1";
@@ -108,7 +108,6 @@ namespace AccountingServer
             this.pictureBox1.Size = new System.Drawing.Size(1347, 751);
             this.pictureBox1.TabIndex = 2;
             this.pictureBox1.TabStop = false;
-            this.pictureBox1.Visible = false;
             // 
             // tabPage3
             // 
@@ -118,13 +117,13 @@ namespace AccountingServer
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage3.Size = new System.Drawing.Size(1353, 757);
             this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "增删改查";
+            this.tabPage3.Text = "控制台";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
             // textBox1
             // 
             this.textBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox1.Font = new System.Drawing.Font("Microsoft YaHei Mono", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.textBox1.Font = new System.Drawing.Font("Microsoft YaHei Mono", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBox1.Location = new System.Drawing.Point(3, 3);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
@@ -140,6 +139,7 @@ namespace AccountingServer
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1361, 789);
             this.Controls.Add(this.tabControl1);
+            this.KeyPreview = true;
             this.Name = "frmMain";
             this.Text = "Accounting Server";
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.frmMain_KeyDown);
