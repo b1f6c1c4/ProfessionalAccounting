@@ -1,0 +1,429 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="T1000" xml:space="preserve">
+    <value>资产</value>
+  </data>
+  <data name="T1001" xml:space="preserve">
+    <value>库存现金</value>
+  </data>
+  <data name="T1002" xml:space="preserve">
+    <value>银行存款</value>
+  </data>
+  <data name="T1012" xml:space="preserve">
+    <value>其他货币资金</value>
+  </data>
+  <data name="T101201" xml:space="preserve">
+    <value>公交卡</value>
+  </data>
+  <data name="T101203" xml:space="preserve">
+    <value>支付宝</value>
+  </data>
+  <data name="T101204" xml:space="preserve">
+    <value>存出投资款</value>
+  </data>
+  <data name="T101205" xml:space="preserve">
+    <value>学生卡</value>
+  </data>
+  <data name="T1101" xml:space="preserve">
+    <value>交易性金融资产</value>
+  </data>
+  <data name="T110101" xml:space="preserve">
+    <value>成本</value>
+  </data>
+  <data name="T110102" xml:space="preserve">
+    <value>公允价值变动</value>
+  </data>
+  <data name="T1122" xml:space="preserve">
+    <value>应收账款</value>
+  </data>
+  <data name="T1123" xml:space="preserve">
+    <value>预付账款</value>
+  </data>
+  <data name="T1221" xml:space="preserve">
+    <value>其他应收款</value>
+  </data>
+  <data name="T1403" xml:space="preserve">
+    <value>原材料</value>
+  </data>
+  <data name="T1405" xml:space="preserve">
+    <value>库存商品</value>
+  </data>
+  <data name="T1412" xml:space="preserve">
+    <value>包装物及低值易耗品</value>
+  </data>
+  <data name="T1441" xml:space="preserve">
+    <value>贵金属</value>
+  </data>
+  <data name="T1501" xml:space="preserve">
+    <value>持有至到期投资</value>
+  </data>
+  <data name="T150101" xml:space="preserve">
+    <value>投资成本</value>
+  </data>
+  <data name="T150102" xml:space="preserve">
+    <value>利息调整</value>
+  </data>
+  <data name="T150103" xml:space="preserve">
+    <value>应计利息</value>
+  </data>
+  <data name="T1502" xml:space="preserve">
+    <value>持有至到期投资减值准备</value>
+  </data>
+  <data name="T1503" xml:space="preserve">
+    <value>可供出售金融资产</value>
+  </data>
+  <data name="T150301" xml:space="preserve">
+    <value>成本</value>
+  </data>
+  <data name="T150302" xml:space="preserve">
+    <value>公允价值变动</value>
+  </data>
+  <data name="T1504" xml:space="preserve">
+    <value>可供出售金融资产减值准备</value>
+  </data>
+  <data name="T1511" xml:space="preserve">
+    <value>长期股权投资</value>
+  </data>
+  <data name="T151101" xml:space="preserve">
+    <value>成本</value>
+  </data>
+  <data name="T151102" xml:space="preserve">
+    <value>损益调整</value>
+  </data>
+  <data name="T151103" xml:space="preserve">
+    <value>其他权益变动</value>
+  </data>
+  <data name="T1512" xml:space="preserve">
+    <value>长期股权投资减值准备</value>
+  </data>
+  <data name="T1601" xml:space="preserve">
+    <value>固定资产</value>
+  </data>
+  <data name="T1602" xml:space="preserve">
+    <value>累计折旧</value>
+  </data>
+  <data name="T1603" xml:space="preserve">
+    <value>固定资产减值准备</value>
+  </data>
+  <data name="T1604" xml:space="preserve">
+    <value>在建工程</value>
+  </data>
+  <data name="T1605" xml:space="preserve">
+    <value>工程物资</value>
+  </data>
+  <data name="T1606" xml:space="preserve">
+    <value>固定资产清理</value>
+  </data>
+  <data name="T1701" xml:space="preserve">
+    <value>无形资产</value>
+  </data>
+  <data name="T1702" xml:space="preserve">
+    <value>累计摊销</value>
+  </data>
+  <data name="T1703" xml:space="preserve">
+    <value>无形资产减值准备</value>
+  </data>
+  <data name="T1901" xml:space="preserve">
+    <value>待处理财产损溢</value>
+  </data>
+  <data name="T2000" xml:space="preserve">
+    <value>负债</value>
+  </data>
+  <data name="T2001" xml:space="preserve">
+    <value>短期借款</value>
+  </data>
+  <data name="T2202" xml:space="preserve">
+    <value>应付账款</value>
+  </data>
+  <data name="T2203" xml:space="preserve">
+    <value>预收账款</value>
+  </data>
+  <data name="T2211" xml:space="preserve">
+    <value>应付职工薪酬</value>
+  </data>
+  <data name="T2221" xml:space="preserve">
+    <value>应交税费</value>
+  </data>
+  <data name="T222105" xml:space="preserve">
+    <value>应交个人所得税</value>
+  </data>
+  <data name="T2241" xml:space="preserve">
+    <value>其他应付款</value>
+  </data>
+  <data name="T224101" xml:space="preserve">
+    <value>贷记卡</value>
+  </data>
+  <data name="T4000" xml:space="preserve">
+    <value>所有者权益</value>
+  </data>
+  <data name="T4001" xml:space="preserve">
+    <value>实收资本</value>
+  </data>
+  <data name="T4101" xml:space="preserve">
+    <value>盈余公积</value>
+  </data>
+  <data name="T4103" xml:space="preserve">
+    <value>本年利润</value>
+  </data>
+  <data name="T6000" xml:space="preserve">
+    <value>损益</value>
+  </data>
+  <data name="T6001" xml:space="preserve">
+    <value>主营业务收入</value>
+  </data>
+  <data name="T600101" xml:space="preserve">
+    <value>奖学金</value>
+  </data>
+  <data name="T6051" xml:space="preserve">
+    <value>其他业务收入</value>
+  </data>
+  <data name="T6101" xml:space="preserve">
+    <value>公允价值变动损益</value>
+  </data>
+  <data name="T610101" xml:space="preserve">
+    <value>交易性金融资产</value>
+  </data>
+  <data name="T6111" xml:space="preserve">
+    <value>投资收益</value>
+  </data>
+  <data name="T611101" xml:space="preserve">
+    <value>长期股权投资</value>
+  </data>
+  <data name="T611102" xml:space="preserve">
+    <value>交易性金融资产</value>
+  </data>
+  <data name="T611105" xml:space="preserve">
+    <value>可供出售金融资产</value>
+  </data>
+  <data name="T611106" xml:space="preserve">
+    <value>持有至到期投资</value>
+  </data>
+  <data name="T6301" xml:space="preserve">
+    <value>营业外收入</value>
+  </data>
+  <data name="T630101" xml:space="preserve">
+    <value>处置固定资产利得</value>
+  </data>
+  <data name="T630102" xml:space="preserve">
+    <value>无法支付的应付款项</value>
+  </data>
+  <data name="T630103" xml:space="preserve">
+    <value>捐赠利得</value>
+  </data>
+  <data name="T630104" xml:space="preserve">
+    <value>上级拨入资金</value>
+  </data>
+  <data name="T630199" xml:space="preserve">
+    <value>其他</value>
+  </data>
+  <data name="T6401" xml:space="preserve">
+    <value>主营业务成本</value>
+  </data>
+  <data name="T6402" xml:space="preserve">
+    <value>其他业务支出</value>
+  </data>
+  <data name="T6602" xml:space="preserve">
+    <value>管理费用</value>
+  </data>
+  <data name="T660201" xml:space="preserve">
+    <value>水电气费</value>
+  </data>
+  <data name="T660202" xml:space="preserve">
+    <value>房租</value>
+  </data>
+  <data name="T660203" xml:space="preserve">
+    <value>餐费</value>
+  </data>
+  <data name="T660204" xml:space="preserve">
+    <value>通讯费</value>
+  </data>
+  <data name="T660205" xml:space="preserve">
+    <value>医药费</value>
+  </data>
+  <data name="T660206" xml:space="preserve">
+    <value>福利费</value>
+  </data>
+  <data name="T660207" xml:space="preserve">
+    <value>折旧费</value>
+  </data>
+  <data name="T660208" xml:space="preserve">
+    <value>交通运输费</value>
+  </data>
+  <data name="T660209" xml:space="preserve">
+    <value>办公费</value>
+  </data>
+  <data name="T660210" xml:space="preserve">
+    <value>招待费</value>
+  </data>
+  <data name="T660211" xml:space="preserve">
+    <value>无形资产摊销</value>
+  </data>
+  <data name="T660299" xml:space="preserve">
+    <value>其它</value>
+  </data>
+  <data name="T6603" xml:space="preserve">
+    <value>财务费用</value>
+  </data>
+  <data name="T660301" xml:space="preserve">
+    <value>利息支出</value>
+  </data>
+  <data name="T660302" xml:space="preserve">
+    <value>利息收入</value>
+  </data>
+  <data name="T660303" xml:space="preserve">
+    <value>汇兑损溢</value>
+  </data>
+  <data name="T660304" xml:space="preserve">
+    <value>金融机构手续费</value>
+  </data>
+  <data name="T660399" xml:space="preserve">
+    <value>其他费用</value>
+  </data>
+  <data name="T6701" xml:space="preserve">
+    <value>资产减值损失</value>
+  </data>
+  <data name="T670104" xml:space="preserve">
+    <value>长期投资减值损失</value>
+  </data>
+  <data name="T670105" xml:space="preserve">
+    <value>固定资产减值损失</value>
+  </data>
+  <data name="T670106" xml:space="preserve">
+    <value>无形资产减值损失</value>
+  </data>
+  <data name="T670109" xml:space="preserve">
+    <value>持有至到期投资减值损失</value>
+  </data>
+  <data name="T6711" xml:space="preserve">
+    <value>营业外支出</value>
+  </data>
+  <data name="T671101" xml:space="preserve">
+    <value>处置固定资产净损失</value>
+  </data>
+  <data name="T671108" xml:space="preserve">
+    <value>罚没及滞纳金支出</value>
+  </data>
+  <data name="T671109" xml:space="preserve">
+    <value>捐赠支出</value>
+  </data>
+  <data name="T671110" xml:space="preserve">
+    <value>非常损失</value>
+  </data>
+</root>
