@@ -47,7 +47,7 @@ namespace AccountingServer.Entities
         /// </summary>
         public string ID { get; set; }
         /// <summary>
-        /// 日期，若为null表示无日期
+        /// 日期，若为<c>null</c>表示无日期
         /// </summary>
         public DateTime? Date { get; set; }
         /// <summary>
@@ -78,7 +78,7 @@ namespace AccountingServer.Entities
         /// </summary>
         public int? Title { get; set; }
         /// <summary>
-        /// 会计科目二级科目代码，若为null表示无二级科目
+        /// 会计科目二级科目代码，若为<c>null</c>表示无二级科目
         /// </summary>
         public int? SubTitle { get; set; }
         /// <summary>

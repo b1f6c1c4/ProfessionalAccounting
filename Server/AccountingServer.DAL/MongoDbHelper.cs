@@ -92,7 +92,7 @@ namespace AccountingServer.DAL
         /// 从Bson还原记账凭证
         /// </summary>
         /// <param name="doc">Bson</param>
-        /// <returns>记账凭证，若<paramref name="doc"/>为null则为null</returns>
+        /// <returns>记账凭证，若<paramref name="doc"/>为<c>null</c>则为<c>null</c></returns>
         public static Voucher ToVoucher(this BsonDocument doc)
         {
             if (doc == null)
