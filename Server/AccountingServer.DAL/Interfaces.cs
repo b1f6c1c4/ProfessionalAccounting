@@ -8,6 +8,7 @@ namespace AccountingServer.DAL
     {
         Voucher SelectVoucher(string id);
         IEnumerable<Voucher> SelectVouchers(Voucher filter);
+        IEnumerable<Voucher> SelectVouchers(DateTime? startDate, DateTime? endDate);
         long SelectVouchersCount(Voucher filter);
         bool InsertVoucher(Voucher entity);
         bool DeleteVoucher(string id);

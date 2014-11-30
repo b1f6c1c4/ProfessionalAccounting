@@ -101,6 +101,8 @@ namespace AccountingServer.DAL
                         };
         }
 
+        public IEnumerable<Voucher> SelectVouchers(DateTime? startDate, DateTime? endDate) { throw new NotImplementedException(); }
+
         public long SelectVouchersCount(Voucher filter) { throw new NotImplementedException(); }
         public bool InsertVoucher(Voucher entity) { throw new NotImplementedException(); }
         public bool DeleteVoucher(string id) { throw new NotImplementedException(); }

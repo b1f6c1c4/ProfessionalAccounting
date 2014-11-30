@@ -400,6 +400,7 @@ namespace AccountingServer.BLL
         public long SelectVouchersCount(Voucher entity) { return m_Db.SelectVouchersCount(entity); }
         public Voucher SelectVoucher(string id) { return m_Db.SelectVoucher(id); }
         public IEnumerable<Voucher> SelectVouchers(Voucher entity) { return m_Db.SelectVouchers(entity); }
+        public IEnumerable<Voucher> SelectVouchers(DateTime? startDate, DateTime? endDate) { return m_Db.SelectVouchers(startDate, endDate); }
 
         public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail entity)
         {
