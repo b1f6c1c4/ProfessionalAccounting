@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace AccountingServer.Entities
 {
@@ -148,5 +149,21 @@ namespace AccountingServer.Entities
         /// ”‡∂Ó
         /// </summary>
         public double Fund { get; set; }
+    }
+
+    public class BalanceEqualityComparer : EqualityComparer<Balance>
+    {
+        public override bool Equals(Balance x, Balance y)
+        {
+            return x.Title == y.Title && x.SubTitle == y.SubTitle && x.Content == y.Content;
+        }
+
+        public override int GetHashCode(Balance obj)
+        {
+            var t = obj.Title ?? Int32.MinValue;
+            var s = obj.SubTitle ?? Int32.MaxValue;
+            var c = obj.Content == null ? Int32.MinValue : obj.Content.GetHashCode();
+            return t ^ (s << 3) ^ c;
+        }
     }
 }
