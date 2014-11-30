@@ -401,6 +401,19 @@ namespace AccountingServer.BLL
         /// <returns>匹配过滤器的细目</returns>
         public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter) { return m_Db.SelectDetails(filter); }
         /// <summary>
+        /// 按过滤器和细目过滤器查找细目
+        /// <para>若<paramref name="startDate"/>和<paramref name="endDate"/>均为<c>null</c>，则返回所有无日期的记账凭证</para>
+        /// </summary>
+        /// <param name="filter">细目过滤器</param>
+        /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
+        /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
+        /// <returns>指定日期匹配过滤器的细目</returns>
+        public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter,
+                                                              DateTime? startDate, DateTime? endDate)
+        {
+            return m_Db.SelectDetails(filter, startDate, endDate);
+        }
+        /// <summary>
         /// 按细目过滤器查找细目并记数
         /// </summary>
         /// <param name="filter">细目过滤器</param>
