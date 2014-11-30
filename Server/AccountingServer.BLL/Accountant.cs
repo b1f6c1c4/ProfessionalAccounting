@@ -426,10 +426,10 @@ namespace AccountingServer.BLL
         public IEnumerable<Voucher> SelectVouchers(Voucher filter) { return m_Db.SelectVouchers(filter); }
         /// <summary>
         /// 按日期查找记账凭证
-        /// <para>若<paramref name="startDate"/>和<paramref name="endDate"/>均为null，则返回所有无日期的记账凭证</para>
+        /// <para>若<paramref name="startDate"/>和<paramref name="endDate"/>均为<c>null</c>，则返回所有无日期的记账凭证</para>
         /// </summary>
-        /// <param name="startDate">开始日期，若为null表示不检查最小日期，无日期亦可</param>
-        /// <param name="endDate">截止日期，若为null表示不检查最大日期</param>
+        /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
+        /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
         /// <returns>指定日期的记账凭证</returns>
         public IEnumerable<Voucher> SelectVouchers(DateTime? startDate, DateTime? endDate) { return m_Db.SelectVouchers(startDate, endDate); }
 
