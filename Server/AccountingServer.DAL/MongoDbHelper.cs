@@ -221,6 +221,7 @@ namespace AccountingServer.DAL
         /// <param name="voucher">记账凭证</param>
         /// <returns>Bson查询</returns>
         private static IMongoQuery GetUniqueQuery(Voucher voucher) { return GetUniqueQuery(voucher.ID); }
+
         /// <summary>
         /// 按过滤器查询
         /// </summary>
@@ -258,7 +259,7 @@ namespace AccountingServer.DAL
                         break;
                 }
             if (filter.Remark != null)
-                lst.Add(Query.EQ("remark", filter.Remark));
+                lst.Add(Query.EQ("remark", filter.Remark == String.Empty ? null : filter.Remark));
 
             return lst.Any() ? Query.And(lst) : Query.Null;
         }
@@ -299,9 +300,12 @@ namespace AccountingServer.DAL
             if (filter.SubTitle != null)
                 lst.Add(Query.EQ("subtitle", filter.SubTitle));
             if (filter.Content != null)
-                lst.Add(Query.EQ("content", filter.Content));
+                lst.Add(
+                        filter.Content == String.Empty
+                            ? Query.EQ("content", BsonNull.Value)
+                            : Query.EQ("content", filter.Content));
             if (filter.Remark != null)
-                lst.Add(Query.EQ("remark", filter.Remark));
+                lst.Add(Query.EQ("remark", filter.Remark == String.Empty ? null : filter.Remark));
             if (filter.Fund != null)
                 lst.Add(Query.EQ("fund", filter.Fund));
 

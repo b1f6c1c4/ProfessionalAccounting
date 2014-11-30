@@ -29,14 +29,28 @@ namespace AccountingServer.Entities
                 if (filter.SubTitle != voucherDetail.SubTitle)
                     return false;
             if (filter.Content != null)
-                if (filter.Content != voucherDetail.Content)
+            {
+                if (filter.Content == String.Empty)
+                {
+                    if (!String.IsNullOrEmpty(voucherDetail.Content))
+                        return false;
+                }
+                else if (filter.Content != voucherDetail.Content)
                     return false;
+            }
             if (filter.Fund != null)
                 if (filter.Fund != voucherDetail.Fund)
                     return false;
             if (filter.Remark != null)
-                if (filter.Remark != voucherDetail.Remark)
+            {
+                if (filter.Remark == String.Empty)
+                {
+                    if (!String.IsNullOrEmpty(voucherDetail.Remark))
+                        return false;
+                }
+                else if (filter.Remark != voucherDetail.Remark)
                     return false;
+            }
             return true;
         }
     }
