@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Resources;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
 
@@ -108,7 +110,8 @@ namespace AccountingServer.BLL
         /// <returns>名称</returns>
         public static string GetTitleName(int? title, int? subtitle = null)
         {
-            throw new NotImplementedException();
+            var mgr = new ResourceManager("AccountingServer.BLL.AccountTitle", Assembly.GetExecutingAssembly());
+            return mgr.GetString(String.Format("T{0:0000}{1:00}", title, subtitle));
         }
 
         /// <summary>
