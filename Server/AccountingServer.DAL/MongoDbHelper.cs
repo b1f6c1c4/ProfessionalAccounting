@@ -429,6 +429,14 @@ namespace AccountingServer.DAL
             return SelectVouchersWithDetail(filter).SelectMany(v => v.Details).Where(d => d.IsMatch(filter));
         }
 
+        public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter, DateTime? startDate, DateTime? endDate)
+        {
+            return
+                SelectVouchersWithDetail(filter, startDate, endDate)
+                    .SelectMany(v => v.Details)
+                    .Where(d => d.IsMatch(filter));
+        }
+
         public long SelectDetailsCount(VoucherDetail filter)
         {
             return SelectVouchersWithDetail(filter).SelectMany(v => v.Details).Where(d => d.IsMatch(filter)).LongCount();
