@@ -86,7 +86,7 @@ namespace AccountingServer.BLL
             m_Tcp.Write("ClearBalances");
 
             Action<string, string, double?> action =
-                (s, d, f) => m_Tcp.Write(String.Format("{0}={1}={2}", s, d, f.AsCurrency()));
+                (s, d, f) => m_Tcp.Write(String.Format("{0}={1}={2}", s, d, f.AsFullCurrency()));
 
             action("库存现金", "1001.00", m_Accountant.GetFinalBalance(new Balance { Title = 1001 }));
             action(

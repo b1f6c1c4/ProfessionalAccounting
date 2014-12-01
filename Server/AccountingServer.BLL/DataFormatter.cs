@@ -15,6 +15,17 @@ namespace AccountingServer.BLL
         /// <returns>格式化后的金额</returns>
         public static string AsCurrency(this double value)
         {
+            var s = String.Format("￥{0:0.0000}", value);
+            return s.TrimEnd('0').PadRight(s.Length);
+        }
+
+        /// <summary>
+        ///     格式化金额
+        /// </summary>
+        /// <param name="value">金额</param>
+        /// <returns>格式化后的金额</returns>
+        public static string AsFullCurrency(this double value)
+        {
             return String.Format("￥{0:0.0000}", value);
         }
 
@@ -26,6 +37,16 @@ namespace AccountingServer.BLL
         public static string AsCurrency(this double? value)
         {
             return value.HasValue ? AsCurrency(value.Value) : String.Empty;
+        }
+
+        /// <summary>
+        ///     格式化金额
+        /// </summary>
+        /// <param name="value">金额</param>
+        /// <returns>格式化后的金额</returns>
+        public static string AsFullCurrency(this double? value)
+        {
+            return value.HasValue ? AsFullCurrency(value.Value) : String.Empty;
         }
 
         /// <summary>
