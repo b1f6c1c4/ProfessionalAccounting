@@ -213,7 +213,9 @@ namespace AccountingServer.DAL
                 var startinfo = new ProcessStartInfo
                                     {
                                         FileName = "cmd.exe",
-                                        Arguments = "/c " + "mongod --config \"C:\\Users\\b1f6c1c4\\Documents\\tjzh\\Account\\mongod.conf\"",
+                                        Arguments =
+                                            "/c " +
+                                            "mongod --config \"C:\\Users\\b1f6c1c4\\Documents\\tjzh\\Account\\mongod.conf\"",
                                         UseShellExecute = false,
                                         RedirectStandardInput = false,
                                         RedirectStandardOutput = true,

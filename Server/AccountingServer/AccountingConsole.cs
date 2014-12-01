@@ -63,7 +63,6 @@ namespace AccountingServer
         {
             s = s.Trim();
             if (s == "con")
-            {
                 try
                 {
                     m_Accountant.Connect(true);
@@ -75,9 +74,7 @@ namespace AccountingServer
                     editable = false;
                     return e.ToString();
                 }
-            }
             if (s == "shu")
-            {
                 try
                 {
                     m_Accountant.Shutdown();
@@ -90,7 +87,6 @@ namespace AccountingServer
                     editable = false;
                     return e.ToString();
                 }
-            }
             if (s == "T")
             {
                 editable = false;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -92,7 +91,7 @@ namespace AccountingServer
             foreach (var series in m_Charts.SelectMany(chart => chart.Gather()))
                 chart1.Series.Add(series);
         }
-        
+
         private bool GetVoucherCode(out int begin, out int end)
         {
             end = -1;
@@ -162,7 +161,7 @@ namespace AccountingServer
                 textBoxResult.ScrollToCaret();
             }
             else if (e.Alt &&
-                e.KeyCode == Keys.Enter)
+                     e.KeyCode == Keys.Enter)
             {
                 int begin;
                 int end;
