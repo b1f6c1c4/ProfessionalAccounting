@@ -1,19 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Reflection;
-using System.Resources;
+using System.Xml;
 using AccountingServer.Entities;
 
 namespace AccountingServer.BLL
 {
     public static class TitleManager
     {
-        private static readonly ResourceManager Mgr;
+        private static readonly XmlDocument XmlDoc;
 
         static TitleManager()
         {
-            Mgr = new ResourceManager("AccountingServer.BLL.AccountTitle", Assembly.GetExecutingAssembly());
+            using (
+                var stream = Assembly.GetExecutingAssembly()
+                                     .GetManifestResourceStream("AccountingServer.BLL.Resources.Titles.xml"))
+            {
+                if (stream == null)
+                    return;
+                XmlDoc = new XmlDocument();
+                XmlDoc.Load(stream);
+            }
+        }
+
+        /// <summary>
+        ///     返回所有会计科目编号和名称
+        /// </summary>
+        /// <returns>编号和科目名称</returns>
+        public static IEnumerable<Tuple<int, int?, string>> GetTitles()
+        {
+            foreach (XmlElement title in XmlDoc.DocumentElement.ChildNodes)
+            {
+                yield return new Tuple<int, int?, string>(
+                    Convert.ToInt32(title.Attributes["id"].Value),
+                    null,
+                    title.Attributes["name"].Value);
+                foreach (XmlElement subTitle in title.ChildNodes)
+                {
+                    yield return new Tuple<int, int?, string>(
+                        Convert.ToInt32(title.Attributes["id"].Value),
+                        Convert.ToInt32(subTitle.Attributes["id"].Value),
+                        title.Attributes["name"].Value + "-" + subTitle.Attributes["name"].Value);
+                }
+            }
         }
 
         /// <summary>
@@ -24,7 +53,34 @@ namespace AccountingServer.BLL
         /// <returns>名称</returns>
         public static string GetTitleName(int? title, int? subtitle = null)
         {
-            return Mgr.GetString(String.Format("T{0:0000}{1:00}", title, subtitle));
+            if (!title.HasValue)
+                return null;
+
+            var nav = XmlDoc.CreateNavigator();
+
+            if (subtitle.HasValue)
+            {
+                var res = nav.Select(
+                                     String.Format(
+                                                   "/Titles/title[@id={0}]/subTitle[@id={1}]/@name",
+                                                   title,
+                                                   subtitle));
+                if (res.Count == 0)
+                    return null;
+                res.MoveNext();
+                return res.Current.Value;
+            }
+            else
+            {
+                var res = nav.Select(
+                                     String.Format(
+                                                   "/Titles/title[@id={0}]/@name",
+                                                   title));
+                if (res.Count == 0)
+                    return null;
+                res.MoveNext();
+                return res.Current.Value;
+            }
         }
 
         /// <summary>
