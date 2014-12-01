@@ -168,23 +168,6 @@ namespace AccountingServer.BLL
                                     });
         }
 
-        /// <summary>
-        ///     比较两日期（可以为无日期）的早晚
-        /// </summary>
-        /// <param name="b1Date">第一个日期</param>
-        /// <param name="b2Date">第二个日期</param>
-        /// <returns>相等为0，第一个早为-1，第二个早为1（无日期按无穷长时间以前考虑）</returns>
-        private static int CompareDate(DateTime? b1Date, DateTime? b2Date)
-        {
-            if (b1Date.HasValue &&
-                b2Date.HasValue)
-                return b1Date.Value.CompareTo(b2Date.Value);
-            if (b1Date.HasValue)
-                return 1;
-            if (b2Date.HasValue)
-                return -1;
-            return 0;
-        }
 
         /// <summary>
         ///     累加每日金额得到每日余额
@@ -201,10 +184,10 @@ namespace AccountingServer.BLL
             for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
             {
                 while (id < resx.Count &&
-                       CompareDate(resx[id].Date, dt) < 0)
+                       BalanceComparer.CompareDate(resx[id].Date, dt) < 0)
                     fund += resx[id++].Fund;
                 if (id < resx.Count)
-                    fund += resx[id++].Fund;
+                    fund += resx[id].Fund;
 
                 yield return
                     new Balance
@@ -231,7 +214,7 @@ namespace AccountingServer.BLL
                                   SubTitle = filter.SubTitle,
                                   Content = filter.Content
                               };
-            var res = m_Db.SelectVouchersWithDetail(dFilter).Where(v => CompareDate(v.Date, endDate) <= 0);
+            var res = m_Db.SelectVouchersWithDetail(dFilter).Where(v => BalanceComparer.CompareDate(v.Date, endDate) <= 0);
             var resx = res.GroupBy(
                                    v => v.Date,
                                    (dt, vs) =>
@@ -247,7 +230,7 @@ namespace AccountingServer.BLL
                                                  .Where(d => dir == 0 || (dir > 0 ? d.Fund > 0 : d.Fund < 0))
                                                  .Sum(d => d.Fund.Value)
                                        }).ToList();
-            resx.Sort((b1, b2) => CompareDate(b1.Date, b2.Date));
+            resx.Sort(new BalanceComparer());
             return ProcessDailyBalance(startDate, endDate, resx);
         }
 
@@ -272,7 +255,7 @@ namespace AccountingServer.BLL
                                        Content = filter.Content
                                    }).ToArray();
 
-            var res = m_Db.SelectVouchersWithDetail(dFilters).Where(v => CompareDate(v.Date, endDate) <= 0);
+            var res = m_Db.SelectVouchersWithDetail(dFilters).Where(v => BalanceComparer.CompareDate(v.Date, endDate) <= 0);
             var resx = res.GroupBy(
                                    v => v.Date,
                                    (dt, vs) =>
@@ -288,7 +271,7 @@ namespace AccountingServer.BLL
                                                  .Where(d => dir == 0 || (dir > 0 ? d.Fund > 0 : d.Fund < 0))
                                                  .Sum(d => d.Fund.Value)
                                        }).ToList();
-            resx.Sort((b1, b2) => CompareDate(b1.Date, b2.Date));
+            resx.Sort(new BalanceComparer());
             return ProcessDailyBalance(startDate, endDate, resx);
         }
 
