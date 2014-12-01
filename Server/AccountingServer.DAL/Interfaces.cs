@@ -143,6 +143,10 @@ namespace AccountingServer.DAL
         /// <returns>已删除的细目总数</returns>
         int DeleteDetails(VoucherDetail filter);
 
+        /// <summary>
+        ///     关闭数据库服务器
+        /// </summary>
+        void Shutdown();
 
         //DbAsset SelectAsset(Guid id);
         //IEnumerable<DbAsset> SelectAssets(DbAsset filter);

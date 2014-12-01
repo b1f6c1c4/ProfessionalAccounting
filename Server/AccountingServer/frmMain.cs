@@ -42,7 +42,7 @@ namespace AccountingServer
             WindowState = FormWindowState.Maximized;
 
             m_Accountant = new Accountant();
-            m_Accountant.Connect("b1f6c1c4", "142857");
+            m_Accountant.Connect(true);
 
             m_Mobile = new MobileComm();
 

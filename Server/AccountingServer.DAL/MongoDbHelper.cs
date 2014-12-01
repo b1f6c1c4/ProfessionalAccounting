@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using AccountingServer.Entities;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -194,15 +196,37 @@ namespace AccountingServer.DAL
         /// <summary>
         ///     连接到服务器
         /// </summary>
-        public MongoDbHelper()
+        public MongoDbHelper(bool launchServer)
         {
             m_Client = new MongoClient("mongodb://localhost");
             m_Server = m_Client.GetServer();
+
+            try
+            {
+                m_Server.Connect();
+            }
+            catch (Exception)
+            {
+                if (!launchServer)
+                    throw;
+
+                var startinfo = new ProcessStartInfo
+                                    {
+                                        FileName = "cmd.exe",
+                                        Arguments = "/c " + "mongod --config \"C:\\Users\\b1f6c1c4\\Documents\\tjzh\\Account\\mongod.conf\"",
+                                        UseShellExecute = false,
+                                        RedirectStandardInput = false,
+                                        RedirectStandardOutput = true,
+                                        CreateNoWindow = true
+                                    };
+                Process.Start(startinfo);
+                Thread.Sleep(100);
+                m_Server.Connect();
+            }
+
             m_Db = m_Server.GetDatabase("accounting");
 
             m_Vouchers = m_Db.GetCollection("voucher");
-
-            m_Server.Connect();
         }
 
         /// <summary>
@@ -212,6 +236,16 @@ namespace AccountingServer.DAL
         {
             if (m_Server != null)
             {
+                m_Server.Disconnect();
+                m_Server = null;
+            }
+        }
+
+        public void Shutdown()
+        {
+            if (m_Server != null)
+            {
+                m_Server.Shutdown();
                 m_Server.Disconnect();
                 m_Server = null;
             }
