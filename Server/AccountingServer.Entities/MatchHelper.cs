@@ -22,7 +22,12 @@ namespace AccountingServer.Entities
                 if (filter.Title != voucherDetail.Title)
                     return false;
             if (filter.SubTitle != null)
-                if (filter.SubTitle != voucherDetail.SubTitle)
+                if (filter.SubTitle == 0)
+                {
+                    if (voucherDetail.SubTitle != null)
+                        return false;
+                }
+                else if (filter.SubTitle != voucherDetail.SubTitle)
                     return false;
             if (filter.Content != null)
                 if (filter.Content == String.Empty)

@@ -313,7 +313,10 @@ namespace AccountingServer.DAL
             if (filter.Title != null)
                 lst.Add(Query.EQ("title", filter.Title));
             if (filter.SubTitle != null)
-                lst.Add(Query.EQ("subtitle", filter.SubTitle));
+                lst.Add(
+                        filter.SubTitle == 0
+                            ? Query.EQ("subtitle", BsonNull.Value)
+                            : Query.EQ("subtitle", filter.SubTitle));
             if (filter.Content != null)
                 lst.Add(
                         filter.Content == String.Empty
