@@ -145,18 +145,18 @@ namespace AccountingServer
             {
                 var copiedT = balanceT;
                 sb.AppendFormat(
-                                "{0}-{1}:{2}",
+                                "{0}-{1}:\t\t\t{2}",
                                 copiedT.Title.AsTitle(),
-                                Accountant.GetTitleName(copiedT.Title),
+                                TitleManager.GetTitleName(copiedT.Title),
                                 copiedT.Fund.AsCurrency());
                 sb.AppendLine();
                 foreach (var balanceS in ts.Where(sx => sx.Title == copiedT.Title))
                 {
                     var copiedS = balanceS;
                     sb.AppendFormat(
-                                    "  {0}-{1}:{2}  ({3:00.0%})",
+                                    "  {0}-{1}:\t\t\t{2}\t\t({3:00.0%})",
                                     copiedS.SubTitle.HasValue ? copiedS.SubTitle.AsSubTitle() : "  ",
-                                    Accountant.GetTitleName(copiedS),
+                                    TitleManager.GetTitleName(copiedS),
                                     copiedS.Fund.AsCurrency(),
                                     copiedS.Fund / copiedT.Fund);
                     sb.AppendLine();
@@ -166,7 +166,7 @@ namespace AccountingServer
                     {
                         var copiedC = balanceC;
                         sb.AppendFormat(
-                                        "        {0}:{1}  ({2:00.0%}, {3:00.0%})",
+                                        "        {0}:\t\t\t{1}\t\t({2:00.0%}, {3:00.0%})",
                                         copiedC.Content,
                                         copiedC.Fund.AsCurrency(),
                                         copiedC.Fund / copiedS.Fund,
@@ -193,7 +193,7 @@ namespace AccountingServer
                 sb.AppendFormat(
                                 "{0}-{1}:{2}",
                                 copiedT.Title.AsTitle(),
-                                Accountant.GetTitleName(copiedT.Title),
+                                TitleManager.GetTitleName(copiedT.Title),
                                 copiedT.Fund.AsCurrency());
                 sb.AppendLine();
                 foreach (var balanceC in tsc.Where(cx => cx.Title == copiedT.Title))
@@ -479,9 +479,9 @@ namespace AccountingServer
                     sb.AppendFormat(
                                     "SubTitle = {0:00},    // {1}",
                                     detail.SubTitle,
-                                    Accountant.GetTitleName(detail));
+                                    TitleManager.GetTitleName(detail));
                 else
-                    sb.AppendFormat("                  // {0}", Accountant.GetTitleName(detail));
+                    sb.AppendFormat("                  // {0}", TitleManager.GetTitleName(detail));
                 sb.AppendLine();
                 sb.Append("                            ");
                 if (detail.Content != null)
