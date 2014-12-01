@@ -62,6 +62,72 @@
           <layerMoniker Id="6cfbbe53-c4fc-423a-9dd6-b872bf1f7f1a" />
         </dependencyFromLayerToLayer>
       </dependencyToLayers>
+      <childLayers>
+        <layer Id="b1da5c4d-af00-4ea2-9e42-38b08b00243b" name="frmMain">
+          <dependencyToLayers>
+            <dependencyFromLayerToLayer Id="9af324ba-e833-4281-8db3-aef9444c140b" direction="Forward">
+              <layerMoniker Id="7072cd38-3a70-4c91-9c4d-fed0dcef6aac" />
+            </dependencyFromLayerToLayer>
+            <dependencyFromLayerToLayer Id="ccb89cb6-8c75-42a8-8565-a92f4a5c99c7" direction="Forward">
+              <layerMoniker Id="19543ff8-b3a0-44b5-b926-449a17e48f31" />
+            </dependencyFromLayerToLayer>
+            <dependencyFromLayerToLayer Id="b9a10bb3-6672-4f48-a6e8-782f9a1aaa01" direction="Forward">
+              <layerMoniker Id="7cbd89d5-662c-4a0f-9129-6bbd254990b3" />
+            </dependencyFromLayerToLayer>
+            <dependencyFromLayerToLayer Id="44f1c7e0-c085-4215-9db3-0c6a58d3f39f" direction="Bidirectional">
+              <layerMoniker Id="fb42139a-363c-44ad-90f3-38a9e3deedd5" />
+            </dependencyFromLayerToLayer>
+          </dependencyToLayers>
+          <references>
+            <reference Id="303d64f7-9ad4-484c-aeaa-01b874998a36" name="frmMain">
+              <ArtifactNode Label="frmMain" Category="CodeSchema_Class" Id="(Assembly=&quot;$(PersonalUri)/GitHub/ProfessionalAccounting/Server/AccountingServer/bin/Debug/AccountingServer.exe&quot; Namespace=AccountingServer Type=frmMain)" />
+              <ExpandedNode Id="(Assembly=AccountingServer Namespace=AccountingServer Type=frmMain)" Label="frmMain" Category="CodeSchema_Class">
+                <LinkCategory Ref="Represents" />
+              </ExpandedNode>
+            </reference>
+          </references>
+        </layer>
+        <layer Id="fb42139a-363c-44ad-90f3-38a9e3deedd5" name="Program">
+          <references>
+            <reference Id="f29bfe1b-82e6-428a-aae3-15b68532b565" name="Program">
+              <ArtifactNode Label="Program" Category="CodeSchema_Class" Id="(Assembly=&quot;$(PersonalUri)/GitHub/ProfessionalAccounting/Server/AccountingServer/bin/Debug/AccountingServer.exe&quot; Namespace=AccountingServer Type=Program)" />
+              <ExpandedNode Id="(Assembly=AccountingServer Namespace=AccountingServer Type=Program)" Label="Program" Category="CodeSchema_Class">
+                <LinkCategory Ref="Represents" />
+              </ExpandedNode>
+            </reference>
+          </references>
+        </layer>
+        <layer Id="7072cd38-3a70-4c91-9c4d-fed0dcef6aac" name="THUInfo">
+          <references>
+            <reference Id="27d4631e-e0dd-40fb-a262-1e01c3b4a630" name="THUInfo">
+              <ArtifactNode Label="THUInfo" Category="CodeSchema_Class" Id="(Assembly=&quot;$(PersonalUri)/GitHub/ProfessionalAccounting/Server/AccountingServer/bin/Debug/AccountingServer.exe&quot; Namespace=AccountingServer Type=THUInfo)" />
+              <ExpandedNode Id="(Assembly=AccountingServer Namespace=AccountingServer Type=THUInfo)" Label="THUInfo" Category="CodeSchema_Class">
+                <LinkCategory Ref="Represents" />
+              </ExpandedNode>
+            </reference>
+          </references>
+        </layer>
+        <layer Id="19543ff8-b3a0-44b5-b926-449a17e48f31" name="AccountingConsole">
+          <references>
+            <reference Id="fefe92f7-135c-4baa-8fc5-409ce3ec0c0a" name="AccountingConsole">
+              <ArtifactNode Label="AccountingConsole" Category="CodeSchema_Class" Id="(Assembly=&quot;$(PersonalUri)/GitHub/ProfessionalAccounting/Server/AccountingServer/bin/Debug/AccountingServer.exe&quot; Namespace=AccountingServer Type=AccountingConsole)" />
+              <ExpandedNode Id="(Assembly=AccountingServer Namespace=AccountingServer Type=AccountingConsole)" Label="AccountingConsole" Category="CodeSchema_Class">
+                <LinkCategory Ref="Represents" />
+              </ExpandedNode>
+            </reference>
+          </references>
+        </layer>
+        <layer Id="7cbd89d5-662c-4a0f-9129-6bbd254990b3" name="AccountingChart">
+          <references>
+            <reference Id="47b4e052-606a-4d03-915d-55c9d66cec5f" name="AccountingChart">
+              <ArtifactNode Label="AccountingChart" Category="CodeSchema_Class" Id="(Assembly=&quot;$(PersonalUri)/GitHub/ProfessionalAccounting/Server/AccountingServer/bin/Debug/AccountingServer.exe&quot; Namespace=AccountingServer.Chart Type=AccountingChart)" />
+              <ExpandedNode Id="(Assembly=AccountingServer Namespace=AccountingServer.Chart Type=AccountingChart)" Label="AccountingChart" Category="CodeSchema_Class">
+                <LinkCategory Ref="Represents" />
+              </ExpandedNode>
+            </reference>
+          </references>
+        </layer>
+      </childLayers>
       <references>
         <reference Id="06625f1c-acbc-4882-b139-d0c716286e08" name="AccountingServer">
           <ArtifactNode Label="AccountingServer" Category="CodeSchema_Project" Id="(Assembly=&quot;$(PersonalUri)/GitHub/ProfessionalAccounting/Server/AccountingServer/AccountingServer.csproj&quot;)" />

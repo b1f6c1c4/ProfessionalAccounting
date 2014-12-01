@@ -1,0 +1,3427 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" xmlns:dm1="http://schemas.microsoft.com/dsltools/Kernel" xmlns:dm2="http://schemas.microsoft.com/dsltools/Component" xmlns:dm3="http://schemas.microsoft.com/dsltools/UseCase" xmlns:dm4="http://schemas.microsoft.com/dsltools/Activity" xmlns:dm5="http://schemas.microsoft.com/dsltools/Interaction" xmlns:dm6="http://schemas.microsoft.com/dsltools/UmlModelLibrary" xmlns:dm7="http://schemas.microsoft.com/dsltools/UmlDiagrams" xmlns:dm8="http://schemas.microsoft.com/dsltools/LogicalClassDesigner"
+  dslVersion="1.0.0.0"
+  Id="4b0d7e76-b203-4315-8b2c-18d0ef77d7dc"
+  name="Entities"
+  visibility="Private" xmlns="http://schemas.microsoft.com/dsltools/ModelStore">
+  <referencesInternal>
+    <reference
+      Id="8b0c9bfd-79f2-4e2c-a103-1a68bf81df2c"
+      handle="viewcode://./CodeSchema_Namespace?Namespace%3DAccountingServer.Entities"
+      tag="ViewCode" />
+  </referencesInternal>
+  <profileInstances>
+    <packageHasProfileInstances
+      Id="db091824-95f1-42b6-9328-f5e86b0b210c">
+      <profileInstance
+        Id="d9aefa00-a895-4499-90c6-2e0c3406a058"
+        name="CSharpProfile" />
+    </packageHasProfileInstances>
+  </profileInstances>
+  <packagedElements>
+    <packageHasNamedElement>
+      <class
+        Id="46a0ad95-9105-487f-9abc-62e4615e0b3f"
+        name="BalanceComparer"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <referencesInternal>
+          <reference
+            Id="32a829cc-5c1b-458a-8789-ef261594b42b"
+            handle="viewcode://./CodeSchema_Class?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalanceComparer"
+            tag="ViewCode" />
+        </referencesInternal>
+        <appliedStereotypesInternal>
+          <stereotypeInstance
+            Id="bae638c0-248c-49fe-9d74-e3be5454e97b"
+            name="class"
+            profile="CSharpProfile">
+            <propertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="bd1f0c66-3ad4-47f4-abd1-941cfcb39533">
+                <propertyInstance
+                  Id="eb16ef84-004d-48f1-8e69-d285878a0865"
+                  name="ClrAttributes" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="ee2036a1-9336-4058-b3e6-e9c41ba7188b">
+                <propertyInstance
+                  Id="abe436df-4fc6-463f-bfd9-da6135e6e238"
+                  name="IsPartial"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="117ac68a-2446-437e-a191-57ca09a45d30">
+                <propertyInstance
+                  Id="39459546-1164-495c-8538-ee94f70934b8"
+                  name="IsStatic"
+                  value="False" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="c97b5eeb-6da8-4147-bac4-13db8db91ec8">
+                <propertyInstance
+                  Id="6c778887-c4e6-4ced-b839-fd6f66e85e08"
+                  name="IsUnsafe"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="390103a4-1efe-4e10-b472-25d7d3bd6e7a">
+                <propertyInstance
+                  Id="57a1afe6-beaa-49d2-854d-39680decadc5"
+                  name="PackageVisibility"
+                  value="internal" />
+              </stereotypeInstanceHasPropertyInstances>
+            </propertyInstances>
+          </stereotypeInstance>
+        </appliedStereotypesInternal>
+        <suppliersInternal>
+          <dependency
+            Id="9303d023-59f1-402f-a67b-135016ce1d27">
+            <classMoniker
+              Id="af57b537-7479-4e14-9e5d-bc5b4678da32"
+              LastKnownName="Balance"
+              LastKnownLocation="Package1_1841.uml" />
+          </dependency>
+        </suppliersInternal>
+        <generalsInternal>
+          <generalization
+            Id="4b53624b-251b-4a5d-b3db-09015929fa8c"
+            isSubstitutable="false">
+            <classMoniker
+              Id="e063c4df-20c5-4b5e-8468-77a51a016f86"
+              LastKnownName="Comparer&lt;Balance‎&gt;"
+              LastKnownLocation="Package4_1841.uml" />
+          </generalization>
+          <generalization
+            Id="e2f48c3f-a614-4fcf-b050-af72715ac19b"
+            isSubstitutable="false">
+            <classMoniker
+              Id="72a1a106-3e95-48d8-9689-74f8d2bc9f51"
+              LastKnownName="Comparer"
+              LastKnownLocation="Package4_1841.uml" />
+          </generalization>
+        </generalsInternal>
+        <ownedOperationsInternal>
+          <operation
+            Id="d05bc9b7-eaa9-4167-b9a4-87df26634c1b"
+            name="Compare"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <referencesInternal>
+              <reference
+                Id="a31227a2-1a25-4e08-91de-c342125456d4"
+                handle="viewcode://./CodeSchema_Method?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalanceComparer Member%3D(Name%3DCompare OverloadingParameters%3D[(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance)%2C(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance)])"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="22921a7b-f37b-4ec4-9cfe-b7180a65602b"
+                name="method"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="f557087f-4d49-4f5d-91be-2bb86edb1402">
+                    <propertyInstance
+                      Id="e72dadd7-47cc-4ded-ad08-6cfab8e80eda"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="46654798-ec86-4f8f-82ab-ac1a9ed10c44">
+                    <propertyInstance
+                      Id="bb40e8e2-188b-4a73-b797-df7677c5b622"
+                      name="IsPartial"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="96f93b77-4a81-4faf-90ae-6fa316590112">
+                    <propertyInstance
+                      Id="49691ef9-f0a8-42bd-99e0-e319206d31e2"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="b0d52846-b087-4ffe-a0bf-fe2aad960bb2">
+                    <propertyInstance
+                      Id="d2e0b545-3b6f-496a-8609-c4ef97e040da"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="896a7448-731b-4673-a6b2-4b94de139e79">
+                    <propertyInstance
+                      Id="f2b409fe-e217-48fa-a21c-18a167bf79e7"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="9cf20ac3-24f0-4de3-96c0-5ba67f44f2dd">
+                    <propertyInstance
+                      Id="827e0820-b89e-47d1-a23a-bf17c8ef717d"
+                      name="params"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="d0f3af9e-893d-473a-b66b-b78acc1f8e57"
+                  direction="Return">
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="220a3521-e091-4221-bae9-3ef9018e845c"
+                      LastKnownName="Integer"
+                      LastKnownLocation="ModelingProject1.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="aa0ece63-a2ea-4a11-9cd2-afa3762f3943"
+                  name="x"
+                  direction="In">
+                  <referencesInternal>
+                    <reference
+                      Id="84401029-e9f5-4b5f-8844-f7b793ace783"
+                      handle="viewcode://./CodeSchema_Parameter?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalanceComparer Member%3D(Name%3DCompare OverloadingParameters%3D[(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance)%2C(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance)]) ParameterIdentifier%3Dx"
+                      tag="ViewCode" />
+                  </referencesInternal>
+                  <type_NamedElement>
+                    <classMoniker
+                      Id="af57b537-7479-4e14-9e5d-bc5b4678da32"
+                      LastKnownName="Balance"
+                      LastKnownLocation="Package1_1841.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="c41a6ba2-c386-4e74-a81b-f72193b41ea7"
+                  name="y"
+                  direction="In">
+                  <referencesInternal>
+                    <reference
+                      Id="056994dc-f25e-4e3a-b049-3fc5d4674fe0"
+                      handle="viewcode://./CodeSchema_Parameter?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalanceComparer Member%3D(Name%3DCompare OverloadingParameters%3D[(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance)%2C(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance)]) ParameterIdentifier%3Dy"
+                      tag="ViewCode" />
+                  </referencesInternal>
+                  <type_NamedElement>
+                    <classMoniker
+                      Id="af57b537-7479-4e14-9e5d-bc5b4678da32"
+                      LastKnownName="Balance"
+                      LastKnownLocation="Package1_1841.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="36cdc05f-96e2-42a0-a293-90eb925ea385"
+            name="BalanceComparer"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <referencesInternal>
+              <reference
+                Id="e38febd6-d7f0-4c3d-98c2-b8bb531ebde5"
+                handle="viewcode://./CodeSchema_Method?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalanceComparer Member%3D.ctor"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="cc93ee56-02f5-42a1-a100-5342d9f938e9"
+                name="method"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="46ec73e2-3c4f-451e-bb3f-5b3c339b2c04">
+                    <propertyInstance
+                      Id="42b0ef37-7b70-4d16-9cd2-252a7cf98d0c"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="87d1c65f-5e71-4ffe-b78c-0c82d07cae7c">
+                    <propertyInstance
+                      Id="983094a1-1f90-4064-8111-70c192f24538"
+                      name="IsPartial"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="be217ba5-cf61-46b9-bee1-7dbbaed4510f">
+                    <propertyInstance
+                      Id="cd38e911-0297-417e-8936-770b4c71f996"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="b815e65a-6160-4805-ad5a-9ab2aa3a5d26">
+                    <propertyInstance
+                      Id="fd653c5b-5331-4d28-ba7d-0557a668f1d8"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="749b0aac-a9ed-47d2-abed-d2c8a8f93e33">
+                    <propertyInstance
+                      Id="d489d0a0-834d-4abe-bb1a-35fba53ed546"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="6ce6a444-86e9-4a2f-9c48-90b2b27f6f8c">
+                    <propertyInstance
+                      Id="94dc9fb5-59c3-48ce-a455-44dc02839139"
+                      name="params"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+          </operation>
+          <operation
+            Id="c2d55f72-dd06-4c60-8f1f-15673d0ba9e5"
+            name="CompareDate"
+            isLeaf="false"
+            isStatic="true"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <referencesInternal>
+              <reference
+                Id="0b98bf81-540f-4e32-aa4e-279f99a2530d"
+                handle="viewcode://./CodeSchema_Method?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalanceComparer Member%3D(Name%3DCompareDate OverloadingParameters%3D[(Assembly%3D&quot;file:%2F%2F%2FC:%2FProgram Files (x86)%2FReference Assemblies%2FMicrosoft%2FFramework%2F.NETFramework%2Fv4.5%2Fmscorlib.dll&quot; Namespace%3DSystem Type%3D(Name%3DNullable GenericParameterCount%3D1 GenericArguments%3D[(Assembly%3D&quot;file:%2F%2F%2FC:%2FProgram Files (x86)%2FReference Assemblies%2FMicrosoft%2FFramework%2F.NETFramework%2Fv4.5%2Fmscorlib.dll&quot; Namespace%3DSystem Type%3DDateTime)]))%2C(Assembly%3D&quot;file:%2F%2F%2FC:%2FProgram Files (x86)%2FReference Assemblies%2FMicrosoft%2FFramework%2F.NETFramework%2Fv4.5%2Fmscorlib.dll&quot; Namespace%3DSystem Type%3D(Name%3DNullable GenericParameterCount%3D1 GenericArguments%3D[(Assembly%3D&quot;file:%2F%2F%2FC:%2FProgram Files (x86)%2FReference Assemblies%2FMicrosoft%2FFramework%2F.NETFramework%2Fv4.5%2Fmscorlib.dll&quot; Namespace%3DSystem Type%3DDateTime)]))])"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="2f0ede09-41d3-490e-a12e-14845f383e64"
+                name="method"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="c772a438-ff19-4306-bd82-bcd3ae5f2848">
+                    <propertyInstance
+                      Id="3258d087-7167-472a-b9b1-9cf47a3ad2be"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="b2f2c02b-1473-4796-9926-e7737012d87a">
+                    <propertyInstance
+                      Id="6f575646-dcda-40a0-b273-4427519ee9bf"
+                      name="IsPartial"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="eb5929bb-e306-4b11-89a8-700bd25369ae">
+                    <propertyInstance
+                      Id="ee414c71-f165-42fd-8907-fab5b72115a1"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="0554ae81-2ad4-49ee-bd07-596b6a4945ef">
+                    <propertyInstance
+                      Id="606127ef-82cb-4fe4-8df1-d223ed70a3f3"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="54787ca4-b421-4c68-b244-6f98a0ef83ac">
+                    <propertyInstance
+                      Id="677a8a2c-73f8-49e9-8a44-c58dcf36977c"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="9062a17b-9b32-40aa-bae7-58a39d9875fc">
+                    <propertyInstance
+                      Id="53745c53-5be2-47cb-83e2-4bf3d109751e"
+                      name="params"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="3a1c7db0-62a2-4b05-90bf-2f50d7efd2ff"
+                  direction="Return">
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="220a3521-e091-4221-bae9-3ef9018e845c"
+                      LastKnownName="Integer"
+                      LastKnownLocation="ModelingProject1.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="548b61b6-3674-469c-9b44-9f32a70339e0"
+                  name="b1Date"
+                  direction="In">
+                  <referencesInternal>
+                    <reference
+                      Id="6daee2bf-3211-483e-a671-2c4be966d825"
+                      handle="viewcode://./CodeSchema_Parameter?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalanceComparer Member%3D(Name%3DCompareDate OverloadingParameters%3D[(Assembly%3D&quot;file:%2F%2F%2FC:%2FProgram Files (x86)%2FReference Assemblies%2FMicrosoft%2FFramework%2F.NETFramework%2Fv4.5%2Fmscorlib.dll&quot; Namespace%3DSystem Type%3D(Name%3DNullable GenericParameterCount%3D1 GenericArguments%3D[(Assembly%3D&quot;file:%2F%2F%2FC:%2FProgram Files (x86)%2FReference Assemblies%2FMicrosoft%2FFramework%2F.NETFramework%2Fv4.5%2Fmscorlib.dll&quot; Namespace%3DSystem Type%3DDateTime)]))%2C(Assembly%3D&quot;file:%2F%2F%2FC:%2FProgram Files (x86)%2FReference Assemblies%2FMicrosoft%2FFramework%2F.NETFramework%2Fv4.5%2Fmscorlib.dll&quot; Namespace%3DSystem Type%3D(Name%3DNullable GenericParameterCount%3D1 GenericArguments%3D[(Assembly%3D&quot;file:%2F%2F%2FC:%2FProgram Files (x86)%2FReference Assemblies%2FMicrosoft%2FFramework%2F.NETFramework%2Fv4.5%2Fmscorlib.dll&quot; Namespace%3DSystem Type%3DDateTime)]))]) ParameterIdentifier%3Db1Date"
+                      tag="ViewCode" />
+                  </referencesInternal>
+                  <type_NamedElement>
+                    <classMoniker
+                      Id="4481538a-7940-438d-b06d-c6606a507cfa"
+                      LastKnownName="Nullable&lt;DateTime‎&gt;"
+                      LastKnownLocation="Package2_1841.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="a46577f1-3d33-4bed-b1da-c5bf75a9fc5f"
+                  name="b2Date"
+                  direction="In">
+                  <referencesInternal>
+                    <reference
+                      Id="5eac257b-92d8-4811-b611-ab46829d5359"
+                      handle="viewcode://./CodeSchema_Parameter?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalanceComparer Member%3D(Name%3DCompareDate OverloadingParameters%3D[(Assembly%3D&quot;file:%2F%2F%2FC:%2FProgram Files (x86)%2FReference Assemblies%2FMicrosoft%2FFramework%2F.NETFramework%2Fv4.5%2Fmscorlib.dll&quot; Namespace%3DSystem Type%3D(Name%3DNullable GenericParameterCount%3D1 GenericArguments%3D[(Assembly%3D&quot;file:%2F%2F%2FC:%2FProgram Files (x86)%2FReference Assemblies%2FMicrosoft%2FFramework%2F.NETFramework%2Fv4.5%2Fmscorlib.dll&quot; Namespace%3DSystem Type%3DDateTime)]))%2C(Assembly%3D&quot;file:%2F%2F%2FC:%2FProgram Files (x86)%2FReference Assemblies%2FMicrosoft%2FFramework%2F.NETFramework%2Fv4.5%2Fmscorlib.dll&quot; Namespace%3DSystem Type%3D(Name%3DNullable GenericParameterCount%3D1 GenericArguments%3D[(Assembly%3D&quot;file:%2F%2F%2FC:%2FProgram Files (x86)%2FReference Assemblies%2FMicrosoft%2FFramework%2F.NETFramework%2Fv4.5%2Fmscorlib.dll&quot; Namespace%3DSystem Type%3DDateTime)]))]) ParameterIdentifier%3Db2Date"
+                      tag="ViewCode" />
+                  </referencesInternal>
+                  <type_NamedElement>
+                    <classMoniker
+                      Id="4481538a-7940-438d-b06d-c6606a507cfa"
+                      LastKnownName="Nullable&lt;DateTime‎&gt;"
+                      LastKnownLocation="Package2_1841.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+        </ownedOperationsInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="af57b537-7479-4e14-9e5d-bc5b4678da32"
+        name="Balance"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <referencesInternal>
+          <reference
+            Id="0605b5d3-6f8f-4069-befa-e40cb9b81d8f"
+            handle="viewcode://./CodeSchema_Class?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance"
+            tag="ViewCode" />
+        </referencesInternal>
+        <appliedStereotypesInternal>
+          <stereotypeInstance
+            Id="7a228280-b4c9-4883-b263-464a32adbc70"
+            name="class"
+            profile="CSharpProfile">
+            <propertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="bb55f058-7a43-4ce5-b924-14f22bf16d96">
+                <propertyInstance
+                  Id="44ba350a-1542-4740-b612-0cd4c9d605e3"
+                  name="ClrAttributes" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="0db47810-2ac0-4df2-9940-99de1208f062">
+                <propertyInstance
+                  Id="ff65955c-6f1f-42e0-be4c-7025bd8eb89f"
+                  name="IsPartial"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="e5633c22-69b2-40b6-b9ef-9d4093ed7051">
+                <propertyInstance
+                  Id="3ba017fa-2a3d-4560-a12a-bc0a71c2b78e"
+                  name="IsStatic"
+                  value="False" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="1a669d98-23f3-4d77-93c0-2bdb695c1243">
+                <propertyInstance
+                  Id="4d0cdc9c-0996-422e-905c-156f62ff755a"
+                  name="IsUnsafe"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="5855ea9e-62af-4a27-b2df-5fcfb93fdd60">
+                <propertyInstance
+                  Id="c17de465-d4a4-4e5a-92f5-c7b437044939"
+                  name="PackageVisibility"
+                  value="internal" />
+              </stereotypeInstanceHasPropertyInstances>
+            </propertyInstances>
+          </stereotypeInstance>
+        </appliedStereotypesInternal>
+        <targetEnds>
+          <association
+            Id="42d25f9c-6265-4bbc-85aa-7046a6302d25"
+            isDerived="false"
+            sourceEndRoleName="Balance"
+            targetEndRoleName="Date"
+            isLeaf="false"
+            isAbstract="false">
+            <classMoniker
+              Id="4481538a-7940-438d-b06d-c6606a507cfa"
+              LastKnownName="Nullable&lt;DateTime‎&gt;"
+              LastKnownLocation="Package2_1841.uml" />
+            <description>属性 Date 引用类型 Nullable&lt;DateTime‎&gt;。</description>
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="09850eb7-c0dd-4f36-98e8-f2c3f99d83f3"
+                  name="Balance"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false"
+                  isNavigableOwned="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="b5443eed-77d5-4cf2-adaf-234c2029f7af"
+                      name="Lower"
+                      value="*" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="a0ab653e-b0f9-49c7-8a76-fac74225c13e"
+                      name="Upper"
+                      value="*" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="8e4678bf-a766-4899-8b0d-44f7d6772ee2"
+                  name="Date"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="9ba1318c-98c7-489d-afa9-954a7b2733d1"
+                      name="Lower"
+                      value="1" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="8770f140-e488-478e-a2cc-8f10eab162fb"
+                      name="Upper"
+                      value="1" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+          </association>
+          <association
+            Id="b992deb9-c0d9-4c2e-bd9a-7b1e6fbe2c11"
+            isDerived="false"
+            sourceEndRoleName="Balance"
+            targetEndRoleName="Title"
+            isLeaf="false"
+            isAbstract="false">
+            <classMoniker
+              Id="bacc6775-ff8f-44d0-a052-80cedbd082b9"
+              LastKnownName="Nullable&lt;Int32‎&gt;"
+              LastKnownLocation="Package2_1841.uml" />
+            <description>属性 Title 引用类型 Nullable&lt;Int32‎&gt;。</description>
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="1ae3732e-cb16-4da0-862a-5841e72eb9a0"
+                  name="Balance"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false"
+                  isNavigableOwned="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="c4d7b926-4cd6-4739-af8c-9bde189ec4c0"
+                      name="Lower"
+                      value="*" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="250d77a0-927e-4183-923c-1ec6d455e847"
+                      name="Upper"
+                      value="*" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="7eaf3fd2-b62d-484f-9489-597c5dfd1394"
+                  name="Title"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="27d03490-fdd2-4a30-ab19-9546a50dd84c"
+                      name="Lower"
+                      value="1" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="f6b0726e-ce21-403c-973b-532623c4627b"
+                      name="Upper"
+                      value="1" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+          </association>
+          <association
+            Id="a01baabc-beb9-4be9-bfae-51dbc8eb556a"
+            isDerived="false"
+            sourceEndRoleName="Balance"
+            targetEndRoleName="SubTitle"
+            isLeaf="false"
+            isAbstract="false">
+            <classMoniker
+              Id="bacc6775-ff8f-44d0-a052-80cedbd082b9"
+              LastKnownName="Nullable&lt;Int32‎&gt;"
+              LastKnownLocation="Package2_1841.uml" />
+            <description>属性 SubTitle 引用类型 Nullable&lt;Int32‎&gt;。</description>
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="360c0c6f-6d66-417f-b0b5-4ccfcc84b75f"
+                  name="Balance"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false"
+                  isNavigableOwned="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="d484a490-e31f-460c-9879-16192989d81b"
+                      name="Lower"
+                      value="*" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="778d5f8c-e42c-4495-b892-535fd41d592a"
+                      name="Upper"
+                      value="*" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="d0952570-b86e-447b-aa93-f50d632abf01"
+                  name="SubTitle"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="2b31fe47-2eef-49a8-93a5-900a9bb1a47d"
+                      name="Lower"
+                      value="1" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="b902c1ba-f1cb-43d0-907f-8640772645da"
+                      name="Upper"
+                      value="1" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+          </association>
+          <association
+            Id="46160cc2-ae84-4bcb-a870-5dbe960a527d"
+            isDerived="false"
+            sourceEndRoleName="Balance"
+            targetEndRoleName="Fund"
+            isLeaf="false"
+            isAbstract="false">
+            <classMoniker
+              Id="55549e1e-3e32-410f-816e-dccba4c6eb50"
+              LastKnownName="Double"
+              LastKnownLocation="Package2_1841.uml" />
+            <description>属性 Fund 引用类型 Double。</description>
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="11d6248b-c6ac-475b-9fe9-6a085024175e"
+                  name="Balance"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false"
+                  isNavigableOwned="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="059c0b6b-e33a-40eb-89d0-9c08833613b5"
+                      name="Lower"
+                      value="*" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="3ab0fb97-bbf5-4eb0-bb04-7731511abceb"
+                      name="Upper"
+                      value="*" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="afe219cf-4b01-4387-b26d-c00f92dfd22d"
+                  name="Fund"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="1323f597-d1ae-4e0c-803c-f42dd4a86f86"
+                      name="Lower"
+                      value="1" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="204afe3b-b794-470b-8cb5-67fb35cd65f3"
+                      name="Upper"
+                      value="1" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+          </association>
+        </targetEnds>
+        <ownedAttributesInternal>
+          <property
+            Id="290e9df3-f7d6-42a6-b5a0-235935d2a734"
+            name="Date"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <referencesInternal>
+              <reference
+                Id="83d45ca6-1296-4cb1-8575-294bb0723766"
+                handle="viewcode://./CodeSchema_Property?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance Member%3DDate"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="391ea0d4-1cd8-4521-a628-ea6c1a828dda"
+                name="property"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="97def923-3857-47f4-8303-46e3ebaeb9b5">
+                    <propertyInstance
+                      Id="44e574e7-2292-4039-91d8-e9a9429fd551"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="d4e7279d-326d-4347-b515-0162c5b89906">
+                    <propertyInstance
+                      Id="7b9022b1-c58b-4e7a-ba75-f095ecd2ca6d"
+                      name="Get"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="ea68ff38-91bd-4541-bc11-165c48757437">
+                    <propertyInstance
+                      Id="242cb30a-7417-4edd-9eeb-2803d89cbeee"
+                      name="HasBody"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="fac5dd10-df12-4640-9d5f-765d9caa321d">
+                    <propertyInstance
+                      Id="b9512d61-82bc-4a82-a751-2e1733af5e48"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="ce181a42-d806-474d-b04c-093630ed0eb6">
+                    <propertyInstance
+                      Id="022ebc73-281b-42de-a6fa-e59a8ca86b96"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="c4eb47fa-6dab-4838-8da8-4ce0dfdab86d">
+                    <propertyInstance
+                      Id="cf2fbf04-3ee6-4942-bff8-a38406111075"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="60950986-5485-4653-babe-a396152c0672">
+                    <propertyInstance
+                      Id="81aa7cff-96cb-40fb-b7c7-669e02d4c4b9"
+                      name="Set"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <type_NamedElement>
+              <classMoniker
+                Id="4481538a-7940-438d-b06d-c6606a507cfa"
+                LastKnownName="Nullable&lt;DateTime‎&gt;"
+                LastKnownLocation="Package2_1841.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="8e5017dc-6200-40d2-9dd0-52a7f121a814"
+            name="Title"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <referencesInternal>
+              <reference
+                Id="35baa2dc-c807-4f84-959e-8e393970d348"
+                handle="viewcode://./CodeSchema_Property?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance Member%3DTitle"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="f0f6fedc-e15e-4ba5-abbc-45ac592b11b4"
+                name="property"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="18d3a233-3f55-4535-a363-57c69c577ee3">
+                    <propertyInstance
+                      Id="9dc3906f-62a8-4259-b716-0a5d66db5c3b"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="3b31704d-3277-4e8b-8fce-f3f7c1ded458">
+                    <propertyInstance
+                      Id="57d50778-7d18-4246-bf17-a528d61b7678"
+                      name="Get"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="765815f6-096a-4bf6-93db-37c15bcce24a">
+                    <propertyInstance
+                      Id="8b0d22ff-aa4b-482c-b3f0-26c3546c0a87"
+                      name="HasBody"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="b840c754-715a-4a38-b6f7-192c0c662d12">
+                    <propertyInstance
+                      Id="13b701a2-b73f-4a7f-b408-2dc563e1c2b0"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="fdbead39-5761-45cd-b7be-13994b27007c">
+                    <propertyInstance
+                      Id="4780ef3e-0b09-4a10-a257-1896224de56a"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="f2781405-8ab4-4b9c-9bfb-fde16f9a8a00">
+                    <propertyInstance
+                      Id="c02132bc-fdc6-4ee7-bab2-ddeda355801d"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="ae3ea05c-9b15-45ae-a417-ba3830168fac">
+                    <propertyInstance
+                      Id="27ea40b4-ee11-47dd-b7de-ac1af9461b51"
+                      name="Set"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <type_NamedElement>
+              <classMoniker
+                Id="bacc6775-ff8f-44d0-a052-80cedbd082b9"
+                LastKnownName="Nullable&lt;Int32‎&gt;"
+                LastKnownLocation="Package2_1841.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="65379f66-ff49-440e-a63c-e12da9a8774a"
+            name="SubTitle"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <referencesInternal>
+              <reference
+                Id="0969fef5-010d-427a-b8d9-1ff114b000d5"
+                handle="viewcode://./CodeSchema_Property?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance Member%3DSubTitle"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="6bbb7c66-0165-42ea-a17b-f95e618998f0"
+                name="property"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="83679695-cdd2-46c2-b11f-7263fa2d1bdf">
+                    <propertyInstance
+                      Id="53ef553a-44ef-44f9-8895-25c85674f6ad"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="1db46d35-cb72-46f5-ae5f-ba723d74f690">
+                    <propertyInstance
+                      Id="91e1cf43-d9c4-4001-a020-aead1fe06f33"
+                      name="Get"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="a3f496d0-11b1-4454-9cc6-d6c8bc81405e">
+                    <propertyInstance
+                      Id="e9ca7b95-ce4f-473d-9863-f21d3e93fbdd"
+                      name="HasBody"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="72d10cf2-8afb-42e9-81c1-3cae6e9facce">
+                    <propertyInstance
+                      Id="28698f46-c4d1-4baa-be62-0d13205abe12"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="49a0764a-488a-4cc1-b453-907be85e9c61">
+                    <propertyInstance
+                      Id="024a68db-dfc9-4653-837e-687d6474546c"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="6801e16a-2183-4dc5-8867-41c11eee0088">
+                    <propertyInstance
+                      Id="f681ba19-27b9-4847-b9f2-ec29d5c3a3a6"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="c1d18fb4-d058-44bf-9e95-8706055c922e">
+                    <propertyInstance
+                      Id="6c06cfe1-4c52-4cb4-9cdc-bf984265a11d"
+                      name="Set"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <type_NamedElement>
+              <classMoniker
+                Id="bacc6775-ff8f-44d0-a052-80cedbd082b9"
+                LastKnownName="Nullable&lt;Int32‎&gt;"
+                LastKnownLocation="Package2_1841.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="c4e59bfa-8b88-43ff-837d-ca56c4e6f36f"
+            name="Content"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <referencesInternal>
+              <reference
+                Id="c727451b-80e9-49ab-97a4-a7e027eb28ba"
+                handle="viewcode://./CodeSchema_Property?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance Member%3DContent"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="d28d6994-1e6a-49e0-9440-4a2425fb5143"
+                name="property"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="0934172d-b996-4cfe-83be-9aaf0f3cd06f">
+                    <propertyInstance
+                      Id="3f5b6ed5-e262-4d5c-a2de-8648f3d11b8c"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="9d9ed773-1e6e-4480-9280-8cb6c5a1b6bd">
+                    <propertyInstance
+                      Id="4dbf764e-a69c-4b31-af8c-e383288dba99"
+                      name="Get"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="254c130c-16e6-4229-acc0-b3238ac7fcb8">
+                    <propertyInstance
+                      Id="d99894b8-13a4-4047-ae46-b8615a4b64ab"
+                      name="HasBody"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="5f51a191-34a5-4813-8c37-e53cee3968e8">
+                    <propertyInstance
+                      Id="e9bf24da-4de1-4511-bddd-68dabba5a234"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="d6b72824-8b73-43b3-9727-d210c88ed1fc">
+                    <propertyInstance
+                      Id="2aea3bba-ff9c-4a08-869d-9959342b4413"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="c6e75417-4bae-46a1-ab06-dd3ea681e2c1">
+                    <propertyInstance
+                      Id="1810e860-c897-47c0-93ed-a4a4ad582104"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="a1c8a42a-9752-4992-937c-0341596146d4">
+                    <propertyInstance
+                      Id="a40fb4d8-d55b-41fc-8b1b-95a56c8546f6"
+                      name="Set"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                LastKnownName="String"
+                LastKnownLocation="ModelingProject1.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="386af946-a4d3-4fa3-b5a2-7303ee27865e"
+            name="Fund"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <referencesInternal>
+              <reference
+                Id="6208ca84-b0b2-484d-81eb-2675cb271294"
+                handle="viewcode://./CodeSchema_Property?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance Member%3DFund"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="1e9ee00f-79ba-460e-a146-77c0d60a2660"
+                name="property"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="00a6c508-4263-463b-b7d0-82869140c43d">
+                    <propertyInstance
+                      Id="e685428b-0b53-445c-8a8d-5b978de8386d"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="a1961d0e-b414-4d39-9566-ab2dda54eeb0">
+                    <propertyInstance
+                      Id="b4075bb9-3c2d-414d-bfe3-c046730aa262"
+                      name="Get"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="e6a05b2b-9c91-4b21-80b9-35b17717da67">
+                    <propertyInstance
+                      Id="8d465ef5-3250-4dee-a16d-c1e561ab607d"
+                      name="HasBody"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="9816da24-7625-45f6-b223-4a6c01508abb">
+                    <propertyInstance
+                      Id="67636fe1-79e1-4718-b86b-a3b4952500b1"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="d6d5a829-b2c6-44d1-9a43-73ccf22aa979">
+                    <propertyInstance
+                      Id="695c29ed-2c6d-4c32-a779-ea04cf8914ba"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="ead1d0a6-4ce5-4a6a-b37b-997bd50cbe04">
+                    <propertyInstance
+                      Id="ed252234-3371-4ddc-9dc3-cfc5a2c3b3b8"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="5fa1f9b7-ba34-4e30-a605-3674f2a54854">
+                    <propertyInstance
+                      Id="a1b36eac-3285-4c70-9e71-aabe2d0edd97"
+                      name="Set"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <type_NamedElement>
+              <classMoniker
+                Id="55549e1e-3e32-410f-816e-dccba4c6eb50"
+                LastKnownName="Double"
+                LastKnownLocation="Package2_1841.uml" />
+            </type_NamedElement>
+          </property>
+        </ownedAttributesInternal>
+        <ownedOperationsInternal>
+          <operation
+            Id="0fe94f6f-7ac6-42ff-83a8-640d42eed4b9"
+            name="Balance"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <referencesInternal>
+              <reference
+                Id="aaccca62-b622-44e2-b890-f42273427afc"
+                handle="viewcode://./CodeSchema_Method?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance Member%3D.ctor"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="b11615d0-c34b-4c0c-a9b1-25a9b1a8bb21"
+                name="method"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="aec3bc25-b027-442c-8357-ecee293e5d61">
+                    <propertyInstance
+                      Id="9dfc7a96-964d-43e6-a035-88554c93597c"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="c374d0cb-8f91-4926-81d2-e44542762d8f">
+                    <propertyInstance
+                      Id="76328424-b6ea-48b3-896d-24f29da5c393"
+                      name="IsPartial"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="d3ffbd3d-ad75-4624-90c7-cc99801ad6bd">
+                    <propertyInstance
+                      Id="37017ed8-dff5-4444-bcd2-3fcc910ac825"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="03be8dec-1415-49f0-bb9f-61e2dee9c34e">
+                    <propertyInstance
+                      Id="371aa587-9006-4874-b0e5-f2583685a035"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="fda1c081-22cc-47ae-9c86-bc80c07146ac">
+                    <propertyInstance
+                      Id="1377ed4a-88a6-41c3-b1ca-271465401900"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="8626356f-b561-4888-857f-0612cc137e18">
+                    <propertyInstance
+                      Id="de3f4406-60ab-4683-9d2c-5f040c06c98c"
+                      name="params"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+          </operation>
+        </ownedOperationsInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="8a1aa08f-1a2e-48d8-9f37-5d3f80c9d491"
+        name="BalanceEqualityComparer"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <referencesInternal>
+          <reference
+            Id="15c4fae0-4fe4-44fe-9448-f3b5acd9c6bf"
+            handle="viewcode://./CodeSchema_Class?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalanceEqualityComparer"
+            tag="ViewCode" />
+        </referencesInternal>
+        <appliedStereotypesInternal>
+          <stereotypeInstance
+            Id="297c1de5-6e4f-4ed4-999a-40407576d734"
+            name="class"
+            profile="CSharpProfile">
+            <propertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="3fec2caa-0e42-434e-a81e-876b0c134334">
+                <propertyInstance
+                  Id="9dee1f69-2da2-4786-95a2-551a274ea8c2"
+                  name="ClrAttributes" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="e0f6b2d2-7489-4cbe-a5cd-9b5e617b7981">
+                <propertyInstance
+                  Id="719560a2-4cd0-4a8c-a706-7bebfa28fa68"
+                  name="IsPartial"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="02a531c7-3c9e-4329-bd03-331c9ab3767b">
+                <propertyInstance
+                  Id="b62bc136-dc47-44e9-ae93-3b52d085b634"
+                  name="IsStatic"
+                  value="False" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="307ffede-fef1-4f7b-90a0-5cd8ff8f42b9">
+                <propertyInstance
+                  Id="54099e58-ef7a-4b1f-8feb-27011d201a06"
+                  name="IsUnsafe"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="df0877ea-6105-48cc-9378-84473dd645d5">
+                <propertyInstance
+                  Id="8fa93a7b-b6ee-4be6-b79e-a3edccc72658"
+                  name="PackageVisibility"
+                  value="internal" />
+              </stereotypeInstanceHasPropertyInstances>
+            </propertyInstances>
+          </stereotypeInstance>
+        </appliedStereotypesInternal>
+        <suppliersInternal>
+          <dependency
+            Id="4db30cd2-ead5-45e5-9783-95e743aa610a">
+            <classMoniker
+              Id="af57b537-7479-4e14-9e5d-bc5b4678da32"
+              LastKnownName="Balance"
+              LastKnownLocation="Package1_1841.uml" />
+          </dependency>
+        </suppliersInternal>
+        <generalsInternal>
+          <generalization
+            Id="25c7bd26-48a2-4cc1-9d2a-3dea37d6ce7a"
+            isSubstitutable="false">
+            <classMoniker
+              Id="9a7e483c-d47c-4182-922d-544e0457d864"
+              LastKnownName="EqualityComparer&lt;Balance‎&gt;"
+              LastKnownLocation="Package4_1841.uml" />
+          </generalization>
+          <generalization
+            Id="3d8af889-3447-49d4-9861-daf378e82e23"
+            isSubstitutable="false">
+            <classMoniker
+              Id="72be4048-3037-4849-833f-4b47d5fa27cc"
+              LastKnownName="EqualityComparer"
+              LastKnownLocation="Package4_1841.uml" />
+          </generalization>
+        </generalsInternal>
+        <ownedOperationsInternal>
+          <operation
+            Id="1bf554ee-c79d-4dce-8b75-374f4dcd88f4"
+            name="Equals"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <referencesInternal>
+              <reference
+                Id="74bccd9d-2a98-4b14-a721-533d18b0f5f7"
+                handle="viewcode://./CodeSchema_Method?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalanceEqualityComparer Member%3D(Name%3DEquals OverloadingParameters%3D[(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance)%2C(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance)])"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="58bae64f-5cd1-4d7b-8d7f-a6255cf9caed"
+                name="method"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="57343d94-ea38-431e-9ab0-9e3ea4d40eb0">
+                    <propertyInstance
+                      Id="58e219b4-6be8-4d80-8187-e69f38a50e56"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="c4a4def5-a5e8-417c-b7d6-095d16f3e9a6">
+                    <propertyInstance
+                      Id="1ff446ee-41b1-4538-b5e5-0fdecea5c6c3"
+                      name="IsPartial"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="6a365538-5936-4853-b6b8-ea036c79539f">
+                    <propertyInstance
+                      Id="a6608ab6-1dfb-4f5b-b2d9-cd0c9d5a6b61"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="596c3c5c-e8e3-49b9-9d2a-58028a018264">
+                    <propertyInstance
+                      Id="4fdf2776-72d5-4c28-ac8b-6b8789403314"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="d55ec3f8-1417-4eda-bb9d-ee5abd176fe4">
+                    <propertyInstance
+                      Id="595d2af5-c6bc-4559-b2a8-835ba12576d2"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="0da71bba-5396-4d9c-b12e-41a6e81d1741">
+                    <propertyInstance
+                      Id="912fa7c5-2b6f-4d18-ae54-2dd7420be347"
+                      name="params"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="6ef5ed15-6131-40ac-b2d2-bee2d7ceb190"
+                  direction="Return">
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="8943dc84-709e-4f62-b15a-a3273aa6f165"
+                      LastKnownName="Boolean"
+                      LastKnownLocation="ModelingProject1.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="5c8db5be-4db4-4c3a-9761-abf5eee79b39"
+                  name="x"
+                  direction="In">
+                  <referencesInternal>
+                    <reference
+                      Id="a540dfd6-0d0b-4a6f-afb5-5ac24494dcbe"
+                      handle="viewcode://./CodeSchema_Parameter?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalanceEqualityComparer Member%3D(Name%3DEquals OverloadingParameters%3D[(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance)%2C(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance)]) ParameterIdentifier%3Dx"
+                      tag="ViewCode" />
+                  </referencesInternal>
+                  <type_NamedElement>
+                    <classMoniker
+                      Id="af57b537-7479-4e14-9e5d-bc5b4678da32"
+                      LastKnownName="Balance"
+                      LastKnownLocation="Package1_1841.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="1a725e07-bbfb-4db6-bd27-feadc5e1aa9f"
+                  name="y"
+                  direction="In">
+                  <referencesInternal>
+                    <reference
+                      Id="d90c4887-8d84-44a5-91f0-11afc4b9c3c5"
+                      handle="viewcode://./CodeSchema_Parameter?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalanceEqualityComparer Member%3D(Name%3DEquals OverloadingParameters%3D[(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance)%2C(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance)]) ParameterIdentifier%3Dy"
+                      tag="ViewCode" />
+                  </referencesInternal>
+                  <type_NamedElement>
+                    <classMoniker
+                      Id="af57b537-7479-4e14-9e5d-bc5b4678da32"
+                      LastKnownName="Balance"
+                      LastKnownLocation="Package1_1841.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="9e60330e-9a1d-4762-aae1-a78b0d287c15"
+            name="GetHashCode"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <referencesInternal>
+              <reference
+                Id="e87aa2fa-08b9-4da4-ab84-fabba7a44ea5"
+                handle="viewcode://./CodeSchema_Method?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalanceEqualityComparer Member%3D(Name%3DGetHashCode OverloadingParameters%3D[(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance)])"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="8669d26d-ce13-472e-92fb-27e2917f6722"
+                name="method"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="d41281a2-1788-4e47-8012-307859d0a2ed">
+                    <propertyInstance
+                      Id="50640d4a-6ca2-4761-b319-240d8fc7ef71"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="ac02b740-c837-403b-b9d2-76138a58c905">
+                    <propertyInstance
+                      Id="9b1ace6c-af2b-42c7-9f24-a14f46cc1ca2"
+                      name="IsPartial"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="2f9c18a5-1397-40ef-b9be-52e7e2b20585">
+                    <propertyInstance
+                      Id="dcfb0ae2-bf50-48d9-a1b2-897bdd31f2aa"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="38c81450-c8e9-487f-b163-9594a270b80e">
+                    <propertyInstance
+                      Id="0f3e2985-fec0-4bbc-851a-563a56fe6e85"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="d494ba8f-86eb-46f1-818c-e78328bf9312">
+                    <propertyInstance
+                      Id="bdcf3bd6-1fe1-4454-8484-b420451983d8"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="11a1190b-c6e7-4480-8b24-e159d6772187">
+                    <propertyInstance
+                      Id="8c1dcd9b-d608-4a35-9e50-d2908174e676"
+                      name="params"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="ec9b9e59-9a01-4571-8d2a-39d7ad207d15"
+                  direction="Return">
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="220a3521-e091-4221-bae9-3ef9018e845c"
+                      LastKnownName="Integer"
+                      LastKnownLocation="ModelingProject1.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="9bde9919-2603-4695-acdf-1b201b19db2f"
+                  name="obj"
+                  direction="In">
+                  <referencesInternal>
+                    <reference
+                      Id="3928b15b-ea42-41c6-878b-5a478205cd1e"
+                      handle="viewcode://./CodeSchema_Parameter?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalanceEqualityComparer Member%3D(Name%3DGetHashCode OverloadingParameters%3D[(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalance)]) ParameterIdentifier%3Dobj"
+                      tag="ViewCode" />
+                  </referencesInternal>
+                  <type_NamedElement>
+                    <classMoniker
+                      Id="af57b537-7479-4e14-9e5d-bc5b4678da32"
+                      LastKnownName="Balance"
+                      LastKnownLocation="Package1_1841.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="f33c582f-f8b9-4211-ba0d-c6bc18869756"
+            name="BalanceEqualityComparer"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <referencesInternal>
+              <reference
+                Id="f37c54ac-0c0e-4a35-9c5c-bb7ca9c3820c"
+                handle="viewcode://./CodeSchema_Method?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DBalanceEqualityComparer Member%3D.ctor"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="b7689f14-c4ab-4b3f-ad8c-6626745e74a2"
+                name="method"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="ac342744-2a8e-475b-91b3-a55f20b53d4e">
+                    <propertyInstance
+                      Id="4d3d6401-1074-4a67-9151-950a04a8f047"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="a87623bd-e4ac-4290-8c70-e13f8e6eb119">
+                    <propertyInstance
+                      Id="c9b69f41-8c82-4b4d-a44b-45501870e15b"
+                      name="IsPartial"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="726d36ae-128e-4333-ae2d-21e5d0971a01">
+                    <propertyInstance
+                      Id="d8b04565-e461-49bc-8d25-1d4efa006b56"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="f671c43f-8d99-447b-968f-1ae93c355a72">
+                    <propertyInstance
+                      Id="834a66d7-1d74-4d6d-b441-5ad8e8f603b7"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="89e76be9-9df0-45e5-8a3d-d8a8cb06086d">
+                    <propertyInstance
+                      Id="b7c63c2f-c07a-4874-adb4-26af3905ee9a"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="8c1ad6e3-7f0a-4057-9fc4-e32799cd5f49">
+                    <propertyInstance
+                      Id="22de2efe-33ef-48d1-9cfa-666748845e24"
+                      name="params"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+          </operation>
+        </ownedOperationsInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="e48252b0-ec3b-46ea-86dd-01231e91bb3a"
+        name="VoucherDetail"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <referencesInternal>
+          <reference
+            Id="16d351b5-4d7a-428c-b9ca-89b2fbe59e71"
+            handle="viewcode://./CodeSchema_Class?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherDetail"
+            tag="ViewCode" />
+        </referencesInternal>
+        <appliedStereotypesInternal>
+          <stereotypeInstance
+            Id="5a0d731c-8e3d-40b1-bba0-1e17ce62691f"
+            name="class"
+            profile="CSharpProfile">
+            <propertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="27955a9b-17c2-468d-8ea1-2e63fe97cf45">
+                <propertyInstance
+                  Id="b60240b8-7d24-4e4c-a629-15f59c41f1ef"
+                  name="ClrAttributes" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="1d06e6e8-5da4-460d-8814-693b34bed30c">
+                <propertyInstance
+                  Id="8cc7f693-bfe6-4098-9289-8d93491bf2a5"
+                  name="IsPartial"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="b32a4196-2f68-4406-ad80-770d2f5bb060">
+                <propertyInstance
+                  Id="b53ae22f-8ab4-40d2-917c-e7e75208f15e"
+                  name="IsStatic"
+                  value="False" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="c4f9514b-69a9-4322-8c42-c6fd860af3ae">
+                <propertyInstance
+                  Id="c262cb9a-a492-47ad-b57b-bfe8df99f3bd"
+                  name="IsUnsafe"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="68d9315e-310c-44b2-a8ca-442a5ad95952">
+                <propertyInstance
+                  Id="d692c8b7-051e-49f9-b447-80103850fc47"
+                  name="PackageVisibility"
+                  value="internal" />
+              </stereotypeInstanceHasPropertyInstances>
+            </propertyInstances>
+          </stereotypeInstance>
+        </appliedStereotypesInternal>
+        <targetEnds>
+          <association
+            Id="fae05067-4c6f-4b70-9262-3a565e6d902f"
+            isDerived="false"
+            sourceEndRoleName="VoucherDetail"
+            targetEndRoleName="Title"
+            isLeaf="false"
+            isAbstract="false">
+            <classMoniker
+              Id="bacc6775-ff8f-44d0-a052-80cedbd082b9"
+              LastKnownName="Nullable&lt;Int32‎&gt;"
+              LastKnownLocation="Package2_1841.uml" />
+            <description>属性 Title 引用类型 Nullable&lt;Int32‎&gt;。</description>
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="77f34413-4bd2-4eec-8d45-1cf5014e2210"
+                  name="VoucherDetail"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false"
+                  isNavigableOwned="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="21d778d1-eef2-4a2e-9cce-c3d2343a95ae"
+                      name="Lower"
+                      value="*" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="1f55656a-9f24-4e8e-a21d-a913bf6fc24c"
+                      name="Upper"
+                      value="*" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="d7b2f4e5-ecdb-461f-bb9f-0d85b23f00bb"
+                  name="Title"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="b93603bd-f700-4eae-a607-fb991b2743f3"
+                      name="Lower"
+                      value="1" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="45ee015e-3304-4f31-91d7-55f55a826b28"
+                      name="Upper"
+                      value="1" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+          </association>
+          <association
+            Id="373517f0-26da-4cae-bed8-e6a7c6875b2c"
+            isDerived="false"
+            sourceEndRoleName="VoucherDetail"
+            targetEndRoleName="SubTitle"
+            isLeaf="false"
+            isAbstract="false">
+            <classMoniker
+              Id="bacc6775-ff8f-44d0-a052-80cedbd082b9"
+              LastKnownName="Nullable&lt;Int32‎&gt;"
+              LastKnownLocation="Package2_1841.uml" />
+            <description>属性 SubTitle 引用类型 Nullable&lt;Int32‎&gt;。</description>
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="457722ac-c34f-448c-8fbb-7b2affd434a0"
+                  name="VoucherDetail"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false"
+                  isNavigableOwned="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="9f34e006-1b5a-4fc9-ad01-aa0f6689b64c"
+                      name="Lower"
+                      value="*" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="0aa7a6af-5f76-4f6c-bde8-bcd11e5877a4"
+                      name="Upper"
+                      value="*" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="7dd3f8d7-9ff8-4b83-9073-249a2d16e166"
+                  name="SubTitle"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="ee3ea321-3b57-441c-add1-9927d78a913c"
+                      name="Lower"
+                      value="1" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="cb5a38e9-2b5a-4a43-85d9-0a8003666d62"
+                      name="Upper"
+                      value="1" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+          </association>
+          <association
+            Id="bdd0866d-2852-416c-aeba-807c4627d685"
+            isDerived="false"
+            sourceEndRoleName="VoucherDetail"
+            targetEndRoleName="Fund"
+            isLeaf="false"
+            isAbstract="false">
+            <classMoniker
+              Id="ea54e934-95a7-4fe6-8a96-f3f26172c97b"
+              LastKnownName="Nullable&lt;Double‎&gt;"
+              LastKnownLocation="Package2_1841.uml" />
+            <description>属性 Fund 引用类型 Nullable&lt;Double‎&gt;。</description>
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="5de3e950-3b1f-4127-872a-f6bf60156041"
+                  name="VoucherDetail"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false"
+                  isNavigableOwned="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="893c0118-5fc5-423e-8602-63060958888c"
+                      name="Lower"
+                      value="*" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="b2d46b99-39e2-40ec-bb17-5aefe6c66955"
+                      name="Upper"
+                      value="*" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="429d19f8-e7ef-4b72-9957-6d885a97a880"
+                  name="Fund"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="5defc499-b288-485e-9442-d19a0b653894"
+                      name="Lower"
+                      value="1" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="1b2acea7-42f3-474b-a2d1-f32c2eae8dd4"
+                      name="Upper"
+                      value="1" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+          </association>
+        </targetEnds>
+        <ownedAttributesInternal>
+          <property
+            Id="dc5b6bca-0f5f-4360-902c-7016ddc4d0d2"
+            name="Item"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <referencesInternal>
+              <reference
+                Id="3563ebfc-e10c-48d5-a85d-87f502805133"
+                handle="viewcode://./CodeSchema_Property?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherDetail Member%3DItem"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="2bc0bcfa-6789-44fc-83e3-6da586d55f89"
+                name="property"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="204f8c5b-f0da-4b50-b6fa-2b8621191000">
+                    <propertyInstance
+                      Id="f5c42914-66e2-4a4b-940c-d3202cf24478"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="70d1dd83-ede4-4881-b01f-33e568c68513">
+                    <propertyInstance
+                      Id="9710e939-264a-4f6d-a5f2-de5bc6995e1a"
+                      name="Get"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="0d276aa5-144a-4f03-b322-56f1591f5234">
+                    <propertyInstance
+                      Id="947c8c53-e010-452c-a1dd-b55349fc2e31"
+                      name="HasBody"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="17e11860-6e4f-4171-8f3f-ea5dece76a5c">
+                    <propertyInstance
+                      Id="a24f8e5a-f78d-4693-84b3-da25782d89f5"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="2b482e71-96a3-46b8-8cd5-675670f21395">
+                    <propertyInstance
+                      Id="95a9f252-1002-474c-a1b4-819f03ee64cf"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="b968cc5b-d17a-4602-b696-bee039c214d4">
+                    <propertyInstance
+                      Id="a57b327c-29e5-41a1-aadc-7dc1b3be6b4d"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="8b1dfeee-9fef-41c9-a967-75cae66b16c7">
+                    <propertyInstance
+                      Id="0fe6cd30-78e2-42ab-a8fd-c28f2aaebe84"
+                      name="Set"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                LastKnownName="String"
+                LastKnownLocation="ModelingProject1.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="631f8d6c-00a7-493a-ba3b-819d30d82b6a"
+            name="Title"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <referencesInternal>
+              <reference
+                Id="5604e65d-7ea6-4c82-8c2a-d7fa47254c79"
+                handle="viewcode://./CodeSchema_Property?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherDetail Member%3DTitle"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="412bdc7c-2d82-44b4-bf2b-195e1352e510"
+                name="property"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="cfac720d-66e6-46f6-882a-638999bf136b">
+                    <propertyInstance
+                      Id="53e5ab0e-5e61-4bd4-a57e-53ccdc68c61e"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="0157d780-2af2-471e-83a2-8cad25b3fbc3">
+                    <propertyInstance
+                      Id="0ec9a40f-3388-4fef-bcea-e5a551c54686"
+                      name="Get"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="b386849c-4e03-4ab7-8d71-ae3376f32946">
+                    <propertyInstance
+                      Id="1de96507-2adf-42c9-8b31-7ba83632d317"
+                      name="HasBody"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="e6634eff-cc44-4a91-8850-90bfe8fb27b0">
+                    <propertyInstance
+                      Id="9dcf3857-8a4c-494a-933a-e2559e3d9005"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="9447549e-8a45-4d0f-8067-36d39ef0b7ed">
+                    <propertyInstance
+                      Id="b83c1ebe-9fda-4e0d-bbda-601baa9c3469"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="ecb52080-c651-41ed-8434-e18e72b7cf26">
+                    <propertyInstance
+                      Id="ea68c63d-d9af-496a-bf77-d99cb0f28ff6"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="f0283baf-a42f-46bd-97df-5f56039f78d3">
+                    <propertyInstance
+                      Id="ea41a9f8-2b74-4fdb-9bdd-2a6e1e960a31"
+                      name="Set"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <type_NamedElement>
+              <classMoniker
+                Id="bacc6775-ff8f-44d0-a052-80cedbd082b9"
+                LastKnownName="Nullable&lt;Int32‎&gt;"
+                LastKnownLocation="Package2_1841.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="84182ba1-2cff-4388-9c2d-ad0b7789ab4b"
+            name="SubTitle"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <referencesInternal>
+              <reference
+                Id="ee233494-cc11-4129-a2f6-c079eaa9f943"
+                handle="viewcode://./CodeSchema_Property?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherDetail Member%3DSubTitle"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="5037b511-8ac2-4e21-a8e8-227378d50d7d"
+                name="property"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="a9676dd5-a6b2-495c-ad7e-c393acf47918">
+                    <propertyInstance
+                      Id="67f0c8fc-4c37-431b-93eb-b13c70c64ff0"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="2ca62706-ea5d-405c-b275-834288fbbd04">
+                    <propertyInstance
+                      Id="4e8a12a2-7fc4-4f30-88bd-1dcbc0abaa59"
+                      name="Get"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="b6d8ce7e-04fe-4a1c-9f7d-8c24449d7fb5">
+                    <propertyInstance
+                      Id="d6b3e85e-18d6-4b0c-8b8e-fae3fb2c25eb"
+                      name="HasBody"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="0d37a1e4-c281-44e5-b841-69ae914aaffe">
+                    <propertyInstance
+                      Id="d8bc7de4-d524-4dd5-928f-f475d415e926"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="86a3ba47-2072-4c92-9a72-dbcd836517b5">
+                    <propertyInstance
+                      Id="3fe2c368-9d6b-47b1-9e7b-327730b3ed4d"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="dc8f9678-cbc1-4d42-b0a3-f4341dfc8f06">
+                    <propertyInstance
+                      Id="d962acd5-0a80-4a85-8391-549abe89dfc8"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="8c0fc094-57e5-48f7-8dda-8de3cde2d865">
+                    <propertyInstance
+                      Id="5f325168-585e-4876-8ae8-dde2d276e222"
+                      name="Set"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <type_NamedElement>
+              <classMoniker
+                Id="bacc6775-ff8f-44d0-a052-80cedbd082b9"
+                LastKnownName="Nullable&lt;Int32‎&gt;"
+                LastKnownLocation="Package2_1841.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="87569e09-5827-406a-ae12-0e72cd6973b7"
+            name="Content"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <referencesInternal>
+              <reference
+                Id="2c0c2a93-5f1e-48c7-a30a-26172c4eb915"
+                handle="viewcode://./CodeSchema_Property?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherDetail Member%3DContent"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="9d2fbc8b-179e-4335-910f-73636c59910a"
+                name="property"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="bd468c5a-3857-45c6-a020-f1663297ff36">
+                    <propertyInstance
+                      Id="5cfa554f-748a-446a-82ff-e0fe7399fdb0"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="5d19a281-cab7-4b27-b542-51e1f35a9a5b">
+                    <propertyInstance
+                      Id="0dc22c73-4358-471d-b3d0-138fde602455"
+                      name="Get"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="b3d938d2-a3f9-4dc2-aafd-5e14600ae7c0">
+                    <propertyInstance
+                      Id="1983fdc2-6f5f-45a8-aedc-d11a0c371240"
+                      name="HasBody"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="94f87b64-946d-441c-82c8-2796e51e6d64">
+                    <propertyInstance
+                      Id="9afe31b2-65e9-4625-9505-a4bb9fce45b7"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="3c28eb97-9112-4d2d-aa50-89dec3066968">
+                    <propertyInstance
+                      Id="81d91ded-12b8-446d-852a-89ac76276996"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="23569eec-365e-4e75-ab90-2f8b44ee7b8d">
+                    <propertyInstance
+                      Id="e3842dc8-c0f6-49e9-b7af-6d4ac75e414e"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="59f2e7a6-021e-43cb-8802-2bfcfad05abc">
+                    <propertyInstance
+                      Id="6fddfcbf-338b-4eb8-bf7e-ef2dd7d304db"
+                      name="Set"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                LastKnownName="String"
+                LastKnownLocation="ModelingProject1.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="bf32444f-70b7-4738-ae39-59d8e04a2ec6"
+            name="Fund"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <referencesInternal>
+              <reference
+                Id="063c32f4-f62e-4386-93a1-9d0a808a2e27"
+                handle="viewcode://./CodeSchema_Property?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherDetail Member%3DFund"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="5ae09095-791a-4e88-9e01-a8b46e5b90d8"
+                name="property"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="e9f12d69-406e-420c-8cbf-3f4dbb2fc107">
+                    <propertyInstance
+                      Id="7354e208-057a-48e6-8bbe-f0015d60adf9"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="d49b6d79-dc78-473c-98d4-661c3e361eea">
+                    <propertyInstance
+                      Id="4af7660c-4da9-40ae-8954-bf786bbe188f"
+                      name="Get"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="3728c576-916b-49d9-a81a-bceddd493b3c">
+                    <propertyInstance
+                      Id="95c5f7c6-9c7d-46a5-9096-6fddd674af28"
+                      name="HasBody"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="fa30bd4b-bfc0-420d-b82d-780d003a7e41">
+                    <propertyInstance
+                      Id="3b9da7a7-ff0d-4c04-a6e7-b9c1740850cb"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="73207aa6-d6ac-402f-aff7-fb962589f55c">
+                    <propertyInstance
+                      Id="48636ff5-a458-40fb-8f06-980b638092b2"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="a053c27a-0d3f-4094-b59b-a60082f2f59c">
+                    <propertyInstance
+                      Id="97e328ed-8707-4e77-87a1-aede85d7ca59"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="e9912930-d48c-40ca-a02c-be3b7e3b17e4">
+                    <propertyInstance
+                      Id="da1258ec-f9c7-443a-8b18-cde891d3972a"
+                      name="Set"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <type_NamedElement>
+              <classMoniker
+                Id="ea54e934-95a7-4fe6-8a96-f3f26172c97b"
+                LastKnownName="Nullable&lt;Double‎&gt;"
+                LastKnownLocation="Package2_1841.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="25f70c32-a2b9-4a1e-b991-980982f1a6fa"
+            name="Remark"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <referencesInternal>
+              <reference
+                Id="dbed9ff3-4d77-44ce-8ed7-dfb2493e9f3c"
+                handle="viewcode://./CodeSchema_Property?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherDetail Member%3DRemark"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="69e3d8cf-95ac-4aa4-845e-bcb15a5d5aa6"
+                name="property"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="31861235-37c0-4552-a07d-f4e9055a7abe">
+                    <propertyInstance
+                      Id="5eac35b3-bba7-4a7d-a91b-ddad063c6703"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="854ae581-69d0-4c77-8938-7a96f84e95c5">
+                    <propertyInstance
+                      Id="39f1a33e-ccb6-4b8a-a31e-62f292843053"
+                      name="Get"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="b4940ff6-844f-4460-a518-9350c2d1f96a">
+                    <propertyInstance
+                      Id="f7dd81f7-a9db-48a3-855d-7d09bd8c9556"
+                      name="HasBody"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="0f7d1d1b-805b-4b7d-99c7-ece8a501f8db">
+                    <propertyInstance
+                      Id="5b09ad57-2850-4295-a225-6bec3014cc95"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="d900ab1a-bc29-4f31-9d54-0abfb875fc44">
+                    <propertyInstance
+                      Id="951f9b29-e01c-434a-80e8-aa031bba6878"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="fa3f64db-1113-40f9-aa84-5a6aaf85c4df">
+                    <propertyInstance
+                      Id="bd3b2a0e-ff79-497f-886d-c974927531b3"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="b4635dbe-017c-43fe-8990-2bc9a06e141d">
+                    <propertyInstance
+                      Id="a8f95ff1-0d31-4099-8a51-ed0260adc9de"
+                      name="Set"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                LastKnownName="String"
+                LastKnownLocation="ModelingProject1.uml" />
+            </type_NamedElement>
+          </property>
+        </ownedAttributesInternal>
+        <ownedOperationsInternal>
+          <operation
+            Id="a084aac9-1ed5-4bd4-8408-d1ded3efd7e5"
+            name="VoucherDetail"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <referencesInternal>
+              <reference
+                Id="eb601783-6135-4c9e-81cf-8b9f7f809a2b"
+                handle="viewcode://./CodeSchema_Method?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherDetail Member%3D.ctor"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="1dda68df-0a02-4db1-90c2-66a01728ce15"
+                name="method"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="d7c73a5e-d56f-4726-9a78-95d0dfa0cd4d">
+                    <propertyInstance
+                      Id="8bcdb795-362b-442a-bd10-62b1f885740a"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="fbd77b9e-1c07-4d09-9757-a036e1fc8fb8">
+                    <propertyInstance
+                      Id="fa328b40-a6c4-4cc7-bf82-e0f58b79f829"
+                      name="IsPartial"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="018f698e-d538-4741-96e2-3223f502bfd2">
+                    <propertyInstance
+                      Id="6e157435-d0c6-43f0-9104-0d6df4525f56"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="43be24f0-6200-4fd3-b464-ef56b4d9fa5c">
+                    <propertyInstance
+                      Id="3f8adab1-8671-418a-b511-f4b920e46ec8"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="e026d038-be10-4287-b90d-b87fc12bbca5">
+                    <propertyInstance
+                      Id="9105ccce-2f97-4863-a3b6-a5aabf1b9fa1"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="06d9c1e0-ce81-473f-8db8-252bfc85d422">
+                    <propertyInstance
+                      Id="4070f416-0acf-4219-85bc-a70673fca915"
+                      name="params"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+          </operation>
+        </ownedOperationsInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="f1603937-b375-42b0-95ae-c910d509fa89"
+        name="Voucher"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <referencesInternal>
+          <reference
+            Id="14e4245d-5d60-4f59-bc85-3e4127a6fe06"
+            handle="viewcode://./CodeSchema_Class?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucher"
+            tag="ViewCode" />
+        </referencesInternal>
+        <appliedStereotypesInternal>
+          <stereotypeInstance
+            Id="0a404149-5465-4c7b-91ec-0ec7742c8027"
+            name="class"
+            profile="CSharpProfile">
+            <propertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="91bbd9fe-eb88-43cf-aa99-77bb8c4e9d09">
+                <propertyInstance
+                  Id="4970099e-d3f5-4a0e-8555-869e78c4a5c4"
+                  name="ClrAttributes" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="6267e887-eb2c-46ab-8946-de1401886c2b">
+                <propertyInstance
+                  Id="ec8a81bb-74d8-4153-af36-790fe6c50ba6"
+                  name="IsPartial"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="43df1069-7b93-4550-b171-4e0200fca3da">
+                <propertyInstance
+                  Id="57b839ce-3524-417c-a01c-e34b41439755"
+                  name="IsStatic"
+                  value="False" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="6b988329-9a49-48c4-8f40-5e1fa12d14eb">
+                <propertyInstance
+                  Id="06d7e9b4-111d-4de6-955b-ba2e885de096"
+                  name="IsUnsafe"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="4f895894-27e6-4c5b-b2eb-713f13542ed3">
+                <propertyInstance
+                  Id="c090093f-94d9-4619-aec7-0adf32300af3"
+                  name="PackageVisibility"
+                  value="internal" />
+              </stereotypeInstanceHasPropertyInstances>
+            </propertyInstances>
+          </stereotypeInstance>
+        </appliedStereotypesInternal>
+        <suppliersInternal>
+          <dependency
+            Id="aa92e174-0caa-42a5-879a-6771067433e0">
+            <enumerationMoniker
+              Id="434e9dbc-9bfe-4728-bfaa-8f5b724de5de"
+              LastKnownName="VoucherType"
+              LastKnownLocation="Package1_1841.uml" />
+          </dependency>
+        </suppliersInternal>
+        <targetEnds>
+          <association
+            Id="b368da9c-ce5e-44e5-92e6-8f60c67cd08a"
+            isDerived="false"
+            sourceEndRoleName="Voucher"
+            targetEndRoleName="Date"
+            isLeaf="false"
+            isAbstract="false">
+            <classMoniker
+              Id="4481538a-7940-438d-b06d-c6606a507cfa"
+              LastKnownName="Nullable&lt;DateTime‎&gt;"
+              LastKnownLocation="Package2_1841.uml" />
+            <description>属性 Date 引用类型 Nullable&lt;DateTime‎&gt;。</description>
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="819f0a17-e93f-4704-a62a-dc0afc0e6ad5"
+                  name="Voucher"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false"
+                  isNavigableOwned="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="37f31249-2e7e-4307-a570-20cd3d188efc"
+                      name="Lower"
+                      value="*" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="d38319fb-c3d3-46b3-bf8e-acbe8f586433"
+                      name="Upper"
+                      value="*" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="3e96ac79-c98c-48e2-a4ab-f6ba99c1be0f"
+                  name="Date"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="9ed4ca53-9026-4c2a-bbc1-b4868fc63484"
+                      name="Lower"
+                      value="1" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="7eaf6547-5b78-4c78-9e7b-1bd0f934c9ef"
+                      name="Upper"
+                      value="1" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+          </association>
+          <association
+            Id="49240ee5-8f62-4019-8912-2f0d0b2f4ec7"
+            isDerived="false"
+            sourceEndRoleName="Voucher"
+            targetEndRoleName="Details"
+            isLeaf="false"
+            isAbstract="false">
+            <classMoniker
+              Id="e48252b0-ec3b-46ea-86dd-01231e91bb3a"
+              LastKnownName="VoucherDetail"
+              LastKnownLocation="Package1_1841.uml" />
+            <description>属性 Details 引用类型 VoucherDetail。</description>
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="cb8adfb6-32a4-4847-af33-c757078c2078"
+                  name="Voucher"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false"
+                  isNavigableOwned="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="08157323-2f18-477d-9961-9df49e3ee699"
+                      name="Lower"
+                      value="1" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="6840274a-939c-4c5b-8539-4f8a0291708a"
+                      name="Upper"
+                      value="1" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="9c33edcf-a8cf-4cdf-8b1e-fe76b02a8079"
+                  name="Details"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isOrdered="true"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="58a1cc57-1053-419e-ad07-918b5f8d8d42"
+                      name="Lower"
+                      value="*" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="f2349808-3a6d-4abf-904f-4a17d269efb3"
+                      name="Upper"
+                      value="*" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+          </association>
+          <association
+            Id="4775d08c-825e-4370-9d3a-77b37f7a4b1d"
+            isDerived="false"
+            sourceEndRoleName="Voucher"
+            targetEndRoleName="Type"
+            isLeaf="false"
+            isAbstract="false">
+            <classMoniker
+              Id="3a723f28-3114-46d3-9229-d606b34fb2c1"
+              LastKnownName="Nullable&lt;VoucherType‎&gt;"
+              LastKnownLocation="Package2_1841.uml" />
+            <description>属性 Type 引用类型 Nullable&lt;VoucherType‎&gt;。</description>
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="6613a4d3-716b-46cb-8480-636dfcea3f54"
+                  name="Voucher"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false"
+                  isNavigableOwned="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="107317be-1e35-4c05-9887-ff4467d4a942"
+                      name="Lower"
+                      value="*" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="45145eb4-83b6-4b0e-b230-76374a40a08e"
+                      name="Upper"
+                      value="*" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="4669be3a-babf-4b7b-8ac6-9e2e9230fc28"
+                  name="Type"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="da866f17-7bca-4843-b443-39e8d9f46d8b"
+                      name="Lower"
+                      value="1" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="ba09c27a-f5ff-4bbd-8d5c-e7d17bccb61d"
+                      name="Upper"
+                      value="1" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+          </association>
+        </targetEnds>
+        <ownedAttributesInternal>
+          <property
+            Id="733ada58-c2d0-464f-a601-e4267b9c5a2e"
+            name="ID"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <referencesInternal>
+              <reference
+                Id="9b47d90a-42da-486d-aa19-deab3db10032"
+                handle="viewcode://./CodeSchema_Property?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucher Member%3DID"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="7d87e92b-ba4a-454d-ac55-ee875721ed8c"
+                name="property"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="1a0dd69a-3e19-4c94-98e5-822d48922d6a">
+                    <propertyInstance
+                      Id="141b3c12-257e-4850-884c-721b5fe2f7a3"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="ae12e779-03d6-46f6-986b-174ea77bc7fd">
+                    <propertyInstance
+                      Id="810310da-b093-4420-b60e-bd49e573fd91"
+                      name="Get"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="45797e38-02d0-4ab6-bbda-9927c392dd85">
+                    <propertyInstance
+                      Id="98e80e95-dc21-4d62-848c-ea5436fc5d36"
+                      name="HasBody"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="8aa71210-18c4-4a21-8f60-20cabf7684a4">
+                    <propertyInstance
+                      Id="42d407c0-6b5d-4faf-a629-ed03f4b38f8f"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="a28390c0-e002-450a-a8d3-3206e3b1df8c">
+                    <propertyInstance
+                      Id="64e7879f-b6cb-4bbf-bf9a-095ee6f88d27"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="9ac7b4c1-066e-4e65-bfd4-06516f949fa7">
+                    <propertyInstance
+                      Id="6bbe58de-04a4-453d-b46d-3cb16878eab1"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="51d7c4cd-1f84-4391-9d0c-e53736980d7d">
+                    <propertyInstance
+                      Id="8fe40fac-ef9a-4057-9c83-da88fdbd0c92"
+                      name="Set"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                LastKnownName="String"
+                LastKnownLocation="ModelingProject1.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="8bace386-7370-4413-b8c1-d39d325eebc8"
+            name="Date"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <referencesInternal>
+              <reference
+                Id="d4c8a9ba-72d9-4920-a57b-6e3acaceb834"
+                handle="viewcode://./CodeSchema_Property?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucher Member%3DDate"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="8ef48228-baa4-491f-bc69-19d489c1bcb5"
+                name="property"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="b69b3580-6812-460b-9694-d70b1be62498">
+                    <propertyInstance
+                      Id="2b3ab864-86d0-4bf2-85c2-26aeb3fd00ff"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="7601ed26-b3e0-42f9-8e8d-439f132a0279">
+                    <propertyInstance
+                      Id="42605a99-6db4-4d3a-a0c5-54dbd5f3cfcc"
+                      name="Get"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="bde17293-9a77-41d4-8502-25490878aef0">
+                    <propertyInstance
+                      Id="6195898c-50b9-4132-9eb4-e35830ac60ce"
+                      name="HasBody"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="28dcedb2-3e72-426a-8f9e-e12fa95222b1">
+                    <propertyInstance
+                      Id="fba4f893-31ed-4dfa-91d8-70ab04d80e5d"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="de812a82-b8bc-4839-a3a7-c9701a6f3d85">
+                    <propertyInstance
+                      Id="2df98709-b444-4274-a424-e9442b9a7af6"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="e059d9ed-b332-4596-8447-168bbc9d4c1c">
+                    <propertyInstance
+                      Id="232d5d30-9322-494d-a14e-02068ae6dfd5"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="9ec42d09-ec73-43b6-a99f-7e745f02a33f">
+                    <propertyInstance
+                      Id="e53cf314-3113-4509-b78d-a494721161de"
+                      name="Set"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <type_NamedElement>
+              <classMoniker
+                Id="4481538a-7940-438d-b06d-c6606a507cfa"
+                LastKnownName="Nullable&lt;DateTime‎&gt;"
+                LastKnownLocation="Package2_1841.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="c7949952-989f-4c5b-8c91-21324c42fcd5"
+            name="Remark"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <referencesInternal>
+              <reference
+                Id="1fb22a27-e289-4e23-a96e-94016c2768a8"
+                handle="viewcode://./CodeSchema_Property?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucher Member%3DRemark"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="7de80bf3-0453-4716-a911-1b180cfae7a4"
+                name="property"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="8b0d4208-930b-49e0-9338-7cf8783015fa">
+                    <propertyInstance
+                      Id="b77f8fcf-5ba8-4b0a-a926-ffc640333258"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="257c5673-3390-4a28-b7cc-d2022c633412">
+                    <propertyInstance
+                      Id="ec2151f6-2bd0-4848-9279-9e6c2e6a9034"
+                      name="Get"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="dd4328fb-a9c3-4f81-95b7-6d1a78dc422b">
+                    <propertyInstance
+                      Id="77bca1c9-ac33-4703-9af9-27d0a1ae0164"
+                      name="HasBody"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="c1fa1731-713f-4f28-b535-612bb0e2752b">
+                    <propertyInstance
+                      Id="50504a4a-824c-4c2f-a598-0fcd2723a19b"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="2fd09ae5-d134-4266-bfb6-ce46e1f8ec39">
+                    <propertyInstance
+                      Id="253a1065-f360-4a82-8444-9c16df066d4a"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="4facfc87-bf2e-42f3-abd7-bf011b192984">
+                    <propertyInstance
+                      Id="996edd21-5752-4577-a516-24a980a9accf"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="7b024137-e55d-481b-a6cb-b1be7b644b45">
+                    <propertyInstance
+                      Id="2a0e3eb6-754b-4826-addf-06d45fe9dec8"
+                      name="Set"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                LastKnownName="String"
+                LastKnownLocation="ModelingProject1.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="f950fc70-6be2-4194-89d7-841637fb7857"
+            name="Details"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isOrdered="true"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <referencesInternal>
+              <reference
+                Id="677c30a3-40d1-4b3b-80dc-bbe3edb453ab"
+                handle="viewcode://./CodeSchema_Property?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucher Member%3DDetails"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="374aa4f7-7813-40d0-b738-681d6d1160f8"
+                name="property"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="bdd6f970-f18d-4d94-abb7-748790ce133b">
+                    <propertyInstance
+                      Id="a4076e7c-f611-4e21-ab04-730bb58729e4"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="4dd23ef6-d1f0-452a-96ea-a1cb054286e3">
+                    <propertyInstance
+                      Id="6c51932b-8aed-4d46-9a43-fee12435f14b"
+                      name="Get"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="6b7eb9b6-e7ba-404a-afda-5907fe827039">
+                    <propertyInstance
+                      Id="9e0c028a-d881-4b8c-a0f8-1d39c9376438"
+                      name="HasBody"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="4d4cda0b-e251-4739-aa0c-04a6ee6a9b83">
+                    <propertyInstance
+                      Id="cc779df2-d604-4348-8873-ec5778aa1a70"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="0d07bc21-1eb7-492f-b622-2dfe971b9f65">
+                    <propertyInstance
+                      Id="ed75a220-a681-44cd-986e-fbf043f5ca42"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="4a28e82e-599d-4468-b53d-5bcbffc0fc5d">
+                    <propertyInstance
+                      Id="45a17669-a2c4-4950-8f8e-986c89d90176"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="6520f856-8b38-4083-95d8-58c0ee5e9ef1">
+                    <propertyInstance
+                      Id="f76634f8-5810-46cc-a72b-e78f5787e96f"
+                      name="Set"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <lowerValueInternal>
+              <literalString
+                Id="3b4fef1c-0bf8-48c2-8f04-de00762b1c0f"
+                name="Lower"
+                value="*" />
+            </lowerValueInternal>
+            <upperValueInternal>
+              <literalString
+                Id="631226c3-5e1a-4344-ad07-af1392811398"
+                name="Upper"
+                value="*" />
+            </upperValueInternal>
+            <type_NamedElement>
+              <classMoniker
+                Id="e48252b0-ec3b-46ea-86dd-01231e91bb3a"
+                LastKnownName="VoucherDetail"
+                LastKnownLocation="Package1_1841.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="6ec65943-67f7-4c93-b014-aafc985c5614"
+            name="Type"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <referencesInternal>
+              <reference
+                Id="8ed49750-7918-404f-912f-a9bbe67360d8"
+                handle="viewcode://./CodeSchema_Property?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucher Member%3DType"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="469aa7fe-a804-47ea-a96f-ac691a808d2c"
+                name="property"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="8dd5d261-a4a1-4bb5-9fde-bc3fdb8b55a2">
+                    <propertyInstance
+                      Id="370ad0ac-31b0-4582-9325-443528cb7ff4"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="9c90364f-1b47-4e08-a292-fa7bc6cb77bc">
+                    <propertyInstance
+                      Id="7557bfe3-15fe-4b01-ae2b-a9c3df9b38f6"
+                      name="Get"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="33abe79f-f7f9-4d47-b472-d00c289d32f7">
+                    <propertyInstance
+                      Id="e0f6f75b-3e6a-4758-a71e-dd4be61ad981"
+                      name="HasBody"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="d060d9cc-46f6-4a9d-b0f1-37ad5ebe0377">
+                    <propertyInstance
+                      Id="d13eaf29-71e8-403c-b001-2a301240f273"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="fb334a83-e77d-40b3-a613-0b2de120a646">
+                    <propertyInstance
+                      Id="7fa35453-3026-4b51-9fd8-34c01898e178"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="1a9793bb-a8c5-44b9-8a41-5033ef761738">
+                    <propertyInstance
+                      Id="410a0709-7070-497b-9ec6-f03c09ff1466"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="0cf92094-39f7-41b1-83d1-48a54e307c52">
+                    <propertyInstance
+                      Id="b9284fe2-537e-410a-a34d-c3a99c75c5a0"
+                      name="Set"
+                      value="public" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <type_NamedElement>
+              <classMoniker
+                Id="3a723f28-3114-46d3-9229-d606b34fb2c1"
+                LastKnownName="Nullable&lt;VoucherType‎&gt;"
+                LastKnownLocation="Package2_1841.uml" />
+            </type_NamedElement>
+          </property>
+        </ownedAttributesInternal>
+        <ownedOperationsInternal>
+          <operation
+            Id="2a6d0c7d-e8cc-42a1-831e-707a2cab98d2"
+            name="Voucher"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <referencesInternal>
+              <reference
+                Id="1ab060d0-51f5-4aae-ad4d-8619a6b3225b"
+                handle="viewcode://./CodeSchema_Method?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucher Member%3D.ctor"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="491721fe-fa6d-49f7-8709-4b3801b2fd33"
+                name="method"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="e97178b7-e4e7-414b-b9f0-c67a0611b396">
+                    <propertyInstance
+                      Id="fe2ffe3e-696f-438b-a269-b04a24f0e437"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="2761daa7-82de-48d8-a4af-bfa901b5c6bf">
+                    <propertyInstance
+                      Id="47df4b44-bd59-4c88-9cbb-798b8e9abe32"
+                      name="IsPartial"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="5c06855d-156d-417a-b3d0-e5fe9335317c">
+                    <propertyInstance
+                      Id="0506b858-d191-4269-b5ae-167107df5681"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="3ce7028c-54f7-4f3b-b482-ea5b0e2e868e">
+                    <propertyInstance
+                      Id="cceb450f-d7bd-4296-8909-e75c37823b41"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="86848017-ce78-4331-a9c4-c64231017c71">
+                    <propertyInstance
+                      Id="8773e924-83b4-40da-a37a-64856553a040"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="4e3f0e9a-fc61-423c-ad19-a55d9b498ac8">
+                    <propertyInstance
+                      Id="c75ae4a0-c7d7-463d-ac9b-7eb9a1f6e2fa"
+                      name="params"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+          </operation>
+        </ownedOperationsInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <enumeration
+        Id="434e9dbc-9bfe-4728-bfaa-8f5b724de5de"
+        name="VoucherType"
+        isAbstract="false"
+        isLeaf="false">
+        <referencesInternal>
+          <reference
+            Id="3f9c0dde-b845-458e-8f2b-44ea6412bfac"
+            handle="viewcode://./CodeSchema_Enum?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherType"
+            tag="ViewCode" />
+        </referencesInternal>
+        <appliedStereotypesInternal>
+          <stereotypeInstance
+            Id="5b5260f6-e8c0-4f9c-bed6-7c26a9cd0d3d"
+            name="enum"
+            profile="CSharpProfile">
+            <propertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="619cbb08-359e-4bf7-9c96-bd87ed73dbf3">
+                <propertyInstance
+                  Id="d5d9f6d5-c73e-4105-8543-02a368ff97ad"
+                  name="ClrAttributes" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="12df62b2-e7da-4b99-9eb6-0d5d67a0276b">
+                <propertyInstance
+                  Id="ba440e1a-d50e-4e36-aa59-70c6d56ab009"
+                  name="BaseType"
+                  value="int" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="f417789f-ee5f-4290-bdea-28337d00b154">
+                <propertyInstance
+                  Id="72601c93-cf38-4774-b359-e51e855596a4"
+                  name="PackageVisibility"
+                  value="internal" />
+              </stereotypeInstanceHasPropertyInstances>
+            </propertyInstances>
+          </stereotypeInstance>
+        </appliedStereotypesInternal>
+        <ownedLiterals>
+          <enumerationLiteral
+            Id="7b265eda-c539-453f-9027-2b3e5876971d"
+            name="Ordinal">
+            <referencesInternal>
+              <reference
+                Id="aaa7400e-b439-41f5-9a7b-019dfaabf4c5"
+                handle="viewcode://./CodeSchema_Field?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherType Member%3DOrdinal"
+                tag="ViewCode" />
+            </referencesInternal>
+          </enumerationLiteral>
+          <enumerationLiteral
+            Id="623a0f0c-579d-4939-939d-ed5c9d559bb4"
+            name="Carry">
+            <referencesInternal>
+              <reference
+                Id="dddb9286-0d25-4005-9896-a6780d84ec9b"
+                handle="viewcode://./CodeSchema_Field?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherType Member%3DCarry"
+                tag="ViewCode" />
+            </referencesInternal>
+          </enumerationLiteral>
+          <enumerationLiteral
+            Id="21cf9cd0-82f8-448e-bef6-250ff8d0bb02"
+            name="Amortization">
+            <referencesInternal>
+              <reference
+                Id="c2d13ad6-f9d7-4901-ab42-a54142140e1e"
+                handle="viewcode://./CodeSchema_Field?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherType Member%3DAmortization"
+                tag="ViewCode" />
+            </referencesInternal>
+          </enumerationLiteral>
+          <enumerationLiteral
+            Id="2cb11a55-9da6-4594-bb2b-9ceb9bed729f"
+            name="Depreciation">
+            <referencesInternal>
+              <reference
+                Id="19e7f5cd-1917-4143-ac23-c3ba6630ee93"
+                handle="viewcode://./CodeSchema_Field?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherType Member%3DDepreciation"
+                tag="ViewCode" />
+            </referencesInternal>
+          </enumerationLiteral>
+          <enumerationLiteral
+            Id="c9dbf5d8-da3d-4c22-b6bf-9cc22accce94"
+            name="Devalue">
+            <referencesInternal>
+              <reference
+                Id="81b8854b-bbcc-4e97-b8ad-d34af82c2bce"
+                handle="viewcode://./CodeSchema_Field?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherType Member%3DDevalue"
+                tag="ViewCode" />
+            </referencesInternal>
+          </enumerationLiteral>
+          <enumerationLiteral
+            Id="d4cfc9d7-5dc9-4c14-86c6-f5297b9f2d96"
+            name="AnnualCarry">
+            <referencesInternal>
+              <reference
+                Id="a7548501-3230-49fb-a5a2-e0a0a8a66d33"
+                handle="viewcode://./CodeSchema_Field?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherType Member%3DAnnualCarry"
+                tag="ViewCode" />
+            </referencesInternal>
+          </enumerationLiteral>
+          <enumerationLiteral
+            Id="d4b80348-312e-4e99-beec-853afac72faf"
+            name="Uncertain">
+            <referencesInternal>
+              <reference
+                Id="a5887cad-fe53-42b2-9d6e-0c1b55d246ed"
+                handle="viewcode://./CodeSchema_Field?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherType Member%3DUncertain"
+                tag="ViewCode" />
+            </referencesInternal>
+          </enumerationLiteral>
+        </ownedLiterals>
+      </enumeration>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="9670ff20-9f7f-4ce7-9a0a-27be0965480c"
+        name="MatchHelper"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <referencesInternal>
+          <reference
+            Id="9bf50efe-1fc7-46fb-a7ff-b76fc4880805"
+            handle="viewcode://./CodeSchema_Class?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DMatchHelper"
+            tag="ViewCode" />
+        </referencesInternal>
+        <appliedStereotypesInternal>
+          <stereotypeInstance
+            Id="fc698353-e3f6-44bd-8d62-11e75f15fa3f"
+            name="class"
+            profile="CSharpProfile">
+            <propertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="e5f3fb1f-ab06-4edc-9680-43416cedd45b">
+                <propertyInstance
+                  Id="0c41ae1b-cee5-45f5-9424-2b01835883b5"
+                  name="ClrAttributes" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="a3b7aa9d-e0a8-4e8f-962d-377abadcc7ff">
+                <propertyInstance
+                  Id="b4a9194f-c2e5-4304-bfe0-7180c5c4ed58"
+                  name="IsPartial"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="01e314f6-9ac1-4ec6-a874-801ad02d3291">
+                <propertyInstance
+                  Id="e0e66fa3-b255-4fd3-a92f-9ff674b35176"
+                  name="IsStatic"
+                  value="True" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="c92bb935-5aaa-4144-9d93-d442cbae0ac9">
+                <propertyInstance
+                  Id="661c9366-7a2a-43f7-8f70-7b0debdb7f29"
+                  name="IsUnsafe"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="404629e0-41c1-4eff-bc32-2715f5372fe4">
+                <propertyInstance
+                  Id="e8700654-6a29-4e20-88ef-d9644854a36a"
+                  name="PackageVisibility"
+                  value="internal" />
+              </stereotypeInstanceHasPropertyInstances>
+            </propertyInstances>
+          </stereotypeInstance>
+        </appliedStereotypesInternal>
+        <suppliersInternal>
+          <dependency
+            Id="dafd77de-d7ce-458e-a9df-6461ff074b92">
+            <classMoniker
+              Id="e48252b0-ec3b-46ea-86dd-01231e91bb3a"
+              LastKnownName="VoucherDetail"
+              LastKnownLocation="Package1_1841.uml" />
+          </dependency>
+        </suppliersInternal>
+        <ownedOperationsInternal>
+          <operation
+            Id="daf2c509-0171-47f5-85b4-0370a7a67e64"
+            name="IsMatch"
+            isLeaf="false"
+            isStatic="true"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <referencesInternal>
+              <reference
+                Id="b645f3d1-beab-445e-85ee-fe64579d3d8a"
+                handle="viewcode://./CodeSchema_Method?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DMatchHelper Member%3D(Name%3DIsMatch OverloadingParameters%3D[(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherDetail)%2C(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherDetail)])"
+                tag="ViewCode" />
+            </referencesInternal>
+            <appliedStereotypesInternal>
+              <stereotypeInstance
+                Id="3f4b0e0c-792a-497e-8616-ac7793cac5ac"
+                name="method"
+                profile="CSharpProfile">
+                <propertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="4feb2d4c-eb51-4b01-9ebc-3f0609d8f7cb">
+                    <propertyInstance
+                      Id="693429cb-dc08-4bc2-8c35-9a7e0621fe07"
+                      name="ClrAttributes" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="0109a941-dde0-40f7-bf2d-b69ae424a51b">
+                    <propertyInstance
+                      Id="bd500a96-7158-4916-94d7-88bf0ff4b9b7"
+                      name="IsPartial"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="2529de77-e393-4836-8dbd-78803278ff46">
+                    <propertyInstance
+                      Id="5e7b4628-83e1-4fd5-b5ba-3d65ffd0f6c8"
+                      name="IsUnsafe"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="434932d8-c62f-4d10-9e4c-baec597eebf5">
+                    <propertyInstance
+                      Id="2a213172-bf2f-43bc-9fc1-e21edfed4370"
+                      name="Inheritance"
+                      value="none" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="aa02c85b-8ef2-4273-9c00-b8d195f3278f">
+                    <propertyInstance
+                      Id="c204bf46-035c-4929-8a8c-f3011a50ad3c"
+                      name="PackageVisibility"
+                      value="internal" />
+                  </stereotypeInstanceHasPropertyInstances>
+                  <stereotypeInstanceHasPropertyInstances
+                    Id="a59170fb-1be2-4f2c-a90f-4fcff609c073">
+                    <propertyInstance
+                      Id="1c3166ef-4f16-4c5d-abad-db91cfd3616c"
+                      name="params"
+                      value="false" />
+                  </stereotypeInstanceHasPropertyInstances>
+                </propertyInstances>
+              </stereotypeInstance>
+            </appliedStereotypesInternal>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="ab81566f-f647-43c0-80c1-d90525535af5"
+                  direction="Return">
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="8943dc84-709e-4f62-b15a-a3273aa6f165"
+                      LastKnownName="Boolean"
+                      LastKnownLocation="ModelingProject1.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="c0735537-b0cc-4c04-9b70-9386795ea2a8"
+                  name="voucherDetail"
+                  direction="In">
+                  <referencesInternal>
+                    <reference
+                      Id="e731f766-d678-4166-871c-7cae6a7c2b92"
+                      handle="viewcode://./CodeSchema_Parameter?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DMatchHelper Member%3D(Name%3DIsMatch OverloadingParameters%3D[(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherDetail)%2C(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherDetail)]) ParameterIdentifier%3DvoucherDetail"
+                      tag="ViewCode" />
+                  </referencesInternal>
+                  <type_NamedElement>
+                    <classMoniker
+                      Id="e48252b0-ec3b-46ea-86dd-01231e91bb3a"
+                      LastKnownName="VoucherDetail"
+                      LastKnownLocation="Package1_1841.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="e2582c5b-4f6c-41d3-bb1d-37d325260814"
+                  name="filter"
+                  direction="In">
+                  <referencesInternal>
+                    <reference
+                      Id="200a2ade-cbab-49f6-9207-a3b261a6528c"
+                      handle="viewcode://./CodeSchema_Parameter?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DMatchHelper Member%3D(Name%3DIsMatch OverloadingParameters%3D[(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherDetail)%2C(Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.Entities%2Fbin%2FDebug%2FAccountingServer.Entities.dll Namespace%3DAccountingServer.Entities Type%3DVoucherDetail)]) ParameterIdentifier%3Dfilter"
+                      tag="ViewCode" />
+                  </referencesInternal>
+                  <type_NamedElement>
+                    <classMoniker
+                      Id="e48252b0-ec3b-46ea-86dd-01231e91bb3a"
+                      LastKnownName="VoucherDetail"
+                      LastKnownLocation="Package1_1841.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+        </ownedOperationsInternal>
+      </class>
+    </packageHasNamedElement>
+  </packagedElements>
+</package>

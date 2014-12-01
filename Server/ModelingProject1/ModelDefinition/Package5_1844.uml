@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" xmlns:dm1="http://schemas.microsoft.com/dsltools/Kernel" xmlns:dm2="http://schemas.microsoft.com/dsltools/Component" xmlns:dm3="http://schemas.microsoft.com/dsltools/UseCase" xmlns:dm4="http://schemas.microsoft.com/dsltools/Activity" xmlns:dm5="http://schemas.microsoft.com/dsltools/Interaction" xmlns:dm6="http://schemas.microsoft.com/dsltools/UmlModelLibrary" xmlns:dm7="http://schemas.microsoft.com/dsltools/UmlDiagrams" xmlns:dm8="http://schemas.microsoft.com/dsltools/LogicalClassDesigner"
+  dslVersion="1.0.0.0"
+  Id="c9305d0f-0719-48d6-8130-f172aa8ad2d1"
+  name="Bson"
+  visibility="Private" xmlns="http://schemas.microsoft.com/dsltools/ModelStore">
+  <referencesInternal>
+    <reference
+      Id="a03dab6a-22b3-4b2f-b0c3-45e2258b1c12"
+      handle="viewcode://./CodeSchema_Namespace?Namespace%3DMongoDB.Bson"
+      tag="ViewCode" />
+  </referencesInternal>
+  <packagedElements>
+    <packageHasNamedElement>
+      <class
+        Id="66a26424-2e4e-4aa8-a7b7-6e7e23c07582"
+        name="BsonDocument"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <referencesInternal>
+          <reference
+            Id="9ca5b037-d2b7-43d2-a0af-3dbdc20c2961"
+            handle="viewcode://./CodeSchema_Class?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.DAL%2Fbin%2FDebug%2FMongoDB.Bson.dll Namespace%3DMongoDB.Bson Type%3DBsonDocument"
+            tag="ViewCode" />
+        </referencesInternal>
+        <appliedStereotypesInternal>
+          <stereotypeInstance
+            Id="ce6ed64b-310b-4add-8ddf-a4b779bfa158"
+            name="class"
+            profile="CSharpProfile">
+            <propertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="f6ceb781-7fc9-4ede-af8d-3cf97948a2e5">
+                <propertyInstance
+                  Id="5e9bb7d1-599f-47e7-88b5-040f22460ba8"
+                  name="ClrAttributes" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="65b1cd14-8241-4934-9171-d7b2b9328c01">
+                <propertyInstance
+                  Id="03afc385-c3a0-4ab6-a535-8b1994519ada"
+                  name="IsPartial"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="b73dcdf2-470f-4aff-9760-7b229790174a">
+                <propertyInstance
+                  Id="385d19e6-6ff7-4afc-bbfa-54d4be86e57f"
+                  name="IsStatic"
+                  value="False" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="cca05b30-c0c2-4a98-945a-47bea66e5aee">
+                <propertyInstance
+                  Id="be98da4d-f19b-45ff-8eea-6b6e6c9d4b02"
+                  name="IsUnsafe"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="619b1753-c3f4-48d4-967a-ef3d7846bf1e">
+                <propertyInstance
+                  Id="febedd45-5e64-4455-862c-7587e57c0136"
+                  name="PackageVisibility"
+                  value="internal" />
+              </stereotypeInstanceHasPropertyInstances>
+            </propertyInstances>
+          </stereotypeInstance>
+        </appliedStereotypesInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="d3f8c2b4-019a-4cb7-bd2b-616fb38763f7"
+        name="ObjectId"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <referencesInternal>
+          <reference
+            Id="b542e2f6-5d5a-4792-b15b-77d082acd87c"
+            handle="viewcode://./CodeSchema_Struct?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2Fb1f6c1c4%2FDocuments%2FGitHub%2FProfessionalAccounting%2FServer%2FAccountingServer.DAL%2Fbin%2FDebug%2FMongoDB.Bson.dll Namespace%3DMongoDB.Bson Type%3DObjectId"
+            tag="ViewCode" />
+        </referencesInternal>
+        <appliedStereotypesInternal>
+          <stereotypeInstance
+            Id="4bde2989-dce5-48c2-91d0-0dac83a609ea"
+            name="struct"
+            profile="CSharpProfile">
+            <propertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="61fc31ee-58bb-4e6d-938b-6604e095366e">
+                <propertyInstance
+                  Id="656f0439-018a-450b-b16b-5f36ec237ddd"
+                  name="ClrAttributes" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="402a62a5-d065-4cd4-9f7d-a072c22e98bf">
+                <propertyInstance
+                  Id="50fe58d1-c470-43d4-bff5-786a0104766a"
+                  name="IsPartial"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="ca1cc887-546a-4a10-9aca-7af45e0fea89">
+                <propertyInstance
+                  Id="8734a135-34c0-4d44-896e-ca693fa0beb7"
+                  name="IsUnsafe"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="5b6e93cf-1a32-478d-b535-d43a4336b73b">
+                <propertyInstance
+                  Id="030fb535-447f-435d-b584-0b4d0b477d8c"
+                  name="PackageVisibility"
+                  value="internal" />
+              </stereotypeInstanceHasPropertyInstances>
+            </propertyInstances>
+          </stereotypeInstance>
+        </appliedStereotypesInternal>
+      </class>
+    </packageHasNamedElement>
+  </packagedElements>
+</package>
