@@ -22,8 +22,8 @@ namespace AccountingServer
         /// <summary>
         ///     更新或添加记账凭证
         /// </summary>
-        /// <param name="code"></param>
-        /// <returns></returns>
+        /// <param name="code">记账凭证的C#代码</param>
+        /// <returns>新记账凭证的C#代码</returns>
         public string ExecuteUpsert(string code)
         {
             var voucher = ParseVoucher(code);
@@ -40,15 +40,31 @@ namespace AccountingServer
         }
 
         /// <summary>
+        ///     删除记账凭证
+        /// </summary>
+        /// <param name="code">记账凭证的C#代码</param>
+        /// <returns>是否成功</returns>
+        public bool ExecuteRemoval(string code)
+        {
+            var voucher = ParseVoucher(code);
+            if (voucher.ID == null)
+                throw new Exception();
+
+            return m_Accountant.DeleteVoucher(voucher.ID);
+        }
+
+        /// <summary>
         ///     执行表达式
         /// </summary>
         /// <param name="s">表达式</param>
+        /// <param name="editable">执行结果是否可编辑</param>
         /// <returns>执行结果</returns>
-        public string Execute(string s)
+        public string Execute(string s, out bool editable)
         {
             s = s.Trim();
             if (s.EndsWith("`"))
             {
+                editable = false;
                 var sx = s.TrimEnd('`', '!');
                 if (s.EndsWith("!`"))
                 {
@@ -124,6 +140,7 @@ namespace AccountingServer
             }
 
             {
+                editable = true;
                 var sb = new StringBuilder();
                 foreach (var voucher in ExecuteQuery(s))
                     sb.Append(PresentVoucher(voucher));
