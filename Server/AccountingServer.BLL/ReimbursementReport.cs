@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using AccountingServer.Entities;
 
@@ -45,7 +46,7 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     报表数据
         /// </summary>
-        private readonly IEnumerable<ReportItem> m_Report;
+        private readonly List<ReportItem> m_Report;
 
         /// <summary>
         ///     报表数据
@@ -58,9 +59,9 @@ namespace AccountingServer.BLL
         /// <param name="helper">会计业务处理类</param>
         /// <param name="startDate">开始日期</param>
         /// <param name="endDate">截止日期</param>
-        public ReimbursementReport(Accountant helper, DateTime startDate, DateTime endDate)
+        public ReimbursementReport(Accountant helper, DateTime? startDate, DateTime? endDate)
         {
-            m_Report = GenerateReport(helper, startDate, endDate);
+            m_Report = GenerateReport(helper, startDate, endDate).ToList();
         }
 
         /// <summary>
@@ -81,6 +82,23 @@ namespace AccountingServer.BLL
                                  reportItem.Coefficient);
         }
 
+        public string Preview()
+        {
+            var sb = new StringBuilder();
+            foreach (var reportItem in m_Report)
+            {
+                sb.AppendFormat(
+                                "{0}{1}{2}{3}{4}",
+                                reportItem.Title.CPadRight(20),
+                                reportItem.Content.CPadRight(20),
+                                reportItem.OrigContent.CPadRight(20),
+                                reportItem.Fund.AsCurrency().CPadLeft(12),
+                                reportItem.Coefficient.ToString("0.0%").CPadLeft(12));
+                sb.AppendLine();
+            }
+            return sb.ToString();
+        }
+
         /// <summary>
         ///     生成报表数据
         /// </summary>
@@ -88,7 +106,7 @@ namespace AccountingServer.BLL
         /// <param name="startDate">开始日期</param>
         /// <param name="endDate">截止日期</param>
         /// <returns>报表数据</returns>
-        private static IEnumerable<ReportItem> GenerateReport(Accountant helper, DateTime startDate, DateTime endDate)
+        private static IEnumerable<ReportItem> GenerateReport(Accountant helper, DateTime? startDate, DateTime? endDate)
         {
             {
                 var lst = helper.GetBalancesAcrossContent(new Balance { Title = 1403 }, startDate, endDate);
@@ -96,7 +114,7 @@ namespace AccountingServer.BLL
                     yield return
                         new ReportItem
                             {
-                                Title = TitleManager.GetTitleName(detail.Title),
+                                Title = TitleManager.GetTitleName(detail),
                                 Content = "（移动电源零部件）",
                                 OrigContent = detail.Content,
                                 Fund = detail.Fund,
@@ -109,7 +127,7 @@ namespace AccountingServer.BLL
                     yield return
                         new ReportItem
                             {
-                                Title = TitleManager.GetTitleName(detail.Title),
+                                Title = TitleManager.GetTitleName(detail),
                                 Content = detail.Content,
                                 OrigContent = detail.Content,
                                 Fund = detail.Fund,
@@ -122,7 +140,7 @@ namespace AccountingServer.BLL
                     yield return
                         new ReportItem
                             {
-                                Title = TitleManager.GetTitleName(detail.Title),
+                                Title = TitleManager.GetTitleName(detail),
                                 Content = detail.Content,
                                 OrigContent = detail.Content,
                                 Fund = detail.Fund,
@@ -138,7 +156,7 @@ namespace AccountingServer.BLL
                     yield return
                         new ReportItem
                             {
-                                Title = TitleManager.GetTitleName(detail.Title),
+                                Title = TitleManager.GetTitleName(detail),
                                 Content = detail.Content,
                                 OrigContent = detail.Content,
                                 Fund = detail.Fund,
@@ -155,7 +173,7 @@ namespace AccountingServer.BLL
                     yield return
                         new ReportItem
                             {
-                                Title = TitleManager.GetTitleName(detail.Title),
+                                Title = TitleManager.GetTitleName(detail),
                                 Content = detail.Content,
                                 OrigContent = detail.Content,
                                 Fund = detail.Fund,
@@ -172,7 +190,7 @@ namespace AccountingServer.BLL
                     yield return
                         new ReportItem
                             {
-                                Title = TitleManager.GetTitleName(detail.Title),
+                                Title = TitleManager.GetTitleName(detail),
                                 Content = detail.Content,
                                 OrigContent = detail.Content,
                                 Fund = detail.Fund,
@@ -200,7 +218,7 @@ namespace AccountingServer.BLL
                             yield return
                                 new ReportItem
                                     {
-                                        Title = TitleManager.GetTitleName(detail.Title),
+                                        Title = TitleManager.GetTitleName(detail),
                                         Content = "（清华大学食堂）",
                                         OrigContent = detail.Content,
                                         Fund = detail.Fund,
@@ -211,7 +229,7 @@ namespace AccountingServer.BLL
                             yield return
                                 new ReportItem
                                     {
-                                        Title = TitleManager.GetTitleName(detail.Title),
+                                        Title = TitleManager.GetTitleName(detail),
                                         Content = detail.Content,
                                         OrigContent = detail.Content,
                                         Fund = detail.Fund,
@@ -229,7 +247,7 @@ namespace AccountingServer.BLL
                     yield return
                         new ReportItem
                             {
-                                Title = TitleManager.GetTitleName(detail.Title),
+                                Title = TitleManager.GetTitleName(detail),
                                 Content = detail.Content,
                                 OrigContent = detail.Content,
                                 Fund = detail.Fund,
@@ -245,7 +263,7 @@ namespace AccountingServer.BLL
                     yield return
                         new ReportItem
                             {
-                                Title = TitleManager.GetTitleName(detail.Title),
+                                Title = TitleManager.GetTitleName(detail),
                                 Content = detail.Content,
                                 OrigContent = detail.Content,
                                 Fund = detail.Fund,
@@ -264,7 +282,7 @@ namespace AccountingServer.BLL
                             yield return
                                 new ReportItem
                                     {
-                                        Title = TitleManager.GetTitleName(detail.Title),
+                                        Title = TitleManager.GetTitleName(detail),
                                         Content = detail.Content,
                                         OrigContent = detail.Content,
                                         Fund = detail.Fund,
@@ -275,7 +293,7 @@ namespace AccountingServer.BLL
                             yield return
                                 new ReportItem
                                     {
-                                        Title = TitleManager.GetTitleName(detail.Title),
+                                        Title = TitleManager.GetTitleName(detail),
                                         Content = detail.Content,
                                         OrigContent = detail.Content,
                                         Fund = detail.Fund,
@@ -286,7 +304,7 @@ namespace AccountingServer.BLL
                             yield return
                                 new ReportItem
                                     {
-                                        Title = TitleManager.GetTitleName(detail.Title),
+                                        Title = TitleManager.GetTitleName(detail),
                                         Content = detail.Content,
                                         OrigContent = detail.Content,
                                         Fund = detail.Fund,
@@ -297,7 +315,7 @@ namespace AccountingServer.BLL
                             yield return
                                 new ReportItem
                                     {
-                                        Title = TitleManager.GetTitleName(detail.Title),
+                                        Title = TitleManager.GetTitleName(detail),
                                         Content = detail.Content,
                                         OrigContent = detail.Content,
                                         Fund = detail.Fund,
@@ -308,7 +326,7 @@ namespace AccountingServer.BLL
                             yield return
                                 new ReportItem
                                     {
-                                        Title = TitleManager.GetTitleName(detail.Title),
+                                        Title = TitleManager.GetTitleName(detail),
                                         Content = detail.Content,
                                         OrigContent = detail.Content,
                                         Fund = detail.Fund,
@@ -319,7 +337,7 @@ namespace AccountingServer.BLL
                             yield return
                                 new ReportItem
                                     {
-                                        Title = TitleManager.GetTitleName(detail.Title),
+                                        Title = TitleManager.GetTitleName(detail),
                                         Content = detail.Content,
                                         OrigContent = detail.Content,
                                         Fund = detail.Fund,
@@ -337,7 +355,7 @@ namespace AccountingServer.BLL
                     yield return
                         new ReportItem
                             {
-                                Title = TitleManager.GetTitleName(detail.Title),
+                                Title = TitleManager.GetTitleName(detail),
                                 Content = detail.Content,
                                 OrigContent = detail.Content,
                                 Fund = detail.Fund,
@@ -353,7 +371,7 @@ namespace AccountingServer.BLL
                     yield return
                         new ReportItem
                             {
-                                Title = TitleManager.GetTitleName(detail.Title),
+                                Title = TitleManager.GetTitleName(detail),
                                 Content = detail.Content,
                                 OrigContent = detail.Content,
                                 Fund = detail.Fund,
@@ -369,7 +387,7 @@ namespace AccountingServer.BLL
                     yield return
                         new ReportItem
                             {
-                                Title = TitleManager.GetTitleName(detail.Title),
+                                Title = TitleManager.GetTitleName(detail),
                                 Content = null,
                                 OrigContent = detail.Content,
                                 Fund = detail.Fund,
@@ -388,7 +406,7 @@ namespace AccountingServer.BLL
                     yield return
                         new ReportItem
                             {
-                                Title = TitleManager.GetTitleName(detail.Title),
+                                Title = TitleManager.GetTitleName(detail),
                                 Content = detail.Content,
                                 OrigContent = detail.Content,
                                 Fund = detail.Fund,
