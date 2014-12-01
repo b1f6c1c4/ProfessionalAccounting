@@ -171,6 +171,7 @@ namespace AccountingServer.DAL
         public long SelectDetailsCount(VoucherDetail filter) { throw new NotImplementedException(); }
         public bool InsertDetail(VoucherDetail entity) { throw new NotImplementedException(); }
         public int DeleteDetails(VoucherDetail filter) { throw new NotImplementedException(); }
+        public void Shutdown() { throw new NotImplementedException(); }
 
         /*public IEnumerable<DbFixedAsset> SelectFixedAssets(DbFixedAsset filter)
         {

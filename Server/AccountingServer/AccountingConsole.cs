@@ -62,6 +62,35 @@ namespace AccountingServer
         public string Execute(string s, out bool editable)
         {
             s = s.Trim();
+            if (s == "con")
+            {
+                try
+                {
+                    m_Accountant.Connect(true);
+                    editable = false;
+                    return "OK";
+                }
+                catch (Exception e)
+                {
+                    editable = false;
+                    return e.ToString();
+                }
+            }
+            if (s == "shu")
+            {
+                try
+                {
+                    m_Accountant.Shutdown();
+                    m_Accountant.Disconnect();
+                    editable = false;
+                    return "OK";
+                }
+                catch (Exception e)
+                {
+                    editable = false;
+                    return e.ToString();
+                }
+            }
             if (s == "T")
             {
                 editable = false;

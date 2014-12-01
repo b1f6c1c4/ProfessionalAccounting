@@ -33,13 +33,19 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     连接数据库
         /// </summary>
-        /// <param name="un">用户名</param>
-        /// <param name="pw">密码</param>
-        public void Connect(string un, string pw)
+        public void Connect(bool launchServer)
         {
-            m_Db = new MongoDbHelper();
+            m_Db = new MongoDbHelper(launchServer);
 
             //m_OldDb = new SqlDbHelper(un, pw);
+        }
+
+        /// <summary>
+        ///     关闭数据库服务器
+        /// </summary>
+        public void Shutdown()
+        {
+            m_Db.Shutdown();
         }
 
         /// <summary>
