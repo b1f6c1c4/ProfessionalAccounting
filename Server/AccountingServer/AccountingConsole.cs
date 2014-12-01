@@ -62,6 +62,17 @@ namespace AccountingServer
         public string Execute(string s, out bool editable)
         {
             s = s.Trim();
+            if (s == "T")
+            {
+                editable = false;
+                var sb = new StringBuilder();
+                foreach (var title in TitleManager.GetTitles())
+                {
+                    sb.AppendFormat("{0}{1}\t\t{2}", title.Item1.AsTitle(), title.Item2.AsSubTitle(), title.Item3);
+                    sb.AppendLine();
+                }
+                return sb.ToString();
+            }
             if (s.EndsWith("`"))
             {
                 editable = false;
