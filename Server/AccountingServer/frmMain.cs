@@ -17,6 +17,8 @@ namespace AccountingServer
         private readonly AccountingConsole m_Console;
         private readonly AccountingChart[] m_Charts;
 
+        private bool m_Editable;
+
         [DllImport("user32.dll")]
         private static extern bool SetProcessDPIAware();
 
@@ -32,6 +34,10 @@ namespace AccountingServer
         public frmMain()
         {
             InitializeComponent();
+            chart1.Dock = DockStyle.Fill;
+            pictureBox1.Dock = DockStyle.Fill;
+            textBoxResult.Dock = DockStyle.Fill;
+
             SetProcessDPIAware();
             WindowState = FormWindowState.Maximized;
 
@@ -86,131 +92,134 @@ namespace AccountingServer
             foreach (var series in m_Charts.SelectMany(chart => chart.Gather()))
                 chart1.Series.Add(series);
         }
-
-        private void frmMain_KeyDown(object sender, KeyEventArgs e)
+        
+        private bool GetVoucherCode(out int begin, out int end)
         {
-            switch (e.KeyCode)
+            end = -1;
+            begin = textBoxResult.SelectionStart + textBoxResult.SelectionLength;
+            do
             {
-                case Keys.F1:
-                    tabControl1.SelectTab(tabPage1);
-                    chart1.Series.SuspendUpdates();
-                    GatherData();
-                    chart1.Series.ResumeUpdates();
-                    break;
-                case Keys.F2:
-                    {
-                        var qrCode = m_Mobile.GetQRCode(pictureBox1.Width / 8, pictureBox1.Height / 8);
-                        var bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-                        var g = Graphics.FromImage(bitmap);
-                        g.InterpolationMode = InterpolationMode.NearestNeighbor;
-                        g.DrawImage(
-                                    qrCode,
-                                    new Rectangle(0, 0, pictureBox1.Width, pictureBox1.Height),
-                                    new Rectangle(0, 0, pictureBox1.Width / 8, pictureBox1.Height / 8),
-                                    GraphicsUnit.Pixel);
-                        g.Dispose();
-                        pictureBox1.Image = bitmap;
-                    }
-                    tabControl1.SelectTab(tabPage2);
-                    break;
-                case Keys.F3:
-                    tabControl1.SelectTab(tabPage3);
-                    break;
-                    //case Keys.T:
-                    //    m_Toggle21 ^= true;
-                    //    chart1.ChartAreas["生活资产"].AxisY.Maximum = m_Toggle21 ? 1000 : 7000;
-                    //    break;
-                    //case Keys.C:
-                    //    THUInfo.FetchFromInfo().ContinueWith(t => THUInfo.Analyze(t.Result));
-                    //    break;
-                    //case Keys.X:
-                    //    m_Accountant.CopyDb();
-                    //    break;
-            }
+                begin = textBoxResult.Text.LastIndexOf("new Voucher", begin, StringComparison.Ordinal);
+                if (begin == -1)
+                    return true;
+            } while (textBoxResult.Text.Substring(begin, 17) == "new VoucherDetail");
+            var nested = 0;
+            end = begin + 11;
+            for (; end < textBoxResult.Text.Length; end++)
+                if (textBoxResult.Text[end] == '{')
+                    nested++;
+                else if (textBoxResult.Text[end] == '}')
+                    if (--nested == 0)
+                        break;
+            return false;
         }
 
-        private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
+        private void textBoxResult_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (!ModifierKeys.HasFlag(Keys.Shift) &&
-                ! ModifierKeys.HasFlag(Keys.Control))
+            if (!m_Editable)
+                return;
+            if (!ModifierKeys.HasFlag(Keys.Alt))
                 return;
             if ((e.KeyChar == '\r' || e.KeyChar == '\n'))
                 e.Handled = true;
         }
 
-        private void textBox1_KeyUp(object sender, KeyEventArgs e)
+        private void textBoxResult_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Escape)
             {
-                textBox1.SelectionStart = 0;
-                textBox1.SelectionLength = textBox1.Text.Length;
+                textBoxCommand.Focus();
+                textBoxCommand.SelectionStart = 0;
+                textBoxCommand.SelectionLength = textBoxCommand.Text.Length;
                 return;
             }
-            if (e.Control &&
-                e.Shift &&
-                e.KeyCode == Keys.Enter)
+            if (!m_Editable)
+                return;
+            if (e.Alt &&
+                e.KeyCode == Keys.Delete)
             {
-                var id = textBox1.SelectionStart + textBox1.SelectionLength;
-                do
-                {
-                    id = textBox1.Text.LastIndexOf("new Voucher", id, StringComparison.Ordinal);
-                    if (id == -1)
-                        return;
-                } while (textBox1.Text.Substring(id, 17) == "new VoucherDetail");
-                var nested = 0;
-                var i = id + 11;
-                for (; i < textBox1.Text.Length; i++)
-                    if (textBox1.Text[i] == '{')
-                        nested++;
-                    else if (textBox1.Text[i] == '}')
-                        if (--nested == 0)
-                            break;
+                int begin;
+                int end;
+                if (GetVoucherCode(out begin, out end))
+                    return;
 
                 try
                 {
-                    var s = textBox1.Text.Substring(id, i - id + 1);
+                    var s = textBoxResult.Text.Substring(begin, end - begin + 1);
+                    if (!m_Console.ExecuteRemoval(s))
+                        throw new Exception();
+                    textBoxResult.Text = textBoxResult.Text.Insert(end, "*/").Insert(begin, "/*");
+                    textBoxResult.SelectionStart = begin;
+                    textBoxResult.SelectionLength = end - begin + 5;
+                }
+                catch (Exception exception)
+                {
+                    textBoxResult.Text = textBoxResult.Text.Insert(end, exception.ToString());
+                    textBoxResult.SelectionStart = begin;
+                    textBoxResult.SelectionLength = end - begin + 1;
+                }
+
+                textBoxResult.ScrollToCaret();
+            }
+            else if (e.Alt &&
+                e.KeyCode == Keys.Enter)
+            {
+                int begin;
+                int end;
+                if (GetVoucherCode(out begin, out end))
+                    return;
+
+                try
+                {
+                    var s = textBoxResult.Text.Substring(begin, end - begin + 1);
                     var result = m_Console.ExecuteUpsert(s);
-                    textBox1.Text = textBox1.Text.Remove(id, i - id + 1).Insert(id, result);
-                    textBox1.SelectionStart = id;
-                    textBox1.SelectionLength = result.Length;
+                    textBoxResult.Text = textBoxResult.Text.Remove(begin, end - begin + 1).Insert(begin, result);
+                    textBoxResult.SelectionStart = begin;
+                    textBoxResult.SelectionLength = result.Length;
                 }
                 catch (Exception exception)
                 {
-                    textBox1.SelectionStart = id;
-                    textBox1.SelectionLength = i - id + 1;
-                    textBox1.Text = textBox1.Text.Insert(i, exception.ToString());
+                    textBoxResult.Text = textBoxResult.Text.Insert(end, exception.ToString());
+                    textBoxResult.SelectionStart = begin;
+                    textBoxResult.SelectionLength = end - begin + 1;
                 }
 
-                textBox1.ScrollToCaret();
-                return;
-            }
-            if (e.Control &&
-                e.KeyCode == Keys.Enter)
-            {
-                var sid = textBox1.SelectionStart;
-                var id = textBox1.GetLineFromCharIndex(sid);
-                try
-                {
-                    var result = m_Console.Execute(textBox1.Lines[id]);
-                    textBox1.Text = textBox1.Text.Insert(sid, Environment.NewLine + result);
-                }
-                catch (Exception exception)
-                {
-                    textBox1.Text = textBox1.Text.Insert(sid, Environment.NewLine + exception);
-                }
-                textBox1.SelectionStart = sid;
+                textBoxResult.ScrollToCaret();
             }
         }
 
 
-        private void textBox1_MouseWheel(object sender, MouseEventArgs e)
+        private void textBoxResult_MouseWheel(object sender, MouseEventArgs e)
         {
             if (ModifierKeys.HasFlag(Keys.Control) &&
                 e.Delta != 0)
-                textBox1.Font = new Font(
+                textBoxResult.Font = new Font(
                     "Microsoft YaHei Mono",
-                    textBox1.Font.Size +
+                    textBoxResult.Font.Size +
                     e.Delta / 18F);
+        }
+
+        private void textBoxCommand_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar != '\r' &&
+                e.KeyChar != '\n')
+            {
+                textBoxCommand.BackColor = Color.White;
+                return;
+            }
+            try
+            {
+                var result = m_Console.Execute(textBoxCommand.Text, out m_Editable);
+                textBoxResult.Text = result;
+                textBoxResult.Focus();
+                textBoxResult.SelectionLength = 0;
+                textBoxCommand.BackColor = m_Editable ? Color.FromArgb(75, 255, 75) : Color.FromArgb(255, 255, 75);
+            }
+            catch (Exception exception)
+            {
+                textBoxResult.Text = exception.ToString();
+                textBoxCommand.BackColor = Color.FromArgb(255, 70, 70);
+            }
         }
     }
 }
