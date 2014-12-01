@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection;
 using System.Resources;
 using AccountingServer.Entities;
@@ -7,6 +9,13 @@ namespace AccountingServer.BLL
 {
     public static class TitleManager
     {
+        private static readonly ResourceManager Mgr;
+
+        static TitleManager()
+        {
+            Mgr = new ResourceManager("AccountingServer.BLL.AccountTitle", Assembly.GetExecutingAssembly());
+        }
+
         /// <summary>
         ///     返回编号对应的会计科目名称
         /// </summary>
@@ -15,8 +24,7 @@ namespace AccountingServer.BLL
         /// <returns>名称</returns>
         public static string GetTitleName(int? title, int? subtitle = null)
         {
-            var mgr = new ResourceManager("AccountingServer.BLL.AccountTitle", Assembly.GetExecutingAssembly());
-            return mgr.GetString(String.Format("T{0:0000}{1:00}", title, subtitle));
+            return Mgr.GetString(String.Format("T{0:0000}{1:00}", title, subtitle));
         }
 
         /// <summary>
