@@ -54,6 +54,7 @@
     <Compile Include="MobilePatterns.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReimbursementReport.cs" />
+    <Compile Include="TitleManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AccountingServer.DAL\AccountingServer.DAL.csproj">
