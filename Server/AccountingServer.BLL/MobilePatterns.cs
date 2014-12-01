@@ -523,10 +523,7 @@ namespace AccountingServer.BLL
         /// <param name="result">序列化的数据</param>
         /// <param name="helper">会计业务处理类</param>
         [Pattern(Name = "（期末折旧）", TextPattern = "折旧", UI = "")]
-        public static void 折旧(string result, Accountant helper)
-        {
-            helper.Depreciate();
-        }
+        public static void 折旧(string result, Accountant helper) { helper.Depreciate(); }
 
         /// <summary>
         ///     结转
@@ -534,9 +531,6 @@ namespace AccountingServer.BLL
         /// <param name="result">序列化的数据</param>
         /// <param name="helper">会计业务处理类</param>
         [Pattern(Name = "（期末结转）", TextPattern = "结转", UI = "")]
-        public static void 结转(string result, Accountant helper)
-        {
-            helper.Carry();
-        }
+        public static void 结转(string result, Accountant helper) { helper.Carry(); }
     }
 }

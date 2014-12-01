@@ -36,12 +36,10 @@ namespace AccountingServer.BLL
                     null,
                     title.Attributes["name"].Value);
                 foreach (XmlElement subTitle in title.ChildNodes)
-                {
                     yield return new Tuple<int, int?, string>(
                         Convert.ToInt32(title.Attributes["id"].Value),
                         Convert.ToInt32(subTitle.Attributes["id"].Value),
                         title.Attributes["name"].Value + "-" + subTitle.Attributes["name"].Value);
-                }
             }
         }
 

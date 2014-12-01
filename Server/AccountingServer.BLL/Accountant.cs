@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Resources;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
 
@@ -184,7 +182,8 @@ namespace AccountingServer.BLL
                                   SubTitle = filter.SubTitle,
                                   Content = filter.Content
                               };
-            var res = m_Db.SelectVouchersWithDetail(dFilter).Where(v => BalanceComparer.CompareDate(v.Date, endDate) <= 0);
+            var res =
+                m_Db.SelectVouchersWithDetail(dFilter).Where(v => BalanceComparer.CompareDate(v.Date, endDate) <= 0);
             var resx = res.GroupBy(
                                    v => v.Date,
                                    (dt, vs) =>
@@ -225,7 +224,8 @@ namespace AccountingServer.BLL
                                        Content = filter.Content
                                    }).ToArray();
 
-            var res = m_Db.SelectVouchersWithDetail(dFilters).Where(v => BalanceComparer.CompareDate(v.Date, endDate) <= 0);
+            var res =
+                m_Db.SelectVouchersWithDetail(dFilters).Where(v => BalanceComparer.CompareDate(v.Date, endDate) <= 0);
             var resx = res.GroupBy(
                                    v => v.Date,
                                    (dt, vs) =>
@@ -444,7 +444,10 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="id">编号</param>
         /// <returns>是否成功</returns>
-        public bool DeleteVoucher(string id) { return m_Db.DeleteVoucher(id); }
+        public bool DeleteVoucher(string id)
+        {
+            return m_Db.DeleteVoucher(id);
+        }
 
         /// <summary>
         ///     按过滤器删除记账凭证
@@ -520,7 +523,5 @@ namespace AccountingServer.BLL
         {
             throw new NotImplementedException();
         }
-
-
     }
 }

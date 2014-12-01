@@ -211,7 +211,7 @@ namespace AccountingServer.Entities
             if (x != null &&
                 y != null)
             {
-                switch (CompareDate(x.Date,y.Date))
+                switch (CompareDate(x.Date, y.Date))
                 {
                     case 1:
                         return 1;
