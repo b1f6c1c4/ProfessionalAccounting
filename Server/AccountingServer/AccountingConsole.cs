@@ -150,6 +150,19 @@ namespace AccountingServer
                 }
             }
 
+            if (s.StartsWith("R"))
+            {
+                editable = false;
+                DateTime? startDate, endDate;
+                bool nullable;
+                if (!ParseVoucherQuery(s.Substring(1), out startDate, out endDate, out nullable))
+                    return null;
+
+                var report = new ReimbursementReport(m_Accountant, startDate, endDate);
+
+                return report.Preview();
+            }
+
             {
                 editable = true;
                 var sb = new StringBuilder();
@@ -173,19 +186,19 @@ namespace AccountingServer
             {
                 var copiedT = balanceT;
                 sb.AppendFormat(
-                                "{0}-{1}:\t\t\t{2}",
+                                "{0}-{1}:{2}",
                                 copiedT.Title.AsTitle(),
-                                TitleManager.GetTitleName(copiedT.Title),
-                                copiedT.Fund.AsCurrency());
+                                TitleManager.GetTitleName(copiedT.Title).CPadRight(28),
+                                copiedT.Fund.AsCurrency().CPadLeft(15));
                 sb.AppendLine();
                 foreach (var balanceS in ts.Where(sx => sx.Title == copiedT.Title))
                 {
                     var copiedS = balanceS;
                     sb.AppendFormat(
-                                    "  {0}-{1}:\t\t\t{2}\t\t({3:00.0%})",
+                                    "  {0}-{1}:{2}   ({3:00.0%})",
                                     copiedS.SubTitle.HasValue ? copiedS.SubTitle.AsSubTitle() : "  ",
-                                    TitleManager.GetTitleName(copiedS),
-                                    copiedS.Fund.AsCurrency(),
+                                    TitleManager.GetTitleName(copiedS).CPadRight(28),
+                                    copiedS.Fund.AsCurrency().CPadLeft(15),
                                     copiedS.Fund / copiedT.Fund);
                     sb.AppendLine();
                     foreach (var balanceC in tsc.Where(
@@ -194,9 +207,9 @@ namespace AccountingServer
                     {
                         var copiedC = balanceC;
                         sb.AppendFormat(
-                                        "        {0}:\t\t\t{1}\t\t({2:00.0%}, {3:00.0%})",
-                                        copiedC.Content,
-                                        copiedC.Fund.AsCurrency(),
+                                        "        {0}:{1}   ({2:00.0%}, {3:00.0%})",
+                                        copiedC.Content.CPadRight(25),
+                                        copiedC.Fund.AsCurrency().CPadLeft(15),
                                         copiedC.Fund / copiedS.Fund,
                                         copiedC.Fund / copiedT.Fund);
                         sb.AppendLine();
@@ -221,16 +234,16 @@ namespace AccountingServer
                 sb.AppendFormat(
                                 "{0}-{1}:{2}",
                                 copiedT.Title.AsTitle(),
-                                TitleManager.GetTitleName(copiedT.Title),
-                                copiedT.Fund.AsCurrency());
+                                TitleManager.GetTitleName(copiedT.Title).CPadRight(28),
+                                copiedT.Fund.AsCurrency().CPadLeft(15));
                 sb.AppendLine();
                 foreach (var balanceC in tsc.Where(cx => cx.Title == copiedT.Title))
                 {
                     var copiedC = balanceC;
                     sb.AppendFormat(
-                                    "        {0}:{1}  ({2:00.0%})",
-                                    copiedC.Content,
-                                    copiedC.Fund.AsCurrency(),
+                                    "        {0}:{1}   ({2:00.0%})",
+                                    copiedC.Content.CPadRight(25),
+                                    copiedC.Fund.AsCurrency().CPadLeft(15),
                                     copiedC.Fund / copiedT.Fund);
                     sb.AppendLine();
                 }

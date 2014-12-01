@@ -267,6 +267,29 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
+        ///     按日期、过滤器计算各内容金额
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <param name="startDate">开始日期</param>
+        /// <param name="endDate">截止日期</param>
+        /// <returns>各内容金额</returns>
+        public IEnumerable<Balance> GetBalancesAcrossContent(Balance filter, DateTime? startDate, DateTime? endDate)
+        {
+            var dFilter = new VoucherDetail { Title = filter.Title, SubTitle = filter.SubTitle };
+            return m_Db.SelectDetails(dFilter, startDate, endDate)
+                       .GroupBy(
+                                d => d.Content,
+                                (c, ds) =>
+                                new Balance
+                                    {
+                                        Title = filter.Title,
+                                        SubTitle = filter.SubTitle,
+                                        Content = c,
+                                        Fund = ds.Sum(d => d.Fund.Value)
+                                    });
+        }
+
+        /// <summary>
         ///     按科目计算各内容余额
         /// </summary>
         /// <param name="filter">过滤器</param>
@@ -492,10 +515,6 @@ namespace AccountingServer.BLL
             throw new NotImplementedException();
         }
 
-        public IEnumerable<Balance> GetBalancesAcrossContent(Balance filter, DateTime? startDate, DateTime? endDate)
-        {
-            throw new NotImplementedException();
-        }
 
     }
 }
