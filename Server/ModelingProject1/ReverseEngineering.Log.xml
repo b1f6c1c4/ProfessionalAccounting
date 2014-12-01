@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="file:///C:/PROGRAM FILES (X86)/MICROSOFT VISUAL STUDIO 12.0/COMMON7/IDE/EXTENSIONS/MICROSOFT/ARCHITECTURE TOOLS/EXTENSIBILITY/Logging/ReverseEngineeringLog.xslt"?>
+<Log xmlns="http://schemas.microsoft.com/VisualStudio/2010/CodeGen.RE.Log" Label="代码生成/文本转换记录">
+  <MessageClass Name="Message" Label="消息" Option="显示提供相关信息的消息" />
+  <MessageClass Name="Warning" Label="警告" Option="显示警告" />
+  <MessageClass Name="Error" Label="错误" Option="显示错误" />
+  <MessageClass Name="Property" Label="属性" Option="显示元数据" />
+  <MessageClass Name="Diagnostic" Label="消息" Option="显示诊断消息" />
+  <Message Timestamp="2014-12-01T18:48:11" Importance="High" Text="已启动反向工程。" />
+  <Error Timestamp="2014-12-01T18:48:17" Importance="High" Text="长度不能小于 0。&#xD;&#xA;参数名: length 反向工程过程已停止。" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “0198fa09-8364-4e23-80dc-d7e1e36cfe78”-  (ClassifierTemplateParameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “2758929b-6b14-4693-884d-f835828aca8e”-  (ClassifierTemplateParameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “3cd15396-c339-4d95-80e1-c3d8875f2ad2”-  (ClassifierTemplateParameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “5d9f405e-b606-493f-8949-f06a0da2ffce”-  (ClassifierTemplateParameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “Boolean”-  (PrimitiveType)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “Integer”-  (PrimitiveType)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer”-  (Package)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL”-  (Package)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Medium" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant”-  (Class)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::Accountant”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::Amortization”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::Carry”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::Connect”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::Connect::pw”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::Connect::un”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::Cost”-  (Property)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::DeleteDetails”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::DeleteDetails::filter”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::DeleteVouchers”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::DeleteVouchers::filter”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::Depreciate”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::Disconnect”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::FullYearProfit”-  (Property)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetBalance”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetBalance::filter”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetBalances”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetBalances::filter”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetBalancesAcrossContent”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetBalancesAcrossContent::endDate”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetBalancesAcrossContent::filter”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetBalancesAcrossContent::startDate”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetDailyBalance”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetDailyBalance::dir”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetDailyBalance::endDate”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetDailyBalance::filter”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetDailyBalance::filters”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetDailyBalance::startDate”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetFinalBalance”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetFinalBalance::filter”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetFinalBalancesAcrossContent”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetFinalBalancesAcrossContent::filter”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetTitleName”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetTitleName::balance”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetTitleName::detail”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetTitleName::subtitle”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::GetTitleName::title”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::InsertVoucher”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::InsertVoucher::entity”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::IsBalanced”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::IsBalanced::entity”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::m_Db”-  (Property)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::ProcessDailyBalance”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::ProcessDailyBalance::endDate”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::ProcessDailyBalance::resx”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::ProcessDailyBalance::startDate”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectDetails”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectDetails::endDate”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectDetails::filter”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectDetails::startDate”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectDetailsCount”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectDetailsCount::filter”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectVoucher”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectVoucher::id”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectVouchers”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectVouchers::endDate”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectVouchers::filter”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectVouchers::startDate”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectVouchersCount”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectVouchersCount::filter”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectVouchersWithDetail”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectVouchersWithDetail::endDate”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectVouchersWithDetail::filter”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::SelectVouchersWithDetail::startDate”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::Shrink”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::Shrink::voucher”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::UpdateVoucher”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::Accountant::UpdateVoucher::entity”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Medium" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::DataFormatter”-  (Class)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::DataFormatter::AsCurrency”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::DataFormatter::AsCurrency::value”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::DataFormatter::AsDate”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::DataFormatter::AsDate::value”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::DataFormatter::AsPureCurrency”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::DataFormatter::AsPureCurrency::value”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::DataFormatter::AsSubTitle”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::DataFormatter::AsSubTitle::value”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::DataFormatter::AsTitle”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::DataFormatter::AsTitle::value”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::DataFormatter::AsTitleOrSubTitle”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::DataFormatter::AsTitleOrSubTitle::value”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Medium" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm”-  (Class)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::Connect”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::Connect::connected”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::Connect::disconnected”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::Connect::helper”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::Connect::received”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::Disconnect”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::GetPatternAttr”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::GetPatternAttr::pattern”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::GetQRCode”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::GetQRCode::h”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::GetQRCode::w”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::m_Accountant”-  (Property)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::m_Parsing”-  (Property)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::m_SucceedCount”-  (Property)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::m_Tcp”-  (Property)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::MobileComm”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::ParseData”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::ParseData::str”-  (Parameter)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::Patterns”-  (Property)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::SendAllData”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::MobileComm::Stop”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::AccountingServer::BLL::MobilePatterns”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::AccountingServer::BLL::PatternAttribute”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Medium" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::ReportItem”-  (Class)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::ReportItem::Coefficient”-  (Property)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::ReportItem::Content”-  (Property)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::ReportItem::Fund”-  (Property)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::ReportItem::OrigContent”-  (Property)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::ReportItem::ReportItem”-  (Operation)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::BLL::ReportItem::Title”-  (Property)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::DAL”-  (Package)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::AccountingServer::DAL::IDbHelper”-  (Interface)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::Entities”-  (Package)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::AccountingServer::Entities::Balance”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::AccountingServer::Entities::Voucher”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::AccountingServer::Entities::VoucherDetail”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::AccountingServer::TCP”-  (Package)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::AccountingServer::TCP::ITcpHelper”-  (Interface)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::System”-  (Package)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Action”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Action&lt;IPEndPoint‎&gt;”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Action&lt;String‎&gt;”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::System::Collections”-  (Package)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::System::Collections::Generic”-  (Package)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Collections::Generic::IEnumerable”-  (Interface)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Collections::Generic::IEnumerable&lt;Balance‎&gt;”-  (Interface)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Collections::Generic::IEnumerable&lt;IEnumerable‎&lt;Balance‎&gt;‎&gt;”-  (Interface)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Collections::Generic::IEnumerable&lt;MethodInfo‎&gt;”-  (Interface)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Collections::Generic::IEnumerable&lt;Voucher‎&gt;”-  (Interface)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Collections::Generic::IEnumerable&lt;VoucherDetail‎&gt;”-  (Interface)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Collections::Generic::IReadOnlyList”-  (Interface)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Collections::Generic::IReadOnlyList&lt;Balance‎&gt;”-  (Interface)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::DateTime”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Double”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::System::Drawing”-  (Package)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Drawing::Bitmap”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Int64”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::System::Net”-  (Package)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Net::IPEndPoint”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Nullable”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Nullable&lt;DateTime‎&gt;”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Nullable&lt;Double‎&gt;”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Nullable&lt;Int32‎&gt;”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “ModelingProject1::System::Reflection”-  (Package)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Reflection::MemberInfo”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中:  “ModelingProject1::System::Reflection::MethodInfo”-  (Class)   (已进行部分反向工程 - 定义未更新) " />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下元素反向工程到 UML 模型中: “String”-  (PrimitiveType)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下关系反向工程到 UML 模型中:  ModelingProject1::AccountingServer::BLL::ReportItem 到 ModelingProject1::System::Double (Association)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="Diagnostic" Text="已将以下关系反向工程到 UML 模型中:  ModelingProject1::AccountingServer::BLL::ReportItem 到 ModelingProject1::System::Double (Association)" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="High" Text="已对(4)个类型进行完全反向工程。" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="High" Text="已对(29)个类型进行部分反向工程。  这些类型未包含在原始选定内容中，因此未对其整个定义进行反向工程。  相反，此浅表操作只确保这些类型存在于 UML 模型中，因为需要用它们来完全描述其他元素。" />
+  <Message Timestamp="2014-12-01T18:48:17" Importance="High" Text="反向工程操作已完成，出现了(1)个错误和(0)个警告。" />
+</Log>

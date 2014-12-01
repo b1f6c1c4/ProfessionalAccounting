@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" xmlns:dm1="http://schemas.microsoft.com/dsltools/Kernel" xmlns:dm2="http://schemas.microsoft.com/dsltools/Component" xmlns:dm3="http://schemas.microsoft.com/dsltools/UseCase" xmlns:dm4="http://schemas.microsoft.com/dsltools/Activity" xmlns:dm5="http://schemas.microsoft.com/dsltools/Interaction" xmlns:dm6="http://schemas.microsoft.com/dsltools/UmlModelLibrary" xmlns:dm7="http://schemas.microsoft.com/dsltools/UmlDiagrams" xmlns:dm8="http://schemas.microsoft.com/dsltools/LogicalClassDesigner"
+  dslVersion="1.0.0.0"
+  Id="6ddfee5e-f5b0-44bb-820c-86853e4b35d5"
+  name="AccountingServer"
+  visibility="Private" xmlns="http://schemas.microsoft.com/dsltools/ModelStore">
+  <referencesInternal>
+    <reference
+      Id="bb12991a-8500-4291-9a6d-69e35bea6598"
+      handle="viewcode://./CodeSchema_Namespace?Namespace%3DAccountingServer"
+      tag="ViewCode" />
+  </referencesInternal>
+  <packagedElements>
+    <packageHasNamedElement>
+      <packageMoniker
+        Id="4b0d7e76-b203-4315-8b2c-18d0ef77d7dc"
+        LastKnownName="Entities"
+        LastKnownLocation="Package1_1841.uml" />
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <packageMoniker
+        Id="31ff16cd-2ddc-4ae5-9a70-488ad5935bde"
+        LastKnownName="DAL"
+        LastKnownLocation="Package_1844.uml" />
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <packageMoniker
+        Id="578021c9-8011-4e33-8b42-a30e29dab908"
+        LastKnownName="BLL"
+        LastKnownLocation="Package_1846.uml" />
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <packageMoniker
+        Id="2963160f-1277-4967-ba6b-51253f878dfc"
+        LastKnownName="TCP"
+        LastKnownLocation="Package4_1846.uml" />
+    </packageHasNamedElement>
+  </packagedElements>
+</package>
