@@ -411,6 +411,13 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
+        ///     按编号删除记账凭证
+        /// </summary>
+        /// <param name="id">编号</param>
+        /// <returns>是否成功</returns>
+        public bool DeleteVoucher(string id) { return m_Db.DeleteVoucher(id); }
+
+        /// <summary>
         ///     按过滤器删除记账凭证
         /// </summary>
         /// <param name="filter">过滤器</param>
@@ -489,5 +496,6 @@ namespace AccountingServer.BLL
         {
             throw new NotImplementedException();
         }
+
     }
 }
