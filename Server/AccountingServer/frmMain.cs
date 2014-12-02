@@ -11,10 +11,9 @@ namespace AccountingServer
     public partial class frmMain : Form
     {
         private readonly Accountant m_Accountant;
-        private readonly MobileComm m_Mobile;
 
         private readonly AccountingConsole m_Console;
-        private readonly AccountingChart[] m_Charts;
+        //private readonly AccountingChart[] m_Charts;
 
         private bool m_Editable;
 
@@ -41,56 +40,57 @@ namespace AccountingServer
             WindowState = FormWindowState.Maximized;
 
             m_Accountant = new Accountant();
-            m_Accountant.Connect(true);
-
-            m_Mobile = new MobileComm();
-
-            m_Mobile.Connect(
-                             m_Accountant,
-                             ep => SetCaption(String.Format("AccountingServer-{0}", ep.ToString())),
-                             ep => { },
-                             ep =>
-                             {
-                                 SetCaption("AccountingServer");
-                                 MessageBox.Show(String.Format("与{0}的数据传输完毕！", ep.ToString()), @"数据传输");
-                             });
 
             m_Console = new AccountingConsole(m_Accountant);
+            m_Console.PresentQRCode += qrCode =>
+                                       {
+                                           if (qrCode == null)
+                                           {
+                                               pictureBox1.Visible = false;
+                                               textBoxResult.Visible = true;
+                                           }
+                                           else
+                                           {
+                                               pictureBox1.Image = qrCode;
+                                               pictureBox1.Visible = true;
+                                               textBoxResult.Visible = false;
+                                           }
+                                       };
 
-            var curDate = DateTime.Now.Date;
-            var startDate = new DateTime(curDate.Year, curDate.Month - (curDate.Day >= 20 ? 0 : 1), 19);
-            var endDate = startDate.AddMonths(1);
+            //var curDate = DateTime.Now.Date;
+            //var startDate = new DateTime(curDate.Year, curDate.Month - (curDate.Day >= 20 ? 0 : 1), 19);
+            //var endDate = startDate.AddMonths(1);
 
-            m_Charts = new AccountingChart[]
-                           {
-                               new 投资资产(m_Accountant, startDate, endDate, curDate),
-                               new 生活资产(m_Accountant, startDate, endDate, curDate),
-                               new 其他资产(m_Accountant, startDate, endDate, curDate),
-                               new 生活费用(m_Accountant, startDate, endDate, curDate),
-                               new 其他费用(m_Accountant, startDate, endDate, curDate),
-                               new 负债(m_Accountant, startDate, endDate, curDate)
-                           };
+            //m_Charts = new AccountingChart[]
+            //               {
+            //                   new 投资资产(m_Accountant, startDate, endDate, curDate),
+            //                   new 生活资产(m_Accountant, startDate, endDate, curDate),
+            //                   new 其他资产(m_Accountant, startDate, endDate, curDate),
+            //                   new 生活费用(m_Accountant, startDate, endDate, curDate),
+            //                   new 其他费用(m_Accountant, startDate, endDate, curDate),
+            //                   new 负债(m_Accountant, startDate, endDate, curDate)
+            //               };
 
-            chart1.ChartAreas.SuspendUpdates();
+            //chart1.ChartAreas.SuspendUpdates();
 
-            chart1.ChartAreas.Clear();
-            foreach (var chart in m_Charts)
-                chart1.ChartAreas.Add(chart.Setup());
+            //chart1.ChartAreas.Clear();
+            //foreach (var chart in m_Charts)
+            //    chart1.ChartAreas.Add(chart.Setup());
 
-            chart1.Legends[0].Font = new Font("Microsoft YaHei Mono", 12, GraphicsUnit.Pixel);
+            //chart1.Legends[0].Font = new Font("Microsoft YaHei Mono", 12, GraphicsUnit.Pixel);
 
-            GatherData();
+            //GatherData();
 
-            chart1.ChartAreas.ResumeUpdates();
+            //chart1.ChartAreas.ResumeUpdates();
         }
 
-        private void GatherData()
-        {
-            chart1.Series.Clear();
+        //private void GatherData()
+        //{
+        //    chart1.Series.Clear();
 
-            foreach (var series in m_Charts.SelectMany(chart => chart.Gather()))
-                chart1.Series.Add(series);
-        }
+        //    foreach (var series in m_Charts.SelectMany(chart => chart.Gather()))
+        //        chart1.Series.Add(series);
+        //}
 
         private bool GetVoucherCode(out int begin, out int end)
         {
@@ -209,10 +209,14 @@ namespace AccountingServer
             try
             {
                 var result = m_Console.Execute(textBoxCommand.Text, out m_Editable);
-                textBoxResult.Text = result;
-                textBoxResult.Focus();
-                textBoxResult.SelectionLength = 0;
-                textBoxCommand.BackColor = m_Editable ? Color.FromArgb(75, 255, 75) : Color.FromArgb(255, 255, 75);
+
+                if (result != null)
+                {
+                    textBoxResult.Text = result;
+                    textBoxResult.Focus();
+                    textBoxResult.SelectionLength = 0;
+                    textBoxCommand.BackColor = m_Editable ? Color.FromArgb(75, 255, 75) : Color.FromArgb(255, 255, 75);
+                }
             }
             catch (Exception exception)
             {
