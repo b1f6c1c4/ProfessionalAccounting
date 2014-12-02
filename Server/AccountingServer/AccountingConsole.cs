@@ -87,6 +87,33 @@ namespace AccountingServer
                     editable = false;
                     return e.ToString();
                 }
+            if (s == "mobile")
+            {
+                editable = false;
+                if (m_Mobile == null)
+                {
+                    m_Mobile = new MobileComm();
+
+                    m_Mobile.Connect(m_Accountant);
+
+                    PresentQRCode(m_Mobile.GetQRCode(256, 256));
+                }
+                else
+                {
+                    m_Mobile.Dispose();
+                    m_Mobile = null;
+
+                    PresentQRCode(null);
+                }
+                return null;
+            }
+            if (s == "fetch")
+            {
+                editable = false;
+                string res;
+                THUInfo.FetchFromInfo(out res);
+                return res;
+            }
             if (s == "T")
             {
                 editable = false;
