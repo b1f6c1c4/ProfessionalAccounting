@@ -11,7 +11,7 @@ using ZXing.QrCode;
 
 namespace AccountingServer.BLL
 {
-    public class MobileComm
+    public class MobileComm : IDisposable
     {
         private bool m_Parsing;
         private int m_SucceedCount;
@@ -21,20 +21,23 @@ namespace AccountingServer.BLL
         private static readonly IEnumerable<MethodInfo> Patterns =
             typeof(MobilePatterns).GetMethods(BindingFlags.Public | BindingFlags.Static);
 
-        public void Connect(Accountant helper, Action<IPEndPoint> connected, Action<string> received,
-                            Action<IPEndPoint> disconnected)
+        public event ClientConnectedEventHandler ClientConnected;
+        public event ClientDisconnectedEventHandler ClientDisconnected;
+        public event DataArrivalEventHandler DataArrival;
+
+        public void Connect(Accountant helper)
         {
             m_Accountant = helper;
             m_Tcp = new TcpHelper();
             m_Tcp.ClientConnected += ep =>
                                      {
-                                         connected(ep);
+                                         ClientConnected(ep);
                                          m_SucceedCount = 0;
                                          m_Parsing = true;
                                      };
             m_Tcp.DataArrival += str =>
                                  {
-                                     received(str);
+                                     DataArrival(str);
                                      if (String.IsNullOrWhiteSpace(str))
                                          return;
                                      if (str == "FINISHED")
@@ -56,7 +59,12 @@ namespace AccountingServer.BLL
                                              Console.WriteLine(e);
                                          }
                                  };
-            m_Tcp.ClientDisconnected += ep => disconnected(ep);
+            m_Tcp.ClientDisconnected += ClientDisconnected;
+        }
+
+        public void Dispose()
+        {
+            m_Tcp.Dispose();
         }
 
         public Bitmap GetQRCode(int w, int h)
@@ -198,7 +206,5 @@ namespace AccountingServer.BLL
                 Attribute.GetCustomAttribute(pattern, typeof(PatternAttribute));
             return attr;
         }
-
-        public void Stop() { m_Tcp.Stop(); }
     }
 }

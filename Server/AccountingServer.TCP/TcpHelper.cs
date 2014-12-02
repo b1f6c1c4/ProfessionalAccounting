@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -6,15 +7,10 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using ThreadState = System.Threading.ThreadState;
 
 namespace AccountingServer.TCP
 {
-    public delegate void ClientConnectedEventHandler(IPEndPoint ipEndPoint);
-
-    public delegate void ClientDisconnectedEventHandler(IPEndPoint ipEndPoint);
-
-    public delegate void DataArrivalEventHandler(string str);
-
     public class TcpHelper : ITcpHelper
     {
         private const int Port = 14285;
@@ -24,9 +20,11 @@ namespace AccountingServer.TCP
         private readonly TcpListener m_Listener;
         private Socket m_Client;
         private IPEndPoint m_EndPoint;
+
+        #region events
+
         public event ClientConnectedEventHandler ClientConnected;
         public event ClientDisconnectedEventHandler ClientDisconnected;
-
         public event DataArrivalEventHandler DataArrival;
 
         protected void OnClientConnected(IPEndPoint ipEndPoint)
@@ -49,6 +47,8 @@ namespace AccountingServer.TCP
             if (handler != null)
                 handler(str);
         }
+
+        #endregion
 
         public TcpHelper()
         {
@@ -97,16 +97,21 @@ namespace AccountingServer.TCP
                 }
                 catch (ThreadAbortException)
                 {
-                    Console.WriteLine("[ReadTask Aborted]");
+                    Debug.WriteLine("[ReadTask Aborted]");
                     break;
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("[Exception From ReadTask]");
-                    Console.WriteLine(e);
+                    Debug.WriteLine("[Exception From ReadTask]");
+                    Debug.WriteLine(e);
                 }
         }
 
+        public void Dispose()
+        {
+            m_ReadThread.Abort();
+            m_ListenThread.Abort();
+        }
         ~TcpHelper() { m_Listener.Stop(); }
 
         public string IPEndPointString
@@ -114,14 +119,11 @@ namespace AccountingServer.TCP
             get
             {
                 var nw = NetworkInterface.GetAllNetworkInterfaces();
-                //nw.Single(n=>n.Name)
                 var n = nw[3];
                 var ipai =
                     n.GetIPProperties()
                      .UnicastAddresses.First(a => a.Address.AddressFamily == AddressFamily.InterNetwork);
 
-                //var ipe = Dns.GetHostEntry(Dns.GetHostName());
-                //var ipa = ipe.AddressList[1];
                 return String.Format("{0}:{1:#}", ipai.Address, Port);
             }
         }
@@ -129,13 +131,11 @@ namespace AccountingServer.TCP
         public void Write(string s)
         {
             var buff = Encoding.UTF8.GetBytes(s + "\n");
-            //var buff = Encoding.GetEncoding("GB2312").GetBytes(s + "\r\n");
             Write(buff, buff.Length);
         }
 
         private void Write(byte[] buff, int length)
         {
-            //m_Client.BeginSend(buff, 0, length, SocketFlags.None, ar => { }, m_Client);
             m_Client.Send(buff, 0, length, SocketFlags.None);
         }
 
@@ -172,15 +172,16 @@ namespace AccountingServer.TCP
                 }
                 catch (ThreadAbortException e)
                 {
-                    Console.WriteLine("[ListenTask Aborted]");
+                    Debug.WriteLine("[ListenTask Aborted]");
                     break;
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("[Exception From ListenTask]");
-                    Console.WriteLine(e);
+                    Debug.WriteLine("[Exception From ListenTask]");
+                    Debug.WriteLine(e);
                 }
         }
+
 
         public void Disconnect()
         {
@@ -210,12 +211,6 @@ namespace AccountingServer.TCP
                     m_ListenThread = new Thread(Listen) { IsBackground = true, Name = "Listen" };
                     m_ListenThread.Start();
                 }
-        }
-
-        public void Stop()
-        {
-            m_ReadThread.Abort();
-            m_ListenThread.Abort();
         }
     }
 }
