@@ -196,35 +196,12 @@ namespace AccountingServer.DAL
         /// <summary>
         ///     连接到服务器
         /// </summary>
-        public MongoDbHelper(bool launchServer)
+        public MongoDbHelper()
         {
             m_Client = new MongoClient("mongodb://localhost");
             m_Server = m_Client.GetServer();
 
-            try
-            {
-                m_Server.Connect();
-            }
-            catch (Exception)
-            {
-                if (!launchServer)
-                    throw;
-
-                var startinfo = new ProcessStartInfo
-                                    {
-                                        FileName = "cmd.exe",
-                                        Arguments =
-                                            "/c " +
-                                            "mongod --config \"C:\\Users\\b1f6c1c4\\Documents\\tjzh\\Account\\mongod.conf\"",
-                                        UseShellExecute = false,
-                                        RedirectStandardInput = false,
-                                        RedirectStandardOutput = true,
-                                        CreateNoWindow = true
-                                    };
-                Process.Start(startinfo);
-                Thread.Sleep(100);
-                m_Server.Connect();
-            }
+            m_Server.Connect();
 
             m_Db = m_Server.GetDatabase("accounting");
 

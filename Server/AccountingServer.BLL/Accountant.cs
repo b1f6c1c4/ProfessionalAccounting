@@ -31,9 +31,9 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     连接数据库
         /// </summary>
-        public void Connect(bool launchServer)
+        public void Connect()
         {
-            m_Db = new MongoDbHelper(launchServer);
+            m_Db = new MongoDbHelper();
 
             //m_OldDb = new SqlDbHelper(un, pw);
         }

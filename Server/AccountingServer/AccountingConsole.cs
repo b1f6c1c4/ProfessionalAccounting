@@ -1,9 +1,12 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using Microsoft.CSharp;
@@ -13,9 +16,25 @@ namespace AccountingServer
     internal class AccountingConsole
     {
         /// <summary>
+        ///     呈现二维码
+        /// </summary>
+        /// <param name="qrCode">二维码图像，若为null表示隐藏二维码</param>
+        public delegate void PresentQRCodeEventHandler(Bitmap qrCode);
+
+        /// <summary>
+        ///     呈现二维码
+        /// </summary>
+        public event PresentQRCodeEventHandler PresentQRCode;
+
+        /// <summary>
         ///     会计业务处理类
         /// </summary>
         private readonly Accountant m_Accountant;
+
+        /// <summary>
+        ///     移动数据传输
+        /// </summary>
+        private MobileComm m_Mobile;
 
         public AccountingConsole(Accountant helper) { m_Accountant = helper; }
 
@@ -62,10 +81,26 @@ namespace AccountingServer
         public string Execute(string s, out bool editable)
         {
             s = s.Trim();
-            if (s == "con")
+            if (s == "launch")
+            {
+                editable = false;
+                var startinfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments =
+                        "/c " +
+                        "mongod --config \"C:\\Users\\b1f6c1c4\\Documents\\tjzh\\Account\\mongod.conf\"",
+                    UseShellExecute = false,
+                    RedirectStandardInput = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                };
+                return Process.Start(startinfo).Id.ToString();
+            }
+            if (s == "connect")
                 try
                 {
-                    m_Accountant.Connect(true);
+                    m_Accountant.Connect();
                     editable = false;
                     return "OK";
                 }
@@ -74,7 +109,7 @@ namespace AccountingServer
                     editable = false;
                     return e.ToString();
                 }
-            if (s == "shu")
+            if (s == "shutdown")
                 try
                 {
                     m_Accountant.Shutdown();

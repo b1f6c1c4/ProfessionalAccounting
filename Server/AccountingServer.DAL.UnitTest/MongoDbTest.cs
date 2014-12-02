@@ -10,7 +10,7 @@ namespace AccountingServer.DAL.UnitTest
     {
         private readonly MongoDbHelper m_MongoDb;
 
-        public MongoDbTest() { m_MongoDb = new MongoDbHelper(true); }
+        public MongoDbTest() { m_MongoDb = new MongoDbHelper(); }
 
         [TestMethod]
         public void Vouchers()
