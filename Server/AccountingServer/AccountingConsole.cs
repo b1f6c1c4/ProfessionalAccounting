@@ -166,14 +166,20 @@ namespace AccountingServer
                     return res;
                 case "Titles":
                 case "T":
-                    editable = false;
-                    var sb = new StringBuilder();
-                    foreach (var title in TitleManager.GetTitles())
                     {
-                        sb.AppendFormat("{0}{1}\t\t{2}", title.Item1.AsTitle(), title.Item2.AsSubTitle(), title.Item3);
-                        sb.AppendLine();
+                        editable = false;
+                        var sb = new StringBuilder();
+                        foreach (var title in TitleManager.GetTitles())
+                        {
+                            sb.AppendFormat(
+                                            "{0}{1}\t\t{2}",
+                                            title.Item1.AsTitle(),
+                                            title.Item2.AsSubTitle(),
+                                            title.Item3);
+                            sb.AppendLine();
+                        }
+                        return sb.ToString();
                     }
-                    return sb.ToString();
                 case "help":
                 case "?":
                     editable = false;
@@ -185,6 +191,119 @@ namespace AccountingServer
                             throw new MissingManifestResourceException();
                         using (var reader = new StreamReader(stream))
                             return reader.ReadToEnd();
+                    }
+                case "c1":
+                    {
+                        if (!m_Accountant.Connected)
+                            throw new InvalidOperationException("尚未连接到数据库");
+
+                        editable = true;
+                        var sb = new StringBuilder();
+                        var flag = false;
+                        foreach (var voucher in m_Accountant.SelectVouchers(null))
+                        {
+                            var val = m_Accountant.IsBalanced(voucher);
+                            if (Math.Abs(val) < Accountant.Tolerance)
+                                continue;
+
+                            flag = true;
+                            if (val > 0)
+                                sb.AppendFormat("/* Debit - Credit = {0:R} */", val);
+                            else
+                                sb.AppendFormat("/* Credit - Debit = {0:R} */", -val);
+                            sb.AppendLine();
+                            sb.Append(PresentVoucher(voucher));
+                        }
+                        return flag ? sb.ToString() : "OK";
+                    }
+                case "c2":
+                    {
+                        if (!m_Accountant.Connected)
+                            throw new InvalidOperationException("尚未连接到数据库");
+
+                        editable = false;
+                        var sb = new StringBuilder();
+                        var flag = false;
+                        foreach (var title in TitleManager.GetTitles())
+                            if (Accountant.IsAsset(title.Item1) &&
+                                title.Item1 != 1602 &&
+                                title.Item1 != 1603 &&
+                                title.Item1 != 1702 &&
+                                title.Item1 != 1703)
+                            {
+                                foreach (
+                                    var content in
+                                        m_Accountant.SelectDetails(
+                                                                   new VoucherDetail
+                                                                       {
+                                                                           Title = title.Item1,
+                                                                           SubTitle = title.Item2
+                                                                       })
+                                                    .Select(d => d.Content)
+                                                    .Distinct())
+                                    foreach (
+                                        var balance in
+                                            m_Accountant.GetDailyBalance(
+                                                                         new Balance
+                                                                             {
+                                                                                 Title = title.Item1,
+                                                                                 SubTitle = title.Item2,
+                                                                                 Content = content
+                                                                             }))
+                                        if (balance.Fund < -Accountant.Tolerance)
+                                        {
+                                            flag = true;
+                                            sb.AppendFormat(
+                                                            "{0:yyyyMMdd} {1}{2} {3} {4}:{5:R}",
+                                                            balance.Date,
+                                                            title.Item1.AsTitle(),
+                                                            title.Item2.AsSubTitle(),
+                                                            title.Item3,
+                                                            content,
+                                                            balance.Fund);
+                                            sb.AppendLine();
+                                            break;
+                                        }
+                            }
+                            else if (Accountant.IsDebt(title.Item1) ||
+                                     title.Item1 == 1602 ||
+                                     title.Item1 == 1603 ||
+                                     title.Item1 == 1702 ||
+                                     title.Item1 == 1703)
+                                foreach (
+                                    var content in
+                                        m_Accountant.SelectDetails(
+                                                                   new VoucherDetail
+                                                                       {
+                                                                           Title = title.Item1,
+                                                                           SubTitle = title.Item2
+                                                                       })
+                                                    .Select(d => d.Content)
+                                                    .Distinct())
+                                    foreach (
+                                        var balance in
+                                            m_Accountant.GetDailyBalance(
+                                                                         new Balance
+                                                                             {
+                                                                                 Title = title.Item1,
+                                                                                 SubTitle = title.Item2,
+                                                                                 Content = content
+                                                                             }))
+                                        if (balance.Fund > Accountant.Tolerance)
+                                        {
+                                            flag = true;
+                                            sb.AppendFormat(
+                                                            "{0:yyyyMMdd} {1}{2} {3} {4}:{5:R}",
+                                                            balance.Date,
+                                                            title.Item1.AsTitle(),
+                                                            title.Item2.AsSubTitle(),
+                                                            title.Item3,
+                                                            content,
+                                                            balance.Fund);
+                                            sb.AppendLine();
+                                            break;
+                                        }
+                        return flag ? sb.ToString() : "OK";
                     }
             }
             if (s.EndsWith("`"))
@@ -208,7 +327,9 @@ namespace AccountingServer
                                                    Fund = bs.Sum(d => d.Fund.Value)
                                                },
                                            new BalanceEqualityComparer());
-                    var tsc = !s.EndsWith("!``") ? tscX.Where(d => Math.Abs(d.Fund) > 1e-12).ToList() : tscX.ToList();
+                    var tsc = !s.EndsWith("!``")
+                                  ? tscX.Where(d => Math.Abs(d.Fund) > Accountant.Tolerance).ToList()
+                                  : tscX.ToList();
                     tsc.Sort(new BalanceComparer());
                     var tX = tsc.GroupBy(
                                          d => d.Title,
@@ -219,7 +340,9 @@ namespace AccountingServer
                                                  Fund = bs.Sum(d => d.Fund)
                                              },
                                          EqualityComparer<int?>.Default);
-                    var t = !s.EndsWith("``") ? tX.Where(d => Math.Abs(d.Fund) > 1e-12).ToList() : tX.ToList();
+                    var t = !s.EndsWith("``")
+                                ? tX.Where(d => Math.Abs(d.Fund) > Accountant.Tolerance).ToList()
+                                : tX.ToList();
 
                     return PresentSubtotal(t, tsc);
                 }
@@ -241,7 +364,9 @@ namespace AccountingServer
                                                    Fund = bs.Sum(d => d.Fund.Value)
                                                },
                                            new BalanceEqualityComparer());
-                    var tsc = !s.EndsWith("``") ? tscX.Where(d => Math.Abs(d.Fund) > 1e-12).ToList() : tscX.ToList();
+                    var tsc = !s.EndsWith("``")
+                                  ? tscX.Where(d => Math.Abs(d.Fund) > Accountant.Tolerance).ToList()
+                                  : tscX.ToList();
                     tsc.Sort(new BalanceComparer());
                     var tsX = tsc.GroupBy(
                                           d =>
@@ -254,7 +379,9 @@ namespace AccountingServer
                                                   Fund = bs.Sum(d => d.Fund)
                                               },
                                           new BalanceEqualityComparer());
-                    var ts = !s.EndsWith("``") ? tsX.Where(d => Math.Abs(d.Fund) > 1e-12).ToList() : tsX.ToList();
+                    var ts = !s.EndsWith("``")
+                                 ? tsX.Where(d => Math.Abs(d.Fund) > Accountant.Tolerance).ToList()
+                                 : tsX.ToList();
                     var tX = ts.GroupBy(
                                         d => d.Title,
                                         (b, bs) =>
@@ -264,7 +391,9 @@ namespace AccountingServer
                                                 Fund = bs.Sum(d => d.Fund)
                                             },
                                         EqualityComparer<int?>.Default);
-                    var t = !s.EndsWith("``") ? tX.Where(d => Math.Abs(d.Fund) > 1e-12).ToList() : tX.ToList();
+                    var t = !s.EndsWith("``")
+                                ? tX.Where(d => Math.Abs(d.Fund) > Accountant.Tolerance).ToList()
+                                : tX.ToList();
 
                     return PresentSubtotal(t, ts, tsc);
                 }
