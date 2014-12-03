@@ -29,7 +29,6 @@ namespace AccountingServer
             textBoxResult.Dock = DockStyle.Fill;
 
             SetProcessDPIAware();
-            WindowState = FormWindowState.Maximized;
 
             m_Accountant = new Accountant();
 

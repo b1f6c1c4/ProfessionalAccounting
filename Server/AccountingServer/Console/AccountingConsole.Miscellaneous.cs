@@ -66,12 +66,12 @@ namespace AccountingServer.Console
         ///     从info.tsinghua.edu.cn抓取信息
         /// </summary>
         /// <returns></returns>
-        private static string FetchInfo()
+        private string FetchInfo()
         {
             //throw new NotImplementedException();
-            string res;
-            THUInfo.FetchFromInfo(out res);
-            return res;
+            var thuInfo = new THUInfo(m_Accountant);
+            thuInfo.FetchData(@"2014010914", @"");
+            return thuInfo.Compare();
         }
 
         /// <summary>
