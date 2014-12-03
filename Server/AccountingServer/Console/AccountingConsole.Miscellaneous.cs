@@ -6,7 +6,7 @@ using System.Resources;
 using System.Text;
 using AccountingServer.BLL;
 
-namespace AccountingServer
+namespace AccountingServer.Console
 {
     internal partial class AccountingConsole
     {

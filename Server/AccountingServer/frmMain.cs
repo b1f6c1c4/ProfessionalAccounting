@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using AccountingServer.BLL;
+using AccountingServer.Console;
 
 namespace AccountingServer
 {
