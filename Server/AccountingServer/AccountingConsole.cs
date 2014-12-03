@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Resources;
 using System.Text;
-using System.Windows.Forms;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using Microsoft.CSharp;
@@ -81,84 +83,109 @@ namespace AccountingServer
         public string Execute(string s, out bool editable)
         {
             s = s.Trim();
-            if (s == "launch")
+            switch (s)
             {
-                editable = false;
-                var startinfo = new ProcessStartInfo
-                {
-                    FileName = "cmd.exe",
-                    Arguments =
-                        "/c " +
-                        "mongod --config \"C:\\Users\\b1f6c1c4\\Documents\\tjzh\\Account\\mongod.conf\"",
-                    UseShellExecute = false,
-                    RedirectStandardInput = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true
-                };
-                return Process.Start(startinfo).Id.ToString();
-            }
-            if (s == "connect")
-                try
-                {
-                    m_Accountant.Connect();
-                    editable = false;
-                    return "OK";
-                }
-                catch (Exception e)
-                {
-                    editable = false;
-                    return e.ToString();
-                }
-            if (s == "shutdown")
-                try
-                {
-                    m_Accountant.Shutdown();
-                    m_Accountant.Disconnect();
-                    editable = false;
-                    return "OK";
-                }
-                catch (Exception e)
-                {
-                    editable = false;
-                    return e.ToString();
-                }
-            if (s == "mobile")
-            {
-                editable = false;
-                if (m_Mobile == null)
-                {
-                    m_Mobile = new MobileComm();
+                case "launch":
+                case "lau":
+                    try
+                    {
+                        editable = false;
+                        var startinfo = new ProcessStartInfo
+                                            {
+                                                FileName = "cmd.exe",
+                                                Arguments =
+                                                    "/c " +
+                                                    "mongod --config \"C:\\Users\\b1f6c1c4\\Documents\\tjzh\\Account\\mongod.conf\"",
+                                                UseShellExecute = false,
+                                                RedirectStandardInput = false,
+                                                RedirectStandardOutput = true,
+                                                CreateNoWindow = true
+                                            };
 
-                    m_Mobile.Connect(m_Accountant);
+                        var process = Process.Start(startinfo);
+                        if (process == null)
+                            throw new Exception();
 
-                    PresentQRCode(m_Mobile.GetQRCode(256, 256));
-                }
-                else
-                {
-                    m_Mobile.Dispose();
-                    m_Mobile = null;
+                        return String.Format("OK {0}", process.Id);
+                    }
+                    catch (Exception e)
+                    {
+                        editable = false;
+                        return e.ToString();
+                    }
+                case "connect":
+                case "con":
+                    try
+                    {
+                        m_Accountant.Connect();
+                        editable = false;
+                        return "OK";
+                    }
+                    catch (Exception e)
+                    {
+                        editable = false;
+                        return e.ToString();
+                    }
+                case "shutdown":
+                case "shu":
+                    try
+                    {
+                        m_Accountant.Shutdown();
+                        m_Accountant.Disconnect();
+                        editable = false;
+                        return "OK";
+                    }
+                    catch (Exception e)
+                    {
+                        editable = false;
+                        return e.ToString();
+                    }
+                case "mobile":
+                case "mob":
+                    editable = false;
+                    if (m_Mobile == null)
+                    {
+                        m_Mobile = new MobileComm();
 
-                    PresentQRCode(null);
-                }
-                return null;
-            }
-            if (s == "fetch")
-            {
-                editable = false;
-                string res;
-                THUInfo.FetchFromInfo(out res);
-                return res;
-            }
-            if (s == "T")
-            {
-                editable = false;
-                var sb = new StringBuilder();
-                foreach (var title in TitleManager.GetTitles())
-                {
-                    sb.AppendFormat("{0}{1}\t\t{2}", title.Item1.AsTitle(), title.Item2.AsSubTitle(), title.Item3);
-                    sb.AppendLine();
-                }
-                return sb.ToString();
+                        m_Mobile.Connect(m_Accountant);
+
+                        PresentQRCode(m_Mobile.GetQRCode(256, 256));
+                    }
+                    else
+                    {
+                        m_Mobile.Dispose();
+                        m_Mobile = null;
+
+                        PresentQRCode(null);
+                    }
+                    return null;
+                case "fetch":
+                    editable = false;
+                    string res;
+                    THUInfo.FetchFromInfo(out res);
+                    return res;
+                case "Titles":
+                case "T":
+                    editable = false;
+                    var sb = new StringBuilder();
+                    foreach (var title in TitleManager.GetTitles())
+                    {
+                        sb.AppendFormat("{0}{1}\t\t{2}", title.Item1.AsTitle(), title.Item2.AsSubTitle(), title.Item3);
+                        sb.AppendLine();
+                    }
+                    return sb.ToString();
+                case "help":
+                case "?":
+                    editable = false;
+                    using (
+                        var stream =
+                            Assembly.GetExecutingAssembly().GetManifestResourceStream("AccountingServer.Console.txt"))
+                    {
+                        if (stream == null)
+                            throw new MissingManifestResourceException();
+                        using (var reader = new StreamReader(stream))
+                            return reader.ReadToEnd();
+                    }
             }
             if (s.EndsWith("`"))
             {
@@ -167,6 +194,9 @@ namespace AccountingServer
                 if (s.EndsWith("!`"))
                 {
                     var res = ExecuteDetailQuery(sx);
+                    if (res == null)
+                        throw new InvalidOperationException("检索表达式无效");
+
                     var tscX = res.GroupBy(
                                            d =>
                                            new Balance { Title = d.Title, Content = d.Content },
@@ -196,6 +226,9 @@ namespace AccountingServer
                 else
                 {
                     var res = ExecuteDetailQuery(sx);
+                    if (res == null)
+                        throw new InvalidOperationException("检索表达式无效");
+
                     var tscX = res.GroupBy(
                                            d =>
                                            new Balance { Title = d.Title, SubTitle = d.SubTitle, Content = d.Content },
@@ -253,7 +286,11 @@ namespace AccountingServer
             {
                 editable = true;
                 var sb = new StringBuilder();
-                foreach (var voucher in ExecuteQuery(s))
+                var query = ExecuteQuery(s);
+                if (query == null)
+                    throw new InvalidOperationException("日期表达式无效");
+
+                foreach (var voucher in query)
                     sb.Append(PresentVoucher(voucher));
                 return sb.ToString();
             }
@@ -266,6 +303,7 @@ namespace AccountingServer
         /// <param name="ts">按二级科目的汇总</param>
         /// <param name="tsc">按内容的汇总</param>
         /// <returns></returns>
+        // ReSharper disable once ParameterTypeCanBeEnumerable.Local
         private static string PresentSubtotal(List<Balance> t, List<Balance> ts, List<Balance> tsc)
         {
             var sb = new StringBuilder();
@@ -312,6 +350,7 @@ namespace AccountingServer
         /// <param name="t">按一级科目的汇总</param>
         /// <param name="tsc">按内容的汇总</param>
         /// <returns></returns>
+        // ReSharper disable once ParameterTypeCanBeEnumerable.Local
         private static string PresentSubtotal(List<Balance> t, List<Balance> tsc)
         {
             var sb = new StringBuilder();
@@ -343,7 +382,7 @@ namespace AccountingServer
         /// </summary>
         /// <param name="s">检索表达式</param>
         /// <returns>检索结果，若表达式无效则为<c>null</c></returns>
-        public IEnumerable<Voucher> ExecuteQuery(string s)
+        private IEnumerable<Voucher> ExecuteQuery(string s)
         {
             string dateQ;
             var detail = ParseQuery(s, out dateQ);
@@ -352,6 +391,9 @@ namespace AccountingServer
             bool nullable;
             if (!ParseVoucherQuery(dateQ, out startDate, out endDate, out nullable))
                 return null;
+
+            if (!m_Accountant.Connected)
+                throw new InvalidOperationException("尚未连接到数据库");
 
             if (startDate.HasValue ||
                 endDate.HasValue ||
@@ -374,6 +416,9 @@ namespace AccountingServer
             bool nullable;
             if (!ParseVoucherQuery(dateQ, out startDate, out endDate, out nullable))
                 return null;
+
+            if (!m_Accountant.Connected)
+                throw new InvalidOperationException("尚未连接到数据库");
 
             if (startDate.HasValue ||
                 endDate.HasValue ||
@@ -571,7 +616,7 @@ namespace AccountingServer
         }
 
         /// <summary>
-        ///     将记账凭证用C#书写
+        ///     将记账凭证用C#表示
         /// </summary>
         /// <param name="voucher">记账凭证</param>
         /// <returns>C#表达式</returns>
@@ -622,7 +667,6 @@ namespace AccountingServer
                 sb.AppendLine();
             }
             sb.AppendLine("   } }");
-            sb.AppendLine();
             return sb.ToString();
         }
 

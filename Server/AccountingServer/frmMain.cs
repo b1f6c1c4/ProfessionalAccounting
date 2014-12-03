@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using AccountingServer.BLL;
-using AccountingServer.Chart;
 
 namespace AccountingServer
 {
+    // ReSharper disable once InconsistentNaming
     public partial class frmMain : Form
     {
+        // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
         private readonly Accountant m_Accountant;
 
         private readonly AccountingConsole m_Console;
@@ -19,15 +19,6 @@ namespace AccountingServer
 
         [DllImport("user32.dll")]
         private static extern bool SetProcessDPIAware();
-
-        //private delegate void SetCaptionDelegate(string str);
-        private void SetCaption(string str)
-        {
-            if (InvokeRequired)
-                Invoke(new Action(() => { Text = str; }));
-            else
-                Text = str;
-        }
 
         public frmMain()
         {
@@ -100,7 +91,7 @@ namespace AccountingServer
             {
                 begin = textBoxResult.Text.LastIndexOf("new Voucher", begin, StringComparison.Ordinal);
                 if (begin == -1)
-                    return true;
+                    return false;
             } while (textBoxResult.Text.Substring(begin, 17) == "new VoucherDetail");
             var nested = 0;
             end = begin + 11;
@@ -110,83 +101,13 @@ namespace AccountingServer
                 else if (textBoxResult.Text[end] == '}')
                     if (--nested == 0)
                         break;
-            return false;
+
+            if (end + 2 < textBoxResult.Text.Length &&
+                textBoxResult.Text[end + 1] == '\r' &&
+                textBoxResult.Text[end + 2] == '\n')
+                end += 2;
+            return true;
         }
-
-        private void textBoxResult_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (!m_Editable)
-                return;
-            if (!ModifierKeys.HasFlag(Keys.Alt))
-                return;
-            if ((e.KeyChar == '\r' || e.KeyChar == '\n'))
-                e.Handled = true;
-        }
-
-        private void textBoxResult_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Escape)
-            {
-                textBoxCommand.Focus();
-                textBoxCommand.SelectionStart = 0;
-                textBoxCommand.SelectionLength = textBoxCommand.Text.Length;
-                return;
-            }
-            if (!m_Editable)
-                return;
-            if (e.Alt &&
-                e.KeyCode == Keys.Delete)
-            {
-                int begin;
-                int end;
-                if (GetVoucherCode(out begin, out end))
-                    return;
-
-                try
-                {
-                    var s = textBoxResult.Text.Substring(begin, end - begin + 1);
-                    if (!m_Console.ExecuteRemoval(s))
-                        throw new Exception();
-                    textBoxResult.Text = textBoxResult.Text.Insert(end, "*/").Insert(begin, "/*");
-                    textBoxResult.SelectionStart = begin;
-                    textBoxResult.SelectionLength = end - begin + 5;
-                }
-                catch (Exception exception)
-                {
-                    textBoxResult.Text = textBoxResult.Text.Insert(end, exception.ToString());
-                    textBoxResult.SelectionStart = begin;
-                    textBoxResult.SelectionLength = end - begin + 1;
-                }
-
-                textBoxResult.ScrollToCaret();
-            }
-            else if (e.Alt &&
-                     e.KeyCode == Keys.Enter)
-            {
-                int begin;
-                int end;
-                if (GetVoucherCode(out begin, out end))
-                    return;
-
-                try
-                {
-                    var s = textBoxResult.Text.Substring(begin, end - begin + 1);
-                    var result = m_Console.ExecuteUpsert(s);
-                    textBoxResult.Text = textBoxResult.Text.Remove(begin, end - begin + 1).Insert(begin, result);
-                    textBoxResult.SelectionStart = begin;
-                    textBoxResult.SelectionLength = result.Length;
-                }
-                catch (Exception exception)
-                {
-                    textBoxResult.Text = textBoxResult.Text.Insert(end, exception.ToString());
-                    textBoxResult.SelectionStart = begin;
-                    textBoxResult.SelectionLength = end - begin + 1;
-                }
-
-                textBoxResult.ScrollToCaret();
-            }
-        }
-
 
         private void textBoxResult_MouseWheel(object sender, MouseEventArgs e)
         {
@@ -198,31 +119,169 @@ namespace AccountingServer
                     e.Delta / 18F);
         }
 
-        private void textBoxCommand_KeyPress(object sender, KeyPressEventArgs e)
+        private void textBoxCommand_TextChanged(object sender, EventArgs e)
         {
-            if (e.KeyChar != '\r' &&
-                e.KeyChar != '\n')
-            {
-                textBoxCommand.BackColor = Color.White;
-                return;
-            }
+            textBoxCommand.BackColor = textBoxCommand.Text.StartsWith("+") ? Color.Black : Color.White;
+            textBoxCommand.ForeColor = textBoxCommand.Text.StartsWith("+") ? Color.White : Color.Black;
+        }
+
+        private bool PerformUpsert()
+        {
+            int begin;
+            int end;
+            if (!GetVoucherCode(out begin, out end))
+                return false;
+
             try
             {
-                var result = m_Console.Execute(textBoxCommand.Text, out m_Editable);
+                var s = textBoxResult.Text.Substring(begin, end - begin + 1);
+                var result = m_Console.ExecuteUpsert(s);
+                textBoxResult.Text = textBoxResult.Text.Remove(begin, end - begin + 1)
+                                                  .Insert(begin, result);
+                textBoxResult.SelectionStart = begin;
+                textBoxResult.SelectionLength = result.Length;
+            }
+            catch (Exception exception)
+            {
+                textBoxResult.Text = textBoxResult.Text.Insert(end, exception.ToString());
+                textBoxResult.SelectionStart = begin;
+                textBoxResult.SelectionLength = end - begin + 1;
+            }
 
-                if (result != null)
+            textBoxResult.ScrollToCaret();
+            return true;
+        }
+
+        private bool PerformRemoval()
+        {
+            int begin;
+            int end;
+            if (!GetVoucherCode(out begin, out end))
+                return false;
+
+            try
+            {
+                var s = textBoxResult.Text.Substring(begin, end - begin + 1);
+                if (!m_Console.ExecuteRemoval(s))
+                    throw new Exception();
+                // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
+                if (textBoxResult.Text[end] == '}')
+                    textBoxResult.Text = textBoxResult.Text.Insert(end + 1, "*/").Insert(begin, "/*");
+                else //if (textBoxResult.Text[end] == '\n')
+                    textBoxResult.Text = textBoxResult.Text.Insert(end - 1, "*/").Insert(begin, "/*");
+                textBoxResult.SelectionStart = begin;
+                textBoxResult.SelectionLength = end - begin + 5;
+            }
+            catch (Exception exception)
+            {
+                textBoxResult.Text = textBoxResult.Text.Insert(end, exception.ToString());
+                textBoxResult.SelectionStart = begin;
+                textBoxResult.SelectionLength = end - begin + 1;
+            }
+
+            textBoxResult.ScrollToCaret();
+            return true;
+        }
+
+        private bool ExecuteCommand()
+        {
+            try
+            {
+                var text = textBoxCommand.Text;
+                if (text.StartsWith("+"))
                 {
-                    textBoxResult.Text = result;
+                    var result = m_Console.Execute(text.Substring(1), out m_Editable);
+                    if (result == null)
+                        return true;
+
+                    var lng = textBoxResult.Text.Length;
                     textBoxResult.Focus();
+                    textBoxResult.AppendText(result);
+                    textBoxResult.SelectionStart = lng;
                     textBoxResult.SelectionLength = 0;
-                    textBoxCommand.BackColor = m_Editable ? Color.FromArgb(75, 255, 75) : Color.FromArgb(255, 255, 75);
+                    textBoxCommand.BackColor = m_Editable
+                                                   ? Color.FromArgb(0, 200, 0)
+                                                   : Color.FromArgb(200, 220, 0);
                 }
+                else
+                {
+                    var result = m_Console.Execute(text, out m_Editable);
+                    if (result == null)
+                        return true;
+
+                    textBoxResult.Focus();
+                    textBoxResult.Text = result;
+                    textBoxResult.SelectionLength = 0;
+                    textBoxCommand.BackColor = m_Editable
+                                                   ? Color.FromArgb(75, 255, 75)
+                                                   : Color.FromArgb(250, 250, 0);
+                }
+                return true;
             }
             catch (Exception exception)
             {
                 textBoxResult.Text = exception.ToString();
                 textBoxCommand.BackColor = Color.FromArgb(255, 70, 70);
+                return false;
             }
+        }
+
+        private void FocusTextBoxCommand()
+        {
+            textBoxCommand.Focus();
+            if (textBoxCommand.Text.StartsWith("+"))
+                if (textBoxCommand.SelectionLength != textBoxCommand.Text.Length - 1 ||
+                    textBoxCommand.SelectionStart != 1)
+                {
+                    textBoxCommand.SelectionStart = 1;
+                    textBoxCommand.SelectionLength = textBoxCommand.Text.Length - 1;
+                }
+
+            textBoxCommand.SelectionStart = 0;
+            textBoxCommand.SelectionLength = textBoxCommand.Text.Length;
+        }
+
+        protected override bool ProcessDialogKey(Keys keyData)
+        {
+            if (textBoxCommand.Focused)
+            {
+                if (keyData == Keys.Escape)
+                {
+                    FocusTextBoxCommand();
+                    return true;
+                }
+
+                if (keyData == Keys.Enter)
+                {
+                    if (ExecuteCommand())
+                        return true;
+                }
+            }
+            else if (textBoxResult.Focused)
+            {
+                if (keyData == Keys.Escape)
+                {
+                    FocusTextBoxCommand();
+                    return true;
+                }
+
+                if (m_Editable)
+                {
+                    if (keyData.HasFlag(Keys.Enter) &&
+                        keyData.HasFlag(Keys.Alt))
+                    {
+                        if (PerformUpsert())
+                            return true;
+                    }
+                    if (keyData.HasFlag(Keys.Delete) &&
+                        keyData.HasFlag(Keys.Alt))
+                    {
+                        if (PerformRemoval())
+                            return true;
+                    }
+                }
+            }
+            return base.ProcessDialogKey(keyData);
         }
     }
 }
