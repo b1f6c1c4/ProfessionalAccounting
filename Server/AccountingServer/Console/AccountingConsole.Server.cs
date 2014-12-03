@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace AccountingServer
+namespace AccountingServer.Console
 {
     internal partial class AccountingConsole
     {

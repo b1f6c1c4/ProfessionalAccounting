@@ -2,7 +2,7 @@
 using System.Globalization;
 using AccountingServer.Entities;
 
-namespace AccountingServer
+namespace AccountingServer.Console
 {
     internal partial class AccountingConsole
     {
