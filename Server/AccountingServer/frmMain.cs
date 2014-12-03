@@ -202,6 +202,9 @@ namespace AccountingServer
                     textBoxCommand.BackColor = m_Editable
                                                    ? Color.FromArgb(0, 200, 0)
                                                    : Color.FromArgb(200, 220, 0);
+
+                    if (result.StartsWith("OK"))
+                        FocusTextBoxCommand();
                 }
                 else
                 {
@@ -215,6 +218,9 @@ namespace AccountingServer
                     textBoxCommand.BackColor = m_Editable
                                                    ? Color.FromArgb(75, 255, 75)
                                                    : Color.FromArgb(250, 250, 0);
+
+                    if (result.StartsWith("OK"))
+                        FocusTextBoxCommand();
                 }
                 return true;
             }

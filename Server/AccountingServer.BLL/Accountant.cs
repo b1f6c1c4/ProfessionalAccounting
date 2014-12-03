@@ -16,6 +16,16 @@ namespace AccountingServer.BLL
         ///// </summary>
         //public const int FullYearProfit = 4103;
 
+        /// <summary>
+        ///     资产类科目
+        /// </summary>
+        public const int Asset0 = 1000;
+
+        /// <summary>
+        ///     负债类科目
+        /// </summary>
+        public const int Debt0 = 2000;
+
         ///// <summary>
         /////     费用
         ///// </summary>
@@ -26,12 +36,17 @@ namespace AccountingServer.BLL
         /// </summary>
         private IDbHelper m_Db;
 
+        /// <summary>
+        ///     判断金额相等的误差
+        /// </summary>
+        public const double Tolerance = 1e-8;
+
         //private IDbHelper m_OldDb;
 
         /// <summary>
         ///     获取是否已经连接到数据库
         /// </summary>
-        public bool Connected { get { return m_Db == null; } }
+        public bool Connected { get { return m_Db != null; } }
 
         /// <summary>
         ///     连接数据库
@@ -39,7 +54,7 @@ namespace AccountingServer.BLL
         public void Connect()
         {
             m_Db = new MongoDbHelper();
-            
+
             //m_OldDb = new SqlDbHelper(un, pw);
         }
 
@@ -61,6 +76,26 @@ namespace AccountingServer.BLL
 
             //m_OldDb.Dispose();
             //m_OldDb = null;
+        }
+
+        /// <summary>
+        ///     是否为资产类科目
+        /// </summary>
+        /// <param name="id">科目编号</param>
+        /// <returns>是否为资产</returns>
+        public static bool IsAsset(int? id)
+        {
+            return id / 1000 == Asset0 / 1000;
+        }
+
+        /// <summary>
+        ///     是否为负债类科目
+        /// </summary>
+        /// <param name="id">科目编号</param>
+        /// <returns>是否为负债</returns>
+        public static bool IsDebt(int? id)
+        {
+            return id / 1000 == Debt0 / 1000;
         }
 
         /// <summary>
@@ -145,22 +180,38 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     累加每日金额得到每日余额
         /// </summary>
+        /// <param name="resx">每日金额</param>
         /// <param name="startDate">开始累加的日期</param>
         /// <param name="endDate">停止累加的日期</param>
-        /// <param name="resx">每日金额</param>
         /// <returns>每日余额</returns>
-        private static IEnumerable<Balance> ProcessDailyBalance(DateTime startDate, DateTime endDate,
-                                                                IReadOnlyList<Balance> resx)
+        private static IEnumerable<Balance> ProcessDailyBalance(IReadOnlyList<Balance> resx,
+                                                                DateTime? startDate, DateTime? endDate)
         {
             var id = 0;
             var fund = 0D;
-            for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+            DateTime dt;
+            if (startDate.HasValue)
+                dt = startDate.Value;
+            else if (resx.Any(b => b.Date.HasValue))
+                // ReSharper disable once PossibleInvalidOperationException
+                dt = resx.First(b => b.Date.HasValue).Date.Value;
+            else
+            {
+                if (resx.Any())
+                    yield return new Balance { Fund = resx.Sum(b => b.Fund) };
+                yield break;
+            }
+
+            // ReSharper disable once PossibleInvalidOperationException
+            var last = endDate ?? resx.Last().Date.Value;
+
+            for (; dt <= last; dt = dt.AddDays(1))
             {
                 while (id < resx.Count &&
                        BalanceComparer.CompareDate(resx[id].Date, dt) < 0)
                     fund += resx[id++].Fund;
                 if (id < resx.Count)
-                    fund += resx[id].Fund;
+                    fund += resx[id++].Fund;
 
                 yield return
                     new Balance
@@ -179,7 +230,8 @@ namespace AccountingServer.BLL
         /// <param name="endDate">截止日期</param>
         /// <param name="dir">0表示同时考虑借贷方，大于0表示只考虑借方，小于0表示只考虑贷方</param>
         /// <returns>每日余额，借方为正，贷方为负</returns>
-        public IEnumerable<Balance> GetDailyBalance(Balance filter, DateTime startDate, DateTime endDate, int dir = 0)
+        public IEnumerable<Balance> GetDailyBalance(Balance filter,
+                                                    DateTime? startDate = null, DateTime? endDate = null, int dir = 0)
         {
             var dFilter = new VoucherDetail
                               {
@@ -187,8 +239,10 @@ namespace AccountingServer.BLL
                                   SubTitle = filter.SubTitle,
                                   Content = filter.Content
                               };
-            var res =
-                m_Db.SelectVouchersWithDetail(dFilter).Where(v => BalanceComparer.CompareDate(v.Date, endDate) <= 0);
+            var res = endDate.HasValue
+                          ? m_Db.SelectVouchersWithDetail(dFilter)
+                                .Where(v => BalanceComparer.CompareDate(v.Date, endDate) <= 0)
+                          : m_Db.SelectVouchersWithDetail(dFilter);
             var resx = res.GroupBy(
                                    v => v.Date,
                                    (dt, vs) =>
@@ -205,7 +259,7 @@ namespace AccountingServer.BLL
                                                  .Sum(d => d.Fund.Value)
                                        }).ToList();
             resx.Sort(new BalanceComparer());
-            return ProcessDailyBalance(startDate, endDate, resx);
+            return ProcessDailyBalance(resx, startDate, endDate);
         }
 
         /// <summary>
@@ -216,8 +270,8 @@ namespace AccountingServer.BLL
         /// <param name="endDate">截止日期</param>
         /// <param name="dir">0表示同时考虑借贷方，大于0表示只考虑借方，小于0表示只考虑贷方</param>
         /// <returns>每日总余额，借方为正，贷方为负</returns>
-        public IEnumerable<Balance> GetDailyBalance(IEnumerable<Balance> filters, DateTime startDate, DateTime endDate,
-                                                    int dir = 0)
+        public IEnumerable<Balance> GetDailyBalance(IEnumerable<Balance> filters,
+                                                    DateTime? startDate = null, DateTime? endDate = null, int dir = 0)
         {
             var dFilters =
                 filters.Select(
@@ -229,8 +283,10 @@ namespace AccountingServer.BLL
                                        Content = filter.Content
                                    }).ToArray();
 
-            var res =
-                m_Db.SelectVouchersWithDetail(dFilters).Where(v => BalanceComparer.CompareDate(v.Date, endDate) <= 0);
+            var res = endDate.HasValue
+                          ? m_Db.SelectVouchersWithDetail(dFilters)
+                                .Where(v => BalanceComparer.CompareDate(v.Date, endDate) <= 0)
+                          : m_Db.SelectVouchersWithDetail(dFilters);
             var resx = res.GroupBy(
                                    v => v.Date,
                                    (dt, vs) =>
@@ -247,9 +303,9 @@ namespace AccountingServer.BLL
                                                  .Sum(d => d.Fund.Value)
                                        }).ToList();
             resx.Sort(new BalanceComparer());
-            return ProcessDailyBalance(startDate, endDate, resx);
+            return ProcessDailyBalance(resx, startDate, endDate);
         }
-
+        
         /// <summary>
         ///     按日期、科目计算各内容金额
         /// </summary>
