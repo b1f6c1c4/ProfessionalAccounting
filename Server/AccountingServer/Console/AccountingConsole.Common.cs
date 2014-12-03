@@ -100,18 +100,25 @@ namespace AccountingServer.Console
             {
                 editable = false;
                 var sx = s.TrimEnd('`', '!');
-                if (s.EndsWith("!`"))
-                {
-                    var withZero = s.EndsWith("!``");
-
-                    return SubtotalWith2Levels(sx, withZero);
-                }
-                else
-                {
-                    var withZero = s.EndsWith("``");
-
-                    return SubtotalWith3Levels(sx, withZero);
-                }
+                return s.EndsWith("!`")
+                           ? SubtotalWith2Levels(sx, !s.EndsWith("!``"))
+                           : SubtotalWith3Levels(sx, !s.EndsWith("``"));
+            }
+            if (s.EndsWith("D", StringComparison.OrdinalIgnoreCase))
+            {
+                editable = false;
+                var sx = s.TrimEnd('`', '!', 'D', 'd');
+                return s.EndsWith("!`D")
+                           ? DailySubtotalWith3Levels(sx, !s.EndsWith("!``D", StringComparison.OrdinalIgnoreCase), s.EndsWith("D", StringComparison.Ordinal), false)
+                           : DailySubtotalWith4Levels(sx, !s.EndsWith("``D", StringComparison.OrdinalIgnoreCase), s.EndsWith("D", StringComparison.Ordinal), false);
+            }
+            if (s.EndsWith("A", StringComparison.OrdinalIgnoreCase))
+            {
+                editable = false;
+                var sx = s.TrimEnd('`', '!', 'A', 'a');
+                return s.EndsWith("!`A")
+                           ? DailySubtotalWith3Levels(sx, !s.EndsWith("!``A", StringComparison.OrdinalIgnoreCase), s.EndsWith("A", StringComparison.Ordinal), true)
+                           : DailySubtotalWith4Levels(sx, !s.EndsWith("``A", StringComparison.OrdinalIgnoreCase), s.EndsWith("A", StringComparison.Ordinal), true);
             }
 
             if (s.StartsWith("R"))

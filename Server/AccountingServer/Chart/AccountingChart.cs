@@ -73,7 +73,7 @@ namespace AccountingServer.Chart
         private Series Gather(string content, Balance filter, Color color)
         {
             var s = new Series(content) { ChartType = SeriesChartType.StackedArea, ChartArea = "投资资产" };
-            var balances = Accountant.GetDailyBalance(filter, StartDate, EndDate);
+            var balances = Accountant.GetDailyBalance(filter, startDate: StartDate, endDate: EndDate);
             foreach (var balance in balances)
                 s.Points.AddXY(balance.Date.Value, balance.Fund);
             s.Color = color;
@@ -117,7 +117,7 @@ namespace AccountingServer.Chart
         private Series Gather生活资产(string content, Balance filter, Color color)
         {
             var s = new Series(content) { ChartType = SeriesChartType.StackedArea, ChartArea = "生活资产" };
-            var balances = Accountant.GetDailyBalance(filter, StartDate, EndDate);
+            var balances = Accountant.GetDailyBalance(filter, startDate: StartDate, endDate: EndDate);
             foreach (var balance in balances)
                 s.Points.AddXY(balance.Date.Value, balance.Fund);
             s.Color = color;
@@ -224,21 +224,21 @@ namespace AccountingServer.Chart
         public override IEnumerable<Series> Gather()
         {
             var balance1 =
-                Accountant.GetDailyBalance(new Balance { Title = 6602, SubTitle = 03 }, StartDate, EndDate, 1).ToArray();
+                Accountant.GetDailyBalance(new Balance { Title = 6602, SubTitle = 03 }, startDate: StartDate, endDate: EndDate, dir: 1).ToArray();
             var balance2 =
                 Accountant.GetDailyBalance(
                                            new Balance { Title = 6602, SubTitle = 06, Content = "食品" },
-                                           StartDate,
-                                           EndDate,
-                                           1).ToArray();
+                                           startDate: StartDate,
+                                           endDate: EndDate,
+                                           dir: 1).ToArray();
             var balance3 =
                 Accountant.GetDailyBalance(
                                            new Balance { Title = 6602, SubTitle = 01, Content = "水费" },
-                                           StartDate,
-                                           EndDate,
-                                           1).ToArray();
+                                           startDate: StartDate,
+                                           endDate: EndDate,
+                                           dir: 1).ToArray();
             var balance4 =
-                Accountant.GetDailyBalance(new Balance { Title = 6602, SubTitle = 06 }, StartDate, EndDate, 1).ToArray();
+                Accountant.GetDailyBalance(new Balance { Title = 6602, SubTitle = 06 }, startDate: StartDate, endDate: EndDate, dir: 1).ToArray();
             var balance5 = Accountant.GetDailyBalance(
                                                       new[]
                                                           { new Balance { Title = 6401 }, new Balance { Title = 6402 } },
@@ -426,7 +426,7 @@ namespace AccountingServer.Chart
                                                       StartDate,
                                                       EndDate).ToArray();
             var balance10 =
-                Accountant.GetDailyBalance(new Balance { Title = 2241, SubTitle = 01 }, StartDate, EndDate).ToArray();
+                Accountant.GetDailyBalance(new Balance { Title = 2241, SubTitle = 01 }, startDate: StartDate, endDate: EndDate).ToArray();
 
             {
                 var s = new Series("其他")

@@ -125,6 +125,111 @@ namespace AccountingServer.BLL
                                                                DateTime? startDate, DateTime? endDate)
         {
             var id = 0;
+            DateTime dt;
+            if (startDate.HasValue)
+                dt = startDate.Value;
+            else if (resx.Any(b => b.Date.HasValue))
+                // ReSharper disable once PossibleInvalidOperationException
+                dt = resx.First(b => b.Date.HasValue).Date.Value;
+            else
+            {
+                if (resx.Any())
+                    yield return new Balance { Fund = resx.Sum(b => b.Fund) };
+                yield break;
+            }
+
+            // ReSharper disable once PossibleInvalidOperationException
+            var last = endDate ?? resx.Last().Date.Value;
+
+            var fund = 0D;
+            for (; dt <= last; dt = dt.AddDays(1))
+            {
+                while (id < resx.Count &&
+                       BalanceComparer.CompareDate(resx[id].Date, dt) <= 0)
+                    fund += resx[id++].Fund;
+
+                yield return
+                    new Balance
+                        {
+                            Date = dt,
+                            Fund = fund
+                        };
+            }
+        }
+
+        /// <summary>
+        ///     有多个栏目的情况下，累加每日金额得到每日余额
+        /// </summary>
+        /// <param name="resx">日期分离的每日金额</param>
+        /// <param name="startDate">开始累加的日期</param>
+        /// <param name="endDate">停止累加的日期</param>
+        /// <returns>每日余额</returns>
+        public static IEnumerable<IEnumerable<Balance>> ProcessDailyBalance(
+            IReadOnlyList<Tuple<DateTime?, IEnumerable<Balance>>> resx,
+            DateTime? startDate, DateTime? endDate)
+        {
+            var id = 0;
+            DateTime dt;
+            if (startDate.HasValue)
+                dt = startDate.Value;
+            else if (resx.Any(t => t.Item1.HasValue))
+                // ReSharper disable once PossibleInvalidOperationException
+                dt = resx.First(t => t.Item1.HasValue).Item1.Value;
+            else
+            {
+                if (resx.Any())
+                {
+                    yield return resx[0].Item2;
+                }
+                yield break;
+            }
+
+            // ReSharper disable once PossibleInvalidOperationException
+            var last = endDate ?? resx.Last().Item1.Value;
+
+            var fund = new Dictionary<Balance, double>(new BalanceEqualityComparer());
+            for (; dt <= last; dt = dt.AddDays(1))
+            {
+                while (id < resx.Count &&
+                       BalanceComparer.CompareDate(resx[id].Item1, dt) <= 0)
+                {
+                    foreach (var balance in resx[id].Item2)
+                    {
+                        if (fund.ContainsKey(balance))
+                            fund[balance] += balance.Fund;
+                        else
+                            fund[balance] = balance.Fund;
+                    }
+                    id++;
+                }
+
+                var copiedDt = dt;
+                yield return
+                    fund.AsEnumerable()
+                        .Select(
+                                kvp =>
+                                new Balance
+                                    {
+                                        Date = copiedDt,
+                                        Title = kvp.Key.Title,
+                                        SubTitle = kvp.Key.SubTitle,
+                                        Content = kvp.Key.Content,
+                                        Fund = kvp.Value
+                                    });
+            }
+        }
+
+        /// <summary>
+        ///     累加每日金额得到变动日余额
+        /// </summary>
+        /// <param name="resx">每日金额</param>
+        /// <param name="startDate">开始累加的日期</param>
+        /// <param name="endDate">停止累加的日期</param>
+        /// <returns>变动日余额</returns>
+        public static IEnumerable<Balance> ProcessAccumulatedBalance(IReadOnlyList<Balance> resx,
+                                                                     DateTime? startDate, DateTime? endDate)
+        {
+            var id = 0;
             var fund = 0D;
             DateTime dt;
             if (startDate.HasValue)
@@ -142,18 +247,17 @@ namespace AccountingServer.BLL
             // ReSharper disable once PossibleInvalidOperationException
             var last = endDate ?? resx.Last().Date.Value;
 
-            for (; dt <= last; dt = dt.AddDays(1))
-            {
-                while (id < resx.Count &&
-                       BalanceComparer.CompareDate(resx[id].Date, dt) <= 0)
-                    fund += resx[id++].Fund;
-                //if (id < resx.Count)
-                //    fund += resx[id++].Fund;
+            while (id < resx.Count &&
+                   BalanceComparer.CompareDate(resx[id].Date, dt) < 0)
+                fund += resx[id++].Fund;
 
+            for (; id < resx.Count && resx[id].Date <= last; id++)
+            {
+                fund += resx[id].Fund;
                 yield return
                     new Balance
                         {
-                            Date = dt,
+                            Date = resx[id].Date,
                             Fund = fund
                         };
             }
@@ -177,15 +281,20 @@ namespace AccountingServer.BLL
         ///         // 2014-01-03 : 300
         ///         // 2014-01-04 : 300
         ///         // 2014-01-05 : 800
+        ///         GetDailyBalance(new Balance { Title = 6602, SubTitle = 03, Content = null }, null, null, true);
+        ///         // 2014-01-01 : 100
+        ///         // 2014-01-02 : 300
+        ///         // 2014-01-05 : 800
         ///     </code>
         /// </example>
         /// <param name="filter">过滤器</param>
         /// <param name="startDate">开始日期</param>
         /// <param name="endDate">截止日期</param>
         /// <param name="dir">0表示同时考虑借贷方，大于0表示只考虑借方，小于0表示只考虑贷方</param>
+        /// <param name="aggr">是否每变动日累加而非每日求余额</param>
         /// <returns>每日余额，借方为正，贷方为负</returns>
         public IEnumerable<Balance> GetDailyBalance(Balance filter,
-                                                    DateTime? startDate = null, DateTime? endDate = null, int dir = 0)
+                                                    DateTime? startDate = null, DateTime? endDate = null, int dir = 0, bool aggr = false)
         {
             var dFilter = new VoucherDetail
                               {
@@ -213,7 +322,9 @@ namespace AccountingServer.BLL
                                                  .Sum(d => d.Fund.Value)
                                        }).ToList();
             resx.Sort(new BalanceComparer());
-            return ProcessDailyBalance(resx, startDate, endDate);
+            return aggr
+                       ? ProcessAccumulatedBalance(resx, startDate, endDate)
+                       : ProcessDailyBalance(resx, startDate, endDate);
         }
 
         /// <summary>
