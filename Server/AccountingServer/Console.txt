@@ -78,5 +78,9 @@ shu	shutdown		关闭
 mob	mobile			启动/中止移动数据传输，显示/隐藏二维码
 
 
+对账：
+fetch				从ecard.tsinghua.edu.cn上获取学生卡交易记录，与现有账单自动对账，显示差异
+
+
 其他：
 ?	help			帮助

@@ -47,7 +47,7 @@ namespace AccountingServer
             this.textBoxCommand.Font = new System.Drawing.Font("Microsoft YaHei Mono", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBoxCommand.Location = new System.Drawing.Point(0, 0);
             this.textBoxCommand.Name = "textBoxCommand";
-            this.textBoxCommand.Size = new System.Drawing.Size(1361, 43);
+            this.textBoxCommand.Size = new System.Drawing.Size(1455, 43);
             this.textBoxCommand.TabIndex = 4;
             this.textBoxCommand.TextChanged += new System.EventHandler(this.textBoxCommand_TextChanged);
             // 
@@ -94,7 +94,7 @@ namespace AccountingServer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1361, 789);
+            this.ClientSize = new System.Drawing.Size(1455, 861);
             this.Controls.Add(this.chart1);
             this.Controls.Add(this.textBoxResult);
             this.Controls.Add(this.pictureBox1);
