@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.BLL", "Acc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer", "AccountingServer\AccountingServer.csproj", "{28C2EDB0-CE1E-473E-9CA6-70E29A1408A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.DAL.UnitTest", "AccountingServer.DAL.UnitTest\AccountingServer.DAL.UnitTest.csproj", "{B1AB5807-B9AC-4E70-9568-6C91329BCDB2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.UnitTest", "AccountingServer.DAL.UnitTest\AccountingServer.UnitTest.csproj", "{B1AB5807-B9AC-4E70-9568-6C91329BCDB2}"
 EndProject
 Project("{F088123C-0E9E-452A-89E6-6BA2F21D5CAC}") = "ModelingProject1", "ModelingProject1\ModelingProject1.modelproj", "{40547211-BF9A-48E3-97F7-56CE030EDD18}"
 EndProject
