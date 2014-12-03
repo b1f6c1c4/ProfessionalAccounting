@@ -287,7 +287,10 @@ namespace AccountingServer.DAL
                         break;
                 }
             if (filter.Remark != null)
-                lst.Add(Query.EQ("remark", filter.Remark == String.Empty ? null : filter.Remark));
+                lst.Add(
+                        filter.Remark == String.Empty
+                            ? Query.EQ("remark", BsonNull.Value)
+                            : Query.EQ("remark", filter.Remark));
 
             return lst.Any() ? Query.And(lst) : Query.Null;
         }
@@ -307,8 +310,8 @@ namespace AccountingServer.DAL
             if (startDate.HasValue)
                 return Query.GTE("date", startDate);
             if (endDate.HasValue)
-                return Query.Or(Query.EQ("date", null), Query.LTE("date", endDate));
-            return Query.EQ("date", null);
+                return Query.Or(Query.EQ("date", BsonNull.Value), Query.LTE("date", endDate));
+            return Query.EQ("date", BsonNull.Value);
         }
 
         /// <summary>
@@ -336,7 +339,10 @@ namespace AccountingServer.DAL
                             ? Query.EQ("content", BsonNull.Value)
                             : Query.EQ("content", filter.Content));
             if (filter.Remark != null)
-                lst.Add(Query.EQ("remark", filter.Remark == String.Empty ? null : filter.Remark));
+                lst.Add(
+                        filter.Remark == String.Empty
+                            ? Query.EQ("remark", BsonNull.Value)
+                            : Query.EQ("remark", filter.Remark));
             if (filter.Fund != null)
                 lst.Add(Query.EQ("fund", filter.Fund));
 
