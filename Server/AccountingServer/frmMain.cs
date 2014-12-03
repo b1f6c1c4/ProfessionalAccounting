@@ -258,10 +258,8 @@ namespace AccountingServer
                 }
 
                 if (keyData == Keys.Enter)
-                {
                     if (ExecuteCommand())
                         return true;
-                }
             }
             else if (textBoxResult.Focused)
             {
@@ -275,16 +273,12 @@ namespace AccountingServer
                 {
                     if (keyData.HasFlag(Keys.Enter) &&
                         keyData.HasFlag(Keys.Alt))
-                    {
                         if (PerformUpsert())
                             return true;
-                    }
                     if (keyData.HasFlag(Keys.Delete) &&
                         keyData.HasFlag(Keys.Alt))
-                    {
                         if (PerformRemoval())
                             return true;
-                    }
                 }
             }
             return base.ProcessDialogKey(keyData);

@@ -45,8 +45,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccountingConsole.cs" />
+    <Compile Include="AccountingConsole.Common.cs" />
+    <Compile Include="AccountingConsole.Server.cs" />
     <Compile Include="Chart\AccountingChart.cs" />
+    <Compile Include="AccountingConsole.Parse.cs" />
+    <Compile Include="AccountingConsole.Voucher.cs" />
+    <Compile Include="AccountingConsole.Check.cs" />
+    <Compile Include="AccountingConsole.Subtotal.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
     </Compile>
