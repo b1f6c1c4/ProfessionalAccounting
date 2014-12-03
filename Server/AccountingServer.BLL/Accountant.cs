@@ -11,15 +11,15 @@ namespace AccountingServer.BLL
     /// </summary>
     public class Accountant
     {
-        /// <summary>
-        ///     本年利润
-        /// </summary>
-        public const int FullYearProfit = 4103;
+        ///// <summary>
+        /////     本年利润
+        ///// </summary>
+        //public const int FullYearProfit = 4103;
 
-        /// <summary>
-        ///     费用
-        /// </summary>
-        public const int Cost = 5000;
+        ///// <summary>
+        /////     费用
+        ///// </summary>
+        //public const int Cost = 5000;
 
         /// <summary>
         ///     数据库访问
@@ -29,12 +29,17 @@ namespace AccountingServer.BLL
         //private IDbHelper m_OldDb;
 
         /// <summary>
+        ///     获取是否已经连接到数据库
+        /// </summary>
+        public bool Connected { get { return m_Db == null; } }
+
+        /// <summary>
         ///     连接数据库
         /// </summary>
         public void Connect()
         {
             m_Db = new MongoDbHelper();
-
+            
             //m_OldDb = new SqlDbHelper(un, pw);
         }
 

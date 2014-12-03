@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using AccountingServer.Entities;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -176,6 +174,7 @@ namespace AccountingServer.DAL
         /// <summary>
         ///     MongoDb客户端
         /// </summary>
+        // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
         private readonly MongoClient m_Client;
 
         /// <summary>
@@ -186,6 +185,7 @@ namespace AccountingServer.DAL
         /// <summary>
         ///     MongoDb数据库
         /// </summary>
+        // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
         private readonly MongoDatabase m_Db;
 
         /// <summary>
