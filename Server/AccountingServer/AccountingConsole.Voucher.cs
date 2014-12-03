@@ -10,6 +10,21 @@ namespace AccountingServer
     internal partial class AccountingConsole
     {
         /// <summary>
+        ///     转义字符串
+        /// </summary>
+        /// <param name="s">待转义的字符串</param>
+        /// <returns>转义后的字符串</returns>
+        private static string ProcessString(string s)
+        {
+            if (s == null)
+                return "null";
+
+            s = s.Replace("\\", "\\\\");
+            s = s.Replace("\"", "\\\"");
+            return "\"" + s + "\"";
+        }
+
+        /// <summary>
         ///     将记账凭证用C#表示
         /// </summary>
         /// <param name="voucher">记账凭证</param>

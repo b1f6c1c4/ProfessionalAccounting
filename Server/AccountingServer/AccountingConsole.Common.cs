@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Reflection;
-using System.Resources;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
@@ -13,25 +9,9 @@ namespace AccountingServer
     internal partial class AccountingConsole
     {
         /// <summary>
-        ///     呈现二维码
-        /// </summary>
-        /// <param name="qrCode">二维码图像，若为null表示隐藏二维码</param>
-        public delegate void PresentQRCodeEventHandler(Bitmap qrCode);
-
-        /// <summary>
-        ///     呈现二维码
-        /// </summary>
-        public event PresentQRCodeEventHandler PresentQRCode;
-
-        /// <summary>
         ///     会计业务处理类
         /// </summary>
         private readonly Accountant m_Accountant;
-
-        /// <summary>
-        ///     移动数据传输
-        /// </summary>
-        private MobileComm m_Mobile;
 
         public AccountingConsole(Accountant helper) { m_Accountant = helper; }
 
@@ -228,86 +208,6 @@ namespace AccountingServer
             var report = new ReimbursementReport(m_Accountant, startDate, endDate);
 
             return report.Preview();
-        }
-
-
-        /// <summary>
-        ///     显示控制台帮助
-        /// </summary>
-        /// <returns>帮助内容</returns>
-        private static string ListHelp()
-        {
-            using (
-                var stream =
-                    Assembly.GetExecutingAssembly().GetManifestResourceStream("AccountingServer.Console.txt"))
-            {
-                if (stream == null)
-                    throw new MissingManifestResourceException();
-                using (var reader = new StreamReader(stream))
-                    return reader.ReadToEnd();
-            }
-        }
-
-        /// <summary>
-        ///     显示所有会计科目及其编号
-        /// </summary>
-        /// <returns>会计科目及其编号</returns>
-        private static string ListTitles()
-        {
-            var sb = new StringBuilder();
-            foreach (var title in TitleManager.GetTitles())
-            {
-                sb.AppendFormat(
-                                "{0}{1}\t\t{2}",
-                                title.Item1.AsTitle(),
-                                title.Item2.AsSubTitle(),
-                                title.Item3);
-                sb.AppendLine();
-            }
-            return sb.ToString();
-        }
-
-        /// <summary>
-        ///     从info.tsinghua.edu.cn抓取信息
-        /// </summary>
-        /// <returns></returns>
-        private static string FetchInfo() { throw new NotImplementedException(); }
-
-        /// <summary>
-        ///     启动/关闭移动通信模块，同时显示隐藏二维码
-        /// </summary>
-        private void ToggleMobile()
-        {
-            if (m_Mobile == null)
-            {
-                m_Mobile = new MobileComm();
-
-                m_Mobile.Connect(m_Accountant);
-
-                PresentQRCode(m_Mobile.GetQRCode(256, 256));
-            }
-            else
-            {
-                m_Mobile.Dispose();
-                m_Mobile = null;
-
-                PresentQRCode(null);
-            }
-        }
-
-        /// <summary>
-        ///     转义字符串
-        /// </summary>
-        /// <param name="s">待转义的字符串</param>
-        /// <returns>转义后的字符串</returns>
-        private static string ProcessString(string s)
-        {
-            if (s == null)
-                return "null";
-
-            s = s.Replace("\\", "\\\\");
-            s = s.Replace("\"", "\\\"");
-            return "\"" + s + "\"";
         }
     }
 }
