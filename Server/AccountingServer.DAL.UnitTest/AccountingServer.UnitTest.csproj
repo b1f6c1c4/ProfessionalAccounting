@@ -50,10 +50,15 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AccountantTest.cs" />
     <Compile Include="MongoDbTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AccountingServer.BLL\AccountingServer.BLL.csproj">
+      <Project>{4f938d5a-6b22-4150-a74c-8203fdf1d215}</Project>
+      <Name>AccountingServer.BLL</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AccountingServer.DAL\AccountingServer.DAL.csproj">
       <Project>{2cab5dc7-a5a8-47a4-9d46-bfe2a474bb48}</Project>
       <Name>AccountingServer.DAL</Name>
