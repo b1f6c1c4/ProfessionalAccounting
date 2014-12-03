@@ -1,117 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AccountingServer.DAL;
 using AccountingServer.Entities;
 
 namespace AccountingServer.BLL
 {
-    /// <summary>
-    ///     基本会计业务处理类
-    /// </summary>
-    public class Accountant
+    public partial class Accountant
     {
-        ///// <summary>
-        /////     本年利润
-        ///// </summary>
-        //public const int FullYearProfit = 4103;
-
-        /// <summary>
-        ///     资产类科目
-        /// </summary>
-        public const int Asset0 = 1000;
-
-        /// <summary>
-        ///     负债类科目
-        /// </summary>
-        public const int Debt0 = 2000;
-
-        ///// <summary>
-        /////     费用
-        ///// </summary>
-        //public const int Cost = 5000;
-
-        /// <summary>
-        ///     数据库访问
-        /// </summary>
-        private IDbHelper m_Db;
-
-        /// <summary>
-        ///     判断金额相等的误差
-        /// </summary>
-        public const double Tolerance = 1e-8;
-
-        //private IDbHelper m_OldDb;
-
-        /// <summary>
-        ///     获取是否已经连接到数据库
-        /// </summary>
-        public bool Connected { get { return m_Db != null; } }
-
-        /// <summary>
-        ///     连接数据库
-        /// </summary>
-        public void Connect()
-        {
-            m_Db = new MongoDbHelper();
-
-            //m_OldDb = new SqlDbHelper(un, pw);
-        }
-
-        /// <summary>
-        ///     关闭数据库服务器
-        /// </summary>
-        public void Shutdown()
-        {
-            m_Db.Shutdown();
-        }
-
-        /// <summary>
-        ///     断开数据库连接
-        /// </summary>
-        public void Disconnect()
-        {
-            m_Db.Dispose();
-            m_Db = null;
-
-            //m_OldDb.Dispose();
-            //m_OldDb = null;
-        }
-
-        /// <summary>
-        ///     是否为资产类科目
-        /// </summary>
-        /// <param name="id">科目编号</param>
-        /// <returns>是否为资产</returns>
-        public static bool IsAsset(int? id)
-        {
-            return id / 1000 == Asset0 / 1000;
-        }
-
-        /// <summary>
-        ///     是否为负债类科目
-        /// </summary>
-        /// <param name="id">科目编号</param>
-        /// <returns>是否为负债</returns>
-        public static bool IsDebt(int? id)
-        {
-            return id / 1000 == Debt0 / 1000;
-        }
-
-        /// <summary>
-        ///     检查记账凭证借贷方数额是否相等
-        /// </summary>
-        /// <param name="entity">记账凭证</param>
-        /// <returns>借方比贷方多出数</returns>
-        public double IsBalanced(Voucher entity)
-        {
-            // ReSharper disable once PossibleInvalidOperationException
-            return entity.Details.Sum(d => d.Fund.Value);
-        }
-
         /// <summary>
         ///     按日期、科目、内容计算余额
         /// </summary>
+        /// <example>
+        ///     <list type="bullet">
+        ///         <item>2014-01-01 借：餐费-A餐厅 100元</item>
+        ///         <item>2014-01-02 借：餐费-B餐厅 200元</item>
+        ///         <item>2014-01-05 借：餐费 500元</item>
+        ///     </list>
+        ///     <code>
+        ///         GetBalance(new Balance { Title = 6602, SubTitle = 03, Content = "A餐厅", Date = DateTime.Parse("2014-01-05") }); // 100.0
+        ///         GetBalance(new Balance { Title = 6602, SubTitle = 03, Content = "", Date = DateTime.Parse("2014-01-05") }); // 500.0
+        ///         GetBalance(new Balance { Title = 6602, SubTitle = 03, Content = null, Date = DateTime.Parse("2014-01-02") }); // 300.0
+        ///     </code>
+        /// </example>
         /// <param name="filter">过滤器</param>
         /// <returns>余额，借方为正，贷方为负</returns>
         public double GetBalance(Balance filter)
@@ -132,6 +42,18 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     按科目、内容计算余额
         /// </summary>
+        /// <example>
+        ///     <list type="bullet">
+        ///         <item>2014-01-01 借：餐费-A餐厅 100元</item>
+        ///         <item>2014-01-02 借：餐费-B餐厅 200元</item>
+        ///         <item>2014-01-05 借：餐费 500元</item>
+        ///     </list>
+        ///     <code>
+        ///         GetFinalBalance(new Balance { Title = 6602, SubTitle = 03, Content = "A餐厅" }); // 100.0
+        ///         GetFinalBalance(new Balance { Title = 6602, SubTitle = 03, Content = "" }); // 500.0
+        ///         GetFinalBalance(new Balance { Title = 6602, SubTitle = 03, Content = null }); // 800.0
+        ///     </code>
+        /// </example>
         /// <param name="filter">过滤器</param>
         /// <returns>余额，借方为正，贷方为负</returns>
         public double GetFinalBalance(Balance filter)
@@ -149,6 +71,21 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     按科目、内容计算每日金额
         /// </summary>
+        /// <example>
+        ///     <list type="bullet">
+        ///         <item>2014-01-01 借：餐费-A餐厅 100元</item>
+        ///         <item>2014-01-02 借：餐费-B餐厅 200元</item>
+        ///         <item>2014-01-05 借：餐费 500元</item>
+        ///     </list>
+        ///     <code>
+        ///         GetBalances(new Balance { Title = 6602, SubTitle = 03, Content = "A餐厅" });
+        ///         // 2014-01-01 : 100
+        ///         GetBalances(new Balance { Title = 6602, SubTitle = 03, Content = null });
+        ///         // 2014-01-01 : 100
+        ///         // 2014-01-02 : 200
+        ///         // 2014-01-05 : 500
+        ///     </code>
+        /// </example>
         /// <param name="filter">过滤器</param>
         /// <returns>每日金额，借方为正，贷方为负</returns>
         public IEnumerable<Balance> GetBalances(Balance filter)
@@ -184,8 +121,8 @@ namespace AccountingServer.BLL
         /// <param name="startDate">开始累加的日期</param>
         /// <param name="endDate">停止累加的日期</param>
         /// <returns>每日余额</returns>
-        private static IEnumerable<Balance> ProcessDailyBalance(IReadOnlyList<Balance> resx,
-                                                                DateTime? startDate, DateTime? endDate)
+        public static IEnumerable<Balance> ProcessDailyBalance(IReadOnlyList<Balance> resx,
+                                                               DateTime? startDate, DateTime? endDate)
         {
             var id = 0;
             var fund = 0D;
@@ -208,10 +145,10 @@ namespace AccountingServer.BLL
             for (; dt <= last; dt = dt.AddDays(1))
             {
                 while (id < resx.Count &&
-                       BalanceComparer.CompareDate(resx[id].Date, dt) < 0)
+                       BalanceComparer.CompareDate(resx[id].Date, dt) <= 0)
                     fund += resx[id++].Fund;
-                if (id < resx.Count)
-                    fund += resx[id++].Fund;
+                //if (id < resx.Count)
+                //    fund += resx[id++].Fund;
 
                 yield return
                     new Balance
@@ -225,6 +162,23 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     按科目、内容计算每日余额
         /// </summary>
+        /// <example>
+        ///     <list type="bullet">
+        ///         <item>2014-01-01 借：餐费-A餐厅 100元</item>
+        ///         <item>2014-01-02 借：餐费-B餐厅 200元</item>
+        ///         <item>2014-01-05 借：餐费 500元</item>
+        ///     </list>
+        ///     <code>
+        ///         GetDailyBalance(new Balance { Title = 6602, SubTitle = 03, Content = "A餐厅" }, null, null);
+        ///         // 2014-01-01 : 100
+        ///         GetDailyBalance(new Balance { Title = 6602, SubTitle = 03, Content = null }, null, null);
+        ///         // 2014-01-01 : 100
+        ///         // 2014-01-02 : 300
+        ///         // 2014-01-03 : 300
+        ///         // 2014-01-04 : 300
+        ///         // 2014-01-05 : 800
+        ///     </code>
+        /// </example>
         /// <param name="filter">过滤器</param>
         /// <param name="startDate">开始日期</param>
         /// <param name="endDate">截止日期</param>
@@ -265,6 +219,22 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     按科目、内容计算每日总余额
         /// </summary>
+        /// <example>
+        ///     <list type="bullet">
+        ///         <item>2014-01-01 借：餐费-A餐厅 100元</item>
+        ///         <item>2014-01-02 借：餐费-B餐厅 200元</item>
+        ///         <item>2014-01-05 借：餐费 500元</item>
+        ///     </list>
+        ///     <code>
+        ///         GetDailyBalance(new [] { new Balance { Title = 6602, SubTitle = 03, Content = "A餐厅" }
+        ///                                  new Balance { Title = 6602, SubTitle = 03, Content = "" } }, null, null);
+        ///         // 2014-01-01 : 100
+        ///         // 2014-01-02 : 100
+        ///         // 2014-01-03 : 100
+        ///         // 2014-01-04 : 100
+        ///         // 2014-01-05 : 600
+        ///     </code>
+        /// </example>
         /// <param name="filters">过滤器</param>
         /// <param name="startDate">开始日期</param>
         /// <param name="endDate">截止日期</param>
@@ -305,10 +275,26 @@ namespace AccountingServer.BLL
             resx.Sort(new BalanceComparer());
             return ProcessDailyBalance(resx, startDate, endDate);
         }
-        
+
         /// <summary>
         ///     按日期、科目计算各内容金额
         /// </summary>
+        /// <example>
+        ///     <list type="bullet">
+        ///         <item>2014-01-01 借：餐费-A餐厅 100元</item>
+        ///         <item>2014-01-02 借：餐费-B餐厅 200元</item>
+        ///         <item>2014-01-05 借：餐费 500元</item>
+        ///     </list>
+        ///     <code>
+        ///         GetBalancesAcrossContent(new Balance { Title = 6602, SubTitle = 03 });
+        ///         // 2014-01-01 : 
+        ///         //              A餐厅 : 100
+        ///         // 2014-01-02 : 
+        ///         //              B餐厅 : 100
+        ///         // 2014-01-05 : 
+        ///         //              null : 500
+        ///     </code>
+        /// </example>
         /// <param name="filter">过滤器</param>
         /// <returns>各内容每日金额，借方为正，贷方为负</returns>
         public IEnumerable<IEnumerable<Balance>> GetBalancesAcrossContent(Balance filter)
@@ -336,6 +322,18 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     按日期、过滤器计算各内容金额
         /// </summary>
+        /// <example>
+        ///     <list type="bullet">
+        ///         <item>2014-01-01 借：餐费-A餐厅 100元</item>
+        ///         <item>2014-01-02 借：餐费-B餐厅 200元</item>
+        ///         <item>2014-01-05 借：餐费 500元</item>
+        ///     </list>
+        ///     <code>
+        ///         GetBalancesAcrossContent(new Balance { Title = 6602, SubTitle = 03 }, "2014-01-02", "2014-01-05");
+        ///         // B餐厅 : 200
+        ///         // null : 500
+        ///     </code>
+        /// </example>
         /// <param name="filter">过滤器</param>
         /// <param name="startDate">开始日期</param>
         /// <param name="endDate">截止日期</param>
@@ -359,6 +357,19 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     按科目计算各内容余额
         /// </summary>
+        /// <example>
+        ///     <list type="bullet">
+        ///         <item>2014-01-01 借：餐费-A餐厅 100元</item>
+        ///         <item>2014-01-02 借：餐费-B餐厅 200元</item>
+        ///         <item>2014-01-05 借：餐费 500元</item>
+        ///     </list>
+        ///     <code>
+        ///         GetFinalBalancesAcrossContent(new Balance { Title = 6602, SubTitle = 03 });
+        ///         // A餐厅 : 100
+        ///         // B餐厅 : 200
+        ///         // null : 500
+        ///     </code>
+        /// </example>
         /// <param name="filter">过滤器</param>
         /// <returns>各内容余额，借方为正，贷方为负</returns>
         public IEnumerable<Balance> GetFinalBalancesAcrossContent(Balance filter)
@@ -375,214 +386,6 @@ namespace AccountingServer.BLL
                                         Content = c,
                                         Fund = ds.Sum(d => d.Fund.Value)
                                     });
-        }
-
-        /// <summary>
-        ///     按过滤器查找记账凭证并记数
-        /// </summary>
-        /// <param name="filter">过滤器</param>
-        /// <returns>匹配过滤器的记账凭证总数</returns>
-        public long SelectVouchersCount(Voucher filter)
-        {
-            return m_Db.SelectVouchersCount(filter);
-        }
-
-        /// <summary>
-        ///     按编号查找记账凭证
-        /// </summary>
-        /// <param name="id">编号</param>
-        /// <returns>记账凭证，如果没有则为null</returns>
-        public Voucher SelectVoucher(string id)
-        {
-            return m_Db.SelectVoucher(id);
-        }
-
-        /// <summary>
-        ///     按过滤器查找记账凭证
-        /// </summary>
-        /// <param name="filter">过滤器</param>
-        /// <returns>匹配过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> SelectVouchers(Voucher filter)
-        {
-            return m_Db.SelectVouchers(filter);
-        }
-
-        /// <summary>
-        ///     按过滤器和日期查找记账凭证
-        ///     <para>若<paramref name="startDate" />和<paramref name="endDate" />均为<c>null</c>，则返回所有无日期的记账凭证</para>
-        /// </summary>
-        /// <param name="filter">过滤器</param>
-        /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
-        /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
-        /// <returns>指定日期匹配过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> SelectVouchers(Voucher filter, DateTime? startDate, DateTime? endDate)
-        {
-            return m_Db.SelectVouchers(filter, startDate, endDate);
-        }
-
-        /// <summary>
-        ///     添加或替换记账凭证
-        ///     <para>不能改变记账凭证的编号</para>
-        /// </summary>
-        /// <param name="entity">新记账凭证</param>
-        /// <returns>是否成功</returns>
-        public bool UpdateVoucher(Voucher entity)
-        {
-            return m_Db.UpdateVoucher(entity);
-        }
-
-        /// <summary>
-        ///     按细目过滤器查找记账凭证
-        /// </summary>
-        /// <param name="filter">细目过滤器</param>
-        /// <returns>任一细目匹配过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter)
-        {
-            return m_Db.SelectVouchersWithDetail(filter);
-        }
-
-        /// <summary>
-        ///     按过滤器和细目过滤器查找记账凭证
-        ///     <para>若<paramref name="startDate" />和<paramref name="endDate" />均为<c>null</c>，则返回所有无日期的记账凭证</para>
-        /// </summary>
-        /// <param name="filter">细目过滤器</param>
-        /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
-        /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
-        /// <returns>指定日期任一细目匹配过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter,
-                                                             DateTime? startDate, DateTime? endDate)
-        {
-            return m_Db.SelectVouchersWithDetail(filter, startDate, endDate);
-        }
-
-        /// <summary>
-        ///     按细目过滤器查找细目
-        /// </summary>
-        /// <param name="filter">细目过滤器</param>
-        /// <returns>匹配过滤器的细目</returns>
-        public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter)
-        {
-            return m_Db.SelectDetails(filter);
-        }
-
-        /// <summary>
-        ///     按过滤器和细目过滤器查找细目
-        ///     <para>若<paramref name="startDate" />和<paramref name="endDate" />均为<c>null</c>，则返回所有无日期的记账凭证</para>
-        /// </summary>
-        /// <param name="filter">细目过滤器</param>
-        /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
-        /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
-        /// <returns>指定日期匹配过滤器的细目</returns>
-        public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter,
-                                                        DateTime? startDate, DateTime? endDate)
-        {
-            return m_Db.SelectDetails(filter, startDate, endDate);
-        }
-
-        /// <summary>
-        ///     按细目过滤器查找细目并记数
-        /// </summary>
-        /// <param name="filter">细目过滤器</param>
-        /// <returns>匹配过滤器的细目总数</returns>
-        public long SelectDetailsCount(VoucherDetail filter)
-        {
-            return m_Db.SelectDetailsCount(filter);
-        }
-
-        /// <summary>
-        ///     添加记账凭证
-        ///     <para>若<paramref name="entity" />没有指定编号，则添加成功后会自动给<paramref name="entity" />添加编号</para>
-        /// </summary>
-        /// <param name="entity">记账凭证</param>
-        /// <returns>是否成功</returns>
-        public bool InsertVoucher(Voucher entity)
-        {
-            return m_Db.InsertVoucher(entity);
-        }
-
-        /// <summary>
-        ///     按编号删除记账凭证
-        /// </summary>
-        /// <param name="id">编号</param>
-        /// <returns>是否成功</returns>
-        public bool DeleteVoucher(string id)
-        {
-            return m_Db.DeleteVoucher(id);
-        }
-
-        /// <summary>
-        ///     按过滤器删除记账凭证
-        /// </summary>
-        /// <param name="filter">过滤器</param>
-        /// <returns>已删除的记账凭证总数</returns>
-        public int DeleteVouchers(Voucher filter)
-        {
-            return m_Db.DeleteVouchers(filter);
-        }
-
-        /// <summary>
-        ///     按过滤器删除细目
-        /// </summary>
-        /// <param name="filter">细目过滤器</param>
-        /// <returns>已删除的细目总数</returns>
-        public int DeleteDetails(VoucherDetail filter)
-        {
-            return m_Db.DeleteDetails(filter);
-        }
-
-        //public bool InsertFixedAsset(DbFixedAsset entity) { return m_Db.InsertFixedAsset(entity); }
-        //public int DeleteFixedAssets(DbFixedAsset entity) { return m_Db.DeleteFixedAssets(entity); }
-
-        //public bool InsertShortcut(DbShortcut entity) { return m_Db.InsertShortcuts(entity); }
-        //public int DeleteShortcuts(DbShortcut entity) { return m_Db.DeleteShortcuts(new DbShortcut {ID = entity.ID}); }
-
-
-        //public bool InsertTitle(DbTitle entity) { return m_Db.InsertTitle(entity); }
-        //public int DeleteTitles(DbTitle entity) { return m_Db.DeleteTitles(entity); }
-
-        /// <summary>
-        ///     合并记账凭证上相同的细目
-        /// </summary>
-        /// <param name="voucher">记账凭证</param>
-        public void Shrink(Voucher voucher)
-        {
-            voucher.Details = voucher.Details
-                                     .GroupBy(
-                                              d => new VoucherDetail { Title = d.Title, Content = d.Content },
-                                              (key, grp) =>
-                                              {
-                                                  key.Item = voucher.ID;
-                                                  key.Fund =
-                                                      grp.Sum(
-                                                              d =>
-                                                              d.Fund);
-                                                  return key;
-                                              }).ToArray();
-            m_Db.UpdateVoucher(voucher);
-        }
-
-        /// <summary>
-        ///     折旧
-        /// </summary>
-        public void Depreciate()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        ///     期末结转
-        /// </summary>
-        public void Carry()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        ///     摊销
-        /// </summary>
-        public void Amortization()
-        {
-            throw new NotImplementedException();
         }
     }
 }

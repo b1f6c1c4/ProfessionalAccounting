@@ -48,8 +48,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>AccountTitle.zh-cn.resx</DependentUpon>
     </Compile>
+    <Compile Include="Accountant.Basic.cs" />
     <Compile Include="DataFormatter.cs" />
-    <Compile Include="Accountant.cs" />
+    <Compile Include="Accountant.Grouping.cs" />
     <Compile Include="MobileComm.cs" />
     <Compile Include="MobilePatterns.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
