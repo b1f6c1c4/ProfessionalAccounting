@@ -66,7 +66,13 @@ namespace AccountingServer.Console
         ///     从info.tsinghua.edu.cn抓取信息
         /// </summary>
         /// <returns></returns>
-        private static string FetchInfo() { throw new NotImplementedException(); }
+        private static string FetchInfo()
+        {
+            //throw new NotImplementedException();
+            string res;
+            THUInfo.FetchFromInfo(out res);
+            return res;
+        }
 
         /// <summary>
         ///     启动/关闭移动通信模块，同时显示隐藏二维码
