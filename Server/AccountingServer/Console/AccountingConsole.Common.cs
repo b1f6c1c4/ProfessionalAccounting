@@ -78,7 +78,7 @@ namespace AccountingServer.Console
                     ToggleMobile();
                     return null;
                 case "fetch":
-                    editable = false;
+                    editable = true;
                     return FetchInfo();
                 case "Titles":
                 case "T":

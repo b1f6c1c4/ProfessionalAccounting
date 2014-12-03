@@ -29,6 +29,8 @@ namespace AccountingServer
             textBoxResult.Dock = DockStyle.Fill;
 
             SetProcessDPIAware();
+            this.Width = 1280;
+            this.Height = 860;
 
             m_Accountant = new Accountant();
 

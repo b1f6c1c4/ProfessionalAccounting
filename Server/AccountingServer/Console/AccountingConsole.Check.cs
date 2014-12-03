@@ -18,14 +18,12 @@ namespace AccountingServer.Console
                 throw new InvalidOperationException("尚未连接到数据库");
 
             var sb = new StringBuilder();
-            var flag = false;
             foreach (var voucher in m_Accountant.SelectVouchers(null))
             {
                 var val = m_Accountant.IsBalanced(voucher);
                 if (Math.Abs(val) < Accountant.Tolerance)
                     continue;
 
-                flag = true;
                 if (val > 0)
                     sb.AppendFormat("/* Debit - Credit = {0:R} */", val);
                 else
@@ -33,7 +31,7 @@ namespace AccountingServer.Console
                 sb.AppendLine();
                 sb.Append(PresentVoucher(voucher));
             }
-            return flag ? sb.ToString() : "OK";
+            return sb.Length > 0 ? sb.ToString() : "OK";
         }
 
         /// <summary>

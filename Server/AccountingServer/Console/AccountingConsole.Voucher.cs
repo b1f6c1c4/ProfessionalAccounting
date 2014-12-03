@@ -29,7 +29,7 @@ namespace AccountingServer.Console
         /// </summary>
         /// <param name="voucher">记账凭证</param>
         /// <returns>C#表达式</returns>
-        private static string PresentVoucher(Voucher voucher)
+        public static string PresentVoucher(Voucher voucher)
         {
             var sb = new StringBuilder();
             sb.Append("new Voucher {");
