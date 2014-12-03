@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
@@ -92,6 +93,49 @@ namespace AccountingServer.Console
 
 
         /// <summary>
+        ///     检索记账凭证并按一级科目、内容三层分类汇总，生成报表
+        /// </summary>
+        /// <param name="sx">检索表达式</param>
+        /// <param name="withZero">是否包含汇总为零的部分</param>
+        /// <returns>报表</returns>
+        private string SubtotalWith2Levels(string sx, bool withZero)
+        {
+            var res = ExecuteDetailQuery(sx);
+            if (res == null)
+                throw new InvalidOperationException("检索表达式无效");
+
+            var tscX = res.GroupBy(
+                                   d =>
+                                   new Balance { Title = d.Title, Content = d.Content },
+                                   (b, bs) =>
+                                   new Balance
+                                       {
+                                           Title = b.Title,
+                                           Content = b.Content,
+                                           Fund = bs.Sum(d => d.Fund.Value)
+                                       },
+                                   new BalanceEqualityComparer());
+            var tsc = !withZero
+                          ? tscX.Where(d => Math.Abs(d.Fund) > Accountant.Tolerance).ToList()
+                          : tscX.ToList();
+            tsc.Sort(new BalanceComparer());
+            var tX = tsc.GroupBy(
+                                 d => d.Title,
+                                 (b, bs) =>
+                                 new Balance
+                                     {
+                                         Title = b,
+                                         Fund = bs.Sum(d => d.Fund)
+                                     },
+                                 EqualityComparer<int?>.Default);
+            var t = !withZero
+                        ? tX.Where(d => Math.Abs(d.Fund) > Accountant.Tolerance).ToList()
+                        : tX.ToList();
+
+            return PresentSubtotal(t, tsc);
+        }
+
+        /// <summary>
         ///     检索记账凭证并按一级科目、二级科目、内容三层分类汇总，生成报表
         /// </summary>
         /// <param name="sx">检索表达式</param>
@@ -150,46 +194,231 @@ namespace AccountingServer.Console
         }
 
         /// <summary>
-        ///     检索记账凭证并按一级科目、内容三层分类汇总，生成报表
+        ///     检索记账凭证并按日期、一级科目、二级科目、内容四层分类汇总，生成报表
         /// </summary>
         /// <param name="sx">检索表达式</param>
         /// <param name="withZero">是否包含汇总为零的部分</param>
+        /// <param name="reversed">是否将日期放在最外侧</param>
+        /// <param name="aggr"></param>
         /// <returns>报表</returns>
-        private string SubtotalWith2Levels(string sx, bool withZero)
+        private string DailySubtotalWith4Levels(string sx, bool withZero, bool reversed, bool aggr)
         {
-            var res = ExecuteDetailQuery(sx);
-            if (res == null)
+            string dateQ;
+            var detail = ParseQuery(sx, out dateQ);
+
+            DateTime? startDate, endDate;
+            bool nullable;
+            if (!ParseVoucherQuery(dateQ, out startDate, out endDate, out nullable))
                 throw new InvalidOperationException("检索表达式无效");
 
-            var tscX = res.GroupBy(
-                                   d =>
-                                   new Balance { Title = d.Title, Content = d.Content },
-                                   (b, bs) =>
-                                   new Balance
-                                       {
-                                           Title = b.Title,
-                                           Content = b.Content,
-                                           Fund = bs.Sum(d => d.Fund.Value)
-                                       },
-                                   new BalanceEqualityComparer());
-            var tsc = !withZero
-                          ? tscX.Where(d => Math.Abs(d.Fund) > Accountant.Tolerance).ToList()
-                          : tscX.ToList();
-            tsc.Sort(new BalanceComparer());
-            var tX = tsc.GroupBy(
-                                 d => d.Title,
-                                 (b, bs) =>
-                                 new Balance
-                                     {
-                                         Title = b,
-                                         Fund = bs.Sum(d => d.Fund)
-                                     },
-                                 EqualityComparer<int?>.Default);
-            var t = !withZero
-                        ? tX.Where(d => Math.Abs(d.Fund) > Accountant.Tolerance).ToList()
-                        : tX.ToList();
+            if (!m_Accountant.Connected)
+                throw new InvalidOperationException("尚未连接到数据库");
 
-            return PresentSubtotal(t, tsc);
+            if (detail.Content == null)
+            {
+                if (detail.Title != null)
+                    return reversed
+                               ? SubtotalWith4Levels1X00Reversed(detail, startDate, endDate, withZero)
+                               : SubtotalWith4Levels1X00(detail, startDate, endDate, withZero, aggr);
+                
+                throw new NotImplementedException();
+            }
+            else
+            {
+                if (detail.Title != null)
+                    return SubtotalWith4Levels1X10(withZero, detail, startDate, endDate, aggr);
+                
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        ///     检索记账凭证并按日期、一级科目、内容三层分类汇总，生成报表
+        /// </summary>
+        /// <param name="sx">检索表达式</param>
+        /// <param name="withZero">是否包含汇总为零的部分</param>
+        /// <param name="reversed">是否将日期放在最外侧</param>
+        /// <param name="aggr"></param>
+        /// <returns>报表</returns>
+        private string DailySubtotalWith3Levels(string sx, bool withZero, bool reversed, bool aggr)
+        {
+            string dateQ;
+            var detail = ParseQuery(sx, out dateQ);
+
+            DateTime? startDate, endDate;
+            bool nullable;
+            if (!ParseVoucherQuery(dateQ, out startDate, out endDate, out nullable))
+                throw new InvalidOperationException("检索表达式无效");
+
+            if (!m_Accountant.Connected)
+                throw new InvalidOperationException("尚未连接到数据库");
+
+            if (detail.Content == null)
+            {
+                if (detail.Title != null)
+                    return reversed
+                               ? SubtotalWith4Levels1X00Reversed(detail, startDate, endDate, withZero)
+                               : SubtotalWith4Levels1X00(detail, startDate, endDate, withZero, aggr);
+                
+                throw new NotImplementedException();
+            }
+            else
+            {
+                if (detail.Title != null)
+                    return SubtotalWith4Levels1X10(withZero, detail, startDate, endDate, aggr);
+                
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        ///     根据相关信息检索记账凭证并按内容、日期分类汇总，生成报表
+        /// </summary>
+        private string SubtotalWith4Levels1X00(VoucherDetail filter, DateTime? startDate,
+                                                       DateTime? endDate, bool withZero, bool aggr)
+        {
+            var vouchers = endDate == null
+                               ? m_Accountant.SelectVouchersWithDetail(filter)
+                               : m_Accountant.SelectVouchersWithDetail(filter, startDate, endDate);
+
+            var result = vouchers.SelectMany(
+                                             v =>
+                                             v.Details.Where(d=>d.IsMatch(filter)).Select(d => new Tuple<DateTime?, VoucherDetail>(v.Date, d)))
+                                 .GroupBy(
+                                          t => t.Item2.Content,
+                                          (c, ts) =>
+                                          {
+                                              var tmp = ts.GroupBy(
+                                                                   t => t.Item1,
+                                                                   (d, tss) =>
+                                                                   new Balance
+                                                                       {
+                                                                           Date = d,
+                                                                           //Content = c,
+                                                                           Fund = tss.Sum(t => t.Item2.Fund.Value)
+                                                                       }).ToList();
+                                              tmp.Sort(new BalanceComparer());
+                                              return new Tuple<string, IEnumerable<Balance>>(
+                                                  c,
+                                                  aggr
+                                                      ? Accountant.ProcessAccumulatedBalance(tmp, startDate, endDate)
+                                                      : Accountant.ProcessDailyBalance(tmp, startDate, endDate));
+                                          });
+
+            var sb = new StringBuilder();
+            var flag = false;
+            foreach (var balances in result)
+            {
+                sb.AppendFormat("    {0}:", balances.Item1);
+                sb.AppendLine();
+
+                foreach (var balance in balances.Item2)
+                {
+                    if (withZero)
+                        if (Math.Abs(balance.Fund) < Accountant.Tolerance)
+                        {
+                            flag = true;
+                            sb.Append("~");
+                            continue;
+                        }
+                    if (flag)
+                    {
+                        sb.AppendLine();
+                        flag = false;
+                    }
+                    sb.AppendFormat("{0:yyyyMMdd} {1}", balance.Date, balance.Fund.AsCurrency().CPadLeft(12));
+                    sb.AppendLine();
+                }
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
+        ///     根据相关信息检索记账凭证并按日期、内容分类汇总，生成报表
+        /// </summary>
+        private string SubtotalWith4Levels1X00Reversed(VoucherDetail filter, DateTime? startDate,
+                                                       DateTime? endDate, bool withZero)
+        {
+            var vouchers = endDate == null
+                               ? m_Accountant.SelectVouchersWithDetail(filter)
+                               : m_Accountant.SelectVouchersWithDetail(filter, startDate, endDate);
+
+            var result = vouchers.GroupBy(
+                                          v => v.Date,
+                                          (dt, vs) => new Tuple<DateTime?, IEnumerable<Balance>>(
+                                                          dt,
+                                                          vs.SelectMany(v => v.Details)
+                                                            .Where(d => d.IsMatch(filter))
+                                                            .GroupBy(
+                                                                     d => new Balance { Content = d.Content },
+                                                                     (b, ds) =>
+                                                                     new Balance
+                                                                         {
+                                                                             Date = dt,
+                                                                             Title = filter.Title,
+                                                                             SubTitle = filter.SubTitle,
+                                                                             Content = b.Content,
+                                                                             Fund = ds.Sum(d => d.Fund.Value)
+                                                                         }))).ToList();
+
+            result.Sort((t1, t2) => BalanceComparer.CompareDate(t1.Item1, t2.Item1));
+
+            var cuml = Accountant.ProcessDailyBalance(result, startDate, endDate);
+
+            var sb = new StringBuilder();
+            foreach (var balances in cuml)
+            {
+                sb.AppendFormat("{0:yyyyMMdd}:", balances.First().Date);
+                sb.AppendLine();
+
+                foreach (var balance in balances)
+                {
+                    if (withZero)
+                        if (Math.Abs(balance.Fund) < Accountant.Tolerance)
+                            continue;
+                    sb.AppendFormat("    {0}:{1}", balance.Content.CPadRight(25), balance.Fund.AsCurrency().CPadLeft(12));
+                    sb.AppendLine();
+                }
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
+        ///     根据相关信息检索记账凭证并按日期分类汇总，生成报表
+        /// </summary>
+        private string SubtotalWith4Levels1X10(bool withZero, VoucherDetail filter, DateTime? startDate, DateTime? endDate, bool aggr)
+        {
+            var result =
+                m_Accountant.GetDailyBalance(
+                                             new Balance
+                                                 {
+                                                     Title = filter.Title,
+                                                     SubTitle = filter.SubTitle,
+                                                     Content = filter.Content
+                                                 },
+                                             startDate,
+                                             endDate,
+                                             aggr: aggr);
+            var sb = new StringBuilder();
+            var flag = false;
+            foreach (var balance in result)
+            {
+                if (withZero)
+                    if (Math.Abs(balance.Fund) < Accountant.Tolerance)
+                    {
+                        flag = true;
+                        sb.Append("~");
+                        continue;
+                    }
+                if (flag)
+                {
+                    sb.AppendLine();
+                    flag = false;
+                }
+                sb.AppendFormat("{0:yyyyMMdd} {1}", balance.Date, balance.Fund.AsCurrency().CPadLeft(12));
+                sb.AppendLine();
+            }
+            return sb.ToString();
         }
     }
 }

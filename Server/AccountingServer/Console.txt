@@ -32,11 +32,20 @@ T100101 []			限制科目
 !`					按Title，Content分类汇总总额并制作报表（不含0）
 !``					按Title，Content分类汇总总额并制作报表（含0）
 
-`D					按Title，SubTitle，Content分类汇总每日余额并制作报表（不含0）
-``D					按Title，SubTitle，Content分类汇总每日余额并制作报表（含0）
-!`D					按Title，Content分类汇总每日余额并制作报表（不含0）
-!``D				按Title，Content分类汇总每日余额并制作报表（含0）
+`D					按Date，Title，SubTitle，Content分类汇总并制作报表（不含0）
+``D					按Date，Title，SubTitle，Content分类汇总并制作报表（含0）
+!`D					按Date，Title，Content分类汇总并制作报表（不含0）
+!``D				按Date，Title，Content分类汇总并制作报表（含0）
 
+`d					按Title，SubTitle，Content，Date分类汇总并制作报表（不含0）
+``d					按Title，SubTitle，Content，Date分类汇总并制作报表（含0）
+!`d					按Title，Content，Date分类汇总并制作报表（不含0）
+!``d				按Title，Content，Date分类汇总并制作报表（含0）
+
+`a					按Title，SubTitle，Content，Date分类汇总并制作报表（不含0，不含未改变日期）
+``a					按Title，SubTitle，Content，Date分类汇总并制作报表（含0，不含未改变日期）
+!`a					按Title，Content，Date分类汇总并制作报表（不含0，不含未改变日期）
+!``a				按Title，Content，Date分类汇总并制作报表（含0，不含未改变日期）
 
 检索所有科目：
 T	Titles			检索所有科目编号及其名称
