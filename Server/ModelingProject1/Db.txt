@@ -63,7 +63,8 @@ db.asset:
 				"date":new Date("2014-12-31"),
 				"devto":700.0
 			}
-		]
+		],
+	"remark":null
 }
 db.inventory:
 db.amortization:

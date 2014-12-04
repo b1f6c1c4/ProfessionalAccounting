@@ -13,6 +13,11 @@ namespace AccountingServer.DAL
     /// </summary>
     internal static class BsonHelper
     {
+        private static bool ContainsNotNull(this BsonDocument doc, string key)
+        {
+            return doc.Contains(key) && !doc[key].IsBsonNull;
+        }
+
         /// <summary>
         ///     将ObjectId编号转换为字符串编号
         /// </summary>
@@ -103,7 +108,7 @@ namespace AccountingServer.DAL
         {
             var doc = new BsonDocument
                           {
-                              { "_id",asset.ID.HasValue? asset.ID.Value.ToBsonValue() :BsonNull.Value},
+                              { "_id", asset.ID.HasValue ? asset.ID.Value.ToBsonValue() : BsonNull.Value },
                               { "name", asset.Name },
                               { "date", asset.Date },
                               { "value", asset.Value },
@@ -112,7 +117,12 @@ namespace AccountingServer.DAL
                               { "title", asset.Title },
                               { "deptitle", asset.DepreciationTitle },
                               { "devtitle", asset.DevaluationTitle },
-                              { "exptitle", asset.ExpenseTitle * 100 + asset.ExpenseSubTitle }
+                              {
+                                  "exptitle",
+                                  asset.ExpenseSubTitle.HasValue
+                                      ? asset.ExpenseTitle * 100 + asset.ExpenseSubTitle
+                                      : asset.ExpenseTitle
+                              }
                           };
             if (asset.Method != DepreciationMethod.None)
                 switch (asset.Method)
@@ -134,6 +144,8 @@ namespace AccountingServer.DAL
                     arr.Add(item.ToBsonDocument());
                 doc.Add("schedule", arr);
             }
+            if (asset.Remark != null)
+                doc.Add("remark", asset.Remark);
 
             return doc;
         }
@@ -170,10 +182,10 @@ namespace AccountingServer.DAL
                 return null;
 
             var voucher = new Voucher { ID = doc["_id"].AsObjectId.Wrap() };
-            if (doc.Contains("date"))
+            if (doc.ContainsNotNull("date"))
                 voucher.Date = doc["date"].IsBsonNull ? (DateTime?)null : doc["date"].AsLocalTime;
             voucher.Type = VoucherType.Ordinal;
-            if (doc.Contains("special"))
+            if (doc.ContainsNotNull("special"))
                 switch (doc["special"].AsString)
                 {
                     case "amorz":
@@ -195,7 +207,7 @@ namespace AccountingServer.DAL
                         voucher.Type = VoucherType.Uncertain;
                         break;
                 }
-            if (doc.Contains("detail"))
+            if (doc.ContainsNotNull("detail"))
             {
                 var ddocs = doc["detail"].AsBsonArray;
                 var details = new VoucherDetail[ddocs.Count];
@@ -203,7 +215,7 @@ namespace AccountingServer.DAL
                     details[i] = ddocs[i].AsBsonDocument.ToVoucherDetail();
                 voucher.Details = details;
             }
-            if (doc.Contains("remark"))
+            if (doc.ContainsNotNull("remark"))
                 voucher.Remark = doc["remark"].AsString;
 
             return voucher;
@@ -217,15 +229,15 @@ namespace AccountingServer.DAL
         private static VoucherDetail ToVoucherDetail(this BsonDocument ddoc)
         {
             var detail = new VoucherDetail();
-            if (ddoc.Contains("title"))
+            if (ddoc.ContainsNotNull("title"))
                 detail.Title = ddoc["title"].AsInt32;
-            if (ddoc.Contains("subtitle"))
+            if (ddoc.ContainsNotNull("subtitle"))
                 detail.SubTitle = ddoc["subtitle"].AsInt32;
-            if (ddoc.Contains("content"))
+            if (ddoc.ContainsNotNull("content"))
                 detail.Content = ddoc["content"].AsString;
-            if (ddoc.Contains("fund"))
+            if (ddoc.ContainsNotNull("fund"))
                 detail.Fund = ddoc["fund"].AsDouble;
-            if (ddoc.Contains("remark"))
+            if (ddoc.ContainsNotNull("remark"))
                 detail.Remark = ddoc["remark"].AsString;
             return detail;
         }
@@ -241,29 +253,30 @@ namespace AccountingServer.DAL
                 return null;
 
             var asset = new DbAsset { ID = doc["_id"].AsGuid };
-            if (doc.Contains("name"))
+            if (doc.ContainsNotNull("name"))
                 asset.Name = doc["name"].AsString;
-            if (doc.Contains("date"))
-                asset.Date = doc["date"].IsBsonNull ? (DateTime?)null : doc["date"].AsLocalTime;
-            if (doc.Contains("value"))
+            if (doc.ContainsNotNull("date"))
+                asset.Date = doc["date"].AsLocalTime;
+            if (doc.ContainsNotNull("value"))
                 asset.Value = doc["value"].AsDouble;
-            if (doc.Contains("salvge"))
+            if (doc.ContainsNotNull("salvge"))
                 asset.Salvge = doc["salvge"].AsDouble;
-            if (doc.Contains("life"))
+            if (doc.ContainsNotNull("life"))
                 asset.Life = doc["life"].AsInt32;
-            if (doc.Contains("title"))
+            if (doc.ContainsNotNull("title"))
                 asset.Title = doc["title"].AsInt32;
-            if (doc.Contains("deptitle"))
+            if (doc.ContainsNotNull("deptitle"))
                 asset.DepreciationTitle = doc["deptitle"].AsInt32;
-            if (doc.Contains("devtitle"))
+            if (doc.ContainsNotNull("devtitle"))
                 asset.DevaluationTitle = doc["devtitle"].AsInt32;
-            if (doc.Contains("exptitle"))
+            if (doc.ContainsNotNull("exptitle"))
             {
                 var expenseTitle = doc["exptitle"].AsInt32;
                 asset.ExpenseTitle = expenseTitle / 100;
                 asset.ExpenseSubTitle = expenseTitle % 100;
             }
-            if (doc.Contains("method"))
+            asset.Method = DepreciationMethod.None;
+            if (doc.ContainsNotNull("method"))
                 switch (doc["method"].AsString)
                 {
                     case "sl":
@@ -276,8 +289,7 @@ namespace AccountingServer.DAL
                         asset.Method = DepreciationMethod.DoubleDeclineMethod;
                         break;
                 }
-            asset.Method = DepreciationMethod.None;
-            if (doc.Contains("schedule"))
+            if (doc.ContainsNotNull("schedule"))
             {
                 var ddocs = doc["schedule"].AsBsonArray;
                 var schedule = new IAssetItem[ddocs.Count];
@@ -285,6 +297,8 @@ namespace AccountingServer.DAL
                     schedule[i] = ddocs[i].AsBsonDocument.ToAssetItem();
                 asset.Schedule = schedule;
             }
+            if (doc.ContainsNotNull("remark"))
+                asset.Remark = doc["remark"].AsString;
 
             return asset;
         }
@@ -297,16 +311,16 @@ namespace AccountingServer.DAL
         private static IAssetItem ToAssetItem(this BsonDocument ddoc)
         {
             IAssetItem item;
-            if (ddoc.Contains("dep"))
+            if (ddoc.ContainsNotNull("dep"))
                 item = new DepreciateItem { Amount = ddoc["dep"].AsDouble };
-            else if (ddoc.Contains("dev"))
+            else if (ddoc.ContainsNotNull("dev"))
                 item = new DevalueItem { FairValue = ddoc["dev"].AsDouble };
             else
                 throw new InvalidOperationException();
 
-            if (ddoc.Contains("voucher"))
+            if (ddoc.ContainsNotNull("voucher"))
                 item.VoucherID = ddoc["voucher"].AsObjectId.Wrap();
-            if (ddoc.Contains("date"))
+            if (ddoc.ContainsNotNull("date"))
                 item.Date = ddoc["date"].AsBsonDateTime.ToLocalTime();
 
             return item;
@@ -582,7 +596,6 @@ namespace AccountingServer.DAL
         }
 
 
-
         public Voucher SelectVoucher(string id)
         {
             return m_Vouchers.FindOneByIdAs<BsonDocument>(id.UnWrap()).ToVoucher();
@@ -773,6 +786,7 @@ namespace AccountingServer.DAL
             var result = m_Assets.Remove(GetQuery(filter));
             return result.Response["n"].AsInt32;
         }
+
         //public void Depreciate() { throw new NotImplementedException(); }
         //public void Carry() { throw new NotImplementedException(); }
     }
