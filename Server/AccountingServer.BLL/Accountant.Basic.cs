@@ -41,8 +41,6 @@ namespace AccountingServer.BLL
         /// </summary>
         public const double Tolerance = 1e-8;
 
-        //private IDbHelper m_OldDb;
-
         /// <summary>
         ///     获取是否已经连接到数据库
         /// </summary>
@@ -84,8 +82,6 @@ namespace AccountingServer.BLL
         public void Connect()
         {
             m_Db = new MongoDbHelper();
-
-            //m_OldDb = new SqlDbHelper(un, pw);
         }
 
         /// <summary>
@@ -103,9 +99,6 @@ namespace AccountingServer.BLL
         {
             m_Db.Dispose();
             m_Db = null;
-
-            //m_OldDb.Dispose();
-            //m_OldDb = null;
         }
 
         /// <summary>
@@ -260,16 +253,6 @@ namespace AccountingServer.BLL
         {
             return m_Db.DeleteDetails(filter);
         }
-
-        //public bool InsertFixedAsset(DbFixedAsset entity) { return m_Db.InsertFixedAsset(entity); }
-        //public int DeleteFixedAssets(DbFixedAsset entity) { return m_Db.DeleteFixedAssets(entity); }
-
-        //public bool InsertShortcut(DbShortcut entity) { return m_Db.InsertShortcuts(entity); }
-        //public int DeleteShortcuts(DbShortcut entity) { return m_Db.DeleteShortcuts(new DbShortcut {ID = entity.ID}); }
-
-
-        //public bool InsertTitle(DbTitle entity) { return m_Db.InsertTitle(entity); }
-        //public int DeleteTitles(DbTitle entity) { return m_Db.DeleteTitles(entity); }
 
         /// <summary>
         ///     合并记账凭证上相同的细目
