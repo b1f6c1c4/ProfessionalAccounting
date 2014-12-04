@@ -35,25 +35,36 @@ db.voucher:
 
 db.asset:
 {
+	"_id":Guid.NewGuid(),
 	"name":"..",
 	"date":new Date("2014-11-28"),
 	"value":1000,
-	"salvge":0.05,
+	"salvge":50,
 	"life":3,
-	"title":1601,
+	"title":1601, // 原值
+	"deptitle":1602, // 折旧
+	"devtitle":1603, // 减值准备
+	"exptitle":660210, // 费用
+	"method":"sl",
 	"schedule":
 		[
 			{
-				"voucher":.....
-				"date":new Date("2014-09-30"),
+				"voucher":ObjectId(""),
+				"date":new Date("2014-11-30"),
 				"dep":100.0
 			}
 			{
-				"voucher":.....
-				"date":new Date("2014-09-30"),
-				"dev":100.0
+				"voucher":ObjectId(""),
+				"date":new Date("2014-12-31"),
+				"dep":100.0
 			}
-		]
+			{
+				"voucher":ObjectId(""),
+				"date":new Date("2014-12-31"),
+				"devto":700.0
+			}
+		],
+	"remark":null
 }
 db.inventory:
 db.amortization:

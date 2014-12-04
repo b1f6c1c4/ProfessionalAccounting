@@ -45,6 +45,7 @@ namespace AccountingServer.BLL
         ///     获取是否已经连接到数据库
         /// </summary>
         public bool Connected { get { return m_Db != null; } }
+
         /// <summary>
         ///     是否为资产类科目
         /// </summary>
@@ -255,6 +256,68 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
+        ///     按编号查找资产
+        /// </summary>
+        /// <param name="id">编号</param>
+        /// <returns>资产，如果没有则为<c>null</c></returns>
+        public DbAsset SelectAsset(Guid id)
+        {
+            return m_Db.SelectAsset(id);
+        }
+
+        /// <summary>
+        ///     按过滤器查找资产
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>匹配过滤器的资产</returns>
+        public IEnumerable<DbAsset> SelectAssets(DbAsset filter)
+        {
+            return m_Db.SelectAssets(filter);
+        }
+
+        /// <summary>
+        ///     添加资产
+        ///     <para>若<paramref name="entity" />没有指定编号，则添加成功后会自动给<paramref name="entity" />添加编号</para>
+        /// </summary>
+        /// <param name="entity">资产</param>
+        /// <returns>是否成功</returns>
+        public bool InsertAsset(DbAsset entity)
+        {
+            return m_Db.InsertAsset(entity);
+        }
+
+        /// <summary>
+        ///     按编号删除资产
+        /// </summary>
+        /// <param name="id">编号</param>
+        /// <returns>是否成功</returns>
+        public bool DeleteAsset(Guid id)
+        {
+            return m_Db.DeleteAsset(id);
+        }
+
+        /// <summary>
+        ///     按过滤器删除资产
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>已删除的资产总数</returns>
+        public int DeleteAssets(DbAsset filter)
+        {
+            return m_Db.DeleteAssets(filter);
+        }
+
+        /// <summary>
+        ///     添加或替换资产
+        ///     <para>不能改变资产的编号</para>
+        /// </summary>
+        /// <param name="entity">新资产</param>
+        /// <returns>是否成功</returns>
+        public bool UpdateAsset(DbAsset entity)
+        {
+            return m_Db.UpdateAsset(entity);
+        }
+
+        /// <summary>
         ///     合并记账凭证上相同的细目
         /// </summary>
         /// <param name="voucher">记账凭证</param>
@@ -276,14 +339,6 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     折旧
-        /// </summary>
-        public void Depreciate()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         ///     期末结转
         /// </summary>
         public void Carry()
@@ -298,6 +353,5 @@ namespace AccountingServer.BLL
         {
             throw new NotImplementedException();
         }
-
     }
 }

@@ -49,6 +49,7 @@
       <DependentUpon>AccountTitle.zh-cn.resx</DependentUpon>
     </Compile>
     <Compile Include="Accountant.Basic.cs" />
+    <Compile Include="Accountant.Asset.cs" />
     <Compile Include="DataFormatter.cs" />
     <Compile Include="Accountant.Grouping.cs" />
     <Compile Include="MobileComm.cs" />

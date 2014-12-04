@@ -111,33 +111,153 @@ namespace AccountingServer.Entities
         public string Remark { get; set; }
     }
 
-    //public interface IAssetItem
-    //{
+    /// <summary>
+    ///     资产折旧计算表栏目
+    /// </summary>
+    public interface IAssetItem
+    {
+        /// <summary>
+        ///     记账凭证编号
+        /// </summary>
+        string VoucherID { get; set; }
 
-    //}
+        /// <summary>
+        ///     记账日期
+        /// </summary>
+        DateTime? Date { get; set; }
+    }
 
-    //public struct Depreciate : IAssetItem
-    //{
-    //    public DateTime? Date { get; set; }
-    //    public double? Fund { get; set; }
-    //}
-    //public struct Devalue : IAssetItem
-    //{
-    //    public DateTime? Date { get; set; }
-    //    public double? Fund { get; set; }
-    //}
+    /// <summary>
+    ///     计提资产折旧
+    /// </summary>
+    public class DepreciateItem : IAssetItem
+    {
+        public string VoucherID { get; set; }
 
-    //public class DbAsset
-    //{
-    //    public Guid ID { get; set; }
-    //    public string Name { get; set; }
-    //    public DateTime? Date { get; set; }
-    //    public double? Value { get; set; }
-    //    public int? Life { get; set; }
-    //    public double? Salvge { get; set; }
-    //    public int? Title { get; set; }
-    //    public IAssetItem[] Schedule { get; set; }
-    //}
+        public DateTime? Date { get; set; }
+
+        /// <summary>
+        ///     折旧额
+        /// </summary>
+        public double Amount { get; set; }
+    }
+
+    /// <summary>
+    ///     计提资产减值准备
+    /// </summary>
+    public class DevalueItem : IAssetItem
+    {
+        public string VoucherID { get; set; }
+
+        public DateTime? Date { get; set; }
+
+        /// <summary>
+        ///     公允价值
+        /// </summary>
+        public double FairValue { get; set; }
+    }
+
+    /// <summary>
+    ///     计提折旧方法
+    /// </summary>
+    public enum DepreciationMethod
+    {
+        /// <summary>
+        ///     不计提折旧
+        /// </summary>
+        None,
+
+        /// <summary>
+        ///     年限平均法
+        /// </summary>
+        StraightLine,
+
+        /// <summary>
+        ///     年数总和法
+        /// </summary>
+        SumOfTheYear,
+
+        /// <summary>
+        ///     双倍余额递减法
+        /// </summary>
+        DoubleDeclineMethod
+    }
+
+    /// <summary>
+    ///     资产
+    /// </summary>
+    public class DbAsset
+    {
+        /// <summary>
+        ///     编号
+        /// </summary>
+        public Guid? ID { get; set; }
+
+        /// <summary>
+        ///     名称
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        ///     入账日期
+        /// </summary>
+        public DateTime? Date { get; set; }
+
+        /// <summary>
+        ///     资产原值
+        /// </summary>
+        public double? Value { get; set; }
+
+        /// <summary>
+        ///     预计净残值
+        /// </summary>
+        public double? Salvge { get; set; }
+
+        /// <summary>
+        ///     使用寿命
+        /// </summary>
+        public int? Life { get; set; }
+
+        /// <summary>
+        ///     原值所在科目编号
+        /// </summary>
+        public int? Title { get; set; }
+
+        /// <summary>
+        ///     折旧所在科目编号
+        /// </summary>
+        public int? DepreciationTitle { get; set; }
+
+        /// <summary>
+        ///     减值准备所在科目编号
+        /// </summary>
+        public int? DevaluationTitle { get; set; }
+
+        /// <summary>
+        ///     费用所在科目编号
+        /// </summary>
+        public int? ExpenseTitle { get; set; }
+
+        /// <summary>
+        ///     费用所在二级科目编号
+        /// </summary>
+        public int? ExpenseSubTitle { get; set; }
+
+        /// <summary>
+        ///     折旧方法
+        /// </summary>
+        public DepreciationMethod? Method { get; set; }
+
+        /// <summary>
+        ///     资产折旧计算表
+        /// </summary>
+        public IAssetItem[] Schedule { get; set; }
+
+        /// <summary>
+        ///     备注
+        /// </summary>
+        public string Remark { get; set; }
+    }
 
     /// <summary>
     ///     余额表项目
