@@ -41,8 +41,6 @@ namespace AccountingServer.BLL
         /// </summary>
         public const double Tolerance = 1e-8;
 
-        private IDbHelper m_OldDb;
-
         /// <summary>
         ///     获取是否已经连接到数据库
         /// </summary>
@@ -85,8 +83,6 @@ namespace AccountingServer.BLL
         public void Connect()
         {
             m_Db = new MongoDbHelper();
-
-            m_OldDb = new SqlDbHelper("b1f6c1c4", "142857");
         }
 
         /// <summary>
@@ -104,9 +100,6 @@ namespace AccountingServer.BLL
         {
             m_Db.Dispose();
             m_Db = null;
-
-            m_OldDb.Dispose();
-            m_OldDb = null;
         }
 
         /// <summary>
