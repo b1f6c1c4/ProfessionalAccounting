@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Text;
 using AccountingServer.Entities;
 
@@ -172,6 +173,54 @@ namespace AccountingServer.DAL
         public bool InsertDetail(VoucherDetail entity) { throw new NotImplementedException(); }
         public int DeleteDetails(VoucherDetail filter) { throw new NotImplementedException(); }
         public void Shutdown() { throw new NotImplementedException(); }
+        public DbAsset SelectAsset(Guid id) { throw new NotImplementedException(); }
+
+        public IEnumerable<DbAsset> SelectAssets(DbAsset filter)
+        {
+            var sb = new StringBuilder();
+            sb.Append("SELECT * FROM FixedAssets WHERE 1=1");
+            if (filter.ID != null)
+                sb.AppendFormat(" AND ID='{0}'", filter.ID);
+            if (filter.Name != null)
+                sb.AppendFormat(" AND Item={0}", filter.Name);
+            if (filter.Date.HasValue)
+                sb.AppendFormat(" AND DT='{0:yyyyMMdd}'", filter.Date);
+            if (filter.Value.HasValue)
+                sb.AppendFormat(" AND Value={0:0.0000}", filter.Value);
+            if (filter.Life.HasValue)
+                sb.AppendFormat(" AND DepreciableLife={0:0}", filter.Life);
+            if (filter.Salvge.HasValue)
+                sb.AppendFormat(" AND Salvge={0:0.0000}", filter.Salvge);
+            if (filter.Title.HasValue)
+                sb.AppendFormat(" AND Title={0:0000.00}", filter.Title);
+
+            using (var reader = ExecuteReader(sb.ToString()))
+                while (reader.Read())
+                {
+                    var title = reader.GetDecimalSafe(7);
+                    yield return
+                        new DbAsset
+                            {
+                                ID = Guid.Parse(reader.GetStringSafe(0)),
+                                Name = reader.GetStringSafe(1),
+                                Date = reader.GetDateSafe(2),
+                                Value = (double)reader.GetDecimalSafe(4),
+                                Life = reader.GetInt32Safe(5),
+                                Salvge = (double)reader.GetDecimalSafe(6),
+                                Title = 1601,
+                                DepreciationTitle = 1602,
+                                DevaluationTitle = 1603,
+                                Method = DepreciationMethod.StraightLine,
+                                ExpenseTitle = (int)title,
+                                ExpenseSubTitle = (int)(100 * (title - (int)title))
+                            };
+                }
+        }
+
+        public bool InsertAsset(DbAsset entity) { throw new NotImplementedException(); }
+        public bool DeleteAsset(Guid id) { throw new NotImplementedException(); }
+        public int DeleteAssets(DbAsset filter) { throw new NotImplementedException(); }
+        public bool UpdateAsset(DbAsset entity) { throw new NotImplementedException(); }
 
         /*public IEnumerable<DbFixedAsset> SelectFixedAssets(DbFixedAsset filter)
         {
