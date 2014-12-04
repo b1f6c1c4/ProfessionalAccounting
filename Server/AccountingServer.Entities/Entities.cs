@@ -188,7 +188,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     编号
         /// </summary>
-        public Guid ID { get; set; }
+        public Guid? ID { get; set; }
 
         /// <summary>
         ///     名称
@@ -243,7 +243,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     折旧方法
         /// </summary>
-        public DepreciationMethod Method { get; set; }
+        public DepreciationMethod? Method { get; set; }
 
         /// <summary>
         ///     资产折旧计算表

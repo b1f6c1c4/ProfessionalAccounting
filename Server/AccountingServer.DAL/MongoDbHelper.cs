@@ -103,7 +103,7 @@ namespace AccountingServer.DAL
         {
             var doc = new BsonDocument
                           {
-                              { "_id", asset.ID.ToBsonValue() },
+                              { "_id",asset.ID.HasValue? asset.ID.Value.ToBsonValue() :BsonNull.Value},
                               { "name", asset.Name },
                               { "date", asset.Date },
                               { "value", asset.Value },
@@ -263,7 +263,6 @@ namespace AccountingServer.DAL
                 asset.ExpenseTitle = expenseTitle / 100;
                 asset.ExpenseSubTitle = expenseTitle % 100;
             }
-            asset.Method = DepreciationMethod.None;
             if (doc.Contains("method"))
                 switch (doc["method"].AsString)
                 {
@@ -277,6 +276,7 @@ namespace AccountingServer.DAL
                         asset.Method = DepreciationMethod.DoubleDeclineMethod;
                         break;
                 }
+            asset.Method = DepreciationMethod.None;
             if (doc.Contains("schedule"))
             {
                 var ddocs = doc["schedule"].AsBsonArray;
@@ -410,9 +410,9 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="id">编号</param>
         /// <returns>Bson查询</returns>
-        private static IMongoQuery GetUniqueQuery(Guid id)
+        private static IMongoQuery GetUniqueQuery(Guid? id)
         {
-            return Query.EQ("_id", id.ToBsonValue());
+            return Query.EQ("_id", id.HasValue ? id.Value.ToBsonValue() : BsonNull.Value);
         }
 
         /// <summary>
@@ -523,6 +523,65 @@ namespace AccountingServer.DAL
 
             return lst.Any() ? Query.And(lst) : Query.Null;
         }
+
+        /// <summary>
+        ///     按过滤器查询
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>Bson查询</returns>
+        private static IMongoQuery GetQuery(DbAsset filter)
+        {
+            if (filter == null)
+                return Query.Null;
+
+            var lst = new List<IMongoQuery>();
+
+            if (filter.ID != null)
+                lst.Add(Query.EQ("_id", filter.ID.Value.ToBsonValue()));
+            if (filter.Name != null)
+                lst.Add(
+                        filter.Name == String.Empty
+                            ? Query.EQ("name", BsonNull.Value)
+                            : Query.EQ("name", filter.Name));
+            if (filter.Date != null)
+                lst.Add(Query.EQ("date", filter.Date));
+            if (filter.Value != null)
+                lst.Add(Query.EQ("value", filter.Value));
+            if (filter.Salvge != null)
+                lst.Add(Query.EQ("salvge", filter.Salvge));
+            if (filter.Life != null)
+                lst.Add(Query.EQ("life", filter.Life));
+            if (filter.Title != null)
+                lst.Add(Query.EQ("title", filter.Title));
+            if (filter.DepreciationTitle != null)
+                lst.Add(Query.EQ("deptitle", filter.DepreciationTitle));
+            if (filter.DevaluationTitle != null)
+                lst.Add(Query.EQ("devtitle", filter.DevaluationTitle));
+            if (filter.ExpenseTitle != null)
+                lst.Add(
+                        Query.EQ(
+                                 "exptitle",
+                                 filter.ExpenseSubTitle != null
+                                     ? filter.ExpenseTitle * 100 + filter.ExpenseSubTitle
+                                     : filter.ExpenseTitle));
+            if (filter.Method.HasValue)
+                switch (filter.Method.Value)
+                {
+                    case DepreciationMethod.StraightLine:
+                        lst.Add(Query.EQ("method", "sl"));
+                        break;
+                    case DepreciationMethod.SumOfTheYear:
+                        lst.Add(Query.EQ("method", "sy"));
+                        break;
+                    case DepreciationMethod.DoubleDeclineMethod:
+                        lst.Add(Query.EQ("method", "dd"));
+                        break;
+                }
+
+            return lst.Any() ? Query.And(lst) : Query.Null;
+        }
+
+
 
         public Voucher SelectVoucher(string id)
         {
@@ -686,7 +745,10 @@ namespace AccountingServer.DAL
             return m_Assets.FindOneAs<BsonDocument>(Query.EQ("_id", id.ToBsonValue())).ToAsset();
         }
 
-        public IEnumerable<DbAsset> SelectAssets(DbAsset filter) { throw new NotImplementedException(); }
+        public IEnumerable<DbAsset> SelectAssets(DbAsset filter)
+        {
+            return m_Assets.FindAs<BsonDocument>(GetQuery(filter)).Select(d => d.ToAsset());
+        }
 
         public bool InsertAsset(DbAsset entity)
         {
@@ -706,7 +768,11 @@ namespace AccountingServer.DAL
             return result.Ok;
         }
 
-        public int DeleteAssets(DbAsset filter) { throw new NotImplementedException(); }
+        public int DeleteAssets(DbAsset filter)
+        {
+            var result = m_Assets.Remove(GetQuery(filter));
+            return result.Response["n"].AsInt32;
+        }
         //public void Depreciate() { throw new NotImplementedException(); }
         //public void Carry() { throw new NotImplementedException(); }
     }
