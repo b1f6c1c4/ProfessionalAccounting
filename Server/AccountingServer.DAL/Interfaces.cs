@@ -148,17 +148,52 @@ namespace AccountingServer.DAL
         /// </summary>
         void Shutdown();
 
-        //DbAsset SelectAsset(Guid id);
-        //IEnumerable<DbAsset> SelectAssets(DbAsset filter);
-        //bool InsertAsset(DbAsset entity);
-        //int DeleteAssets(DbAsset filter);
 
+        /// <summary>
+        ///     按编号查找资产
+        /// </summary>
+        /// <param name="id">编号</param>
+        /// <returns>资产，如果没有则为<c>null</c></returns>
+        DbAsset SelectAsset(Guid id);
 
-        //IEnumerable<VoucherDetail> GetXBalances(VoucherDetail filter, bool noCarry = false, int? sID = null, int? eID = null, int dir = 0);
+        /// <summary>
+        ///     按过滤器查找资产
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>匹配过滤器的资产</returns>
+        IEnumerable<DbAsset> SelectAssets(DbAsset filter);
+
+        /// <summary>
+        ///     添加资产
+        ///     <para>若<paramref name="entity" />没有指定编号，则添加成功后会自动给<paramref name="entity" />添加编号</para>
+        /// </summary>
+        /// <param name="entity">资产</param>
+        /// <returns>是否成功</returns>
+        bool InsertAsset(DbAsset entity);
+
+        /// <summary>
+        ///     按编号删除资产
+        /// </summary>
+        /// <param name="id">编号</param>
+        /// <returns>是否成功</returns>
+        bool DeleteAsset(Guid id);
+
+        /// <summary>
+        ///     按过滤器删除资产
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>已删除的资产总数</returns>
+        int DeleteAssets(DbAsset filter);
+
+        /// <summary>
+        ///     添加或替换资产
+        ///     <para>不能改变资产的编号</para>
+        /// </summary>
+        /// <param name="entity">新资产</param>
+        /// <returns>是否成功</returns>
+        bool UpdateAsset(DbAsset entity);
+
         //void Depreciate();
         //void Carry();
-        //IEnumerable<DailyBalance> GetDailyBalance(decimal title, string remark, int dir = 0);
-        //IEnumerable<DailyBalance> GetDailyXBalance(decimal title, int dir = 0);
-        //string GetFixedAssetName(Guid id);
     }
 }

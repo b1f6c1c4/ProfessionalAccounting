@@ -95,6 +95,71 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
+        ///     将资产转换为Bson
+        /// </summary>
+        /// <param name="asset">资产</param>
+        /// <returns>Bson</returns>
+        public static BsonDocument ToBsonDocument(this DbAsset asset)
+        {
+            var doc = new BsonDocument
+                          {
+                              { "_id", asset.ID.ToBsonValue() },
+                              { "name", asset.Name },
+                              { "date", asset.Date },
+                              { "value", asset.Value },
+                              { "salvge", asset.Salvge },
+                              { "life", asset.Life },
+                              { "title", asset.Title },
+                              { "deptitle", asset.DepreciationTitle },
+                              { "devtitle", asset.DevaluationTitle },
+                              { "exptitle", asset.ExpenseTitle * 100 + asset.ExpenseSubTitle }
+                          };
+            if (asset.Method != DepreciationMethod.None)
+                switch (asset.Method)
+                {
+                    case DepreciationMethod.StraightLine:
+                        doc.Add("method", "sl");
+                        break;
+                    case DepreciationMethod.SumOfTheYear:
+                        doc.Add("method", "sy");
+                        break;
+                    case DepreciationMethod.DoubleDeclineMethod:
+                        doc.Add("method", "dd");
+                        break;
+                }
+            if (asset.Schedule != null)
+            {
+                var arr = new BsonArray(asset.Schedule.Length);
+                foreach (var item in asset.Schedule)
+                    arr.Add(item.ToBsonDocument());
+                doc.Add("schedule", arr);
+            }
+
+            return doc;
+        }
+
+        /// <summary>
+        ///     将折旧表条目转换为Bson
+        /// </summary>
+        /// <param name="item">条目</param>
+        /// <returns>Bson</returns>
+        private static BsonDocument ToBsonDocument(this IAssetItem item)
+        {
+            var val = new BsonDocument();
+            if (item.VoucherID != null)
+                val.Add("voucher", item.VoucherID.UnWrap());
+            if (item.Date != null)
+                val.Add("date", item.Date);
+
+            if (item is DepreciateItem)
+                val.Add("dep", (item as DepreciateItem).Amount);
+            else if (item is DevalueItem)
+                val.Add("devto", (item as DevalueItem).FairValue);
+
+            return val;
+        }
+
+        /// <summary>
         ///     从Bson还原记账凭证
         /// </summary>
         /// <param name="doc">Bson</param>
@@ -164,6 +229,90 @@ namespace AccountingServer.DAL
                 detail.Remark = ddoc["remark"].AsString;
             return detail;
         }
+
+        /// <summary>
+        ///     从Bson还原资产
+        /// </summary>
+        /// <param name="doc">Bson</param>
+        /// <returns>资产，若<paramref name="doc" />为<c>null</c>则为<c>null</c></returns>
+        public static DbAsset ToAsset(this BsonDocument doc)
+        {
+            if (doc == null)
+                return null;
+
+            var asset = new DbAsset { ID = doc["_id"].AsGuid };
+            if (doc.Contains("name"))
+                asset.Name = doc["name"].AsString;
+            if (doc.Contains("date"))
+                asset.Date = doc["date"].IsBsonNull ? (DateTime?)null : doc["date"].AsLocalTime;
+            if (doc.Contains("value"))
+                asset.Value = doc["value"].AsDouble;
+            if (doc.Contains("salvge"))
+                asset.Salvge = doc["salvge"].AsDouble;
+            if (doc.Contains("life"))
+                asset.Life = doc["life"].AsInt32;
+            if (doc.Contains("title"))
+                asset.Title = doc["title"].AsInt32;
+            if (doc.Contains("deptitle"))
+                asset.DepreciationTitle = doc["deptitle"].AsInt32;
+            if (doc.Contains("devtitle"))
+                asset.DevaluationTitle = doc["devtitle"].AsInt32;
+            if (doc.Contains("exptitle"))
+            {
+                var expenseTitle = doc["exptitle"].AsInt32;
+                asset.ExpenseTitle = expenseTitle / 100;
+                asset.ExpenseSubTitle = expenseTitle % 100;
+            }
+            asset.Method = DepreciationMethod.None;
+            if (doc.Contains("method"))
+                switch (doc["method"].AsString)
+                {
+                    case "sl":
+                        asset.Method = DepreciationMethod.StraightLine;
+                        break;
+                    case "sy":
+                        asset.Method = DepreciationMethod.SumOfTheYear;
+                        break;
+                    case "dd":
+                        asset.Method = DepreciationMethod.DoubleDeclineMethod;
+                        break;
+                }
+            if (doc.Contains("schedule"))
+            {
+                var ddocs = doc["schedule"].AsBsonArray;
+                var schedule = new IAssetItem[ddocs.Count];
+                for (var i = 0; i < ddocs.Count; i++)
+                    schedule[i] = ddocs[i].AsBsonDocument.ToAssetItem();
+                asset.Schedule = schedule;
+            }
+
+            return asset;
+        }
+
+        /// <summary>
+        ///     从Bson还原折旧表条目
+        /// </summary>
+        /// <param name="ddoc">Bson</param>
+        /// <returns>条目</returns>
+        private static IAssetItem ToAssetItem(this BsonDocument ddoc)
+        {
+            IAssetItem item;
+            if (ddoc.Contains("dep"))
+                item = new DepreciateItem { Amount = ddoc["dep"].AsDouble };
+            else if (ddoc.Contains("dev"))
+                item = new DevalueItem { FairValue = ddoc["dev"].AsDouble };
+            else
+                throw new InvalidOperationException();
+
+            if (ddoc.Contains("voucher"))
+                item.VoucherID = ddoc["voucher"].AsObjectId.Wrap();
+            if (ddoc.Contains("date"))
+                item.Date = ddoc["date"].AsBsonDateTime.ToLocalTime();
+
+            return item;
+        }
+
+        public static BsonValue ToBsonValue(this Guid id) { return new BsonBinaryData(id); }
     }
 
     /// <summary>
@@ -194,6 +343,11 @@ namespace AccountingServer.DAL
         private readonly MongoCollection m_Vouchers;
 
         /// <summary>
+        ///     资产集合
+        /// </summary>
+        private readonly MongoCollection m_Assets;
+
+        /// <summary>
         ///     连接到服务器
         /// </summary>
         public MongoDbHelper()
@@ -206,6 +360,7 @@ namespace AccountingServer.DAL
             m_Db = m_Server.GetDatabase("accounting");
 
             m_Vouchers = m_Db.GetCollection("voucher");
+            m_Assets = m_Db.GetCollection("asset");
         }
 
         /// <summary>
@@ -248,6 +403,26 @@ namespace AccountingServer.DAL
         private static IMongoQuery GetUniqueQuery(Voucher voucher)
         {
             return GetUniqueQuery(voucher.ID);
+        }
+
+        /// <summary>
+        ///     按编号唯一查询
+        /// </summary>
+        /// <param name="id">编号</param>
+        /// <returns>Bson查询</returns>
+        private static IMongoQuery GetUniqueQuery(Guid id)
+        {
+            return Query.EQ("_id", id.ToBsonValue());
+        }
+
+        /// <summary>
+        ///     按资产的编号唯一查询
+        /// </summary>
+        /// <param name="asset">资产</param>
+        /// <returns>Bson查询</returns>
+        private static IMongoQuery GetUniqueQuery(DbAsset asset)
+        {
+            return GetUniqueQuery(asset.ID);
         }
 
         /// <summary>
@@ -505,15 +680,34 @@ namespace AccountingServer.DAL
             return count;
         }
 
-        //public DbAsset SelectAsset(Guid id) { throw new NotImplementedException(); }
-        //public IEnumerable<DbAsset> SelectAssets(DbAsset filter) { throw new NotImplementedException(); }
-        //public bool InsertAsset(DbAsset entity) { throw new NotImplementedException(); }
-        //public int DeleteAssets(DbAsset filter) { throw new NotImplementedException(); }
-        //public IEnumerable<VoucherDetail> GetXBalances(VoucherDetail filter, bool noCarry = false, int? sID = null, int? eID = null, int dir = 0) { throw new NotImplementedException(); }
+
+        public DbAsset SelectAsset(Guid id)
+        {
+            return m_Assets.FindOneAs<BsonDocument>(Query.EQ("_id", id.ToBsonValue())).ToAsset();
+        }
+
+        public IEnumerable<DbAsset> SelectAssets(DbAsset filter) { throw new NotImplementedException(); }
+
+        public bool InsertAsset(DbAsset entity)
+        {
+            var res = m_Assets.Insert(entity.ToBsonDocument());
+            return res.Ok;
+        }
+
+        public bool DeleteAsset(Guid id)
+        {
+            var res = m_Assets.Remove(GetUniqueQuery(id));
+            return res.Ok;
+        }
+
+        public bool UpdateAsset(DbAsset entity)
+        {
+            var result = m_Assets.Update(GetUniqueQuery(entity), new UpdateDocument(entity.ToBsonDocument()));
+            return result.Ok;
+        }
+
+        public int DeleteAssets(DbAsset filter) { throw new NotImplementedException(); }
         //public void Depreciate() { throw new NotImplementedException(); }
         //public void Carry() { throw new NotImplementedException(); }
-        //public IEnumerable<DailyBalance> GetDailyBalance(decimal title, string remark, int dir = 0) { throw new NotImplementedException(); }
-        //public IEnumerable<DailyBalance> GetDailyXBalance(decimal title, int dir = 0) { throw new NotImplementedException(); }
-        //public string GetFixedAssetName(Guid id) { throw new NotImplementedException(); }
     }
 }
