@@ -88,6 +88,9 @@ namespace AccountingServer.Console
                 case "?":
                     editable = false;
                     return ListHelp();
+                case "a":
+                    editable = false;
+                    return PresentAssets();
                 case "c1":
                     editable = true;
                     return BasicCheck();

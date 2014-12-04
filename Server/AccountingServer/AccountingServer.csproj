@@ -53,6 +53,7 @@
     <Compile Include="Console\AccountingConsole.Server.cs" />
     <Compile Include="Console\AccountingConsole.Subtotal.cs" />
     <Compile Include="Console\AccountingConsole.Voucher.cs" />
+    <Compile Include="Console\AccountingConsole.Asset.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
     </Compile>

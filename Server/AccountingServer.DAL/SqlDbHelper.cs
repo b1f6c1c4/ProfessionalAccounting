@@ -178,7 +178,7 @@ namespace AccountingServer.DAL
         public IEnumerable<DbAsset> SelectAssets(DbAsset filter)
         {
             var sb = new StringBuilder();
-            sb.Append("SELECT * FROM FixedAssets WHERE 1=1");
+            sb.Append("SELECT id,name,dt,value,[DepreciableLife],[Salvge],title FROM FixedAssets WHERE 1=1");
             if (filter.ID != null)
                 sb.AppendFormat(" AND ID='{0}'", filter.ID);
             if (filter.Name != null)
@@ -197,16 +197,16 @@ namespace AccountingServer.DAL
             using (var reader = ExecuteReader(sb.ToString()))
                 while (reader.Read())
                 {
-                    var title = reader.GetDecimalSafe(7);
+                    var title = reader.GetDecimalSafe(6);
                     yield return
                         new DbAsset
                             {
-                                ID = Guid.Parse(reader.GetStringSafe(0)),
+                                ID = (Guid)reader[0],
                                 Name = reader.GetStringSafe(1),
                                 Date = reader.GetDateSafe(2),
-                                Value = (double)reader.GetDecimalSafe(4),
-                                Life = reader.GetInt32Safe(5),
-                                Salvge = (double)reader.GetDecimalSafe(6),
+                                Value = (double)reader.GetDecimalSafe(3),
+                                Life = (int)reader.GetDouble(4),
+                                Salvge = (double)reader.GetDecimalSafe(5),
                                 Title = 1601,
                                 DepreciationTitle = 1602,
                                 DevaluationTitle = 1603,

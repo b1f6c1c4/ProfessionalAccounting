@@ -166,14 +166,17 @@ namespace AccountingServer.Entities
         ///     不计提折旧
         /// </summary>
         None,
+
         /// <summary>
         ///     年限平均法
         /// </summary>
         StraightLine,
+
         /// <summary>
         ///     年数总和法
         /// </summary>
         SumOfTheYear,
+
         /// <summary>
         ///     双倍余额递减法
         /// </summary>
@@ -249,6 +252,11 @@ namespace AccountingServer.Entities
         ///     资产折旧计算表
         /// </summary>
         public IAssetItem[] Schedule { get; set; }
+
+        /// <summary>
+        ///     备注
+        /// </summary>
+        public string Remark { get; set; }
     }
 
     /// <summary>
