@@ -343,7 +343,7 @@ namespace AccountingServer.Entities
                                                 if (t is AcquisationItem)
                                                     return 0;
                                                 if (t is DispositionItem)
-                                                    return 1;
+                                                    return 0; // Indistinguished
                                                 if (t is DepreciateItem)
                                                     return 2;
                                                 if (t is DevalueItem)
