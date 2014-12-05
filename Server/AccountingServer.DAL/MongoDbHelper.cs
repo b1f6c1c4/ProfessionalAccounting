@@ -104,7 +104,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="asset">资产</param>
         /// <returns>Bson</returns>
-        public static BsonDocument ToBsonDocument(this DbAsset asset)
+        public static BsonDocument ToBsonDocument(this Asset asset)
         {
             var doc = new BsonDocument
                           {
@@ -247,12 +247,12 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="doc">Bson</param>
         /// <returns>资产，若<paramref name="doc" />为<c>null</c>则为<c>null</c></returns>
-        public static DbAsset ToAsset(this BsonDocument doc)
+        public static Asset ToAsset(this BsonDocument doc)
         {
             if (doc == null)
                 return null;
 
-            var asset = new DbAsset { ID = doc["_id"].AsGuid };
+            var asset = new Asset { ID = doc["_id"].AsGuid };
             if (doc.ContainsNotNull("name"))
                 asset.Name = doc["name"].AsString;
             if (doc.ContainsNotNull("date"))
@@ -434,7 +434,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="asset">资产</param>
         /// <returns>Bson查询</returns>
-        private static IMongoQuery GetUniqueQuery(DbAsset asset)
+        private static IMongoQuery GetUniqueQuery(Asset asset)
         {
             return GetUniqueQuery(asset.ID);
         }
@@ -543,7 +543,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>Bson查询</returns>
-        private static IMongoQuery GetQuery(DbAsset filter)
+        private static IMongoQuery GetQuery(Asset filter)
         {
             if (filter == null)
                 return Query.Null;
@@ -753,17 +753,17 @@ namespace AccountingServer.DAL
         }
 
 
-        public DbAsset SelectAsset(Guid id)
+        public Asset SelectAsset(Guid id)
         {
             return m_Assets.FindOneAs<BsonDocument>(Query.EQ("_id", id.ToBsonValue())).ToAsset();
         }
 
-        public IEnumerable<DbAsset> SelectAssets(DbAsset filter)
+        public IEnumerable<Asset> SelectAssets(Asset filter)
         {
             return m_Assets.FindAs<BsonDocument>(GetQuery(filter)).Select(d => d.ToAsset());
         }
 
-        public bool InsertAsset(DbAsset entity)
+        public bool InsertAsset(Asset entity)
         {
             var res = m_Assets.Insert(entity.ToBsonDocument());
             return res.Ok;
@@ -775,13 +775,13 @@ namespace AccountingServer.DAL
             return res.Ok;
         }
 
-        public bool UpdateAsset(DbAsset entity)
+        public bool UpdateAsset(Asset entity)
         {
             var result = m_Assets.Update(GetUniqueQuery(entity), new UpdateDocument(entity.ToBsonDocument()));
             return result.Ok;
         }
 
-        public int DeleteAssets(DbAsset filter)
+        public int DeleteAssets(Asset filter)
         {
             var result = m_Assets.Remove(GetQuery(filter));
             return result.Response["n"].AsInt32;

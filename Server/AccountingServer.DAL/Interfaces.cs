@@ -154,14 +154,14 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="id">编号</param>
         /// <returns>资产，如果没有则为<c>null</c></returns>
-        DbAsset SelectAsset(Guid id);
+        Asset SelectAsset(Guid id);
 
         /// <summary>
         ///     按过滤器查找资产
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>匹配过滤器的资产</returns>
-        IEnumerable<DbAsset> SelectAssets(DbAsset filter);
+        IEnumerable<Asset> SelectAssets(Asset filter);
 
         /// <summary>
         ///     添加资产
@@ -169,7 +169,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="entity">资产</param>
         /// <returns>是否成功</returns>
-        bool InsertAsset(DbAsset entity);
+        bool InsertAsset(Asset entity);
 
         /// <summary>
         ///     按编号删除资产
@@ -183,7 +183,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>已删除的资产总数</returns>
-        int DeleteAssets(DbAsset filter);
+        int DeleteAssets(Asset filter);
 
         /// <summary>
         ///     添加或替换资产
@@ -191,7 +191,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="entity">新资产</param>
         /// <returns>是否成功</returns>
-        bool UpdateAsset(DbAsset entity);
+        bool UpdateAsset(Asset entity);
 
         //void Depreciate();
         //void Carry();

@@ -11,7 +11,7 @@ namespace AccountingServer.Console
         /// </summary>
         /// <param name="asset">资产</param>
         /// <returns>C#表达式</returns>
-        public static string PresentAsset(DbAsset asset)
+        public static string PresentAsset(Asset asset)
         {
             // TODO: Really Present them
             var sb = new StringBuilder();
@@ -36,7 +36,7 @@ namespace AccountingServer.Console
         public string PresentAssets()
         {
             var sb = new StringBuilder();
-            var query = m_Accountant.SelectAssets(new DbAsset());
+            var query = m_Accountant.SelectAssets(new Asset());
             foreach (var a in query)
                 sb.Append(PresentAsset(a));
             return sb.ToString();
