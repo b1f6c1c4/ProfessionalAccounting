@@ -91,6 +91,16 @@ namespace AccountingServer.Console
                 case "a":
                     editable = false;
                     return PresentAssets();
+                case "dep":
+                    editable = false;
+                    foreach (var asset in m_Accountant.SelectAssets(new Asset()))
+                    {
+                        asset.Salvge = asset.Value * 0.05;
+                        asset.Method = DepreciationMethod.StraightLine;
+                        Accountant.Depreciate(asset);
+                        m_Accountant.UpdateAsset(asset);
+                    }
+                    return PresentAssets();
                 case "c1":
                     editable = true;
                     return BasicCheck();

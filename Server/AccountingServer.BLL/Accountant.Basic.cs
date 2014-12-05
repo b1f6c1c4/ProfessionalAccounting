@@ -262,7 +262,9 @@ namespace AccountingServer.BLL
         /// <returns>资产，如果没有则为<c>null</c></returns>
         public Asset SelectAsset(Guid id)
         {
-            return m_Db.SelectAsset(id);
+            var result = m_Db.SelectAsset(id);
+            InternalRegular(result);
+            return result;
         }
 
         /// <summary>
@@ -272,7 +274,11 @@ namespace AccountingServer.BLL
         /// <returns>匹配过滤器的资产</returns>
         public IEnumerable<Asset> SelectAssets(Asset filter)
         {
-            return m_Db.SelectAssets(filter);
+            foreach (var asset in m_Db.SelectAssets(filter))
+            {
+                InternalRegular(asset);
+                yield return asset;
+            }
         }
 
         /// <summary>

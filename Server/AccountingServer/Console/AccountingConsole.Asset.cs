@@ -28,8 +28,52 @@ namespace AccountingServer.Console
                             asset.ExpenseTitle.AsTitle().CPadLeft(5),
                             asset.ExpenseSubTitle.AsSubTitle(),
                             asset.Life.ToString().CPadLeft(4),
-                            asset.Method.ToString().CPadLeft(25));
+                            asset.Method.ToString().CPadLeft(20));
             sb.AppendLine();
+            if (asset.Schedule != null)
+                foreach (var assetItem in asset.Schedule)
+                {
+                    if (assetItem is AcquisationItem)
+                    {
+                        sb.AppendFormat(
+                                        "   {0:yyyMMdd} ACQ:{1} ={3} ({2})",
+                                        assetItem.Date,
+                                        (assetItem as AcquisationItem).OrigValue.AsCurrency().CPadLeft(13),
+                                        assetItem.VoucherID,
+                                        assetItem.BookValue.AsCurrency().CPadLeft(13));
+                        sb.AppendLine();
+                    }
+                    else if (assetItem is DepreciateItem)
+                    {
+                        sb.AppendFormat(
+                                        "   {0:yyyMMdd} DEP:{1} ={3} ({2})",
+                                        assetItem.Date,
+                                        (assetItem as DepreciateItem).Amount.AsCurrency().CPadLeft(13),
+                                        assetItem.VoucherID,
+                                        assetItem.BookValue.AsCurrency().CPadLeft(13));
+                        sb.AppendLine();
+                    }
+                    else if (assetItem is DevalueItem)
+                    {
+                        sb.AppendFormat(
+                                        "   {0:yyyMMdd} DEV:{1} ={3} ({2})",
+                                        assetItem.Date,
+                                        (assetItem as DevalueItem).FairValue.AsCurrency().CPadLeft(13),
+                                        assetItem.VoucherID,
+                                        assetItem.BookValue.AsCurrency().CPadLeft(13));
+                        sb.AppendLine();
+                    }
+                    else if (assetItem is DispositionItem)
+                    {
+                        sb.AppendFormat(
+                                        "   {0:yyyMMdd} DSP:{1} ={3} ({2})",
+                                        assetItem.Date,
+                                        (assetItem as DispositionItem).NetValue.AsCurrency().CPadLeft(13),
+                                        assetItem.VoucherID,
+                                        assetItem.BookValue.AsCurrency().CPadLeft(13));
+                        sb.AppendLine();
+                    }
+                }
             return sb.ToString();
         }
 

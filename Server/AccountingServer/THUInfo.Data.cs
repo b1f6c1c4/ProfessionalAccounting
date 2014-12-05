@@ -144,7 +144,7 @@ namespace AccountingServer
                                            .ToList();
                     if (vouchers2.Count == group.Count())
                     {
-                        if (!vouchers2.All(v => v.Remark.Equals("reconciliation", StringComparison.OrdinalIgnoreCase)))
+                        if (!vouchers2.All(v => v.Remark.Equals(Voucher.ReconciliationMark, StringComparison.OrdinalIgnoreCase)))
                             foreach (var t in group)
                             {
                                 sb.AppendFormat("~~ {0}", t.Item1);
@@ -171,7 +171,7 @@ namespace AccountingServer
 
             foreach (var voucher in account)
             {
-                if (voucher.Remark.Equals("reconciliation", StringComparison.OrdinalIgnoreCase))
+                if (voucher.Remark.Equals(Voucher.ReconciliationMark, StringComparison.OrdinalIgnoreCase))
                     continue;
                 sb.AppendLine("-- ??:");
                 sb.Append(AccountingConsole.PresentVoucher(voucher));
