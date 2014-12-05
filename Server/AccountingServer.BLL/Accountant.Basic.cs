@@ -260,7 +260,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="id">编号</param>
         /// <returns>资产，如果没有则为<c>null</c></returns>
-        public DbAsset SelectAsset(Guid id)
+        public Asset SelectAsset(Guid id)
         {
             return m_Db.SelectAsset(id);
         }
@@ -270,7 +270,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>匹配过滤器的资产</returns>
-        public IEnumerable<DbAsset> SelectAssets(DbAsset filter)
+        public IEnumerable<Asset> SelectAssets(Asset filter)
         {
             return m_Db.SelectAssets(filter);
         }
@@ -281,7 +281,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="entity">资产</param>
         /// <returns>是否成功</returns>
-        public bool InsertAsset(DbAsset entity)
+        public bool InsertAsset(Asset entity)
         {
             return m_Db.InsertAsset(entity);
         }
@@ -301,7 +301,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>已删除的资产总数</returns>
-        public int DeleteAssets(DbAsset filter)
+        public int DeleteAssets(Asset filter)
         {
             return m_Db.DeleteAssets(filter);
         }
@@ -312,7 +312,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="entity">新资产</param>
         /// <returns>是否成功</returns>
-        public bool UpdateAsset(DbAsset entity)
+        public bool UpdateAsset(Asset entity)
         {
             return m_Db.UpdateAsset(entity);
         }

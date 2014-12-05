@@ -186,7 +186,7 @@ namespace AccountingServer.Entities
     /// <summary>
     ///     ×Ê²ú
     /// </summary>
-    public class DbAsset
+    public class Asset
     {
         /// <summary>
         ///     ±àºÅ
