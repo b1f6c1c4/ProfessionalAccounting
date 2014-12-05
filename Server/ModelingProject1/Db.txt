@@ -37,7 +37,7 @@ db.asset:
 {
 	"_id":Guid.NewGuid(),
 	"name":"..",
-	"date":new Date("2014-11-28"),
+	"date":new Date("2014-10-20"),
 	"value":1000,
 	"salvge":50,
 	"life":3,
@@ -50,8 +50,14 @@ db.asset:
 		[
 			{
 				"voucher":ObjectId(""),
+				"date":new Date("2014-10-20"),
+				"acq":1000
+			}
+			{
+				"voucher":ObjectId(""),
 				"date":new Date("2014-11-30"),
-				"dep":100.0
+				"dep":100.0,
+				"remark":(ReconciliationMark)
 			}
 			{
 				"voucher":ObjectId(""),
@@ -62,6 +68,11 @@ db.asset:
 				"voucher":ObjectId(""),
 				"date":new Date("2014-12-31"),
 				"devto":700.0
+			}
+			{
+				"voucher":ObjectId(""),
+				"date":new Date("2014-11-30"),
+				"dispo":700
 			}
 		],
 	"remark":null

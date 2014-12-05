@@ -155,18 +155,24 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="item">条目</param>
         /// <returns>Bson</returns>
-        private static BsonDocument ToBsonDocument(this IAssetItem item)
+        private static BsonDocument ToBsonDocument(this AssetItem item)
         {
             var val = new BsonDocument();
             if (item.VoucherID != null)
                 val.Add("voucher", item.VoucherID.UnWrap());
             if (item.Date != null)
                 val.Add("date", item.Date);
+            if (item.Remark != null)
+                val.Add("remark", item.Remark);
 
-            if (item is DepreciateItem)
+            if (item is AcquisationItem)
+                val.Add("acq", (item as AcquisationItem).OrigValue);
+            else if (item is DepreciateItem)
                 val.Add("dep", (item as DepreciateItem).Amount);
             else if (item is DevalueItem)
                 val.Add("devto", (item as DevalueItem).FairValue);
+            else if (item is DispositionItem)
+                val.Add("dispo", (item as DispositionItem).NetValue);
 
             return val;
         }
@@ -208,13 +214,7 @@ namespace AccountingServer.DAL
                         break;
                 }
             if (doc.ContainsNotNull("detail"))
-            {
-                var ddocs = doc["detail"].AsBsonArray;
-                var details = new VoucherDetail[ddocs.Count];
-                for (var i = 0; i < ddocs.Count; i++)
-                    details[i] = ddocs[i].AsBsonDocument.ToVoucherDetail();
-                voucher.Details = details;
-            }
+                voucher.Details = doc["detail"].AsBsonArray.Select(t => t.AsBsonDocument.ToVoucherDetail()).ToArray();
             if (doc.ContainsNotNull("remark"))
                 voucher.Remark = doc["remark"].AsString;
 
@@ -290,13 +290,7 @@ namespace AccountingServer.DAL
                         break;
                 }
             if (doc.ContainsNotNull("schedule"))
-            {
-                var ddocs = doc["schedule"].AsBsonArray;
-                var schedule = new IAssetItem[ddocs.Count];
-                for (var i = 0; i < ddocs.Count; i++)
-                    schedule[i] = ddocs[i].AsBsonDocument.ToAssetItem();
-                asset.Schedule = schedule;
-            }
+                asset.Schedule = doc["schedule"].AsBsonArray.Select(t => t.AsBsonDocument.ToAssetItem()).ToArray();
             if (doc.ContainsNotNull("remark"))
                 asset.Remark = doc["remark"].AsString;
 
@@ -308,13 +302,17 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="ddoc">Bson</param>
         /// <returns>条目</returns>
-        private static IAssetItem ToAssetItem(this BsonDocument ddoc)
+        private static AssetItem ToAssetItem(this BsonDocument ddoc)
         {
-            IAssetItem item;
-            if (ddoc.ContainsNotNull("dep"))
+            AssetItem item;
+            if (ddoc.ContainsNotNull("acq"))
+                item = new AcquisationItem { OrigValue = ddoc["acq"].AsDouble };
+            else if (ddoc.ContainsNotNull("dep"))
                 item = new DepreciateItem { Amount = ddoc["dep"].AsDouble };
-            else if (ddoc.ContainsNotNull("dev"))
-                item = new DevalueItem { FairValue = ddoc["dev"].AsDouble };
+            else if (ddoc.ContainsNotNull("devto"))
+                item = new DevalueItem { FairValue = ddoc["devto"].AsDouble };
+            else if (ddoc.ContainsNotNull("dispo"))
+                item = new DevalueItem { FairValue = ddoc["dispo"].AsDouble };
             else
                 throw new InvalidOperationException();
 
@@ -322,6 +320,8 @@ namespace AccountingServer.DAL
                 item.VoucherID = ddoc["voucher"].AsObjectId.Wrap();
             if (ddoc.ContainsNotNull("date"))
                 item.Date = ddoc["date"].AsBsonDateTime.ToLocalTime();
+            if (ddoc.ContainsNotNull("remark"))
+                item.Remark = ddoc["remark"].AsString;
 
             return item;
         }

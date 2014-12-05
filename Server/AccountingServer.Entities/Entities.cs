@@ -50,6 +50,11 @@ namespace AccountingServer.Entities
     public class Voucher
     {
         /// <summary>
+        ///     对账忽略标志
+        /// </summary>
+        public const string ReconciliationMark = "reconciliation";
+
+        /// <summary>
         ///     编号
         /// </summary>
         public string ID { get; set; }
@@ -114,47 +119,44 @@ namespace AccountingServer.Entities
     /// <summary>
     ///     资产折旧计算表栏目
     /// </summary>
-    public interface IAssetItem
+    public abstract class AssetItem
     {
+        /// <summary>
+        ///     规范忽略标志
+        /// </summary>
+        public const string IgnoranceMark = "reconciliation";
+
         /// <summary>
         ///     记账凭证编号
         /// </summary>
-        string VoucherID { get; set; }
+        public string VoucherID { get; set; }
 
         /// <summary>
         ///     记账日期
         /// </summary>
-        DateTime? Date { get; set; }
-    }
-
-    /// <summary>
-    ///     计提资产折旧
-    /// </summary>
-    public class DepreciateItem : IAssetItem
-    {
-        public string VoucherID { get; set; }
-
         public DateTime? Date { get; set; }
 
         /// <summary>
-        ///     折旧额
+        ///     账面价值
+        ///     <para>不存储在数据库中</para>
         /// </summary>
-        public double Amount { get; set; }
+        public double BookValue { get; set; }
+
+        /// <summary>
+        ///     备注
+        /// </summary>
+        public string Remark { get; set; }
     }
 
     /// <summary>
-    ///     计提资产减值准备
+    ///     取得资产
     /// </summary>
-    public class DevalueItem : IAssetItem
+    public class AcquisationItem : AssetItem
     {
-        public string VoucherID { get; set; }
-
-        public DateTime? Date { get; set; }
-
         /// <summary>
-        ///     公允价值
+        ///     原值
         /// </summary>
-        public double FairValue { get; set; }
+        public double OrigValue { get; set; }
     }
 
     /// <summary>
@@ -184,10 +186,48 @@ namespace AccountingServer.Entities
     }
 
     /// <summary>
+    ///     计提资产折旧
+    /// </summary>
+    public class DepreciateItem : AssetItem
+    {
+        /// <summary>
+        ///     折旧额
+        /// </summary>
+        public double Amount { get; set; }
+    }
+
+    /// <summary>
+    ///     计提资产减值准备
+    /// </summary>
+    public class DevalueItem : AssetItem
+    {
+        /// <summary>
+        ///     公允价值
+        /// </summary>
+        public double FairValue { get; set; }
+    }
+
+    /// <summary>
+    ///     处置资产
+    /// </summary>
+    public class DispositionItem : AssetItem
+    {
+        /// <summary>
+        ///     原账面净值
+        /// </summary>
+        public double NetValue { get; set; }
+    }
+
+    /// <summary>
     ///     资产
     /// </summary>
     public class Asset
     {
+        /// <summary>
+        ///     规范忽略标志
+        /// </summary>
+        public const string IgnoranceMark = "reconciliation";
+
         /// <summary>
         ///     编号
         /// </summary>
@@ -251,7 +291,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     资产折旧计算表
         /// </summary>
-        public IAssetItem[] Schedule { get; set; }
+        public AssetItem[] Schedule { get; set; }
 
         /// <summary>
         ///     备注
@@ -288,6 +328,30 @@ namespace AccountingServer.Entities
         ///     余额
         /// </summary>
         public double Fund { get; set; }
+    }
+
+    public class AssetItemComparer : IComparer<AssetItem>
+    {
+        public int Compare(AssetItem x, AssetItem y)
+        {
+            var res = BalanceComparer.CompareDate(x.Date, y.Date);
+            if (res != 0)
+                return res;
+
+            Func<AssetItem, int> getType = t =>
+                                            {
+                                                if (t is AcquisationItem)
+                                                    return 0;
+                                                if (t is DispositionItem)
+                                                    return 1;
+                                                if (t is DepreciateItem)
+                                                    return 2;
+                                                if (t is DevalueItem)
+                                                    return 3;
+                                                throw new InvalidOperationException();
+                                            };
+            return getType(x).CompareTo(getType(y));
+        }
     }
 
     public class BalanceEqualityComparer : EqualityComparer<Balance>

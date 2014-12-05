@@ -517,13 +517,13 @@ namespace AccountingServer.BLL
                                      });
         }
 
-        /// <summary>
-        ///     折旧
-        /// </summary>
-        /// <param name="result">序列化的数据</param>
-        /// <param name="helper">会计业务处理类</param>
-        [Pattern(Name = "（期末折旧）", TextPattern = "折旧", UI = "")]
-        public static void 折旧(string result, Accountant helper) { helper.Depreciate(); }
+        ///// <summary>
+        /////     折旧
+        ///// </summary>
+        ///// <param name="result">序列化的数据</param>
+        ///// <param name="helper">会计业务处理类</param>
+        //[Pattern(Name = "（期末折旧）", TextPattern = "折旧", UI = "")]
+        //public static void 折旧(string result, Accountant helper) { helper.Depreciate(); }
 
         /// <summary>
         ///     结转
