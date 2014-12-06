@@ -107,6 +107,9 @@ namespace AccountingServer.Console
                 case "c2":
                     editable = false;
                     return AdvancedCheck();
+                case "exit":
+                    Environment.Exit(0);
+                    break;
             }
 
             if (s.EndsWith("`"))
