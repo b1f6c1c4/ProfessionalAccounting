@@ -210,6 +210,7 @@ namespace AccountingServer.BLL
                         case "桃李园":
                         case "清青比萨":
                         case "清青快餐":
+                        case "清青时代":
                         case "玉树园":
                         case "闻馨园":
                         case "听涛园":
@@ -219,11 +220,40 @@ namespace AccountingServer.BLL
                                 new ReportItem
                                     {
                                         Title = TitleManager.GetTitleName(detail),
-                                        Content = "（清华大学食堂）",
+                                        Content = "（食堂）",
                                         OrigContent = detail.Content,
                                         Fund = detail.Fund,
                                         Coefficient = 1
                                     };
+                            break;
+                        case "丽华快餐":
+                        case "庆丰包子铺":
+                        case "永和大王":
+                        case "拉登烤肉拌饭":
+                        case "吉野家":
+                        case "没名儿生煎":
+                        case "嘉口福":
+                            yield return
+                                new ReportItem
+                                {
+                                    Title = TitleManager.GetTitleName(detail),
+                                    Content = "（定点I）",
+                                    OrigContent = detail.Content,
+                                    Fund = detail.Fund,
+                                    Coefficient = 0.9
+                                };
+                            break;
+                        case "麦当劳":
+                        case "赛百味":
+                            yield return
+                                new ReportItem
+                                {
+                                    Title = TitleManager.GetTitleName(detail),
+                                    Content = "（定点II）",
+                                    OrigContent = detail.Content,
+                                    Fund = detail.Fund,
+                                    Coefficient = 0.2
+                                };
                             break;
                         default:
                             yield return
@@ -356,10 +386,10 @@ namespace AccountingServer.BLL
                         new ReportItem
                             {
                                 Title = TitleManager.GetTitleName(detail),
-                                Content = detail.Content,
+                                Content = detail.Content.EndsWith("路") ? "（公交）" : detail.Content,
                                 OrigContent = detail.Content,
                                 Fund = detail.Fund,
-                                Coefficient = 0.01
+                                Coefficient = detail.Content == "地铁" || detail.Content.EndsWith("路") ? 1.00 : 0.01
                             };
             }
             {
