@@ -82,6 +82,10 @@ namespace AccountingServer.BLL
                                  reportItem.Coefficient);
         }
 
+        /// <summary>
+        ///     预览
+        /// </summary>
+        /// <returns>空格对齐的报表</returns>
         public string Preview()
         {
             var sb = new StringBuilder();
@@ -94,6 +98,26 @@ namespace AccountingServer.BLL
                                 reportItem.OrigContent.CPadRight(20),
                                 reportItem.Fund.AsCurrency().CPadLeft(12),
                                 reportItem.Coefficient.ToString("0.0%").CPadLeft(12));
+                sb.AppendLine();
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
+        ///     导出
+        /// </summary>
+        /// <returns>制表符分隔的报表</returns>
+        public string ExportString()
+        {
+            var sb = new StringBuilder();
+            foreach (var reportItem in m_Report)
+            {
+                sb.AppendFormat(
+                                "{0}\t{1}\t{2:R}\t{3:R}",
+                                reportItem.Title,
+                                reportItem.Content,
+                                reportItem.Fund,
+                                reportItem.Coefficient);
                 sb.AppendLine();
             }
             return sb.ToString();
