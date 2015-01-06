@@ -67,7 +67,7 @@ namespace AccountingServer.Console
                         var res = LaunchServer();
                         if (!res.StartsWith("OK"))
                             return res;
-                        
+
                         Thread.Sleep(100);
                         res += Environment.NewLine;
                         res += ConnectServer();
@@ -107,6 +107,7 @@ namespace AccountingServer.Console
                     return FetchInfo();
                 case "Titles":
                 case "T":
+                case "t":
                     editable = false;
                     return ListTitles();
                 case "help":
@@ -126,10 +127,10 @@ namespace AccountingServer.Console
                         m_Accountant.UpdateAsset(asset);
                     }
                     return PresentAssets();
-                case "c1":
+                case "chk1":
                     editable = true;
                     return BasicCheck();
-                case "c2":
+                case "chk2":
                     editable = false;
                     return AdvancedCheck();
                 case "exit":
@@ -152,25 +153,41 @@ namespace AccountingServer.Console
                 editable = false;
                 var sx = s.TrimEnd('`', '!', 'D', 'd');
                 return s.EndsWith("!`D")
-                           ? DailySubtotalWith3Levels(sx, s.EndsWith("!``D", StringComparison.OrdinalIgnoreCase), s.EndsWith("D", StringComparison.Ordinal), false)
-                           : DailySubtotalWith4Levels(sx, s.EndsWith("``D", StringComparison.OrdinalIgnoreCase), s.EndsWith("D", StringComparison.Ordinal), false);
+                           ? DailySubtotalWith3Levels(
+                                                      sx,
+                                                      s.EndsWith("!``D", StringComparison.OrdinalIgnoreCase),
+                                                      s.EndsWith("D", StringComparison.Ordinal),
+                                                      false)
+                           : DailySubtotalWith4Levels(
+                                                      sx,
+                                                      s.EndsWith("``D", StringComparison.OrdinalIgnoreCase),
+                                                      s.EndsWith("D", StringComparison.Ordinal),
+                                                      false);
             }
             if (s.EndsWith("A", StringComparison.OrdinalIgnoreCase))
             {
                 editable = false;
                 var sx = s.TrimEnd('`', '!', 'A', 'a');
                 return s.EndsWith("!`A")
-                           ? DailySubtotalWith3Levels(sx, s.EndsWith("!``A", StringComparison.OrdinalIgnoreCase), s.EndsWith("A", StringComparison.Ordinal), true)
-                           : DailySubtotalWith4Levels(sx, s.EndsWith("``A", StringComparison.OrdinalIgnoreCase), s.EndsWith("A", StringComparison.Ordinal), true);
+                           ? DailySubtotalWith3Levels(
+                                                      sx,
+                                                      s.EndsWith("!``A", StringComparison.OrdinalIgnoreCase),
+                                                      s.EndsWith("A", StringComparison.Ordinal),
+                                                      true)
+                           : DailySubtotalWith4Levels(
+                                                      sx,
+                                                      s.EndsWith("``A", StringComparison.OrdinalIgnoreCase),
+                                                      s.EndsWith("A", StringComparison.Ordinal),
+                                                      true);
             }
 
-            if (s.StartsWith("R"))
+            if (s.StartsWith("R", StringComparison.OrdinalIgnoreCase))
             {
                 editable = false;
                 return GenerateReport(s);
             }
 
-            if (s.StartsWith("C"))
+            if (s.StartsWith("C", StringComparison.OrdinalIgnoreCase))
             {
                 editable = false;
                 DateTime? startDate, endDate;
@@ -267,9 +284,12 @@ namespace AccountingServer.Console
         /// <returns>报销报表</returns>
         private string GenerateReport(string s)
         {
+            var isExp = s.EndsWith("-exp");
+            s = isExp ? s.Substring(1, s.Length - 5) : s.Substring(1);
+
             DateTime? startDate, endDate;
             bool nullable;
-            if (!ParseDateQuery(s.Substring(1), out startDate, out endDate, out nullable))
+            if (!ParseDateQuery(s, out startDate, out endDate, out nullable))
                 return null;
 
             if (!m_Accountant.Connected)
@@ -277,7 +297,7 @@ namespace AccountingServer.Console
 
             var report = new ReimbursementReport(m_Accountant, startDate, endDate);
 
-            return report.Preview();
+            return isExp ? report.ExportString() : report.Preview();
         }
     }
 }
