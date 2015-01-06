@@ -28,19 +28,17 @@ namespace AccountingServer.Console
                 }
                 else
                 {
-                    id1 = s.IndexOf("[", StringComparison.Ordinal);
-                    dateQ = s.Substring(id1);
+                    id1 = s.IndexOf(" ", StringComparison.Ordinal);
+                    dateQ = id1 < 0 ? String.Empty : s.Substring(id1);
                 }
                 detail.Title = Convert.ToInt32(s.Substring(1, 4));
 
-                if (id1 > 4)
+                if (s.Length >= 7)
                 {
                     int val;
-                    if (Int32.TryParse(s.Substring(5, Math.Min(2, id1 - 4)), out val))
+                    if (Int32.TryParse(s.Substring(5, 2), out val))
                         detail.SubTitle = val;
                 }
-                else
-                    detail.SubTitle = null;
             }
             else if (s.StartsWith("'"))
             {
@@ -51,7 +49,7 @@ namespace AccountingServer.Console
             else
                 dateQ = s;
 
-            dateQuery = dateQ;
+            dateQuery = dateQ.Trim();
             return detail;
         }
 
@@ -68,16 +66,14 @@ namespace AccountingServer.Console
         {
             nullable = false;
 
-            sOrig = sOrig.Trim(' ');
+            var s = sOrig.Trim('[', ']', ' ');
 
-            if (sOrig == "[]")
+            if (s == String.Empty)
             {
                 startDate = null;
                 endDate = null;
                 return true;
             }
-
-            var s = sOrig.Trim('[', ']');
 
             if (s == ".")
             {

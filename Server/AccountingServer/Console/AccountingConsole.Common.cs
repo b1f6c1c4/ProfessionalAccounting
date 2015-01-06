@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 
@@ -60,6 +61,30 @@ namespace AccountingServer.Console
             s = s.Trim();
             switch (s)
             {
+                case "lc":
+                    editable = false;
+                    {
+                        var res = LaunchServer();
+                        if (!res.StartsWith("OK"))
+                            return res;
+                        
+                        Thread.Sleep(100);
+                        res += Environment.NewLine;
+                        res += ConnectServer();
+                        return res;
+                    }
+                case "ue":
+                    editable = false;
+                    {
+                        var res = ShutdownServer();
+                        if (res != "OK")
+                            return res;
+
+                        Thread.Sleep(100);
+                        Environment.Exit(0);
+                        // ReSharper disable once HeuristicUnreachableCode
+                        return "OK";
+                    }
                 case "launch":
                 case "lau":
                     editable = false;
@@ -108,8 +133,10 @@ namespace AccountingServer.Console
                     editable = false;
                     return AdvancedCheck();
                 case "exit":
+                    editable = false;
                     Environment.Exit(0);
-                    break;
+                    // ReSharper disable once HeuristicUnreachableCode
+                    return "OK";
             }
 
             if (s.EndsWith("`"))
@@ -117,24 +144,24 @@ namespace AccountingServer.Console
                 editable = false;
                 var sx = s.TrimEnd('`', '!');
                 return s.EndsWith("!`")
-                           ? SubtotalWith2Levels(sx, !s.EndsWith("!``"))
-                           : SubtotalWith3Levels(sx, !s.EndsWith("``"));
+                           ? SubtotalWith2Levels(sx, s.EndsWith("!``"))
+                           : SubtotalWith3Levels(sx, s.EndsWith("``"));
             }
             if (s.EndsWith("D", StringComparison.OrdinalIgnoreCase))
             {
                 editable = false;
                 var sx = s.TrimEnd('`', '!', 'D', 'd');
                 return s.EndsWith("!`D")
-                           ? DailySubtotalWith3Levels(sx, !s.EndsWith("!``D", StringComparison.OrdinalIgnoreCase), s.EndsWith("D", StringComparison.Ordinal), false)
-                           : DailySubtotalWith4Levels(sx, !s.EndsWith("``D", StringComparison.OrdinalIgnoreCase), s.EndsWith("D", StringComparison.Ordinal), false);
+                           ? DailySubtotalWith3Levels(sx, s.EndsWith("!``D", StringComparison.OrdinalIgnoreCase), s.EndsWith("D", StringComparison.Ordinal), false)
+                           : DailySubtotalWith4Levels(sx, s.EndsWith("``D", StringComparison.OrdinalIgnoreCase), s.EndsWith("D", StringComparison.Ordinal), false);
             }
             if (s.EndsWith("A", StringComparison.OrdinalIgnoreCase))
             {
                 editable = false;
                 var sx = s.TrimEnd('`', '!', 'A', 'a');
                 return s.EndsWith("!`A")
-                           ? DailySubtotalWith3Levels(sx, !s.EndsWith("!``A", StringComparison.OrdinalIgnoreCase), s.EndsWith("A", StringComparison.Ordinal), true)
-                           : DailySubtotalWith4Levels(sx, !s.EndsWith("``A", StringComparison.OrdinalIgnoreCase), s.EndsWith("A", StringComparison.Ordinal), true);
+                           ? DailySubtotalWith3Levels(sx, s.EndsWith("!``A", StringComparison.OrdinalIgnoreCase), s.EndsWith("A", StringComparison.Ordinal), true)
+                           : DailySubtotalWith4Levels(sx, s.EndsWith("``A", StringComparison.OrdinalIgnoreCase), s.EndsWith("A", StringComparison.Ordinal), true);
             }
 
             if (s.StartsWith("R"))

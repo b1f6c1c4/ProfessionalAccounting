@@ -394,7 +394,6 @@ namespace AccountingServer.DAL
             if (m_Server != null)
             {
                 m_Server.Shutdown();
-                m_Server.Disconnect();
                 m_Server = null;
             }
         }
