@@ -13,11 +13,11 @@ Server/AccountingServer.BLL/bin/
 Server/AccountingServer.BLL/obj/
 Server/AccountingServer.DAL/bin/
 Server/AccountingServer.DAL/obj/
-Server/AccountingServer.DAL.UnitTest/bin/
-Server/AccountingServer.DAL.UnitTest/obj/
 Server/AccountingServer.TCP/bin/
 Server/AccountingServer.TCP/obj/
 Server/AccountingServer.Entities/bin/
 Server/AccountingServer.Entities/obj/
+Server/AccountingServer.UnitTest/bin/
+Server/AccountingServer.UnitTest/obj/
 Server/ModelingProject1/bin/
 Server/ModelingProject1/obj/
