@@ -54,7 +54,6 @@
     <Compile Include="MongoDbTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ConsoleTest.cs" />
-    <Compile Include="UnitTestHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AccountingServer.BLL\AccountingServer.BLL.csproj">
