@@ -170,6 +170,23 @@ namespace AccountingServer.Console
                 return GenerateReport(s);
             }
 
+            if (s.StartsWith("C"))
+            {
+                editable = false;
+                DateTime? startDate, endDate;
+                bool nullable;
+                if (!ParseDateQuery(s.Substring(1), out startDate, out endDate, out nullable) ||
+                    nullable ||
+                    !startDate.HasValue ||
+                    !endDate.HasValue)
+                    throw new InvalidOperationException("日期表达式无效");
+
+                if (!m_Accountant.Connected)
+                    throw new InvalidOperationException("尚未连接到数据库");
+
+                return String.Format("CHART {0:s} {1:s}", startDate, endDate);
+            }
+
             {
                 editable = true;
                 return VouchersQuery(s);
@@ -188,7 +205,7 @@ namespace AccountingServer.Console
 
             DateTime? startDate, endDate;
             bool nullable;
-            if (!ParseVoucherQuery(dateQ, out startDate, out endDate, out nullable))
+            if (!ParseDateQuery(dateQ, out startDate, out endDate, out nullable))
                 return null;
 
             if (!m_Accountant.Connected)
@@ -213,7 +230,7 @@ namespace AccountingServer.Console
 
             DateTime? startDate, endDate;
             bool nullable;
-            if (!ParseVoucherQuery(dateQ, out startDate, out endDate, out nullable))
+            if (!ParseDateQuery(dateQ, out startDate, out endDate, out nullable))
                 return null;
 
             if (!m_Accountant.Connected)
@@ -252,8 +269,11 @@ namespace AccountingServer.Console
         {
             DateTime? startDate, endDate;
             bool nullable;
-            if (!ParseVoucherQuery(s.Substring(1), out startDate, out endDate, out nullable))
+            if (!ParseDateQuery(s.Substring(1), out startDate, out endDate, out nullable))
                 return null;
+
+            if (!m_Accountant.Connected)
+                throw new InvalidOperationException("尚未连接到数据库");
 
             var report = new ReimbursementReport(m_Accountant, startDate, endDate);
 

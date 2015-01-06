@@ -16,7 +16,7 @@ namespace AccountingServer.Chart
 
         protected readonly Accountant Accountant;
 
-        public AccountingChart(Accountant helper, DateTime startDate, DateTime endDate, DateTime curDate)
+        protected AccountingChart(Accountant helper, DateTime startDate, DateTime endDate, DateTime curDate)
         {
             Accountant = helper;
             StartDate = startDate;

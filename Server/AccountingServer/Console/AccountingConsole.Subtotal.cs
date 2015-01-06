@@ -208,7 +208,7 @@ namespace AccountingServer.Console
 
             DateTime? startDate, endDate;
             bool nullable;
-            if (!ParseVoucherQuery(dateQ, out startDate, out endDate, out nullable))
+            if (!ParseDateQuery(dateQ, out startDate, out endDate, out nullable))
                 throw new InvalidOperationException("检索表达式无效");
 
             if (!m_Accountant.Connected)
@@ -247,7 +247,7 @@ namespace AccountingServer.Console
 
             DateTime? startDate, endDate;
             bool nullable;
-            if (!ParseVoucherQuery(dateQ, out startDate, out endDate, out nullable))
+            if (!ParseDateQuery(dateQ, out startDate, out endDate, out nullable))
                 throw new InvalidOperationException("检索表达式无效");
 
             if (!m_Accountant.Connected)
