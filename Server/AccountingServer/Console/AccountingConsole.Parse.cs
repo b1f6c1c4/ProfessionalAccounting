@@ -61,7 +61,7 @@ namespace AccountingServer.Console
         /// <param name="endDate">截止日期，<c>null</c>表示不限最大日期</param>
         /// <param name="nullable"><paramref name="startDate" />和<paramref name="endDate" />均为<c>null</c>时，表示是否只包含无日期</param>
         /// <returns>是否是合法的检索表达式</returns>
-        private static bool ParseVoucherQuery(string sOrig, out DateTime? startDate, out DateTime? endDate,
+        private static bool ParseDateQuery(string sOrig, out DateTime? startDate, out DateTime? endDate,
                                               out bool nullable)
         {
             nullable = false;

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using AccountingServer.BLL;
+using AccountingServer.Chart;
 using AccountingServer.Console;
 
 namespace AccountingServer
@@ -14,7 +16,6 @@ namespace AccountingServer
         private readonly Accountant m_Accountant;
 
         private readonly AccountingConsole m_Console;
-        //private readonly AccountingChart[] m_Charts;
 
         private bool m_Editable;
 
@@ -29,8 +30,8 @@ namespace AccountingServer
             textBoxResult.Dock = DockStyle.Fill;
 
             SetProcessDPIAware();
-            this.Width = 1280;
-            this.Height = 860;
+            Width = 1280;
+            Height = 860;
 
             m_Accountant = new Accountant();
 
@@ -49,41 +50,7 @@ namespace AccountingServer
                                                textBoxResult.Visible = false;
                                            }
                                        };
-
-            //var curDate = DateTime.Now.Date;
-            //var startDate = new DateTime(curDate.Year, curDate.Month - (curDate.Day >= 20 ? 0 : 1), 19);
-            //var endDate = startDate.AddMonths(1);
-
-            //m_Charts = new AccountingChart[]
-            //               {
-            //                   new 投资资产(m_Accountant, startDate, endDate, curDate),
-            //                   new 生活资产(m_Accountant, startDate, endDate, curDate),
-            //                   new 其他资产(m_Accountant, startDate, endDate, curDate),
-            //                   new 生活费用(m_Accountant, startDate, endDate, curDate),
-            //                   new 其他费用(m_Accountant, startDate, endDate, curDate),
-            //                   new 负债(m_Accountant, startDate, endDate, curDate)
-            //               };
-
-            //chart1.ChartAreas.SuspendUpdates();
-
-            //chart1.ChartAreas.Clear();
-            //foreach (var chart in m_Charts)
-            //    chart1.ChartAreas.Add(chart.Setup());
-
-            //chart1.Legends[0].Font = new Font("Microsoft YaHei Mono", 12, GraphicsUnit.Pixel);
-
-            //GatherData();
-
-            //chart1.ChartAreas.ResumeUpdates();
         }
-
-        //private void GatherData()
-        //{
-        //    chart1.Series.Clear();
-
-        //    foreach (var series in m_Charts.SelectMany(chart => chart.Gather()))
-        //        chart1.Series.Add(series);
-        //}
 
         private bool GetVoucherCode(out int begin, out int end)
         {
@@ -187,14 +154,22 @@ namespace AccountingServer
 
         private bool ExecuteCommand()
         {
-            try
-            {
-                var text = textBoxCommand.Text;
-                if (text.StartsWith("+"))
+            var text = textBoxCommand.Text;
+            if (text.StartsWith("+"))
+                try
                 {
                     var result = m_Console.Execute(text.Substring(1), out m_Editable);
                     if (result == null)
                         return true;
+
+                    if (result.StartsWith("CHART"))
+                    {
+                        ProcessChart(result);
+                        FocusTextBoxCommand();
+                        return true;
+                    }
+
+                    SwitchToText();
 
                     var lng = textBoxResult.Text.Length;
                     textBoxResult.Focus();
@@ -207,12 +182,31 @@ namespace AccountingServer
 
                     if (result.StartsWith("OK"))
                         FocusTextBoxCommand();
+                    return true;
                 }
-                else
+                catch (Exception exception)
+                {
+                    textBoxResult.Text = exception.ToString();
+                    textBoxCommand.BackColor = Color.FromArgb(255, 70, 70);
+                    SwitchToText();
+                    return false;
+                }
+            // else
+            {
+                try
                 {
                     var result = m_Console.Execute(text, out m_Editable);
                     if (result == null)
                         return true;
+
+                    if (result.StartsWith("CHART"))
+                    {
+                        ProcessChart(result);
+                        FocusTextBoxCommand();
+                        return true;
+                    }
+                    
+                    SwitchToText();
 
                     textBoxResult.Focus();
                     textBoxResult.Text = result;
@@ -223,15 +217,66 @@ namespace AccountingServer
 
                     if (result.StartsWith("OK"))
                         FocusTextBoxCommand();
+                    return true;
                 }
-                return true;
+                catch (Exception exception)
+                {
+                    textBoxResult.Text = exception.ToString();
+                    textBoxCommand.BackColor = Color.FromArgb(255, 70, 70);
+                    SwitchToText();
+                    return false;
+                }
             }
-            catch (Exception exception)
-            {
-                textBoxResult.Text = exception.ToString();
-                textBoxCommand.BackColor = Color.FromArgb(255, 70, 70);
-                return false;
-            }
+        }
+
+        private void ProcessChart(string expr)
+        {
+            var sp = expr.Split(' ');
+
+            var curDate = DateTime.Now.Date;
+            var startDate = DateTime.Parse(sp[1]);
+            var endDate = DateTime.Parse(sp[2]);
+
+            var charts = new AccountingChart[]
+                             {
+                                 new 投资资产(m_Accountant, startDate, endDate, curDate),
+                                 new 生活资产(m_Accountant, startDate, endDate, curDate),
+                                 new 其他资产(m_Accountant, startDate, endDate, curDate),
+                                 new 生活费用(m_Accountant, startDate, endDate, curDate),
+                                 new 其他费用(m_Accountant, startDate, endDate, curDate),
+                                 new 负债(m_Accountant, startDate, endDate, curDate)
+                             };
+
+            chart1.ChartAreas.SuspendUpdates();
+
+            chart1.ChartAreas.Clear();
+            foreach (var chart in charts)
+                chart1.ChartAreas.Add(chart.Setup());
+
+            chart1.Legends[0].Font = new Font("Microsoft YaHei Mono", 12, GraphicsUnit.Pixel);
+
+            chart1.Series.Clear();
+
+            foreach (var series in charts.SelectMany(chart => chart.Gather()))
+                chart1.Series.Add(series);
+
+            chart1.ChartAreas.ResumeUpdates();
+
+            SwitchToChart();
+        }
+
+        private void SwitchToText()
+        {
+            chart1.Visible = false;
+            textBoxResult.Visible = true;
+            pictureBox1.Visible = false;
+        }
+
+        private void SwitchToChart()
+        {
+            chart1.Visible = true;
+            textBoxResult.Visible = false;
+            pictureBox1.Visible = false;
         }
 
         private void FocusTextBoxCommand()
