@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
+using AccountingServer.DAL;
 using AccountingServer.Entities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AccountingServer.DAL.UnitTest
+namespace AccountingServer.UnitTest
 {
     [TestClass]
     public class MongoDbTest

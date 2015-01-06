@@ -6,8 +6,8 @@
     <ProjectGuid>{B1AB5807-B9AC-4E70-9568-6C91329BCDB2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AccountingServer.DAL.UnitTest</RootNamespace>
-    <AssemblyName>AccountingServer.DAL.UnitTest</AssemblyName>
+    <RootNamespace>AccountingServer.UnitTest</RootNamespace>
+    <AssemblyName>AccountingServer.UnitTest</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -53,6 +53,8 @@
     <Compile Include="AccountantTest.cs" />
     <Compile Include="MongoDbTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ConsoleTest.cs" />
+    <Compile Include="UnitTestHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AccountingServer.BLL\AccountingServer.BLL.csproj">
@@ -66,6 +68,10 @@
     <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj">
       <Project>{7246deb7-bda2-49d8-9490-3ed074219106}</Project>
       <Name>AccountingServer.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AccountingServer\AccountingServer.csproj">
+      <Project>{28c2edb0-ce1e-473e-9ca6-70e29a1408a4}</Project>
+      <Name>AccountingServer</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

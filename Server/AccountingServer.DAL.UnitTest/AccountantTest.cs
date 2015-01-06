@@ -7,7 +7,7 @@ using AccountingServer.BLL;
 using AccountingServer.Entities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AccountingServer.DAL.UnitTest
+namespace AccountingServer.UnitTest
 {
     [TestClass]
     public class AccountantTest
