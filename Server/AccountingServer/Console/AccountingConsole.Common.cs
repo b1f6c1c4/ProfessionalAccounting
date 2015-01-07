@@ -212,7 +212,7 @@ namespace AccountingServer.Console
                 throw new InvalidOperationException("日期表达式无效");
 
             foreach (var voucher in query)
-                sb.Append(PresentVoucher(voucher));
+                sb.Append(CSharpHelper.PresentVoucher(voucher));
             return sb.ToString();
         }
 

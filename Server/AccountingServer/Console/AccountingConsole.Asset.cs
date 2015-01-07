@@ -1,9 +1,7 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
-using Microsoft.CSharp;
 
 namespace AccountingServer.Console
 {
@@ -16,7 +14,7 @@ namespace AccountingServer.Console
         /// <returns>新资产的C#代码</returns>
         public string ExecuteAssetUpsert(string code)
         {
-            var asset = ParseAsset(code);
+            var asset = CSharpHelper.ParseAsset(code);
 
             if (!asset.ID.HasValue)
             {
@@ -26,7 +24,7 @@ namespace AccountingServer.Console
             else if (!m_Accountant.UpdateAsset(asset))
                 throw new Exception();
 
-            return PresentAsset(asset);
+            return CSharpHelper.PresentAsset(asset);
         }
 
         /// <summary>
@@ -36,7 +34,7 @@ namespace AccountingServer.Console
         /// <returns>是否成功</returns>
         public bool ExecuteAssetRemoval(string code)
         {
-            var asset = ParseAsset(code);
+            var asset = CSharpHelper.ParseAsset(code);
             if (!asset.ID.HasValue)
                 throw new Exception();
 
@@ -83,7 +81,7 @@ namespace AccountingServer.Console
                 var sb = new StringBuilder();
                 var filter = ParseAssetQuery(query);
                 foreach (var a in m_Accountant.FilteredSelect(filter))
-                    sb.Append(PresentAsset(a));
+                    sb.Append(CSharpHelper.PresentAsset(a));
 
                 return sb.ToString();
             }
@@ -99,51 +97,6 @@ namespace AccountingServer.Console
         /// <returns>过滤器</returns>
         private static Asset ParseAssetQuery(string s) { throw new NotImplementedException(); }
 
-        /// <summary>
-        ///     将资产用C#表示
-        /// </summary>
-        /// <param name="asset">资产</param>
-        /// <returns>C#表达式</returns>
-        private string PresentAsset(Asset asset) { throw new NotImplementedException(); }
-
-        /// <summary>
-        ///     从C#表达式中取得资产
-        /// </summary>
-        /// <param name="str">C#表达式</param>
-        /// <returns>资产</returns>
-        private static Asset ParseAsset(string str)
-        {
-            var provider = new CSharpCodeProvider();
-            var paras = new CompilerParameters
-                            {
-                                GenerateExecutable = false,
-                                GenerateInMemory = true,
-                                ReferencedAssemblies = { "AccountingServer.Entities.dll" }
-                            };
-            var sb = new StringBuilder();
-            sb.AppendLine("using System;");
-            sb.AppendLine("using AccountingServer.Entities;");
-            sb.AppendLine("namespace AccountingServer.Dynamic");
-            sb.AppendLine("{");
-            sb.AppendLine("    public static class AssetCreator");
-            sb.AppendLine("    {");
-            sb.AppendLine("        public static Asset GetAsset()");
-            sb.AppendLine("        {");
-            sb.AppendFormat("            return {0};" + Environment.NewLine, str);
-            sb.AppendLine("        }");
-            sb.AppendLine("    }");
-            sb.AppendLine("}");
-            var result = provider.CompileAssemblyFromSource(paras, sb.ToString());
-            if (result.Errors.HasErrors)
-                throw new Exception(result.Errors[0].ToString());
-
-            var resultAssembly = result.CompiledAssembly;
-            return
-                (Asset)
-                resultAssembly.GetType("AccountingServer.Dynamic.AssetCreator")
-                              .GetMethod("GetAsset")
-                              .Invoke(null, null);
-        }
 
         /// <summary>
         ///     显示资产及其计算表
@@ -214,7 +167,7 @@ namespace AccountingServer.Console
                     }
 
                     if (assetItem.VoucherID != null)
-                        sb.AppendLine(PresentVoucher(m_Accountant.SelectVoucher(assetItem.VoucherID)));
+                        sb.AppendLine(CSharpHelper.PresentVoucher(m_Accountant.SelectVoucher(assetItem.VoucherID)));
                 }
             return sb.ToString();
         }

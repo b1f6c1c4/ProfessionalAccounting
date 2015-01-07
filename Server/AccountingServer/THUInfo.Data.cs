@@ -127,7 +127,7 @@ namespace AccountingServer
                         sb.AppendLine();
                     }
                     foreach (var voucher in vouchers)
-                        sb.Append(AccountingConsole.PresentVoucher(voucher));
+                        sb.Append(CSharpHelper.PresentVoucher(voucher));
                     sb.AppendLine("---");
                 }
                 else if (vouchers == null ||
@@ -167,7 +167,7 @@ namespace AccountingServer
                         sb.AppendLine();
                     }
                     foreach (var voucher in vouchers2)
-                        sb.Append(AccountingConsole.PresentVoucher(voucher));
+                        sb.Append(CSharpHelper.PresentVoucher(voucher));
                     sb.AppendLine("---");
                 }
                 else
@@ -181,7 +181,7 @@ namespace AccountingServer
                     voucher.Remark.Equals(Voucher.ReconciliationMark, StringComparison.OrdinalIgnoreCase))
                     continue;
                 sb.AppendLine("-- ??:");
-                sb.Append(AccountingConsole.PresentVoucher(voucher));
+                sb.Append(CSharpHelper.PresentVoucher(voucher));
                 sb.AppendLine();
             }
 
