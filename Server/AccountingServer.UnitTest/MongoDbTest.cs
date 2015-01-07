@@ -9,9 +9,9 @@ namespace AccountingServer.UnitTest
     [TestClass]
     public class MongoDbTest
     {
-        private readonly MongoDbHelper m_MongoDb;
+        private readonly MongoDbAdapter m_MongoDb;
 
-        public MongoDbTest() { m_MongoDb = new MongoDbHelper(); }
+        public MongoDbTest() { m_MongoDb = new MongoDbAdapter(); }
 
         [TestMethod]
         public void Vouchers()

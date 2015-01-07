@@ -34,7 +34,8 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     数据库访问
         /// </summary>
-        private IDbHelper m_Db;
+        private readonly IDbAdapter m_Db;
+        private readonly IDbServer m_DbServer;
 
         /// <summary>
         ///     判断金额相等的误差
@@ -77,12 +78,28 @@ namespace AccountingServer.BLL
             return entity.Details.Sum(d => d.Fund.Value);
         }
 
+        public Accountant()
+        {
+            var adapter = new MongoDbAdapter();
+
+            m_Db = adapter;
+            m_DbServer = adapter;
+        }
+
+        /// <summary>
+        ///     启动数据库服务器
+        /// </summary>
+        public void Launch()
+        {
+            m_DbServer.Launch();
+        }
+
         /// <summary>
         ///     连接数据库
         /// </summary>
         public void Connect()
         {
-            m_Db = new MongoDbHelper();
+            m_Db.Connect();
         }
 
         /// <summary>
@@ -90,7 +107,7 @@ namespace AccountingServer.BLL
         /// </summary>
         public void Shutdown()
         {
-            m_Db.Shutdown();
+            m_DbServer.Shutdown();
         }
 
         /// <summary>
@@ -98,8 +115,7 @@ namespace AccountingServer.BLL
         /// </summary>
         public void Disconnect()
         {
-            m_Db.Dispose();
-            m_Db = null;
+            m_Db.Disconnect();
         }
 
         /// <summary>

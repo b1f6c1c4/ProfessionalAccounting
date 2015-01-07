@@ -5,10 +5,20 @@ using AccountingServer.Entities;
 namespace AccountingServer.DAL
 {
     /// <summary>
-    ///     数据库访问类接口
+    ///     数据库访问接口
     /// </summary>
-    public interface IDbHelper : IDisposable
+    public interface IDbAdapter
     {
+        /// <summary>
+        ///     连接服务器
+        /// </summary>
+        void Connect();
+
+        /// <summary>
+        ///     断开服务器
+        /// </summary>
+        void Disconnect();
+
         /// <summary>
         ///     按编号查找记账凭证
         /// </summary>
@@ -143,11 +153,6 @@ namespace AccountingServer.DAL
         /// <returns>已删除的细目总数</returns>
         int DeleteDetails(VoucherDetail filter);
 
-        /// <summary>
-        ///     关闭数据库服务器
-        /// </summary>
-        void Shutdown();
-
 
         /// <summary>
         ///     按编号查找资产
@@ -195,5 +200,21 @@ namespace AccountingServer.DAL
 
         //void Depreciate();
         //void Carry();
+    }
+
+    /// <summary>
+    ///     数据库服务器接口
+    /// </summary>
+    public interface IDbServer
+    {
+        /// <summary>
+        ///     启动服务器
+        /// </summary>
+        void Launch();
+
+        /// <summary>
+        ///     关闭服务器
+        /// </summary>
+        void Shutdown();
     }
 }
