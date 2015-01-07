@@ -42,8 +42,10 @@ namespace AccountingServer.BLL
 
             var lst = asset.Schedule == null ? new List<AssetItem>() : asset.Schedule.ToList();
             foreach (var assetItem in lst)
-                if (assetItem.Date.HasValue)
-                    assetItem.Date = LastDayOfMonth(assetItem.Date.Value.Year, assetItem.Date.Value.Month);
+                if (assetItem is DepreciateItem ||
+                    assetItem is DevalueItem)
+                    if (assetItem.Date.HasValue)
+                        assetItem.Date = LastDayOfMonth(assetItem.Date.Value.Year, assetItem.Date.Value.Month);
 
             lst.Sort(new AssetItemComparer());
 
