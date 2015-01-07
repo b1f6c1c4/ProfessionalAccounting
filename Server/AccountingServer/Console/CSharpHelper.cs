@@ -132,7 +132,7 @@ namespace AccountingServer.Console
         {
             var sb = new StringBuilder();
             sb.Append("@new Asset {");
-            sb.AppendFormat("  StringID = {0},", ProcessString(asset.ID.ToString()));
+            sb.AppendFormat("  StringID = {0},", ProcessString(asset.StringID));
             sb.AppendLine();
             sb.AppendFormat("    Name = {0},", ProcessString(asset.Name));
             sb.AppendLine();
