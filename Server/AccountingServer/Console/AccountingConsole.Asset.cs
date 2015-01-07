@@ -108,18 +108,6 @@ namespace AccountingServer.Console
         }
 
         /// <summary>
-        ///     解析资产检索表达式
-        /// </summary>
-        /// <param name="s">资产检索表达式</param>
-        /// <returns>过滤器</returns>
-        private static Asset ParseAssetQuery(string s)
-        {
-            // TODO: impl. this
-            return new Asset();
-        }
-
-
-        /// <summary>
         ///     显示资产及其计算表
         /// </summary>
         /// <param name="asset">资产</param>
