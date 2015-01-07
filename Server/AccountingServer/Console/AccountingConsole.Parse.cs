@@ -60,9 +60,11 @@ namespace AccountingServer.Console
         /// <param name="startDate">开始日期，<c>null</c>表示不限最小日期并且包含无日期</param>
         /// <param name="endDate">截止日期，<c>null</c>表示不限最大日期</param>
         /// <param name="nullable"><paramref name="startDate" />和<paramref name="endDate" />均为<c>null</c>时，表示是否只包含无日期</param>
+        /// <param name="reverseMonthType">是否反转@的意义</param>
         /// <returns>是否是合法的检索表达式</returns>
-        private static bool ParseDateQuery(string sOrig, out DateTime? startDate, out DateTime? endDate,
-                                              out bool nullable)
+        private static bool ParseDateQuery(string sOrig,
+                                           out DateTime? startDate, out DateTime? endDate, out bool nullable,
+                                           bool reverseMonthType = false)
         {
             nullable = false;
 
@@ -93,7 +95,7 @@ namespace AccountingServer.Console
                 return true;
             }
 
-            if (s == "0")
+            if (s == (reverseMonthType ? "@0" : "0"))
             {
                 var date = DateTime.Now.Date;
                 startDate = date.Day <= 19 ? date.AddMonths(-1).AddDays(20 - date.Day) : date.AddDays(19 - date.Day);
@@ -101,7 +103,7 @@ namespace AccountingServer.Console
                 return true;
             }
 
-            if (s == "-1")
+            if (s == (reverseMonthType ? "@-1" : "-1"))
             {
                 var date = DateTime.Now.Date.AddMonths(-1);
                 startDate = date.Day <= 19 ? date.AddMonths(-1).AddDays(20 - date.Day) : date.AddDays(19 - date.Day);
@@ -109,7 +111,7 @@ namespace AccountingServer.Console
                 return true;
             }
 
-            if (s == "@0")
+            if (s == (reverseMonthType ? "0" : "@0"))
             {
                 var date = DateTime.Now.Date;
                 startDate = date.AddDays(1 - date.Day);
@@ -117,7 +119,7 @@ namespace AccountingServer.Console
                 return true;
             }
 
-            if (s == "@-1")
+            if (s == (reverseMonthType ? "-1" : "@-1"))
             {
                 var date = DateTime.Now.Date.AddMonths(-1);
                 startDate = date.AddDays(1 - date.Day);
@@ -133,14 +135,14 @@ namespace AccountingServer.Console
                 return true;
             }
 
-            if (DateTime.TryParseExact(s + "19", "yyyyMMdd", null, DateTimeStyles.AssumeLocal, out dt))
+            if (DateTime.TryParseExact(s + "19", reverseMonthType ? "@yyyyMMdd" : "yyyyMMdd", null, DateTimeStyles.AssumeLocal, out dt))
             {
                 startDate = dt.AddMonths(-1).AddDays(1);
                 endDate = dt;
                 return true;
             }
 
-            if (DateTime.TryParseExact(s + "01", "@yyyyMMdd", null, DateTimeStyles.AssumeLocal, out dt))
+            if (DateTime.TryParseExact(s + "01", reverseMonthType ? "yyyyMMdd" : "@yyyyMMdd", null, DateTimeStyles.AssumeLocal, out dt))
             {
                 startDate = dt;
                 endDate = dt.AddMonths(1).AddDays(-1);
