@@ -55,5 +55,22 @@ namespace AccountingServer.Console
                 return e.ToString();
             }
         }
+
+        /// <summary>
+        ///     备份数据库
+        /// </summary>
+        /// <returns>备份情况</returns>
+        private string Backup()
+        {
+            try
+            {
+                m_Accountant.Backup();
+                return "OK";
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
+            }
+        }
     }
 }

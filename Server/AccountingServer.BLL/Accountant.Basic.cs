@@ -120,6 +120,14 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
+        ///     备份数据库
+        /// </summary>
+        public void Backup()
+        {
+            m_DbServer.Backup();
+        }
+
+        /// <summary>
         ///     按过滤器查找记账凭证并记数
         /// </summary>
         /// <param name="filter">过滤器</param>

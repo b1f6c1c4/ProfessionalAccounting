@@ -179,5 +179,10 @@ namespace AccountingServer.DAL
         ///     关闭服务器
         /// </summary>
         void Shutdown();
+
+        /// <summary>
+        ///     备份数据库
+        /// </summary>
+        void Backup();
     }
 }
