@@ -78,7 +78,7 @@ namespace AccountingServer.BLL
             var fund = sp[1].AsCurrency();
             var remarks = new[]
                               { "观畴园", "紫荆园", "桃李园", "清青比萨", "清青快餐", "清青休闲", "清青时代", "玉树园", "闻馨园", "听涛园", "丁香园", "芝兰园" };
-            helper.InsertVoucher(
+            helper.Insert(
                                  new Voucher
                                      {
                                          Date = sp[0].AsDate(),
@@ -139,7 +139,7 @@ namespace AccountingServer.BLL
             }
             else
                 dbDetails = new[] { credit, debit };
-            helper.InsertVoucher(new Voucher { Date = sp[0].AsDate(), Details = dbDetails });
+            helper.Insert(new Voucher { Date = sp[0].AsDate(), Details = dbDetails });
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace AccountingServer.BLL
                         break;
                 }
 
-                helper.InsertVoucher(
+                helper.Insert(
                                      new Voucher
                                          {
                                              Date = dt,
@@ -261,7 +261,7 @@ namespace AccountingServer.BLL
             else
                 fund = sp[1].AsCurrency();
 
-            helper.InsertVoucher(
+            helper.Insert(
                                  new Voucher
                                      {
                                          Date = dt,
@@ -314,7 +314,7 @@ namespace AccountingServer.BLL
                 default:
                     throw new InvalidOperationException();
             }
-            helper.InsertVoucher(
+            helper.Insert(
                                  new Voucher
                                      {
                                          Date = sp[0].AsDate(),
@@ -355,7 +355,7 @@ namespace AccountingServer.BLL
                 default:
                     throw new InvalidOperationException();
             }
-            helper.InsertVoucher(
+            helper.Insert(
                                  new Voucher
                                      {
                                          Date = sp[0].AsDate(),
@@ -387,7 +387,7 @@ namespace AccountingServer.BLL
             var sp = result.Split(',');
             var fund = sp[1].AsCurrency();
             var remarks = new[] { "5184", "3593", "9767" };
-            helper.InsertVoucher(
+            helper.Insert(
                                  new Voucher
                                      {
                                          Date = sp[0].AsDate(),
@@ -437,7 +437,7 @@ namespace AccountingServer.BLL
                 default:
                     throw new InvalidOperationException();
             }
-            helper.InsertVoucher(
+            helper.Insert(
                                  new Voucher
                                      {
                                          Date = sp[0].AsDate(),
@@ -483,7 +483,7 @@ namespace AccountingServer.BLL
                                   });
             }
 
-            helper.InsertVoucher(new Voucher { Date = sp[0].AsDate(), Details = dbDetails.ToArray() });
+            helper.Insert(new Voucher { Date = sp[0].AsDate(), Details = dbDetails.ToArray() });
         }
 
         /// <summary>
@@ -494,7 +494,7 @@ namespace AccountingServer.BLL
         [Pattern(Name = "（期末摊销）", TextPattern = "{0} 期末摊销", UI = "Date[日期]")]
         public static void 期末摊销(string result, Accountant helper)
         {
-            helper.InsertVoucher(
+            helper.Insert(
                                  new Voucher
                                      {
                                          Date = result.AsDate(),

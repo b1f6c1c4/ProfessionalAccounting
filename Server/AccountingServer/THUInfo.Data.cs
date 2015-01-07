@@ -17,7 +17,7 @@ namespace AccountingServer
             var sb = new StringBuilder();
 
             var account =
-                m_Accountant.SelectVouchersWithDetail(new VoucherDetail { Title = 1012, SubTitle = 05 }).ToList();
+                m_Accountant.FilteredSelect(new VoucherDetail { Title = 1012, SubTitle = 05 }).ToList();
 
             var groups =
                 GetData().GroupBy(t => new Tuple<DateTime, string, string, double>(t.Item2, t.Item4, t.Item3, t.Item5));

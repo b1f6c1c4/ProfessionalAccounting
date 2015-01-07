@@ -123,9 +123,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>匹配过滤器的记账凭证总数</returns>
-        public long SelectVouchersCount(Voucher filter)
+        public long FilteredCount(Voucher filter)
         {
-            return m_Db.SelectVouchersCount(filter);
+            return m_Db.FilteredCount(filter);
         }
 
         /// <summary>
@@ -143,9 +143,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>匹配过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> SelectVouchers(Voucher filter)
+        public IEnumerable<Voucher> FilteredSelect(Voucher filter)
         {
-            return m_Db.SelectVouchers(filter);
+            return m_Db.FilteredSelect(filter);
         }
 
         /// <summary>
@@ -156,9 +156,9 @@ namespace AccountingServer.BLL
         /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
         /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
         /// <returns>指定日期匹配过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> SelectVouchers(Voucher filter, DateTime? startDate, DateTime? endDate)
+        public IEnumerable<Voucher> FilteredSelect(Voucher filter, DateTime? startDate, DateTime? endDate)
         {
-            return m_Db.SelectVouchers(filter, startDate, endDate);
+            return m_Db.FilteredSelect(filter, startDate, endDate);
         }
 
         /// <summary>
@@ -167,9 +167,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="entity">新记账凭证</param>
         /// <returns>是否成功</returns>
-        public bool UpdateVoucher(Voucher entity)
+        public bool Update(Voucher entity)
         {
-            return m_Db.UpdateVoucher(entity);
+            return m_Db.Update(entity);
         }
 
         /// <summary>
@@ -177,9 +177,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="filter">细目过滤器</param>
         /// <returns>任一细目匹配过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter)
+        public IEnumerable<Voucher> FilteredSelect(VoucherDetail filter)
         {
-            return m_Db.SelectVouchersWithDetail(filter);
+            return m_Db.FilteredSelect(filter);
         }
 
         /// <summary>
@@ -190,10 +190,10 @@ namespace AccountingServer.BLL
         /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
         /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
         /// <returns>指定日期任一细目匹配过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter,
+        public IEnumerable<Voucher> FilteredSelect(VoucherDetail filter,
                                                              DateTime? startDate, DateTime? endDate)
         {
-            return m_Db.SelectVouchersWithDetail(filter, startDate, endDate);
+            return m_Db.FilteredSelect(filter, startDate, endDate);
         }
 
         /// <summary>
@@ -203,7 +203,7 @@ namespace AccountingServer.BLL
         /// <returns>匹配过滤器的细目</returns>
         public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter)
         {
-            return m_Db.SelectDetails(filter);
+            return m_Db.FilteredSelectDetails(filter);
         }
 
         /// <summary>
@@ -217,7 +217,7 @@ namespace AccountingServer.BLL
         public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter,
                                                         DateTime? startDate, DateTime? endDate)
         {
-            return m_Db.SelectDetails(filter, startDate, endDate);
+            return m_Db.FilteredSelectDetails(filter, startDate, endDate);
         }
 
         /// <summary>
@@ -225,9 +225,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="filter">细目过滤器</param>
         /// <returns>匹配过滤器的细目总数</returns>
-        public long SelectDetailsCount(VoucherDetail filter)
+        public long FilteredCount(VoucherDetail filter)
         {
-            return m_Db.SelectDetailsCount(filter);
+            return m_Db.FilteredCount(filter);
         }
 
         /// <summary>
@@ -236,9 +236,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="entity">记账凭证</param>
         /// <returns>是否成功</returns>
-        public bool InsertVoucher(Voucher entity)
+        public bool Insert(Voucher entity)
         {
-            return m_Db.InsertVoucher(entity);
+            return m_Db.Insert(entity);
         }
 
         /// <summary>
@@ -256,9 +256,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>已删除的记账凭证总数</returns>
-        public int DeleteVouchers(Voucher filter)
+        public int FilteredDelete(Voucher filter)
         {
-            return m_Db.DeleteVouchers(filter);
+            return m_Db.FilteredDelete(filter);
         }
 
         /// <summary>
@@ -266,9 +266,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="filter">细目过滤器</param>
         /// <returns>已删除的细目总数</returns>
-        public int DeleteDetails(VoucherDetail filter)
+        public int FilteredDelete(VoucherDetail filter)
         {
-            return m_Db.DeleteDetails(filter);
+            return m_Db.FilteredDelete(filter);
         }
 
         /// <summary>
@@ -288,9 +288,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>匹配过滤器的资产</returns>
-        public IEnumerable<Asset> SelectAssets(Asset filter)
+        public IEnumerable<Asset> FilteredSelect(Asset filter)
         {
-            foreach (var asset in m_Db.SelectAssets(filter))
+            foreach (var asset in m_Db.FilteredSelect(filter))
             {
                 InternalRegular(asset);
                 yield return asset;
@@ -303,9 +303,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="entity">资产</param>
         /// <returns>是否成功</returns>
-        public bool InsertAsset(Asset entity)
+        public bool Insert(Asset entity)
         {
-            return m_Db.InsertAsset(entity);
+            return m_Db.Insert(entity);
         }
 
         /// <summary>
@@ -323,9 +323,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>已删除的资产总数</returns>
-        public int DeleteAssets(Asset filter)
+        public int FilteredDelete(Asset filter)
         {
-            return m_Db.DeleteAssets(filter);
+            return m_Db.FilteredDelete(filter);
         }
 
         /// <summary>
@@ -336,7 +336,7 @@ namespace AccountingServer.BLL
         /// <returns>是否成功</returns>
         public bool UpdateAsset(Asset entity)
         {
-            return m_Db.UpdateAsset(entity);
+            return m_Db.Update(entity);
         }
 
         /// <summary>
@@ -357,7 +357,7 @@ namespace AccountingServer.BLL
                                                               d.Fund);
                                                   return key;
                                               }).ToArray();
-            m_Db.UpdateVoucher(voucher);
+            m_Db.Update(voucher);
         }
 
         /// <summary>

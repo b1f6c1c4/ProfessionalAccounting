@@ -131,7 +131,7 @@ namespace AccountingServer.BLL
                 (description, title, b) =>
                 {
                     var filter = new VoucherDetail { Title = title };
-                    var balances = m_Accountant.SelectVouchersWithDetail(filter)
+                    var balances = m_Accountant.FilteredSelect(filter)
                                                .SelectMany(
                                                            v =>
                                                            v.Details.Select(

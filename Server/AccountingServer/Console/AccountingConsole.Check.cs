@@ -18,7 +18,7 @@ namespace AccountingServer.Console
                 throw new InvalidOperationException("尚未连接到数据库");
 
             var sb = new StringBuilder();
-            foreach (var voucher in m_Accountant.SelectVouchers(null))
+            foreach (var voucher in m_Accountant.FilteredSelect((Voucher)null))
             {
                 var val = m_Accountant.IsBalanced(voucher);
                 if (Math.Abs(val) < Accountant.Tolerance)
