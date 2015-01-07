@@ -190,7 +190,7 @@ namespace AccountingServer.Entities
     {
         public int Compare(AssetItem x, AssetItem y)
         {
-            var res = BalanceComparer.CompareDate(x.Date, y.Date);
+            var res = DateHelper.CompareDate(x.Date, y.Date);
             if (res != 0)
                 return res;
 

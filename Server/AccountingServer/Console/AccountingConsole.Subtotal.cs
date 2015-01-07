@@ -361,7 +361,7 @@ namespace AccountingServer.Console
                                                                              Fund = ds.Sum(d => d.Fund.Value)
                                                                          }))).ToList();
 
-            result.Sort((t1, t2) => BalanceComparer.CompareDate(t1.Item1, t2.Item1));
+            result.Sort((t1, t2) => DateHelper.CompareDate(t1.Item1, t2.Item1));
 
             var cuml = Accountant.ProcessDailyBalance(result, startDate, endDate);
 
