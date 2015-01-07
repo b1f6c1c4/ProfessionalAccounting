@@ -117,7 +117,7 @@ namespace AccountingServer.DAL
                               {
                                   "exptitle",
                                   asset.DepreciationExpenseSubTitle.HasValue
-                                      ? asset.DepreciationExpenseTitle * 100 + asset.DevaluationExpenseSubTitle
+                                      ? asset.DepreciationExpenseTitle * 100 + asset.DepreciationExpenseSubTitle
                                       : asset.DepreciationExpenseTitle
                               },
                               {

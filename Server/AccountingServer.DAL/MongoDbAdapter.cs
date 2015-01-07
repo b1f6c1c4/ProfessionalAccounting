@@ -137,16 +137,6 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     按记账凭证的编号唯一查询
-        /// </summary>
-        /// <param name="voucher">记账凭证</param>
-        /// <returns>Bson查询</returns>
-        private static IMongoQuery GetUniqueQuery(Voucher voucher)
-        {
-            return GetUniqueQuery(voucher.ID);
-        }
-
-        /// <summary>
         ///     按编号唯一查询
         /// </summary>
         /// <param name="id">编号</param>
@@ -154,16 +144,6 @@ namespace AccountingServer.DAL
         private static IMongoQuery GetUniqueQuery(Guid? id)
         {
             return Query.EQ("_id", id.HasValue ? id.Value.ToBsonValue() : BsonNull.Value);
-        }
-
-        /// <summary>
-        ///     按资产的编号唯一查询
-        /// </summary>
-        /// <param name="asset">资产</param>
-        /// <returns>Bson查询</returns>
-        private static IMongoQuery GetUniqueQuery(Asset asset)
-        {
-            return GetUniqueQuery(asset.ID);
         }
 
         /// <summary>
@@ -356,8 +336,6 @@ namespace AccountingServer.DAL
             return m_Vouchers.FindAs<BsonDocument>(And(GetQuery(filter), GetQuery(rng))).Select(d => d.ToVoucher());
         }
 
-        public long FilteredCount(Voucher filter) { return m_Vouchers.Count(GetQuery(filter)); }
-
         public bool Insert(Voucher entity)
         {
             if (entity.ID == null)
@@ -381,7 +359,7 @@ namespace AccountingServer.DAL
         public bool Update(Voucher entity)
         {
             var res = m_Vouchers.Save(entity.ToBsonDocument());
-            return res.DocumentsAffected == 1;
+            return res.DocumentsAffected <= 1;
         }
 
         public IEnumerable<Voucher> FilteredSelect(VoucherDetail filter, DateFilter rng)
@@ -428,17 +406,6 @@ namespace AccountingServer.DAL
                     .Where(d => d.IsMatch(filter));
         }
 
-        public bool Insert(VoucherDetail entity)
-        {
-            var v = SelectVoucher(entity.Item);
-            var d = new VoucherDetail[v.Details.Length + 1];
-            v.Details.CopyTo(d, 0);
-            d[v.Details.Length] = entity;
-
-            var res = m_Vouchers.Update(GetUniqueQuery(v), new UpdateDocument(v.ToBsonDocument()));
-            return res.Ok;
-        }
-
         public long FilteredDelete(VoucherDetail filter)
         {
             var count = 0L;
@@ -448,7 +415,7 @@ namespace AccountingServer.DAL
                 var l = voucher.Details.Count();
                 voucher.Details = voucher.Details.Where(d => !d.IsMatch(filter)).ToArray();
                 l -= voucher.Details.Count();
-                var res = m_Vouchers.Update(GetUniqueQuery(voucher), new UpdateDocument(voucher.ToBsonDocument()));
+                var res = m_Vouchers.Save(voucher.ToBsonDocument());
                 if (res.DocumentsAffected == 1)
                     count += l;
             }
@@ -475,7 +442,7 @@ namespace AccountingServer.DAL
         public bool DeleteAsset(Guid id)
         {
             var res = m_Assets.Remove(GetUniqueQuery(id));
-            return res.DocumentsAffected == 1;
+            return res.DocumentsAffected <= 1;
         }
 
         public bool Update(Asset entity)
