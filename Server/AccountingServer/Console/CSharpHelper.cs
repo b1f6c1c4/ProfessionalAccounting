@@ -37,7 +37,7 @@ namespace AccountingServer.Console
             sb.AppendLine();
             if (voucher.Date.HasValue)
             {
-                sb.AppendFormat("    Date = DateTime.Parse(\"{0:yyyy-MM-dd}\"),", voucher.Date);
+                sb.AppendFormat("    Date = D(\"{0:yyyy-MM-dd}\"),", voucher.Date);
                 sb.AppendLine();
             }
             else
@@ -100,6 +100,14 @@ namespace AccountingServer.Console
             sb.AppendLine("{");
             sb.AppendLine("    public static class VoucherCreator");
             sb.AppendLine("    {");
+            sb.AppendLine("        private Guid G(string s)");
+            sb.AppendLine("        {");
+            sb.AppendLine("            return Guid.Parse(s);");
+            sb.AppendLine("        }");
+            sb.AppendLine("        private DateTime D(string s)");
+            sb.AppendLine("        {");
+            sb.AppendLine("            return DateTime.Parse(s);");
+            sb.AppendLine("        }");
             sb.AppendLine("        public static Voucher GetVoucher()");
             sb.AppendLine("        {");
             sb.AppendFormat("            return {0};" + Environment.NewLine, str);
@@ -123,7 +131,92 @@ namespace AccountingServer.Console
         /// </summary>
         /// <param name="asset">资产</param>
         /// <returns>C#表达式</returns>
-        public static string PresentAsset(Asset asset) { throw new NotImplementedException(); }
+        public static string PresentAsset(Asset asset)
+        {
+            var sb = new StringBuilder();
+            sb.Append("new Voucher {");
+            sb.AppendFormat("  ID = G({0}),", ProcessString(asset.ID.ToString()));
+            sb.AppendLine();
+            sb.AppendFormat("    Name = {0}", ProcessString(asset.Name));
+            sb.AppendLine();
+            if (asset.Date.HasValue)
+            {
+                sb.AppendFormat("    Date = D(\"{0:yyyy-MM-dd}\"),", asset.Date);
+                sb.AppendLine();
+            }
+            else
+                sb.AppendLine("    Date = null,");
+            sb.AppendFormat("    Value = {0}, Salvge = {1}, Life = {2},", asset.Value, asset.Salvge, asset.Life);
+            sb.AppendLine();
+            sb.AppendFormat(
+                            "    Title = {0}, DepreciationTitle = {1}, DevaluationTitle = {2},",
+                            asset.Title,
+                            asset.DepreciationTitle,
+                            asset.DevaluationTitle);
+            sb.AppendLine();
+            sb.AppendFormat(
+                            "    DepreciationExpenseTitle = {0}, DepreciationExpenseSubTitle = {1}",
+                            asset.DepreciationExpenseTitle,
+                            asset.DepreciationExpenseSubTitle);
+            sb.AppendLine();
+            sb.AppendFormat(
+                            "    DevaluationExpenseTitle = {0}, DevaluationExpenseSubTitle = {1}",
+                            asset.DevaluationExpenseTitle,
+                            asset.DevaluationExpenseSubTitle);
+            sb.AppendLine();
+            sb.AppendFormat("    Method = {0}, ", asset.Method);
+            sb.AppendLine();
+            if (asset.Remark != null)
+            {
+                sb.AppendFormat("    Remark = {0},", ProcessString(asset.Remark));
+                sb.AppendLine();
+            }
+            sb.AppendLine("    Details = new[] {");
+            if (asset.Schedule != null)
+            {
+                Action<AssetItem, string> present =
+                    (item, str) =>
+                    {
+                        sb.Append("        new ");
+                        sb.Append(item.GetType().Name.PadRight(16));
+                        sb.Append("{ ");
+                        if (item.Date.HasValue)
+                            sb.AppendFormat(
+                                            "Date = D(\"{0:yyyy-MM-dd}\"), ",
+                                            item.Date);
+                        else
+                            sb.Append("Date = null, ");
+                        sb.AppendFormat("VoucherID = {0},", item.VoucherID);
+                        sb.AppendLine();
+                        if (item.Remark != null)
+                        {
+                            sb.Append("".PadLeft(30));
+                            sb.AppendFormat("Remark = {0},", ProcessString(item.Remark));
+                            sb.AppendLine();
+                        }
+                        sb.Append("".PadLeft(30));
+                        sb.Append(str.PadRight(28));
+                        sb.AppendFormat("BookValue = {0} }},", item.BookValue);
+                        sb.AppendLine();
+                    };
+
+                foreach (var item in asset.Schedule)
+                {
+                    if (item is AcquisationItem)
+                        present(item, String.Format("OrigValue = {0}", (item as AcquisationItem).OrigValue));
+                    else if (item is DepreciateItem)
+                        present(item, String.Format("Amount    = {0}", (item as DepreciateItem).Amount));
+                    else if (item is DevalueItem)
+                        present(item, String.Format("FairValue = {0}", (item as DevalueItem).FairValue));
+                    else if (item is DispositionItem)
+                        present(item, String.Format("NetValue  = {0}", (item as DispositionItem).NetValue));
+                }
+                sb.AppendLine("   } }");
+            }
+            else
+                sb.AppendLine("}");
+            return sb.ToString();
+        }
 
         /// <summary>
         ///     从C#表达式中取得资产
