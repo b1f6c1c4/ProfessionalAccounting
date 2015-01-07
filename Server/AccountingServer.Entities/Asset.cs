@@ -121,6 +121,11 @@ namespace AccountingServer.Entities
         public Guid? ID { get; set; }
 
         /// <summary>
+        ///     编号的标准存储格式
+        /// </summary>
+        public string StringID { get { return ID.ToString().ToUpperInvariant(); } set { ID = Guid.Parse(value); } }
+
+        /// <summary>
         ///     名称
         /// </summary>
         public string Name { get; set; }

@@ -54,26 +54,44 @@ namespace AccountingServer
 
         private bool GetCSharpCode(out int begin, out int end, out bool isAsset)
         {
-            isAsset = false;
 
             end = -1;
             begin = textBoxResult.SelectionStart + textBoxResult.SelectionLength;
-            var assetBegin = textBoxResult.Text.LastIndexOf("new Asset", begin, StringComparison.Ordinal);
-            do
+            var voucherBegin = textBoxResult.Text.LastIndexOf("@new Voucher", begin, StringComparison.Ordinal);
+            var assetBegin = textBoxResult.Text.LastIndexOf("@new Asset", begin, StringComparison.Ordinal);
+            if (voucherBegin == -1 &&
+                assetBegin == -1)
             {
-                begin = textBoxResult.Text.LastIndexOf("new Voucher", begin, StringComparison.Ordinal);
-                if (assetBegin >= 0 &&
-                    (begin == -1 || begin > assetBegin))
+                isAsset = false;
+                return false;
+            }
+
+            if (voucherBegin != -1 && assetBegin != -1)
+            {
+                if (voucherBegin > assetBegin)
+                {
+                    isAsset = false;
+                    begin = voucherBegin;
+                }
+                else
                 {
                     isAsset = true;
-                    break;
+                    begin = assetBegin;
                 }
-                if (begin == -1)
-                    return false;
-            } while (textBoxResult.Text.Substring(begin, 17) == "new VoucherDetail");
+            }
+            else if (voucherBegin == -1)
+            {
+                isAsset = true;
+                begin = assetBegin;
+            }
+            else
+            {
+                isAsset = false;
+                begin = voucherBegin;
+            }
 
             var nested = 0;
-            end = begin + 11;
+            end = begin;
             for (; end < textBoxResult.Text.Length; end++)
                 if (textBoxResult.Text[end] == '{')
                     nested++;
@@ -114,7 +132,7 @@ namespace AccountingServer
 
             try
             {
-                var s = textBoxResult.Text.Substring(begin, end - begin + 1);
+                var s = textBoxResult.Text.Substring(begin + 1, end - begin);
                 var result = isAsset ? m_Console.ExecuteAssetUpsert(s) : m_Console.ExecuteVoucherUpsert(s);
                 textBoxResult.Text = textBoxResult.Text.Remove(begin, end - begin + 1)
                                                   .Insert(begin, result);
@@ -142,7 +160,7 @@ namespace AccountingServer
 
             try
             {
-                var s = textBoxResult.Text.Substring(begin, end - begin + 1);
+                var s = textBoxResult.Text.Substring(begin + 1, end - begin);
                 if (isAsset ? !m_Console.ExecuteAssetRemoval(s) : !m_Console.ExecuteVoucherRemoval(s))
                     throw new Exception();
                 // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression

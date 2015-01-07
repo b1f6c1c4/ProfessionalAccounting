@@ -87,6 +87,21 @@ namespace AccountingServer.Console
 
                 return sb.ToString();
             }
+            if (sp[0] == "a-register")
+            {
+                editable = true;
+
+                var sb = new StringBuilder();
+                var filter = ParseAssetQuery(query);
+                foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
+                {
+                    foreach (var voucher in m_Accountant.RegisterVouchers(a))
+                        sb.Append(CSharpHelper.PresentVoucher(voucher));
+
+                    m_Accountant.Update(a);
+                }
+                return sb.ToString();
+            }
             // TODO: add others
 
             throw new InvalidOperationException("资产表达式无效");

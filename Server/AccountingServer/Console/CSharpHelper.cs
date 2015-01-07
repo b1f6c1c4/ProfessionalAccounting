@@ -33,7 +33,7 @@ namespace AccountingServer.Console
         public static string PresentVoucher(Voucher voucher)
         {
             var sb = new StringBuilder();
-            sb.Append("new Voucher {");
+            sb.Append("@new Voucher {");
             sb.AppendFormat("  ID = {0},", ProcessString(voucher.ID));
             sb.AppendLine();
             if (voucher.Date.HasValue)
@@ -101,11 +101,7 @@ namespace AccountingServer.Console
             sb.AppendLine("{");
             sb.AppendLine("    public static class VoucherCreator");
             sb.AppendLine("    {");
-            sb.AppendLine("        private Guid G(string s)");
-            sb.AppendLine("        {");
-            sb.AppendLine("            return Guid.Parse(s);");
-            sb.AppendLine("        }");
-            sb.AppendLine("        private DateTime D(string s)");
+            sb.AppendLine("        private static DateTime D(string s)");
             sb.AppendLine("        {");
             sb.AppendLine("            return DateTime.Parse(s);");
             sb.AppendLine("        }");
@@ -135,10 +131,10 @@ namespace AccountingServer.Console
         public static string PresentAsset(Asset asset)
         {
             var sb = new StringBuilder();
-            sb.Append("new Voucher {");
-            sb.AppendFormat("  ID = G({0}),", ProcessString(asset.ID.ToString()));
+            sb.Append("@new Asset {");
+            sb.AppendFormat("  StringID = {0},", ProcessString(asset.ID.ToString()));
             sb.AppendLine();
-            sb.AppendFormat("    Name = {0}", ProcessString(asset.Name));
+            sb.AppendFormat("    Name = {0},", ProcessString(asset.Name));
             sb.AppendLine();
             if (asset.Date.HasValue)
             {
@@ -149,16 +145,16 @@ namespace AccountingServer.Console
                 sb.AppendLine("    Date = null,");
             sb.AppendFormat("    Value = {0}, Salvge = {1}, Life = {2},", asset.Value, asset.Salvge, asset.Life);
             sb.AppendLine();
-            sb.AppendFormat("    Title = {0}, Method = {1},", asset.Title, asset.Method);
+            sb.AppendFormat("    Title = {0}, Method = DepreciationMethod.{1},", asset.Title, asset.Method);
             sb.AppendLine();
             sb.AppendFormat(
-                            "    DepreciationTitle = {0}, DepreciationExpenseTitle = {1}, DepreciationExpenseSubTitle = {2}",
+                            "    DepreciationTitle = {0}, DepreciationExpenseTitle = {1}, DepreciationExpenseSubTitle = {2},",
                             asset.DepreciationTitle,
                             asset.DepreciationExpenseTitle,
                             asset.DepreciationExpenseSubTitle);
             sb.AppendLine();
             sb.AppendFormat(
-                            "    DevaluationTitle = {0}, DevaluationExpenseTitle = {1}, DevaluationExpenseSubTitle = {2}",
+                            "    DevaluationTitle = {0}, DevaluationExpenseTitle = {1}, DevaluationExpenseSubTitle = {2},",
                             asset.DevaluationTitle,
                             asset.DevaluationExpenseTitle,
                             asset.DevaluationExpenseSubTitle);
@@ -168,7 +164,7 @@ namespace AccountingServer.Console
                 sb.AppendFormat("    Remark = {0},", ProcessString(asset.Remark));
                 sb.AppendLine();
             }
-            sb.AppendLine("    Details = new[] {");
+            sb.AppendLine("    Schedule = new AssetItem[] {");
             if (asset.Schedule != null)
             {
                 Action<AssetItem, string> present =
@@ -193,7 +189,7 @@ namespace AccountingServer.Console
                             sb.Append("".PadLeft(30));
                             sb.AppendFormat(", Remark = {0} ", ProcessString(item.Remark));
                         }
-                        sb.AppendLine("}},");
+                        sb.AppendLine("},");
                     };
 
                 foreach (var item in asset.Schedule)
@@ -235,6 +231,10 @@ namespace AccountingServer.Console
             sb.AppendLine("{");
             sb.AppendLine("    public static class AssetCreator");
             sb.AppendLine("    {");
+            sb.AppendLine("        private static DateTime D(string s)");
+            sb.AppendLine("        {");
+            sb.AppendLine("            return DateTime.Parse(s);");
+            sb.AppendLine("        }");
             sb.AppendLine("        public static Asset GetAsset()");
             sb.AppendLine("        {");
             sb.AppendFormat("            return {0};" + Environment.NewLine, str);
