@@ -116,9 +116,15 @@ namespace AccountingServer.DAL
                               { "devtitle", asset.DevaluationTitle },
                               {
                                   "exptitle",
-                                  asset.ExpenseSubTitle.HasValue
-                                      ? asset.ExpenseTitle * 100 + asset.ExpenseSubTitle
-                                      : asset.ExpenseTitle
+                                  asset.DepreciationExpenseSubTitle.HasValue
+                                      ? asset.DepreciationExpenseTitle * 100 + asset.DevaluationExpenseSubTitle
+                                      : asset.DepreciationExpenseTitle
+                              },
+                              {
+                                  "exvtitle",
+                                  asset.DevaluationExpenseSubTitle.HasValue
+                                      ? asset.DevaluationExpenseTitle * 100 + asset.DevaluationExpenseSubTitle
+                                      : asset.DevaluationExpenseTitle
                               }
                           };
             if (asset.Method != DepreciationMethod.None)
@@ -269,8 +275,14 @@ namespace AccountingServer.DAL
             if (doc.ContainsNotNull("exptitle"))
             {
                 var expenseTitle = doc["exptitle"].AsInt32;
-                asset.ExpenseTitle = expenseTitle / 100;
-                asset.ExpenseSubTitle = expenseTitle % 100;
+                asset.DepreciationExpenseTitle = expenseTitle / 100;
+                asset.DepreciationExpenseSubTitle = expenseTitle % 100;
+            }
+            if (doc.ContainsNotNull("exvtitle"))
+            {
+                var expenseTitle = doc["exvtitle"].AsInt32;
+                asset.DevaluationExpenseTitle = expenseTitle / 100;
+                asset.DevaluationExpenseSubTitle = expenseTitle % 100;
             }
             asset.Method = DepreciationMethod.None;
             if (doc.ContainsNotNull("method"))

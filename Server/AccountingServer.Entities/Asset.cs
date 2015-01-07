@@ -151,7 +151,7 @@ namespace AccountingServer.Entities
         public int? Title { get; set; }
 
         /// <summary>
-        ///     折旧所在科目编号
+        ///     累计折旧所在科目编号
         /// </summary>
         public int? DepreciationTitle { get; set; }
 
@@ -161,14 +161,24 @@ namespace AccountingServer.Entities
         public int? DevaluationTitle { get; set; }
 
         /// <summary>
-        ///     费用所在科目编号
+        ///     折旧费用所在科目编号
         /// </summary>
-        public int? ExpenseTitle { get; set; }
+        public int? DepreciationExpenseTitle { get; set; }
 
         /// <summary>
-        ///     费用所在二级科目编号
+        ///     折旧费用所在二级科目编号
         /// </summary>
-        public int? ExpenseSubTitle { get; set; }
+        public int? DepreciationExpenseSubTitle { get; set; }
+
+        /// <summary>
+        ///     减值损失所在科目编号
+        /// </summary>
+        public int? DevaluationExpenseTitle { get; set; }
+
+        /// <summary>
+        ///     减值损失所在二级科目编号
+        /// </summary>
+        public int? DevaluationExpenseSubTitle { get; set; }
 
         /// <summary>
         ///     折旧方法

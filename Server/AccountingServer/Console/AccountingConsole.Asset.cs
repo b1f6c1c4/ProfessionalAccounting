@@ -108,7 +108,7 @@ namespace AccountingServer.Console
         {
             var sb = new StringBuilder();
             sb.AppendFormat(
-                            "{0} {1}{2:yyyyMMdd}{3}{4}{5}{6}{7}{8}{9}{10}{11}",
+                            "{0} {1}{2:yyyyMMdd}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}",
                             asset.ID,
                             asset.Name.CPadRight(35),
                             asset.Date,
@@ -117,8 +117,10 @@ namespace AccountingServer.Console
                             asset.Title.AsTitle().CPadLeft(5),
                             asset.DepreciationTitle.AsTitle().CPadLeft(5),
                             asset.DevaluationTitle.AsTitle().CPadLeft(5),
-                            asset.ExpenseTitle.AsTitle().CPadLeft(5),
-                            asset.ExpenseSubTitle.AsSubTitle(),
+                            asset.DepreciationExpenseTitle.AsTitle().CPadLeft(5),
+                            asset.DepreciationExpenseSubTitle.AsSubTitle(),
+                            asset.DevaluationExpenseTitle.AsTitle().CPadLeft(5),
+                            asset.DevaluationExpenseSubTitle.AsSubTitle(),
                             asset.Life.ToString().CPadLeft(4),
                             asset.Method.ToString().CPadLeft(20));
             sb.AppendLine();
