@@ -28,8 +28,7 @@ namespace AccountingServer.UnitTest
                                                              new Balance { Date = DateTime.Parse("2014-01-04"), Fund = 1000D },
                                                              new Balance { Date = DateTime.Parse("2014-01-05"), Fund = 10000D },
                                                          },
-                                                     null,
-                                                     null).ToList();
+                                                     DateFilter.Unconstrained).ToList();
             var exp = new[]
                           {
                               new Balance { Date = DateTime.Parse("2014-01-01"), Fund = 11D },

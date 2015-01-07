@@ -79,28 +79,28 @@ namespace AccountingServer.BLL
             var remarks = new[]
                               { "观畴园", "紫荆园", "桃李园", "清青比萨", "清青快餐", "清青休闲", "清青时代", "玉树园", "闻馨园", "听涛园", "丁香园", "芝兰园" };
             helper.Insert(
-                                 new Voucher
-                                     {
-                                         Date = sp[0].AsDate(),
-                                         Details =
-                                             new[]
-                                                 {
-                                                     new VoucherDetail
-                                                         {
-                                                             Title = 1012,
-                                                             SubTitle = 05,
-                                                             Content = null,
-                                                             Fund = -fund
-                                                         },
-                                                     new VoucherDetail
-                                                         {
-                                                             Title = 6602,
-                                                             SubTitle = 03,
-                                                             Content = remarks[Convert.ToInt32(sp[2])],
-                                                             Fund = fund
-                                                         }
-                                                 }
-                                     });
+                          new Voucher
+                              {
+                                  Date = sp[0].AsDate(),
+                                  Details =
+                                      new[]
+                                          {
+                                              new VoucherDetail
+                                                  {
+                                                      Title = 1012,
+                                                      SubTitle = 05,
+                                                      Content = null,
+                                                      Fund = -fund
+                                                  },
+                                              new VoucherDetail
+                                                  {
+                                                      Title = 6602,
+                                                      SubTitle = 03,
+                                                      Content = remarks[Convert.ToInt32(sp[2])],
+                                                      Fund = fund
+                                                  }
+                                          }
+                              });
         }
 
         /// <summary>
@@ -190,28 +190,28 @@ namespace AccountingServer.BLL
                 }
 
                 helper.Insert(
-                                     new Voucher
-                                         {
-                                             Date = dt,
-                                             Details =
-                                                 new[]
-                                                     {
-                                                         new VoucherDetail
-                                                             {
-                                                                 Title = 1101,
-                                                                 SubTitle = 02,
-                                                                 Content = content,
-                                                                 Fund = fund
-                                                             },
-                                                         new VoucherDetail
-                                                             {
-                                                                 Title = title,
-                                                                 SubTitle = subTitle,
-                                                                 Content = content,
-                                                                 Fund = -fund
-                                                             }
-                                                     }
-                                         });
+                              new Voucher
+                                  {
+                                      Date = dt,
+                                      Details =
+                                          new[]
+                                              {
+                                                  new VoucherDetail
+                                                      {
+                                                          Title = 1101,
+                                                          SubTitle = 02,
+                                                          Content = content,
+                                                          Fund = fund
+                                                      },
+                                                  new VoucherDetail
+                                                      {
+                                                          Title = title,
+                                                          SubTitle = subTitle,
+                                                          Content = content,
+                                                          Fund = -fund
+                                                      }
+                                              }
+                                  });
             }
         }
 
@@ -262,27 +262,27 @@ namespace AccountingServer.BLL
                 fund = sp[1].AsCurrency();
 
             helper.Insert(
-                                 new Voucher
-                                     {
-                                         Date = dt,
-                                         Details =
-                                             new[]
-                                                 {
-                                                     new VoucherDetail
-                                                         {
-                                                             Title = 1123,
-                                                             Content = contentC,
-                                                             Fund = -fund
-                                                         },
-                                                     new VoucherDetail
-                                                         {
-                                                             Title = titleD,
-                                                             SubTitle = subTitleD,
-                                                             Content = contentD,
-                                                             Fund = fund
-                                                         }
-                                                 }
-                                     });
+                          new Voucher
+                              {
+                                  Date = dt,
+                                  Details =
+                                      new[]
+                                          {
+                                              new VoucherDetail
+                                                  {
+                                                      Title = 1123,
+                                                      Content = contentC,
+                                                      Fund = -fund
+                                                  },
+                                              new VoucherDetail
+                                                  {
+                                                      Title = titleD,
+                                                      SubTitle = subTitleD,
+                                                      Content = contentD,
+                                                      Fund = fund
+                                                  }
+                                          }
+                              });
         }
 
         /// <summary>
@@ -315,22 +315,22 @@ namespace AccountingServer.BLL
                     throw new InvalidOperationException();
             }
             helper.Insert(
-                                 new Voucher
-                                     {
-                                         Date = sp[0].AsDate(),
-                                         Details =
-                                             new[]
-                                                 {
-                                                     credit,
-                                                     new VoucherDetail
-                                                         {
-                                                             Title = 6602,
-                                                             SubTitle = 08,
-                                                             Content = sp[3],
-                                                             Fund = fund
-                                                         }
-                                                 }
-                                     });
+                          new Voucher
+                              {
+                                  Date = sp[0].AsDate(),
+                                  Details =
+                                      new[]
+                                          {
+                                              credit,
+                                              new VoucherDetail
+                                                  {
+                                                      Title = 6602,
+                                                      SubTitle = 08,
+                                                      Content = sp[3],
+                                                      Fund = fund
+                                                  }
+                                          }
+                              });
         }
 
         /// <summary>
@@ -356,22 +356,22 @@ namespace AccountingServer.BLL
                     throw new InvalidOperationException();
             }
             helper.Insert(
-                                 new Voucher
-                                     {
-                                         Date = sp[0].AsDate(),
-                                         Details =
-                                             new[]
-                                                 {
-                                                     credit,
-                                                     new VoucherDetail
-                                                         {
-                                                             Title = 6602,
-                                                             SubTitle = 03,
-                                                             Content = sp[3],
-                                                             Fund = fund
-                                                         }
-                                                 }
-                                     });
+                          new Voucher
+                              {
+                                  Date = sp[0].AsDate(),
+                                  Details =
+                                      new[]
+                                          {
+                                              credit,
+                                              new VoucherDetail
+                                                  {
+                                                      Title = 6602,
+                                                      SubTitle = 03,
+                                                      Content = sp[3],
+                                                      Fund = fund
+                                                  }
+                                          }
+                              });
         }
 
         /// <summary>
@@ -388,21 +388,21 @@ namespace AccountingServer.BLL
             var fund = sp[1].AsCurrency();
             var remarks = new[] { "5184", "3593", "9767" };
             helper.Insert(
-                                 new Voucher
-                                     {
-                                         Date = sp[0].AsDate(),
-                                         Details =
-                                             new[]
-                                                 {
-                                                     new VoucherDetail { Title = 1001, Content = null, Fund = fund },
-                                                     new VoucherDetail
-                                                         {
-                                                             Title = 1002,
-                                                             Content = remarks[Convert.ToInt32(sp[2])],
-                                                             Fund = -fund
-                                                         }
-                                                 }
-                                     });
+                          new Voucher
+                              {
+                                  Date = sp[0].AsDate(),
+                                  Details =
+                                      new[]
+                                          {
+                                              new VoucherDetail { Title = 1001, Content = null, Fund = fund },
+                                              new VoucherDetail
+                                                  {
+                                                      Title = 1002,
+                                                      Content = remarks[Convert.ToInt32(sp[2])],
+                                                      Fund = -fund
+                                                  }
+                                          }
+                              });
         }
 
         /// <summary>
@@ -438,22 +438,22 @@ namespace AccountingServer.BLL
                     throw new InvalidOperationException();
             }
             helper.Insert(
-                                 new Voucher
-                                     {
-                                         Date = sp[0].AsDate(),
-                                         Details =
-                                             new[]
-                                                 {
-                                                     debit,
-                                                     new VoucherDetail
-                                                         {
-                                                             Title = 6301,
-                                                             SubTitle = 04,
-                                                             Content = "",
-                                                             Fund = -fund
-                                                         }
-                                                 }
-                                     });
+                          new Voucher
+                              {
+                                  Date = sp[0].AsDate(),
+                                  Details =
+                                      new[]
+                                          {
+                                              debit,
+                                              new VoucherDetail
+                                                  {
+                                                      Title = 6301,
+                                                      SubTitle = 04,
+                                                      Content = "",
+                                                      Fund = -fund
+                                                  }
+                                          }
+                              });
         }
 
         /// <summary>
@@ -495,26 +495,26 @@ namespace AccountingServer.BLL
         public static void 期末摊销(string result, Accountant helper)
         {
             helper.Insert(
-                                 new Voucher
-                                     {
-                                         Date = result.AsDate(),
-                                         Details =
-                                             new[]
-                                                 {
-                                                     new VoucherDetail
-                                                         {
-                                                             Title = 1123,
-                                                             Content = "本科学费",
-                                                             Fund = 108.6957
-                                                         },
-                                                     new VoucherDetail
-                                                         {
-                                                             Title = 6401,
-                                                             Content = "本科学费",
-                                                             Fund = 108.6957
-                                                         }
-                                                 }
-                                     });
+                          new Voucher
+                              {
+                                  Date = result.AsDate(),
+                                  Details =
+                                      new[]
+                                          {
+                                              new VoucherDetail
+                                                  {
+                                                      Title = 1123,
+                                                      Content = "本科学费",
+                                                      Fund = 108.6957
+                                                  },
+                                              new VoucherDetail
+                                                  {
+                                                      Title = 6401,
+                                                      Content = "本科学费",
+                                                      Fund = 108.6957
+                                                  }
+                                          }
+                              });
         }
 
         ///// <summary>

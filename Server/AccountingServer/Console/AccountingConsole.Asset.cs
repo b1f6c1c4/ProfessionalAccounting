@@ -97,20 +97,14 @@ namespace AccountingServer.Console
         /// </summary>
         /// <param name="s">资产检索表达式</param>
         /// <returns>过滤器</returns>
-        private static Asset ParseAssetQuery(string s)
-        {
-            throw new NotImplementedException();
-        }
+        private static Asset ParseAssetQuery(string s) { throw new NotImplementedException(); }
 
         /// <summary>
         ///     将资产用C#表示
         /// </summary>
         /// <param name="asset">资产</param>
         /// <returns>C#表达式</returns>
-        private string PresentAsset(Asset asset)
-        {
-            throw new NotImplementedException();
-        }
+        private string PresentAsset(Asset asset) { throw new NotImplementedException(); }
 
         /// <summary>
         ///     从C#表达式中取得资产
@@ -121,11 +115,11 @@ namespace AccountingServer.Console
         {
             var provider = new CSharpCodeProvider();
             var paras = new CompilerParameters
-            {
-                GenerateExecutable = false,
-                GenerateInMemory = true,
-                ReferencedAssemblies = { "AccountingServer.Entities.dll" }
-            };
+                            {
+                                GenerateExecutable = false,
+                                GenerateInMemory = true,
+                                ReferencedAssemblies = { "AccountingServer.Entities.dll" }
+                            };
             var sb = new StringBuilder();
             sb.AppendLine("using System;");
             sb.AppendLine("using AccountingServer.Entities;");
@@ -227,37 +221,30 @@ namespace AccountingServer.Console
 
         private string ApplyAll(string s, bool isCollapse)
         {
-            DateTime? startDate, endDate;
-            bool nullable;
-            if (!ParseDateQuery(s, out startDate, out endDate, out nullable))
-                throw new InvalidOperationException("检索表达式无效");
+            var rng = ParseDateQuery(s);
 
             var sb = new StringBuilder();
 
             if (isCollapse)
-            {
                 foreach (var asset in m_Accountant.FilteredSelect(new Asset()))
                 {
-                    ApplyItem(asset, startDate, endDate, true);
+                    ApplyItem(asset, rng, true);
                     sb.Append(ListAsset(asset));
                 }
-            }
             else
-            {
                 foreach (var asset in m_Accountant.FilteredSelect(new Asset()))
                 {
-                    ApplyItem(asset, startDate, endDate);
+                    ApplyItem(asset, rng);
                     sb.Append(ListAsset(asset));
                 }
-            }
 
             return sb.ToString();
         }
 
-        private void ApplyItem(Asset asset, DateTime? startDate, DateTime? endDate, bool isCollapsed = false)
+        private void ApplyItem(Asset asset, DateFilter rng, bool isCollapsed = false)
         {
             // TODO: fixthis
-            m_Accountant.Update(asset, startDate, endDate, isCollapsed);
+            m_Accountant.Update(asset, rng, isCollapsed);
         }
 
 

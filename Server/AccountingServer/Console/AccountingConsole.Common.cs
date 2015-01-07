@@ -143,18 +143,15 @@ namespace AccountingServer.Console
             if (s.StartsWith("C", StringComparison.OrdinalIgnoreCase))
             {
                 editable = false;
-                DateTime? startDate, endDate;
-                bool nullable;
-                if (!ParseDateQuery(s.Substring(1), out startDate, out endDate, out nullable) ||
-                    nullable ||
-                    !startDate.HasValue ||
-                    !endDate.HasValue)
+
+                var rng = ParseDateQuery(s.Substring(1));
+                if (!rng.Constrained)
                     throw new InvalidOperationException("日期表达式无效");
 
                 if (!m_Accountant.Connected)
                     throw new InvalidOperationException("尚未连接到数据库");
 
-                return String.Format("CHART {0:s} {1:s}", startDate, endDate);
+                return String.Format("CHART {0:s} {1:s}", rng.StartDate, rng.EndDate);
             }
 
             if (s.StartsWith("a"))
@@ -176,19 +173,12 @@ namespace AccountingServer.Console
             string dateQ;
             var detail = ParseQuery(s, out dateQ);
 
-            DateTime? startDate, endDate;
-            bool nullable;
-            if (!ParseDateQuery(dateQ, out startDate, out endDate, out nullable))
-                return null;
+            var rng = ParseDateQuery(dateQ);
 
             if (!m_Accountant.Connected)
                 throw new InvalidOperationException("尚未连接到数据库");
 
-            if (startDate.HasValue ||
-                endDate.HasValue ||
-                nullable)
-                return m_Accountant.FilteredSelect(detail, startDate, endDate);
-            return m_Accountant.FilteredSelect(detail);
+            return m_Accountant.FilteredSelect(detail, rng);
         }
 
         /// <summary>
@@ -201,19 +191,12 @@ namespace AccountingServer.Console
             string dateQ;
             var detail = ParseQuery(s, out dateQ);
 
-            DateTime? startDate, endDate;
-            bool nullable;
-            if (!ParseDateQuery(dateQ, out startDate, out endDate, out nullable))
-                return null;
+            var rng = ParseDateQuery(dateQ);
 
             if (!m_Accountant.Connected)
                 throw new InvalidOperationException("尚未连接到数据库");
 
-            if (startDate.HasValue ||
-                endDate.HasValue ||
-                nullable)
-                return m_Accountant.SelectDetails(detail, startDate, endDate);
-            return m_Accountant.SelectDetails(detail);
+            return m_Accountant.SelectDetails(detail, rng);
         }
 
         /// <summary>
@@ -243,15 +226,12 @@ namespace AccountingServer.Console
             var isExp = s.EndsWith("-exp");
             s = isExp ? s.Substring(1, s.Length - 5) : s.Substring(1);
 
-            DateTime? startDate, endDate;
-            bool nullable;
-            if (!ParseDateQuery(s, out startDate, out endDate, out nullable))
-                return null;
+            var rng = ParseDateQuery(s);
 
             if (!m_Accountant.Connected)
                 throw new InvalidOperationException("尚未连接到数据库");
 
-            var report = new ReimbursementReport(m_Accountant, startDate, endDate);
+            var report = new ReimbursementReport(m_Accountant, rng);
 
             return isExp ? report.ExportString() : report.Preview();
         }

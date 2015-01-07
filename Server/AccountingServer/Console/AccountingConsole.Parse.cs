@@ -57,32 +57,17 @@ namespace AccountingServer.Console
         ///     解析日期表达式
         /// </summary>
         /// <param name="sOrig">日期表达式</param>
-        /// <param name="startDate">开始日期，<c>null</c>表示不限最小日期并且包含无日期</param>
-        /// <param name="endDate">截止日期，<c>null</c>表示不限最大日期</param>
-        /// <param name="nullable"><paramref name="startDate" />和<paramref name="endDate" />均为<c>null</c>时，表示是否只包含无日期</param>
         /// <param name="reverseMonthType">是否反转@的意义</param>
-        /// <returns>是否是合法的检索表达式</returns>
-        private static bool ParseDateQuery(string sOrig,
-                                           out DateTime? startDate, out DateTime? endDate, out bool nullable,
-                                           bool reverseMonthType = false)
+        /// <returns>日期过滤器</returns>
+        private static DateFilter ParseDateQuery(string sOrig, bool reverseMonthType = false)
         {
-            nullable = false;
-
             var s = sOrig.Trim('[', ']', ' ');
 
             if (s == String.Empty)
-            {
-                startDate = null;
-                endDate = null;
-                return true;
-            }
+                return DateFilter.Unconstrained;
 
             if (s == ".")
-            {
-                startDate = DateTime.Now.Date;
-                endDate = startDate;
-                return true;
-            }
+                return new DateFilter(DateTime.Now.Date, DateTime.Now.Date);
 
             if (s == "..")
             {
@@ -90,63 +75,62 @@ namespace AccountingServer.Console
                 var dayOfWeek = (int)date.DayOfWeek;
                 if (dayOfWeek == 0) // Sunday
                     dayOfWeek = 7;
-                startDate = date.AddDays(1 - dayOfWeek);
-                endDate = startDate.Value.AddDays(6);
-                return true;
+                var startDate = date.AddDays(1 - dayOfWeek);
+                return new DateFilter(startDate, startDate.AddDays(6));
             }
 
             if (s == (reverseMonthType ? "@0" : "0"))
             {
                 var date = DateTime.Now.Date;
-                startDate = date.Day <= 19 ? date.AddMonths(-1).AddDays(20 - date.Day) : date.AddDays(19 - date.Day);
-                endDate = startDate.Value.AddMonths(1).AddDays(-1);
-                return true;
+                var startDate = date.Day <= 19 ? date.AddMonths(-1).AddDays(20 - date.Day) : date.AddDays(19 - date.Day);
+                return new DateFilter(startDate, startDate.AddMonths(1).AddDays(-1));
             }
 
             if (s == (reverseMonthType ? "@-1" : "-1"))
             {
                 var date = DateTime.Now.Date.AddMonths(-1);
-                startDate = date.Day <= 19 ? date.AddMonths(-1).AddDays(20 - date.Day) : date.AddDays(19 - date.Day);
-                endDate = startDate.Value.AddMonths(1).AddDays(-1);
-                return true;
+                var startDate = date.Day <= 19 ? date.AddMonths(-1).AddDays(20 - date.Day) : date.AddDays(19 - date.Day);
+                return new DateFilter(startDate, startDate.AddMonths(1).AddDays(-1));
             }
 
             if (s == (reverseMonthType ? "0" : "@0"))
             {
                 var date = DateTime.Now.Date;
-                startDate = date.AddDays(1 - date.Day);
-                endDate = startDate.Value.AddMonths(1).AddDays(-1);
-                return true;
+                var startDate = date.AddDays(1 - date.Day);
+                return new DateFilter(startDate, startDate.AddMonths(1).AddDays(-1));
             }
 
             if (s == (reverseMonthType ? "-1" : "@-1"))
             {
                 var date = DateTime.Now.Date.AddMonths(-1);
-                startDate = date.AddDays(1 - date.Day);
-                endDate = startDate.Value.AddMonths(1).AddDays(-1);
-                return true;
+                var startDate = date.AddDays(1 - date.Day);
+                return new DateFilter(startDate, startDate.AddMonths(1).AddDays(-1));
             }
 
             DateTime dt;
             if (DateTime.TryParseExact(s, "yyyyMMdd", null, DateTimeStyles.AssumeLocal, out dt))
+                return new DateFilter(dt, dt);
+
+            if (DateTime.TryParseExact(
+                                       s + "19",
+                                       reverseMonthType ? "@yyyyMMdd" : "yyyyMMdd",
+                                       null,
+                                       DateTimeStyles.AssumeLocal,
+                                       out dt))
             {
-                startDate = dt;
-                endDate = startDate;
-                return true;
+                var startDate = dt.AddMonths(-1).AddDays(1);
+                return new DateFilter(startDate, dt);
             }
 
-            if (DateTime.TryParseExact(s + "19", reverseMonthType ? "@yyyyMMdd" : "yyyyMMdd", null, DateTimeStyles.AssumeLocal, out dt))
+            if (DateTime.TryParseExact(
+                                       s + "01",
+                                       reverseMonthType ? "yyyyMMdd" : "@yyyyMMdd",
+                                       null,
+                                       DateTimeStyles.AssumeLocal,
+                                       out dt))
             {
-                startDate = dt.AddMonths(-1).AddDays(1);
-                endDate = dt;
-                return true;
-            }
-
-            if (DateTime.TryParseExact(s + "01", reverseMonthType ? "yyyyMMdd" : "@yyyyMMdd", null, DateTimeStyles.AssumeLocal, out dt))
-            {
-                startDate = dt;
-                endDate = dt.AddMonths(1).AddDays(-1);
-                return true;
+                var startDate = dt;
+                return new DateFilter(startDate, dt.AddMonths(1).AddDays(-1));
             }
 
             var sp = s.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -156,40 +140,17 @@ namespace AccountingServer.Console
                 if (DateTime.TryParseExact(sp[0], "yyyyMMdd", null, DateTimeStyles.AssumeLocal, out dt)
                     &&
                     DateTime.TryParseExact(sp[1], "yyyyMMdd", null, DateTimeStyles.AssumeLocal, out dt2))
-                {
-                    startDate = dt;
-                    endDate = dt2;
-                    return true;
-                }
+                    return new DateFilter(dt, dt2);
             }
             else if (sp.Length == 1)
             {
                 if (DateTime.TryParseExact(sp[0], "yyyyMMdd", null, DateTimeStyles.AssumeLocal, out dt))
-                {
-                    if (sOrig.TrimStart('[')[0] != ' ')
-                    {
-                        startDate = dt;
-                        endDate = null;
-                    }
-                    else
-                    {
-                        startDate = null;
-                        endDate = dt;
-                    }
-                    return true;
-                }
+                    return sOrig.TrimStart('[')[0] != ' ' ? new DateFilter(dt, null) : new DateFilter(null, dt);
                 if (sp[0] == "null")
-                {
-                    startDate = null;
-                    endDate = null;
-                    nullable = true;
-                    return true;
-                }
+                    return DateFilter.TheNullOnly;
             }
 
-            startDate = null;
-            endDate = null;
-            return false;
+            throw new InvalidOperationException("日期表达式无效");
         }
     }
 }

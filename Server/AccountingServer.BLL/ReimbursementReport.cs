@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -57,11 +56,10 @@ namespace AccountingServer.BLL
         ///     创建报表
         /// </summary>
         /// <param name="helper">会计业务处理类</param>
-        /// <param name="startDate">开始日期</param>
-        /// <param name="endDate">截止日期</param>
-        public ReimbursementReport(Accountant helper, DateTime? startDate, DateTime? endDate)
+        /// <param name="rng">日期过滤器</param>
+        public ReimbursementReport(Accountant helper, DateFilter rng)
         {
-            m_Report = GenerateReport(helper, startDate, endDate).ToList();
+            m_Report = GenerateReport(helper, rng).ToList();
         }
 
         /// <summary>
@@ -127,13 +125,12 @@ namespace AccountingServer.BLL
         ///     生成报表数据
         /// </summary>
         /// <param name="helper">会计业务处理类</param>
-        /// <param name="startDate">开始日期</param>
-        /// <param name="endDate">截止日期</param>
+        /// <param name="rng">日期过滤器</param>
         /// <returns>报表数据</returns>
-        private static IEnumerable<ReportItem> GenerateReport(Accountant helper, DateTime? startDate, DateTime? endDate)
+        private static IEnumerable<ReportItem> GenerateReport(Accountant helper, DateFilter rng)
         {
             {
-                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 1403 }, startDate, endDate);
+                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 1403 }, rng);
                 foreach (var detail in lst)
                     yield return
                         new ReportItem
@@ -146,7 +143,7 @@ namespace AccountingServer.BLL
                             };
             }
             {
-                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 1412 }, startDate, endDate);
+                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 1412 }, rng);
                 foreach (var detail in lst)
                     yield return
                         new ReportItem
@@ -159,7 +156,7 @@ namespace AccountingServer.BLL
                             };
             }
             {
-                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 1701 }, startDate, endDate);
+                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 1701 }, rng);
                 foreach (var detail in lst)
                     yield return
                         new ReportItem
@@ -172,7 +169,7 @@ namespace AccountingServer.BLL
                             };
             }
             {
-                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 6401 }, startDate, endDate);
+                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 6401 }, rng);
                 foreach (var detail in lst)
                 {
                     if (detail.Content == "本科学费")
@@ -189,7 +186,7 @@ namespace AccountingServer.BLL
                 }
             }
             {
-                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 6402 }, startDate, endDate);
+                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 6402 }, rng);
                 foreach (var detail in lst)
                 {
                     if (detail.Content == "贵金属")
@@ -206,10 +203,7 @@ namespace AccountingServer.BLL
                 }
             }
             {
-                var lst = helper.GetBalancesAcrossContent(
-                                                          new Balance { Title = 6602, SubTitle = 01 },
-                                                          startDate,
-                                                          endDate);
+                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 6602, SubTitle = 01 }, rng);
                 foreach (var detail in lst)
                     yield return
                         new ReportItem
@@ -222,10 +216,7 @@ namespace AccountingServer.BLL
                             };
             }
             {
-                var lst = helper.GetBalancesAcrossContent(
-                                                          new Balance { Title = 6602, SubTitle = 03 },
-                                                          startDate,
-                                                          endDate);
+                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 6602, SubTitle = 03 }, rng);
                 foreach (var detail in lst)
                     switch (detail.Content)
                     {
@@ -259,25 +250,25 @@ namespace AccountingServer.BLL
                         case "嘉口福":
                             yield return
                                 new ReportItem
-                                {
-                                    Title = TitleManager.GetTitleName(detail),
-                                    Content = "（定点I）",
-                                    OrigContent = detail.Content,
-                                    Fund = detail.Fund,
-                                    Coefficient = 0.9
-                                };
+                                    {
+                                        Title = TitleManager.GetTitleName(detail),
+                                        Content = "（定点I）",
+                                        OrigContent = detail.Content,
+                                        Fund = detail.Fund,
+                                        Coefficient = 0.9
+                                    };
                             break;
                         case "麦当劳":
                         case "赛百味":
                             yield return
                                 new ReportItem
-                                {
-                                    Title = TitleManager.GetTitleName(detail),
-                                    Content = "（定点II）",
-                                    OrigContent = detail.Content,
-                                    Fund = detail.Fund,
-                                    Coefficient = 0.2
-                                };
+                                    {
+                                        Title = TitleManager.GetTitleName(detail),
+                                        Content = "（定点II）",
+                                        OrigContent = detail.Content,
+                                        Fund = detail.Fund,
+                                        Coefficient = 0.2
+                                    };
                             break;
                         default:
                             yield return
@@ -293,10 +284,7 @@ namespace AccountingServer.BLL
                     }
             }
             {
-                var lst = helper.GetBalancesAcrossContent(
-                                                          new Balance { Title = 6602, SubTitle = 04 },
-                                                          startDate,
-                                                          endDate);
+                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 6602, SubTitle = 04 }, rng);
                 foreach (var detail in lst)
                     yield return
                         new ReportItem
@@ -309,10 +297,7 @@ namespace AccountingServer.BLL
                             };
             }
             {
-                var lst = helper.GetBalancesAcrossContent(
-                                                          new Balance { Title = 6602, SubTitle = 05 },
-                                                          startDate,
-                                                          endDate);
+                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 6602, SubTitle = 05 }, rng);
                 foreach (var detail in lst)
                     yield return
                         new ReportItem
@@ -325,10 +310,7 @@ namespace AccountingServer.BLL
                             };
             }
             {
-                var lst = helper.GetBalancesAcrossContent(
-                                                          new Balance { Title = 6602, SubTitle = 06 },
-                                                          startDate,
-                                                          endDate);
+                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 6602, SubTitle = 06 }, rng);
                 foreach (var detail in lst)
                     switch (detail.Content)
                     {
@@ -401,10 +383,7 @@ namespace AccountingServer.BLL
                     }
             }
             {
-                var lst = helper.GetBalancesAcrossContent(
-                                                          new Balance { Title = 6602, SubTitle = 08 },
-                                                          startDate,
-                                                          endDate);
+                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 6602, SubTitle = 08 }, rng);
                 foreach (var detail in lst)
                     yield return
                         new ReportItem
@@ -417,10 +396,7 @@ namespace AccountingServer.BLL
                             };
             }
             {
-                var lst = helper.GetBalancesAcrossContent(
-                                                          new Balance { Title = 6602, SubTitle = 09 },
-                                                          startDate,
-                                                          endDate);
+                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 6602, SubTitle = 09 }, rng);
                 foreach (var detail in lst)
                     yield return
                         new ReportItem
@@ -433,10 +409,7 @@ namespace AccountingServer.BLL
                             };
             }
             {
-                var lst = helper.GetBalancesAcrossContent(
-                                                          new Balance { Title = 6602, SubTitle = 10 },
-                                                          startDate,
-                                                          endDate);
+                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 6602, SubTitle = 10 }, rng);
                 foreach (var detail in lst)
                     yield return
                         new ReportItem
@@ -445,14 +418,11 @@ namespace AccountingServer.BLL
                                 Content = null,
                                 OrigContent = detail.Content,
                                 Fund = detail.Fund,
-                                Coefficient = 0
+                                Coefficient = 1
                             };
             }
             {
-                var lst = helper.GetBalancesAcrossContent(
-                                                          new Balance { Title = 6602, SubTitle = 99 },
-                                                          startDate,
-                                                          endDate);
+                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 6602, SubTitle = 99 }, rng);
                 foreach (var detail in lst)
                 {
                     if (detail.Content != "维修费")
@@ -469,7 +439,7 @@ namespace AccountingServer.BLL
                 }
             }
             //{
-            //    var lst = helper.GetBalancesAcrossContent(new Balance { Title = 1601 }, startDate, endDate); // TODO : INC ONLY
+            //    var lst = helper.GetBalancesAcrossContent(new Balance { Title = 1601 },rng); // TODO : INC ONLY
             //    foreach (var detail in lst)
             //    {
             //        yield return

@@ -117,7 +117,7 @@ namespace AccountingServer.BLL
                                      Title = asset.Title,
                                      Content = asset.ID.ToString()
                                  };
-                foreach (var voucher in m_Db.FilteredSelect(filter))
+                foreach (var voucher in m_Db.FilteredSelect(filter, DateFilter.Unconstrained))
                 {
                     if (asset.Schedule.Any(item => item.VoucherID == voucher.ID))
                         continue;
@@ -163,7 +163,7 @@ namespace AccountingServer.BLL
                                      Title = asset.DepreciationTitle,
                                      Content = asset.ID.ToString()
                                  };
-                foreach (var voucher in m_Db.FilteredSelect(filter))
+                foreach (var voucher in m_Db.FilteredSelect(filter, DateFilter.Unconstrained))
                 {
                     if (asset.Schedule.Any(item => item.VoucherID == voucher.ID))
                         continue;
@@ -186,7 +186,7 @@ namespace AccountingServer.BLL
                                      Title = asset.DevaluationTitle,
                                      Content = asset.ID.ToString()
                                  };
-                foreach (var voucher in m_Db.FilteredSelect(filter))
+                foreach (var voucher in m_Db.FilteredSelect(filter, DateFilter.Unconstrained))
                 {
                     if (asset.Schedule.Any(item => item.VoucherID == voucher.ID))
                         continue;
@@ -209,12 +209,11 @@ namespace AccountingServer.BLL
         ///     根据资产计算表更新账面
         /// </summary>
         /// <param name="asset">资产</param>
-        /// <param name="startDate">开始日期（若<paramref name="isCollapsed" />为<c>true</c>则表示压缩截止日期，在账上反映为无日期）</param>
-        /// <param name="endDate">截止日期</param>
+        /// <param name="rng">日期过滤器</param>
         /// <param name="isCollapsed">是否压缩</param>
         /// <param name="disableCreation">是否要禁止自动生成凭证</param>
         /// <returns>无法更新的条目</returns>
-        public IEnumerable<AssetItem> Update(Asset asset, DateTime? startDate, DateTime? endDate,
+        public IEnumerable<AssetItem> Update(Asset asset, DateFilter rng,
                                              bool isCollapsed = false, bool disableCreation = true)
         {
             if (asset.Schedule == null)
@@ -223,30 +222,15 @@ namespace AccountingServer.BLL
             var bookValue = 0D;
             foreach (var item in asset.Schedule)
             {
-                if (item.Date.HasValue && DateHelper.CompareDate(startDate, item.Date.Value) < 0 &&
-                    (!endDate.HasValue || endDate.Value >= item.Date.Value) ||
-                    !item.Date.HasValue && !startDate.HasValue)
-                {
-                    if (UpdateItem(asset, item, bookValue, false, disableCreation))
+                if (item.Date.Within(rng))
+                    if (!UpdateItem(asset, item, bookValue, isCollapsed, disableCreation))
                         yield return item;
-
-                    bookValue = item.BookValue;
-                    continue;
-                }
-
-                if (item.Date.HasValue && isCollapsed && (!endDate.HasValue || endDate.Value >= item.Date.Value) ||
-                    !item.Date.HasValue && isCollapsed)
-                {
-                    if (UpdateItem(asset, item, bookValue, true, disableCreation))
-                        yield return item;
-
-                    bookValue = item.BookValue;
-                    // continue;
-                }
+                bookValue = item.BookValue;
             }
         }
 
-        private bool UpdateItem(Asset asset, AssetItem item, double bookValue, bool isCollapsed = false, bool disableCreation = false)
+        private bool UpdateItem(Asset asset, AssetItem item, double bookValue, bool isCollapsed = false,
+                                bool disableCreation = false)
         {
             if (item is AcquisationItem)
                 return UpdateItem(asset, item as AcquisationItem, isCollapsed, disableCreation);
@@ -258,7 +242,8 @@ namespace AccountingServer.BLL
             return false;
         }
 
-        private bool UpdateItem(Asset asset, AcquisationItem item, bool isCollapsed = false, bool disableCreation = false)
+        private bool UpdateItem(Asset asset, AcquisationItem item, bool isCollapsed = false,
+                                bool disableCreation = false)
         {
             if (item.VoucherID == null)
             {
@@ -430,7 +415,8 @@ namespace AccountingServer.BLL
             }
         }
 
-        private bool UpdateItem(Asset asset, DevalueItem item, double bookValue, bool isCollapsed = false, bool disableCreation = false)
+        private bool UpdateItem(Asset asset, DevalueItem item, double bookValue, bool isCollapsed = false,
+                                bool disableCreation = false)
         {
             if (item.VoucherID == null)
             {
