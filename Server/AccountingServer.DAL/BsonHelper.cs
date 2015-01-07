@@ -42,7 +42,7 @@ namespace AccountingServer.DAL
         /// <returns>Bson</returns>
         public static BsonDocument ToBsonDocument(this Voucher voucher)
         {
-            var doc = new BsonDocument { { "date", voucher.Date } };
+            var doc = new BsonDocument { { "_id", ObjectId.Parse(voucher.ID) }, { "date", voucher.Date } };
             if (voucher.Type != VoucherType.Ordinal)
                 switch (voucher.Type)
                 {

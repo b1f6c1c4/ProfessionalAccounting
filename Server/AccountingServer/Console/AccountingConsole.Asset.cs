@@ -163,13 +163,20 @@ namespace AccountingServer.Console
                 editable = true;
                 var isCollapsed = sp[0].EndsWith("-collapse");
 
-                var spx = query.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
-
-                var rng = ParseDateQuery(spx.Length <= 1 ? String.Empty : spx[1], true);
+                DateFilter rng;
+                if (query.LastIndexOf('\'') >= 0)
+                {
+                    var spx = query.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
+                    rng = ParseDateQuery(spx.Length <= 1 ? String.Empty : spx[1], true);
+                }
+                else
+                {
+                    rng = ParseDateQuery(query, true);
+                }
 
                 var sb = new StringBuilder();
                 var filter = ParseAssetQuery(query);
-                foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
+                foreach (var a in m_Accountant.FilteredSelect(filter))
                 {
                     foreach (var item in m_Accountant.Update(a, rng, isCollapsed))
                         sb.AppendLine(ListAssetItem(item));
