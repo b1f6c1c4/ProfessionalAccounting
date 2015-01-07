@@ -332,8 +332,8 @@ namespace AccountingServer.BLL
                                                             },
                                                         new VoucherDetail
                                                             {
-                                                                Title = asset.ExpenseTitle,
-                                                                SubTitle = asset.ExpenseSubTitle,
+                                                                Title = asset.DepreciationExpenseTitle,
+                                                                SubTitle = asset.DepreciationExpenseSubTitle,
                                                                 Content = asset.ID.ToString().ToUpperInvariant(),
                                                                 Fund = item.Amount
                                                             }
@@ -384,8 +384,8 @@ namespace AccountingServer.BLL
                                                    d => d.IsMatch(
                                                                   new VoucherDetail
                                                                       {
-                                                                          Title = asset.ExpenseTitle,
-                                                                          SubTitle = asset.ExpenseSubTitle,
+                                                                          Title = asset.DepreciationExpenseTitle,
+                                                                          SubTitle = asset.DepreciationExpenseSubTitle,
                                                                           Content =
                                                                               asset.ID.ToString().ToUpperInvariant()
                                                                       })).ToList();
@@ -398,8 +398,8 @@ namespace AccountingServer.BLL
                         l.Add(
                               new VoucherDetail
                                   {
-                                      Title = asset.ExpenseTitle,
-                                      SubTitle = asset.ExpenseSubTitle,
+                                      Title = asset.DepreciationExpenseTitle,
+                                      SubTitle = asset.DepreciationExpenseSubTitle,
                                       Content = asset.ID.ToString().ToUpperInvariant(),
                                       Fund = item.Amount
                                   });
@@ -439,9 +439,8 @@ namespace AccountingServer.BLL
                                                             },
                                                         new VoucherDetail
                                                             {
-                                                                Title = asset.ExpenseTitle,
-                                                                // TODO : fork expense title
-                                                                SubTitle = asset.ExpenseSubTitle,
+                                                                Title = asset.DevaluationExpenseTitle,
+                                                                SubTitle = asset.DevaluationExpenseSubTitle,
                                                                 Content = asset.ID.ToString().ToUpperInvariant(),
                                                                 Fund = fund
                                                             }
@@ -493,9 +492,8 @@ namespace AccountingServer.BLL
                                                    d => d.IsMatch(
                                                                   new VoucherDetail
                                                                       {
-                                                                          // TODO : fork expense title
-                                                                          Title = asset.ExpenseTitle,
-                                                                          SubTitle = asset.ExpenseSubTitle,
+                                                                          Title = asset.DevaluationExpenseTitle,
+                                                                          SubTitle = asset.DevaluationExpenseSubTitle,
                                                                           Content =
                                                                               asset.ID.ToString().ToUpperInvariant()
                                                                       })).ToList();
@@ -508,8 +506,8 @@ namespace AccountingServer.BLL
                         l.Add(
                               new VoucherDetail
                                   {
-                                      Title = asset.ExpenseTitle,
-                                      SubTitle = asset.ExpenseSubTitle,
+                                      Title = asset.DepreciationExpenseTitle,
+                                      SubTitle = asset.DevaluationExpenseSubTitle,
                                       Content = asset.ID.ToString().ToUpperInvariant(),
                                       Fund = fund
                                   });

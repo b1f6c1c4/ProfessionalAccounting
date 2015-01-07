@@ -283,13 +283,20 @@ namespace AccountingServer.DAL
                 lst.Add(Query.EQ("deptitle", filter.DepreciationTitle));
             if (filter.DevaluationTitle != null)
                 lst.Add(Query.EQ("devtitle", filter.DevaluationTitle));
-            if (filter.ExpenseTitle != null)
+            if (filter.DepreciationExpenseTitle != null)
                 lst.Add(
                         Query.EQ(
                                  "exptitle",
-                                 filter.ExpenseSubTitle != null
-                                     ? filter.ExpenseTitle * 100 + filter.ExpenseSubTitle
-                                     : filter.ExpenseTitle));
+                                 filter.DepreciationExpenseSubTitle != null
+                                     ? filter.DepreciationExpenseTitle * 100 + filter.DepreciationExpenseSubTitle
+                                     : filter.DepreciationExpenseTitle));
+            if (filter.DevaluationExpenseTitle != null)
+                lst.Add(
+                        Query.EQ(
+                                 "exvtitle",
+                                 filter.DevaluationExpenseSubTitle != null
+                                     ? filter.DevaluationExpenseTitle * 100 + filter.DevaluationExpenseSubTitle
+                                     : filter.DevaluationExpenseTitle));
             if (filter.Method.HasValue)
                 switch (filter.Method.Value)
                 {
