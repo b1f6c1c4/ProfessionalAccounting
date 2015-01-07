@@ -321,7 +321,7 @@ namespace AccountingServer.DAL
             else if (ddoc.ContainsNotNull("devto"))
                 item = new DevalueItem { FairValue = ddoc["devto"].AsDouble };
             else if (ddoc.ContainsNotNull("dispo"))
-                item = new DevalueItem { FairValue = ddoc["dispo"].AsDouble };
+                item = new DispositionItem { NetValue = ddoc["dispo"].AsDouble };
             else
                 throw new InvalidOperationException();
 
