@@ -44,27 +44,12 @@ namespace AccountingServer.Console
         ///     启动数据库服务器
         /// </summary>
         /// <returns>启动情况</returns>
-        private static string LaunchServer()
+        private string LaunchServer()
         {
             try
             {
-                var startinfo = new ProcessStartInfo
-                                    {
-                                        FileName = "cmd.exe",
-                                        Arguments =
-                                            "/c " +
-                                            "mongod --config \"C:\\Users\\b1f6c1c4\\Documents\\tjzh\\Account\\mongod.conf\"",
-                                        UseShellExecute = false,
-                                        RedirectStandardInput = false,
-                                        RedirectStandardOutput = true,
-                                        CreateNoWindow = true
-                                    };
-
-                var process = Process.Start(startinfo);
-                if (process == null)
-                    throw new Exception();
-
-                return String.Format("OK {0}", process.Id);
+                m_Accountant.Launch();
+                return "OK";
             }
             catch (Exception e)
             {
