@@ -90,19 +90,11 @@ namespace AccountingServer
                 begin = voucherBegin;
             }
 
-            var nested = 0;
-            end = begin;
-            for (; end < textBoxResult.Text.Length; end++)
-                if (textBoxResult.Text[end] == '{')
-                    nested++;
-                else if (textBoxResult.Text[end] == '}')
-                    if (--nested == 0)
-                        break;
+            end = textBoxResult.Text.IndexOf("}@", begin, StringComparison.Ordinal);
+            if (end < 0)
+                return false;
 
-            if (end + 2 < textBoxResult.Text.Length &&
-                textBoxResult.Text[end + 1] == '\r' &&
-                textBoxResult.Text[end + 2] == '\n')
-                end += 2;
+            end += 1;
             return true;
         }
 
@@ -132,7 +124,7 @@ namespace AccountingServer
 
             try
             {
-                var s = textBoxResult.Text.Substring(begin + 1, end - begin);
+                var s = textBoxResult.Text.Substring(begin + 1, end - begin - 1);
                 var result = isAsset ? m_Console.ExecuteAssetUpsert(s) : m_Console.ExecuteVoucherUpsert(s);
                 textBoxResult.Text = textBoxResult.Text.Remove(begin, end - begin + 1)
                                                   .Insert(begin, result);
@@ -160,7 +152,7 @@ namespace AccountingServer
 
             try
             {
-                var s = textBoxResult.Text.Substring(begin + 1, end - begin);
+                var s = textBoxResult.Text.Substring(begin + 1, end - begin - 1);
                 if (isAsset ? !m_Console.ExecuteAssetRemoval(s) : !m_Console.ExecuteVoucherRemoval(s))
                     throw new Exception();
                 // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
