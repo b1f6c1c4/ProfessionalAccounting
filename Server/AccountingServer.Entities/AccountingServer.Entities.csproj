@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="Asset.cs" />
     <Compile Include="Balance.cs" />
+    <Compile Include="Date.cs" />
     <Compile Include="MatchHelper.cs" />
     <Compile Include="Voucher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

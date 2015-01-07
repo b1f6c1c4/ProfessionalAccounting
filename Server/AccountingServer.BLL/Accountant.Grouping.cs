@@ -32,7 +32,7 @@ namespace AccountingServer.BLL
                                   SubTitle = filter.SubTitle,
                                   Content = filter.Content
                               };
-            var res = m_Db.FilteredSelect(dFilter);
+            var res = m_Db.FilteredSelect(dFilter, DateFilter.Unconstrained);
             if (filter.Date.HasValue)
                 res = res.Where(v => v.Date <= filter.Date);
             filter.Fund = res.SelectMany(v => v.Details).Where(d => d.IsMatch(dFilter)).Sum(d => d.Fund.Value);
@@ -64,7 +64,7 @@ namespace AccountingServer.BLL
                                   SubTitle = filter.SubTitle,
                                   Content = filter.Content
                               };
-            filter.Fund = m_Db.FilteredSelectDetails(dFilter).Sum(d => d.Fund.Value);
+            filter.Fund = m_Db.FilteredSelectDetails(dFilter, DateFilter.Unconstrained).Sum(d => d.Fund.Value);
             return filter.Fund;
         }
 
@@ -96,7 +96,7 @@ namespace AccountingServer.BLL
                                   SubTitle = filter.SubTitle,
                                   Content = filter.Content
                               };
-            return m_Db.FilteredSelect(dFilter)
+            return m_Db.FilteredSelect(dFilter, DateFilter.Unconstrained)
                        .GroupBy(
                                 v => v.Date,
                                 (dt, vs) =>
@@ -118,16 +118,14 @@ namespace AccountingServer.BLL
         ///     累加每日金额得到每日余额
         /// </summary>
         /// <param name="resx">每日金额</param>
-        /// <param name="startDate">开始累加的日期</param>
-        /// <param name="endDate">停止累加的日期</param>
+        /// <param name="rng">日期过滤器</param>
         /// <returns>每日余额</returns>
-        public static IEnumerable<Balance> ProcessDailyBalance(IReadOnlyList<Balance> resx,
-                                                               DateTime? startDate, DateTime? endDate)
+        public static IEnumerable<Balance> ProcessDailyBalance(IReadOnlyList<Balance> resx, DateFilter rng)
         {
             var id = 0;
             DateTime dt;
-            if (startDate.HasValue)
-                dt = startDate.Value;
+            if (rng.StartDate.HasValue)
+                dt = rng.StartDate.Value;
             else if (resx.Any(b => b.Date.HasValue))
                 // ReSharper disable once PossibleInvalidOperationException
                 dt = resx.First(b => b.Date.HasValue).Date.Value;
@@ -139,7 +137,7 @@ namespace AccountingServer.BLL
             }
 
             // ReSharper disable once PossibleInvalidOperationException
-            var last = endDate ?? resx.Last().Date.Value;
+            var last = rng.EndDate ?? resx.Last().Date.Value;
 
             var fund = 0D;
             for (; dt <= last; dt = dt.AddDays(1))
@@ -161,31 +159,28 @@ namespace AccountingServer.BLL
         ///     有多个栏目的情况下，累加每日金额得到每日余额
         /// </summary>
         /// <param name="resx">日期分离的每日金额</param>
-        /// <param name="startDate">开始累加的日期</param>
-        /// <param name="endDate">停止累加的日期</param>
+        /// <param name="rng">日期过滤器</param>
         /// <returns>每日余额</returns>
         public static IEnumerable<IEnumerable<Balance>> ProcessDailyBalance(
             IReadOnlyList<Tuple<DateTime?, IEnumerable<Balance>>> resx,
-            DateTime? startDate, DateTime? endDate)
+            DateFilter rng)
         {
             var id = 0;
             DateTime dt;
-            if (startDate.HasValue)
-                dt = startDate.Value;
+            if (rng.StartDate.HasValue)
+                dt = rng.StartDate.Value;
             else if (resx.Any(t => t.Item1.HasValue))
                 // ReSharper disable once PossibleInvalidOperationException
                 dt = resx.First(t => t.Item1.HasValue).Item1.Value;
             else
             {
                 if (resx.Any())
-                {
                     yield return resx[0].Item2;
-                }
                 yield break;
             }
 
             // ReSharper disable once PossibleInvalidOperationException
-            var last = endDate ?? resx.Last().Item1.Value;
+            var last = rng.EndDate ?? resx.Last().Item1.Value;
 
             var fund = new Dictionary<Balance, double>(new BalanceEqualityComparer());
             for (; dt <= last; dt = dt.AddDays(1))
@@ -194,12 +189,10 @@ namespace AccountingServer.BLL
                        DateHelper.CompareDate(resx[id].Item1, dt) <= 0)
                 {
                     foreach (var balance in resx[id].Item2)
-                    {
                         if (fund.ContainsKey(balance))
                             fund[balance] += balance.Fund;
                         else
                             fund[balance] = balance.Fund;
-                    }
                     id++;
                 }
 
@@ -223,17 +216,15 @@ namespace AccountingServer.BLL
         ///     累加每日金额得到变动日余额
         /// </summary>
         /// <param name="resx">每日金额</param>
-        /// <param name="startDate">开始累加的日期</param>
-        /// <param name="endDate">停止累加的日期</param>
+        /// <param name="rng">日期过滤器</param>
         /// <returns>变动日余额</returns>
-        public static IEnumerable<Balance> ProcessAccumulatedBalance(IReadOnlyList<Balance> resx,
-                                                                     DateTime? startDate, DateTime? endDate)
+        public static IEnumerable<Balance> ProcessAccumulatedBalance(IReadOnlyList<Balance> resx, DateFilter rng)
         {
             var id = 0;
             var fund = 0D;
             DateTime dt;
-            if (startDate.HasValue)
-                dt = startDate.Value;
+            if (rng.StartDate.HasValue)
+                dt = rng.StartDate.Value;
             else if (resx.Any(b => b.Date.HasValue))
                 // ReSharper disable once PossibleInvalidOperationException
                 dt = resx.First(b => b.Date.HasValue).Date.Value;
@@ -245,7 +236,7 @@ namespace AccountingServer.BLL
             }
 
             // ReSharper disable once PossibleInvalidOperationException
-            var last = endDate ?? resx.Last().Date.Value;
+            var last = rng.EndDate ?? resx.Last().Date.Value;
 
             while (id < resx.Count &&
                    DateHelper.CompareDate(resx[id].Date, dt) < 0)
@@ -288,13 +279,11 @@ namespace AccountingServer.BLL
         ///     </code>
         /// </example>
         /// <param name="filter">过滤器</param>
-        /// <param name="startDate">开始日期</param>
-        /// <param name="endDate">截止日期</param>
+        /// <param name="rng">日期过滤器</param>
         /// <param name="dir">0表示同时考虑借贷方，大于0表示只考虑借方，小于0表示只考虑贷方</param>
         /// <param name="aggr">是否每变动日累加而非每日求余额</param>
         /// <returns>每日余额，借方为正，贷方为负</returns>
-        public IEnumerable<Balance> GetDailyBalance(Balance filter,
-                                                    DateTime? startDate = null, DateTime? endDate = null, int dir = 0, bool aggr = false)
+        public IEnumerable<Balance> GetDailyBalance(Balance filter, DateFilter rng, int dir = 0, bool aggr = false)
         {
             var dFilter = new VoucherDetail
                               {
@@ -302,10 +291,8 @@ namespace AccountingServer.BLL
                                   SubTitle = filter.SubTitle,
                                   Content = filter.Content
                               };
-            var res = endDate.HasValue
-                          ? m_Db.FilteredSelect(dFilter)
-                                .Where(v => DateHelper.CompareDate(v.Date, endDate) <= 0)
-                          : m_Db.FilteredSelect(dFilter);
+
+            var res = m_Db.FilteredSelect(dFilter, new DateFilter(null, rng.EndDate));
             var resx = res.GroupBy(
                                    v => v.Date,
                                    (dt, vs) =>
@@ -323,8 +310,8 @@ namespace AccountingServer.BLL
                                        }).ToList();
             resx.Sort(new BalanceComparer());
             return aggr
-                       ? ProcessAccumulatedBalance(resx, startDate, endDate)
-                       : ProcessDailyBalance(resx, startDate, endDate);
+                       ? ProcessAccumulatedBalance(resx, rng)
+                       : ProcessDailyBalance(resx, rng);
         }
 
         /// <summary>
@@ -347,12 +334,10 @@ namespace AccountingServer.BLL
         ///     </code>
         /// </example>
         /// <param name="filters">过滤器</param>
-        /// <param name="startDate">开始日期</param>
-        /// <param name="endDate">截止日期</param>
+        /// <param name="rng">日期过滤器</param>
         /// <param name="dir">0表示同时考虑借贷方，大于0表示只考虑借方，小于0表示只考虑贷方</param>
         /// <returns>每日总余额，借方为正，贷方为负</returns>
-        public IEnumerable<Balance> GetDailyBalance(IEnumerable<Balance> filters,
-                                                    DateTime? startDate = null, DateTime? endDate = null, int dir = 0)
+        public IEnumerable<Balance> GetDailyBalance(IEnumerable<Balance> filters, DateFilter rng, int dir = 0)
         {
             var dFilters =
                 filters.Select(
@@ -364,10 +349,7 @@ namespace AccountingServer.BLL
                                        Content = filter.Content
                                    }).ToArray();
 
-            var res = endDate.HasValue
-                          ? m_Db.FilteredSelect(dFilters)
-                                .Where(v => DateHelper.CompareDate(v.Date, endDate) <= 0)
-                          : m_Db.FilteredSelect(dFilters);
+            var res = m_Db.FilteredSelect(dFilters, new DateFilter(null, rng.EndDate));
             var resx = res.GroupBy(
                                    v => v.Date,
                                    (dt, vs) =>
@@ -384,7 +366,7 @@ namespace AccountingServer.BLL
                                                  .Sum(d => d.Fund.Value)
                                        }).ToList();
             resx.Sort(new BalanceComparer());
-            return ProcessDailyBalance(resx, startDate, endDate);
+            return ProcessDailyBalance(resx, rng);
         }
 
         /// <summary>
@@ -411,7 +393,7 @@ namespace AccountingServer.BLL
         public IEnumerable<IEnumerable<Balance>> GetBalancesAcrossContent(Balance filter)
         {
             var dFilter = new VoucherDetail { Title = filter.Title, SubTitle = filter.SubTitle };
-            return m_Db.FilteredSelect(dFilter)
+            return m_Db.FilteredSelect(dFilter, DateFilter.Unconstrained)
                        .GroupBy(
                                 v => v.Date,
                                 (dt, vs) =>
@@ -446,13 +428,12 @@ namespace AccountingServer.BLL
         ///     </code>
         /// </example>
         /// <param name="filter">过滤器</param>
-        /// <param name="startDate">开始日期</param>
-        /// <param name="endDate">截止日期</param>
+        /// <param name="rng">日期过滤器</param>
         /// <returns>各内容金额</returns>
-        public IEnumerable<Balance> GetBalancesAcrossContent(Balance filter, DateTime? startDate, DateTime? endDate)
+        public IEnumerable<Balance> GetBalancesAcrossContent(Balance filter, DateFilter rng)
         {
             var dFilter = new VoucherDetail { Title = filter.Title, SubTitle = filter.SubTitle };
-            return m_Db.FilteredSelectDetails(dFilter, startDate, endDate)
+            return m_Db.FilteredSelectDetails(dFilter, rng)
                        .GroupBy(
                                 d => d.Content,
                                 (c, ds) =>
@@ -486,7 +467,7 @@ namespace AccountingServer.BLL
         public IEnumerable<Balance> GetFinalBalancesAcrossContent(Balance filter)
         {
             var dFilter = new VoucherDetail { Title = filter.Title, SubTitle = filter.SubTitle };
-            return m_Db.FilteredSelectDetails(dFilter)
+            return m_Db.FilteredSelectDetails(dFilter, DateFilter.Unconstrained)
                        .GroupBy(
                                 d => d.Content,
                                 (c, ds) =>

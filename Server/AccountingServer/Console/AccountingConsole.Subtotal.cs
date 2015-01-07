@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
@@ -206,10 +205,7 @@ namespace AccountingServer.Console
             string dateQ;
             var detail = ParseQuery(sx, out dateQ);
 
-            DateTime? startDate, endDate;
-            bool nullable;
-            if (!ParseDateQuery(dateQ, out startDate, out endDate, out nullable))
-                throw new InvalidOperationException("检索表达式无效");
+            var rng = ParseDateQuery(dateQ);
 
             if (!m_Accountant.Connected)
                 throw new InvalidOperationException("尚未连接到数据库");
@@ -218,18 +214,15 @@ namespace AccountingServer.Console
             {
                 if (detail.Title != null)
                     return reversed
-                               ? SubtotalWith4Levels1X00Reversed(detail, startDate, endDate, withZero)
-                               : SubtotalWith4Levels1X00(detail, startDate, endDate, withZero, aggr);
-                
+                               ? SubtotalWith4Levels1X00Reversed(detail, rng, withZero)
+                               : SubtotalWith4Levels1X00(detail, rng, withZero, aggr);
+
                 throw new NotImplementedException();
             }
-            else
-            {
-                if (detail.Title != null)
-                    return SubtotalWith4Levels1X10(withZero, detail, startDate, endDate, aggr);
-                
-                throw new NotImplementedException();
-            }
+            if (detail.Title != null)
+                return SubtotalWith4Levels1X10(withZero, detail, rng, aggr);
+
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -245,10 +238,7 @@ namespace AccountingServer.Console
             string dateQ;
             var detail = ParseQuery(sx, out dateQ);
 
-            DateTime? startDate, endDate;
-            bool nullable;
-            if (!ParseDateQuery(dateQ, out startDate, out endDate, out nullable))
-                throw new InvalidOperationException("检索表达式无效");
+            var rng = ParseDateQuery(dateQ);
 
             if (!m_Accountant.Connected)
                 throw new InvalidOperationException("尚未连接到数据库");
@@ -257,33 +247,28 @@ namespace AccountingServer.Console
             {
                 if (detail.Title != null)
                     return reversed
-                               ? SubtotalWith4Levels1X00Reversed(detail, startDate, endDate, withZero)
-                               : SubtotalWith4Levels1X00(detail, startDate, endDate, withZero, aggr);
-                
+                               ? SubtotalWith4Levels1X00Reversed(detail, rng, withZero)
+                               : SubtotalWith4Levels1X00(detail, rng, withZero, aggr);
+
                 throw new NotImplementedException();
             }
-            else
-            {
-                if (detail.Title != null)
-                    return SubtotalWith4Levels1X10(withZero, detail, startDate, endDate, aggr);
-                
-                throw new NotImplementedException();
-            }
+            if (detail.Title != null)
+                return SubtotalWith4Levels1X10(withZero, detail, rng, aggr);
+
+            throw new NotImplementedException();
         }
 
         /// <summary>
         ///     根据相关信息检索记账凭证并按内容、日期分类汇总，生成报表
         /// </summary>
-        private string SubtotalWith4Levels1X00(VoucherDetail filter, DateTime? startDate,
-                                                       DateTime? endDate, bool withZero, bool aggr)
+        private string SubtotalWith4Levels1X00(VoucherDetail filter, DateFilter rng, bool withZero, bool aggr)
         {
-            var vouchers = endDate == null
-                               ? m_Accountant.FilteredSelect(filter)
-                               : m_Accountant.FilteredSelect(filter, startDate, endDate);
+            var vouchers = m_Accountant.FilteredSelect(filter, rng);
 
             var result = vouchers.SelectMany(
                                              v =>
-                                             v.Details.Where(d=>d.IsMatch(filter)).Select(d => new Tuple<DateTime?, VoucherDetail>(v.Date, d)))
+                                             v.Details.Where(d => d.IsMatch(filter))
+                                              .Select(d => new Tuple<DateTime?, VoucherDetail>(v.Date, d)))
                                  .GroupBy(
                                           t => t.Item2.Content,
                                           (c, ts) =>
@@ -301,8 +286,8 @@ namespace AccountingServer.Console
                                               return new Tuple<string, IEnumerable<Balance>>(
                                                   c,
                                                   aggr
-                                                      ? Accountant.ProcessAccumulatedBalance(tmp, startDate, endDate)
-                                                      : Accountant.ProcessDailyBalance(tmp, startDate, endDate));
+                                                      ? Accountant.ProcessAccumulatedBalance(tmp, rng)
+                                                      : Accountant.ProcessDailyBalance(tmp, rng));
                                           });
 
             var sb = new StringBuilder();
@@ -336,12 +321,9 @@ namespace AccountingServer.Console
         /// <summary>
         ///     根据相关信息检索记账凭证并按日期、内容分类汇总，生成报表
         /// </summary>
-        private string SubtotalWith4Levels1X00Reversed(VoucherDetail filter, DateTime? startDate,
-                                                       DateTime? endDate, bool withZero)
+        private string SubtotalWith4Levels1X00Reversed(VoucherDetail filter, DateFilter rng, bool withZero)
         {
-            var vouchers = endDate == null
-                               ? m_Accountant.FilteredSelect(filter)
-                               : m_Accountant.FilteredSelect(filter, startDate, endDate);
+            var vouchers = m_Accountant.FilteredSelect(filter, rng);
 
             var result = vouchers.GroupBy(
                                           v => v.Date,
@@ -363,7 +345,7 @@ namespace AccountingServer.Console
 
             result.Sort((t1, t2) => DateHelper.CompareDate(t1.Item1, t2.Item1));
 
-            var cuml = Accountant.ProcessDailyBalance(result, startDate, endDate);
+            var cuml = Accountant.ProcessDailyBalance(result, rng);
 
             var sb = new StringBuilder();
             foreach (var balances in cuml)
@@ -376,7 +358,10 @@ namespace AccountingServer.Console
                     if (withZero)
                         if (Math.Abs(balance.Fund) < Accountant.Tolerance)
                             continue;
-                    sb.AppendFormat("    {0}:{1}", balance.Content.CPadRight(25), balance.Fund.AsCurrency().CPadLeft(12));
+                    sb.AppendFormat(
+                                    "    {0}:{1}",
+                                    balance.Content.CPadRight(25),
+                                    balance.Fund.AsCurrency().CPadLeft(12));
                     sb.AppendLine();
                 }
             }
@@ -386,7 +371,7 @@ namespace AccountingServer.Console
         /// <summary>
         ///     根据相关信息检索记账凭证并按日期分类汇总，生成报表
         /// </summary>
-        private string SubtotalWith4Levels1X10(bool withZero, VoucherDetail filter, DateTime? startDate, DateTime? endDate, bool aggr)
+        private string SubtotalWith4Levels1X10(bool withZero, VoucherDetail filter, DateFilter rng, bool aggr)
         {
             var result =
                 m_Accountant.GetDailyBalance(
@@ -396,8 +381,7 @@ namespace AccountingServer.Console
                                                      SubTitle = filter.SubTitle,
                                                      Content = filter.Content
                                                  },
-                                             startDate,
-                                             endDate,
+                                             rng,
                                              aggr: aggr);
             var sb = new StringBuilder();
             var flag = false;

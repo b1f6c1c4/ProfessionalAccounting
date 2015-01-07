@@ -70,7 +70,8 @@ namespace AccountingServer.Console
                                                                      Title = title.Item1,
                                                                      SubTitle = title.Item2,
                                                                      Content = content
-                                                                 }))
+                                                                 },
+                                                             DateFilter.Unconstrained))
                             if (balance.Fund < -Accountant.Tolerance)
                             {
                                 flag = true;
@@ -109,7 +110,8 @@ namespace AccountingServer.Console
                                                                      Title = title.Item1,
                                                                      SubTitle = title.Item2,
                                                                      Content = content
-                                                                 }))
+                                                                 },
+                                                             DateFilter.Unconstrained))
                             if (balance.Fund > Accountant.Tolerance)
                             {
                                 flag = true;

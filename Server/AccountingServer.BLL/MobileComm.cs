@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using AccountingServer.Entities;
 using AccountingServer.TCP;
@@ -62,10 +61,7 @@ namespace AccountingServer.BLL
             m_Tcp.ClientDisconnected += ClientDisconnected;
         }
 
-        public void Dispose()
-        {
-            m_Tcp.Dispose();
-        }
+        public void Dispose() { m_Tcp.Dispose(); }
 
         public Bitmap GetQRCode(int w, int h)
         {

@@ -26,6 +26,62 @@ namespace AccountingServer.Entities
         ///     截止日期（含）
         /// </summary>
         public DateTime? EndDate;
+
+        public static DateFilter Unconstrained = new DateFilter
+                                                     {
+                                                         NullOnly = false,
+                                                         Nullable = true,
+                                                         StartDate = null,
+                                                         EndDate = null
+                                                     };
+
+        public static DateFilter TheNullOnly = new DateFilter
+                                                   {
+                                                       NullOnly = true,
+                                                       Nullable = true,
+                                                       StartDate = null,
+                                                       EndDate = null
+                                                   };
+
+        public DateFilter(DateTime? startDate, DateTime? endDate)
+        {
+            if (startDate.HasValue &&
+                endDate.HasValue)
+            {
+                NullOnly = false;
+                Nullable = false;
+                StartDate = startDate;
+                EndDate = endDate;
+                return;
+            }
+
+            if (startDate.HasValue)
+            {
+                NullOnly = false;
+                Nullable = false;
+                StartDate = startDate;
+                EndDate = null;
+                return;
+            }
+
+            if (endDate.HasValue)
+            {
+                NullOnly = false;
+                Nullable = true;
+                StartDate = null;
+                EndDate = endDate;
+                return;
+            }
+
+            {
+                NullOnly = false;
+                Nullable = true;
+                StartDate = null;
+                EndDate = null;
+            }
+        }
+
+        public bool Constrained { get { return StartDate.HasValue && EndDate.HasValue; } }
     }
 
     public static class DateHelper
