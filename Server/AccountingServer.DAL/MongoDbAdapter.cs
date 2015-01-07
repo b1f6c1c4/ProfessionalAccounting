@@ -250,9 +250,55 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     按过滤器查询
+        ///     按过滤器和细目过滤器查询
         /// </summary>
-        /// <param name="filter">过滤器</param>
+        /// <param name="vfilter">过滤器</param>
+        /// <param name="filter">细目过滤器</param>
+        /// <returns>Bson查询</returns>
+        private static IMongoQuery GetQuery(Voucher vfilter, VoucherDetail filter)
+        {
+            var queryVoucher = GetQuery(vfilter);
+            var queryFilter = GetQuery(filter);
+            return queryFilter != Query.Null
+                            ? And(queryVoucher, Query.ElemMatch("detail", queryFilter))
+                            : queryVoucher;
+        }
+
+        /// <summary>
+        ///     按细目过滤器和日期查询
+        /// </summary>
+        /// <param name="filter">细目过滤器</param>
+        /// <param name="rng">日期过滤器</param>
+        /// <returns>Bson查询</returns>
+        private static IMongoQuery GetQuery(VoucherDetail filter, DateFilter rng)
+        {
+            var queryVoucher = GetQuery(rng);
+            var queryFilter = GetQuery(filter);
+            return queryFilter != Query.Null
+                            ? And(queryVoucher, Query.ElemMatch("detail", queryFilter))
+                            : queryVoucher;
+        }
+
+        /// <summary>
+        ///     按过滤器、细目过滤器和日期查询
+        /// </summary>
+        /// <param name="vfilter">过滤器</param>
+        /// <param name="filter">细目过滤器</param>
+        /// <param name="rng">日期过滤器</param>
+        /// <returns>Bson查询</returns>
+        private static IMongoQuery GetQuery(Voucher vfilter, VoucherDetail filter, DateFilter rng)
+        {
+            var queryVoucher = And(GetQuery(vfilter), GetQuery(rng));
+            var queryFilter = GetQuery(filter);
+            return queryFilter != Query.Null
+                       ? And(queryVoucher, Query.ElemMatch("detail", queryFilter))
+                       : queryVoucher;
+        }
+
+        /// <summary>
+        ///     按资产过滤器查询
+        /// </summary>
+        /// <param name="filter">资产过滤器</param>
         /// <returns>Bson查询</returns>
         private static IMongoQuery GetQuery(Asset filter)
         {
@@ -367,12 +413,15 @@ namespace AccountingServer.DAL
             if (filter.Item != null)
                 return new[] { SelectVoucher(filter.Item) };
 
-            var queryFilter = GetQuery(filter);
-            var query = queryFilter != Query.Null
-                            ? And(GetQuery(rng), Query.ElemMatch("detail", queryFilter))
-                            : GetQuery(rng);
+            return m_Vouchers.FindAs<BsonDocument>(GetQuery(filter, rng)).Select(d => d.ToVoucher());
+        }
 
-            return m_Vouchers.FindAs<BsonDocument>(query).Select(d => d.ToVoucher());
+        public IEnumerable<Voucher> FilteredSelect(Voucher vfilter, VoucherDetail filter, DateFilter rng)
+        {
+            if (filter.Item != null)
+                return new[] { SelectVoucher(filter.Item) };
+
+            return m_Vouchers.FindAs<BsonDocument>(GetQuery(vfilter, filter, rng)).Select(d => d.ToVoucher());
         }
 
         public IEnumerable<Voucher> FilteredSelect(IEnumerable<VoucherDetail> filters, DateFilter rng)
@@ -404,6 +453,12 @@ namespace AccountingServer.DAL
                 FilteredSelect(filter, rng)
                     .SelectMany(v => v.Details)
                     .Where(d => d.IsMatch(filter));
+        }
+
+        public long FilteredDelete(Voucher vfilter, VoucherDetail filter)
+        {
+            var res = m_Vouchers.Remove(GetQuery(vfilter, filter));
+            return res.DocumentsAffected;
         }
 
         public long FilteredDelete(VoucherDetail filter)

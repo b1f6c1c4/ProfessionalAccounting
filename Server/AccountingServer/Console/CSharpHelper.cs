@@ -32,6 +32,9 @@ namespace AccountingServer.Console
         /// <returns>C#表达式</returns>
         public static string PresentVoucher(Voucher voucher)
         {
+            if (voucher == null)
+                return "@null@";
+
             var sb = new StringBuilder();
             sb.Append("@new Voucher {");
             sb.AppendFormat("  ID = {0},", ProcessString(voucher.ID));
@@ -130,6 +133,9 @@ namespace AccountingServer.Console
         /// <returns>C#表达式</returns>
         public static string PresentAsset(Asset asset)
         {
+            if (asset == null)
+                return "@null@";
+
             var sb = new StringBuilder();
             sb.Append("@new Asset {");
             sb.AppendFormat("  StringID = {0},", ProcessString(asset.StringID));

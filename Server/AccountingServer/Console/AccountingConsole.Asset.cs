@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
@@ -102,7 +103,81 @@ namespace AccountingServer.Console
                 }
                 return sb.ToString();
             }
-            // TODO: add others
+            if (sp[0] == "a-unregister")
+            {
+                editable = true;
+
+                var sb = new StringBuilder();
+                var filter = ParseAssetQuery(query);
+                foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
+                {
+                    foreach (var item in a.Schedule)
+                        item.VoucherID = null;
+
+                    sb.Append(a);
+                    m_Accountant.Update(a);
+                }
+                return sb.ToString();
+            }
+            if (sp[0] == "a-redep")
+            {
+                editable = true;
+
+                var sb = new StringBuilder();
+                var filter = ParseAssetQuery(query);
+                foreach (var a in m_Accountant.FilteredSelect(filter))
+                {
+                    Accountant.Depreciate(a);
+                    sb.Append(CSharpHelper.PresentAsset(a));
+                    m_Accountant.Update(a);
+                }
+                return sb.ToString();
+            }
+            if (sp[0] == "a-reset-hard")
+            {
+                editable = true;
+
+                var filter = ParseAssetQuery(query);
+                var cnt = 0L;
+                foreach (var a in m_Accountant.FilteredSelect(filter))
+                {
+                    cnt += m_Accountant.FilteredDelete(
+                                                       new Voucher { Type = VoucherType.Depreciation },
+                                                       new VoucherDetail
+                                                           {
+                                                               Title = a.DepreciationTitle,
+                                                               Content = a.StringID
+                                                           });
+                    cnt += m_Accountant.FilteredDelete(
+                                                       new Voucher { Type = VoucherType.Devalue },
+                                                       new VoucherDetail
+                                                           {
+                                                               Title = a.DevaluationTitle,
+                                                               Content = a.StringID
+                                                           });
+                }
+                return "OK " + cnt.ToString(CultureInfo.InvariantCulture);
+            }
+            if (sp[0].StartsWith("a-apply"))
+            {
+                editable = true;
+                var isCollapsed = sp[0].EndsWith("-collapse");
+
+                var spx = query.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
+
+                var rng = ParseDateQuery(spx.Length <= 1 ? String.Empty : spx[1], true);
+
+                var sb = new StringBuilder();
+                var filter = ParseAssetQuery(query);
+                foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
+                {
+                    foreach (var item in m_Accountant.Update(a, rng, isCollapsed))
+                        sb.AppendLine(ListAssetItem(item));
+
+                    m_Accountant.Update(a);
+                }
+                return sb.ToString();
+            }
 
             throw new InvalidOperationException("资产表达式无效");
         }
@@ -118,7 +193,7 @@ namespace AccountingServer.Console
             var sb = new StringBuilder();
             sb.AppendFormat(
                             "{0} {1}{2:yyyyMMdd}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}",
-                            asset.ID,
+                            asset.StringID,
                             asset.Name.CPadRight(35),
                             asset.Date,
                             asset.Value.AsCurrency().CPadLeft(13),
@@ -136,91 +211,44 @@ namespace AccountingServer.Console
             if (showSchedule && asset.Schedule != null)
                 foreach (var assetItem in asset.Schedule)
                 {
-                    if (assetItem is AcquisationItem)
-                    {
-                        sb.AppendFormat(
-                                        "   {0:yyyMMdd} ACQ:{1} ={3} ({2})",
-                                        assetItem.Date,
-                                        (assetItem as AcquisationItem).OrigValue.AsCurrency().CPadLeft(13),
-                                        assetItem.VoucherID,
-                                        assetItem.BookValue.AsCurrency().CPadLeft(13));
-                        sb.AppendLine();
-                    }
-                    else if (assetItem is DepreciateItem)
-                    {
-                        sb.AppendFormat(
-                                        "   {0:yyyMMdd} DEP:{1} ={3} ({2})",
-                                        assetItem.Date,
-                                        (assetItem as DepreciateItem).Amount.AsCurrency().CPadLeft(13),
-                                        assetItem.VoucherID,
-                                        assetItem.BookValue.AsCurrency().CPadLeft(13));
-                        sb.AppendLine();
-                    }
-                    else if (assetItem is DevalueItem)
-                    {
-                        sb.AppendFormat(
-                                        "   {0:yyyMMdd} DEV:{1} ={3} ({2})",
-                                        assetItem.Date,
-                                        (assetItem as DevalueItem).FairValue.AsCurrency().CPadLeft(13),
-                                        assetItem.VoucherID,
-                                        assetItem.BookValue.AsCurrency().CPadLeft(13));
-                        sb.AppendLine();
-                    }
-                    else if (assetItem is DispositionItem)
-                    {
-                        sb.AppendFormat(
-                                        "   {0:yyyMMdd} DSP:{1} ={3} ({2})",
-                                        assetItem.Date,
-                                        (assetItem as DispositionItem).NetValue.AsCurrency().CPadLeft(13),
-                                        assetItem.VoucherID,
-                                        assetItem.BookValue.AsCurrency().CPadLeft(13));
-                        sb.AppendLine();
-                    }
-
+                    sb.AppendLine(ListAssetItem(assetItem));
                     if (assetItem.VoucherID != null)
                         sb.AppendLine(CSharpHelper.PresentVoucher(m_Accountant.SelectVoucher(assetItem.VoucherID)));
                 }
             return sb.ToString();
         }
 
-        private string ApplyAll(string s, bool isCollapse)
+        private static string ListAssetItem(AssetItem assetItem)
         {
-            var rng = ParseDateQuery(s);
-
-            var sb = new StringBuilder();
-
-            if (isCollapse)
-                foreach (var asset in m_Accountant.FilteredSelect(new Asset()))
-                {
-                    ApplyItem(asset, rng, true);
-                    sb.Append(ListAsset(asset));
-                }
-            else
-                foreach (var asset in m_Accountant.FilteredSelect(new Asset()))
-                {
-                    ApplyItem(asset, rng);
-                    sb.Append(ListAsset(asset));
-                }
-
-            return sb.ToString();
-        }
-
-        private void ApplyItem(Asset asset, DateFilter rng, bool isCollapsed = false)
-        {
-            // TODO: fixthis
-            m_Accountant.Update(asset, rng, isCollapsed);
-        }
-
-
-        private void RecalcAllDepreciation()
-        {
-            foreach (var asset in m_Accountant.FilteredSelect(new Asset()))
-            {
-                asset.Salvge = asset.Value * 0.05;
-                asset.Method = DepreciationMethod.StraightLine;
-                Accountant.Depreciate(asset);
-                m_Accountant.Update(asset);
-            }
+            if (assetItem is AcquisationItem)
+                return String.Format(
+                                     "   {0:yyyMMdd} ACQ:{1} ={3} ({2})",
+                                     assetItem.Date,
+                                     (assetItem as AcquisationItem).OrigValue.AsCurrency().CPadLeft(13),
+                                     assetItem.VoucherID,
+                                     assetItem.BookValue.AsCurrency().CPadLeft(13));
+            if (assetItem is DepreciateItem)
+                return String.Format(
+                                     "   {0:yyyMMdd} DEP:{1} ={3} ({2})",
+                                     assetItem.Date,
+                                     (assetItem as DepreciateItem).Amount.AsCurrency().CPadLeft(13),
+                                     assetItem.VoucherID,
+                                     assetItem.BookValue.AsCurrency().CPadLeft(13));
+            if (assetItem is DevalueItem)
+                return String.Format(
+                                     "   {0:yyyMMdd} DEV:{1} ={3} ({2})",
+                                     assetItem.Date,
+                                     (assetItem as DevalueItem).FairValue.AsCurrency().CPadLeft(13),
+                                     assetItem.VoucherID,
+                                     assetItem.BookValue.AsCurrency().CPadLeft(13));
+            if (assetItem is DispositionItem)
+                return String.Format(
+                                     "   {0:yyyMMdd} DSP:{1} ={3} ({2})",
+                                     assetItem.Date,
+                                     (assetItem as DispositionItem).NetValue.AsCurrency().CPadLeft(13),
+                                     assetItem.VoucherID,
+                                     assetItem.BookValue.AsCurrency().CPadLeft(13));
+            return null;
         }
 
         private static IEnumerable<Asset> Sort(IEnumerable<Asset> enumerable)

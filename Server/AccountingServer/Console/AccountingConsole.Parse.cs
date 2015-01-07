@@ -61,6 +61,7 @@ namespace AccountingServer.Console
         /// <returns>日期过滤器</returns>
         private static DateFilter ParseDateQuery(string sOrig, bool reverseMonthType = false)
         {
+            sOrig = sOrig.Trim(' ');
             var s = sOrig.Trim('[', ']', ' ');
 
             if (s == String.Empty)
@@ -108,6 +109,121 @@ namespace AccountingServer.Console
             }
 
             DateTime dt;
+
+            if (sOrig.StartsWith("[") &&
+                sOrig.EndsWith("]"))
+            {
+                var sp = s.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                if (sp.Length == 2)
+                {
+                    if (DateTime.TryParseExact(
+                                               sp[0],
+                                               "yyyyMMdd",
+                                               null,
+                                               DateTimeStyles.AssumeLocal,
+                                               out dt)) { }
+                    else if (DateTime.TryParseExact(
+                                                    sp[0] + "20",
+                                                    reverseMonthType ? "@yyyyMMdd" : "yyyyMMdd",
+                                                    null,
+                                                    DateTimeStyles.AssumeLocal,
+                                                    out dt))
+                        dt = dt.AddMonths(-1);
+                    else if (DateTime.TryParseExact(
+                                                    sp[0] + "01",
+                                                    reverseMonthType ? "yyyyMMdd" : "@yyyyMMdd",
+                                                    null,
+                                                    DateTimeStyles.AssumeLocal,
+                                                    out dt)) { }
+                    else
+                        throw new InvalidOperationException("日期表达式无效");
+
+
+                    DateTime dt2;
+                    if (DateTime.TryParseExact(
+                                               sp[1],
+                                               "yyyyMMdd",
+                                               null,
+                                               DateTimeStyles.AssumeLocal,
+                                               out dt2)) { }
+                    else if (DateTime.TryParseExact(
+                                                    sp[1] + "19",
+                                                    reverseMonthType ? "@yyyyMMdd" : "yyyyMMdd",
+                                                    null,
+                                                    DateTimeStyles.AssumeLocal,
+                                                    out dt2)) { }
+                    else if (DateTime.TryParseExact(
+                                                    sp[1] + "01",
+                                                    reverseMonthType ? "yyyyMMdd" : "@yyyyMMdd",
+                                                    null,
+                                                    DateTimeStyles.AssumeLocal,
+                                                    out dt2))
+                        dt2 = dt2.AddMonths(1).AddDays(-1);
+                    else
+                        throw new InvalidOperationException("日期表达式无效");
+                    return new DateFilter(dt, dt2);
+                }
+                if (sp.Length == 1)
+                {
+                    if (sOrig[1] != ' ' ^ sOrig[sOrig.Length - 2] != ' ')
+                    {
+                        if (sOrig[sOrig.Length - 2] != ' ')
+                        {
+                            if (DateTime.TryParseExact(
+                                                       sp[0],
+                                                       "yyyyMMdd",
+                                                       null,
+                                                       DateTimeStyles.AssumeLocal,
+                                                       out dt)) { }
+                            else if (DateTime.TryParseExact(
+                                                            sp[0] + "19",
+                                                            reverseMonthType ? "@yyyyMMdd" : "yyyyMMdd",
+                                                            null,
+                                                            DateTimeStyles.AssumeLocal,
+                                                            out dt)) { }
+                            else if (DateTime.TryParseExact(
+                                                            sp[0] + "01",
+                                                            reverseMonthType ? "yyyyMMdd" : "@yyyyMMdd",
+                                                            null,
+                                                            DateTimeStyles.AssumeLocal,
+                                                            out dt))
+                                dt = dt.AddMonths(1).AddDays(-1);
+                            else
+                                throw new InvalidOperationException("日期表达式无效");
+                            return new DateFilter(null, dt);
+                        }
+                        //else
+                        {
+                            if (DateTime.TryParseExact(
+                                                       sp[0],
+                                                       "yyyyMMdd",
+                                                       null,
+                                                       DateTimeStyles.AssumeLocal,
+                                                       out dt)) { }
+                            else if (DateTime.TryParseExact(
+                                                            sp[0] + "20",
+                                                            reverseMonthType ? "@yyyyMMdd" : "yyyyMMdd",
+                                                            null,
+                                                            DateTimeStyles.AssumeLocal,
+                                                            out dt))
+                                dt = dt.AddMonths(-1);
+                            else if (DateTime.TryParseExact(
+                                                            sp[0] + "01",
+                                                            reverseMonthType ? "yyyyMMdd" : "@yyyyMMdd",
+                                                            null,
+                                                            DateTimeStyles.AssumeLocal,
+                                                            out dt)) { }
+                            else
+                                throw new InvalidOperationException("日期表达式无效");
+
+                            return new DateFilter(dt, null);
+                        }
+                    }
+                    if (sp[0] == "null")
+                        return DateFilter.TheNullOnly;
+                }
+            }
+
             if (DateTime.TryParseExact(s, "yyyyMMdd", null, DateTimeStyles.AssumeLocal, out dt))
                 return new DateFilter(dt, dt);
 
@@ -133,22 +249,6 @@ namespace AccountingServer.Console
                 return new DateFilter(startDate, dt.AddMonths(1).AddDays(-1));
             }
 
-            var sp = s.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            if (sp.Length == 2)
-            {
-                DateTime dt2;
-                if (DateTime.TryParseExact(sp[0], "yyyyMMdd", null, DateTimeStyles.AssumeLocal, out dt)
-                    &&
-                    DateTime.TryParseExact(sp[1], "yyyyMMdd", null, DateTimeStyles.AssumeLocal, out dt2))
-                    return new DateFilter(dt, dt2);
-            }
-            else if (sp.Length == 1)
-            {
-                if (DateTime.TryParseExact(sp[0], "yyyyMMdd", null, DateTimeStyles.AssumeLocal, out dt))
-                    return sOrig.TrimStart('[')[0] != ' ' ? new DateFilter(dt, null) : new DateFilter(null, dt);
-                if (sp[0] == "null")
-                    return DateFilter.TheNullOnly;
-            }
 
             throw new InvalidOperationException("日期表达式无效");
         }
