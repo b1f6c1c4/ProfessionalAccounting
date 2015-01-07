@@ -223,7 +223,7 @@ namespace AccountingServer.BLL
             var bookValue = 0D;
             foreach (var item in asset.Schedule)
             {
-                if (item.Date.HasValue && BalanceComparer.CompareDate(startDate, item.Date.Value) < 0 &&
+                if (item.Date.HasValue && DateHelper.CompareDate(startDate, item.Date.Value) < 0 &&
                     (!endDate.HasValue || endDate.Value >= item.Date.Value) ||
                     !item.Date.HasValue && !startDate.HasValue)
                 {

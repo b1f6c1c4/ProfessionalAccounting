@@ -145,7 +145,7 @@ namespace AccountingServer.BLL
             for (; dt <= last; dt = dt.AddDays(1))
             {
                 while (id < resx.Count &&
-                       BalanceComparer.CompareDate(resx[id].Date, dt) <= 0)
+                       DateHelper.CompareDate(resx[id].Date, dt) <= 0)
                     fund += resx[id++].Fund;
 
                 yield return
@@ -191,7 +191,7 @@ namespace AccountingServer.BLL
             for (; dt <= last; dt = dt.AddDays(1))
             {
                 while (id < resx.Count &&
-                       BalanceComparer.CompareDate(resx[id].Item1, dt) <= 0)
+                       DateHelper.CompareDate(resx[id].Item1, dt) <= 0)
                 {
                     foreach (var balance in resx[id].Item2)
                     {
@@ -248,7 +248,7 @@ namespace AccountingServer.BLL
             var last = endDate ?? resx.Last().Date.Value;
 
             while (id < resx.Count &&
-                   BalanceComparer.CompareDate(resx[id].Date, dt) < 0)
+                   DateHelper.CompareDate(resx[id].Date, dt) < 0)
                 fund += resx[id++].Fund;
 
             for (; id < resx.Count && resx[id].Date <= last; id++)
@@ -304,7 +304,7 @@ namespace AccountingServer.BLL
                               };
             var res = endDate.HasValue
                           ? m_Db.FilteredSelect(dFilter)
-                                .Where(v => BalanceComparer.CompareDate(v.Date, endDate) <= 0)
+                                .Where(v => DateHelper.CompareDate(v.Date, endDate) <= 0)
                           : m_Db.FilteredSelect(dFilter);
             var resx = res.GroupBy(
                                    v => v.Date,
@@ -366,7 +366,7 @@ namespace AccountingServer.BLL
 
             var res = endDate.HasValue
                           ? m_Db.FilteredSelect(dFilters)
-                                .Where(v => BalanceComparer.CompareDate(v.Date, endDate) <= 0)
+                                .Where(v => DateHelper.CompareDate(v.Date, endDate) <= 0)
                           : m_Db.FilteredSelect(dFilters);
             var resx = res.GroupBy(
                                    v => v.Date,
