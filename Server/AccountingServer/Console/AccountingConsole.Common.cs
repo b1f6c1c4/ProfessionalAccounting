@@ -17,40 +17,6 @@ namespace AccountingServer.Console
         public AccountingConsole(Accountant helper) { m_Accountant = helper; }
 
         /// <summary>
-        ///     更新或添加记账凭证
-        /// </summary>
-        /// <param name="code">记账凭证的C#代码</param>
-        /// <returns>新记账凭证的C#代码</returns>
-        public string ExecuteUpsert(string code)
-        {
-            var voucher = ParseVoucher(code);
-
-            if (voucher.ID == null)
-            {
-                if (!m_Accountant.InsertVoucher(voucher))
-                    throw new Exception();
-            }
-            else if (!m_Accountant.UpdateVoucher(voucher))
-                throw new Exception();
-
-            return PresentVoucher(voucher);
-        }
-
-        /// <summary>
-        ///     删除记账凭证
-        /// </summary>
-        /// <param name="code">记账凭证的C#代码</param>
-        /// <returns>是否成功</returns>
-        public bool ExecuteRemoval(string code)
-        {
-            var voucher = ParseVoucher(code);
-            if (voucher.ID == null)
-                throw new Exception();
-
-            return m_Accountant.DeleteVoucher(voucher.ID);
-        }
-
-        /// <summary>
         ///     执行表达式
         /// </summary>
         /// <param name="s">表达式</param>
@@ -114,19 +80,6 @@ namespace AccountingServer.Console
                 case "?":
                     editable = false;
                     return ListHelp();
-                case "a":
-                    editable = false;
-                    return PresentAssets();
-                case "dep":
-                    editable = false;
-                    foreach (var asset in m_Accountant.SelectAssets(new Asset()))
-                    {
-                        asset.Salvge = asset.Value * 0.05;
-                        asset.Method = DepreciationMethod.StraightLine;
-                        Accountant.Depreciate(asset);
-                        m_Accountant.UpdateAsset(asset);
-                    }
-                    return PresentAssets();
                 case "chk1":
                     editable = true;
                     return BasicCheck();
@@ -203,6 +156,9 @@ namespace AccountingServer.Console
 
                 return String.Format("CHART {0:s} {1:s}", startDate, endDate);
             }
+
+            if (s.StartsWith("a"))
+                return ExecuteAsset(s, out editable);
 
             {
                 editable = true;
