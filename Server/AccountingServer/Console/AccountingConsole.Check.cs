@@ -29,7 +29,7 @@ namespace AccountingServer.Console
                 else
                     sb.AppendFormat("/* Credit - Debit = {0:R} */", -val);
                 sb.AppendLine();
-                sb.Append(PresentVoucher(voucher));
+                sb.Append(CSharpHelper.PresentVoucher(voucher));
             }
             return sb.Length > 0 ? sb.ToString() : "OK";
         }
