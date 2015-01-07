@@ -35,13 +35,6 @@ namespace AccountingServer.DAL
         IEnumerable<Voucher> FilteredSelect(Voucher filter, DateFilter rng);
 
         /// <summary>
-        ///     按过滤器查找记账凭证并记数
-        /// </summary>
-        /// <param name="filter">过滤器</param>
-        /// <returns>匹配过滤器的记账凭证总数</returns>
-        long FilteredCount(Voucher filter);
-
-        /// <summary>
         ///     添加记账凭证
         ///     <para>若<paramref name="entity" />没有指定编号，则添加成功后会自动给<paramref name="entity" />添加编号</para>
         /// </summary>
@@ -61,7 +54,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>已删除的记账凭证总数</returns>
-        int FilteredDelete(Voucher filter);
+        long FilteredDelete(Voucher filter);
 
         /// <summary>
         ///     添加或替换记账凭证
@@ -96,25 +89,11 @@ namespace AccountingServer.DAL
         IEnumerable<VoucherDetail> FilteredSelectDetails(VoucherDetail filter, DateFilter rng);
 
         /// <summary>
-        ///     按细目过滤器查找细目并记数
-        /// </summary>
-        /// <param name="filter">细目过滤器</param>
-        /// <returns>匹配过滤器的细目总数</returns>
-        long FilteredCount(VoucherDetail filter);
-
-        /// <summary>
-        ///     添加细目
-        /// </summary>
-        /// <param name="entity">细目</param>
-        /// <returns>是否成功</returns>
-        bool Insert(VoucherDetail entity);
-
-        /// <summary>
         ///     按过滤器删除细目
         /// </summary>
         /// <param name="filter">细目过滤器</param>
         /// <returns>已删除的细目总数</returns>
-        int FilteredDelete(VoucherDetail filter);
+        long FilteredDelete(VoucherDetail filter);
 
 
         /// <summary>
@@ -151,7 +130,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>已删除的资产总数</returns>
-        int FilteredDelete(Asset filter);
+        long FilteredDelete(Asset filter);
 
         /// <summary>
         ///     添加或替换资产
@@ -160,9 +139,6 @@ namespace AccountingServer.DAL
         /// <param name="entity">新资产</param>
         /// <returns>是否成功</returns>
         bool Update(Asset entity);
-
-        //void Depreciate();
-        //void Carry();
     }
 
     /// <summary>

@@ -362,38 +362,26 @@ namespace AccountingServer.DAL
         {
             if (entity.ID == null)
                 entity.ID = ObjectId.GenerateNewId().Wrap();
-            var result = m_Vouchers.Insert(entity.ToBsonDocument());
-            return result.Ok;
+            var res = m_Vouchers.Insert(entity.ToBsonDocument());
+            return res.Ok;
         }
 
         public bool DeleteVoucher(string id)
         {
-            var result = m_Vouchers.Remove(GetUniqueQuery(id));
-            return result.Ok;
+            var res = m_Vouchers.Remove(GetUniqueQuery(id));
+            return res.DocumentsAffected == 1;
         }
 
-        public int FilteredDelete(Voucher filter)
+        public long FilteredDelete(Voucher filter)
         {
-            var result = m_Vouchers.Remove(GetQuery(filter));
-            return result.Response["n"].AsInt32;
+            var res = m_Vouchers.Remove(GetQuery(filter));
+            return res.DocumentsAffected;
         }
 
         public bool Update(Voucher entity)
         {
-            var result = m_Vouchers.Update(GetUniqueQuery(entity), new UpdateDocument(entity.ToBsonDocument()));
-            return result.Ok;
-        }
-
-        public IEnumerable<Voucher> FilteredSelect(VoucherDetail filter)
-        {
-            if (filter.Item != null)
-                return new[] { SelectVoucher(filter.Item) };
-
-            var queryFilter = GetQuery(filter);
-            var query = queryFilter != Query.Null ? Query.ElemMatch("detail", queryFilter) : Query.Null;
-
-            return m_Vouchers.FindAs<BsonDocument>(query)
-                             .Select(d => d.ToVoucher());
+            var res = m_Vouchers.Save(entity.ToBsonDocument());
+            return res.DocumentsAffected == 1;
         }
 
         public IEnumerable<Voucher> FilteredSelect(VoucherDetail filter, DateFilter rng)
@@ -440,11 +428,6 @@ namespace AccountingServer.DAL
                     .Where(d => d.IsMatch(filter));
         }
 
-        public long FilteredCount(VoucherDetail filter)
-        {
-            return FilteredSelect(filter).SelectMany(v => v.Details).Where(d => d.IsMatch(filter)).LongCount();
-        }
-
         public bool Insert(VoucherDetail entity)
         {
             var v = SelectVoucher(entity.Item);
@@ -452,20 +435,22 @@ namespace AccountingServer.DAL
             v.Details.CopyTo(d, 0);
             d[v.Details.Length] = entity;
 
-            var result = m_Vouchers.Update(GetUniqueQuery(v), new UpdateDocument(v.ToBsonDocument()));
-            return result.Ok;
+            var res = m_Vouchers.Update(GetUniqueQuery(v), new UpdateDocument(v.ToBsonDocument()));
+            return res.Ok;
         }
 
-        public int FilteredDelete(VoucherDetail filter)
+        public long FilteredDelete(VoucherDetail filter)
         {
-            var count = 0;
-            var v = FilteredSelect(filter);
+            var count = 0L;
+            var v = FilteredSelect(filter, DateFilter.Unconstrained);
             foreach (var voucher in v)
             {
+                var l = voucher.Details.Count();
                 voucher.Details = voucher.Details.Where(d => !d.IsMatch(filter)).ToArray();
-                var result = m_Vouchers.Update(GetUniqueQuery(voucher), new UpdateDocument(voucher.ToBsonDocument()));
-                if (result.Ok)
-                    count++;
+                l -= voucher.Details.Count();
+                var res = m_Vouchers.Update(GetUniqueQuery(voucher), new UpdateDocument(voucher.ToBsonDocument()));
+                if (res.DocumentsAffected == 1)
+                    count += l;
             }
             return count;
         }
@@ -490,22 +475,19 @@ namespace AccountingServer.DAL
         public bool DeleteAsset(Guid id)
         {
             var res = m_Assets.Remove(GetUniqueQuery(id));
-            return res.Ok;
+            return res.DocumentsAffected == 1;
         }
 
         public bool Update(Asset entity)
         {
-            var result = m_Assets.Update(GetUniqueQuery(entity), new UpdateDocument(entity.ToBsonDocument()));
-            return result.Ok;
+            var res = m_Assets.Save(entity.ToBsonDocument());
+            return res.DocumentsAffected == 1;
         }
 
-        public int FilteredDelete(Asset filter)
+        public long FilteredDelete(Asset filter)
         {
-            var result = m_Assets.Remove(GetQuery(filter));
-            return result.Response["n"].AsInt32;
+            var res = m_Assets.Remove(GetQuery(filter));
+            return res.DocumentsAffected;
         }
-
-        //public void Depreciate() { throw new NotImplementedException(); }
-        //public void Carry() { throw new NotImplementedException(); }
     }
 }
