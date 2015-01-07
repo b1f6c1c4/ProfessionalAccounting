@@ -152,5 +152,26 @@ namespace AccountingServer.Console
 
             throw new InvalidOperationException("日期表达式无效");
         }
+
+        /// <summary>
+        ///     解析资产检索表达式
+        /// </summary>
+        /// <param name="s">资产检索表达式</param>
+        /// <returns>过滤器</returns>
+        private static Asset ParseAssetQuery(string s)
+        {
+            var begin = s.IndexOf('\'');
+            if (begin < 0)
+                return new Asset();
+
+            var end = s.LastIndexOf('\'');
+            if (begin >= end)
+                throw new InvalidOperationException("资产检索表达式无效");
+
+            var sx = s.Substring(begin + 1, end - begin - 1);
+
+            Guid g;
+            return Guid.TryParse(sx, out g) ? new Asset { ID = g } : new Asset { Name = sx };
+        }
     }
 }
