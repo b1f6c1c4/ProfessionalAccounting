@@ -93,6 +93,9 @@ namespace AccountingServer.Console
                     return "OK";
             }
 
+            if (s.StartsWith("a"))
+                return ExecuteAsset(s, out editable);
+
             if (s.EndsWith("`"))
             {
                 editable = false;
@@ -153,9 +156,6 @@ namespace AccountingServer.Console
 
                 return String.Format("CHART {0:s} {1:s}", rng.StartDate, rng.EndDate);
             }
-
-            if (s.StartsWith("a"))
-                return ExecuteAsset(s, out editable);
 
             {
                 editable = true;
