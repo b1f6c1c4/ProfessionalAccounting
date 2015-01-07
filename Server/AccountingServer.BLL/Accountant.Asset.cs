@@ -117,7 +117,7 @@ namespace AccountingServer.BLL
                                      Title = asset.Title,
                                      Content = asset.ID.ToString()
                                  };
-                foreach (var voucher in m_Db.SelectVouchersWithDetail(filter))
+                foreach (var voucher in m_Db.FilteredSelect(filter))
                 {
                     if (asset.Schedule.Any(item => item.VoucherID == voucher.ID))
                         continue;
@@ -163,7 +163,7 @@ namespace AccountingServer.BLL
                                      Title = asset.DepreciationTitle,
                                      Content = asset.ID.ToString()
                                  };
-                foreach (var voucher in m_Db.SelectVouchersWithDetail(filter))
+                foreach (var voucher in m_Db.FilteredSelect(filter))
                 {
                     if (asset.Schedule.Any(item => item.VoucherID == voucher.ID))
                         continue;
@@ -186,7 +186,7 @@ namespace AccountingServer.BLL
                                      Title = asset.DevaluationTitle,
                                      Content = asset.ID.ToString()
                                  };
-                foreach (var voucher in m_Db.SelectVouchersWithDetail(filter))
+                foreach (var voucher in m_Db.FilteredSelect(filter))
                 {
                     if (asset.Schedule.Any(item => item.VoucherID == voucher.ID))
                         continue;
@@ -280,7 +280,7 @@ namespace AccountingServer.BLL
                                                             }
                                                     }
                                   };
-                var res = m_Db.InsertVoucher(voucher);
+                var res = m_Db.Insert(voucher);
                 item.VoucherID = voucher.ID;
                 return res;
             }
@@ -321,7 +321,7 @@ namespace AccountingServer.BLL
                     ds[0].Fund = item.OrigValue;
                 }
 
-                return m_Db.UpdateVoucher(voucher);
+                return m_Db.Update(voucher);
             }
         }
 
@@ -354,7 +354,7 @@ namespace AccountingServer.BLL
                                                             }
                                                     }
                                   };
-                var res = m_Db.InsertVoucher(voucher);
+                var res = m_Db.Insert(voucher);
                 item.VoucherID = voucher.ID;
                 return res;
             }
@@ -426,7 +426,7 @@ namespace AccountingServer.BLL
                     ds[0].Fund = item.Amount;
                 }
 
-                return m_Db.UpdateVoucher(voucher);
+                return m_Db.Update(voucher);
             }
         }
 
@@ -461,7 +461,7 @@ namespace AccountingServer.BLL
                                                             }
                                                     }
                                   };
-                var res = m_Db.InsertVoucher(voucher);
+                var res = m_Db.Insert(voucher);
                 item.VoucherID = voucher.ID;
                 return res;
             }
@@ -535,7 +535,7 @@ namespace AccountingServer.BLL
                     ds[0].Fund = fund;
                 }
 
-                return m_Db.UpdateVoucher(voucher);
+                return m_Db.Update(voucher);
             }
         }
 

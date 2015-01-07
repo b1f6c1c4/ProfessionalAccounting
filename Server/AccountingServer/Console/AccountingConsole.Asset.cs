@@ -20,7 +20,7 @@ namespace AccountingServer.Console
 
             if (!asset.ID.HasValue)
             {
-                if (!m_Accountant.InsertAsset(asset))
+                if (!m_Accountant.Insert(asset))
                     throw new Exception();
             }
             else if (!m_Accountant.UpdateAsset(asset))
@@ -60,7 +60,7 @@ namespace AccountingServer.Console
 
                 var sb = new StringBuilder();
                 var filter = ParseAssetQuery(query);
-                foreach (var a in m_Accountant.SelectAssets(filter))
+                foreach (var a in m_Accountant.FilteredSelect(filter))
                     sb.Append(ListAsset(a, false));
 
                 return sb.ToString();
@@ -71,7 +71,7 @@ namespace AccountingServer.Console
 
                 var sb = new StringBuilder();
                 var filter = ParseAssetQuery(query);
-                foreach (var a in m_Accountant.SelectAssets(filter))
+                foreach (var a in m_Accountant.FilteredSelect(filter))
                     sb.Append(ListAsset(a));
 
                 return sb.ToString();
@@ -82,7 +82,7 @@ namespace AccountingServer.Console
 
                 var sb = new StringBuilder();
                 var filter = ParseAssetQuery(query);
-                foreach (var a in m_Accountant.SelectAssets(filter))
+                foreach (var a in m_Accountant.FilteredSelect(filter))
                     sb.Append(PresentAsset(a));
 
                 return sb.ToString();
@@ -236,7 +236,7 @@ namespace AccountingServer.Console
 
             if (isCollapse)
             {
-                foreach (var asset in m_Accountant.SelectAssets(new Asset()))
+                foreach (var asset in m_Accountant.FilteredSelect(new Asset()))
                 {
                     ApplyItem(asset, startDate, endDate, true);
                     sb.Append(ListAsset(asset));
@@ -244,7 +244,7 @@ namespace AccountingServer.Console
             }
             else
             {
-                foreach (var asset in m_Accountant.SelectAssets(new Asset()))
+                foreach (var asset in m_Accountant.FilteredSelect(new Asset()))
                 {
                     ApplyItem(asset, startDate, endDate);
                     sb.Append(ListAsset(asset));
@@ -263,7 +263,7 @@ namespace AccountingServer.Console
 
         private void RecalcAllDepreciation()
         {
-            foreach (var asset in m_Accountant.SelectAssets(new Asset()))
+            foreach (var asset in m_Accountant.FilteredSelect(new Asset()))
             {
                 asset.Salvge = asset.Value * 0.05;
                 asset.Method = DepreciationMethod.StraightLine;

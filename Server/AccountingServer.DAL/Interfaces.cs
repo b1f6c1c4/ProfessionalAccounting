@@ -31,7 +31,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>匹配过滤器的记账凭证</returns>
-        IEnumerable<Voucher> SelectVouchers(Voucher filter);
+        IEnumerable<Voucher> FilteredSelect(Voucher filter);
 
         /// <summary>
         ///     按过滤器和日期查找记账凭证
@@ -41,14 +41,14 @@ namespace AccountingServer.DAL
         /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
         /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
         /// <returns>指定日期匹配过滤器的记账凭证</returns>
-        IEnumerable<Voucher> SelectVouchers(Voucher filter, DateTime? startDate, DateTime? endDate);
+        IEnumerable<Voucher> FilteredSelect(Voucher filter, DateTime? startDate, DateTime? endDate);
 
         /// <summary>
         ///     按过滤器查找记账凭证并记数
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>匹配过滤器的记账凭证总数</returns>
-        long SelectVouchersCount(Voucher filter);
+        long FilteredCount(Voucher filter);
 
         /// <summary>
         ///     添加记账凭证
@@ -56,7 +56,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="entity">记账凭证</param>
         /// <returns>是否成功</returns>
-        bool InsertVoucher(Voucher entity);
+        bool Insert(Voucher entity);
 
         /// <summary>
         ///     按编号删除记账凭证
@@ -70,7 +70,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>已删除的记账凭证总数</returns>
-        int DeleteVouchers(Voucher filter);
+        int FilteredDelete(Voucher filter);
 
         /// <summary>
         ///     添加或替换记账凭证
@@ -78,14 +78,14 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="entity">新记账凭证</param>
         /// <returns>是否成功</returns>
-        bool UpdateVoucher(Voucher entity);
+        bool Update(Voucher entity);
 
         /// <summary>
         ///     按细目过滤器查找记账凭证
         /// </summary>
         /// <param name="filter">细目过滤器</param>
         /// <returns>任一细目匹配过滤器的记账凭证</returns>
-        IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter);
+        IEnumerable<Voucher> FilteredSelect(VoucherDetail filter);
 
         /// <summary>
         ///     按过滤器和细目过滤器查找记账凭证
@@ -95,14 +95,14 @@ namespace AccountingServer.DAL
         /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
         /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
         /// <returns>指定日期任一细目匹配过滤器的记账凭证</returns>
-        IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter, DateTime? startDate, DateTime? endDate);
+        IEnumerable<Voucher> FilteredSelect(VoucherDetail filter, DateTime? startDate, DateTime? endDate);
 
         /// <summary>
         ///     按细目过滤器查找记账凭证
         /// </summary>
         /// <param name="filters">细目过滤器</param>
         /// <returns>任一细目匹配任一过滤器的记账凭证</returns>
-        IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> filters);
+        IEnumerable<Voucher> FilteredSelect(IEnumerable<VoucherDetail> filters);
 
         /// <summary>
         ///     按过滤器和细目过滤器查找记账凭证
@@ -112,15 +112,15 @@ namespace AccountingServer.DAL
         /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
         /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
         /// <returns>指定日期任一细目匹配任一过滤器的记账凭证</returns>
-        IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> filters, DateTime? startDate,
-                                                      DateTime? endDate);
+        IEnumerable<Voucher> FilteredSelect(IEnumerable<VoucherDetail> filters,
+                                            DateTime? startDate, DateTime? endDate);
 
         /// <summary>
         ///     按细目过滤器查找细目
         /// </summary>
         /// <param name="filter">细目过滤器</param>
         /// <returns>匹配过滤器的细目</returns>
-        IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter);
+        IEnumerable<VoucherDetail> FilteredSelectDetails(VoucherDetail filter);
 
         /// <summary>
         ///     按过滤器和细目过滤器查找细目
@@ -130,28 +130,28 @@ namespace AccountingServer.DAL
         /// <param name="startDate">开始日期，若为<c>null</c>表示不检查最小日期，无日期亦可</param>
         /// <param name="endDate">截止日期，若为<c>null</c>表示不检查最大日期</param>
         /// <returns>指定日期匹配过滤器的细目</returns>
-        IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter, DateTime? startDate, DateTime? endDate);
+        IEnumerable<VoucherDetail> FilteredSelectDetails(VoucherDetail filter, DateTime? startDate, DateTime? endDate);
 
         /// <summary>
         ///     按细目过滤器查找细目并记数
         /// </summary>
         /// <param name="filter">细目过滤器</param>
         /// <returns>匹配过滤器的细目总数</returns>
-        long SelectDetailsCount(VoucherDetail filter);
+        long FilteredCount(VoucherDetail filter);
 
         /// <summary>
         ///     添加细目
         /// </summary>
         /// <param name="entity">细目</param>
         /// <returns>是否成功</returns>
-        bool InsertDetail(VoucherDetail entity);
+        bool Insert(VoucherDetail entity);
 
         /// <summary>
         ///     按过滤器删除细目
         /// </summary>
         /// <param name="filter">细目过滤器</param>
         /// <returns>已删除的细目总数</returns>
-        int DeleteDetails(VoucherDetail filter);
+        int FilteredDelete(VoucherDetail filter);
 
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>匹配过滤器的资产</returns>
-        IEnumerable<Asset> SelectAssets(Asset filter);
+        IEnumerable<Asset> FilteredSelect(Asset filter);
 
         /// <summary>
         ///     添加资产
@@ -174,7 +174,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="entity">资产</param>
         /// <returns>是否成功</returns>
-        bool InsertAsset(Asset entity);
+        bool Insert(Asset entity);
 
         /// <summary>
         ///     按编号删除资产
@@ -188,7 +188,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>已删除的资产总数</returns>
-        int DeleteAssets(Asset filter);
+        int FilteredDelete(Asset filter);
 
         /// <summary>
         ///     添加或替换资产
@@ -196,7 +196,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="entity">新资产</param>
         /// <returns>是否成功</returns>
-        bool UpdateAsset(Asset entity);
+        bool Update(Asset entity);
 
         //void Depreciate();
         //void Carry();

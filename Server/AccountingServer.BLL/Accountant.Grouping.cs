@@ -32,7 +32,7 @@ namespace AccountingServer.BLL
                                   SubTitle = filter.SubTitle,
                                   Content = filter.Content
                               };
-            var res = m_Db.SelectVouchersWithDetail(dFilter);
+            var res = m_Db.FilteredSelect(dFilter);
             if (filter.Date.HasValue)
                 res = res.Where(v => v.Date <= filter.Date);
             filter.Fund = res.SelectMany(v => v.Details).Where(d => d.IsMatch(dFilter)).Sum(d => d.Fund.Value);
@@ -64,7 +64,7 @@ namespace AccountingServer.BLL
                                   SubTitle = filter.SubTitle,
                                   Content = filter.Content
                               };
-            filter.Fund = m_Db.SelectDetails(dFilter).Sum(d => d.Fund.Value);
+            filter.Fund = m_Db.FilteredSelectDetails(dFilter).Sum(d => d.Fund.Value);
             return filter.Fund;
         }
 
@@ -96,7 +96,7 @@ namespace AccountingServer.BLL
                                   SubTitle = filter.SubTitle,
                                   Content = filter.Content
                               };
-            return m_Db.SelectVouchersWithDetail(dFilter)
+            return m_Db.FilteredSelect(dFilter)
                        .GroupBy(
                                 v => v.Date,
                                 (dt, vs) =>
@@ -303,9 +303,9 @@ namespace AccountingServer.BLL
                                   Content = filter.Content
                               };
             var res = endDate.HasValue
-                          ? m_Db.SelectVouchersWithDetail(dFilter)
+                          ? m_Db.FilteredSelect(dFilter)
                                 .Where(v => BalanceComparer.CompareDate(v.Date, endDate) <= 0)
-                          : m_Db.SelectVouchersWithDetail(dFilter);
+                          : m_Db.FilteredSelect(dFilter);
             var resx = res.GroupBy(
                                    v => v.Date,
                                    (dt, vs) =>
@@ -365,9 +365,9 @@ namespace AccountingServer.BLL
                                    }).ToArray();
 
             var res = endDate.HasValue
-                          ? m_Db.SelectVouchersWithDetail(dFilters)
+                          ? m_Db.FilteredSelect(dFilters)
                                 .Where(v => BalanceComparer.CompareDate(v.Date, endDate) <= 0)
-                          : m_Db.SelectVouchersWithDetail(dFilters);
+                          : m_Db.FilteredSelect(dFilters);
             var resx = res.GroupBy(
                                    v => v.Date,
                                    (dt, vs) =>
@@ -411,7 +411,7 @@ namespace AccountingServer.BLL
         public IEnumerable<IEnumerable<Balance>> GetBalancesAcrossContent(Balance filter)
         {
             var dFilter = new VoucherDetail { Title = filter.Title, SubTitle = filter.SubTitle };
-            return m_Db.SelectVouchersWithDetail(dFilter)
+            return m_Db.FilteredSelect(dFilter)
                        .GroupBy(
                                 v => v.Date,
                                 (dt, vs) =>
@@ -452,7 +452,7 @@ namespace AccountingServer.BLL
         public IEnumerable<Balance> GetBalancesAcrossContent(Balance filter, DateTime? startDate, DateTime? endDate)
         {
             var dFilter = new VoucherDetail { Title = filter.Title, SubTitle = filter.SubTitle };
-            return m_Db.SelectDetails(dFilter, startDate, endDate)
+            return m_Db.FilteredSelectDetails(dFilter, startDate, endDate)
                        .GroupBy(
                                 d => d.Content,
                                 (c, ds) =>
@@ -486,7 +486,7 @@ namespace AccountingServer.BLL
         public IEnumerable<Balance> GetFinalBalancesAcrossContent(Balance filter)
         {
             var dFilter = new VoucherDetail { Title = filter.Title, SubTitle = filter.SubTitle };
-            return m_Db.SelectDetails(dFilter)
+            return m_Db.FilteredSelectDetails(dFilter)
                        .GroupBy(
                                 d => d.Content,
                                 (c, ds) =>

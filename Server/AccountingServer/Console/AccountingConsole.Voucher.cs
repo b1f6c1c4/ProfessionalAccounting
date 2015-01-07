@@ -20,10 +20,10 @@ namespace AccountingServer.Console
 
             if (voucher.ID == null)
             {
-                if (!m_Accountant.InsertVoucher(voucher))
+                if (!m_Accountant.Insert(voucher))
                     throw new Exception();
             }
-            else if (!m_Accountant.UpdateVoucher(voucher))
+            else if (!m_Accountant.Update(voucher))
                 throw new Exception();
 
             return PresentVoucher(voucher);

@@ -187,8 +187,8 @@ namespace AccountingServer.Console
             if (startDate.HasValue ||
                 endDate.HasValue ||
                 nullable)
-                return m_Accountant.SelectVouchersWithDetail(detail, startDate, endDate);
-            return m_Accountant.SelectVouchersWithDetail(detail);
+                return m_Accountant.FilteredSelect(detail, startDate, endDate);
+            return m_Accountant.FilteredSelect(detail);
         }
 
         /// <summary>

@@ -278,8 +278,8 @@ namespace AccountingServer.Console
                                                        DateTime? endDate, bool withZero, bool aggr)
         {
             var vouchers = endDate == null
-                               ? m_Accountant.SelectVouchersWithDetail(filter)
-                               : m_Accountant.SelectVouchersWithDetail(filter, startDate, endDate);
+                               ? m_Accountant.FilteredSelect(filter)
+                               : m_Accountant.FilteredSelect(filter, startDate, endDate);
 
             var result = vouchers.SelectMany(
                                              v =>
@@ -340,8 +340,8 @@ namespace AccountingServer.Console
                                                        DateTime? endDate, bool withZero)
         {
             var vouchers = endDate == null
-                               ? m_Accountant.SelectVouchersWithDetail(filter)
-                               : m_Accountant.SelectVouchersWithDetail(filter, startDate, endDate);
+                               ? m_Accountant.FilteredSelect(filter)
+                               : m_Accountant.FilteredSelect(filter, startDate, endDate);
 
             var result = vouchers.GroupBy(
                                           v => v.Date,

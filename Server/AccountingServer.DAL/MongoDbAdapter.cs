@@ -309,21 +309,21 @@ namespace AccountingServer.DAL
             return m_Vouchers.FindOneByIdAs<BsonDocument>(id.UnWrap()).ToVoucher();
         }
 
-        public IEnumerable<Voucher> SelectVouchers(Voucher filter)
+        public IEnumerable<Voucher> FilteredSelect(Voucher filter)
         {
             return m_Vouchers.FindAs<BsonDocument>(GetQuery(filter)).Select(d => d.ToVoucher());
         }
 
-        public IEnumerable<Voucher> SelectVouchers(Voucher filter, DateTime? startDate, DateTime? endDate)
+        public IEnumerable<Voucher> FilteredSelect(Voucher filter, DateTime? startDate, DateTime? endDate)
         {
             return
                 m_Vouchers.FindAs<BsonDocument>(Query.And(GetQuery(filter), GetQuery(startDate, endDate)))
                           .Select(d => d.ToVoucher());
         }
 
-        public long SelectVouchersCount(Voucher filter) { return m_Vouchers.Count(GetQuery(filter)); }
+        public long FilteredCount(Voucher filter) { return m_Vouchers.Count(GetQuery(filter)); }
 
-        public bool InsertVoucher(Voucher entity)
+        public bool Insert(Voucher entity)
         {
             if (entity.ID == null)
                 entity.ID = ObjectId.GenerateNewId().Wrap();
@@ -337,19 +337,19 @@ namespace AccountingServer.DAL
             return result.Ok;
         }
 
-        public int DeleteVouchers(Voucher filter)
+        public int FilteredDelete(Voucher filter)
         {
             var result = m_Vouchers.Remove(GetQuery(filter));
             return result.Response["n"].AsInt32;
         }
 
-        public bool UpdateVoucher(Voucher entity)
+        public bool Update(Voucher entity)
         {
             var result = m_Vouchers.Update(GetUniqueQuery(entity), new UpdateDocument(entity.ToBsonDocument()));
             return result.Ok;
         }
 
-        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter)
+        public IEnumerable<Voucher> FilteredSelect(VoucherDetail filter)
         {
             if (filter.Item != null)
                 return new[] { SelectVoucher(filter.Item) };
@@ -361,7 +361,7 @@ namespace AccountingServer.DAL
                              .Select(d => d.ToVoucher());
         }
 
-        public IEnumerable<Voucher> SelectVouchersWithDetail(VoucherDetail filter, DateTime? startDate,
+        public IEnumerable<Voucher> FilteredSelect(VoucherDetail filter, DateTime? startDate,
                                                              DateTime? endDate)
         {
             if (filter.Item != null)
@@ -377,7 +377,7 @@ namespace AccountingServer.DAL
             return m_Vouchers.FindAs<BsonDocument>(query).Select(d => d.ToVoucher());
         }
 
-        public IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> filters)
+        public IEnumerable<Voucher> FilteredSelect(IEnumerable<VoucherDetail> filters)
         {
             return filters.Where(filter => filter.Item != null).Select(filter => SelectVoucher(filter.Item))
                           .Concat(
@@ -393,7 +393,7 @@ namespace AccountingServer.DAL
                                             .Select(d => d.ToVoucher()));
         }
 
-        public IEnumerable<Voucher> SelectVouchersWithDetail(IEnumerable<VoucherDetail> filters, DateTime? startDate,
+        public IEnumerable<Voucher> FilteredSelect(IEnumerable<VoucherDetail> filters, DateTime? startDate,
                                                              DateTime? endDate)
         {
             return filters.Where(filter => filter.Item != null).Select(filter => SelectVoucher(filter.Item))
@@ -417,25 +417,25 @@ namespace AccountingServer.DAL
                                             .Select(d => d.ToVoucher()));
         }
 
-        public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter)
+        public IEnumerable<VoucherDetail> FilteredSelectDetails(VoucherDetail filter)
         {
-            return SelectVouchersWithDetail(filter).SelectMany(v => v.Details).Where(d => d.IsMatch(filter));
+            return FilteredSelect(filter).SelectMany(v => v.Details).Where(d => d.IsMatch(filter));
         }
 
-        public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter, DateTime? startDate, DateTime? endDate)
+        public IEnumerable<VoucherDetail> FilteredSelectDetails(VoucherDetail filter, DateTime? startDate, DateTime? endDate)
         {
             return
-                SelectVouchersWithDetail(filter, startDate, endDate)
+                FilteredSelect(filter, startDate, endDate)
                     .SelectMany(v => v.Details)
                     .Where(d => d.IsMatch(filter));
         }
 
-        public long SelectDetailsCount(VoucherDetail filter)
+        public long FilteredCount(VoucherDetail filter)
         {
-            return SelectVouchersWithDetail(filter).SelectMany(v => v.Details).Where(d => d.IsMatch(filter)).LongCount();
+            return FilteredSelect(filter).SelectMany(v => v.Details).Where(d => d.IsMatch(filter)).LongCount();
         }
 
-        public bool InsertDetail(VoucherDetail entity)
+        public bool Insert(VoucherDetail entity)
         {
             var v = SelectVoucher(entity.Item);
             var d = new VoucherDetail[v.Details.Length + 1];
@@ -446,10 +446,10 @@ namespace AccountingServer.DAL
             return result.Ok;
         }
 
-        public int DeleteDetails(VoucherDetail filter)
+        public int FilteredDelete(VoucherDetail filter)
         {
             var count = 0;
-            var v = SelectVouchersWithDetail(filter);
+            var v = FilteredSelect(filter);
             foreach (var voucher in v)
             {
                 voucher.Details = voucher.Details.Where(d => !d.IsMatch(filter)).ToArray();
@@ -466,12 +466,12 @@ namespace AccountingServer.DAL
             return m_Assets.FindOneAs<BsonDocument>(Query.EQ("_id", id.ToBsonValue())).ToAsset();
         }
 
-        public IEnumerable<Asset> SelectAssets(Asset filter)
+        public IEnumerable<Asset> FilteredSelect(Asset filter)
         {
             return m_Assets.FindAs<BsonDocument>(GetQuery(filter)).Select(d => d.ToAsset());
         }
 
-        public bool InsertAsset(Asset entity)
+        public bool Insert(Asset entity)
         {
             var res = m_Assets.Insert(entity.ToBsonDocument());
             return res.Ok;
@@ -483,13 +483,13 @@ namespace AccountingServer.DAL
             return res.Ok;
         }
 
-        public bool UpdateAsset(Asset entity)
+        public bool Update(Asset entity)
         {
             var result = m_Assets.Update(GetUniqueQuery(entity), new UpdateDocument(entity.ToBsonDocument()));
             return result.Ok;
         }
 
-        public int DeleteAssets(Asset filter)
+        public int FilteredDelete(Asset filter)
         {
             var result = m_Assets.Remove(GetQuery(filter));
             return result.Response["n"].AsInt32;
