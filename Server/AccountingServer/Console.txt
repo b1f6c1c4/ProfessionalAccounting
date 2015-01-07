@@ -13,6 +13,8 @@
 [yyyyMMdd]			某日
 [yyyyMM]			某财月
 [@yyyyMM]			某月
+[yyyyMM yyyyMM]		某几财月
+[@yyyyMM @yyyyMM]	某几月
 [yyyyMMdd yyyyMMdd]	某两日之间
 [yyyyMMdd ]			某日之后
 [ yyyyMMdd]			某日之前
@@ -71,7 +73,9 @@ a							检索所有资产（以报告形式显示，无计算表）
 a-list						检索所有资产（以报告形式显示）
 a-query						检索所有资产
 a-register					注册所有凭证
+a-unregister					解除所有凭证
 a-redep						重新计算所有折旧
+a-reset-hard					保留获得和处置，清除账上其它所有和资产相关的内容
 a-apply [yyyyMM]				将某月的资产折旧/减值登记入账
 a-apply-collapse [ yyyyMM]	将某月（含）以前的资产折旧/减值一起登记入账，按无日期处理
 注：此时无@为自然月，有@为财月

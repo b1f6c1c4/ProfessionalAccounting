@@ -172,6 +172,17 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     按过滤器和细目过滤器查找记账凭证
         /// </summary>
+        /// <param name="vfilter">过滤器</param>
+        /// <param name="filter">细目过滤器</param>
+        /// <returns>任一细目匹配过滤器的记账凭证</returns>
+        public IEnumerable<Voucher> FilteredSelect(Voucher vfilter, VoucherDetail filter)
+        {
+            return m_Db.FilteredSelect(vfilter, filter, DateFilter.Unconstrained);
+        }
+
+        /// <summary>
+        ///     按过滤器和细目过滤器查找记账凭证
+        /// </summary>
         /// <param name="filter">过滤器</param>
         /// <param name="rng">日期过滤器</param>
         /// <returns>指定日期任一细目匹配过滤器的记账凭证</returns>
@@ -225,21 +236,12 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     按过滤器删除记账凭证
         /// </summary>
-        /// <param name="filter">过滤器</param>
-        /// <returns>已删除的记账凭证总数</returns>
-        public long FilteredDelete(Voucher filter)
-        {
-            return m_Db.FilteredDelete(filter);
-        }
-
-        /// <summary>
-        ///     按过滤器删除细目
-        /// </summary>
+        /// <param name="vfilter">过滤器</param>
         /// <param name="filter">细目过滤器</param>
-        /// <returns>已删除的细目总数</returns>
-        public long FilteredDelete(VoucherDetail filter)
+        /// <returns>已删除的记账凭证总数</returns>
+        public long FilteredDelete(Voucher vfilter, VoucherDetail filter)
         {
-            return m_Db.FilteredDelete(filter);
+            return m_Db.FilteredDelete(vfilter, filter);
         }
 
         /// <summary>
