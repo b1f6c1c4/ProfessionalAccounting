@@ -106,7 +106,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="asset">资产</param>
         /// <returns>未注册的凭证</returns>
-        private IEnumerable<Voucher> RegisterVouchers(Asset asset)
+        public IEnumerable<Voucher> RegisterVouchers(Asset asset)
         {
             if (asset.Remark == Asset.IgnoranceMark)
                 yield break;
@@ -115,10 +115,13 @@ namespace AccountingServer.BLL
                 var filter = new VoucherDetail
                                  {
                                      Title = asset.Title,
-                                     Content = asset.ID.ToString()
+                                     Content = asset.StringID
                                  };
                 foreach (var voucher in m_Db.FilteredSelect(filter, DateFilter.Unconstrained))
                 {
+                    if (voucher.Remark == Asset.IgnoranceMark)
+                        continue;
+
                     if (asset.Schedule.Any(item => item.VoucherID == voucher.ID))
                         continue;
 
@@ -165,6 +168,9 @@ namespace AccountingServer.BLL
                                  };
                 foreach (var voucher in m_Db.FilteredSelect(filter, DateFilter.Unconstrained))
                 {
+                    if (voucher.Remark == Asset.IgnoranceMark)
+                        continue;
+
                     if (asset.Schedule.Any(item => item.VoucherID == voucher.ID))
                         continue;
 
@@ -188,6 +194,9 @@ namespace AccountingServer.BLL
                                  };
                 foreach (var voucher in m_Db.FilteredSelect(filter, DateFilter.Unconstrained))
                 {
+                    if (voucher.Remark == Asset.IgnoranceMark)
+                        continue;
+
                     if (asset.Schedule.Any(item => item.VoucherID == voucher.ID))
                         continue;
 
@@ -260,7 +269,7 @@ namespace AccountingServer.BLL
                                                         new VoucherDetail
                                                             {
                                                                 Title = asset.Title,
-                                                                Content = asset.ID.ToString().ToUpperInvariant(),
+                                                                Content = asset.StringID,
                                                                 Fund = item.OrigValue
                                                             }
                                                     }
@@ -283,7 +292,7 @@ namespace AccountingServer.BLL
                                                                       {
                                                                           Title = asset.Title,
                                                                           Content =
-                                                                              asset.ID.ToString().ToUpperInvariant()
+                                                                              asset.StringID
                                                                       })).ToList();
                     if (ds.Count == 0)
                     {
@@ -295,7 +304,7 @@ namespace AccountingServer.BLL
                               new VoucherDetail
                                   {
                                       Title = asset.Title,
-                                      Content = asset.ID.ToString().ToUpperInvariant(),
+                                      Content = asset.StringID,
                                       Fund = item.OrigValue
                                   });
                         voucher.Details = l.ToArray();
@@ -327,14 +336,14 @@ namespace AccountingServer.BLL
                                                         new VoucherDetail
                                                             {
                                                                 Title = asset.DepreciationTitle,
-                                                                Content = asset.ID.ToString().ToUpperInvariant(),
+                                                                Content = asset.StringID,
                                                                 Fund = -item.Amount
                                                             },
                                                         new VoucherDetail
                                                             {
                                                                 Title = asset.DepreciationExpenseTitle,
                                                                 SubTitle = asset.DepreciationExpenseSubTitle,
-                                                                Content = asset.ID.ToString().ToUpperInvariant(),
+                                                                Content = asset.StringID,
                                                                 Fund = item.Amount
                                                             }
                                                     }
@@ -357,7 +366,7 @@ namespace AccountingServer.BLL
                                                                       {
                                                                           Title = asset.DepreciationTitle,
                                                                           Content =
-                                                                              asset.ID.ToString().ToUpperInvariant()
+                                                                              asset.StringID
                                                                       })).ToList();
                     if (ds.Count == 0)
                     {
@@ -369,7 +378,7 @@ namespace AccountingServer.BLL
                               new VoucherDetail
                                   {
                                       Title = asset.DepreciationTitle,
-                                      Content = asset.ID.ToString().ToUpperInvariant(),
+                                      Content = asset.StringID,
                                       Fund = item.Amount
                                   });
                         voucher.Details = l.ToArray();
@@ -387,7 +396,7 @@ namespace AccountingServer.BLL
                                                                           Title = asset.DepreciationExpenseTitle,
                                                                           SubTitle = asset.DepreciationExpenseSubTitle,
                                                                           Content =
-                                                                              asset.ID.ToString().ToUpperInvariant()
+                                                                              asset.StringID
                                                                       })).ToList();
                     if (ds.Count == 0)
                     {
@@ -400,7 +409,7 @@ namespace AccountingServer.BLL
                                   {
                                       Title = asset.DepreciationExpenseTitle,
                                       SubTitle = asset.DepreciationExpenseSubTitle,
-                                      Content = asset.ID.ToString().ToUpperInvariant(),
+                                      Content = asset.StringID,
                                       Fund = item.Amount
                                   });
                         voucher.Details = l.ToArray();
@@ -434,14 +443,14 @@ namespace AccountingServer.BLL
                                                         new VoucherDetail
                                                             {
                                                                 Title = asset.DevaluationTitle,
-                                                                Content = asset.ID.ToString().ToUpperInvariant(),
+                                                                Content = asset.StringID,
                                                                 Fund = -fund
                                                             },
                                                         new VoucherDetail
                                                             {
                                                                 Title = asset.DevaluationExpenseTitle,
                                                                 SubTitle = asset.DevaluationExpenseSubTitle,
-                                                                Content = asset.ID.ToString().ToUpperInvariant(),
+                                                                Content = asset.StringID,
                                                                 Fund = fund
                                                             }
                                                     }
@@ -465,7 +474,7 @@ namespace AccountingServer.BLL
                                                                       {
                                                                           Title = asset.DevaluationTitle,
                                                                           Content =
-                                                                              asset.ID.ToString().ToUpperInvariant()
+                                                                              asset.StringID
                                                                       })).ToList();
                     if (ds.Count == 0)
                     {
@@ -477,7 +486,7 @@ namespace AccountingServer.BLL
                               new VoucherDetail
                                   {
                                       Title = asset.DevaluationTitle,
-                                      Content = asset.ID.ToString().ToUpperInvariant(),
+                                      Content = asset.StringID,
                                       Fund = -fund
                                   });
                         voucher.Details = l.ToArray();
@@ -495,7 +504,7 @@ namespace AccountingServer.BLL
                                                                           Title = asset.DevaluationExpenseTitle,
                                                                           SubTitle = asset.DevaluationExpenseSubTitle,
                                                                           Content =
-                                                                              asset.ID.ToString().ToUpperInvariant()
+                                                                              asset.StringID
                                                                       })).ToList();
                     if (ds.Count == 0)
                     {
@@ -508,7 +517,7 @@ namespace AccountingServer.BLL
                                   {
                                       Title = asset.DepreciationExpenseTitle,
                                       SubTitle = asset.DevaluationExpenseSubTitle,
-                                      Content = asset.ID.ToString().ToUpperInvariant(),
+                                      Content = asset.StringID,
                                       Fund = fund
                                   });
                         voucher.Details = l.ToArray();

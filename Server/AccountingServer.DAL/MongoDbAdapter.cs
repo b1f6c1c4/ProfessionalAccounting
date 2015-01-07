@@ -110,16 +110,16 @@ namespace AccountingServer.DAL
         public void Backup()
         {
             var startinfo = new ProcessStartInfo
-            {
-                FileName = "cmd.exe",
-                Arguments =
-                    "/c " +
-                    "mongodump -h 127.0.0.1 -d accounting -o \"C:\\Users\\b1f6c1c4\\OneDrive\\Backup\"",
-                UseShellExecute = false,
-                RedirectStandardInput = false,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true
-            };
+                                {
+                                    FileName = "cmd.exe",
+                                    Arguments =
+                                        "/c " +
+                                        "mongodump -h 127.0.0.1 -d accounting -o \"C:\\Users\\b1f6c1c4\\OneDrive\\Backup\"",
+                                    UseShellExecute = false,
+                                    RedirectStandardInput = false,
+                                    RedirectStandardOutput = true,
+                                    CreateNoWindow = true
+                                };
 
             var process = Process.Start(startinfo);
             if (process == null)
@@ -208,7 +208,7 @@ namespace AccountingServer.DAL
                             ? Query.EQ("remark", BsonNull.Value)
                             : Query.EQ("remark", filter.Remark));
 
-            return lst.Any() ? Query.And(lst) : Query.Null;
+            return And(lst);
         }
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace AccountingServer.DAL
             if (filter.Fund != null)
                 lst.Add(Query.EQ("fund", filter.Fund));
 
-            return lst.Any() ? Query.And(lst) : Query.Null;
+            return And(lst);
         }
 
         /// <summary>
@@ -330,7 +330,19 @@ namespace AccountingServer.DAL
                         break;
                 }
 
-            return lst.Any() ? Query.And(lst) : Query.Null;
+            return And(lst);
+        }
+
+        private static IMongoQuery And(params IMongoQuery[] queries)
+        {
+            var lst = queries.ToList();
+            return And(lst);
+        }
+
+        private static IMongoQuery And(IList<IMongoQuery> queries)
+        {
+            queries.Remove(Query.Null);
+            return queries.Any() ? Query.And(queries) : Query.Null;
         }
 
 
@@ -341,9 +353,7 @@ namespace AccountingServer.DAL
 
         public IEnumerable<Voucher> FilteredSelect(Voucher filter, DateFilter rng)
         {
-            return
-                m_Vouchers.FindAs<BsonDocument>(Query.And(GetQuery(filter), GetQuery(rng)))
-                          .Select(d => d.ToVoucher());
+            return m_Vouchers.FindAs<BsonDocument>(And(GetQuery(filter), GetQuery(rng))).Select(d => d.ToVoucher());
         }
 
         public long FilteredCount(Voucher filter) { return m_Vouchers.Count(GetQuery(filter)); }
@@ -393,9 +403,7 @@ namespace AccountingServer.DAL
 
             var queryFilter = GetQuery(filter);
             var query = queryFilter != Query.Null
-                            ? Query.And(
-                                        GetQuery(rng),
-                                        Query.ElemMatch("detail", queryFilter))
+                            ? And(GetQuery(rng), Query.ElemMatch("detail", queryFilter))
                             : GetQuery(rng);
 
             return m_Vouchers.FindAs<BsonDocument>(query).Select(d => d.ToVoucher());
@@ -406,21 +414,21 @@ namespace AccountingServer.DAL
             return filters.Where(filter => filter.Item != null).Select(filter => SelectVoucher(filter.Item))
                           .Concat(
                                   m_Vouchers.FindAs<BsonDocument>(
-                                                                  Query.And(
-                                                                            GetQuery(rng),
-                                                                            Query.Or(
-                                                                                     filters.Where(
-                                                                                                   filter =>
-                                                                                                   filter.Item == null)
-                                                                                            .Select(GetQuery)
-                                                                                            .Where(
-                                                                                                   query =>
-                                                                                                   query != Query.Null)
-                                                                                            .Select(
-                                                                                                    query =>
-                                                                                                    Query.ElemMatch(
-                                                                                                                    "detail",
-                                                                                                                    query)))))
+                                                                  And(
+                                                                      GetQuery(rng),
+                                                                      Query.Or(
+                                                                               filters.Where(
+                                                                                             filter =>
+                                                                                             filter.Item == null)
+                                                                                      .Select(GetQuery)
+                                                                                      .Where(
+                                                                                             query =>
+                                                                                             query != Query.Null)
+                                                                                      .Select(
+                                                                                              query =>
+                                                                                              Query.ElemMatch(
+                                                                                                              "detail",
+                                                                                                              query)))))
                                             .Select(d => d.ToVoucher()));
         }
 
