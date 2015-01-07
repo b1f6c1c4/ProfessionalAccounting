@@ -52,16 +52,26 @@ namespace AccountingServer
                                        };
         }
 
-        private bool GetVoucherCode(out int begin, out int end)
+        private bool GetCSharpCode(out int begin, out int end, out bool isAsset)
         {
+            isAsset = false;
+
             end = -1;
             begin = textBoxResult.SelectionStart + textBoxResult.SelectionLength;
+            var assetBegin = textBoxResult.Text.LastIndexOf("new Asset", begin, StringComparison.Ordinal);
             do
             {
                 begin = textBoxResult.Text.LastIndexOf("new Voucher", begin, StringComparison.Ordinal);
+                if (assetBegin >= 0 &&
+                    (begin == -1 || begin > assetBegin))
+                {
+                    isAsset = true;
+                    break;
+                }
                 if (begin == -1)
                     return false;
             } while (textBoxResult.Text.Substring(begin, 17) == "new VoucherDetail");
+
             var nested = 0;
             end = begin + 11;
             for (; end < textBoxResult.Text.Length; end++)
@@ -98,13 +108,14 @@ namespace AccountingServer
         {
             int begin;
             int end;
-            if (!GetVoucherCode(out begin, out end))
+            bool isAsset;
+            if (!GetCSharpCode(out begin, out end, out isAsset))
                 return false;
 
             try
             {
                 var s = textBoxResult.Text.Substring(begin, end - begin + 1);
-                var result = m_Console.ExecuteUpsert(s);
+                var result = isAsset ? m_Console.ExecuteAssetUpsert(s) : m_Console.ExecuteVoucherUpsert(s);
                 textBoxResult.Text = textBoxResult.Text.Remove(begin, end - begin + 1)
                                                   .Insert(begin, result);
                 textBoxResult.SelectionStart = begin;
@@ -125,13 +136,14 @@ namespace AccountingServer
         {
             int begin;
             int end;
-            if (!GetVoucherCode(out begin, out end))
+            bool isAsset;
+            if (!GetCSharpCode(out begin, out end, out isAsset))
                 return false;
 
             try
             {
                 var s = textBoxResult.Text.Substring(begin, end - begin + 1);
-                if (!m_Console.ExecuteRemoval(s))
+                if (isAsset ? !m_Console.ExecuteAssetRemoval(s) : !m_Console.ExecuteVoucherRemoval(s))
                     throw new Exception();
                 // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
                 if (textBoxResult.Text[end] == '}')
@@ -205,7 +217,7 @@ namespace AccountingServer
                         FocusTextBoxCommand();
                         return true;
                     }
-                    
+
                     SwitchToText();
 
                     textBoxResult.Focus();
