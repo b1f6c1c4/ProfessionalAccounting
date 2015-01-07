@@ -68,6 +68,9 @@ namespace AccountingServer.Console
                     editable = false;
                     ToggleMobile();
                     return null;
+                case "backup":
+                    editable = false;
+                    return Backup();
                 case "fetch":
                     editable = true;
                     return FetchInfo();

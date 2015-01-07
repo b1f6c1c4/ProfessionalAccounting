@@ -87,6 +87,7 @@ chk3				检查一致性（资产与资产账户一致，摊销与摊销账户一
 lan	launch			启动
 con	connect			连接
 shu	shutdown		关闭
+backup				备份
 mob	mobile			启动/中止移动数据传输，显示/隐藏二维码
 
 

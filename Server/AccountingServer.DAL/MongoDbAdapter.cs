@@ -107,6 +107,25 @@ namespace AccountingServer.DAL
             m_Server = null;
         }
 
+        public void Backup()
+        {
+            var startinfo = new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments =
+                    "/c " +
+                    "mongodump -h 127.0.0.1 -d accounting -o \"C:\\Users\\b1f6c1c4\\OneDrive\\Backup\"",
+                UseShellExecute = false,
+                RedirectStandardInput = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            };
+
+            var process = Process.Start(startinfo);
+            if (process == null)
+                throw new Exception();
+        }
+
         /// <summary>
         ///     按编号唯一查询
         /// </summary>
