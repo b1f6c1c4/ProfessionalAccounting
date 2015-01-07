@@ -42,23 +42,19 @@ namespace AccountingServer.DAL
         /// </summary>
         private MongoCollection m_Assets;
 
-        public MongoDbAdapter()
-        {
-        }
-
         public void Launch()
         {
             var startinfo = new ProcessStartInfo
-            {
-                FileName = "cmd.exe",
-                Arguments =
-                    "/c " +
-                    "mongod --config \"C:\\Users\\b1f6c1c4\\Documents\\tjzh\\Account\\mongod.conf\"",
-                UseShellExecute = false,
-                RedirectStandardInput = false,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true
-            };
+                                {
+                                    FileName = "cmd.exe",
+                                    Arguments =
+                                        "/c " +
+                                        "mongod --config \"C:\\Users\\b1f6c1c4\\Documents\\tjzh\\Account\\mongod.conf\"",
+                                    UseShellExecute = false,
+                                    RedirectStandardInput = false,
+                                    RedirectStandardOutput = true,
+                                    CreateNoWindow = true
+                                };
 
             var process = Process.Start(startinfo);
             if (process == null)
@@ -102,14 +98,12 @@ namespace AccountingServer.DAL
             m_Client = null;
 
             m_Server.Disconnect();
-            
+
             try
             {
                 m_Server.Shutdown();
             }
-            catch (EndOfStreamException)
-            {
-            }
+            catch (EndOfStreamException) { }
             m_Server = null;
         }
 
