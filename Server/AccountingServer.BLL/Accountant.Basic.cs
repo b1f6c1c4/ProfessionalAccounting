@@ -327,7 +327,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="entity">新资产</param>
         /// <returns>是否成功</returns>
-        public bool UpdateAsset(Asset entity)
+        public bool Update(Asset entity)
         {
             return m_Db.Update(entity);
         }

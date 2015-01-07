@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
@@ -21,7 +23,7 @@ namespace AccountingServer.Console
                 if (!m_Accountant.Insert(asset))
                     throw new Exception();
             }
-            else if (!m_Accountant.UpdateAsset(asset))
+            else if (!m_Accountant.Update(asset))
                 throw new Exception();
 
             return CSharpHelper.PresentAsset(asset);
@@ -58,7 +60,7 @@ namespace AccountingServer.Console
 
                 var sb = new StringBuilder();
                 var filter = ParseAssetQuery(query);
-                foreach (var a in m_Accountant.FilteredSelect(filter))
+                foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
                     sb.Append(ListAsset(a, false));
 
                 return sb.ToString();
@@ -69,7 +71,7 @@ namespace AccountingServer.Console
 
                 var sb = new StringBuilder();
                 var filter = ParseAssetQuery(query);
-                foreach (var a in m_Accountant.FilteredSelect(filter))
+                foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
                     sb.Append(ListAsset(a));
 
                 return sb.ToString();
@@ -80,7 +82,7 @@ namespace AccountingServer.Console
 
                 var sb = new StringBuilder();
                 var filter = ParseAssetQuery(query);
-                foreach (var a in m_Accountant.FilteredSelect(filter))
+                foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
                     sb.Append(CSharpHelper.PresentAsset(a));
 
                 return sb.ToString();
@@ -95,7 +97,11 @@ namespace AccountingServer.Console
         /// </summary>
         /// <param name="s">资产检索表达式</param>
         /// <returns>过滤器</returns>
-        private static Asset ParseAssetQuery(string s) { throw new NotImplementedException(); }
+        private static Asset ParseAssetQuery(string s)
+        {
+            // TODO: impl. this
+            return new Asset();
+        }
 
 
         /// <summary>
@@ -210,8 +216,13 @@ namespace AccountingServer.Console
                 asset.Salvge = asset.Value * 0.05;
                 asset.Method = DepreciationMethod.StraightLine;
                 Accountant.Depreciate(asset);
-                m_Accountant.UpdateAsset(asset);
+                m_Accountant.Update(asset);
             }
+        }
+
+        private static IEnumerable<Asset> Sort(IEnumerable<Asset> enumerable)
+        {
+            return enumerable.OrderBy(a => a.Date, new DateComparer()).ThenBy(a => a.Name).ThenBy(a => a.ID);
         }
     }
 }

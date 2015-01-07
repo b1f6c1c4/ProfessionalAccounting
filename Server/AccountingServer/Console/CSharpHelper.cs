@@ -1,5 +1,6 @@
 ﻿using System;
 using System.CodeDom.Compiler;
+using System.Globalization;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
@@ -148,23 +149,19 @@ namespace AccountingServer.Console
                 sb.AppendLine("    Date = null,");
             sb.AppendFormat("    Value = {0}, Salvge = {1}, Life = {2},", asset.Value, asset.Salvge, asset.Life);
             sb.AppendLine();
-            sb.AppendFormat(
-                            "    Title = {0}, DepreciationTitle = {1}, DevaluationTitle = {2},",
-                            asset.Title,
-                            asset.DepreciationTitle,
-                            asset.DevaluationTitle);
+            sb.AppendFormat("    Title = {0}, Method = {1},", asset.Title, asset.Method);
             sb.AppendLine();
             sb.AppendFormat(
-                            "    DepreciationExpenseTitle = {0}, DepreciationExpenseSubTitle = {1}",
+                            "    DepreciationTitle = {0}, DepreciationExpenseTitle = {1}, DepreciationExpenseSubTitle = {2}",
+                            asset.DepreciationTitle,
                             asset.DepreciationExpenseTitle,
                             asset.DepreciationExpenseSubTitle);
             sb.AppendLine();
             sb.AppendFormat(
-                            "    DevaluationExpenseTitle = {0}, DevaluationExpenseSubTitle = {1}",
+                            "    DevaluationTitle = {0}, DevaluationExpenseTitle = {1}, DevaluationExpenseSubTitle = {2}",
+                            asset.DevaluationTitle,
                             asset.DevaluationExpenseTitle,
                             asset.DevaluationExpenseSubTitle);
-            sb.AppendLine();
-            sb.AppendFormat("    Method = {0}, ", asset.Method);
             sb.AppendLine();
             if (asset.Remark != null)
             {
@@ -186,30 +183,29 @@ namespace AccountingServer.Console
                                             item.Date);
                         else
                             sb.Append("Date = null, ");
-                        sb.AppendFormat("VoucherID = {0},", item.VoucherID);
-                        sb.AppendLine();
+                        sb.AppendFormat("VoucherID = {0}", (ProcessString(item.VoucherID) + ",").PadRight(27));
+                        sb.Append(str.PadRight(30));
+                        sb.AppendFormat(
+                                        "BookValue = {0} ",
+                                        item.BookValue.ToString(CultureInfo.InvariantCulture).PadRight(16));
                         if (item.Remark != null)
                         {
                             sb.Append("".PadLeft(30));
-                            sb.AppendFormat("Remark = {0},", ProcessString(item.Remark));
-                            sb.AppendLine();
+                            sb.AppendFormat(", Remark = {0} ", ProcessString(item.Remark));
                         }
-                        sb.Append("".PadLeft(30));
-                        sb.Append(str.PadRight(28));
-                        sb.AppendFormat("BookValue = {0} }},", item.BookValue);
-                        sb.AppendLine();
+                        sb.AppendLine("}},");
                     };
 
                 foreach (var item in asset.Schedule)
                 {
                     if (item is AcquisationItem)
-                        present(item, String.Format("OrigValue = {0}", (item as AcquisationItem).OrigValue));
+                        present(item, String.Format("OrigValue = {0},", (item as AcquisationItem).OrigValue));
                     else if (item is DepreciateItem)
-                        present(item, String.Format("Amount    = {0}", (item as DepreciateItem).Amount));
+                        present(item, String.Format("Amount    = {0},", (item as DepreciateItem).Amount));
                     else if (item is DevalueItem)
-                        present(item, String.Format("FairValue = {0}", (item as DevalueItem).FairValue));
+                        present(item, String.Format("FairValue = {0},", (item as DevalueItem).FairValue));
                     else if (item is DispositionItem)
-                        present(item, String.Format("NetValue  = {0}", (item as DispositionItem).NetValue));
+                        present(item, String.Format("NetValue  = {0},", (item as DispositionItem).NetValue));
                 }
                 sb.AppendLine("   } }");
             }

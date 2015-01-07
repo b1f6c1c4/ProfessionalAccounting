@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace AccountingServer.Entities
 {
@@ -82,6 +83,11 @@ namespace AccountingServer.Entities
         }
 
         public bool Constrained { get { return StartDate.HasValue && EndDate.HasValue; } }
+    }
+
+    public class DateComparer : Comparer<DateTime?>
+    {
+        public override int Compare(DateTime? x, DateTime? y) { return DateHelper.CompareDate(x, y); }
     }
 
     public static class DateHelper
