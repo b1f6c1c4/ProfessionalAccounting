@@ -76,7 +76,7 @@ namespace AccountingServer.Console
                 sb.AppendLine(" },");
                 sb.AppendLine();
             }
-            sb.AppendLine("   } }");
+            sb.AppendLine("   } }@");
             return sb.ToString();
         }
 
@@ -203,10 +203,10 @@ namespace AccountingServer.Console
                     else if (item is DispositionItem)
                         present(item, String.Format("NetValue  = {0},", (item as DispositionItem).NetValue));
                 }
-                sb.AppendLine("   } }");
+                sb.AppendLine("   } }@");
             }
             else
-                sb.AppendLine("}");
+                sb.AppendLine("}@");
             return sb.ToString();
         }
 

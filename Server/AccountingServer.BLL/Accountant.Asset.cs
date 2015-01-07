@@ -147,8 +147,7 @@ namespace AccountingServer.BLL
                         var lst = asset.Schedule.Where(
                                                        item =>
                                                        item is DispositionItem &&
-                                                       (!voucher.Date.HasValue || item.Date == voucher.Date) &&
-                                                       Math.Abs((item as DispositionItem).NetValue - value) < Tolerance)
+                                                       (!voucher.Date.HasValue || item.Date == voucher.Date))
                                        .ToList();
 
                         if (lst.Count == 1)

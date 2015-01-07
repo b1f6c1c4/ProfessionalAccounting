@@ -128,16 +128,6 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     按过滤器查找记账凭证并记数
-        /// </summary>
-        /// <param name="filter">过滤器</param>
-        /// <returns>匹配过滤器的记账凭证总数</returns>
-        public long FilteredCount(Voucher filter)
-        {
-            return m_Db.FilteredCount(filter);
-        }
-
-        /// <summary>
         ///     按编号查找记账凭证
         /// </summary>
         /// <param name="id">编号</param>
@@ -145,16 +135,6 @@ namespace AccountingServer.BLL
         public Voucher SelectVoucher(string id)
         {
             return m_Db.SelectVoucher(id);
-        }
-
-        /// <summary>
-        ///     按过滤器查找记账凭证
-        /// </summary>
-        /// <param name="filter">过滤器</param>
-        /// <returns>匹配过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> FilteredSelect(Voucher filter)
-        {
-            return m_Db.FilteredSelect(filter, DateFilter.Unconstrained);
         }
 
         /// <summary>
@@ -222,16 +202,6 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     按细目过滤器查找细目并记数
-        /// </summary>
-        /// <param name="filter">细目过滤器</param>
-        /// <returns>匹配过滤器的细目总数</returns>
-        public long FilteredCount(VoucherDetail filter)
-        {
-            return m_Db.FilteredCount(filter);
-        }
-
-        /// <summary>
         ///     添加记账凭证
         ///     <para>若<paramref name="entity" />没有指定编号，则添加成功后会自动给<paramref name="entity" />添加编号</para>
         /// </summary>
@@ -257,7 +227,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>已删除的记账凭证总数</returns>
-        public int FilteredDelete(Voucher filter)
+        public long FilteredDelete(Voucher filter)
         {
             return m_Db.FilteredDelete(filter);
         }
@@ -267,7 +237,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="filter">细目过滤器</param>
         /// <returns>已删除的细目总数</returns>
-        public int FilteredDelete(VoucherDetail filter)
+        public long FilteredDelete(VoucherDetail filter)
         {
             return m_Db.FilteredDelete(filter);
         }
@@ -324,7 +294,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>已删除的资产总数</returns>
-        public int FilteredDelete(Asset filter)
+        public long FilteredDelete(Asset filter)
         {
             return m_Db.FilteredDelete(filter);
         }
@@ -365,14 +335,6 @@ namespace AccountingServer.BLL
         ///     期末结转
         /// </summary>
         public void Carry()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        ///     摊销
-        /// </summary>
-        public void Amortization()
         {
             throw new NotImplementedException();
         }
