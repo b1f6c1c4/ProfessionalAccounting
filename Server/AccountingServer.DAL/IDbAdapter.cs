@@ -162,20 +162,4 @@ namespace AccountingServer.DAL
         /// <returns>是否成功</returns>
         bool Update(Asset entity);
     }
-
-    /// <summary>
-    ///     数据库服务器接口
-    /// </summary>
-    public interface IDbServer
-    {
-        /// <summary>
-        ///     启动服务器
-        /// </summary>
-        void Launch();
-
-        /// <summary>
-        ///     备份数据库
-        /// </summary>
-        void Backup();
-    }
 }

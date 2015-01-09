@@ -48,7 +48,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BsonHelper.cs" />
-    <Compile Include="Interfaces.cs" />
+    <Compile Include="IDbAdapter.cs" />
+    <Compile Include="IDbServer.cs" />
     <Compile Include="MongoDbAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
