@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Amortization.cs" />
     <Compile Include="Asset.cs" />
     <Compile Include="Balance.cs" />
     <Compile Include="Date.cs" />

@@ -43,6 +43,11 @@ namespace AccountingServer.DAL
         private MongoCollection<Asset> m_Assets;
 
         /// <summary>
+        ///     摊销集合
+        /// </summary>
+        private MongoCollection<Amortization> m_Amortizations; 
+
+        /// <summary>
         ///     是否已经连接到数据库
         /// </summary>
         public bool Connected { get; private set; }
@@ -55,6 +60,8 @@ namespace AccountingServer.DAL
             BsonSerializer.RegisterSerializer(typeof(VoucherDetail), new VoucherDetailSerializer());
             BsonSerializer.RegisterSerializer(typeof(Asset), new AssetSerializer());
             BsonSerializer.RegisterSerializer(typeof(AssetItem), new AssetItemSerializer());
+            BsonSerializer.RegisterSerializer(typeof(Amortization), new AmortizationSerializer());
+            BsonSerializer.RegisterSerializer(typeof(AmortItem), new AmortizationSerializer());
         }
 
         public void Launch()
@@ -85,6 +92,7 @@ namespace AccountingServer.DAL
 
             m_Vouchers = m_Db.GetCollection<Voucher>("voucher");
             m_Assets = m_Db.GetCollection<Asset>("asset");
+            m_Amortizations = m_Db.GetCollection<Amortization>("amortization");
 
             Connected = true;
         }
@@ -97,6 +105,7 @@ namespace AccountingServer.DAL
             m_Db = null;
             m_Vouchers = null;
             m_Assets = null;
+            m_Amortizations = null;
 
             m_Server.Disconnect();
             m_Server = null;
@@ -347,9 +356,51 @@ namespace AccountingServer.DAL
                         lst.Add(Query.EQ("method", "dd"));
                         break;
                 }
+            if (filter.Remark != null)
+                lst.Add(
+                        filter.Remark == String.Empty
+                            ? Query.EQ("remark", BsonNull.Value)
+                            : Query.EQ("remark", filter.Remark));
 
             return And(lst);
         }
+
+        /// <summary>
+        ///     按摊销过滤器查询
+        /// </summary>
+        /// <param name="filter">资产过滤器</param>
+        /// <returns>Bson查询</returns>
+        private static IMongoQuery GetQuery(Amortization filter)
+        {
+            if (filter == null)
+                return null;
+
+            var lst = new List<IMongoQuery>();
+
+            if (filter.ID != null)
+                lst.Add(Query.EQ("_id", filter.ID.Value.ToBsonValue()));
+            if (filter.Name != null)
+                lst.Add(
+                        filter.Name == String.Empty
+                            ? Query.EQ("name", BsonNull.Value)
+                            : Query.EQ("name", filter.Name));
+            if (filter.Value != null)
+                lst.Add(Query.EQ("value", filter.Value));
+            if (filter.Date != null)
+                lst.Add(Query.EQ("date", filter.Date));
+            if (filter.TotalDays != null)
+                lst.Add(Query.EQ("tday", filter.TotalDays));
+            if (filter.Template != null)
+                lst.Add(GetQuery(filter.Template));
+            if (filter.Remark != null)
+                lst.Add(
+                        filter.Remark == String.Empty
+                            ? Query.EQ("remark", BsonNull.Value)
+                            : Query.EQ("remark", filter.Remark));
+
+            return And(lst);
+        }
+
 
         private static IMongoQuery And(params IMongoQuery[] queries)
         {
@@ -442,12 +493,6 @@ namespace AccountingServer.DAL
 
         public IEnumerable<Asset> FilteredSelect(Asset filter) { return m_Assets.Find(GetQuery(filter)); }
 
-        public bool Insert(Asset entity)
-        {
-            var res = m_Assets.Save(entity);
-            return res.DocumentsAffected == 1;
-        }
-
         public bool DeleteAsset(Guid id)
         {
             var res = m_Assets.Remove(GetUniqueQuery(id));
@@ -463,6 +508,29 @@ namespace AccountingServer.DAL
         public long FilteredDelete(Asset filter)
         {
             var res = m_Assets.Remove(GetQuery(filter));
+            return res.DocumentsAffected;
+        }
+
+
+        public Amortization SelectAmortization(Guid id) { return m_Amortizations.FindOne(Query.EQ("_id", id.ToBsonValue())); }
+
+        public IEnumerable<Amortization> FilteredSelect(Amortization filter) { return m_Amortizations.Find(GetQuery(filter)); }
+
+        public bool DeleteAmortization(Guid id)
+        {
+            var res = m_Amortizations.Remove(GetUniqueQuery(id));
+            return res.DocumentsAffected == 1;
+        }
+
+        public bool Upsert(Amortization entity)
+        {
+            var res = m_Amortizations.Save(entity);
+            return res.DocumentsAffected == 1;
+        }
+
+        public long FilteredDelete(Amortization filter)
+        {
+            var res = m_Amortizations.Remove(GetQuery(filter));
             return res.DocumentsAffected;
         }
     }

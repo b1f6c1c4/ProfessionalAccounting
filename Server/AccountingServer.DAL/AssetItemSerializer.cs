@@ -53,7 +53,7 @@ namespace AccountingServer.DAL
             else if (item is DevalueItem)
                 bsonWriter.Write("devto", (item as DevalueItem).FairValue);
             else if (item is DispositionItem)
-                bsonWriter.Write("dispo", 0);
+                bsonWriter.WriteNull("dispo");
             bsonWriter.WriteEndDocument();
         }
     }
