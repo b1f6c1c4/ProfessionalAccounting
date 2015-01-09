@@ -5,20 +5,14 @@ namespace AccountingServer.Console
     internal partial class AccountingConsole
     {
         /// <summary>
-        ///     关闭数据库服务器
+        ///     检查是否已连接；若未连接，尝试连接
         /// </summary>
-        /// <returns>关闭情况</returns>
-        private string ShutdownServer()
+        private void AutoConnect()
         {
-            try
+            if (!m_Accountant.Connected)
             {
-                m_Accountant.Shutdown();
-                m_Accountant.Disconnect();
-                return "OK";
-            }
-            catch (Exception e)
-            {
-                return e.ToString();
+                m_Accountant.Launch();
+                m_Accountant.Connect();
             }
         }
 

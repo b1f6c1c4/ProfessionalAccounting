@@ -39,18 +39,6 @@ namespace AccountingServer.Console
                         res += ConnectServer();
                         return res;
                     }
-                case "ue":
-                    editable = false;
-                    {
-                        var res = ShutdownServer();
-                        if (res != "OK")
-                            return res;
-
-                        Thread.Sleep(100);
-                        Environment.Exit(0);
-                        // ReSharper disable once HeuristicUnreachableCode
-                        return "OK";
-                    }
                 case "launch":
                 case "lau":
                     editable = false;
@@ -59,10 +47,6 @@ namespace AccountingServer.Console
                 case "con":
                     editable = false;
                     return ConnectServer();
-                case "shutdown":
-                case "shu":
-                    editable = false;
-                    return ShutdownServer();
                 case "mobile":
                 case "mob":
                     editable = false;
@@ -153,8 +137,7 @@ namespace AccountingServer.Console
                 if (!rng.Constrained)
                     throw new InvalidOperationException("日期表达式无效");
 
-                if (!m_Accountant.Connected)
-                    throw new InvalidOperationException("尚未连接到数据库");
+                AutoConnect();
 
                 return String.Format("CHART {0:s} {1:s}", rng.StartDate, rng.EndDate);
             }
@@ -177,8 +160,7 @@ namespace AccountingServer.Console
 
             var rng = ParseDateQuery(dateQ);
 
-            if (!m_Accountant.Connected)
-                throw new InvalidOperationException("尚未连接到数据库");
+            AutoConnect();
 
             return m_Accountant.FilteredSelect(detail, rng);
         }
@@ -195,8 +177,7 @@ namespace AccountingServer.Console
 
             var rng = ParseDateQuery(dateQ);
 
-            if (!m_Accountant.Connected)
-                throw new InvalidOperationException("尚未连接到数据库");
+            AutoConnect();
 
             return m_Accountant.SelectDetails(detail, rng);
         }
@@ -230,8 +211,7 @@ namespace AccountingServer.Console
 
             var rng = ParseDateQuery(s);
 
-            if (!m_Accountant.Connected)
-                throw new InvalidOperationException("尚未连接到数据库");
+            AutoConnect();
 
             var report = new ReimbursementReport(m_Accountant, rng);
 

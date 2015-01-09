@@ -68,8 +68,7 @@ namespace AccountingServer.Console
         /// <returns></returns>
         private string FetchInfo()
         {
-            if (!m_Accountant.Connected)
-                throw new InvalidOperationException("尚未连接到数据库");
+            AutoConnect();
 
             var thuInfo = new THUInfo(m_Accountant);
             thuInfo.FetchData(@"2014010914", @"MTQyODU3");

@@ -14,8 +14,7 @@ namespace AccountingServer.Console
         /// <returns>有误的会计凭证表达式</returns>
         private string BasicCheck()
         {
-            if (!m_Accountant.Connected)
-                throw new InvalidOperationException("尚未连接到数据库");
+            AutoConnect();
 
             var sb = new StringBuilder();
             foreach (var voucher in m_Accountant.FilteredSelect((Voucher)null, DateFilter.Unconstrained))
@@ -40,8 +39,7 @@ namespace AccountingServer.Console
         /// <returns>发生错误的第一日及其信息</returns>
         private string AdvancedCheck()
         {
-            if (!m_Accountant.Connected)
-                throw new InvalidOperationException("尚未连接到数据库");
+            AutoConnect();
 
             var sb = new StringBuilder();
             var flag = false;
