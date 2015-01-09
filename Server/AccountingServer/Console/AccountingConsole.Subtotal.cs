@@ -207,8 +207,7 @@ namespace AccountingServer.Console
 
             var rng = ParseDateQuery(dateQ);
 
-            if (!m_Accountant.Connected)
-                throw new InvalidOperationException("尚未连接到数据库");
+            AutoConnect();
 
             if (detail.Content == null)
             {
@@ -240,8 +239,7 @@ namespace AccountingServer.Console
 
             var rng = ParseDateQuery(dateQ);
 
-            if (!m_Accountant.Connected)
-                throw new InvalidOperationException("尚未连接到数据库");
+            AutoConnect();
 
             if (detail.Content == null)
             {

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using AccountingServer.Entities;
 using MongoDB.Bson;
@@ -42,6 +41,13 @@ namespace AccountingServer.DAL
         /// </summary>
         private MongoCollection m_Assets;
 
+        /// <summary>
+        ///     是否已经连接到数据库
+        /// </summary>
+        public bool Connected { get; private set; }
+
+        public MongoDbAdapter() { Connected = false; }
+
         public void Launch()
         {
             var startinfo = new ProcessStartInfo
@@ -65,17 +71,18 @@ namespace AccountingServer.DAL
         {
             m_Client = new MongoClient("mongodb://localhost");
             m_Server = m_Client.GetServer();
-            m_Server.Connect();
 
             m_Db = m_Server.GetDatabase("accounting");
 
-            m_Vouchers = m_Db.GetCollection("voucher");
-            m_Assets = m_Db.GetCollection("asset");
+            m_Vouchers = m_Db.GetCollection<Voucher>("voucher");
+            m_Assets = m_Db.GetCollection<Asset>("asset");
+
+            Connected = true;
         }
 
         public void Disconnect()
         {
-            if (m_Server == null)
+            if (!Connected)
                 return;
 
             m_Db = null;
@@ -85,26 +92,8 @@ namespace AccountingServer.DAL
             m_Server.Disconnect();
             m_Server = null;
             m_Client = null;
-        }
 
-        public void Shutdown()
-        {
-            if (m_Server == null)
-                return;
-
-            m_Db = null;
-            m_Vouchers = null;
-            m_Assets = null;
-            m_Client = null;
-
-            m_Server.Disconnect();
-
-            try
-            {
-                m_Server.Shutdown();
-            }
-            catch (EndOfStreamException) { }
-            m_Server = null;
+            Connected = false;
         }
 
         public void Backup()
@@ -387,7 +376,7 @@ namespace AccountingServer.DAL
             if (entity.ID == null)
                 entity.ID = ObjectId.GenerateNewId().Wrap();
             var res = m_Vouchers.Insert(entity.ToBsonDocument());
-            return res.Ok;
+            return res.DocumentsAffected == 1;
         }
 
         public bool DeleteVoucher(string id)
@@ -491,7 +480,7 @@ namespace AccountingServer.DAL
         public bool Insert(Asset entity)
         {
             var res = m_Assets.Insert(entity.ToBsonDocument());
-            return res.Ok;
+            return res.DocumentsAffected==1;
         }
 
         public bool DeleteAsset(Guid id)

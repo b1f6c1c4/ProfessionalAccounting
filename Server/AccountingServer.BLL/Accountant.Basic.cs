@@ -46,7 +46,7 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     获取是否已经连接到数据库
         /// </summary>
-        public bool Connected { get { return m_Db != null; } }
+        public bool Connected { get { return m_Db.Connected; } }
 
         /// <summary>
         ///     是否为资产类科目
@@ -101,14 +101,6 @@ namespace AccountingServer.BLL
         public void Connect()
         {
             m_Db.Connect();
-        }
-
-        /// <summary>
-        ///     关闭数据库服务器
-        /// </summary>
-        public void Shutdown()
-        {
-            m_DbServer.Shutdown();
         }
 
         /// <summary>

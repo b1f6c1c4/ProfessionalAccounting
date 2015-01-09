@@ -10,6 +10,11 @@ namespace AccountingServer.DAL
     public interface IDbAdapter
     {
         /// <summary>
+        ///     是否已经连接到数据库
+        /// </summary>
+        bool Connected { get; }
+
+        /// <summary>
         ///     连接服务器
         /// </summary>
         void Connect();
@@ -167,11 +172,6 @@ namespace AccountingServer.DAL
         ///     启动服务器
         /// </summary>
         void Launch();
-
-        /// <summary>
-        ///     关闭服务器
-        /// </summary>
-        void Shutdown();
 
         /// <summary>
         ///     备份数据库

@@ -52,6 +52,8 @@ namespace AccountingServer.Console
         /// <returns>执行结果</returns>
         public string ExecuteAsset(string s, out bool editable)
         {
+            AutoConnect();
+
             var sp = s.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
             var query = sp.Length == 1 ? String.Empty : sp[1];
 
