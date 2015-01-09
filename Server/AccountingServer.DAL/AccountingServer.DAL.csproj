@@ -47,11 +47,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssetItemSerializer.cs" />
+    <Compile Include="AssetSerializer.cs" />
     <Compile Include="BsonHelper.cs" />
     <Compile Include="IDbAdapter.cs" />
     <Compile Include="IDbServer.cs" />
     <Compile Include="MongoDbAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VoucherDetailSerializer.cs" />
+    <Compile Include="VoucherSerializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj">

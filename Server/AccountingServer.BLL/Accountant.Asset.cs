@@ -408,7 +408,7 @@ namespace AccountingServer.BLL
             }
 
             if (modified)
-                m_Db.Update(voucher);
+                m_Db.Upsert(voucher);
 
             return true;
         }

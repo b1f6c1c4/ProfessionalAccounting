@@ -1,344 +1,202 @@
 using System;
-using System.Linq;
-using AccountingServer.Entities;
+using System.Collections.Generic;
 using MongoDB.Bson;
+using MongoDB.Bson.IO;
 
 namespace AccountingServer.DAL
 {
     /// <summary>
-    ///     Bson与实体之间的转换
+    ///     Bson序列化辅助读写
     /// </summary>
-    internal static class BsonHelper
+    internal static class SerializationHelper
     {
-        private static bool ContainsNotNull(this BsonDocument doc, string key)
+        private static bool IsEndOfDocument(this BsonReader bsonReader)
         {
-            return doc.Contains(key) && !doc[key].IsBsonNull;
+            if (bsonReader.State == BsonReaderState.Type)
+                bsonReader.ReadBsonType();
+            return bsonReader.State == BsonReaderState.EndOfDocument;
         }
 
-        /// <summary>
-        ///     将ObjectId编号转换为字符串编号
-        /// </summary>
-        /// <param name="id">ObjectId编号</param>
-        /// <returns>字符串编号</returns>
-        public static string Wrap(this ObjectId id)
+        private static bool IsEndOfArray(this BsonReader bsonReader)
         {
-            return id.ToString();
+            if (bsonReader.State == BsonReaderState.Type)
+                bsonReader.ReadBsonType();
+            return bsonReader.State == BsonReaderState.EndOfArray;
         }
 
-        /// <summary>
-        ///     将字符串编号转换为ObjectId编号
-        /// </summary>
-        /// <param name="id">字符串编号</param>
-        /// <returns>ObjectId编号</returns>
-        public static ObjectId UnWrap(this string id)
+        public static string ReadObjectId(this BsonReader bsonReader, string expected, ref string read)
         {
-            return ObjectId.Parse(id);
-        }
-
-        /// <summary>
-        ///     将记账凭证转换为Bson
-        /// </summary>
-        /// <param name="voucher">记账凭证</param>
-        /// <returns>Bson</returns>
-        public static BsonDocument ToBsonDocument(this Voucher voucher)
-        {
-            var doc = new BsonDocument();
-            if (voucher.ID != null)
-                doc.Add("_id", voucher.ID.UnWrap());
-            doc.Add("date", voucher.Date);
-            if (voucher.Type != VoucherType.Ordinal)
-                switch (voucher.Type)
-                {
-                    case VoucherType.Amortization:
-                        doc.Add("special", "amorz");
-                        break;
-                    case VoucherType.AnnualCarry:
-                        doc.Add("special", "acarry");
-                        break;
-                    case VoucherType.Carry:
-                        doc.Add("special", "carry");
-                        break;
-                    case VoucherType.Depreciation:
-                        doc.Add("special", "dep");
-                        break;
-                    case VoucherType.Devalue:
-                        doc.Add("special", "dev");
-                        break;
-                    case VoucherType.Uncertain:
-                        doc.Add("special", "unc");
-                        break;
-                }
-            if (voucher.Details != null)
-            {
-                var arr = new BsonArray(voucher.Details.Length);
-                foreach (var detail in voucher.Details)
-                    arr.Add(detail.ToBsonDocument());
-                doc.Add("detail", arr);
-            }
-            if (voucher.Remark != null)
-                doc.Add("remark", voucher.Remark);
-
-            return doc;
-        }
-
-        /// <summary>
-        ///     将细目转换为Bson
-        /// </summary>
-        /// <param name="detail">细目</param>
-        /// <returns>Bson</returns>
-        private static BsonDocument ToBsonDocument(this VoucherDetail detail)
-        {
-            var val = new BsonDocument { { "title", detail.Title } };
-            if (detail.SubTitle.HasValue)
-                val.Add("subtitle", detail.SubTitle);
-            if (detail.Content != null)
-                val.Add("content", detail.Content);
-            val.Add("fund", detail.Fund);
-            if (detail.Remark != null)
-                val.Add("remark", detail.Remark);
-            return val;
-        }
-
-        /// <summary>
-        ///     将资产转换为Bson
-        /// </summary>
-        /// <param name="asset">资产</param>
-        /// <returns>Bson</returns>
-        public static BsonDocument ToBsonDocument(this Asset asset)
-        {
-            var doc = new BsonDocument
-                          {
-                              { "_id", asset.ID.HasValue ? asset.ID.Value.ToBsonValue() : BsonNull.Value },
-                              { "name", asset.Name },
-                              { "date", asset.Date },
-                              { "value", asset.Value },
-                              { "salvge", asset.Salvge },
-                              { "life", asset.Life },
-                              { "title", asset.Title },
-                              { "deptitle", asset.DepreciationTitle },
-                              { "devtitle", asset.DevaluationTitle },
-                              {
-                                  "exptitle",
-                                  asset.DepreciationExpenseSubTitle.HasValue
-                                      ? asset.DepreciationExpenseTitle * 100 + asset.DepreciationExpenseSubTitle
-                                      : asset.DepreciationExpenseTitle
-                              },
-                              {
-                                  "exvtitle",
-                                  asset.DevaluationExpenseSubTitle.HasValue
-                                      ? asset.DevaluationExpenseTitle * 100 + asset.DevaluationExpenseSubTitle
-                                      : asset.DevaluationExpenseTitle
-                              }
-                          };
-            if (asset.Method != DepreciationMethod.None)
-                switch (asset.Method)
-                {
-                    case DepreciationMethod.StraightLine:
-                        doc.Add("method", "sl");
-                        break;
-                    case DepreciationMethod.SumOfTheYear:
-                        doc.Add("method", "sy");
-                        break;
-                    case DepreciationMethod.DoubleDeclineMethod:
-                        doc.Add("method", "dd");
-                        break;
-                }
-            if (asset.Schedule != null)
-            {
-                var arr = new BsonArray(asset.Schedule.Length);
-                foreach (var item in asset.Schedule)
-                    arr.Add(item.ToBsonDocument());
-                doc.Add("schedule", arr);
-            }
-            if (asset.Remark != null)
-                doc.Add("remark", asset.Remark);
-
-            return doc;
-        }
-
-        /// <summary>
-        ///     将折旧表条目转换为Bson
-        /// </summary>
-        /// <param name="item">条目</param>
-        /// <returns>Bson</returns>
-        private static BsonDocument ToBsonDocument(this AssetItem item)
-        {
-            var val = new BsonDocument();
-            if (item.VoucherID != null)
-                val.Add("voucher", item.VoucherID.UnWrap());
-            if (item.Date != null)
-                val.Add("date", item.Date);
-            if (item.Remark != null)
-                val.Add("remark", item.Remark);
-
-            if (item is AcquisationItem)
-                val.Add("acq", (item as AcquisationItem).OrigValue);
-            else if (item is DepreciateItem)
-                val.Add("dep", (item as DepreciateItem).Amount);
-            else if (item is DevalueItem)
-                val.Add("devto", (item as DevalueItem).FairValue);
-            else if (item is DispositionItem)
-                val.Add("dispo", 0);
-
-            return val;
-        }
-
-        /// <summary>
-        ///     从Bson还原记账凭证
-        /// </summary>
-        /// <param name="doc">Bson</param>
-        /// <returns>记账凭证，若<paramref name="doc" />为<c>null</c>则为<c>null</c></returns>
-        public static Voucher ToVoucher(this BsonDocument doc)
-        {
-            if (doc == null)
+            if (bsonReader.IsEndOfDocument())
+                return null;
+            if (read == null)
+                read = bsonReader.ReadName();
+            if (read != expected)
                 return null;
 
-            var voucher = new Voucher { ID = doc["_id"].AsObjectId.Wrap() };
-            if (doc.ContainsNotNull("date"))
-                voucher.Date = doc["date"].IsBsonNull ? (DateTime?)null : doc["date"].AsLocalTime;
-            voucher.Type = VoucherType.Ordinal;
-            if (doc.ContainsNotNull("special"))
-                switch (doc["special"].AsString)
-                {
-                    case "amorz":
-                        voucher.Type = VoucherType.Amortization;
-                        break;
-                    case "acarry":
-                        voucher.Type = VoucherType.AnnualCarry;
-                        break;
-                    case "carry":
-                        voucher.Type = VoucherType.Carry;
-                        break;
-                    case "dep":
-                        voucher.Type = VoucherType.Depreciation;
-                        break;
-                    case "dev":
-                        voucher.Type = VoucherType.Devalue;
-                        break;
-                    case "unc":
-                        voucher.Type = VoucherType.Uncertain;
-                        break;
-                }
-            if (doc.ContainsNotNull("detail"))
-                voucher.Details = doc["detail"].AsBsonArray.Select(t => ToVoucherDetail(t.AsBsonDocument)).ToArray();
-            if (doc.ContainsNotNull("remark"))
-                voucher.Remark = doc["remark"].AsString;
-
-            return voucher;
+            read = null;
+            return bsonReader.ReadObjectId().ToString();
         }
 
-        /// <summary>
-        ///     从Bson还原细目
-        /// </summary>
-        /// <param name="ddoc">Bson</param>
-        /// <returns>细目</returns>
-        private static VoucherDetail ToVoucherDetail(this BsonDocument ddoc)
+        public static int? ReadInt32(this BsonReader bsonReader, string expected, ref string read)
         {
-            var detail = new VoucherDetail();
-            if (ddoc.ContainsNotNull("title"))
-                detail.Title = ddoc["title"].AsInt32;
-            if (ddoc.ContainsNotNull("subtitle"))
-                detail.SubTitle = ddoc["subtitle"].AsInt32;
-            if (ddoc.ContainsNotNull("content"))
-                detail.Content = ddoc["content"].AsString;
-            if (ddoc.ContainsNotNull("fund"))
-                detail.Fund = ddoc["fund"].AsDouble;
-            if (ddoc.ContainsNotNull("remark"))
-                detail.Remark = ddoc["remark"].AsString;
-            return detail;
-        }
-
-        /// <summary>
-        ///     从Bson还原资产
-        /// </summary>
-        /// <param name="doc">Bson</param>
-        /// <returns>资产，若<paramref name="doc" />为<c>null</c>则为<c>null</c></returns>
-        public static Asset ToAsset(this BsonDocument doc)
-        {
-            if (doc == null)
+            if (bsonReader.IsEndOfDocument())
+                return null;
+            if (read == null)
+                read = bsonReader.ReadName();
+            if (read != expected)
                 return null;
 
-            var asset = new Asset { ID = doc["_id"].AsGuid };
-            if (doc.ContainsNotNull("name"))
-                asset.Name = doc["name"].AsString;
-            if (doc.ContainsNotNull("date"))
-                asset.Date = doc["date"].AsLocalTime;
-            if (doc.ContainsNotNull("value"))
-                asset.Value = doc["value"].AsDouble;
-            if (doc.ContainsNotNull("salvge"))
-                asset.Salvge = doc["salvge"].AsDouble;
-            if (doc.ContainsNotNull("life"))
-                asset.Life = doc["life"].AsInt32;
-            if (doc.ContainsNotNull("title"))
-                asset.Title = doc["title"].AsInt32;
-            if (doc.ContainsNotNull("deptitle"))
-                asset.DepreciationTitle = doc["deptitle"].AsInt32;
-            if (doc.ContainsNotNull("devtitle"))
-                asset.DevaluationTitle = doc["devtitle"].AsInt32;
-            if (doc.ContainsNotNull("exptitle"))
-            {
-                var expenseTitle = doc["exptitle"].AsInt32;
-                asset.DepreciationExpenseTitle = expenseTitle / 100;
-                asset.DepreciationExpenseSubTitle = expenseTitle % 100;
-            }
-            if (doc.ContainsNotNull("exvtitle"))
-            {
-                var expenseTitle = doc["exvtitle"].AsInt32;
-                asset.DevaluationExpenseTitle = expenseTitle / 100;
-                asset.DevaluationExpenseSubTitle = expenseTitle % 100;
-            }
-            asset.Method = DepreciationMethod.None;
-            if (doc.ContainsNotNull("method"))
-                switch (doc["method"].AsString)
-                {
-                    case "sl":
-                        asset.Method = DepreciationMethod.StraightLine;
-                        break;
-                    case "sy":
-                        asset.Method = DepreciationMethod.SumOfTheYear;
-                        break;
-                    case "dd":
-                        asset.Method = DepreciationMethod.DoubleDeclineMethod;
-                        break;
-                }
-            if (doc.ContainsNotNull("schedule"))
-                asset.Schedule = doc["schedule"].AsBsonArray.Select(t => t.AsBsonDocument.ToAssetItem()).ToArray();
-            if (doc.ContainsNotNull("remark"))
-                asset.Remark = doc["remark"].AsString;
-
-            return asset;
+            read = null;
+            return bsonReader.ReadInt32();
         }
 
-        /// <summary>
-        ///     从Bson还原折旧表条目
-        /// </summary>
-        /// <param name="ddoc">Bson</param>
-        /// <returns>条目</returns>
-        private static AssetItem ToAssetItem(this BsonDocument ddoc)
+        public static double? ReadDouble(this BsonReader bsonReader, string expected, ref string read)
         {
-            AssetItem item;
-            if (ddoc.ContainsNotNull("acq"))
-                item = new AcquisationItem { OrigValue = ddoc["acq"].AsDouble };
-            else if (ddoc.ContainsNotNull("dep"))
-                item = new DepreciateItem { Amount = ddoc["dep"].AsDouble };
-            else if (ddoc.ContainsNotNull("devto"))
-                item = new DevalueItem { FairValue = ddoc["devto"].AsDouble };
-            else if (ddoc.ContainsNotNull("dispo"))
-                // ReSharper disable once RedundantEmptyObjectOrCollectionInitializer
-                item = new DispositionItem { };
-            else
-                throw new InvalidOperationException();
+            if (bsonReader.IsEndOfDocument())
+                return null;
+            if (read == null)
+                read = bsonReader.ReadName();
+            if (read != expected)
+                return null;
 
-            if (ddoc.ContainsNotNull("voucher"))
-                item.VoucherID = ddoc["voucher"].AsObjectId.Wrap();
-            if (ddoc.ContainsNotNull("date"))
-                item.Date = ddoc["date"].AsBsonDateTime.ToLocalTime();
-            if (ddoc.ContainsNotNull("remark"))
-                item.Remark = ddoc["remark"].AsString;
-
-            return item;
+            read = null;
+            return bsonReader.ReadDouble();
         }
 
-        public static BsonValue ToBsonValue(this Guid id) { return new BsonBinaryData(id); }
+        public static string ReadString(this BsonReader bsonReader, string expected, ref string read)
+        {
+            if (bsonReader.IsEndOfDocument())
+                return null;
+            if (read == null)
+                read = bsonReader.ReadName();
+            if (read != expected)
+                return null;
+
+            read = null;
+            if (bsonReader.CurrentBsonType == BsonType.Null)
+            {
+                bsonReader.ReadNull();
+                return null;
+            }
+            return bsonReader.ReadString();
+        }
+
+        public static Guid? ReadGuid(this BsonReader bsonReader, string expected, ref string read)
+        {
+            if (bsonReader.IsEndOfDocument())
+                return null;
+            if (read == null)
+                read = bsonReader.ReadName();
+            if (read != expected)
+                return null;
+
+            read = null;
+            if (bsonReader.CurrentBsonType == BsonType.Null)
+            {
+                bsonReader.ReadNull();
+                return null;
+            }
+            return bsonReader.ReadBinaryData().AsGuid;
+        }
+
+        public static DateTime? ReadDateTime(this BsonReader bsonReader, string expected, ref string read)
+        {
+            if (bsonReader.IsEndOfDocument())
+                return null;
+            if (read == null)
+                read = bsonReader.ReadName();
+            if (read != expected)
+                return null;
+
+            read = null;
+            if (bsonReader.CurrentBsonType == BsonType.Null)
+            {
+                bsonReader.ReadNull();
+                return null;
+            }
+            return BsonUtils.ToDateTimeFromMillisecondsSinceEpoch(bsonReader.ReadDateTime());
+        }
+
+        public static bool ReadNull(this BsonReader bsonReader, string expected, ref string read)
+        {
+            if (bsonReader.IsEndOfDocument())
+                return false;
+            if (read == null)
+                read = bsonReader.ReadName();
+            if (read != expected)
+                return false;
+
+            read = null;
+            //bsonReader.ReadNull();
+            bsonReader.ReadInt32(); // TODO:fix this
+            return true;
+        }
+
+        public static List<T> ReadArray<T>(this BsonReader bsonReader, string expected, ref string read,
+                                           Func<BsonReader, T> parser)
+        {
+            if (read == null)
+                read = bsonReader.ReadName();
+            if (read != expected)
+                return null;
+
+            read = null;
+            var lst = new List<T>();
+            bsonReader.ReadStartArray();
+            while (!bsonReader.IsEndOfArray())
+                lst.Add(parser(bsonReader));
+            bsonReader.ReadEndArray();
+            return lst;
+        }
+
+        public static void WriteObjectId(this BsonWriter bsonWriter, string name, string value, bool force = false)
+        {
+            if (value != null)
+                bsonWriter.WriteObjectId(name, ObjectId.Parse(value));
+            else if (force)
+                bsonWriter.WriteNull(name);
+        }
+
+        public static void Write(this BsonWriter bsonWriter, string name, Guid? value, bool force = false)
+        {
+            if (value.HasValue)
+                bsonWriter.WriteBinaryData(name, value.Value.ToBsonValue());
+            else if (force)
+                bsonWriter.WriteNull(name);
+        }
+
+        public static void Write(this BsonWriter bsonWriter, string name, int? value, bool force = false)
+        {
+            if (value.HasValue)
+                bsonWriter.WriteInt32(name, value.Value);
+            else if (force)
+                bsonWriter.WriteNull(name);
+        }
+
+        public static void Write(this BsonWriter bsonWriter, string name, double? value, bool force = false)
+        {
+            if (value.HasValue)
+                bsonWriter.WriteDouble(name, value.Value);
+            else if (force)
+                bsonWriter.WriteNull(name);
+        }
+
+        public static void Write(this BsonWriter bsonWriter, string name, DateTime? value, bool force = false)
+        {
+            if (value.HasValue)
+                bsonWriter.WriteDateTime(name, BsonUtils.ToMillisecondsSinceEpoch(value.Value));
+            else if (force)
+                bsonWriter.WriteNull(name);
+        }
+
+        public static void Write(this BsonWriter bsonWriter, string name, string value, bool force = false)
+        {
+            if (value != null)
+                bsonWriter.WriteString(name, value);
+            else if (force)
+                bsonWriter.WriteNull(name);
+        }
+
+        public static BsonBinaryData ToBsonValue(this Guid id) { return new BsonBinaryData(id); }
     }
 }

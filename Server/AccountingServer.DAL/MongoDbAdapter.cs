@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using AccountingServer.Entities;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 
@@ -34,12 +35,12 @@ namespace AccountingServer.DAL
         /// <summary>
         ///     记账凭证集合
         /// </summary>
-        private MongoCollection m_Vouchers;
+        private MongoCollection<Voucher> m_Vouchers;
 
         /// <summary>
         ///     资产集合
         /// </summary>
-        private MongoCollection m_Assets;
+        private MongoCollection<Asset> m_Assets;
 
         /// <summary>
         ///     是否已经连接到数据库
@@ -47,6 +48,14 @@ namespace AccountingServer.DAL
         public bool Connected { get; private set; }
 
         public MongoDbAdapter() { Connected = false; }
+
+        static MongoDbAdapter()
+        {
+            BsonSerializer.RegisterSerializer(typeof(Voucher), new VoucherSerializer());
+            BsonSerializer.RegisterSerializer(typeof(VoucherDetail), new VoucherDetailSerializer());
+            BsonSerializer.RegisterSerializer(typeof(Asset), new AssetSerializer());
+            BsonSerializer.RegisterSerializer(typeof(AssetItem), new AssetItemSerializer());
+        }
 
         public void Launch()
         {
@@ -74,8 +83,8 @@ namespace AccountingServer.DAL
 
             m_Db = m_Server.GetDatabase("accounting");
 
-            m_Vouchers = m_Db.GetCollection("voucher");
-            m_Assets = m_Db.GetCollection("asset");
+            m_Vouchers = m_Db.GetCollection<Voucher>("voucher");
+            m_Assets = m_Db.GetCollection<Asset>("asset");
 
             Connected = true;
         }
@@ -122,7 +131,7 @@ namespace AccountingServer.DAL
         /// <returns>Bson查询</returns>
         private static IMongoQuery GetUniqueQuery(string id)
         {
-            return Query.EQ("_id", id.UnWrap());
+            return Query.EQ("_id", ObjectId.Parse(id));
         }
 
         /// <summary>
@@ -132,7 +141,7 @@ namespace AccountingServer.DAL
         /// <returns>Bson查询</returns>
         private static IMongoQuery GetUniqueQuery(Guid? id)
         {
-            return Query.EQ("_id", id.HasValue ? id.Value.ToBsonValue() : BsonNull.Value);
+            return Query.EQ("_id", id.HasValue ? id.Value.ToBsonValue() as BsonValue : BsonNull.Value);
         }
 
         /// <summary>
@@ -143,7 +152,7 @@ namespace AccountingServer.DAL
         private static IMongoQuery GetQuery(Voucher filter)
         {
             if (filter == null)
-                return Query.Null;
+                return null;
 
             var lst = new List<IMongoQuery>();
 
@@ -198,7 +207,7 @@ namespace AccountingServer.DAL
             else if (rng.EndDate.HasValue)
                 q = Query.LTE("date", rng.EndDate);
             else
-                return rng.Nullable ? Query.Null : Query.NE("date", BsonNull.Value);
+                return rng.Nullable ? null : Query.NE("date", BsonNull.Value);
 
             return rng.Nullable ? Query.Or(q, Query.EQ("date", BsonNull.Value)) : q;
         }
@@ -211,7 +220,7 @@ namespace AccountingServer.DAL
         private static IMongoQuery GetQuery(VoucherDetail filter)
         {
             if (filter == null)
-                return Query.Null;
+                return null;
 
             var lst = new List<IMongoQuery>();
 
@@ -248,9 +257,7 @@ namespace AccountingServer.DAL
         {
             var queryVoucher = GetQuery(vfilter);
             var queryFilter = GetQuery(filter);
-            return queryFilter != Query.Null
-                            ? And(queryVoucher, Query.ElemMatch("detail", queryFilter))
-                            : queryVoucher;
+            return queryFilter != null? And(queryVoucher, Query.ElemMatch("detail", queryFilter)): queryVoucher;
         }
 
         /// <summary>
@@ -263,9 +270,7 @@ namespace AccountingServer.DAL
         {
             var queryVoucher = GetQuery(rng);
             var queryFilter = GetQuery(filter);
-            return queryFilter != Query.Null
-                            ? And(queryVoucher, Query.ElemMatch("detail", queryFilter))
-                            : queryVoucher;
+            return queryFilter != null ? And(queryVoucher, Query.ElemMatch("detail", queryFilter)) : queryVoucher;
         }
 
         /// <summary>
@@ -279,9 +284,7 @@ namespace AccountingServer.DAL
         {
             var queryVoucher = And(GetQuery(vfilter), GetQuery(rng));
             var queryFilter = GetQuery(filter);
-            return queryFilter != Query.Null
-                       ? And(queryVoucher, Query.ElemMatch("detail", queryFilter))
-                       : queryVoucher;
+            return queryFilter != null ? And(queryVoucher, Query.ElemMatch("detail", queryFilter)) : queryVoucher;
         }
 
         /// <summary>
@@ -292,7 +295,7 @@ namespace AccountingServer.DAL
         private static IMongoQuery GetQuery(Asset filter)
         {
             if (filter == null)
-                return Query.Null;
+                return null;
 
             var lst = new List<IMongoQuery>();
 
@@ -354,26 +357,23 @@ namespace AccountingServer.DAL
             return And(lst);
         }
 
-        private static IMongoQuery And(IList<IMongoQuery> queries)
+        private static IMongoQuery And(ICollection<IMongoQuery> queries)
         {
-            queries.Remove(Query.Null);
-            return queries.Any() ? Query.And(queries) : Query.Null;
+            queries.Remove(null);
+            return queries.Any() ? Query.And(queries) : null;
         }
 
 
-        public Voucher SelectVoucher(string id)
-        {
-            return m_Vouchers.FindOneByIdAs<BsonDocument>(id.UnWrap()).ToVoucher();
-        }
+        public Voucher SelectVoucher(string id) { return m_Vouchers.FindOneById(ObjectId.Parse(id)); }
 
         public IEnumerable<Voucher> FilteredSelect(Voucher filter, DateFilter rng)
         {
-            return m_Vouchers.FindAs<BsonDocument>(And(GetQuery(filter), GetQuery(rng))).Select(d => d.ToVoucher());
+            return m_Vouchers.Find(And(GetQuery(filter), GetQuery(rng)));
         }
 
         public bool Insert(Voucher entity)
         {
-            var res = m_Vouchers.Save(entity.ToBsonDocument());
+            var res = m_Vouchers.Save(entity);
             return res.DocumentsAffected == 1;
         }
 
@@ -389,57 +389,36 @@ namespace AccountingServer.DAL
             return res.DocumentsAffected;
         }
 
-        public bool Update(Voucher entity)
+        public bool Upsert(Voucher entity)
         {
-            var res = m_Vouchers.Save(entity.ToBsonDocument());
+            var res = m_Vouchers.Save(entity);
             return res.DocumentsAffected <= 1;
         }
 
         public IEnumerable<Voucher> FilteredSelect(VoucherDetail filter, DateFilter rng)
         {
-            if (filter.Item != null)
-                return new[] { SelectVoucher(filter.Item) };
-
-            return m_Vouchers.FindAs<BsonDocument>(GetQuery(filter, rng)).Select(d => d.ToVoucher());
+            return m_Vouchers.Find(GetQuery(filter, rng));
         }
 
         public IEnumerable<Voucher> FilteredSelect(Voucher vfilter, VoucherDetail filter, DateFilter rng)
         {
-            if (filter.Item != null)
-                return new[] { SelectVoucher(filter.Item) };
-
-            return m_Vouchers.FindAs<BsonDocument>(GetQuery(vfilter, filter, rng)).Select(d => d.ToVoucher());
+            return m_Vouchers.Find(GetQuery(vfilter, filter, rng));
         }
 
         public IEnumerable<Voucher> FilteredSelect(IEnumerable<VoucherDetail> filters, DateFilter rng)
         {
-            return filters.Where(filter => filter.Item != null).Select(filter => SelectVoucher(filter.Item))
-                          .Concat(
-                                  m_Vouchers.FindAs<BsonDocument>(
-                                                                  And(
-                                                                      GetQuery(rng),
-                                                                      Query.Or(
-                                                                               filters.Where(
-                                                                                             filter =>
-                                                                                             filter.Item == null)
-                                                                                      .Select(GetQuery)
-                                                                                      .Where(
-                                                                                             query =>
-                                                                                             query != Query.Null)
-                                                                                      .Select(
-                                                                                              query =>
-                                                                                              Query.ElemMatch(
-                                                                                                              "detail",
-                                                                                                              query)))))
-                                            .Select(d => d.ToVoucher()));
+            return m_Vouchers.Find(
+                                   And(
+                                       GetQuery(rng),
+                                       Query.Or(
+                                                filters.Where(filter => filter.Item == null).Select(GetQuery)
+                                                       .Where(query => query != null)
+                                                       .Select(query => Query.ElemMatch("detail", query)))));
         }
 
         public IEnumerable<VoucherDetail> FilteredSelectDetails(VoucherDetail filter, DateFilter rng)
         {
-            return
-                FilteredSelect(filter, rng)
-                    .SelectMany(v => v.Details)
-                    .Where(d => d.IsMatch(filter));
+            return FilteredSelect(filter, rng).SelectMany(v => v.Details).Where(d => d.IsMatch(filter));
         }
 
         public long FilteredDelete(Voucher vfilter, VoucherDetail filter)
@@ -465,31 +444,25 @@ namespace AccountingServer.DAL
         }
 
 
-        public Asset SelectAsset(Guid id)
-        {
-            return m_Assets.FindOneAs<BsonDocument>(Query.EQ("_id", id.ToBsonValue())).ToAsset();
-        }
+        public Asset SelectAsset(Guid id) { return m_Assets.FindOne(Query.EQ("_id", id.ToBsonValue())); }
 
-        public IEnumerable<Asset> FilteredSelect(Asset filter)
-        {
-            return m_Assets.FindAs<BsonDocument>(GetQuery(filter)).Select(d => d.ToAsset());
-        }
+        public IEnumerable<Asset> FilteredSelect(Asset filter) { return m_Assets.Find(GetQuery(filter)); }
 
         public bool Insert(Asset entity)
         {
-            var res = m_Assets.Save(entity.ToBsonDocument());
-            return res.DocumentsAffected==1;
+            var res = m_Assets.Save(entity);
+            return res.DocumentsAffected == 1;
         }
 
         public bool DeleteAsset(Guid id)
         {
             var res = m_Assets.Remove(GetUniqueQuery(id));
-            return res.DocumentsAffected <= 1;
+            return res.DocumentsAffected == 1;
         }
 
-        public bool Update(Asset entity)
+        public bool Upsert(Asset entity)
         {
-            var res = m_Assets.Save(entity.ToBsonDocument());
+            var res = m_Assets.Save(entity);
             return res.DocumentsAffected == 1;
         }
 
