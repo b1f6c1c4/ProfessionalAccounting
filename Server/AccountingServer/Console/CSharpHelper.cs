@@ -207,7 +207,7 @@ namespace AccountingServer.Console
                     else if (item is DevalueItem)
                         present(item, String.Format("FairValue = {0},", (item as DevalueItem).FairValue));
                     else if (item is DispositionItem)
-                        present(item, String.Format("NetValue  = {0},", (item as DispositionItem).NetValue));
+                        present(item, "");
                 }
                 sb.AppendLine("   } }@");
             }

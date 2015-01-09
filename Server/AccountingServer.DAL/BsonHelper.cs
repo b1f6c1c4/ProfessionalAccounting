@@ -42,7 +42,10 @@ namespace AccountingServer.DAL
         /// <returns>Bson</returns>
         public static BsonDocument ToBsonDocument(this Voucher voucher)
         {
-            var doc = new BsonDocument { { "_id", ObjectId.Parse(voucher.ID) }, { "date", voucher.Date } };
+            var doc = new BsonDocument();
+            if (voucher.ID != null)
+                doc.Add("_id", voucher.ID.UnWrap());
+            doc.Add("date", voucher.Date);
             if (voucher.Type != VoucherType.Ordinal)
                 switch (voucher.Type)
                 {
@@ -175,7 +178,7 @@ namespace AccountingServer.DAL
             else if (item is DevalueItem)
                 val.Add("devto", (item as DevalueItem).FairValue);
             else if (item is DispositionItem)
-                val.Add("dispo", (item as DispositionItem).NetValue);
+                val.Add("dispo", 0);
 
             return val;
         }
@@ -321,7 +324,8 @@ namespace AccountingServer.DAL
             else if (ddoc.ContainsNotNull("devto"))
                 item = new DevalueItem { FairValue = ddoc["devto"].AsDouble };
             else if (ddoc.ContainsNotNull("dispo"))
-                item = new DispositionItem { NetValue = ddoc["dispo"].AsDouble };
+                // ReSharper disable once RedundantEmptyObjectOrCollectionInitializer
+                item = new DispositionItem { };
             else
                 throw new InvalidOperationException();
 

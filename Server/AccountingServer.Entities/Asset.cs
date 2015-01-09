@@ -92,18 +92,18 @@ namespace AccountingServer.Entities
         ///     公允价值
         /// </summary>
         public double FairValue { get; set; }
+
+        /// <summary>
+        ///     减值额
+        ///     <para>不存储在数据库中</para>
+        /// </summary>
+        public double Amount { get; set; }
     }
 
     /// <summary>
     ///     处置资产
     /// </summary>
-    public class DispositionItem : AssetItem
-    {
-        /// <summary>
-        ///     原账面净值
-        /// </summary>
-        public double NetValue { get; set; }
-    }
+    public class DispositionItem : AssetItem { }
 
     /// <summary>
     ///     资产
