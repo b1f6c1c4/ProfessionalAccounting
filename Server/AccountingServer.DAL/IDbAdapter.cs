@@ -67,7 +67,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="entity">新记账凭证</param>
         /// <returns>是否成功</returns>
-        bool Update(Voucher entity);
+        bool Upsert(Voucher entity);
 
         /// <summary>
         ///     按细目过滤器查找记账凭证
@@ -160,6 +160,6 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="entity">新资产</param>
         /// <returns>是否成功</returns>
-        bool Update(Asset entity);
+        bool Upsert(Asset entity);
     }
 }

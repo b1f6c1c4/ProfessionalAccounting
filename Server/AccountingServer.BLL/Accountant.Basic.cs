@@ -148,7 +148,7 @@ namespace AccountingServer.BLL
         /// <returns>是否成功</returns>
         public bool Update(Voucher entity)
         {
-            return m_Db.Update(entity);
+            return m_Db.Upsert(entity);
         }
 
         /// <summary>
@@ -301,7 +301,7 @@ namespace AccountingServer.BLL
         /// <returns>是否成功</returns>
         public bool Update(Asset entity)
         {
-            return m_Db.Update(entity);
+            return m_Db.Upsert(entity);
         }
 
         /// <summary>
@@ -322,7 +322,7 @@ namespace AccountingServer.BLL
                                                               d.Fund);
                                                   return key;
                                               }).ToArray();
-            m_Db.Update(voucher);
+            m_Db.Upsert(voucher);
         }
 
         /// <summary>
