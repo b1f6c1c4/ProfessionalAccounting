@@ -145,5 +145,42 @@ namespace AccountingServer.DAL
         /// <param name="entity">新资产</param>
         /// <returns>是否成功</returns>
         bool Upsert(Asset entity);
+
+
+        /// <summary>
+        ///     按编号查找摊销
+        /// </summary>
+        /// <param name="id">编号</param>
+        /// <returns>摊销，如果没有则为<c>null</c></returns>
+        Amortization SelectAmortization(Guid id);
+
+        /// <summary>
+        ///     按过滤器查找摊销
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>匹配过滤器的摊销</returns>
+        IEnumerable<Amortization> FilteredSelect(Amortization filter);
+
+        /// <summary>
+        ///     按编号删除摊销
+        /// </summary>
+        /// <param name="id">编号</param>
+        /// <returns>是否成功</returns>
+        bool DeleteAmortization(Guid id);
+
+        /// <summary>
+        ///     按过滤器删除摊销
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>已删除的摊销总数</returns>
+        long FilteredDelete(Amortization filter);
+
+        /// <summary>
+        ///     添加或替换摊销
+        ///     <para>若无编号，则添加新编号</para>
+        /// </summary>
+        /// <param name="entity">新摊销</param>
+        /// <returns>是否成功</returns>
+        bool Upsert(Amortization entity);
     }
 }
