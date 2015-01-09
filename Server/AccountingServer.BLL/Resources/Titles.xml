@@ -114,8 +114,11 @@
 	</title>
 	<title name="营业外支出" id="6711">
 		<subTitle name="处置固定资产净损失" id="1"/>
+		<subTitle name="处置无形资产净损失" id="2"/>
+		<subTitle name="处置其他长期资产净损失" id="5"/>
 		<subTitle name="罚没及滞纳金支出" id="8"/>
 		<subTitle name="捐赠支出" id="9"/>
 		<subTitle name="非常损失" id="10"/>
+		<subTitle name="固定资产盘亏" id="12"/>
 	</title>
 </Titles>
