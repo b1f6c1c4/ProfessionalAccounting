@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace AccountingServer
+namespace AccountingServer.BLL
 {
     /// <summary>
     ///     定宽字符串
