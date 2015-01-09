@@ -279,7 +279,7 @@ namespace AccountingServer.BLL
                 var voucher = m_Db.SelectVoucher(item.VoucherID);
                 if (voucher != null)
                 {
-                    if (voucher.Date != (isCollapsed ? null : item.Date))
+                    if (voucher.Date != (isCollapsed ? null : item.Date) && !disableCreation)
                         return false;
 
                     voucher.Type = VoucherType.Ordinal;
@@ -357,7 +357,7 @@ namespace AccountingServer.BLL
                 var voucher = m_Db.SelectVoucher(item.VoucherID);
                 if (voucher != null)
                 {
-                    if (voucher.Date != (isCollapsed ? null : item.Date))
+                    if (voucher.Date != (isCollapsed ? null : item.Date) && !disableCreation)
                         return false;
 
                     voucher.Type = VoucherType.Depreciation;
@@ -480,7 +480,7 @@ namespace AccountingServer.BLL
                 var voucher = m_Db.SelectVoucher(item.VoucherID);
                 if (voucher != null)
                 {
-                    if (voucher.Date != (isCollapsed ? null : item.Date))
+                    if (voucher.Date != (isCollapsed ? null : item.Date) && !disableCreation)
                         return false;
 
                     var fund = bookValue - item.FairValue;

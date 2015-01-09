@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms.VisualStyles;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 
@@ -207,6 +208,31 @@ namespace AccountingServer.Console
                 {
                     foreach (var item in m_Accountant.Update(a, rng, isCollapsed))
                         sb.AppendLine(ListAssetItem(item));
+
+                    m_Accountant.Update(a);
+                }
+                return sb.ToString();
+            }
+            if (sp[0].StartsWith("a-chk", StringComparison.OrdinalIgnoreCase))
+            {
+                editable = true;
+
+                var filter = ParseAssetQuery(query);
+
+                var rng = new DateFilter(null, DateTime.Now.Date);
+
+                var sb = new StringBuilder();
+                foreach (var a in m_Accountant.FilteredSelect(filter))
+                {
+                    var sbi = new StringBuilder();
+                    foreach (var item in m_Accountant.Update(a, rng, false, true))
+                        sbi.AppendLine(ListAssetItem(item));
+
+                    if (sbi.Length != 0)
+                    {
+                        sb.AppendLine(ListAsset(a, null, false));
+                        sb.AppendLine(sbi.ToString());
+                    }
 
                     m_Accountant.Update(a);
                 }
