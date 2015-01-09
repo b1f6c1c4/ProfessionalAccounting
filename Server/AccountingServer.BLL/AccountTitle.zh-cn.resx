@@ -417,6 +417,12 @@
   <data name="T671101" xml:space="preserve">
     <value>处置固定资产净损失</value>
   </data>
+  <data name="T671102" xml:space="preserve">
+    <value>处置无形资产净损失</value>
+  </data>
+  <data name="T671105" xml:space="preserve">
+    <value>处置其他长期资产净损失</value>
+  </data>
   <data name="T671108" xml:space="preserve">
     <value>罚没及滞纳金支出</value>
   </data>
@@ -425,5 +431,8 @@
   </data>
   <data name="T671110" xml:space="preserve">
     <value>非常损失</value>
+  </data>
+  <data name="T671112" xml:space="preserve">
+    <value>固定资产盘亏</value>
   </data>
 </root>
