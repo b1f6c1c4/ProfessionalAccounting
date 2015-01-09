@@ -62,11 +62,35 @@ namespace AccountingServer.Console
                 var sb = new StringBuilder();
                 var filter = ParseAssetQuery(query);
                 foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
-                    sb.Append(ListAsset(a, false));
+                    sb.Append(ListAsset(a, DateTime.Now.Date, false));
 
                 return sb.ToString();
             }
-            if (sp[0] == "a-li" || sp[0] == "a-list")
+            if (sp[0].StartsWith("a@"))
+            {
+                editable = false;
+
+                var dt = DateTime.ParseExact(sp[0] + "01", "a@yyyyMMdd", null).AddMonths(1).AddDays(-1);
+
+                var sb = new StringBuilder();
+                var filter = ParseAssetQuery(query);
+                foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
+                    sb.Append(ListAsset(a, dt, false));
+
+                return sb.ToString();
+            }
+            if (sp[0] == "a-all")
+            {
+                editable = false;
+
+                var sb = new StringBuilder();
+                var filter = ParseAssetQuery(query);
+                foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
+                    sb.Append(ListAsset(a, null, false));
+
+                return sb.ToString();
+            }
+            if (sp[0].StartsWith("a-li"))
             {
                 editable = false;
 
@@ -194,17 +218,24 @@ namespace AccountingServer.Console
         ///     显示资产及其计算表
         /// </summary>
         /// <param name="asset">资产</param>
+        /// <param name="dt">计算账面价值的时间</param>
         /// <param name="showSchedule">是否显示计算表</param>
         /// <returns>格式化的信息</returns>
-        private string ListAsset(Asset asset, bool showSchedule = true)
+        private string ListAsset(Asset asset, DateTime? dt = null, bool showSchedule = true)
         {
             var sb = new StringBuilder();
+
+            var bookValue = Accountant.GetBookValueOn(asset, dt);
+            if (dt.HasValue &&
+                (!bookValue.HasValue || bookValue < Accountant.Tolerance))
+                return null;
             sb.AppendFormat(
-                            "{0} {1}{2:yyyyMMdd}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}",
+                            "{0} {1}{2:yyyyMMdd}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}",
                             asset.StringID,
                             asset.Name.CPadRight(35),
                             asset.Date,
                             asset.Value.AsCurrency().CPadLeft(13),
+                            dt == null? "-".CPadLeft(13): bookValue.AsCurrency().CPadLeft(13),
                             asset.Salvge.AsCurrency().CPadLeft(13),
                             asset.Title.AsTitle().CPadLeft(5),
                             asset.DepreciationTitle.AsTitle().CPadLeft(5),
