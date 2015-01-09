@@ -127,9 +127,23 @@ namespace AccountingServer.DAL
                 return false;
 
             read = null;
-            //bsonReader.ReadNull();
-            bsonReader.ReadInt32(); // TODO:fix this
+            bsonReader.ReadNull();
             return true;
+        }
+
+        public static T ReadDocument<T>(this BsonReader bsonReader, string expected, ref string read,
+                                        Func<BsonReader, T> parser) where T : class
+        {
+            if (read == null)
+                read = bsonReader.ReadName();
+            if (read != expected)
+                return null;
+
+            read = null;
+            bsonReader.ReadStartDocument();
+            var res = parser(bsonReader);
+            bsonReader.ReadEndDocument();
+            return res;
         }
 
         public static List<T> ReadArray<T>(this BsonReader bsonReader, string expected, ref string read,

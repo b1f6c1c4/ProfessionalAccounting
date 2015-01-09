@@ -39,7 +39,7 @@ namespace AccountingServer.DAL
         public override void Serialize(BsonWriter bsonWriter, Type nominalType, object value,
                                        IBsonSerializationOptions options) { Serialize(bsonWriter, (AssetItem)value); }
 
-        internal static void Serialize(BsonWriter bsonWriter, AssetItem item)
+        public static void Serialize(BsonWriter bsonWriter, AssetItem item)
         {
             bsonWriter.WriteStartDocument();
             bsonWriter.WriteObjectId("voucher", item.VoucherID);

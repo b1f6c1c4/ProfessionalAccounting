@@ -10,7 +10,9 @@ namespace AccountingServer.DAL
     internal class VoucherSerializer : BsonBaseSerializer, IBsonIdProvider
     {
         public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
-                                           IBsonSerializationOptions options)
+                                           IBsonSerializationOptions options) { return Deserialize(bsonReader); }
+
+        public static Voucher Deserialize(BsonReader bsonReader)
         {
             string read = null;
             bsonReader.ReadStartDocument();
@@ -53,10 +55,10 @@ namespace AccountingServer.DAL
         }
 
         public override void Serialize(BsonWriter bsonWriter, Type nominalType, object value,
-                                       IBsonSerializationOptions options)
-        {
-            var voucher = (Voucher)value;
+                                       IBsonSerializationOptions options) { Serialize(bsonWriter, (Voucher)value); }
 
+        public static void Serialize(BsonWriter bsonWriter, Voucher voucher)
+        {
             bsonWriter.WriteStartDocument();
             bsonWriter.WriteObjectId("_id", voucher.ID);
             bsonWriter.Write("date", voucher.Date);
