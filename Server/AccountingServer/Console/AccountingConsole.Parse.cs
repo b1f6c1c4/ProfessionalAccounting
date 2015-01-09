@@ -17,7 +17,7 @@ namespace AccountingServer.Console
             var detail = new VoucherDetail();
             s = s.Trim();
             string dateQ;
-            if (s.StartsWith("T"))
+            if (s.StartsWith("T", StringComparison.OrdinalIgnoreCase))
             {
                 var id1 = s.IndexOf("'", StringComparison.Ordinal);
                 if (id1 > 0)
