@@ -69,15 +69,16 @@ R0-exp	r0-exp		本财月消费报销报表（用于复制到Excel）
 
 
 资产：
-a							检索所有资产（以报告形式显示，无计算表）
-a-list						检索所有资产（以报告形式显示）
-a-query						检索所有资产
-a-register					注册所有凭证
-a-unregister					解除所有凭证
-a-redep						重新计算所有折旧
-a-reset-hard					保留获得和处置，清除账上其它所有和资产相关的内容
-a-apply [yyyyMM]				将某月的资产折旧/减值登记入账
-a-apply-collapse [ yyyyMM]	将某月（含）以前的资产折旧/减值一起登记入账，按无日期处理
+a									检索所有资产（以报告形式显示，无计算表）
+a-li		a-list '(GUID)'				检索某资产（以报告形式显示）
+a-q		a-query '(GUID)'				检索某资产
+a-reg	a-register '(GUID)'			注册所有凭证
+a-unr	a-unregister	 '(GUID)'		解除所有凭证
+a-rd		a-redep '(GUID)'				重新计算折旧
+a-reset-hard '(GUID)'				保留获得和处置，清除账上其它所有和某资产相关的内容
+a-ap		a-apply						将本月的资产折旧/减值登记入账
+a-ap		a-apply '(GUID)' [yyyyMM]	将某月的某资产折旧/减值登记入账
+a-ap-co	a-apply-collapse [ yyyyMM]	将某月（含）以前的资产折旧/减值一起登记入账，按无日期处理
 注：此时无@为自然月，有@为财月
 
 
