@@ -78,7 +78,7 @@ namespace AccountingServer.BLL
             var fund = sp[1].AsCurrency();
             var remarks = new[]
                               { "观畴园", "紫荆园", "桃李园", "清青比萨", "清青快餐", "清青休闲", "清青时代", "玉树园", "闻馨园", "听涛园", "丁香园", "芝兰园" };
-            helper.Insert(
+            helper.Upsert(
                           new Voucher
                               {
                                   Date = sp[0].AsDate(),
@@ -139,7 +139,7 @@ namespace AccountingServer.BLL
             }
             else
                 dbDetails = new[] { credit, debit };
-            helper.Insert(new Voucher { Date = sp[0].AsDate(), Details = dbDetails });
+            helper.Upsert(new Voucher { Date = sp[0].AsDate(), Details = dbDetails });
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace AccountingServer.BLL
                         break;
                 }
 
-                helper.Insert(
+                helper.Upsert(
                               new Voucher
                                   {
                                       Date = dt,
@@ -261,7 +261,7 @@ namespace AccountingServer.BLL
             else
                 fund = sp[1].AsCurrency();
 
-            helper.Insert(
+            helper.Upsert(
                           new Voucher
                               {
                                   Date = dt,
@@ -314,7 +314,7 @@ namespace AccountingServer.BLL
                 default:
                     throw new InvalidOperationException();
             }
-            helper.Insert(
+            helper.Upsert(
                           new Voucher
                               {
                                   Date = sp[0].AsDate(),
@@ -355,7 +355,7 @@ namespace AccountingServer.BLL
                 default:
                     throw new InvalidOperationException();
             }
-            helper.Insert(
+            helper.Upsert(
                           new Voucher
                               {
                                   Date = sp[0].AsDate(),
@@ -387,7 +387,7 @@ namespace AccountingServer.BLL
             var sp = result.Split(',');
             var fund = sp[1].AsCurrency();
             var remarks = new[] { "5184", "3593", "9767" };
-            helper.Insert(
+            helper.Upsert(
                           new Voucher
                               {
                                   Date = sp[0].AsDate(),
@@ -437,7 +437,7 @@ namespace AccountingServer.BLL
                 default:
                     throw new InvalidOperationException();
             }
-            helper.Insert(
+            helper.Upsert(
                           new Voucher
                               {
                                   Date = sp[0].AsDate(),
@@ -483,54 +483,7 @@ namespace AccountingServer.BLL
                                   });
             }
 
-            helper.Insert(new Voucher { Date = sp[0].AsDate(), Details = dbDetails.ToArray() });
+            helper.Upsert(new Voucher { Date = sp[0].AsDate(), Details = dbDetails.ToArray() });
         }
-
-        /// <summary>
-        ///     期末摊销
-        /// </summary>
-        /// <param name="result">序列化的数据</param>
-        /// <param name="helper">会计业务处理类</param>
-        [Pattern(Name = "（期末摊销）", TextPattern = "{0} 期末摊销", UI = "Date[日期]")]
-        public static void 期末摊销(string result, Accountant helper)
-        {
-            helper.Insert(
-                          new Voucher
-                              {
-                                  Date = result.AsDate(),
-                                  Details =
-                                      new[]
-                                          {
-                                              new VoucherDetail
-                                                  {
-                                                      Title = 1123,
-                                                      Content = "本科学费",
-                                                      Fund = 108.6957
-                                                  },
-                                              new VoucherDetail
-                                                  {
-                                                      Title = 6401,
-                                                      Content = "本科学费",
-                                                      Fund = 108.6957
-                                                  }
-                                          }
-                              });
-        }
-
-        ///// <summary>
-        /////     折旧
-        ///// </summary>
-        ///// <param name="result">序列化的数据</param>
-        ///// <param name="helper">会计业务处理类</param>
-        //[Pattern(Name = "（期末折旧）", TextPattern = "折旧", UI = "")]
-        //public static void 折旧(string result, Accountant helper) { helper.Depreciate(); }
-
-        /// <summary>
-        ///     结转
-        /// </summary>
-        /// <param name="result">序列化的数据</param>
-        /// <param name="helper">会计业务处理类</param>
-        [Pattern(Name = "（期末结转）", TextPattern = "结转", UI = "")]
-        public static void 结转(string result, Accountant helper) { helper.Carry(); }
     }
 }

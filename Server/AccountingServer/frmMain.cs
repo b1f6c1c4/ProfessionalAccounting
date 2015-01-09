@@ -54,7 +54,6 @@ namespace AccountingServer
 
         private bool GetCSharpCode(out int begin, out int end, out bool isAsset)
         {
-
             end = -1;
             begin = textBoxResult.SelectionStart + textBoxResult.SelectionLength;
             var voucherBegin = textBoxResult.Text.LastIndexOf("@new Voucher", begin, StringComparison.Ordinal);
@@ -66,8 +65,8 @@ namespace AccountingServer
                 return false;
             }
 
-            if (voucherBegin != -1 && assetBegin != -1)
-            {
+            if (voucherBegin != -1 &&
+                assetBegin != -1)
                 if (voucherBegin > assetBegin)
                 {
                     isAsset = false;
@@ -78,7 +77,6 @@ namespace AccountingServer
                     isAsset = true;
                     begin = assetBegin;
                 }
-            }
             else if (voucherBegin == -1)
             {
                 isAsset = true;
@@ -95,6 +93,10 @@ namespace AccountingServer
                 return false;
 
             end += 1;
+            if (end + 2 < textBoxResult.Text.Length &&
+                textBoxResult.Text[end + 1] == '\r')
+                end += 2;
+
             return true;
         }
 
@@ -124,7 +126,7 @@ namespace AccountingServer
 
             try
             {
-                var s = textBoxResult.Text.Substring(begin + 1, end - begin - 1);
+                var s = textBoxResult.Text.Substring(begin, end - begin + 1).Trim().Trim('@');
                 var result = isAsset ? m_Console.ExecuteAssetUpsert(s) : m_Console.ExecuteVoucherUpsert(s);
                 textBoxResult.Text = textBoxResult.Text.Remove(begin, end - begin + 1)
                                                   .Insert(begin, result);
@@ -152,7 +154,7 @@ namespace AccountingServer
 
             try
             {
-                var s = textBoxResult.Text.Substring(begin + 1, end - begin - 1);
+                var s = textBoxResult.Text.Substring(begin, end - begin + 1).Trim().Trim('@');
                 if (isAsset ? !m_Console.ExecuteAssetRemoval(s) : !m_Console.ExecuteVoucherRemoval(s))
                     throw new Exception();
                 // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression

@@ -114,7 +114,7 @@ namespace AccountingServer.DAL
                 bsonReader.ReadNull();
                 return null;
             }
-            return BsonUtils.ToDateTimeFromMillisecondsSinceEpoch(bsonReader.ReadDateTime());
+            return BsonUtils.ToDateTimeFromMillisecondsSinceEpoch(bsonReader.ReadDateTime()).ToLocalTime();
         }
 
         public static bool ReadNull(this BsonReader bsonReader, string expected, ref string read)

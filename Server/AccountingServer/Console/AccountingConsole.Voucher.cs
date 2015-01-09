@@ -15,7 +15,7 @@ namespace AccountingServer.Console
 
             if (voucher.ID == null)
             {
-                if (!m_Accountant.Insert(voucher))
+                if (!m_Accountant.Upsert(voucher))
                     throw new Exception();
             }
             else if (!m_Accountant.Update(voucher))

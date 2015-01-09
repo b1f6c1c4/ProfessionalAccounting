@@ -1,6 +1,5 @@
 using System;
 using AccountingServer.Entities;
-using MongoDB.Bson;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
@@ -10,10 +9,7 @@ namespace AccountingServer.DAL
     internal class AssetItemSerializer : BsonBaseSerializer
     {
         public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
-                                           IBsonSerializationOptions options)
-        {
-            return Deserialize(bsonReader);
-        }
+                                           IBsonSerializationOptions options) { return Deserialize(bsonReader); }
 
         public static AssetItem Deserialize(BsonReader bsonReader)
         {
@@ -41,10 +37,7 @@ namespace AccountingServer.DAL
         }
 
         public override void Serialize(BsonWriter bsonWriter, Type nominalType, object value,
-                                       IBsonSerializationOptions options)
-        {
-            Serialize(bsonWriter, (AssetItem)value);
-        }
+                                       IBsonSerializationOptions options) { Serialize(bsonWriter, (AssetItem)value); }
 
         internal static void Serialize(BsonWriter bsonWriter, AssetItem item)
         {

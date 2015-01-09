@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms.VisualStyles;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 
@@ -22,7 +21,7 @@ namespace AccountingServer.Console
 
             if (!asset.ID.HasValue)
             {
-                if (!m_Accountant.Insert(asset))
+                if (!m_Accountant.Upsert(asset))
                     throw new Exception();
             }
             else if (!m_Accountant.Update(asset))
@@ -146,7 +145,8 @@ namespace AccountingServer.Console
                 }
                 return sb.ToString();
             }
-            if (sp[0].Equals("a-rd", StringComparison.OrdinalIgnoreCase) || sp[0].Equals("a-redep", StringComparison.OrdinalIgnoreCase))
+            if (sp[0].Equals("a-rd", StringComparison.OrdinalIgnoreCase) ||
+                sp[0].Equals("a-redep", StringComparison.OrdinalIgnoreCase))
             {
                 editable = true;
 
@@ -188,7 +188,8 @@ namespace AccountingServer.Console
             if (sp[0].StartsWith("a-ap", StringComparison.OrdinalIgnoreCase))
             {
                 editable = true;
-                var isCollapsed = sp[0].EndsWith("-collapse", StringComparison.OrdinalIgnoreCase) || sp[0].EndsWith("-co", StringComparison.OrdinalIgnoreCase);
+                var isCollapsed = sp[0].EndsWith("-collapse", StringComparison.OrdinalIgnoreCase) ||
+                                  sp[0].EndsWith("-co", StringComparison.OrdinalIgnoreCase);
 
                 string dq;
                 Asset filter = null;

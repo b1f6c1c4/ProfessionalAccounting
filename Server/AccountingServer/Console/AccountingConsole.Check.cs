@@ -48,7 +48,8 @@ namespace AccountingServer.Console
                     title.Item1 != 1602 &&
                     title.Item1 != 1603 &&
                     title.Item1 != 1702 &&
-                    title.Item1 != 1703)
+                    title.Item1 != 1703 &&
+                    !(title.Item1 == 1101 && title.Item2 == 02))
                 {
                     foreach (
                         var content in

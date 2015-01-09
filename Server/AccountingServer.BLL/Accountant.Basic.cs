@@ -205,14 +205,14 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     添加记账凭证
-        ///     <para>若<paramref name="entity" />没有指定编号，则添加成功后会自动给<paramref name="entity" />添加编号</para>
+        ///     添加或替换记账凭证
+        ///     <para>若无编号，则添加新编号</para>
         /// </summary>
-        /// <param name="entity">记账凭证</param>
+        /// <param name="entity">新记账凭证</param>
         /// <returns>是否成功</returns>
-        public bool Insert(Voucher entity)
+        public bool Upsert(Voucher entity)
         {
-            return m_Db.Insert(entity);
+            return m_Db.Upsert(entity);
         }
 
         /// <summary>
@@ -263,14 +263,14 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     添加资产
-        ///     <para>若<paramref name="entity" />没有指定编号，则添加成功后会自动给<paramref name="entity" />添加编号</para>
+        ///     添加或替换资产
+        ///     <para>若无编号，则添加新编号</para>
         /// </summary>
-        /// <param name="entity">资产</param>
+        /// <param name="entity">新资产</param>
         /// <returns>是否成功</returns>
-        public bool Insert(Asset entity)
+        public bool Upsert(Asset entity)
         {
-            return m_Db.Insert(entity);
+            return m_Db.Upsert(entity);
         }
 
         /// <summary>
