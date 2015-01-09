@@ -55,7 +55,7 @@ namespace AccountingServer.Console
             var sp = s.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
             var query = sp.Length == 1 ? String.Empty : sp[1];
 
-            if (sp[0] == "a")
+            if (sp[0].Equals("a", StringComparison.OrdinalIgnoreCase))
             {
                 editable = false;
 
@@ -66,7 +66,7 @@ namespace AccountingServer.Console
 
                 return sb.ToString();
             }
-            if (sp[0].StartsWith("a@"))
+            if (sp[0].StartsWith("a@", StringComparison.OrdinalIgnoreCase))
             {
                 editable = false;
 
@@ -79,7 +79,7 @@ namespace AccountingServer.Console
 
                 return sb.ToString();
             }
-            if (sp[0] == "a-all")
+            if (sp[0].Equals("a-all", StringComparison.OrdinalIgnoreCase))
             {
                 editable = false;
 
@@ -90,7 +90,7 @@ namespace AccountingServer.Console
 
                 return sb.ToString();
             }
-            if (sp[0].StartsWith("a-li"))
+            if (sp[0].StartsWith("a-li", StringComparison.OrdinalIgnoreCase))
             {
                 editable = false;
 
@@ -101,7 +101,7 @@ namespace AccountingServer.Console
 
                 return sb.ToString();
             }
-            if (sp[0] == "a-q" || sp[0] == "a-query")
+            if (sp[0].StartsWith("a-q", StringComparison.OrdinalIgnoreCase))
             {
                 editable = true;
 
@@ -112,7 +112,7 @@ namespace AccountingServer.Console
 
                 return sb.ToString();
             }
-            if (sp[0] == "a-reg" || sp[0] == "a-register")
+            if (sp[0].StartsWith("a-reg", StringComparison.OrdinalIgnoreCase))
             {
                 editable = true;
 
@@ -127,7 +127,7 @@ namespace AccountingServer.Console
                 }
                 return sb.ToString();
             }
-            if (sp[0] == "a-unr" || sp[0] == "a-unregister")
+            if (sp[0].StartsWith("a-unr", StringComparison.OrdinalIgnoreCase))
             {
                 editable = true;
 
@@ -143,7 +143,7 @@ namespace AccountingServer.Console
                 }
                 return sb.ToString();
             }
-            if (sp[0] == "a-rd" || sp[0] == "a-redep")
+            if (sp[0].Equals("a-rd", StringComparison.OrdinalIgnoreCase) || sp[0].Equals("a-redep", StringComparison.OrdinalIgnoreCase))
             {
                 editable = true;
 
@@ -157,7 +157,7 @@ namespace AccountingServer.Console
                 }
                 return sb.ToString();
             }
-            if (sp[0] == "a-reset-hard")
+            if (sp[0].Equals("a-reset-hard", StringComparison.OrdinalIgnoreCase))
             {
                 editable = true;
 
@@ -182,10 +182,10 @@ namespace AccountingServer.Console
                 }
                 return "OK " + cnt.ToString(CultureInfo.InvariantCulture);
             }
-            if (sp[0].StartsWith("a-ap"))
+            if (sp[0].StartsWith("a-ap", StringComparison.OrdinalIgnoreCase))
             {
                 editable = true;
-                var isCollapsed = sp[0].EndsWith("-collapse") || sp[0].EndsWith("-co");
+                var isCollapsed = sp[0].EndsWith("-collapse", StringComparison.OrdinalIgnoreCase) || sp[0].EndsWith("-co", StringComparison.OrdinalIgnoreCase);
 
                 string dq;
                 Asset filter = null;
@@ -235,7 +235,7 @@ namespace AccountingServer.Console
                             asset.Name.CPadRight(35),
                             asset.Date,
                             asset.Value.AsCurrency().CPadLeft(13),
-                            dt == null? "-".CPadLeft(13): bookValue.AsCurrency().CPadLeft(13),
+                            dt == null ? "-".CPadLeft(13) : bookValue.AsCurrency().CPadLeft(13),
                             asset.Salvge.AsCurrency().CPadLeft(13),
                             asset.Title.AsTitle().CPadLeft(5),
                             asset.DepreciationTitle.AsTitle().CPadLeft(5),

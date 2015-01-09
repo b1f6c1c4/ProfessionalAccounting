@@ -25,7 +25,7 @@ namespace AccountingServer.Console
         public string Execute(string s, out bool editable)
         {
             s = s.Trim();
-            switch (s)
+            switch (s.ToLowerInvariant())
             {
                 case "lc":
                     editable = false;
@@ -74,8 +74,7 @@ namespace AccountingServer.Console
                 case "fetch":
                     editable = true;
                     return FetchInfo();
-                case "Titles":
-                case "T":
+                case "titles":
                 case "t":
                     editable = false;
                     return ListTitles();
@@ -96,7 +95,7 @@ namespace AccountingServer.Console
                     return "OK";
             }
 
-            if (s.StartsWith("a"))
+            if (s.StartsWith("a", StringComparison.OrdinalIgnoreCase))
                 return ExecuteAsset(s, out editable);
 
             if (s.EndsWith("`"))

@@ -58,8 +58,6 @@ Alt+Enter			Upsert
 Alt+Delete			Remove
 
 
-Voucher数据呈现：C#表达式
-
 Chart数据呈现：
 C0		c0			本财月决算
 
