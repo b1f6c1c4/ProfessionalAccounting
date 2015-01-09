@@ -29,6 +29,23 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
+        ///     获取资产的账面价值
+        /// </summary>
+        /// <param name="asset">资产</param>
+        /// <param name="dt">日期，若为<c>null</c>则返回原值</param>
+        /// <returns>指定日期的账面价值，若尚未购置则为<c>null</c></returns>
+        public static double? GetBookValueOn(Asset asset, DateTime? dt)
+        {
+            if (!dt.HasValue || asset.Schedule == null)
+                return asset.Value;
+
+            var last = asset.Schedule.LastOrDefault(item => DateHelper.CompareDate(item.Date, dt) <= 0);
+            if (last != null)
+                return last.BookValue;
+            return null;
+        }
+
+        /// <summary>
         ///     调整资产计算表
         /// </summary>
         /// <param name="asset">资产</param>
