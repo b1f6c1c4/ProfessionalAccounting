@@ -77,6 +77,7 @@ namespace AccountingServer.Chart
         {
             var ar = new ChartArea("投资资产");
             SetupChartArea(ar);
+            ar.AxisY.Minimum = 0;
             return ar;
         }
 
@@ -120,7 +121,7 @@ namespace AccountingServer.Chart
             ar.AlignmentOrientation = AreaAlignmentOrientations.Vertical;
             ar.AlignmentStyle = AreaAlignmentStyles.All;
             ar.AxisY.Minimum = 0;
-            ar.AxisY.Maximum = 7000;
+            //ar.AxisY.Maximum = 7000;
             return ar;
         }
 
@@ -155,9 +156,7 @@ namespace AccountingServer.Chart
             ar.AlignWithChartArea = "投资资产";
             ar.AlignmentOrientation = AreaAlignmentOrientations.Vertical;
             ar.AlignmentStyle = AreaAlignmentStyles.All;
-            ar.AxisX.Maximum = EndDate.ToOADate();
-            ar.AxisY.Minimum = 44000;
-            ar.AxisY.Maximum = 62000;
+            ar.AxisY.Minimum = 0;
             return ar;
         }
 
@@ -227,7 +226,7 @@ namespace AccountingServer.Chart
             var ar = new ChartArea("生活费用");
             SetupChartArea(ar);
             ar.AxisY.Minimum = 0;
-            ar.AxisY.Maximum = 2000;
+            //ar.AxisY.Maximum = 2000;
             return ar;
         }
 
@@ -348,7 +347,7 @@ namespace AccountingServer.Chart
             ar.AlignmentOrientation = AreaAlignmentOrientations.Vertical;
             ar.AlignmentStyle = AreaAlignmentStyles.All;
             ar.AxisY.Minimum = 0;
-            ar.AxisY.Maximum = 2000;
+            //ar.AxisY.Maximum = 2000;
             return ar;
         }
 

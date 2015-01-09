@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 
@@ -27,18 +26,6 @@ namespace AccountingServer.Console
             s = s.Trim();
             switch (s.ToLowerInvariant())
             {
-                case "lc":
-                    editable = false;
-                    {
-                        var res = LaunchServer();
-                        if (!res.StartsWith("OK"))
-                            return res;
-
-                        Thread.Sleep(100);
-                        res += Environment.NewLine;
-                        res += ConnectServer();
-                        return res;
-                    }
                 case "launch":
                 case "lau":
                     editable = false;

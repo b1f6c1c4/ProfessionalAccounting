@@ -2,11 +2,12 @@ using System;
 using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Bson.Serialization.Serializers;
 
 namespace AccountingServer.DAL
 {
-    internal class VoucherSerializer : BsonBaseSerializer
+    internal class VoucherSerializer : BsonBaseSerializer, IBsonIdProvider
     {
         public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
                                            IBsonSerializationOptions options)
@@ -39,6 +40,9 @@ namespace AccountingServer.DAL
                     break;
                 case "unc":
                     voucher.Type = VoucherType.Uncertain;
+                    break;
+                default:
+                    voucher.Type = VoucherType.Ordinal;
                     break;
             }
             voucher.Details = bsonReader.ReadArray("detail", ref read, VoucherDetailSerializer.Deserialize).ToArray();
@@ -89,5 +93,19 @@ namespace AccountingServer.DAL
                 bsonWriter.WriteString("remark", voucher.Remark);
             bsonWriter.WriteEndDocument();
         }
+
+        public bool GetDocumentId(object document, out object id, out Type idNominalType, out IIdGenerator idGenerator)
+        {
+            id = null;
+            idNominalType = typeof(Voucher);
+            idGenerator = new StringObjectIdGenerator();
+            if (((Voucher)document).ID == null)
+                return false;
+
+            id = ((Voucher)document).ID;
+            return true;
+        }
+
+        public void SetDocumentId(object document, object id) { ((Voucher)document).ID = (string)id; }
     }
 }

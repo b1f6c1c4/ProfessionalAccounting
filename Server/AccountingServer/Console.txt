@@ -103,6 +103,3 @@ fetch				从ecard.tsinghua.edu.cn上获取学生卡交易记录，与现有账�
 其他：
 ?	help			帮助
 exit				退出
-
-lc					启动并连接
-ue					关闭并退出

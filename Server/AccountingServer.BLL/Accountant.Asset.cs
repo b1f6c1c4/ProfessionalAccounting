@@ -497,7 +497,7 @@ namespace AccountingServer.BLL
                                   Remark = "automatically generated",
                                   Details = details
                               };
-            var res = m_Db.Insert(voucher);
+            var res = m_Db.Upsert(voucher);
             item.VoucherID = voucher.ID;
             return res;
         }

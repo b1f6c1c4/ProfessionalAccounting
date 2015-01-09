@@ -112,6 +112,7 @@ namespace AccountingServer.TCP
             m_ReadThread.Abort();
             m_ListenThread.Abort();
         }
+
         ~TcpHelper() { m_Listener.Stop(); }
 
         public string IPEndPointString
@@ -134,10 +135,7 @@ namespace AccountingServer.TCP
             Write(buff, buff.Length);
         }
 
-        private void Write(byte[] buff, int length)
-        {
-            m_Client.Send(buff, 0, length, SocketFlags.None);
-        }
+        private void Write(byte[] buff, int length) { m_Client.Send(buff, 0, length, SocketFlags.None); }
 
         private void Listen()
         {

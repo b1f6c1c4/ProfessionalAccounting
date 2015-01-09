@@ -2,11 +2,12 @@ using System;
 using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Bson.Serialization.Serializers;
 
 namespace AccountingServer.DAL
 {
-    internal class AssetSerializer : BsonBaseSerializer
+    internal class AssetSerializer : BsonBaseSerializer, IBsonIdProvider
     {
         public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
                                            IBsonSerializationOptions options)
@@ -39,6 +40,9 @@ namespace AccountingServer.DAL
                     break;
                 case "dd":
                     asset.Method = DepreciationMethod.DoubleDeclineMethod;
+                    break;
+                default:
+                    asset.Method = DepreciationMethod.None;
                     break;
             }
             if (asset.DepreciationExpenseTitle > 100)
@@ -82,19 +86,18 @@ namespace AccountingServer.DAL
                              asset.DevaluationExpenseSubTitle.HasValue
                                  ? asset.DevaluationExpenseTitle * 100 + asset.DevaluationExpenseSubTitle
                                  : asset.DevaluationExpenseTitle);
-            if (asset.Method != DepreciationMethod.None)
-                switch (asset.Method)
-                {
-                    case DepreciationMethod.StraightLine:
-                        bsonWriter.Write("method", "sl");
-                        break;
-                    case DepreciationMethod.SumOfTheYear:
-                        bsonWriter.Write("method", "sy");
-                        break;
-                    case DepreciationMethod.DoubleDeclineMethod:
-                        bsonWriter.Write("method", "dd");
-                        break;
-                }
+            switch (asset.Method)
+            {
+                case DepreciationMethod.StraightLine:
+                    bsonWriter.Write("method", "sl");
+                    break;
+                case DepreciationMethod.SumOfTheYear:
+                    bsonWriter.Write("method", "sy");
+                    break;
+                case DepreciationMethod.DoubleDeclineMethod:
+                    bsonWriter.Write("method", "dd");
+                    break;
+            }
             if (asset.Schedule != null)
             {
                 bsonWriter.WriteStartArray("schedule");
@@ -105,5 +108,19 @@ namespace AccountingServer.DAL
             bsonWriter.Write("remark", asset.Remark);
             bsonWriter.WriteEndDocument();
         }
+
+        public bool GetDocumentId(object document, out object id, out Type idNominalType, out IIdGenerator idGenerator)
+        {
+            id = null;
+            idNominalType = typeof(Asset);
+            idGenerator = new GuidGenerator();
+            if (((Asset)document).ID == null)
+                return false;
+
+            id = ((Asset)document).ID;
+            return true;
+        }
+
+        public void SetDocumentId(object document, object id) { ((Asset)document).ID = (Guid)id; }
     }
 }

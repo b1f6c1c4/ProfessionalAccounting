@@ -257,7 +257,7 @@ namespace AccountingServer.DAL
         {
             var queryVoucher = GetQuery(vfilter);
             var queryFilter = GetQuery(filter);
-            return queryFilter != null? And(queryVoucher, Query.ElemMatch("detail", queryFilter)): queryVoucher;
+            return queryFilter != null ? And(queryVoucher, Query.ElemMatch("detail", queryFilter)) : queryVoucher;
         }
 
         /// <summary>
@@ -359,7 +359,7 @@ namespace AccountingServer.DAL
 
         private static IMongoQuery And(ICollection<IMongoQuery> queries)
         {
-            queries.Remove(null);
+            while (queries.Remove(null)) { }
             return queries.Any() ? Query.And(queries) : null;
         }
 
@@ -369,12 +369,6 @@ namespace AccountingServer.DAL
         public IEnumerable<Voucher> FilteredSelect(Voucher filter, DateFilter rng)
         {
             return m_Vouchers.Find(And(GetQuery(filter), GetQuery(rng)));
-        }
-
-        public bool Insert(Voucher entity)
-        {
-            var res = m_Vouchers.Save(entity);
-            return res.DocumentsAffected == 1;
         }
 
         public bool DeleteVoucher(string id)

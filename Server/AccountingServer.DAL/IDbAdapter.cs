@@ -40,14 +40,6 @@ namespace AccountingServer.DAL
         IEnumerable<Voucher> FilteredSelect(Voucher filter, DateFilter rng);
 
         /// <summary>
-        ///     添加记账凭证
-        ///     <para>若<paramref name="entity" />没有指定编号，则添加成功后会自动给<paramref name="entity" />添加编号</para>
-        /// </summary>
-        /// <param name="entity">记账凭证</param>
-        /// <returns>是否成功</returns>
-        bool Insert(Voucher entity);
-
-        /// <summary>
         ///     按编号删除记账凭证
         /// </summary>
         /// <param name="id">编号</param>
@@ -63,7 +55,7 @@ namespace AccountingServer.DAL
 
         /// <summary>
         ///     添加或替换记账凭证
-        ///     <para>不能改变记账凭证的编号</para>
+        ///     <para>若无编号，则添加新编号</para>
         /// </summary>
         /// <param name="entity">新记账凭证</param>
         /// <returns>是否成功</returns>
@@ -133,14 +125,6 @@ namespace AccountingServer.DAL
         IEnumerable<Asset> FilteredSelect(Asset filter);
 
         /// <summary>
-        ///     添加资产
-        ///     <para>若<paramref name="entity" />没有指定编号，则添加成功后会自动给<paramref name="entity" />添加编号</para>
-        /// </summary>
-        /// <param name="entity">资产</param>
-        /// <returns>是否成功</returns>
-        bool Insert(Asset entity);
-
-        /// <summary>
         ///     按编号删除资产
         /// </summary>
         /// <param name="id">编号</param>
@@ -156,7 +140,7 @@ namespace AccountingServer.DAL
 
         /// <summary>
         ///     添加或替换资产
-        ///     <para>不能改变资产的编号</para>
+        ///     <para>若无编号，则添加新编号</para>
         /// </summary>
         /// <param name="entity">新资产</param>
         /// <returns>是否成功</returns>

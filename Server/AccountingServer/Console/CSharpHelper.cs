@@ -199,7 +199,6 @@ namespace AccountingServer.Console
                     };
 
                 foreach (var item in asset.Schedule)
-                {
                     if (item is AcquisationItem)
                         present(item, String.Format("OrigValue = {0},", (item as AcquisationItem).OrigValue));
                     else if (item is DepreciateItem)
@@ -208,7 +207,6 @@ namespace AccountingServer.Console
                         present(item, String.Format("FairValue = {0},", (item as DevalueItem).FairValue));
                     else if (item is DispositionItem)
                         present(item, "");
-                }
                 sb.AppendLine("   } }@");
             }
             else
