@@ -7,6 +7,8 @@ namespace AccountingServer.BLL
 {
     public partial class Accountant
     {
+        private const int DefaultDispositionTitle = 1606;
+
         /// <summary>
         ///     获取指定月的最后一天
         /// </summary>
@@ -36,7 +38,8 @@ namespace AccountingServer.BLL
         /// <returns>指定日期的账面价值，若尚未购置则为<c>null</c></returns>
         public static double? GetBookValueOn(Asset asset, DateTime? dt)
         {
-            if (!dt.HasValue || asset.Schedule == null)
+            if (!dt.HasValue ||
+                asset.Schedule == null)
                 return asset.Value;
 
             var last = asset.Schedule.LastOrDefault(item => DateHelper.CompareDate(item.Date, dt) <= 0);
@@ -104,17 +107,12 @@ namespace AccountingServer.BLL
                         lst.RemoveAt(i--);
                         continue;
                     }
+                    (item as DevalueItem).Amount = bookValue - (item as DevalueItem).FairValue;
                     bookValue = (item as DevalueItem).FairValue;
                     item.BookValue = (item as DevalueItem).FairValue;
                 }
                 else if (item is DispositionItem)
-                    if (item.Remark != AssetItem.IgnoranceMark)
-                    {
-                        (item as DispositionItem).NetValue = bookValue;
-                        bookValue = 0;
-                    }
-                    else
-                        bookValue -= (item as DispositionItem).NetValue;
+                    bookValue = 0;
             }
 
             asset.Schedule = lst.ToArray();
@@ -238,10 +236,10 @@ namespace AccountingServer.BLL
         /// <param name="asset">资产</param>
         /// <param name="rng">日期过滤器</param>
         /// <param name="isCollapsed">是否压缩</param>
-        /// <param name="disableCreation">是否要禁止自动生成凭证</param>
+        /// <param name="editOnly">是否只允许更新</param>
         /// <returns>无法更新的条目</returns>
         public IEnumerable<AssetItem> Update(Asset asset, DateFilter rng,
-                                             bool isCollapsed = false, bool disableCreation = false)
+                                             bool isCollapsed = false, bool editOnly = false)
         {
             if (asset.Schedule == null)
                 yield break;
@@ -250,354 +248,259 @@ namespace AccountingServer.BLL
             foreach (var item in asset.Schedule)
             {
                 if (item.Date.Within(rng))
-                    if (!UpdateItem(asset, item, bookValue, isCollapsed, disableCreation))
+                    if (!UpdateItem(asset, item, bookValue, isCollapsed, editOnly))
                         yield return item;
                 bookValue = item.BookValue;
             }
         }
 
+        /// <summary>
+        ///     根据资产计算表条目更新账面
+        /// </summary>
+        /// <param name="asset">资产</param>
+        /// <param name="item">计算表条目</param>
+        /// <param name="bookValue">此条目前账面价值</param>
+        /// <param name="isCollapsed">是否压缩</param>
+        /// <param name="editOnly">是否只允许更新</param>
+        /// <returns>是否成功</returns>
         private bool UpdateItem(Asset asset, AssetItem item, double bookValue, bool isCollapsed = false,
-                                bool disableCreation = false)
+                                bool editOnly = false)
         {
             if (item is AcquisationItem)
-                return UpdateItem(asset, item as AcquisationItem, isCollapsed, disableCreation);
+                return UpdateVoucher(
+                                     item,
+                                     isCollapsed,
+                                     editOnly,
+                                     VoucherType.Ordinal,
+                                     new VoucherDetail
+                                         {
+                                             Title = asset.Title,
+                                             Content = asset.StringID,
+                                             Fund = (item as AcquisationItem).OrigValue
+                                         });
+
             if (item is DepreciateItem)
-                return UpdateItem(asset, item as DepreciateItem, isCollapsed, disableCreation);
+                return UpdateVoucher(
+                                     item,
+                                     isCollapsed,
+                                     editOnly,
+                                     VoucherType.Depreciation,
+                                     new VoucherDetail
+                                         {
+                                             Title = asset.DepreciationExpenseTitle,
+                                             SubTitle = asset.DepreciationExpenseSubTitle,
+                                             Content = asset.StringID,
+                                             Fund = (item as DepreciateItem).Amount
+                                         },
+                                     new VoucherDetail
+                                         {
+                                             Title = asset.DepreciationTitle,
+                                             Content = asset.StringID,
+                                             Fund = -(item as DepreciateItem).Amount
+                                         });
+
             if (item is DevalueItem)
-                return UpdateItem(asset, item as DevalueItem, bookValue, isCollapsed, disableCreation);
-            //if (item is DispositionItem)
-            //    return UpdateItem(asset, item as DispositionItem, bookValue, isCollapsed, disableCreation);
+                return UpdateVoucher(
+                                     item,
+                                     isCollapsed,
+                                     editOnly,
+                                     VoucherType.Devalue,
+                                     new VoucherDetail
+                                         {
+                                             Title = asset.DevaluationExpenseTitle,
+                                             SubTitle = asset.DevaluationExpenseSubTitle,
+                                             Content = asset.StringID,
+                                             Fund = (item as DevalueItem).Amount
+                                         },
+                                     new VoucherDetail
+                                         {
+                                             Title = asset.DevaluationTitle,
+                                             Content = asset.StringID,
+                                             Fund = -(item as DevalueItem).Amount
+                                         });
+
+            if (item is DispositionItem)
+            {
+                var totalDep = asset.Schedule.Where(
+                                                    it =>
+                                                    DateHelper.CompareDate(it.Date, item.Date) < 0 &&
+                                                    it is DepreciateItem)
+                                    .Cast<DepreciateItem>().Aggregate(0D, (td, it) => td + it.Amount);
+                var totalDev = asset.Schedule.Where(
+                                                    it =>
+                                                    DateHelper.CompareDate(it.Date, item.Date) < 0 &&
+                                                    it is DevalueItem)
+                                    .Cast<DevalueItem>().Aggregate(0D, (td, it) => td + it.Amount);
+                return UpdateVoucher(
+                                     item,
+                                     isCollapsed,
+                                     editOnly,
+                                     VoucherType.Ordinal,
+                                     new VoucherDetail
+                                         {
+                                             Title = asset.Title,
+                                             Content = asset.StringID,
+                                             Fund = -asset.Value
+                                         },
+                                     new VoucherDetail
+                                         {
+                                             Title = asset.DepreciationTitle,
+                                             Content = asset.StringID,
+                                             Fund = totalDep
+                                         },
+                                     new VoucherDetail
+                                         {
+                                             Title = asset.DevaluationTitle,
+                                             Content = asset.StringID,
+                                             Fund = totalDev
+                                         },
+                                     new VoucherDetail
+                                         {
+                                             Title = DefaultDispositionTitle,
+                                             Content = asset.StringID,
+                                             Fund = bookValue,
+                                             Remark = Asset.IgnoranceMark // 不用于检索，只用于添加
+                                         }
+                    );
+            }
 
             return false;
         }
 
-        private bool UpdateItem(Asset asset, AcquisationItem item, bool isCollapsed = false,
-                                bool disableCreation = false)
+        /// <summary>
+        ///     根据资产计算表条目更新账面
+        /// </summary>
+        /// <param name="item">计算表条目</param>
+        /// <param name="isCollapsed">是否压缩</param>
+        /// <param name="editOnly">是否只允许更新</param>
+        /// <param name="voucherType">凭证类型</param>
+        /// <param name="expectedDetails">应填细目</param>
+        /// <returns>是否成功</returns>
+        private bool UpdateVoucher(AssetItem item, bool isCollapsed, bool editOnly, VoucherType voucherType,
+                                   params VoucherDetail[] expectedDetails)
         {
-            if (item.VoucherID != null)
+            if (item.VoucherID == null)
+                return !editOnly && GenerateVoucher(item, isCollapsed, voucherType, expectedDetails);
+
+            var voucher = m_Db.SelectVoucher(item.VoucherID);
+            if (voucher == null)
+                return !editOnly && GenerateVoucher(item, isCollapsed, voucherType, expectedDetails);
+
+            if (voucher.Date != (isCollapsed ? null : item.Date) &&
+                !editOnly)
+                return false;
+
+            voucher.Type = voucherType;
+
+            var modified = false;
+
+            foreach (var d in expectedDetails)
             {
-                var voucher = m_Db.SelectVoucher(item.VoucherID);
-                if (voucher != null)
-                {
-                    if (voucher.Date != (isCollapsed ? null : item.Date) && !disableCreation)
-                        return false;
+                if (d.Remark == Asset.IgnoranceMark)
+                    continue;
 
-                    voucher.Type = VoucherType.Ordinal;
-
-                    var flag = false;
-                    {
-                        var ds = voucher.Details.Where(
-                                                       d => d.IsMatch(
-                                                                      new VoucherDetail
-                                                                          {
-                                                                              Title = asset.Title,
-                                                                              Content =
-                                                                                  asset.StringID
-                                                                          })).ToList();
-                        if (ds.Count == 0)
-                        {
-                            if (disableCreation)
-                                return false;
-
-                            var l = voucher.Details.ToList();
-                            l.Add(
-                                  new VoucherDetail
-                                      {
-                                          Title = asset.Title,
-                                          Content = asset.StringID,
-                                          Fund = item.OrigValue
-                                      });
-                            voucher.Details = l.ToArray();
-                            flag = true;
-                        }
-                        else if (ds.Count > 1)
-                            return false;
-
-                        if (Math.Abs(ds[0].Fund.Value - item.OrigValue) > Tolerance)
-                        {
-                            ds[0].Fund = item.OrigValue;
-                            flag = true;
-                        }
-                    }
-
-                    if (!flag)
-                        return true;
-                    return m_Db.Update(voucher);
-                }
-            }
-            {
-                if (disableCreation)
+                bool sucess;
+                bool mo;
+                UpdateDetail(d, voucher, out sucess, out mo, editOnly);
+                if (!sucess)
                     return false;
-
-                var voucher = new Voucher
-                                  {
-                                      Date = isCollapsed ? null : item.Date,
-                                      Type = VoucherType.Ordinal,
-                                      Remark = "automatically generated",
-                                      Details = new[]
-                                                    {
-                                                        new VoucherDetail
-                                                            {
-                                                                Title = asset.Title,
-                                                                Content = asset.StringID,
-                                                                Fund = item.OrigValue
-                                                            }
-                                                    }
-                                  };
-                var res = m_Db.Insert(voucher);
-                item.VoucherID = voucher.ID;
-                return res;
+                modified |= mo;
             }
+
+            if (modified)
+                m_Db.Update(voucher);
+
+            return true;
         }
 
-        private bool UpdateItem(Asset asset, DepreciateItem item, bool isCollapsed = false, bool disableCreation = false)
+        /// <summary>
+        ///     更新凭证的细目
+        /// </summary>
+        /// <param name="expected">应填细目</param>
+        /// <param name="voucher">凭证</param>
+        /// <param name="sucess">是否成功</param>
+        /// <param name="modified">是否更改了凭证</param>
+        /// <param name="editOnly">是否只允许更新</param>
+        private static void UpdateDetail(VoucherDetail expected, Voucher voucher,
+                                         out bool sucess, out bool modified, bool editOnly = false)
         {
-            if (item.VoucherID != null)
+            sucess = false;
+            modified = false;
+
+            var fund = expected.Fund.Value;
+            expected.Fund = null;
+            var isEliminated = Math.Abs(fund) < Tolerance;
+
+            var ds = voucher.Details.Where(d => d.IsMatch(expected)).ToList();
+
+            expected.Fund = fund;
+
+            if (ds.Count == 0)
             {
-                var voucher = m_Db.SelectVoucher(item.VoucherID);
-                if (voucher != null)
+                if (isEliminated)
                 {
-                    if (voucher.Date != (isCollapsed ? null : item.Date) && !disableCreation)
-                        return false;
-
-                    voucher.Type = VoucherType.Depreciation;
-
-                    var flag = false;
-                    {
-                        var ds = voucher.Details.Where(
-                                                       d => d.IsMatch(
-                                                                      new VoucherDetail
-                                                                          {
-                                                                              Title = asset.DepreciationTitle,
-                                                                              Content =
-                                                                                  asset.StringID
-                                                                          })).ToList();
-                        if (ds.Count == 0)
-                        {
-                            if (disableCreation)
-                                return false;
-
-                            var l = voucher.Details.ToList();
-                            l.Add(
-                                  new VoucherDetail
-                                      {
-                                          Title = asset.DepreciationTitle,
-                                          Content = asset.StringID,
-                                          Fund = item.Amount
-                                      });
-                            voucher.Details = l.ToArray();
-                            flag = true;
-                        }
-                        else if (ds.Count > 1)
-                            return false;
-
-                        if (Math.Abs(ds[0].Fund.Value - (-item.Amount)) > Tolerance)
-                        {
-                            ds[0].Fund = -item.Amount;
-                            flag = true;
-                        }
-                    }
-                    {
-                        var ds = voucher.Details.Where(
-                                                       d => d.IsMatch(
-                                                                      new VoucherDetail
-                                                                          {
-                                                                              Title = asset.DepreciationExpenseTitle,
-                                                                              SubTitle =
-                                                                                  asset.DepreciationExpenseSubTitle,
-                                                                              Content =
-                                                                                  asset.StringID
-                                                                          })).ToList();
-                        if (ds.Count == 0)
-                        {
-                            if (disableCreation)
-                                return false;
-
-                            var l = voucher.Details.ToList();
-                            l.Add(
-                                  new VoucherDetail
-                                      {
-                                          Title = asset.DepreciationExpenseTitle,
-                                          SubTitle = asset.DepreciationExpenseSubTitle,
-                                          Content = asset.StringID,
-                                          Fund = item.Amount
-                                      });
-                            voucher.Details = l.ToArray();
-                            flag = true;
-                        }
-                        else if (ds.Count > 1)
-                            return false;
-
-                        if (Math.Abs(ds[0].Fund.Value - item.Amount) > Tolerance)
-                        {
-                            ds[0].Fund = item.Amount;
-                            flag = true;
-                        }
-                    }
-
-                    if (!flag)
-                        return true;
-                    return m_Db.Update(voucher);
+                    sucess = true;
+                    return;
                 }
-            }
-            {
-                if (disableCreation)
-                    return false;
 
-                var voucher = new Voucher
-                                  {
-                                      Date = isCollapsed ? null : item.Date,
-                                      Type = VoucherType.Depreciation,
-                                      Remark = "automatically generated",
-                                      Details = new[]
-                                                    {
-                                                        new VoucherDetail
-                                                            {
-                                                                Title = asset.DepreciationTitle,
-                                                                Content = asset.StringID,
-                                                                Fund = -item.Amount
-                                                            },
-                                                        new VoucherDetail
-                                                            {
-                                                                Title = asset.DepreciationExpenseTitle,
-                                                                SubTitle = asset.DepreciationExpenseSubTitle,
-                                                                Content = asset.StringID,
-                                                                Fund = item.Amount
-                                                            }
-                                                    }
-                                  };
-                var res = m_Db.Insert(voucher);
-                item.VoucherID = voucher.ID;
-                return res;
+                if (editOnly)
+                    return;
+
+                var l = voucher.Details.ToList();
+                l.Add(expected);
+                voucher.Details = l.ToArray();
+                sucess = true;
+                modified = true;
+                return;
             }
+            if (ds.Count > 1)
+                return;
+
+            if (isEliminated)
+            {
+                if (editOnly)
+                    return;
+
+                var l = voucher.Details.ToList();
+                l.Remove(ds[0]);
+                voucher.Details = l.ToArray();
+                sucess = true;
+                modified = true;
+                return;
+            }
+
+            if (!(Math.Abs(ds[0].Fund.Value - fund) > Tolerance))
+            {
+                sucess = true;
+                return;
+            }
+
+            ds[0].Fund = fund;
+            modified = true;
         }
 
-        private bool UpdateItem(Asset asset, DevalueItem item, double bookValue, bool isCollapsed = false,
-                                bool disableCreation = false)
+        /// <summary>
+        ///     生成凭证、插入数据库并注册
+        /// </summary>
+        /// <param name="item">计算表条目</param>
+        /// <param name="isCollapsed">是否压缩</param>
+        /// <param name="voucherType">凭证类型</param>
+        /// <param name="details">细目</param>
+        /// <returns>是否成功</returns>
+        private bool GenerateVoucher(AssetItem item, bool isCollapsed, VoucherType voucherType,
+                                     params VoucherDetail[] details)
         {
-            if (item.VoucherID != null)
-            {
-                var voucher = m_Db.SelectVoucher(item.VoucherID);
-                if (voucher != null)
-                {
-                    if (voucher.Date != (isCollapsed ? null : item.Date) && !disableCreation)
-                        return false;
-
-                    var fund = bookValue - item.FairValue;
-                    voucher.Type = VoucherType.Devalue;
-
-                    var flag = false;
-                    {
-                        var ds = voucher.Details.Where(
-                                                       d => d.IsMatch(
-                                                                      new VoucherDetail
-                                                                          {
-                                                                              Title = asset.DevaluationTitle,
-                                                                              Content =
-                                                                                  asset.StringID
-                                                                          })).ToList();
-                        if (ds.Count == 0)
-                        {
-                            if (disableCreation)
-                                return false;
-
-                            var l = voucher.Details.ToList();
-                            l.Add(
-                                  new VoucherDetail
-                                      {
-                                          Title = asset.DevaluationTitle,
-                                          Content = asset.StringID,
-                                          Fund = -fund
-                                      });
-                            flag = true;
-                            voucher.Details = l.ToArray();
-                        }
-                        else if (ds.Count > 1)
-                            return false;
-
-                        if (Math.Abs(ds[0].Fund.Value - (-fund)) > Tolerance)
-                        {
-                            ds[0].Fund = -fund;
-                            flag = true;
-                        }
-                    }
-                    {
-                        var ds = voucher.Details.Where(
-                                                       d => d.IsMatch(
-                                                                      new VoucherDetail
-                                                                          {
-                                                                              Title = asset.DevaluationExpenseTitle,
-                                                                              SubTitle =
-                                                                                  asset.DevaluationExpenseSubTitle,
-                                                                              Content =
-                                                                                  asset.StringID
-                                                                          })).ToList();
-                        if (ds.Count == 0)
-                        {
-                            if (disableCreation)
-                                return false;
-
-                            var l = voucher.Details.ToList();
-                            l.Add(
-                                  new VoucherDetail
-                                      {
-                                          Title = asset.DepreciationExpenseTitle,
-                                          SubTitle = asset.DevaluationExpenseSubTitle,
-                                          Content = asset.StringID,
-                                          Fund = fund
-                                      });
-                            voucher.Details = l.ToArray();
-                        }
-                        else if (ds.Count > 1)
-                            return false;
-
-                        if (Math.Abs(ds[0].Fund.Value - fund) > Tolerance)
-                        {
-                            ds[0].Fund = fund;
-                            flag = true;
-                        }
-                    }
-
-                    if (!flag)
-                        return true;
-                    return m_Db.Update(voucher);
-                }
-            }
-            {
-                if (disableCreation)
-                    return false;
-
-                var fund = bookValue - item.FairValue;
-                var voucher = new Voucher
-                                  {
-                                      Date = isCollapsed ? null : item.Date,
-                                      Type = VoucherType.Devalue,
-                                      Remark = "automatically generated",
-                                      Details = new[]
-                                                    {
-                                                        new VoucherDetail
-                                                            {
-                                                                Title = asset.DevaluationTitle,
-                                                                Content = asset.StringID,
-                                                                Fund = -fund
-                                                            },
-                                                        new VoucherDetail
-                                                            {
-                                                                Title = asset.DevaluationExpenseTitle,
-                                                                SubTitle = asset.DevaluationExpenseSubTitle,
-                                                                Content = asset.StringID,
-                                                                Fund = fund
-                                                            }
-                                                    }
-                                  };
-                var res = m_Db.Insert(voucher);
-                item.VoucherID = voucher.ID;
-                return res;
-            }
+            var voucher = new Voucher
+                              {
+                                  Date = isCollapsed ? null : item.Date,
+                                  Type = voucherType,
+                                  Remark = "automatically generated",
+                                  Details = details
+                              };
+            var res = m_Db.Insert(voucher);
+            item.VoucherID = voucher.ID;
+            return res;
         }
-
-        private bool UpdateItem(Asset asset, DispositionItem item, double bookValue, bool isCollapsed = false,
-                                bool disableCreation = false) { throw new NotImplementedException(); }
 
         /// <summary>
         ///     折旧

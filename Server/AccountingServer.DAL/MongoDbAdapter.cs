@@ -74,8 +74,8 @@ namespace AccountingServer.DAL
 
             m_Db = m_Server.GetDatabase("accounting");
 
-            m_Vouchers = m_Db.GetCollection<Voucher>("voucher");
-            m_Assets = m_Db.GetCollection<Asset>("asset");
+            m_Vouchers = m_Db.GetCollection("voucher");
+            m_Assets = m_Db.GetCollection("asset");
 
             Connected = true;
         }
@@ -373,9 +373,7 @@ namespace AccountingServer.DAL
 
         public bool Insert(Voucher entity)
         {
-            if (entity.ID == null)
-                entity.ID = ObjectId.GenerateNewId().Wrap();
-            var res = m_Vouchers.Insert(entity.ToBsonDocument());
+            var res = m_Vouchers.Save(entity.ToBsonDocument());
             return res.DocumentsAffected == 1;
         }
 
@@ -479,7 +477,7 @@ namespace AccountingServer.DAL
 
         public bool Insert(Asset entity)
         {
-            var res = m_Assets.Insert(entity.ToBsonDocument());
+            var res = m_Assets.Save(entity.ToBsonDocument());
             return res.DocumentsAffected==1;
         }
 

@@ -305,14 +305,14 @@ namespace AccountingServer.Console
                 return String.Format(
                                      "   {0:yyyMMdd} DEV:{1} ={3} ({2})",
                                      assetItem.Date,
-                                     (assetItem as DevalueItem).FairValue.AsCurrency().CPadLeft(13),
+                                     (assetItem as DevalueItem).Amount.AsCurrency().CPadLeft(13),
                                      assetItem.VoucherID,
                                      assetItem.BookValue.AsCurrency().CPadLeft(13));
             if (assetItem is DispositionItem)
                 return String.Format(
                                      "   {0:yyyMMdd} DSP:{1} ={3} ({2})",
                                      assetItem.Date,
-                                     (assetItem as DispositionItem).NetValue.AsCurrency().CPadLeft(13),
+                                     "ALL".CPadLeft(13),
                                      assetItem.VoucherID,
                                      assetItem.BookValue.AsCurrency().CPadLeft(13));
             return null;
