@@ -66,7 +66,7 @@ namespace AccountingServer.Console
 
                 return sb.ToString();
             }
-            if (sp[0] == "a-list")
+            if (sp[0] == "a-li" || sp[0] == "a-list")
             {
                 editable = false;
 
@@ -77,7 +77,7 @@ namespace AccountingServer.Console
 
                 return sb.ToString();
             }
-            if (sp[0] == "a-query")
+            if (sp[0] == "a-q" || sp[0] == "a-query")
             {
                 editable = true;
 
@@ -88,7 +88,7 @@ namespace AccountingServer.Console
 
                 return sb.ToString();
             }
-            if (sp[0] == "a-register")
+            if (sp[0] == "a-reg" || sp[0] == "a-register")
             {
                 editable = true;
 
@@ -103,7 +103,7 @@ namespace AccountingServer.Console
                 }
                 return sb.ToString();
             }
-            if (sp[0] == "a-unregister")
+            if (sp[0] == "a-unr" || sp[0] == "a-unregister")
             {
                 editable = true;
 
@@ -119,7 +119,7 @@ namespace AccountingServer.Console
                 }
                 return sb.ToString();
             }
-            if (sp[0] == "a-redep")
+            if (sp[0] == "a-rd" || sp[0] == "a-redep")
             {
                 editable = true;
 
@@ -158,24 +158,25 @@ namespace AccountingServer.Console
                 }
                 return "OK " + cnt.ToString(CultureInfo.InvariantCulture);
             }
-            if (sp[0].StartsWith("a-apply"))
+            if (sp[0].StartsWith("a-ap"))
             {
                 editable = true;
-                var isCollapsed = sp[0].EndsWith("-collapse");
+                var isCollapsed = sp[0].EndsWith("-collapse") || sp[0].EndsWith("-co");
 
-                DateFilter rng;
+                string dq;
+                Asset filter = null;
                 if (query.LastIndexOf('\'') >= 0)
                 {
                     var spx = query.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
-                    rng = ParseDateQuery(spx.Length <= 1 ? String.Empty : spx[1], true);
+                    dq = spx.Length <= 1 ? String.Empty : spx[1];
+                    filter = ParseAssetQuery(spx[0]);
                 }
                 else
-                {
-                    rng = ParseDateQuery(query, true);
-                }
+                    dq = query;
+
+                var rng = String.IsNullOrWhiteSpace(dq) ? ParseDateQuery("[0]", true) : ParseDateQuery(dq, true);
 
                 var sb = new StringBuilder();
-                var filter = ParseAssetQuery(query);
                 foreach (var a in m_Accountant.FilteredSelect(filter))
                 {
                     foreach (var item in m_Accountant.Update(a, rng, isCollapsed))
