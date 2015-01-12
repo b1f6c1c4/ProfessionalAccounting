@@ -43,6 +43,12 @@ namespace AccountingServer.Entities
         public double? Amount { get; set; }
 
         /// <summary>
+        ///     待摊额
+        ///     <para>不存储在数据库中</para>
+        /// </summary>
+        public double? Residue { get; set; }
+
+        /// <summary>
         ///     备注
         /// </summary>
         public string Remark { get; set; }
