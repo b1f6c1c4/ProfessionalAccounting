@@ -141,7 +141,7 @@ namespace AccountingServer.BLL
                                      Title = asset.Title,
                                      Content = asset.StringID
                                  };
-                foreach (var voucher in m_Db.FilteredSelect(filter, DateFilter.Unconstrained))
+                foreach (var voucher in m_Db.FilteredSelect(filter: filter))
                 {
                     if (voucher.Remark == Asset.IgnoranceMark)
                         continue;
@@ -189,7 +189,7 @@ namespace AccountingServer.BLL
                                      Title = asset.DepreciationTitle,
                                      Content = asset.StringID
                                  };
-                foreach (var voucher in m_Db.FilteredSelect(filter, DateFilter.Unconstrained))
+                foreach (var voucher in m_Db.FilteredSelect(filter: filter))
                 {
                     if (voucher.Remark == Asset.IgnoranceMark)
                         continue;
@@ -215,7 +215,7 @@ namespace AccountingServer.BLL
                                      Title = asset.DevaluationTitle,
                                      Content = asset.StringID
                                  };
-                foreach (var voucher in m_Db.FilteredSelect(filter, DateFilter.Unconstrained))
+                foreach (var voucher in m_Db.FilteredSelect(filter: filter))
                 {
                     if (voucher.Remark == Asset.IgnoranceMark)
                         continue;

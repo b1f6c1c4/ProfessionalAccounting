@@ -32,7 +32,7 @@ namespace AccountingServer.BLL
                                   SubTitle = filter.SubTitle,
                                   Content = filter.Content
                               };
-            var res = m_Db.FilteredSelect(dFilter, DateFilter.Unconstrained);
+            var res = m_Db.FilteredSelect(filter: dFilter);
             if (filter.Date.HasValue)
                 res = res.Where(v => v.Date <= filter.Date);
             filter.Fund = res.SelectMany(v => v.Details).Where(d => d.IsMatch(dFilter)).Sum(d => d.Fund.Value);
@@ -64,7 +64,7 @@ namespace AccountingServer.BLL
                                   SubTitle = filter.SubTitle,
                                   Content = filter.Content
                               };
-            filter.Fund = m_Db.FilteredSelectDetails(dFilter, DateFilter.Unconstrained).Sum(d => d.Fund.Value);
+            filter.Fund = m_Db.FilteredSelectDetails(filter: dFilter).Sum(d => d.Fund.Value);
             return filter.Fund;
         }
 
@@ -96,7 +96,7 @@ namespace AccountingServer.BLL
                                   SubTitle = filter.SubTitle,
                                   Content = filter.Content
                               };
-            return m_Db.FilteredSelect(dFilter, DateFilter.Unconstrained)
+            return m_Db.FilteredSelect(filter: dFilter)
                        .GroupBy(
                                 v => v.Date,
                                 (dt, vs) =>
@@ -292,7 +292,7 @@ namespace AccountingServer.BLL
                                   Content = filter.Content
                               };
 
-            var res = m_Db.FilteredSelect(dFilter, new DateFilter(null, rng.EndDate));
+            var res = m_Db.FilteredSelect(filter: dFilter, rng: new DateFilter(null, rng.EndDate));
             var resx = res.GroupBy(
                                    v => v.Date,
                                    (dt, vs) =>
@@ -349,7 +349,7 @@ namespace AccountingServer.BLL
                                        Content = filter.Content
                                    }).ToArray();
 
-            var res = m_Db.FilteredSelect(dFilters, new DateFilter(null, rng.EndDate));
+            var res = m_Db.FilteredSelect(filters: dFilters, rng: new DateFilter(null, rng.EndDate));
             var resx = res.GroupBy(
                                    v => v.Date,
                                    (dt, vs) =>
@@ -393,7 +393,7 @@ namespace AccountingServer.BLL
         public IEnumerable<IEnumerable<Balance>> GetBalancesAcrossContent(Balance filter)
         {
             var dFilter = new VoucherDetail { Title = filter.Title, SubTitle = filter.SubTitle };
-            return m_Db.FilteredSelect(dFilter, DateFilter.Unconstrained)
+            return m_Db.FilteredSelect(filter: dFilter)
                        .GroupBy(
                                 v => v.Date,
                                 (dt, vs) =>
@@ -433,7 +433,7 @@ namespace AccountingServer.BLL
         public IEnumerable<Balance> GetBalancesAcrossContent(Balance filter, DateFilter rng)
         {
             var dFilter = new VoucherDetail { Title = filter.Title, SubTitle = filter.SubTitle };
-            return m_Db.FilteredSelectDetails(dFilter, rng)
+            return m_Db.FilteredSelectDetails(filter: dFilter, rng: rng)
                        .GroupBy(
                                 d => d.Content,
                                 (c, ds) =>
@@ -467,7 +467,7 @@ namespace AccountingServer.BLL
         public IEnumerable<Balance> GetFinalBalancesAcrossContent(Balance filter)
         {
             var dFilter = new VoucherDetail { Title = filter.Title, SubTitle = filter.SubTitle };
-            return m_Db.FilteredSelectDetails(dFilter, DateFilter.Unconstrained)
+            return m_Db.FilteredSelectDetails(filter: dFilter)
                        .GroupBy(
                                 d => d.Content,
                                 (c, ds) =>
