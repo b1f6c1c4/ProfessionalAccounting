@@ -397,9 +397,14 @@ namespace AccountingServer.BLL
                 !editOnly)
                 return false;
 
-            voucher.Type = voucherType;
 
             var modified = false;
+
+            if (voucher.Type != voucherType)
+            {
+                modified = true;
+                voucher.Type = voucherType;
+            }
 
             foreach (var d in expectedDetails)
             {

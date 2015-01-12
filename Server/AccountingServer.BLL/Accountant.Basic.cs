@@ -119,6 +119,8 @@ namespace AccountingServer.BLL
             m_DbServer.Backup();
         }
 
+        #region voucher
+
         /// <summary>
         ///     按编号查找记账凭证
         /// </summary>
@@ -233,6 +235,10 @@ namespace AccountingServer.BLL
             return m_Db.FilteredDelete(vfilter, filter);
         }
 
+        #endregion
+
+        #region asset
+
         /// <summary>
         ///     按编号查找资产
         /// </summary>
@@ -300,6 +306,80 @@ namespace AccountingServer.BLL
         {
             return m_Db.Upsert(entity);
         }
+
+        #endregion
+
+        #region amort
+
+        /// <summary>
+        ///     按编号查找摊销
+        /// </summary>
+        /// <param name="id">编号</param>
+        /// <returns>摊销，如果没有则为<c>null</c></returns>
+        public Amortization SelectAmortization(Guid id)
+        {
+            var result = m_Db.SelectAmortization(id);
+            InternalRegular(result);
+            return result;
+        }
+
+        /// <summary>
+        ///     按过滤器查找摊销
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>匹配过滤器的摊销</returns>
+        public IEnumerable<Amortization> FilteredSelect(Amortization filter)
+        {
+            foreach (var amort in m_Db.FilteredSelect(filter))
+            {
+                InternalRegular(amort);
+                yield return amort;
+            }
+        }
+
+        /// <summary>
+        ///     添加或替换摊销
+        ///     <para>若无编号，则添加新编号</para>
+        /// </summary>
+        /// <param name="entity">新摊销</param>
+        /// <returns>是否成功</returns>
+        public bool Upsert(Amortization entity)
+        {
+            return m_Db.Upsert(entity);
+        }
+
+        /// <summary>
+        ///     按编号删除摊销
+        /// </summary>
+        /// <param name="id">编号</param>
+        /// <returns>是否成功</returns>
+        public bool DeleteAmortization(Guid id)
+        {
+            return m_Db.DeleteAmortization(id);
+        }
+
+        /// <summary>
+        ///     按过滤器删除摊销
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns>已删除的摊销总数</returns>
+        public long FilteredDelete(Amortization filter)
+        {
+            return m_Db.FilteredDelete(filter);
+        }
+
+        /// <summary>
+        ///     添加或替换摊销
+        ///     <para>不能改变摊销的编号</para>
+        /// </summary>
+        /// <param name="entity">新摊销</param>
+        /// <returns>是否成功</returns>
+        public bool Update(Amortization entity)
+        {
+            return m_Db.Upsert(entity);
+        }
+
+        #endregion
 
         /// <summary>
         ///     合并记账凭证上相同的细目

@@ -43,6 +43,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Accountant.Amort.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="AccountTitle.zh-cn.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
