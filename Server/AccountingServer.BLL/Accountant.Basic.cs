@@ -321,7 +321,7 @@ namespace AccountingServer.BLL
                                                               d =>
                                                               d.Fund);
                                                   return key;
-                                              }).ToArray();
+                                              }).ToList();
             m_Db.Upsert(voucher);
         }
 
