@@ -261,7 +261,7 @@ namespace AccountingServer.Console
         /// </summary>
         private string SubtotalWith4Levels1X00(VoucherDetail filter, DateFilter rng, bool withZero, bool aggr)
         {
-            var vouchers = m_Accountant.FilteredSelect(filter, rng);
+            var vouchers = m_Accountant.FilteredSelect(filter: filter, rng: rng);
 
             var result = vouchers.SelectMany(
                                              v =>
@@ -321,7 +321,7 @@ namespace AccountingServer.Console
         /// </summary>
         private string SubtotalWith4Levels1X00Reversed(VoucherDetail filter, DateFilter rng, bool withZero)
         {
-            var vouchers = m_Accountant.FilteredSelect(filter, rng);
+            var vouchers = m_Accountant.FilteredSelect(filter: filter, rng: rng);
 
             var result = vouchers.GroupBy(
                                           v => v.Date,

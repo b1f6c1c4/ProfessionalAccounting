@@ -6,7 +6,6 @@ using AccountingServer.Entities;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
 
 namespace AccountingServer.DAL
 {
@@ -141,13 +140,45 @@ namespace AccountingServer.DAL
 
         public Voucher SelectVoucher(string id) { return m_Vouchers.FindOneById(ObjectId.Parse(id)); }
 
-        public IEnumerable<Voucher> FilteredSelect(Voucher filter, DateFilter rng)
+        public IEnumerable<Voucher> FilteredSelect(Voucher vfilter = null,
+                                                   VoucherDetail filter = null,
+                                                   DateFilter? rng = null)
         {
-            return
-                m_Vouchers.Find(
-                                MongoDbQueryHelper.And(
-                                                       MongoDbQueryHelper.GetQuery(filter),
-                                                       MongoDbQueryHelper.GetQuery(rng)));
+            return m_Vouchers.Find(MongoDbQueryHelper.GetQuery(vfilter, filter, rng));
+        }
+
+
+        public IEnumerable<Voucher> FilteredSelect(Voucher vfilter = null,
+                                                   IEnumerable<VoucherDetail> filters = null,
+                                                   DateFilter? rng = null,
+                                                   bool useAnd = false)
+        {
+            return m_Vouchers.Find(MongoDbQueryHelper.GetQuery(vfilter, filters, rng, useAnd));
+        }
+
+        public IEnumerable<VoucherDetail> FilteredSelectDetails(Voucher vfilter = null,
+                                                                VoucherDetail filter = null,
+                                                                DateFilter? rng = null)
+        {
+            var res = m_Vouchers.Find(MongoDbQueryHelper.GetQuery(vfilter, filter, rng));
+
+            return from voucher in res
+                   from detail in voucher.Details
+                   where detail.IsMatch(filter)
+                   select detail;
+        }
+
+        public IEnumerable<VoucherDetail> FilteredSelectDetails(Voucher vfilter = null,
+                                                                IEnumerable<VoucherDetail> filters = null,
+                                                                DateFilter? rng = null,
+                                                                bool useAnd = false)
+        {
+            var res = m_Vouchers.Find(MongoDbQueryHelper.GetQuery(vfilter, filters, rng, useAnd));
+
+            return from voucher in res
+                   from detail in voucher.Details
+                   where detail.IsMatch(filters, useAnd)
+                   select detail;
         }
 
         public bool DeleteVoucher(string id)
@@ -156,9 +187,9 @@ namespace AccountingServer.DAL
             return res.DocumentsAffected == 1;
         }
 
-        public long FilteredDelete(Voucher filter)
+        public long FilteredDelete(Voucher vfilter, VoucherDetail filter, DateFilter? rng)
         {
-            var res = m_Vouchers.Remove(MongoDbQueryHelper.GetQuery(filter));
+            var res = m_Vouchers.Remove(MongoDbQueryHelper.GetQuery(vfilter, filter, rng));
             return res.DocumentsAffected;
         }
 
@@ -166,57 +197,6 @@ namespace AccountingServer.DAL
         {
             var res = m_Vouchers.Save(entity);
             return res.DocumentsAffected <= 1;
-        }
-
-        public IEnumerable<Voucher> FilteredSelect(VoucherDetail filter, DateFilter rng)
-        {
-            return m_Vouchers.Find(MongoDbQueryHelper.GetQuery(filter, rng));
-        }
-
-        public IEnumerable<Voucher> FilteredSelect(Voucher vfilter, VoucherDetail filter, DateFilter rng)
-        {
-            return m_Vouchers.Find(MongoDbQueryHelper.GetQuery(vfilter, filter, rng));
-        }
-
-        public IEnumerable<Voucher> FilteredSelect(IEnumerable<VoucherDetail> filters, DateFilter rng)
-        {
-            return m_Vouchers.Find(
-                                   MongoDbQueryHelper.And(
-                                                          MongoDbQueryHelper.GetQuery(rng),
-                                                          Query.Or(
-                                                                   filters.Where(filter => filter.Item == null)
-                                                                          .Select(MongoDbQueryHelper.GetQuery)
-                                                                          .Where(query => query != null)
-                                                                          .Select(
-                                                                                  query =>
-                                                                                  Query.ElemMatch("detail", query)))));
-        }
-
-        public IEnumerable<VoucherDetail> FilteredSelectDetails(VoucherDetail filter, DateFilter rng)
-        {
-            return FilteredSelect(filter, rng).SelectMany(v => v.Details).Where(d => d.IsMatch(filter));
-        }
-
-        public long FilteredDelete(Voucher vfilter, VoucherDetail filter)
-        {
-            var res = m_Vouchers.Remove(MongoDbQueryHelper.GetQuery(vfilter, filter));
-            return res.DocumentsAffected;
-        }
-
-        public long FilteredDelete(VoucherDetail filter)
-        {
-            var count = 0L;
-            var v = FilteredSelect(filter, DateFilter.Unconstrained);
-            foreach (var voucher in v)
-            {
-                var l = voucher.Details.Count();
-                voucher.Details = voucher.Details.Where(d => !d.IsMatch(filter)).ToList();
-                l -= voucher.Details.Count();
-                var res = m_Vouchers.Save(voucher.ToBsonDocument());
-                if (res.DocumentsAffected == 1)
-                    count += l;
-            }
-            return count;
         }
 
         #endregion

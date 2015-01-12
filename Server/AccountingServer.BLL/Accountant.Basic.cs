@@ -130,15 +130,35 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     按过滤器和日期查找记账凭证
+        ///     按过滤器查找记账凭证
         /// </summary>
-        /// <param name="filter">过滤器</param>
+        /// <param name="vfilter">过滤器</param>
+        /// <param name="filter">细目过滤器</param>
         /// <param name="rng">日期过滤器</param>
-        /// <returns>指定日期匹配过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> FilteredSelect(Voucher filter, DateFilter rng)
+        /// <returns>任一细目匹配过滤器的记账凭证</returns>
+        public IEnumerable<Voucher> FilteredSelect(Voucher vfilter = null,
+                                                   VoucherDetail filter = null,
+                                                   DateFilter? rng = null)
         {
-            return m_Db.FilteredSelect(filter, rng);
+            return m_Db.FilteredSelect(vfilter, filter, rng);
         }
+
+        /// <summary>
+        ///     按过滤器查找记账凭证
+        /// </summary>
+        /// <param name="vfilter">过滤器</param>
+        /// <param name="filters">细目过滤器</param>
+        /// <param name="rng">日期过滤器</param>
+        /// <param name="useAnd">各细目过滤器之间的关系为合取</param>
+        /// <returns>任一细目匹配任一过滤器的记账凭证</returns>
+        public IEnumerable<Voucher> FilteredSelect(Voucher vfilter = null,
+                                                   IEnumerable<VoucherDetail> filters = null,
+                                                   DateFilter? rng = null,
+                                                   bool useAnd = false)
+        {
+            return m_Db.FilteredSelect(vfilter, filters, rng, useAnd);
+        }
+
 
         /// <summary>
         ///     添加或替换记账凭证
@@ -152,56 +172,33 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     按细目过滤器查找记账凭证
-        /// </summary>
-        /// <param name="filter">细目过滤器</param>
-        /// <returns>任一细目匹配过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> FilteredSelect(VoucherDetail filter)
-        {
-            return m_Db.FilteredSelect(filter, DateFilter.Unconstrained);
-        }
-
-        /// <summary>
-        ///     按过滤器和细目过滤器查找记账凭证
+        ///     按过滤器查找细目
         /// </summary>
         /// <param name="vfilter">过滤器</param>
         /// <param name="filter">细目过滤器</param>
-        /// <returns>任一细目匹配过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> FilteredSelect(Voucher vfilter, VoucherDetail filter)
-        {
-            return m_Db.FilteredSelect(vfilter, filter, DateFilter.Unconstrained);
-        }
-
-        /// <summary>
-        ///     按过滤器和细目过滤器查找记账凭证
-        /// </summary>
-        /// <param name="filter">过滤器</param>
         /// <param name="rng">日期过滤器</param>
-        /// <returns>指定日期任一细目匹配过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> FilteredSelect(VoucherDetail filter, DateFilter rng)
-        {
-            return m_Db.FilteredSelect(filter, rng);
-        }
-
-        /// <summary>
-        ///     按细目过滤器查找细目
-        /// </summary>
-        /// <param name="filter">细目过滤器</param>
         /// <returns>匹配过滤器的细目</returns>
-        public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter)
+        public IEnumerable<VoucherDetail> FilteredSelectDetails(Voucher vfilter = null,
+                                                                VoucherDetail filter = null,
+                                                                DateFilter? rng = null)
         {
-            return m_Db.FilteredSelectDetails(filter, DateFilter.Unconstrained);
+            return m_Db.FilteredSelectDetails(vfilter, filter, rng);
         }
 
         /// <summary>
-        ///     按过滤器和细目过滤器查找细目
+        ///     按过滤器查找细目
         /// </summary>
-        /// <param name="filter">细目过滤器</param>
+        /// <param name="vfilter">过滤器</param>
+        /// <param name="filters">细目过滤器</param>
         /// <param name="rng">日期过滤器</param>
-        /// <returns>指定日期匹配过滤器的细目</returns>
-        public IEnumerable<VoucherDetail> SelectDetails(VoucherDetail filter, DateFilter rng)
+        /// <param name="useAnd">各细目过滤器之间的关系为合取</param>
+        /// <returns>匹配过滤器的细目</returns>
+        public IEnumerable<VoucherDetail> FilteredSelectDetails(Voucher vfilter = null,
+                                                                IEnumerable<VoucherDetail> filters = null,
+                                                                DateFilter? rng = null,
+                                                                bool useAnd = false)
         {
-            return m_Db.FilteredSelectDetails(filter, rng);
+            return m_Db.FilteredSelectDetails(vfilter, filters, rng, useAnd);
         }
 
         /// <summary>

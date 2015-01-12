@@ -149,7 +149,7 @@ namespace AccountingServer.Console
 
             AutoConnect();
 
-            return m_Accountant.FilteredSelect(detail, rng);
+            return m_Accountant.FilteredSelect(filter: detail, rng: rng);
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace AccountingServer.Console
 
             AutoConnect();
 
-            return m_Accountant.SelectDetails(detail, rng);
+            return m_Accountant.FilteredSelectDetails(filter: detail, rng: rng);
         }
 
         /// <summary>

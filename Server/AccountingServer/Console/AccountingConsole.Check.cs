@@ -17,7 +17,7 @@ namespace AccountingServer.Console
             AutoConnect();
 
             var sb = new StringBuilder();
-            foreach (var voucher in m_Accountant.FilteredSelect((Voucher)null, DateFilter.Unconstrained))
+            foreach (var voucher in m_Accountant.FilteredSelect(null, filter: null))
             {
                 var val = m_Accountant.IsBalanced(voucher);
                 if (Math.Abs(val) < Accountant.Tolerance)
@@ -53,12 +53,13 @@ namespace AccountingServer.Console
                 {
                     foreach (
                         var content in
-                            m_Accountant.SelectDetails(
-                                                       new VoucherDetail
-                                                           {
-                                                               Title = title.Item1,
-                                                               SubTitle = title.Item2
-                                                           })
+                            m_Accountant.FilteredSelectDetails(
+                                                               filter:
+                                                                   new VoucherDetail
+                                                                       {
+                                                                           Title = title.Item1,
+                                                                           SubTitle = title.Item2
+                                                                       })
                                         .Select(d => d.Content)
                                         .Distinct())
                         foreach (
@@ -93,12 +94,13 @@ namespace AccountingServer.Console
                          title.Item1 == 1703)
                     foreach (
                         var content in
-                            m_Accountant.SelectDetails(
-                                                       new VoucherDetail
-                                                           {
-                                                               Title = title.Item1,
-                                                               SubTitle = title.Item2
-                                                           })
+                            m_Accountant.FilteredSelectDetails(
+                                                               filter:
+                                                                   new VoucherDetail
+                                                                       {
+                                                                           Title = title.Item1,
+                                                                           SubTitle = title.Item2
+                                                                       })
                                         .Select(d => d.Content)
                                         .Distinct())
                         foreach (

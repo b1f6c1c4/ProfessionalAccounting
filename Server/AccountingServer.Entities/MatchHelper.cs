@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AccountingServer.Entities
 {
@@ -49,6 +51,19 @@ namespace AccountingServer.Entities
                 else if (filter.Remark != voucherDetail.Remark)
                     return false;
             return true;
+        }
+
+        /// <summary>
+        ///     判断细目是否符合过滤器
+        /// </summary>
+        /// <param name="voucherDetail">细目</param>
+        /// <param name="filters">过滤器</param>
+        /// <param name="useAnd">各细目过滤器之间的关系为合取</param>
+        /// <returns>是否符合</returns>
+        public static bool IsMatch(this VoucherDetail voucherDetail, IEnumerable<VoucherDetail> filters,
+                                   bool useAnd = false)
+        {
+            return useAnd ? filters.All(voucherDetail.IsMatch) : filters.Any(voucherDetail.IsMatch);
         }
     }
 }

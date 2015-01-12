@@ -38,7 +38,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>Bson查询</returns>
-        public static IMongoQuery GetQuery(Voucher filter)
+        public static IMongoQuery GetAtomQuery(Voucher filter)
         {
             if (filter == null)
                 return null;
@@ -83,22 +83,25 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="rng">日期过滤器</param>
         /// <returns>Bson查询</returns>
-        public static IMongoQuery GetQuery(DateFilter rng)
+        private static IMongoQuery GetAtomQuery(DateFilter? rng)
         {
-            if (rng.NullOnly)
+            if (!rng.HasValue)
+                return null;
+
+            if (rng.Value.NullOnly)
                 return Query.EQ("date", BsonNull.Value);
 
             IMongoQuery q;
-            if (rng.Constrained)
-                q = Query.And(Query.GTE("date", rng.StartDate), Query.LTE("date", rng.EndDate));
-            else if (rng.StartDate.HasValue)
-                q = Query.GTE("date", rng.StartDate);
-            else if (rng.EndDate.HasValue)
-                q = Query.LTE("date", rng.EndDate);
+            if (rng.Value.Constrained)
+                q = Query.And(Query.GTE("date", rng.Value.StartDate), Query.LTE("date", rng.Value.EndDate));
+            else if (rng.Value.StartDate.HasValue)
+                q = Query.GTE("date", rng.Value.StartDate);
+            else if (rng.Value.EndDate.HasValue)
+                q = Query.LTE("date", rng.Value.EndDate);
             else
-                return rng.Nullable ? null : Query.NE("date", BsonNull.Value);
+                return rng.Value.Nullable ? null : Query.NE("date", BsonNull.Value);
 
-            return rng.Nullable ? Query.Or(q, Query.EQ("date", BsonNull.Value)) : q;
+            return rng.Value.Nullable ? Query.Or(q, Query.EQ("date", BsonNull.Value)) : q;
         }
 
         /// <summary>
@@ -106,7 +109,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">细目过滤器</param>
         /// <returns>Bson查询</returns>
-        public static IMongoQuery GetQuery(VoucherDetail filter)
+        private static IMongoQuery GetAtomQuery(VoucherDetail filter)
         {
             if (filter == null)
                 return null;
@@ -137,43 +140,39 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     按过滤器和细目过滤器查询
-        /// </summary>
-        /// <param name="vfilter">过滤器</param>
-        /// <param name="filter">细目过滤器</param>
-        /// <returns>Bson查询</returns>
-        public static IMongoQuery GetQuery(Voucher vfilter, VoucherDetail filter)
-        {
-            var queryVoucher = GetQuery(vfilter);
-            var queryFilter = GetQuery(filter);
-            return queryFilter != null ? And(queryVoucher, Query.ElemMatch("detail", queryFilter)) : queryVoucher;
-        }
-
-        /// <summary>
-        ///     按细目过滤器和日期查询
-        /// </summary>
-        /// <param name="filter">细目过滤器</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <returns>Bson查询</returns>
-        public static IMongoQuery GetQuery(VoucherDetail filter, DateFilter rng)
-        {
-            var queryVoucher = GetQuery(rng);
-            var queryFilter = GetQuery(filter);
-            return queryFilter != null ? And(queryVoucher, Query.ElemMatch("detail", queryFilter)) : queryVoucher;
-        }
-
-        /// <summary>
         ///     按过滤器、细目过滤器和日期查询
         /// </summary>
         /// <param name="vfilter">过滤器</param>
         /// <param name="filter">细目过滤器</param>
         /// <param name="rng">日期过滤器</param>
         /// <returns>Bson查询</returns>
-        public static IMongoQuery GetQuery(Voucher vfilter, VoucherDetail filter, DateFilter rng)
+        public static IMongoQuery GetQuery(Voucher vfilter = null,
+                                           VoucherDetail filter = null,
+                                           DateFilter? rng = null)
         {
-            var queryVoucher = And(GetQuery(vfilter), GetQuery(rng));
-            var queryFilter = GetQuery(filter);
+            var queryVoucher = And(GetAtomQuery(vfilter), GetAtomQuery(rng));
+            var queryFilter = GetAtomQuery(filter);
             return queryFilter != null ? And(queryVoucher, Query.ElemMatch("detail", queryFilter)) : queryVoucher;
+        }
+
+        /// <summary>
+        ///     按过滤器、多细目过滤器和日期查询
+        /// </summary>
+        /// <param name="vfilter">过滤器</param>
+        /// <param name="filters">细目过滤器</param>
+        /// <param name="rng">日期过滤器</param>
+        /// <param name="useAnd">各细目过滤器之间的关系为合取</param>
+        /// <returns>Bson查询</returns>
+        public static IMongoQuery GetQuery(Voucher vfilter = null,
+                                           IEnumerable<VoucherDetail> filters = null,
+                                           DateFilter? rng = null,
+                                           bool useAnd = false)
+        {
+            var queryFilters = filters != null
+                                   ? filters.Select(f => Query.ElemMatch("detail", GetAtomQuery(f))).ToList()
+                                   : null;
+            var queryFilter = useAnd ? And(queryFilters) : Or(queryFilters);
+            return And(GetAtomQuery(vfilter), queryFilter, GetAtomQuery(rng));
         }
 
         /// <summary>
@@ -270,8 +269,8 @@ namespace AccountingServer.DAL
                 lst.Add(Query.EQ("date", filter.Date));
             if (filter.TotalDays != null)
                 lst.Add(Query.EQ("tday", filter.TotalDays));
-            if (filter.Template != null)
-                lst.Add(GetQuery(filter.Template));
+            //if (filter.Template != null)
+            //    throw new NotImplementedException(); TODO: query according to Template
             if (filter.Remark != null)
                 lst.Add(
                         filter.Remark == String.Empty
@@ -281,16 +280,49 @@ namespace AccountingServer.DAL
             return And(lst);
         }
 
-        public static IMongoQuery And(params IMongoQuery[] queries)
+        /// <summary>
+        ///     合取
+        /// </summary>
+        /// <param name="queries">查询</param>
+        /// <returns>合取</returns>
+        private static IMongoQuery And(params IMongoQuery[] queries)
         {
             var lst = queries.ToList();
             return And(lst);
         }
 
+        /// <summary>
+        ///     合取
+        /// </summary>
+        /// <param name="queries">查询</param>
+        /// <returns>合取</returns>
         private static IMongoQuery And(ICollection<IMongoQuery> queries)
         {
             while (queries.Remove(null)) { }
             return queries.Any() ? Query.And(queries) : null;
+        }
+
+        /// <summary>
+        ///     析取
+        /// </summary>
+        /// <param name="queries">查询</param>
+        /// <returns>析取</returns>
+        // ReSharper disable once UnusedMember.Global
+        public static IMongoQuery Or(params IMongoQuery[] queries)
+        {
+            var lst = queries.ToList();
+            return Or(lst);
+        }
+
+        /// <summary>
+        ///     析取
+        /// </summary>
+        /// <param name="queries">查询</param>
+        /// <returns>析取</returns>
+        private static IMongoQuery Or(ICollection<IMongoQuery> queries)
+        {
+            while (queries.Remove(null)) { }
+            return queries.Any() ? Query.Or(queries) : null;
         }
     }
 }
