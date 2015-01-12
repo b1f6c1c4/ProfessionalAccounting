@@ -60,7 +60,14 @@ namespace AccountingServer.BLL
                 !asset.Value.HasValue)
                 return;
 
-            var lst = asset.Schedule == null ? new List<AssetItem>() : asset.Schedule.ToList();
+            List<AssetItem> lst;
+            if (asset.Schedule == null)
+                lst = new List<AssetItem>();
+            else if (asset.Schedule is List<AssetItem>)
+                lst = asset.Schedule as List<AssetItem>;
+            else
+                lst = asset.Schedule.ToList();
+
             foreach (var assetItem in lst)
                 if (assetItem is DepreciateItem ||
                     assetItem is DevalueItem)
@@ -115,7 +122,7 @@ namespace AccountingServer.BLL
                     bookValue = 0;
             }
 
-            asset.Schedule = lst.ToArray();
+            asset.Schedule = lst;
         }
 
         /// <summary>
@@ -446,9 +453,7 @@ namespace AccountingServer.BLL
                 if (editOnly)
                     return;
 
-                var l = voucher.Details.ToList();
-                l.Add(expected);
-                voucher.Details = l.ToArray();
+                voucher.Details.Add(expected);
                 sucess = true;
                 modified = true;
                 return;
@@ -461,9 +466,7 @@ namespace AccountingServer.BLL
                 if (editOnly)
                     return;
 
-                var l = voucher.Details.ToList();
-                l.Remove(ds[0]);
-                voucher.Details = l.ToArray();
+                voucher.Details.Remove(ds[0]);
                 sucess = true;
                 modified = true;
                 return;
@@ -513,8 +516,11 @@ namespace AccountingServer.BLL
                 !asset.Life.HasValue)
                 return;
 
-            var items = asset.Schedule.ToList();
-            items.RemoveAll(a => a is DepreciateItem && a.Remark != AssetItem.IgnoranceMark);
+            var items =
+                asset.Schedule.Where(
+                                     assetItem =>
+                                     !(assetItem is DepreciateItem) || assetItem.Remark == AssetItem.IgnoranceMark)
+                     .ToList();
 
             switch (asset.Method)
             {
@@ -659,7 +665,7 @@ namespace AccountingServer.BLL
                     throw new NotImplementedException();
             }
 
-            asset.Schedule = items.ToArray();
+            asset.Schedule = items;
         }
     }
 }

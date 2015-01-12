@@ -104,7 +104,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     摊销计算表
         /// </summary>
-        public AmortItem[] Schedule { get; set; }
+        public IList<AmortItem> Schedule { get; set; }
 
         /// <summary>
         ///     备注

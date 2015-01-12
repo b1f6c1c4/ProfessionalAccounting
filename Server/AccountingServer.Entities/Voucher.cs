@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace AccountingServer.Entities
 {
@@ -71,7 +72,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     Ï¸Ä¿
         /// </summary>
-        public VoucherDetail[] Details { get; set; }
+        public IList<VoucherDetail> Details { get; set; }
 
         /// <summary>
         ///     Àà±ð

@@ -210,7 +210,7 @@ namespace AccountingServer.DAL
             foreach (var voucher in v)
             {
                 var l = voucher.Details.Count();
-                voucher.Details = voucher.Details.Where(d => !d.IsMatch(filter)).ToArray();
+                voucher.Details = voucher.Details.Where(d => !d.IsMatch(filter)).ToList();
                 l -= voucher.Details.Count();
                 var res = m_Vouchers.Save(voucher.ToBsonDocument());
                 if (res.DocumentsAffected == 1)

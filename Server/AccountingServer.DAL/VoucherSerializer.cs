@@ -47,7 +47,7 @@ namespace AccountingServer.DAL
                     voucher.Type = VoucherType.Ordinal;
                     break;
             }
-            voucher.Details = bsonReader.ReadArray("detail", ref read, VoucherDetailSerializer.Deserialize).ToArray();
+            voucher.Details = bsonReader.ReadArray("detail", ref read, VoucherDetailSerializer.Deserialize);
             voucher.Remark = bsonReader.ReadString("remark", ref read);
             bsonReader.ReadEndDocument();
 

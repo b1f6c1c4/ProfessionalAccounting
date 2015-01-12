@@ -49,7 +49,7 @@ namespace AccountingServer.DAL
                     break;
             }
             amort.Template = bsonReader.ReadDocument("template", ref read, VoucherSerializer.Deserialize);
-            amort.Schedule = bsonReader.ReadArray("schedule", ref read, AmortItemSerializer.Deserialize).ToArray();
+            amort.Schedule = bsonReader.ReadArray("schedule", ref read, AmortItemSerializer.Deserialize);
             amort.Remark = bsonReader.ReadString("remark", ref read);
             bsonReader.ReadEndDocument();
             return amort;

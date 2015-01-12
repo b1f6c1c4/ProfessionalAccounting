@@ -193,7 +193,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     资产折旧计算表
         /// </summary>
-        public AssetItem[] Schedule { get; set; }
+        public IList<AssetItem> Schedule { get; set; }
 
         /// <summary>
         ///     备注
