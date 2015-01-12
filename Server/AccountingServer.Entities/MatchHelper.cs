@@ -10,6 +10,34 @@ namespace AccountingServer.Entities
     public static class MatchHelper
     {
         /// <summary>
+        ///     判断凭证是否符合过滤器
+        /// </summary>
+        /// <param name="voucher">凭证</param>
+        /// <param name="filter">过滤器</param>
+        /// <returns>是否符合</returns>
+        public static bool IsMatch(this Voucher voucher, Voucher filter)
+        {
+            if (filter.ID != null)
+                if (filter.ID != voucher.ID)
+                    return false;
+            if (filter.Date != null)
+                if (filter.Date != voucher.Date)
+                    return false;
+            if (filter.Type != null)
+                if (filter.Type != voucher.Type)
+                    return false;
+            if (filter.Remark != null)
+                if (filter.Remark == String.Empty)
+                {
+                    if (!String.IsNullOrEmpty(voucher.Remark))
+                        return false;
+                }
+                else if (filter.Remark != voucher.Remark)
+                    return false;
+            return true;
+        }
+
+        /// <summary>
         ///     判断细目是否符合过滤器
         /// </summary>
         /// <param name="voucherDetail">细目</param>
