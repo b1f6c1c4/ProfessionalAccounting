@@ -55,6 +55,7 @@
     <Compile Include="IDbAdapter.cs" />
     <Compile Include="IDbServer.cs" />
     <Compile Include="MongoDbAdapter.cs" />
+    <Compile Include="MongoDbQueryHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VoucherDetailSerializer.cs" />
     <Compile Include="VoucherSerializer.cs" />
