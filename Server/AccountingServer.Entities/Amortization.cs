@@ -40,13 +40,13 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     摊销额
         /// </summary>
-        public double? Amount { get; set; }
+        public double Amount { get; set; }
 
         /// <summary>
         ///     待摊额
         ///     <para>不存储在数据库中</para>
         /// </summary>
-        public double? Residue { get; set; }
+        public double Residue { get; set; }
 
         /// <summary>
         ///     备注
@@ -97,7 +97,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     周期
         /// </summary>
-        public AmortizeInterval Interval { get; set; }
+        public AmortizeInterval? Interval { get; set; }
 
         /// <summary>
         ///     模板

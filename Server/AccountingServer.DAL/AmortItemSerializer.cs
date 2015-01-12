@@ -20,7 +20,7 @@ namespace AccountingServer.DAL
                            {
                                VoucherID = bsonReader.ReadObjectId("voucher", ref read),
                                Date = bsonReader.ReadDateTime("date", ref read),
-                               Amount = bsonReader.ReadDouble("amount", ref read),
+                               Amount = bsonReader.ReadDouble("amount", ref read) ?? 0D,
                                Remark = bsonReader.ReadString("remark", ref read)
                            };
             bsonReader.ReadEndDocument();

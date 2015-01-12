@@ -60,7 +60,7 @@ namespace AccountingServer.DAL
             BsonSerializer.RegisterSerializer(typeof(Asset), new AssetSerializer());
             BsonSerializer.RegisterSerializer(typeof(AssetItem), new AssetItemSerializer());
             BsonSerializer.RegisterSerializer(typeof(Amortization), new AmortizationSerializer());
-            BsonSerializer.RegisterSerializer(typeof(AmortItem), new AmortizationSerializer());
+            BsonSerializer.RegisterSerializer(typeof(AmortItem), new AmortItemSerializer());
         }
 
         #region server
