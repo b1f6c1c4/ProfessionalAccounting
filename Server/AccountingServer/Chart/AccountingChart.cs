@@ -90,6 +90,15 @@ namespace AccountingServer.Chart
             s.Color = color;
             return s;
         }
+        private Series Gather(string content, IEnumerable<Balance> filter, Color color)
+        {
+            var s = new Series(content) { ChartType = SeriesChartType.StackedArea, ChartArea = "投资资产" };
+            var balances = Accountant.GetDailyBalance(filter, DateRange);
+            foreach (var balance in balances)
+                s.Points.AddXY(balance.Date.Value, balance.Fund);
+            s.Color = color;
+            return s;
+        }
 
         public override IEnumerable<Series> Gather()
         {
@@ -101,8 +110,11 @@ namespace AccountingServer.Chart
             yield return Gather("中银增利", new Balance { Title = 1101, Content = "中银增利" }, Color.DarkMagenta);
             yield return Gather("中银纯债C", new Balance { Title = 1101, Content = "中银纯债C" }, Color.DarkOrchid);
             yield return Gather("定存宝A", new Balance { Title = 1101, Content = "定存宝A" }, Color.Navy);
-            yield return
-                Gather("月息通 YAD14I3000", new Balance { Title = 1101, Content = "月息通 YAD14I3000" }, Color.Olive);
+            yield return Gather("月息通", new[]
+                                           {
+                                               new Balance { Title = 1101, Content = "月息通 YAD14I3000" } ,
+                                               new Balance { Title = 1101, Content = "月息通 YDK15A1651" } 
+                                           }, Color.Olive);
             yield return Gather("富盈人生第34期", new Balance { Title = 1101, Content = "富盈人生第34期" }, Color.MidnightBlue);
             yield return Gather("贵金属", new Balance { Title = 1441 }, Color.Gold);
         }
