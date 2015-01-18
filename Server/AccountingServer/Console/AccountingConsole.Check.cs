@@ -12,7 +12,7 @@ namespace AccountingServer.Console
         ///     检查每张会计凭证借贷方是否相等
         /// </summary>
         /// <returns>有误的会计凭证表达式</returns>
-        private string BasicCheck()
+        private IQueryResult BasicCheck()
         {
             AutoConnect();
 
@@ -30,14 +30,16 @@ namespace AccountingServer.Console
                 sb.AppendLine();
                 sb.Append(CSharpHelper.PresentVoucher(voucher));
             }
-            return sb.Length > 0 ? sb.ToString() : "OK";
+            if (sb.Length > 0)
+                return new EditableText(sb.ToString());
+            return new Suceed();
         }
 
         /// <summary>
         ///     检查每科目每内容每日资产无贷方余额，负债无借方余额
         /// </summary>
         /// <returns>发生错误的第一日及其信息</returns>
-        private string AdvancedCheck()
+        private IQueryResult AdvancedCheck()
         {
             AutoConnect();
 
@@ -127,7 +129,9 @@ namespace AccountingServer.Console
                                 sb.AppendLine();
                                 break;
                             }
-            return flag ? sb.ToString() : "OK";
+            if (flag)
+                return new EditableText(sb.ToString());
+            return new Suceed();
         }
     }
 }

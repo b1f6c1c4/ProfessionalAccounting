@@ -182,16 +182,26 @@ namespace AccountingServer
             if (text.StartsWith("+"))
                 try
                 {
-                    var result = m_Console.Execute(text.Substring(1), out m_Editable);
-                    if (result == null)
+                    var res = m_Console.Execute(text.Substring(1));
+                    if (res == null)
                         return true;
 
-                    if (result.StartsWith("CHART"))
+                    if (res is DefaultChart)
                     {
-                        ProcessChart(result);
+                        ProcessChart(res as DefaultChart);
                         FocusTextBoxCommand();
                         return true;
                     }
+                    if (res is CustomChart)
+                    {
+                        ProcessChart(res as CustomChart);
+                        FocusTextBoxCommand();
+                        return true;
+                    }
+
+                    m_Editable |= res is EditableText;
+
+                    var result = res.ToString();
 
                     SwitchToText();
 
@@ -204,7 +214,7 @@ namespace AccountingServer
                                                    ? Color.FromArgb(0, 200, 0)
                                                    : Color.FromArgb(200, 220, 0);
 
-                    if (result.StartsWith("OK"))
+                    if (res.AutoReturn)
                         FocusTextBoxCommand();
                     return true;
                 }
@@ -219,16 +229,20 @@ namespace AccountingServer
             {
                 try
                 {
-                    var result = m_Console.Execute(text, out m_Editable);
-                    if (result == null)
+                    var res = m_Console.Execute(text);
+                    if (res == null)
                         return true;
 
-                    if (result.StartsWith("CHART"))
+                    if (res is DefaultChart)
                     {
-                        ProcessChart(result);
+                        ProcessChart(res as DefaultChart);
                         FocusTextBoxCommand();
                         return true;
                     }
+
+                    m_Editable = res is EditableText;
+
+                    var result = res.ToString();
 
                     SwitchToText();
 
@@ -239,7 +253,7 @@ namespace AccountingServer
                                                    ? Color.FromArgb(75, 255, 75)
                                                    : Color.FromArgb(250, 250, 0);
 
-                    if (result.StartsWith("OK"))
+                    if (res.AutoReturn)
                         FocusTextBoxCommand();
                     return true;
                 }
@@ -253,22 +267,18 @@ namespace AccountingServer
             }
         }
 
-        private void ProcessChart(string expr)
+        private void ProcessChart(DefaultChart chartArgs)
         {
-            var sp = expr.Split(' ');
-
             var curDate = DateTime.Now.Date;
-            var startDate = DateTime.Parse(sp[1]);
-            var endDate = DateTime.Parse(sp[2]);
 
             var charts = new AccountingChart[]
                              {
-                                 new 投资资产(m_Accountant, startDate, endDate, curDate),
-                                 new 生活资产(m_Accountant, startDate, endDate, curDate),
-                                 new 其他资产(m_Accountant, startDate, endDate, curDate),
-                                 new 生活费用(m_Accountant, startDate, endDate, curDate),
-                                 new 其他费用(m_Accountant, startDate, endDate, curDate),
-                                 new 负债(m_Accountant, startDate, endDate, curDate)
+                                 new 投资资产(m_Accountant, chartArgs.StartDate, chartArgs.EndDate, curDate),
+                                 new 生活资产(m_Accountant, chartArgs.StartDate, chartArgs.EndDate, curDate),
+                                 new 其他资产(m_Accountant, chartArgs.StartDate, chartArgs.EndDate, curDate),
+                                 new 生活费用(m_Accountant, chartArgs.StartDate, chartArgs.EndDate, curDate),
+                                 new 其他费用(m_Accountant, chartArgs.StartDate, chartArgs.EndDate, curDate),
+                                 new 负债(m_Accountant, chartArgs.StartDate, chartArgs.EndDate, curDate)
                              };
 
             chart1.ChartAreas.SuspendUpdates();
@@ -283,6 +293,27 @@ namespace AccountingServer
 
             foreach (var series in charts.SelectMany(chart => chart.Gather()))
                 chart1.Series.Add(series);
+
+            chart1.ChartAreas.ResumeUpdates();
+
+            SwitchToChart();
+        }
+        private void ProcessChart(CustomChart chartArgs)
+        {
+            chart1.ChartAreas.SuspendUpdates();
+
+            chart1.ChartAreas.Clear();
+            var ar = chart1.ChartAreas.Add("chartArea1");
+
+            chart1.Legends[0].Font = new Font("Microsoft YaHei Mono", 12, GraphicsUnit.Pixel);
+
+            chart1.Series.Clear();
+
+            foreach (var series in chartArgs.Series)
+            {
+                series.ChartArea = "chartArea1";
+                chart1.Series.Add(series);
+            }
 
             chart1.ChartAreas.ResumeUpdates();
 
