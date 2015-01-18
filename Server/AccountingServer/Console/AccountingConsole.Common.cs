@@ -21,117 +21,105 @@ namespace AccountingServer.Console
         /// <param name="s">表达式</param>
         /// <param name="editable">执行结果是否可编辑</param>
         /// <returns>执行结果</returns>
-        public string Execute(string s, out bool editable)
+        public IQueryResult Execute(string s)
         {
-            s = s.Trim();
-            switch (s.ToLowerInvariant())
+            try
             {
-                case "launch":
-                case "lau":
-                    editable = false;
-                    return LaunchServer();
-                case "connect":
-                case "con":
-                    editable = false;
-                    return ConnectServer();
-                case "mobile":
-                case "mob":
-                    editable = false;
-                    ToggleMobile();
-                    return null;
-                case "backup":
-                    editable = false;
-                    return Backup();
-                case "fetch":
-                    editable = true;
-                    return FetchInfo();
-                case "titles":
-                case "t":
-                    editable = false;
-                    return ListTitles();
-                case "help":
-                case "?":
-                    editable = false;
-                    return ListHelp();
-                case "chk1":
-                    editable = true;
-                    return BasicCheck();
-                case "chk2":
-                    editable = false;
-                    return AdvancedCheck();
-                case "exit":
-                    editable = false;
-                    Environment.Exit(0);
-                    // ReSharper disable once HeuristicUnreachableCode
-                    return "OK";
-            }
+                s = s.Trim();
+                switch (s.ToLowerInvariant())
+                {
+                    case "launch":
+                    case "lau":
+                        return LaunchServer();
+                    case "connect":
+                    case "con":
+                        return ConnectServer();
+                    case "mobile":
+                    case "mob":
+                        ToggleMobile();
+                        return null;
+                    case "backup":
+                        return Backup();
+                    case "fetch":
+                        return FetchInfo();
+                    case "titles":
+                    case "t":
+                        return ListTitles();
+                    case "help":
+                    case "?":
+                        return ListHelp();
+                    case "chk1":
+                        return BasicCheck();
+                    case "chk2":
+                        return AdvancedCheck();
+                    case "exit":
+                        Environment.Exit(0);
+                        // ReSharper disable once HeuristicUnreachableCode
+                        return new Suceed();
+                }
 
-            if (s.StartsWith("a", StringComparison.OrdinalIgnoreCase))
-                return ExecuteAsset(s, out editable);
+                if (s.StartsWith("a", StringComparison.OrdinalIgnoreCase))
+                    return ExecuteAsset(s);
 
-            if (s.EndsWith("`"))
-            {
-                editable = false;
-                var sx = s.TrimEnd('`', '!');
-                return s.EndsWith("!`")
-                           ? SubtotalWith2Levels(sx, s.EndsWith("!``"))
-                           : SubtotalWith3Levels(sx, s.EndsWith("``"));
-            }
-            if (s.EndsWith("D", StringComparison.OrdinalIgnoreCase))
-            {
-                editable = false;
-                var sx = s.TrimEnd('`', '!', 'D', 'd');
-                return s.EndsWith("!`D")
-                           ? DailySubtotalWith3Levels(
-                                                      sx,
-                                                      s.EndsWith("!``D", StringComparison.OrdinalIgnoreCase),
-                                                      s.EndsWith("D", StringComparison.Ordinal),
-                                                      false)
-                           : DailySubtotalWith4Levels(
-                                                      sx,
-                                                      s.EndsWith("``D", StringComparison.OrdinalIgnoreCase),
-                                                      s.EndsWith("D", StringComparison.Ordinal),
-                                                      false);
-            }
-            if (s.EndsWith("A", StringComparison.OrdinalIgnoreCase))
-            {
-                editable = false;
-                var sx = s.TrimEnd('`', '!', 'A', 'a');
-                return s.EndsWith("!`A")
-                           ? DailySubtotalWith3Levels(
-                                                      sx,
-                                                      s.EndsWith("!``A", StringComparison.OrdinalIgnoreCase),
-                                                      s.EndsWith("A", StringComparison.Ordinal),
-                                                      true)
-                           : DailySubtotalWith4Levels(
-                                                      sx,
-                                                      s.EndsWith("``A", StringComparison.OrdinalIgnoreCase),
-                                                      s.EndsWith("A", StringComparison.Ordinal),
-                                                      true);
-            }
+                if (s.EndsWith("`"))
+                {
+                    var sx = s.TrimEnd('`', '!');
+                    return s.EndsWith("!`")
+                               ? SubtotalWith2Levels(sx, s.EndsWith("!``"))
+                               : SubtotalWith3Levels(sx, s.EndsWith("``"));
+                }
+                if (s.EndsWith("D", StringComparison.OrdinalIgnoreCase))
+                {
+                    var sx = s.TrimEnd('`', '!', 'D', 'd');
+                    return s.EndsWith("!`D")
+                               ? DailySubtotalWith3Levels(
+                                                          sx,
+                                                          s.EndsWith("!``D", StringComparison.OrdinalIgnoreCase),
+                                                          s.EndsWith("D", StringComparison.Ordinal),
+                                                          false)
+                               : DailySubtotalWith4Levels(
+                                                          sx,
+                                                          s.EndsWith("``D", StringComparison.OrdinalIgnoreCase),
+                                                          s.EndsWith("D", StringComparison.Ordinal),
+                                                          false);
+                }
+                if (s.EndsWith("A", StringComparison.OrdinalIgnoreCase))
+                {
+                    var sx = s.TrimEnd('`', '!', 'A', 'a');
+                    return s.EndsWith("!`A")
+                               ? DailySubtotalWith3Levels(
+                                                          sx,
+                                                          s.EndsWith("!``A", StringComparison.OrdinalIgnoreCase),
+                                                          s.EndsWith("A", StringComparison.Ordinal),
+                                                          true)
+                               : DailySubtotalWith4Levels(
+                                                          sx,
+                                                          s.EndsWith("``A", StringComparison.OrdinalIgnoreCase),
+                                                          s.EndsWith("A", StringComparison.Ordinal),
+                                                          true);
+                }
 
-            if (s.StartsWith("R", StringComparison.OrdinalIgnoreCase))
-            {
-                editable = false;
-                return GenerateReport(s);
-            }
+                if (s.StartsWith("R", StringComparison.OrdinalIgnoreCase))
+                    return GenerateReport(s);
 
-            if (s.StartsWith("C", StringComparison.OrdinalIgnoreCase))
-            {
-                editable = false;
+                if (s.StartsWith("C", StringComparison.OrdinalIgnoreCase))
+                {
+                    var rng = ParseDateQuery(s.Substring(1));
+                    if (!rng.Constrained)
+                        throw new InvalidOperationException("日期表达式无效");
 
-                var rng = ParseDateQuery(s.Substring(1));
-                if (!rng.Constrained)
-                    throw new InvalidOperationException("日期表达式无效");
+                    AutoConnect();
 
-                AutoConnect();
+                    // ReSharper disable PossibleInvalidOperationException
+                    return new DefaultChart(rng.StartDate.Value, rng.EndDate.Value);
+                    // ReSharper restore PossibleInvalidOperationException
+                }
 
-                return String.Format("CHART {0:s} {1:s}", rng.StartDate, rng.EndDate);
-            }
-
-            {
-                editable = true;
                 return VouchersQuery(s);
+            }
+            catch (Exception e)
+            {
+                return new Failed(e);
             }
         }
 
@@ -174,7 +162,7 @@ namespace AccountingServer.Console
         /// </summary>
         /// <param name="s">检索表达式</param>
         /// <returns>记账凭证表达式</returns>
-        private string VouchersQuery(string s)
+        private IQueryResult VouchersQuery(string s)
         {
             var sb = new StringBuilder();
             var query = ExecuteQuery(s);
@@ -183,7 +171,7 @@ namespace AccountingServer.Console
 
             foreach (var voucher in query)
                 sb.Append(CSharpHelper.PresentVoucher(voucher));
-            return sb.ToString();
+            return new EditableText(sb.ToString());
         }
 
         /// <summary>
@@ -191,7 +179,7 @@ namespace AccountingServer.Console
         /// </summary>
         /// <param name="s">检索表达式</param>
         /// <returns>报销报表</returns>
-        private string GenerateReport(string s)
+        private IQueryResult GenerateReport(string s)
         {
             var isExp = s.EndsWith("-exp");
             s = isExp ? s.Substring(1, s.Length - 5) : s.Substring(1);
@@ -202,7 +190,7 @@ namespace AccountingServer.Console
 
             var report = new ReimbursementReport(m_Accountant, rng);
 
-            return isExp ? report.ExportString() : report.Preview();
+            return new UnEditableText(isExp ? report.ExportString() : report.Preview());
         }
     }
 }

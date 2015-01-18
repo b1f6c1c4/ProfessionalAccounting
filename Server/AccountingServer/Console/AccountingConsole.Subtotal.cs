@@ -97,7 +97,7 @@ namespace AccountingServer.Console
         /// <param name="sx">检索表达式</param>
         /// <param name="withZero">是否包含汇总为零的部分</param>
         /// <returns>报表</returns>
-        private string SubtotalWith2Levels(string sx, bool withZero)
+        private IQueryResult SubtotalWith2Levels(string sx, bool withZero)
         {
             var res = ExecuteDetailQuery(sx);
             if (res == null)
@@ -131,7 +131,7 @@ namespace AccountingServer.Console
                         ? tX.Where(d => Math.Abs(d.Fund) > Accountant.Tolerance).ToList()
                         : tX.ToList();
 
-            return PresentSubtotal(t, tsc);
+            return new UnEditableText(PresentSubtotal(t, tsc));
         }
 
         /// <summary>
@@ -140,7 +140,7 @@ namespace AccountingServer.Console
         /// <param name="sx">检索表达式</param>
         /// <param name="withZero">是否包含汇总为零的部分</param>
         /// <returns>报表</returns>
-        private string SubtotalWith3Levels(string sx, bool withZero)
+        private IQueryResult SubtotalWith3Levels(string sx, bool withZero)
         {
             var res = ExecuteDetailQuery(sx);
             if (res == null)
@@ -189,7 +189,7 @@ namespace AccountingServer.Console
                         ? tX.Where(d => Math.Abs(d.Fund) > Accountant.Tolerance).ToList()
                         : tX.ToList();
 
-            return PresentSubtotal(t, ts, tsc);
+            return new UnEditableText(PresentSubtotal(t, ts, tsc));
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace AccountingServer.Console
         /// <param name="reversed">是否将日期放在最外侧</param>
         /// <param name="aggr"></param>
         /// <returns>报表</returns>
-        private string DailySubtotalWith4Levels(string sx, bool withZero, bool reversed, bool aggr)
+        private IQueryResult DailySubtotalWith4Levels(string sx, bool withZero, bool reversed, bool aggr)
         {
             string dateQ;
             var detail = ParseQuery(sx, out dateQ);
@@ -212,14 +212,15 @@ namespace AccountingServer.Console
             if (detail.Content == null)
             {
                 if (detail.Title != null)
-                    return reversed
-                               ? SubtotalWith4Levels1X00Reversed(detail, rng, withZero)
-                               : SubtotalWith4Levels1X00(detail, rng, withZero, aggr);
+                    return new UnEditableText(
+                        reversed
+                            ? SubtotalWith4Levels1X00Reversed(detail, rng, withZero)
+                            : SubtotalWith4Levels1X00(detail, rng, withZero, aggr));
 
                 throw new NotImplementedException();
             }
             if (detail.Title != null)
-                return SubtotalWith4Levels1X10(withZero, detail, rng, aggr);
+                return new UnEditableText(SubtotalWith4Levels1X10(withZero, detail, rng, aggr));
 
             throw new NotImplementedException();
         }
@@ -232,7 +233,7 @@ namespace AccountingServer.Console
         /// <param name="reversed">是否将日期放在最外侧</param>
         /// <param name="aggr"></param>
         /// <returns>报表</returns>
-        private string DailySubtotalWith3Levels(string sx, bool withZero, bool reversed, bool aggr)
+        private IQueryResult DailySubtotalWith3Levels(string sx, bool withZero, bool reversed, bool aggr)
         {
             string dateQ;
             var detail = ParseQuery(sx, out dateQ);
@@ -244,14 +245,15 @@ namespace AccountingServer.Console
             if (detail.Content == null)
             {
                 if (detail.Title != null)
-                    return reversed
-                               ? SubtotalWith4Levels1X00Reversed(detail, rng, withZero)
-                               : SubtotalWith4Levels1X00(detail, rng, withZero, aggr);
+                    return new UnEditableText(
+                        reversed
+                            ? SubtotalWith4Levels1X00Reversed(detail, rng, withZero)
+                            : SubtotalWith4Levels1X00(detail, rng, withZero, aggr));
 
                 throw new NotImplementedException();
             }
             if (detail.Title != null)
-                return SubtotalWith4Levels1X10(withZero, detail, rng, aggr);
+                return new UnEditableText(SubtotalWith4Levels1X10(withZero, detail, rng, aggr));
 
             throw new NotImplementedException();
         }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace AccountingServer.Console
+﻿namespace AccountingServer.Console
 {
     internal partial class AccountingConsole
     {
@@ -20,51 +18,30 @@ namespace AccountingServer.Console
         ///     连接数据库服务器
         /// </summary>
         /// <returns>连接情况</returns>
-        private string ConnectServer()
+        private IQueryResult ConnectServer()
         {
-            try
-            {
-                m_Accountant.Connect();
-                return "OK";
-            }
-            catch (Exception e)
-            {
-                return e.ToString();
-            }
+            m_Accountant.Connect();
+            return new Suceed();
         }
 
         /// <summary>
         ///     启动数据库服务器
         /// </summary>
         /// <returns>启动情况</returns>
-        private string LaunchServer()
+        private IQueryResult LaunchServer()
         {
-            try
-            {
-                m_Accountant.Launch();
-                return "OK";
-            }
-            catch (Exception e)
-            {
-                return e.ToString();
-            }
+            m_Accountant.Launch();
+            return new Suceed();
         }
 
         /// <summary>
         ///     备份数据库
         /// </summary>
         /// <returns>备份情况</returns>
-        private string Backup()
+        private IQueryResult Backup()
         {
-            try
-            {
-                m_Accountant.Backup();
-                return "OK";
-            }
-            catch (Exception e)
-            {
-                return e.ToString();
-            }
+            m_Accountant.Backup();
+            return new Suceed();
         }
     }
 }

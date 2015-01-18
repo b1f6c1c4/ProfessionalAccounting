@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
@@ -50,7 +49,7 @@ namespace AccountingServer.Console
         /// <param name="s">表达式</param>
         /// <param name="editable">执行结果是否可编辑</param>
         /// <returns>执行结果</returns>
-        public string ExecuteAsset(string s, out bool editable)
+        public IQueryResult ExecuteAsset(string s)
         {
             AutoConnect();
 
@@ -59,19 +58,15 @@ namespace AccountingServer.Console
 
             if (sp[0].Equals("a", StringComparison.OrdinalIgnoreCase))
             {
-                editable = false;
-
                 var sb = new StringBuilder();
                 var filter = ParseAssetQuery(query);
                 foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
                     sb.Append(ListAsset(a, DateTime.Now.Date, false));
 
-                return sb.ToString();
+                return new UnEditableText(sb.ToString());
             }
             if (sp[0].StartsWith("a@", StringComparison.OrdinalIgnoreCase))
             {
-                editable = false;
-
                 var dt = DateTime.ParseExact(sp[0] + "01", "a@yyyyMMdd", null).AddMonths(1).AddDays(-1);
 
                 var sb = new StringBuilder();
@@ -79,45 +74,37 @@ namespace AccountingServer.Console
                 foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
                     sb.Append(ListAsset(a, dt, false));
 
-                return sb.ToString();
+                return new UnEditableText(sb.ToString());
             }
             if (sp[0].Equals("a-all", StringComparison.OrdinalIgnoreCase))
             {
-                editable = false;
-
                 var sb = new StringBuilder();
                 var filter = ParseAssetQuery(query);
                 foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
                     sb.Append(ListAsset(a, null, false));
 
-                return sb.ToString();
+                return new UnEditableText(sb.ToString());
             }
             if (sp[0].StartsWith("a-li", StringComparison.OrdinalIgnoreCase))
             {
-                editable = false;
-
                 var sb = new StringBuilder();
                 var filter = ParseAssetQuery(query);
                 foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
                     sb.Append(ListAsset(a));
 
-                return sb.ToString();
+                return new UnEditableText(sb.ToString());
             }
             if (sp[0].StartsWith("a-q", StringComparison.OrdinalIgnoreCase))
             {
-                editable = true;
-
                 var sb = new StringBuilder();
                 var filter = ParseAssetQuery(query);
                 foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
                     sb.Append(CSharpHelper.PresentAsset(a));
 
-                return sb.ToString();
+                return new EditableText(sb.ToString());
             }
             if (sp[0].StartsWith("a-reg", StringComparison.OrdinalIgnoreCase))
             {
-                editable = true;
-
                 var sb = new StringBuilder();
                 var filter = ParseAssetQuery(query);
                 foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
@@ -127,12 +114,12 @@ namespace AccountingServer.Console
 
                     m_Accountant.Update(a);
                 }
-                return sb.ToString();
+                if (sb.Length > 0)
+                    return new EditableText(sb.ToString());
+                return new Suceed();
             }
             if (sp[0].StartsWith("a-unr", StringComparison.OrdinalIgnoreCase))
             {
-                editable = true;
-
                 var sb = new StringBuilder();
                 var filter = ParseAssetQuery(query);
                 foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
@@ -140,16 +127,14 @@ namespace AccountingServer.Console
                     foreach (var item in a.Schedule)
                         item.VoucherID = null;
 
-                    sb.Append(a);
+                    sb.Append(ListAsset(a));
                     m_Accountant.Update(a);
                 }
-                return sb.ToString();
+                return new EditableText(sb.ToString());
             }
             if (sp[0].Equals("a-rd", StringComparison.OrdinalIgnoreCase) ||
                 sp[0].Equals("a-redep", StringComparison.OrdinalIgnoreCase))
             {
-                editable = true;
-
                 var sb = new StringBuilder();
                 var filter = ParseAssetQuery(query);
                 foreach (var a in m_Accountant.FilteredSelect(filter))
@@ -158,12 +143,10 @@ namespace AccountingServer.Console
                     sb.Append(CSharpHelper.PresentAsset(a));
                     m_Accountant.Update(a);
                 }
-                return sb.ToString();
+                return new EditableText(sb.ToString());
             }
             if (sp[0].Equals("a-reset-hard", StringComparison.OrdinalIgnoreCase))
             {
-                editable = true;
-
                 var filter = ParseAssetQuery(query);
                 var cnt = 0L;
                 foreach (var a in m_Accountant.FilteredSelect(filter))
@@ -183,11 +166,10 @@ namespace AccountingServer.Console
                                                                Content = a.StringID
                                                            });
                 }
-                return "OK " + cnt.ToString(CultureInfo.InvariantCulture);
+                return new NumberAffected(cnt);
             }
             if (sp[0].StartsWith("a-ap", StringComparison.OrdinalIgnoreCase))
             {
-                editable = true;
                 var isCollapsed = sp[0].EndsWith("-collapse", StringComparison.OrdinalIgnoreCase) ||
                                   sp[0].EndsWith("-co", StringComparison.OrdinalIgnoreCase);
 
@@ -212,12 +194,12 @@ namespace AccountingServer.Console
 
                     m_Accountant.Update(a);
                 }
-                return sb.ToString();
+                if (sb.Length > 0)
+                    return new EditableText(sb.ToString());
+                return new Suceed();
             }
             if (sp[0].StartsWith("a-chk", StringComparison.OrdinalIgnoreCase))
             {
-                editable = true;
-
                 var filter = ParseAssetQuery(query);
 
                 var rng = new DateFilter(null, DateTime.Now.Date);
@@ -237,7 +219,9 @@ namespace AccountingServer.Console
 
                     m_Accountant.Update(a);
                 }
-                return sb.ToString();
+                if (sb.Length > 0)
+                    return new EditableText(sb.ToString());
+                return new Suceed();
             }
 
             throw new InvalidOperationException("资产表达式无效");

@@ -29,7 +29,7 @@ namespace AccountingServer.Console
         ///     显示控制台帮助
         /// </summary>
         /// <returns>帮助内容</returns>
-        private static string ListHelp()
+        private static IQueryResult ListHelp()
         {
             using (
                 var stream =
@@ -38,7 +38,7 @@ namespace AccountingServer.Console
                 if (stream == null)
                     throw new MissingManifestResourceException();
                 using (var reader = new StreamReader(stream))
-                    return reader.ReadToEnd();
+                    return new UnEditableText(reader.ReadToEnd());
             }
         }
 
@@ -46,7 +46,7 @@ namespace AccountingServer.Console
         ///     显示所有会计科目及其编号
         /// </summary>
         /// <returns>会计科目及其编号</returns>
-        private static string ListTitles()
+        private static IQueryResult ListTitles()
         {
             var sb = new StringBuilder();
             foreach (var title in TitleManager.GetTitles())
@@ -58,20 +58,20 @@ namespace AccountingServer.Console
                                 title.Item3);
                 sb.AppendLine();
             }
-            return sb.ToString();
+            return new UnEditableText(sb.ToString());
         }
 
         /// <summary>
         ///     从info.tsinghua.edu.cn抓取信息
         /// </summary>
         /// <returns></returns>
-        private string FetchInfo()
+        private IQueryResult FetchInfo()
         {
             AutoConnect();
 
             var thuInfo = new THUInfo(m_Accountant);
             thuInfo.FetchData(@"2014010914", @"MTQyODU3");
-            return thuInfo.Compare();
+            return new EditableText(thuInfo.Compare());
         }
 
         /// <summary>
