@@ -156,6 +156,19 @@ namespace AccountingServer.BLL
                             };
             }
             {
+                var lst = helper.GetBalancesAcrossContent(new Balance { Title = 1601 }, rng);
+                foreach (var detail in lst)
+                    yield return
+                        new ReportItem
+                        {
+                            Title = TitleManager.GetTitleName(detail),
+                            Content = detail.Content,
+                            OrigContent = detail.Content,
+                            Fund = detail.Fund,
+                            Coefficient = detail.Content == null ? 1 : 0.01
+                        };
+            }
+            {
                 var lst = helper.GetBalancesAcrossContent(new Balance { Title = 1701 }, rng);
                 foreach (var detail in lst)
                     yield return
@@ -361,13 +374,35 @@ namespace AccountingServer.BLL
                         case "理发":
                             yield return
                                 new ReportItem
-                                    {
-                                        Title = TitleManager.GetTitleName(detail),
-                                        Content = detail.Content,
-                                        OrigContent = detail.Content,
-                                        Fund = detail.Fund,
-                                        Coefficient = 0.5
-                                    };
+                                {
+                                    Title = TitleManager.GetTitleName(detail),
+                                    Content = detail.Content,
+                                    OrigContent = detail.Content,
+                                    Fund = detail.Fund,
+                                    Coefficient = 0.5
+                                };
+                            break;
+                        case "电影":
+                            yield return
+                                new ReportItem
+                                {
+                                    Title = TitleManager.GetTitleName(detail),
+                                    Content = detail.Content,
+                                    OrigContent = detail.Content,
+                                    Fund = detail.Fund,
+                                    Coefficient = 0.01
+                                };
+                            break;
+                        case "音乐会":
+                            yield return
+                                new ReportItem
+                                {
+                                    Title = TitleManager.GetTitleName(detail),
+                                    Content = detail.Content,
+                                    OrigContent = detail.Content,
+                                    Fund = detail.Fund,
+                                    Coefficient = 1
+                                };
                             break;
                         default:
                             yield return
@@ -424,19 +459,77 @@ namespace AccountingServer.BLL
             {
                 var lst = helper.GetBalancesAcrossContent(new Balance { Title = 6602, SubTitle = 99 }, rng);
                 foreach (var detail in lst)
-                {
-                    if (detail.Content != "维修费")
-                        continue;
-                    yield return
-                        new ReportItem
-                            {
-                                Title = TitleManager.GetTitleName(detail),
-                                Content = detail.Content,
-                                OrigContent = detail.Content,
-                                Fund = detail.Fund,
-                                Coefficient = 0.05
-                            };
-                }
+                    switch (detail.Content)
+                    {
+                        case "Github":
+                            yield return
+                                new ReportItem
+                                {
+                                    Title = TitleManager.GetTitleName(detail),
+                                    Content = detail.Content,
+                                    OrigContent = detail.Content,
+                                    Fund = detail.Fund,
+                                    Coefficient = 1
+                                };
+                            break;
+                        case "团费":
+                            yield return
+                                new ReportItem
+                                {
+                                    Title = TitleManager.GetTitleName(detail),
+                                    Content = detail.Content,
+                                    OrigContent = detail.Content,
+                                    Fund = detail.Fund,
+                                    Coefficient = 1
+                                };
+                            break;
+                        case "培训费":
+                            yield return
+                                new ReportItem
+                                {
+                                    Title = TitleManager.GetTitleName(detail),
+                                    Content = detail.Content,
+                                    OrigContent = detail.Content,
+                                    Fund = detail.Fund,
+                                    Coefficient = 1
+                                };
+                            break;
+                        case "短信告知":
+                        case "短信服务":
+                        case "短信通知":
+                            yield return
+                                new ReportItem
+                                {
+                                    Title = TitleManager.GetTitleName(detail),
+                                    Content = "（银行短信提醒）",
+                                    OrigContent = detail.Content,
+                                    Fund = detail.Fund,
+                                    Coefficient = 1
+                                };
+                            break;
+                        case "维修费":
+                            yield return
+                                new ReportItem
+                                {
+                                    Title = TitleManager.GetTitleName(detail),
+                                    Content = detail.Content,
+                                    OrigContent = detail.Content,
+                                    Fund = detail.Fund,
+                                    Coefficient = 0.05
+                                };
+                            break;
+                        default:
+                            yield return
+                                new ReportItem
+                                {
+                                    Title = TitleManager.GetTitleName(detail),
+                                    Content = detail.Content,
+                                    OrigContent = detail.Content,
+                                    Fund = detail.Fund,
+                                    Coefficient = 0
+                                };
+                            break;
+                    }
             }
             //{
             //    var lst = helper.GetBalancesAcrossContent(new Balance { Title = 1601 },rng); // TODO : INC ONLY
