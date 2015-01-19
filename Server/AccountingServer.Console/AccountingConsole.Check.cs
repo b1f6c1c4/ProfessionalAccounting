@@ -6,7 +6,7 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.Console
 {
-    internal partial class AccountingConsole
+    public partial class AccountingConsole
     {
         /// <summary>
         ///     检查每张会计凭证借贷方是否相等

@@ -7,23 +7,23 @@ using AccountingServer.BLL;
 
 namespace AccountingServer.Console
 {
-    internal partial class AccountingConsole
+    public partial class AccountingConsole
     {
-        /// <summary>
-        ///     呈现二维码
-        /// </summary>
-        /// <param name="qrCode">二维码图像，若为null表示隐藏二维码</param>
-        public delegate void PresentQRCodeEventHandler(Bitmap qrCode);
+        ///// <summary>
+        /////     呈现二维码
+        ///// </summary>
+        ///// <param name="qrCode">二维码图像，若为null表示隐藏二维码</param>
+        //public delegate void PresentQRCodeEventHandler(Bitmap qrCode);
 
-        /// <summary>
-        ///     呈现二维码
-        /// </summary>
-        public event PresentQRCodeEventHandler PresentQRCode;
+        ///// <summary>
+        /////     呈现二维码
+        ///// </summary>
+        //public event PresentQRCodeEventHandler PresentQRCode;
 
-        /// <summary>
-        ///     移动数据传输
-        /// </summary>
-        private MobileComm m_Mobile;
+        ///// <summary>
+        /////     移动数据传输
+        ///// </summary>
+        //private MobileComm m_Mobile;
 
         /// <summary>
         ///     显示控制台帮助
@@ -74,26 +74,26 @@ namespace AccountingServer.Console
             return new EditableText(thuInfo.Compare());
         }
 
-        /// <summary>
-        ///     启动/关闭移动通信模块，同时显示隐藏二维码
-        /// </summary>
-        private void ToggleMobile()
-        {
-            if (m_Mobile == null)
-            {
-                m_Mobile = new MobileComm();
+        ///// <summary>
+        /////     启动/关闭移动通信模块，同时显示隐藏二维码
+        ///// </summary>
+        //private void ToggleMobile()
+        //{
+        //    if (m_Mobile == null)
+        //    {
+        //        m_Mobile = new MobileComm();
 
-                m_Mobile.Connect(m_Accountant);
+        //        m_Mobile.Connect(m_Accountant);
 
-                PresentQRCode(m_Mobile.GetQRCode(256, 256));
-            }
-            else
-            {
-                m_Mobile.Dispose();
-                m_Mobile = null;
+        //        PresentQRCode(m_Mobile.GetQRCode(256, 256));
+        //    }
+        //    else
+        //    {
+        //        m_Mobile.Dispose();
+        //        m_Mobile = null;
 
-                PresentQRCode(null);
-            }
-        }
+        //        PresentQRCode(null);
+        //    }
+        //}
     }
 }

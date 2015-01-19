@@ -4,7 +4,7 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.Console
 {
-    internal partial class AccountingConsole
+    public partial class AccountingConsole
     {
         /// <summary>
         ///     解析检索表达式

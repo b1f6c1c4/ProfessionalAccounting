@@ -1,6 +1,6 @@
 ﻿namespace AccountingServer.Console
 {
-    internal partial class AccountingConsole
+    public partial class AccountingConsole
     {
         /// <summary>
         ///     检查是否已连接；若未连接，尝试连接
