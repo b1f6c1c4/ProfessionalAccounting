@@ -59,6 +59,10 @@
       <Project>{4f938d5a-6b22-4150-a74c-8203fdf1d215}</Project>
       <Name>AccountingServer.BLL</Name>
     </ProjectReference>
+    <ProjectReference Include="..\AccountingServer.Console\AccountingServer.Console.csproj">
+      <Project>{0ddc759f-23de-4443-a97c-4edc1c40690c}</Project>
+      <Name>AccountingServer.Console</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AccountingServer.DAL\AccountingServer.DAL.csproj">
       <Project>{2cab5dc7-a5a8-47a4-9d46-bfe2a474bb48}</Project>
       <Name>AccountingServer.DAL</Name>

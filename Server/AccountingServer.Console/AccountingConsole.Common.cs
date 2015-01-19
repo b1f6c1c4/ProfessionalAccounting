@@ -6,7 +6,7 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.Console
 {
-    internal partial class AccountingConsole
+    public partial class AccountingConsole
     {
         /// <summary>
         ///     会计业务处理类
@@ -34,10 +34,10 @@ namespace AccountingServer.Console
                     case "connect":
                     case "con":
                         return ConnectServer();
-                    case "mobile":
-                    case "mob":
-                        ToggleMobile();
-                        return null;
+                    //case "mobile":
+                    //case "mob":
+                    //    ToggleMobile();
+                    //    return null;
                     case "backup":
                         return Backup();
                     case "fetch":

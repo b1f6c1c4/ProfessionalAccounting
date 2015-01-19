@@ -36,20 +36,20 @@ namespace AccountingServer
             m_Accountant = new Accountant();
 
             m_Console = new AccountingConsole(m_Accountant);
-            m_Console.PresentQRCode += qrCode =>
-                                       {
-                                           if (qrCode == null)
-                                           {
-                                               pictureBox1.Visible = false;
-                                               textBoxResult.Visible = true;
-                                           }
-                                           else
-                                           {
-                                               pictureBox1.Image = qrCode;
-                                               pictureBox1.Visible = true;
-                                               textBoxResult.Visible = false;
-                                           }
-                                       };
+            //m_Console.PresentQRCode += qrCode =>
+            //                           {
+            //                               if (qrCode == null)
+            //                               {
+            //                                   pictureBox1.Visible = false;
+            //                                   textBoxResult.Visible = true;
+            //                               }
+            //                               else
+            //                               {
+            //                                   pictureBox1.Image = qrCode;
+            //                                   pictureBox1.Visible = true;
+            //                                   textBoxResult.Visible = false;
+            //                               }
+            //                           };
         }
 
         private bool GetCSharpCode(out int begin, out int end, out bool isAsset)

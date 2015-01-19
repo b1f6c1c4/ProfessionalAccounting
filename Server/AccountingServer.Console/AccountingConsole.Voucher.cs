@@ -2,7 +2,7 @@
 
 namespace AccountingServer.Console
 {
-    internal partial class AccountingConsole
+    public partial class AccountingConsole
     {
         /// <summary>
         ///     更新或添加记账凭证

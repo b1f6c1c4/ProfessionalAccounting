@@ -15,7 +15,7 @@ namespace AccountingServer.UnitTest
             VoucherDetail vd;
 
             var method =
-                Assembly.GetAssembly(typeof(THUInfo))
+                Assembly.GetAssembly(typeof(AccountingServer.Console.AccountingConsole))
                         .GetType("AccountingServer.Console.AccountingConsole")
                         .GetMethod("ParseQuery", BindingFlags.Static | BindingFlags.NonPublic);
 

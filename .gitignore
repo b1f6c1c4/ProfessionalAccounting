@@ -9,6 +9,8 @@ $RECYCLE.BIN/
 *.cache
 Server/AccountingServer/bin/
 Server/AccountingServer/obj/
+Server/AccountingServer.Console/bin/
+Server/AccountingServer.Console/obj/
 Server/AccountingServer.BLL/bin/
 Server/AccountingServer.BLL/obj/
 Server/AccountingServer.DAL/bin/
