@@ -160,13 +160,13 @@ namespace AccountingServer.BLL
                 foreach (var detail in lst)
                     yield return
                         new ReportItem
-                        {
-                            Title = TitleManager.GetTitleName(detail),
-                            Content = detail.Content,
-                            OrigContent = detail.Content,
-                            Fund = detail.Fund,
-                            Coefficient = detail.Content == null ? 1 : 0.01
-                        };
+                            {
+                                Title = TitleManager.GetTitleName(detail),
+                                Content = detail.Content,
+                                OrigContent = detail.Content,
+                                Fund = detail.Fund,
+                                Coefficient = detail.Content == null ? 1 : 0.01
+                            };
             }
             {
                 var lst = helper.GetBalancesAcrossContent(new Balance { Title = 1701 }, rng);
@@ -360,6 +360,7 @@ namespace AccountingServer.BLL
                                         Coefficient = 1
                                     };
                             break;
+                        case "服装":
                         case "生活用品":
                             yield return
                                 new ReportItem
@@ -374,35 +375,35 @@ namespace AccountingServer.BLL
                         case "理发":
                             yield return
                                 new ReportItem
-                                {
-                                    Title = TitleManager.GetTitleName(detail),
-                                    Content = detail.Content,
-                                    OrigContent = detail.Content,
-                                    Fund = detail.Fund,
-                                    Coefficient = 0.5
-                                };
+                                    {
+                                        Title = TitleManager.GetTitleName(detail),
+                                        Content = detail.Content,
+                                        OrigContent = detail.Content,
+                                        Fund = detail.Fund,
+                                        Coefficient = 0.5
+                                    };
                             break;
                         case "电影":
                             yield return
                                 new ReportItem
-                                {
-                                    Title = TitleManager.GetTitleName(detail),
-                                    Content = detail.Content,
-                                    OrigContent = detail.Content,
-                                    Fund = detail.Fund,
-                                    Coefficient = 0.01
-                                };
+                                    {
+                                        Title = TitleManager.GetTitleName(detail),
+                                        Content = detail.Content,
+                                        OrigContent = detail.Content,
+                                        Fund = detail.Fund,
+                                        Coefficient = 0.01
+                                    };
                             break;
                         case "音乐会":
                             yield return
                                 new ReportItem
-                                {
-                                    Title = TitleManager.GetTitleName(detail),
-                                    Content = detail.Content,
-                                    OrigContent = detail.Content,
-                                    Fund = detail.Fund,
-                                    Coefficient = 1
-                                };
+                                    {
+                                        Title = TitleManager.GetTitleName(detail),
+                                        Content = detail.Content,
+                                        OrigContent = detail.Content,
+                                        Fund = detail.Fund,
+                                        Coefficient = 1
+                                    };
                             break;
                         default:
                             yield return
@@ -464,91 +465,73 @@ namespace AccountingServer.BLL
                         case "Github":
                             yield return
                                 new ReportItem
-                                {
-                                    Title = TitleManager.GetTitleName(detail),
-                                    Content = detail.Content,
-                                    OrigContent = detail.Content,
-                                    Fund = detail.Fund,
-                                    Coefficient = 1
-                                };
+                                    {
+                                        Title = TitleManager.GetTitleName(detail),
+                                        Content = detail.Content,
+                                        OrigContent = detail.Content,
+                                        Fund = detail.Fund,
+                                        Coefficient = 1
+                                    };
                             break;
                         case "团费":
                             yield return
                                 new ReportItem
-                                {
-                                    Title = TitleManager.GetTitleName(detail),
-                                    Content = detail.Content,
-                                    OrigContent = detail.Content,
-                                    Fund = detail.Fund,
-                                    Coefficient = 1
-                                };
+                                    {
+                                        Title = TitleManager.GetTitleName(detail),
+                                        Content = detail.Content,
+                                        OrigContent = detail.Content,
+                                        Fund = detail.Fund,
+                                        Coefficient = 1
+                                    };
                             break;
                         case "培训费":
                             yield return
                                 new ReportItem
-                                {
-                                    Title = TitleManager.GetTitleName(detail),
-                                    Content = detail.Content,
-                                    OrigContent = detail.Content,
-                                    Fund = detail.Fund,
-                                    Coefficient = 1
-                                };
+                                    {
+                                        Title = TitleManager.GetTitleName(detail),
+                                        Content = detail.Content,
+                                        OrigContent = detail.Content,
+                                        Fund = detail.Fund,
+                                        Coefficient = 1
+                                    };
                             break;
                         case "短信告知":
                         case "短信服务":
                         case "短信通知":
                             yield return
                                 new ReportItem
-                                {
-                                    Title = TitleManager.GetTitleName(detail),
-                                    Content = "（银行短信提醒）",
-                                    OrigContent = detail.Content,
-                                    Fund = detail.Fund,
-                                    Coefficient = 1
-                                };
+                                    {
+                                        Title = TitleManager.GetTitleName(detail),
+                                        Content = "（银行短信提醒）",
+                                        OrigContent = detail.Content,
+                                        Fund = detail.Fund,
+                                        Coefficient = 1
+                                    };
                             break;
                         case "维修费":
                             yield return
                                 new ReportItem
-                                {
-                                    Title = TitleManager.GetTitleName(detail),
-                                    Content = detail.Content,
-                                    OrigContent = detail.Content,
-                                    Fund = detail.Fund,
-                                    Coefficient = 0.05
-                                };
+                                    {
+                                        Title = TitleManager.GetTitleName(detail),
+                                        Content = detail.Content,
+                                        OrigContent = detail.Content,
+                                        Fund = detail.Fund,
+                                        Coefficient = 0.05
+                                    };
                             break;
                         default:
                             yield return
                                 new ReportItem
-                                {
-                                    Title = TitleManager.GetTitleName(detail),
-                                    Content = detail.Content,
-                                    OrigContent = detail.Content,
-                                    Fund = detail.Fund,
-                                    Coefficient = 0
-                                };
+                                    {
+                                        Title = TitleManager.GetTitleName(detail),
+                                        Content = detail.Content,
+                                        OrigContent = detail.Content,
+                                        Fund = detail.Fund,
+                                        Coefficient = 0
+                                    };
                             break;
                     }
             }
-            //{
-            //    var lst = helper.GetBalancesAcrossContent(new Balance { Title = 1601 },rng); // TODO : INC ONLY
-            //    foreach (var detail in lst)
-            //    {
-            //        yield return
-            //            new ReportItem
-            //                {
-            //                    Title = Accountant.GetTitleName(detail.Title),
-            //                    Content =
-            //                        (String.IsNullOrEmpty(detail.Content))
-            //                            ? null
-            //                            : helper.GetFixedAssetName(Guid.Parse(detail.Content)), // TODO : Get Fixed Asset Name
-            //                    OrigContent = detail.Content,
-            //                    Fund = detail.Fund,
-            //                    Coefficient = 0
-            //                };
-            //    }
-            //}
         }
     }
 }
