@@ -104,9 +104,16 @@ namespace AccountingServer.Chart
         public override IEnumerable<Series> Gather()
         {
             yield return Gather("存出投资款", new Balance { Title = 1012, SubTitle = 04 }, Color.Maroon);
-            yield return Gather("中银活期宝", new Balance { Title = 1101, Content = "中银活期宝" }, Color.SpringGreen);
-            yield return Gather("广发基金天天红", new Balance { Title = 1101, Content = "广发基金天天红" }, Color.GreenYellow);
-            yield return Gather("余额宝", new Balance { Title = 1101, Content = "余额宝" }, Color.MediumSpringGreen);
+            yield return Gather(
+                                "货币基金",
+                                new[]
+                                    {
+                                        new Balance { Title = 1101, Content = "中银活期宝" },
+                                        new Balance { Title = 1101, Content = "广发基金天天红" },
+                                        new Balance { Title = 1101, Content = "余额宝" },
+                                        new Balance { Title = 1101, Content = "华夏基金财富宝" }
+                                    },
+                                Color.SpringGreen);
             yield return Gather("中银优选", new Balance { Title = 1101, Content = "中银优选" }, Color.DarkOrange);
             yield return Gather("中银增利", new Balance { Title = 1101, Content = "中银增利" }, Color.DarkMagenta);
             yield return Gather("中银纯债C", new Balance { Title = 1101, Content = "中银纯债C" }, Color.DarkOrchid);
