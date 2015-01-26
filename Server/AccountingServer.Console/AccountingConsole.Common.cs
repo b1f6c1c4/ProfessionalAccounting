@@ -60,6 +60,8 @@ namespace AccountingServer.Console
 
                 if (s.StartsWith("a", StringComparison.OrdinalIgnoreCase))
                     return ExecuteAsset(s);
+                if (s.StartsWith("o", StringComparison.OrdinalIgnoreCase))
+                    return ExecuteAmort(s);
 
                 if (s.EndsWith("`"))
                 {

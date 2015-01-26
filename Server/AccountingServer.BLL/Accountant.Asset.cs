@@ -49,6 +49,24 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
+        ///     获取摊销的待摊额
+        /// </summary>
+        /// <param name="asset">摊销</param>
+        /// <param name="dt">日期，若为<c>null</c>则返回总额</param>
+        /// <returns>指定日期的待摊额，若尚未开始则为<c>null</c></returns>
+        public static double? GetBookValueOn(Amortization amort, DateTime? dt)
+        {
+            if (!dt.HasValue ||
+                amort.Schedule == null)
+                return amort.Value;
+
+            var last = amort.Schedule.LastOrDefault(item => DateHelper.CompareDate(item.Date, dt) <= 0);
+            if (last != null)
+                return last.Residue;
+            return null;
+        }
+
+        /// <summary>
         ///     调整资产计算表
         /// </summary>
         /// <param name="asset">资产</param>

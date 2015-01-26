@@ -26,6 +26,54 @@ namespace AccountingServer.Console
         }
 
         /// <summary>
+        ///     从C#表达式中取得对象
+        /// </summary>
+        /// <param name="str">C#表达式</param>
+        /// <param name="type">对象类型</param>
+        /// <returns>对象</returns>
+        private static object ParseCSharp(string str, Type type)
+        {
+            var provider = new CSharpCodeProvider();
+            var paras = new CompilerParameters
+                            {
+                                GenerateExecutable = false,
+                                GenerateInMemory = true,
+                                ReferencedAssemblies = { "AccountingServer.Entities.dll" }
+                            };
+            var sb = new StringBuilder();
+            sb.AppendLine("using System;");
+            sb.AppendLine("using System.Collections.Generic;");
+            sb.AppendLine("using AccountingServer.Entities;");
+            sb.AppendLine("namespace AccountingServer.Console.Dynamic");
+            sb.AppendLine("{");
+            sb.AppendLine("    public static class ObjectCreator");
+            sb.AppendLine("    {");
+            sb.AppendLine("        private static DateTime D(string s)");
+            sb.AppendLine("        {");
+            sb.AppendLine("            return DateTime.Parse(s);");
+            sb.AppendLine("        }");
+            sb.AppendFormat("        public static {0} GetObject()", type.FullName);
+            sb.AppendLine();
+            sb.AppendLine("        {");
+            sb.AppendFormat("            return {0};", str);
+            sb.AppendLine();
+            sb.AppendLine("        }");
+            sb.AppendLine("    }");
+            sb.AppendLine("}");
+            var result = provider.CompileAssemblyFromSource(paras, sb.ToString());
+            if (result.Errors.HasErrors)
+                throw new Exception(result.Errors[0].ToString());
+
+            var resultAssembly = result.CompiledAssembly;
+            return
+                resultAssembly.GetType("AccountingServer.Console.Dynamic.ObjectCreator")
+                              .GetMethod("GetObject")
+                              .Invoke(null, null);
+        }
+
+        #region voucher
+
+        /// <summary>
         ///     将记账凭证用C#表示
         /// </summary>
         /// <param name="voucher">记账凭证</param>
@@ -56,7 +104,7 @@ namespace AccountingServer.Console
                 sb.AppendFormat("    Remark = {0},", ProcessString(voucher.Remark));
                 sb.AppendLine();
             }
-            sb.AppendLine("    Details = new[] {");
+            sb.AppendLine("    Details = new List<VoucherDetail> {");
             foreach (var detail in voucher.Details)
             {
                 sb.Append("        new VoucherDetail { ");
@@ -90,41 +138,12 @@ namespace AccountingServer.Console
         /// <returns>记账凭证</returns>
         public static Voucher ParseVoucher(string str)
         {
-            var provider = new CSharpCodeProvider();
-            var paras = new CompilerParameters
-                            {
-                                GenerateExecutable = false,
-                                GenerateInMemory = true,
-                                ReferencedAssemblies = { "AccountingServer.Entities.dll" }
-                            };
-            var sb = new StringBuilder();
-            sb.AppendLine("using System;");
-            sb.AppendLine("using AccountingServer.Entities;");
-            sb.AppendLine("namespace AccountingServer.Dynamic");
-            sb.AppendLine("{");
-            sb.AppendLine("    public static class VoucherCreator");
-            sb.AppendLine("    {");
-            sb.AppendLine("        private static DateTime D(string s)");
-            sb.AppendLine("        {");
-            sb.AppendLine("            return DateTime.Parse(s);");
-            sb.AppendLine("        }");
-            sb.AppendLine("        public static Voucher GetVoucher()");
-            sb.AppendLine("        {");
-            sb.AppendFormat("            return {0};" + Environment.NewLine, str);
-            sb.AppendLine("        }");
-            sb.AppendLine("    }");
-            sb.AppendLine("}");
-            var result = provider.CompileAssemblyFromSource(paras, sb.ToString());
-            if (result.Errors.HasErrors)
-                throw new Exception(result.Errors[0].ToString());
-
-            var resultAssembly = result.CompiledAssembly;
-            return
-                (Voucher)
-                resultAssembly.GetType("AccountingServer.Dynamic.VoucherCreator")
-                              .GetMethod("GetVoucher")
-                              .Invoke(null, null);
+            return (Voucher)ParseCSharp(str, typeof(Voucher));
         }
+
+        #endregion
+
+        #region asset
 
         /// <summary>
         ///     将资产用C#表示
@@ -170,7 +189,7 @@ namespace AccountingServer.Console
                 sb.AppendFormat("    Remark = {0},", ProcessString(asset.Remark));
                 sb.AppendLine();
             }
-            sb.AppendLine("    Schedule = new AssetItem[] {");
+            sb.AppendLine("    Schedule = new List<AssetItem> {");
             if (asset.Schedule != null)
             {
                 Action<AssetItem, string> present =
@@ -221,40 +240,88 @@ namespace AccountingServer.Console
         /// <returns>资产</returns>
         public static Asset ParseAsset(string str)
         {
-            var provider = new CSharpCodeProvider();
-            var paras = new CompilerParameters
-                            {
-                                GenerateExecutable = false,
-                                GenerateInMemory = true,
-                                ReferencedAssemblies = { "AccountingServer.Entities.dll" }
-                            };
-            var sb = new StringBuilder();
-            sb.AppendLine("using System;");
-            sb.AppendLine("using AccountingServer.Entities;");
-            sb.AppendLine("namespace AccountingServer.Dynamic");
-            sb.AppendLine("{");
-            sb.AppendLine("    public static class AssetCreator");
-            sb.AppendLine("    {");
-            sb.AppendLine("        private static DateTime D(string s)");
-            sb.AppendLine("        {");
-            sb.AppendLine("            return DateTime.Parse(s);");
-            sb.AppendLine("        }");
-            sb.AppendLine("        public static Asset GetAsset()");
-            sb.AppendLine("        {");
-            sb.AppendFormat("            return {0};" + Environment.NewLine, str);
-            sb.AppendLine("        }");
-            sb.AppendLine("    }");
-            sb.AppendLine("}");
-            var result = provider.CompileAssemblyFromSource(paras, sb.ToString());
-            if (result.Errors.HasErrors)
-                throw new Exception(result.Errors[0].ToString());
-
-            var resultAssembly = result.CompiledAssembly;
-            return
-                (Asset)
-                resultAssembly.GetType("AccountingServer.Dynamic.AssetCreator")
-                              .GetMethod("GetAsset")
-                              .Invoke(null, null);
+            return (Asset)ParseCSharp(str, typeof(Asset));
         }
+
+        #endregion
+
+        #region amort
+
+        /// <summary>
+        ///     将摊销用C#表示
+        /// </summary>
+        /// <param name="amort">摊销</param>
+        /// <returns>C#表达式</returns>
+        public static string PresentAmort(Amortization amort)
+        {
+            if (amort == null)
+                return "@null@";
+
+            var sb = new StringBuilder();
+            sb.Append("@new Amortization {");
+            sb.AppendFormat("  StringID = {0},", ProcessString(amort.StringID));
+            sb.AppendLine();
+            sb.AppendFormat("    Name = {0},", ProcessString(amort.Name));
+            sb.AppendLine();
+            if (amort.Date.HasValue)
+            {
+                sb.AppendFormat("    Date = D(\"{0:yyyy-MM-dd}\"),", amort.Date);
+                sb.AppendLine();
+            }
+            else
+                sb.AppendLine("    Date = null,");
+            sb.AppendFormat("    Value = {0}, ", amort.Value);
+            sb.AppendLine();
+            sb.AppendFormat("    TotalDays = {0}, Interval = AmortizeInterval.{1},", amort.TotalDays, amort.Interval);
+            sb.AppendLine();
+            sb.AppendFormat("    Template = {0}, ", PresentVoucher(amort.Template).Trim('@'));
+            sb.AppendLine();
+            if (amort.Remark != null)
+            {
+                sb.AppendFormat("    Remark = {0},", ProcessString(amort.Remark));
+                sb.AppendLine();
+            }
+            sb.AppendLine("    Schedule = new List<AmortItem> {");
+            if (amort.Schedule != null)
+            {
+                foreach (var item in amort.Schedule)
+                {
+                    sb.Append("        new AmortItem {");
+                    if (item.Date.HasValue)
+                        sb.AppendFormat(
+                                        "Date = D(\"{0:yyyy-MM-dd}\"), ",
+                                        item.Date);
+                    else
+                        sb.Append("Date = null, ");
+                    sb.AppendFormat("VoucherID = {0}", (ProcessString(item.VoucherID) + ",").PadRight(27));
+                    sb.AppendFormat("Amount = {0}", item.Amount.ToString(CultureInfo.InvariantCulture).PadRight(27));
+                    sb.AppendFormat(
+                                    "Residue = {0} ",
+                                    item.Residue.ToString(CultureInfo.InvariantCulture).PadRight(16));
+                    if (item.Remark != null)
+                    {
+                        sb.Append("".PadLeft(30));
+                        sb.AppendFormat(", Remark = {0} ", ProcessString(item.Remark));
+                    }
+                    sb.AppendLine("},");
+                }
+                sb.AppendLine("   } }@");
+            }
+            else
+                sb.AppendLine("}@");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        ///     从C#表达式中取得摊销
+        /// </summary>
+        /// <param name="str">C#表达式</param>
+        /// <returns>摊销</returns>
+        public static Amortization ParseAmort(string str)
+        {
+            return (Amortization)ParseCSharp(str, typeof(Amortization));
+        }
+
+        #endregion
     }
 }

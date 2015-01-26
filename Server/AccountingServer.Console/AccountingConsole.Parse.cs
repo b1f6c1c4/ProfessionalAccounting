@@ -273,5 +273,26 @@ namespace AccountingServer.Console
             Guid g;
             return Guid.TryParse(sx, out g) ? new Asset { ID = g } : new Asset { Name = sx };
         }
+
+        /// <summary>
+        ///     解析摊销检索表达式
+        /// </summary>
+        /// <param name="s">摊销检索表达式</param>
+        /// <returns>过滤器</returns>
+        private static Amortization ParseAmortQuery(string s)
+        {
+            var begin = s.IndexOf('\'');
+            if (begin < 0)
+                return new Amortization();
+
+            var end = s.LastIndexOf('\'');
+            if (begin >= end)
+                throw new InvalidOperationException("摊销检索表达式无效");
+
+            var sx = s.Substring(begin + 1, end - begin - 1);
+
+            Guid g;
+            return Guid.TryParse(sx, out g) ? new Amortization { ID = g } : new Amortization { Name = sx };
+        }
     }
 }

@@ -82,6 +82,21 @@ a-ap-co	a-apply-collapse [ yyyyMM]	将某月（含）以前的资产折旧/减�
 a-chk								检查一致性
 注：此时无@为自然月，有@为财月
 
+摊销：
+o									检索所有摊销（以报告形式显示，无计算表，不显示待摊额为零的）
+o@yyyyMM							检索所有摊销（以报告形式显示，无计算表，按指定日期计算待摊额，不显示待摊额为零和未开始的）
+o-all								检索所有摊销（以报告形式显示，无计算表）
+o-li		o-list '(GUID)'				检索某摊销（以报告形式显示）
+o-q		o-query '(GUID)'				检索某摊销
+o-reg	o-register '(GUID)'			注册所有凭证
+o-unr	o-unregister	 '(GUID)'		解除所有凭证
+o-rd		o-reamo '(GUID)'				重新计算摊销
+o-ap		o-apply						将本月的摊销登记入账
+o-ap		o-apply '(GUID)' [yyyyMM]	将某月的某摊销登记入账
+o-ap-co	o-apply-collapse [ yyyyMM]	将某月（含）以前的摊销一起登记入账，按无日期处理
+o-chk								检查一致性
+注：此时无@为自然月，有@为财月
+
 
 检查数据：
 chk1				检查基本正确性（每一Voucher借贷方相等）
