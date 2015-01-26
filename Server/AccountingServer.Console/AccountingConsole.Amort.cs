@@ -132,7 +132,7 @@ namespace AccountingServer.Console
                 }
                 return new EditableText(sb.ToString());
             }
-            if (sp[0].Equals("o-rd", StringComparison.OrdinalIgnoreCase) ||
+            if (sp[0].Equals("o-ra", StringComparison.OrdinalIgnoreCase) ||
                 sp[0].Equals("o-reamo", StringComparison.OrdinalIgnoreCase))
             {
                 var sb = new StringBuilder();

@@ -91,7 +91,10 @@ namespace AccountingServer.DAL
                     break;
             }
             if (asset.Template != null)
+            {
+                bsonWriter.WriteName("template");
                 VoucherSerializer.Serialize(bsonWriter, asset.Template);
+            }
             if (asset.Schedule != null)
             {
                 bsonWriter.WriteStartArray("schedule");
