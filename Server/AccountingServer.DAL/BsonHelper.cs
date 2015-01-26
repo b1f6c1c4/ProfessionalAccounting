@@ -134,21 +134,25 @@ namespace AccountingServer.DAL
         public static T ReadDocument<T>(this BsonReader bsonReader, string expected, ref string read,
                                         Func<BsonReader, T> parser) where T : class
         {
+            if (bsonReader.IsEndOfDocument())
+                return null;
             if (read == null)
                 read = bsonReader.ReadName();
             if (read != expected)
                 return null;
 
             read = null;
-            bsonReader.ReadStartDocument();
+            //bsonReader.ReadStartDocument();
             var res = parser(bsonReader);
-            bsonReader.ReadEndDocument();
+            //bsonReader.ReadEndDocument();
             return res;
         }
 
         public static List<T> ReadArray<T>(this BsonReader bsonReader, string expected, ref string read,
                                            Func<BsonReader, T> parser)
         {
+            if (bsonReader.IsEndOfDocument())
+                return null;
             if (read == null)
                 read = bsonReader.ReadName();
             if (read != expected)

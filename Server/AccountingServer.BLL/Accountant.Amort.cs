@@ -278,11 +278,20 @@ namespace AccountingServer.BLL
                 dtCur = NextAmortizationDate(amort.Interval.Value, dtCur);
                 n++;
             }
+
             var a = amort.Value.Value / n;
+            var residue = amort.Value.Value;
+
             dtCur = ThisAmortizationDate(amort.Interval.Value, amort.Date.Value);
-            while (dtCur < dtEnd)
+            while (true)
             {
+                if (dtCur >= dtEnd)
+                {
+                    lst.Add(new AmortItem { Date = dtCur, Amount = residue });
+                    break;
+                }
                 lst.Add(new AmortItem { Date = dtCur, Amount = a });
+                residue -= a;
                 dtCur = NextAmortizationDate(amort.Interval.Value, dtCur);
             }
 

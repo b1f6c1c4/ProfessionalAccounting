@@ -127,7 +127,7 @@ namespace AccountingServer.Console
                 sb.AppendLine(" },");
                 sb.AppendLine();
             }
-            sb.AppendLine("   } }@");
+            sb.AppendLine("} }@");
             return sb.ToString();
         }
 
@@ -226,7 +226,7 @@ namespace AccountingServer.Console
                         present(item, String.Format("FairValue = {0},", (item as DevalueItem).FairValue));
                     else if (item is DispositionItem)
                         present(item, "");
-                sb.AppendLine("   } }@");
+                sb.AppendLine("} }@");
             }
             else
                 sb.AppendLine("}@");
@@ -274,19 +274,20 @@ namespace AccountingServer.Console
             sb.AppendLine();
             sb.AppendFormat("    TotalDays = {0}, Interval = AmortizeInterval.{1},", amort.TotalDays, amort.Interval);
             sb.AppendLine();
-            sb.AppendFormat("    Template = {0}, ", PresentVoucher(amort.Template).Trim('@'));
-            sb.AppendLine();
+            sb.Append("Template = ");
+            sb.Append(PresentVoucher(amort.Template).Trim().Trim('@'));
+            sb.AppendLine(",");
             if (amort.Remark != null)
             {
                 sb.AppendFormat("    Remark = {0},", ProcessString(amort.Remark));
                 sb.AppendLine();
             }
-            sb.AppendLine("    Schedule = new List<AmortItem> {");
             if (amort.Schedule != null)
             {
+                sb.AppendLine("    Schedule = new List<AmortItem> {");
                 foreach (var item in amort.Schedule)
                 {
-                    sb.Append("        new AmortItem {");
+                    sb.Append("        new AmortItem { ");
                     if (item.Date.HasValue)
                         sb.AppendFormat(
                                         "Date = D(\"{0:yyyy-MM-dd}\"), ",
@@ -294,7 +295,9 @@ namespace AccountingServer.Console
                     else
                         sb.Append("Date = null, ");
                     sb.AppendFormat("VoucherID = {0}", (ProcessString(item.VoucherID) + ",").PadRight(27));
-                    sb.AppendFormat("Amount = {0}", item.Amount.ToString(CultureInfo.InvariantCulture).PadRight(27));
+                    sb.AppendFormat(
+                                    "Amount = {0}",
+                                    (item.Amount.ToString(CultureInfo.InvariantCulture) + ",").PadRight(19));
                     sb.AppendFormat(
                                     "Residue = {0} ",
                                     item.Residue.ToString(CultureInfo.InvariantCulture).PadRight(16));
@@ -305,10 +308,13 @@ namespace AccountingServer.Console
                     }
                     sb.AppendLine("},");
                 }
-                sb.AppendLine("   } }@");
+                sb.AppendLine("} }@");
             }
             else
+            {
+                sb.AppendLine("    Schedule = null");
                 sb.AppendLine("}@");
+            }
             return sb.ToString();
         }
 
