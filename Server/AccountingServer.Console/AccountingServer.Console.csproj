@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccountingConsole.Amort.cs" />
     <Compile Include="AccountingConsole.Asset.cs" />
     <Compile Include="AccountingConsole.Check.cs" />
     <Compile Include="AccountingConsole.Common.cs" />

@@ -8,11 +8,46 @@ namespace AccountingServer.BLL
     public partial class Accountant
     {
         /// <summary>
+        ///     获取本次摊销日期
+        /// </summary>
+        /// <param name="interval">间隔类型</param>
+        /// <param name="the">日期</param>
+        /// <returns>这次摊销日期</returns>
+        private static DateTime ThisAmortizationDate(AmortizeInterval interval, DateTime the)
+        {
+            switch (interval)
+            {
+                case AmortizeInterval.EveryDay:
+                case AmortizeInterval.SameDayOfWeek:
+                    return the;
+                case AmortizeInterval.SameDayOfYear:
+                    if (the.Month == 2 &&
+                        the.Day == 29)
+                        return the.AddDays(1);
+                    return the;
+                case AmortizeInterval.SameDayOfMonth:
+                    if (the.Day > 28)
+                        return the.AddDays(1 - the.Day).AddMonths(1);
+                    return the;
+                case AmortizeInterval.LastDayOfWeek:
+                    if (the.DayOfWeek == DayOfWeek.Sunday)
+                        return the;
+                    return the.AddDays(7 - (int)the.DayOfWeek); // 周日的DayOfWeek是0
+                case AmortizeInterval.LastDayOfMonth:
+                    return LastDayOfMonth(the.Year, the.Month);
+                case AmortizeInterval.LastDayOfYear:
+                    return new DateTime(the.Year + 1, 1, 1).AddDays(-1);
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
+
+        /// <summary>
         ///     获取下一个摊销日期
         /// </summary>
         /// <param name="interval">间隔类型</param>
         /// <param name="last">上一次摊销日期</param>
-        /// <returns>此月最后一天</returns>
+        /// <returns>下一个摊销日期</returns>
         private static DateTime NextAmortizationDate(AmortizeInterval interval, DateTime last)
         {
             switch (interval)
@@ -22,10 +57,11 @@ namespace AccountingServer.BLL
                 case AmortizeInterval.SameDayOfWeek:
                     return last.AddDays(7);
                 case AmortizeInterval.LastDayOfWeek:
-                    return last.AddDays(last.DayOfWeek == DayOfWeek.Sunday ? 7 : 14 - (int)last.DayOfWeek);
-                    // 周日的DayOfWeek是0
+                    if (last.DayOfWeek == DayOfWeek.Sunday)
+                        return last.AddDays(7);
+                    return last.AddDays(14 - (int)last.DayOfWeek); // 周日的DayOfWeek是0
                 case AmortizeInterval.SameDayOfMonth:
-                    return last.AddMonths(1); // TODO: fix 30th
+                    return last.AddMonths(1);
                 case AmortizeInterval.LastDayOfMonth:
                     return LastDayOfMonth(last.Year, last.Month + 1);
                 case AmortizeInterval.SameDayOfYear:
@@ -197,12 +233,24 @@ namespace AccountingServer.BLL
         /// <returns>是否成功</returns>
         private bool GenerateVoucher(AmortItem item, bool isCollapsed, Voucher template)
         {
+            var lst = new List<VoucherDetail>();
+            foreach (var detail in template.Details)
+                lst.Add(
+                        new VoucherDetail
+                            {
+                                Title = detail.Title,
+                                SubTitle = detail.SubTitle,
+                                Content = detail.Content,
+                                Fund =
+                                    detail.Remark == AmortItem.IgnoranceMark ? detail.Fund : item.Amount * detail.Fund,
+                                Remark = item.Remark
+                            });
             var voucher = new Voucher
                               {
                                   Date = isCollapsed ? null : item.Date,
                                   Remark = template.Remark ?? "automatically generated",
                                   Type = template.Type,
-                                  Details = template.Details
+                                  Details = lst
                               };
             var res = m_Db.Upsert(voucher);
             item.VoucherID = voucher.ID;
@@ -220,11 +268,25 @@ namespace AccountingServer.BLL
                 amort.Interval == null)
                 return;
 
-            switch (amort.Interval)
+            var lst = new List<AmortItem>();
+
+            var dtCur = ThisAmortizationDate(amort.Interval.Value, amort.Date.Value);
+            var dtEnd = amort.Date.Value.AddDays(amort.TotalDays.Value);
+            var n = 1;
+            while (dtCur < dtEnd)
             {
-                default:
-                    throw new NotImplementedException();
+                dtCur = NextAmortizationDate(amort.Interval.Value, dtCur);
+                n++;
             }
+            var a = amort.Value.Value / n;
+            dtCur = ThisAmortizationDate(amort.Interval.Value, amort.Date.Value);
+            while (dtCur < dtEnd)
+            {
+                lst.Add(new AmortItem { Date = dtCur, Amount = a });
+                dtCur = NextAmortizationDate(amort.Interval.Value, dtCur);
+            }
+
+            amort.Schedule = lst;
         }
     }
 }

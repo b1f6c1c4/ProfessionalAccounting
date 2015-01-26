@@ -47,7 +47,6 @@ namespace AccountingServer.Console
         ///     执行表达式（资产）
         /// </summary>
         /// <param name="s">表达式</param>
-        /// <param name="editable">执行结果是否可编辑</param>
         /// <returns>执行结果</returns>
         public IQueryResult ExecuteAsset(string s)
         {
@@ -248,7 +247,7 @@ namespace AccountingServer.Console
                             asset.Name.CPadRight(35),
                             asset.Date,
                             asset.Value.AsCurrency().CPadLeft(13),
-                            dt == null ? "-".CPadLeft(13) : bookValue.AsCurrency().CPadLeft(13),
+                            dt.HasValue ? bookValue.AsCurrency().CPadLeft(13) : "-".CPadLeft(13),
                             asset.Salvge.AsCurrency().CPadLeft(13),
                             asset.Title.AsTitle().CPadLeft(5),
                             asset.DepreciationTitle.AsTitle().CPadLeft(5),

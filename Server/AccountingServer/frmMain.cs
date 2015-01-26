@@ -52,6 +52,31 @@ namespace AccountingServer
             //                           };
         }
 
+        private bool GetCSharpCode(out int begin, out int end, out string typeName)
+        {
+            begin = textBoxResult.Text.LastIndexOf(
+                                                   "@new",
+                                                   textBoxResult.SelectionStart + textBoxResult.SelectionLength,
+                                                   StringComparison.Ordinal);
+
+            typeName = null;
+
+            end = textBoxResult.Text.IndexOf("}@", begin, StringComparison.Ordinal);
+            if (end < 0)
+                return false;
+
+            end += 1;
+            if (end + 2 < textBoxResult.Text.Length &&
+                textBoxResult.Text[end + 1] == '\r')
+                end += 2;
+
+            typeName = textBoxResult.Text.Substring(
+                                                    begin + 5,
+                                                    textBoxResult.Text.IndexOfAny(new[] { ' ', '{' }, begin + 5)
+                                                    - begin - 5);
+            return true;
+        }
+
         private bool GetCSharpCode(out int begin, out int end, out bool isAsset)
         {
             end = -1;
@@ -120,14 +145,28 @@ namespace AccountingServer
         {
             int begin;
             int end;
-            bool isAsset;
-            if (!GetCSharpCode(out begin, out end, out isAsset))
+            string typeName;
+            if (!GetCSharpCode(out begin, out end, out typeName))
                 return false;
 
             try
             {
                 var s = textBoxResult.Text.Substring(begin, end - begin + 1).Trim().Trim('@');
-                var result = isAsset ? m_Console.ExecuteAssetUpsert(s) : m_Console.ExecuteVoucherUpsert(s);
+                string result;
+                switch (typeName)
+                {
+                    case "Voucher":
+                        result = m_Console.ExecuteVoucherUpsert(s);
+                        break;
+                    case "Asset":
+                        result = m_Console.ExecuteAssetUpsert(s);
+                        break;
+                    case "Amortization":
+                        result = m_Console.ExecuteAmortUpsert(s);
+                        break;
+                    default:
+                        return false;
+                }
                 textBoxResult.Text = textBoxResult.Text.Remove(begin, end - begin + 1)
                                                   .Insert(begin, result);
                 textBoxResult.SelectionStart = begin;
@@ -148,14 +187,29 @@ namespace AccountingServer
         {
             int begin;
             int end;
-            bool isAsset;
-            if (!GetCSharpCode(out begin, out end, out isAsset))
+            string typeName;
+            if (!GetCSharpCode(out begin, out end, out typeName))
                 return false;
 
             try
             {
                 var s = textBoxResult.Text.Substring(begin, end - begin + 1).Trim().Trim('@');
-                if (isAsset ? !m_Console.ExecuteAssetRemoval(s) : !m_Console.ExecuteVoucherRemoval(s))
+                bool result;
+                switch (typeName)
+                {
+                    case "Voucher":
+                        result = m_Console.ExecuteVoucherRemoval(s);
+                        break;
+                    case "Asset":
+                        result = m_Console.ExecuteAssetRemoval(s);
+                        break;
+                    case "Amortization":
+                        result = m_Console.ExecuteAmortRemoval(s);
+                        break;
+                    default:
+                        return false;
+                }
+                if (!result)
                     throw new Exception();
                 // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
                 if (textBoxResult.Text[end] == '}')
