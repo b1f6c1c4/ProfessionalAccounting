@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Forms.DataVisualization.Charting;
+using AccountingServer.Console.Chart;
 
 namespace AccountingServer.Console
 {
@@ -54,27 +55,32 @@ namespace AccountingServer.Console
         public override bool AutoReturn { get { return true; } }
     }
 
-    public class DefaultChart : IQueryResult
+    public class ChartData : IQueryResult
     {
-        private readonly DateTime m_StartDate;
-        private readonly DateTime m_EndDate;
+        private readonly IList<Series> m_Series;
+        private readonly IList<ChartArea> m_ChartAreas;
 
-        public DefaultChart(DateTime startDate, DateTime endDate)
+        public ChartData(IList<ChartArea> chartAreas, IList<Series> series)
         {
-            m_StartDate = startDate;
-            m_EndDate = endDate;
+            m_ChartAreas = chartAreas;
+            m_Series = series;
         }
 
-        public DateTime StartDate { get { return m_StartDate; } }
-        public DateTime EndDate { get { return m_EndDate; } }
-        public bool AutoReturn { get { return true; } }
-    }
+        public ChartData(IEnumerable<AccountingChart> accountingCharts)
+        {
+            m_ChartAreas = new List<ChartArea>();
+            m_Series = new List<Series>();
+            foreach (var chart in accountingCharts)
+            {
+                m_ChartAreas.Add(chart.Setup());
+                foreach (var series in chart.Gather())
+                    m_Series.Add(series);
+            }
+        }
 
-    public class CustomChart : IQueryResult
-    {
-        private readonly IList<Series> m_List;
-        public CustomChart(IList<Series> list) { m_List = list; }
-        public IList<Series> Series { get { return m_List; } }
+        public IList<Series> Series { get { return m_Series; } }
+        public IList<ChartArea> ChartAreas { get { return m_ChartAreas; } }
+
         public bool AutoReturn { get { return true; } }
     }
 }

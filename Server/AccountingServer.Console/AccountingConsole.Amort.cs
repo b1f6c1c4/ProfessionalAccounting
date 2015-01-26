@@ -226,7 +226,9 @@ namespace AccountingServer.Console
                             amort.Date,
                             amort.Value.AsCurrency().CPadLeft(13),
                             dt.HasValue ? bookValue.AsCurrency().CPadLeft(13) : "-".CPadLeft(13),
-                            (amort.TotalDays.HasValue ? amort.TotalDays.Value.ToString(CultureInfo.InvariantCulture):"-").CPadLeft(4),
+                            (amort.TotalDays.HasValue
+                                 ? amort.TotalDays.Value.ToString(CultureInfo.InvariantCulture)
+                                 : "-").CPadLeft(4),
                             amort.Interval.ToString().CPadLeft(20));
             sb.AppendLine();
             if (showSchedule && amort.Schedule != null)
@@ -241,12 +243,12 @@ namespace AccountingServer.Console
 
         private static string ListAmortItem(AmortItem amortItem)
         {
-                return String.Format(
-                                     "   {0:yyyMMdd} AMO:{1} ={3} ({2})",
-                                     amortItem.Date,
-                                     amortItem.Amount.AsCurrency().CPadLeft(13),
-                                     amortItem.VoucherID,
-                                     amortItem.Residue.AsCurrency().CPadLeft(13));
+            return String.Format(
+                                 "   {0:yyyMMdd} AMO:{1} ={3} ({2})",
+                                 amortItem.Date,
+                                 amortItem.Amount.AsCurrency().CPadLeft(13),
+                                 amortItem.VoucherID,
+                                 amortItem.Residue.AsCurrency().CPadLeft(13));
         }
 
         private static IEnumerable<Amortization> Sort(IEnumerable<Amortization> enumerable)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using AccountingServer.BLL;
+using AccountingServer.Console.Chart;
 using AccountingServer.Entities;
 
 namespace AccountingServer.Console
@@ -34,10 +35,10 @@ namespace AccountingServer.Console
                     case "connect":
                     case "con":
                         return ConnectServer();
-                    //case "mobile":
-                    //case "mob":
-                    //    ToggleMobile();
-                    //    return null;
+                        //case "mobile":
+                        //case "mob":
+                        //    ToggleMobile();
+                        //    return null;
                     case "backup":
                         return Backup();
                     case "fetch":
@@ -113,7 +114,13 @@ namespace AccountingServer.Console
                     AutoConnect();
 
                     // ReSharper disable PossibleInvalidOperationException
-                    return new DefaultChart(rng.StartDate.Value, rng.EndDate.Value);
+                    return
+                        new ChartData(
+                            DefaultChart.Enumerate(
+                                                   m_Accountant,
+                                                   rng.StartDate.Value,
+                                                   rng.EndDate.Value,
+                                                   DateTime.Now.Date));
                     // ReSharper restore PossibleInvalidOperationException
                 }
 
