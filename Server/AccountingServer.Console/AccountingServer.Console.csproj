@@ -51,6 +51,7 @@
     <Compile Include="AccountingConsole.Subtotal.cs" />
     <Compile Include="AccountingConsole.Voucher.cs" />
     <Compile Include="Chart\AccountingChart.cs" />
+    <Compile Include="Chart\AssetChart.cs" />
     <Compile Include="Chart\DefaultChart.cs" />
     <Compile Include="CSharpHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

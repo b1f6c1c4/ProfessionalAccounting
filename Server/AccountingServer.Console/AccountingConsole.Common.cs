@@ -20,7 +20,6 @@ namespace AccountingServer.Console
         ///     执行表达式
         /// </summary>
         /// <param name="s">表达式</param>
-        /// <param name="editable">执行结果是否可编辑</param>
         /// <returns>执行结果</returns>
         public IQueryResult Execute(string s)
         {
@@ -107,21 +106,38 @@ namespace AccountingServer.Console
 
                 if (s.StartsWith("C", StringComparison.OrdinalIgnoreCase))
                 {
-                    var rng = ParseDateQuery(s.Substring(1));
+                    string[] sp;
+                    string dq;
+                    if (Char.IsDigit(s, 1))
+                    {
+                        sp = null;
+                        dq = s.Substring(1);
+                    }
+                    else
+                    {
+                        sp = s.Split(new[] { ' ' }, 2);
+                        dq = sp[1];
+                    }
+                    var rng = ParseDateQuery(dq);
                     if (!rng.Constrained)
                         throw new InvalidOperationException("日期表达式无效");
 
                     AutoConnect();
 
-                    // ReSharper disable PossibleInvalidOperationException
-                    return
-                        new ChartData(
-                            DefaultChart.Enumerate(
-                                                   m_Accountant,
-                                                   rng.StartDate.Value,
-                                                   rng.EndDate.Value,
-                                                   DateTime.Now.Date));
-                    // ReSharper restore PossibleInvalidOperationException
+                    // ReSharper disable once PossibleInvalidOperationException
+                    var startDate = rng.StartDate.Value;
+                    // ReSharper disable once PossibleInvalidOperationException
+                    var endDate = rng.EndDate.Value;
+                    var curDate = DateTime.Now.Date;
+
+                    ChartData chartData;
+                    if (sp == null)
+                        chartData = new ChartData(DefaultChart.Enumerate(m_Accountant, startDate, endDate, curDate));
+                    else if (sp[0].StartsWith("C-asset", StringComparison.OrdinalIgnoreCase))
+                        chartData = new ChartData(new AssetChart(m_Accountant, startDate, endDate, curDate));
+                    else
+                        throw new InvalidOperationException("图表表达式无效");
+                    return chartData;
                 }
 
                 return VouchersQuery(s);

@@ -58,7 +58,7 @@ namespace AccountingServer.Console.Chart
             return s;
         }
 
-        public override IEnumerable<Series> Gather()
+        public override IEnumerable<Series> GatherAsset()
         {
             yield return Gather("存出投资款", new Balance { Title = 1012, SubTitle = 04 }, Color.Maroon);
             yield return Gather(
@@ -68,7 +68,8 @@ namespace AccountingServer.Console.Chart
                                         new Balance { Title = 1101, Content = "中银活期宝" },
                                         new Balance { Title = 1101, Content = "广发基金天天红" },
                                         new Balance { Title = 1101, Content = "余额宝" },
-                                        new Balance { Title = 1101, Content = "华夏基金财富宝" }
+                                        new Balance { Title = 1101, Content = "华夏基金财富宝" },
+                                        new Balance { Title = 1101, Content = "民生加银理财月度1027期" }
                                     },
                                 Color.SpringGreen);
             yield return Gather("中银优选", new Balance { Title = 1101, Content = "中银优选" }, Color.DarkOrange);
@@ -115,7 +116,7 @@ namespace AccountingServer.Console.Chart
             return s;
         }
 
-        public override IEnumerable<Series> Gather()
+        public override IEnumerable<Series> GatherAsset()
         {
             yield return Gather生活资产("学生卡", new Balance { Title = 1012, SubTitle = 05 }, Color.LightSkyBlue);
             yield return Gather生活资产("现金", new Balance { Title = 1001 }, Color.PaleVioletRed);
@@ -150,7 +151,7 @@ namespace AccountingServer.Console.Chart
             return s;
         }
 
-        public override IEnumerable<Series> Gather()
+        public override IEnumerable<Series> GatherAsset()
         {
             yield return Gather(
                                 "固定资产",
@@ -210,7 +211,7 @@ namespace AccountingServer.Console.Chart
             return ar;
         }
 
-        public override IEnumerable<Series> Gather()
+        public override IEnumerable<Series> GatherAsset()
         {
             var balance1 =
                 Accountant.GetDailyBalance(new Balance { Title = 6602, SubTitle = 03 }, DateRange, 1).ToArray();
@@ -331,7 +332,7 @@ namespace AccountingServer.Console.Chart
             return ar;
         }
 
-        public override IEnumerable<Series> Gather()
+        public override IEnumerable<Series> GatherAsset()
         {
             var balance7 = Accountant.GetDailyBalance(
                                                       new[]
@@ -396,7 +397,7 @@ namespace AccountingServer.Console.Chart
             return ar;
         }
 
-        public override IEnumerable<Series> Gather()
+        public override IEnumerable<Series> GatherAsset()
         {
             var balance9 = Accountant.GetDailyBalance(
                                                       new[]
