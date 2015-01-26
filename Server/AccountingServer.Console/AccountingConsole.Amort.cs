@@ -220,7 +220,7 @@ namespace AccountingServer.Console
                 (!bookValue.HasValue || bookValue < Accountant.Tolerance))
                 return null;
             sb.AppendFormat(
-                            "{0} {1}{2:yyyyMMdd}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}",
+                            "{0} {1}{2:yyyyMMdd}{3}{4}{5}{6}",
                             amort.StringID,
                             amort.Name.CPadRight(35),
                             amort.Date,

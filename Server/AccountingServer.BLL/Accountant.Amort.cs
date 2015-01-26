@@ -271,7 +271,7 @@ namespace AccountingServer.BLL
             var lst = new List<AmortItem>();
 
             var dtCur = ThisAmortizationDate(amort.Interval.Value, amort.Date.Value);
-            var dtEnd = amort.Date.Value.AddDays(amort.TotalDays.Value);
+            var dtEnd = amort.Date.Value.AddDays(amort.TotalDays.Value - 1);
             var n = 1;
             while (dtCur < dtEnd)
             {
