@@ -425,10 +425,10 @@ namespace AccountingServer.BLL
                         new ReportItem
                             {
                                 Title = TitleManager.GetTitleName(detail),
-                                Content = detail.Content.EndsWith("路") ? "（公交）" : detail.Content,
+                                Content = detail.Content != null && detail.Content.EndsWith("路") ? "（公交）" : detail.Content,
                                 OrigContent = detail.Content,
                                 Fund = detail.Fund,
-                                Coefficient = detail.Content == "地铁" || detail.Content.EndsWith("路") ? 1.00 : 0.01
+                                Coefficient = detail.Content == "地铁" || detail.Content != null && detail.Content.EndsWith("路") ? 1.00 : 0.01
                             };
             }
             {
