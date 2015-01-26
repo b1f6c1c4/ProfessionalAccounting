@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using AccountingServer.BLL;
-using AccountingServer.Chart;
 using AccountingServer.Console;
 
 namespace AccountingServer
@@ -74,54 +72,6 @@ namespace AccountingServer
                                                     begin + 5,
                                                     textBoxResult.Text.IndexOfAny(new[] { ' ', '{' }, begin + 5)
                                                     - begin - 5);
-            return true;
-        }
-
-        private bool GetCSharpCode(out int begin, out int end, out bool isAsset)
-        {
-            end = -1;
-            begin = textBoxResult.SelectionStart + textBoxResult.SelectionLength;
-            var voucherBegin = textBoxResult.Text.LastIndexOf("@new Voucher", begin, StringComparison.Ordinal);
-            var assetBegin = textBoxResult.Text.LastIndexOf("@new Asset", begin, StringComparison.Ordinal);
-            if (voucherBegin == -1 &&
-                assetBegin == -1)
-            {
-                isAsset = false;
-                return false;
-            }
-
-            if (voucherBegin != -1 &&
-                assetBegin != -1)
-                if (voucherBegin > assetBegin)
-                {
-                    isAsset = false;
-                    begin = voucherBegin;
-                }
-                else
-                {
-                    isAsset = true;
-                    begin = assetBegin;
-                }
-            else if (voucherBegin == -1)
-            {
-                isAsset = true;
-                begin = assetBegin;
-            }
-            else
-            {
-                isAsset = false;
-                begin = voucherBegin;
-            }
-
-            end = textBoxResult.Text.IndexOf("}@", begin, StringComparison.Ordinal);
-            if (end < 0)
-                return false;
-
-            end += 1;
-            if (end + 2 < textBoxResult.Text.Length &&
-                textBoxResult.Text[end + 1] == '\r')
-                end += 2;
-
             return true;
         }
 
@@ -240,15 +190,9 @@ namespace AccountingServer
                     if (res == null)
                         return true;
 
-                    if (res is DefaultChart)
+                    if (res is ChartData)
                     {
-                        ProcessChart(res as DefaultChart);
-                        FocusTextBoxCommand();
-                        return true;
-                    }
-                    if (res is CustomChart)
-                    {
-                        ProcessChart(res as CustomChart);
+                        ProcessChart(res as ChartData);
                         FocusTextBoxCommand();
                         return true;
                     }
@@ -287,9 +231,9 @@ namespace AccountingServer
                     if (res == null)
                         return true;
 
-                    if (res is DefaultChart)
+                    if (res is ChartData)
                     {
-                        ProcessChart(res as DefaultChart);
+                        ProcessChart(res as ChartData);
                         FocusTextBoxCommand();
                         return true;
                     }
@@ -321,53 +265,21 @@ namespace AccountingServer
             }
         }
 
-        private void ProcessChart(DefaultChart chartArgs)
-        {
-            var curDate = DateTime.Now.Date;
-
-            var charts = new AccountingChart[]
-                             {
-                                 new 投资资产(m_Accountant, chartArgs.StartDate, chartArgs.EndDate, curDate),
-                                 new 生活资产(m_Accountant, chartArgs.StartDate, chartArgs.EndDate, curDate),
-                                 new 其他资产(m_Accountant, chartArgs.StartDate, chartArgs.EndDate, curDate),
-                                 new 生活费用(m_Accountant, chartArgs.StartDate, chartArgs.EndDate, curDate),
-                                 new 其他费用(m_Accountant, chartArgs.StartDate, chartArgs.EndDate, curDate),
-                                 new 负债(m_Accountant, chartArgs.StartDate, chartArgs.EndDate, curDate)
-                             };
-
-            chart1.ChartAreas.SuspendUpdates();
-
-            chart1.ChartAreas.Clear();
-            foreach (var chart in charts)
-                chart1.ChartAreas.Add(chart.Setup());
-
-            chart1.Legends[0].Font = new Font("Microsoft YaHei Mono", 12, GraphicsUnit.Pixel);
-
-            chart1.Series.Clear();
-
-            foreach (var series in charts.SelectMany(chart => chart.Gather()))
-                chart1.Series.Add(series);
-
-            chart1.ChartAreas.ResumeUpdates();
-
-            SwitchToChart();
-        }
-        private void ProcessChart(CustomChart chartArgs)
+        private void ProcessChart(ChartData chartArgs)
         {
             chart1.ChartAreas.SuspendUpdates();
 
             chart1.ChartAreas.Clear();
-            var ar = chart1.ChartAreas.Add("chartArea1");
+
+            foreach (var chartArea in chartArgs.ChartAreas)
+                chart1.ChartAreas.Add(chartArea);
 
             chart1.Legends[0].Font = new Font("Microsoft YaHei Mono", 12, GraphicsUnit.Pixel);
 
             chart1.Series.Clear();
 
             foreach (var series in chartArgs.Series)
-            {
-                series.ChartArea = "chartArea1";
                 chart1.Series.Add(series);
-            }
 
             chart1.ChartAreas.ResumeUpdates();
 

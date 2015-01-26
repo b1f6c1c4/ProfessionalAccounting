@@ -6,69 +6,26 @@ using System.Windows.Forms.DataVisualization.Charting;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 
-namespace AccountingServer.Chart
+namespace AccountingServer.Console.Chart
 {
-    internal abstract class AccountingChart
+    internal abstract class DefaultChart : AccountingChart
     {
-        private DateTime m_CurDate;
-        private DateFilter m_DateFilter;
+        protected DefaultChart(Accountant helper, DateTime startDate, DateTime endDate, DateTime curDate)
+            : base(helper, startDate, endDate, curDate) { }
 
-        protected readonly Accountant Accountant;
-
-        protected AccountingChart(Accountant helper, DateTime startDate, DateTime endDate, DateTime curDate)
+        public static IEnumerable<AccountingChart> Enumerate(Accountant helper, DateTime startDate, DateTime endDate,
+                                                             DateTime curDate)
         {
-            Accountant = helper;
-            m_DateFilter = new DateFilter(startDate, endDate);
-            m_CurDate = curDate;
+            yield return new 投资资产(helper, startDate, endDate, curDate);
+            yield return new 生活资产(helper, startDate, endDate, curDate);
+            yield return new 其他资产(helper, startDate, endDate, curDate);
+            yield return new 生活费用(helper, startDate, endDate, curDate);
+            yield return new 其他费用(helper, startDate, endDate, curDate);
+            yield return new 负债(helper, startDate, endDate, curDate);
         }
-
-        public DateTime CurDate { get { return m_CurDate; } set { m_CurDate = value; } }
-
-        public DateTime StartDate
-        {
-            // ReSharper disable once PossibleInvalidOperationException
-            get { return m_DateFilter.StartDate.Value; }
-            set { m_DateFilter.StartDate = value; }
-        }
-
-        public DateTime EndDate
-        {
-            // ReSharper disable once PossibleInvalidOperationException
-            get { return m_DateFilter.EndDate.Value; }
-            set { m_DateFilter.EndDate = value; }
-        }
-
-        protected DateFilter DateRange { get { return m_DateFilter; } }
-
-        protected void SetupChartArea(ChartArea area)
-        {
-            area.CursorX.Position = m_CurDate.ToOADate();
-            area.AxisX.IsMarginVisible = false;
-            area.AxisX.Minimum = StartDate.ToOADate();
-            area.AxisX.Maximum = EndDate.ToOADate();
-            area.AxisX.MinorGrid.Enabled = true;
-            area.AxisX.MinorGrid.Interval = 1;
-            area.AxisX.MinorGrid.LineColor = Color.DarkGray;
-            area.AxisX.MajorGrid.Interval = 7;
-            area.AxisX.MajorGrid.LineWidth = 2;
-            area.AxisX.MajorGrid.IntervalOffset = -(int)StartDate.DayOfWeek;
-            area.AxisX.LabelStyle = new LabelStyle
-                                        {
-                                            Format = "MM-dd",
-                                            Font =
-                                                new Font(
-                                                "Consolas",
-                                                14,
-                                                GraphicsUnit.Pixel)
-                                        };
-        }
-
-        public abstract ChartArea Setup();
-
-        public abstract IEnumerable<Series> Gather();
     }
 
-    internal sealed class 投资资产 : AccountingChart
+    internal sealed class 投资资产 : DefaultChart
     {
         public 投资资产(Accountant helper, DateTime startDate, DateTime endDate, DateTime curDate)
             : base(helper, startDate, endDate, curDate) { }
@@ -131,7 +88,7 @@ namespace AccountingServer.Chart
         }
     }
 
-    internal sealed class 生活资产 : AccountingChart
+    internal sealed class 生活资产 : DefaultChart
     {
         public 生活资产(Accountant helper, DateTime startDate, DateTime endDate, DateTime curDate)
             : base(helper, startDate, endDate, curDate) { }
@@ -167,7 +124,7 @@ namespace AccountingServer.Chart
         }
     }
 
-    internal sealed class 其他资产 : AccountingChart
+    internal sealed class 其他资产 : DefaultChart
     {
         public 其他资产(Accountant helper, DateTime startDate, DateTime endDate, DateTime curDate)
             : base(helper, startDate, endDate, curDate) { }
@@ -239,7 +196,7 @@ namespace AccountingServer.Chart
         }
     }
 
-    internal sealed class 生活费用 : AccountingChart
+    internal sealed class 生活费用 : DefaultChart
     {
         public 生活费用(Accountant helper, DateTime startDate, DateTime endDate, DateTime curDate)
             : base(helper, startDate, endDate, curDate) { }
@@ -357,7 +314,7 @@ namespace AccountingServer.Chart
         }
     }
 
-    internal sealed class 其他费用 : AccountingChart
+    internal sealed class 其他费用 : DefaultChart
     {
         public 其他费用(Accountant helper, DateTime startDate, DateTime endDate, DateTime curDate)
             : base(helper, startDate, endDate, curDate) { }
@@ -422,7 +379,7 @@ namespace AccountingServer.Chart
         }
     }
 
-    internal sealed class 负债 : AccountingChart
+    internal sealed class 负债 : DefaultChart
     {
         public 负债(Accountant helper, DateTime startDate, DateTime endDate, DateTime curDate)
             : base(helper, startDate, endDate, curDate) { }

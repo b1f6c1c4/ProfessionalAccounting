@@ -39,7 +39,6 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Chart\AccountingChart.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
     </Compile>
