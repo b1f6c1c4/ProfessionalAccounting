@@ -64,6 +64,6 @@ namespace AccountingServer.Console.Chart
 
         public abstract ChartArea Setup();
 
-        public abstract IEnumerable<Series> Gather();
+        public abstract IEnumerable<Series> GatherAsset();
     }
 }

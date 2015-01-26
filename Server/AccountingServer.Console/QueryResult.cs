@@ -66,6 +66,15 @@ namespace AccountingServer.Console
             m_Series = series;
         }
 
+        public ChartData(AccountingChart chart)
+        {
+            m_ChartAreas = new List<ChartArea>();
+            m_Series = new List<Series>();
+            m_ChartAreas.Add(chart.Setup());
+            foreach (var series in chart.GatherAsset())
+                m_Series.Add(series);
+        }
+
         public ChartData(IEnumerable<AccountingChart> accountingCharts)
         {
             m_ChartAreas = new List<ChartArea>();
@@ -73,7 +82,7 @@ namespace AccountingServer.Console
             foreach (var chart in accountingCharts)
             {
                 m_ChartAreas.Add(chart.Setup());
-                foreach (var series in chart.Gather())
+                foreach (var series in chart.GatherAsset())
                     m_Series.Add(series);
             }
         }
