@@ -104,20 +104,11 @@ namespace AccountingServer.Console
                 if (s.StartsWith("R", StringComparison.OrdinalIgnoreCase))
                     return GenerateReport(s);
 
-                if (s.StartsWith("C", StringComparison.OrdinalIgnoreCase))
+                if (s.StartsWith("c", StringComparison.OrdinalIgnoreCase))
                 {
-                    string[] sp;
-                    string dq;
-                    if (Char.IsDigit(s, 1))
-                    {
-                        sp = null;
-                        dq = s.Substring(1);
-                    }
-                    else
-                    {
-                        sp = s.Split(new[] { ' ' }, 2);
-                        dq = sp[1];
-                    }
+                    var sp = s.Split(new[] { ' ' }, 2);
+                    var dq = sp[1];
+
                     var rng = ParseDateQuery(dq);
                     if (!rng.Constrained)
                         throw new InvalidOperationException("日期表达式无效");
@@ -131,12 +122,10 @@ namespace AccountingServer.Console
                     var curDate = DateTime.Now.Date;
 
                     ChartData chartData;
-                    if (sp == null)
-                        chartData = new ChartData(DefaultChart.Enumerate(m_Accountant, startDate, endDate, curDate));
-                    else if (sp[0].StartsWith("C-asset", StringComparison.OrdinalIgnoreCase))
+                    if (sp[0].StartsWith("c-a", StringComparison.OrdinalIgnoreCase))
                         chartData = new ChartData(new AssetChart(m_Accountant, startDate, endDate, curDate));
                     else
-                        throw new InvalidOperationException("图表表达式无效");
+                        chartData = new ChartData(DefaultChart.Enumerate(m_Accountant, startDate, endDate, curDate));
                     return chartData;
                 }
 
