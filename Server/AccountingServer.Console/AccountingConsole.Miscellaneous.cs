@@ -32,7 +32,7 @@ namespace AccountingServer.Console
         {
             using (
                 var stream =
-                    Assembly.GetExecutingAssembly().GetManifestResourceStream("AccountingServer.Console.Console.txt"))
+                    Assembly.GetExecutingAssembly().GetManifestResourceStream("AccountingServer.Console.Resources.Console.txt"))
             {
                 if (stream == null)
                     throw new MissingManifestResourceException();

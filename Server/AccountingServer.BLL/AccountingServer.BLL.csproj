@@ -46,11 +46,6 @@
     <Compile Include="Accountant.Amort.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="AccountTitle.zh-cn.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>AccountTitle.zh-cn.resx</DependentUpon>
-    </Compile>
     <Compile Include="Accountant.Basic.cs" />
     <Compile Include="Accountant.Asset.cs" />
     <Compile Include="DataFormatter.cs" />
@@ -95,12 +90,6 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="AccountTitle.zh-cn.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>AccountTitle.zh-cn.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Titles.xsd">
