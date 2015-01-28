@@ -111,6 +111,7 @@ namespace AccountingServer.Console
                                        {
                                            Title = b.Title,
                                            Content = b.Content,
+                                           // ReSharper disable once PossibleInvalidOperationException
                                            Fund = bs.Sum(d => d.Fund.Value)
                                        },
                                    new BalanceEqualityComparer());
@@ -155,6 +156,7 @@ namespace AccountingServer.Console
                                            Title = b.Title,
                                            SubTitle = b.SubTitle,
                                            Content = b.Content,
+                                           // ReSharper disable once PossibleInvalidOperationException
                                            Fund = bs.Sum(d => d.Fund.Value)
                                        },
                                    new BalanceEqualityComparer());
@@ -280,6 +282,7 @@ namespace AccountingServer.Console
                                                                        {
                                                                            Date = d,
                                                                            //Content = c,
+                                                                           // ReSharper disable once PossibleInvalidOperationException
                                                                            Fund = tss.Sum(t => t.Item2.Fund.Value)
                                                                        }).ToList();
                                               tmp.Sort(new BalanceComparer());
@@ -340,6 +343,7 @@ namespace AccountingServer.Console
                                                                              Title = filter.Title,
                                                                              SubTitle = filter.SubTitle,
                                                                              Content = b.Content,
+                                                                             // ReSharper disable once PossibleInvalidOperationException
                                                                              Fund = ds.Sum(d => d.Fund.Value)
                                                                          }))).ToList();
 
@@ -348,8 +352,9 @@ namespace AccountingServer.Console
             var cuml = Accountant.ProcessDailyBalance(result, rng);
 
             var sb = new StringBuilder();
-            foreach (var balances in cuml)
+            foreach (var b in cuml)
             {
+                var balances = b.ToList();
                 sb.AppendFormat("{0:yyyyMMdd}:", balances.First().Date);
                 sb.AppendLine();
 

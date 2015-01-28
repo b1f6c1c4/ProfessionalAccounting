@@ -15,6 +15,7 @@ namespace AccountingServer.Entities
         /// <param name="voucher">凭证</param>
         /// <param name="filter">过滤器</param>
         /// <returns>是否符合</returns>
+        // ReSharper disable once UnusedMember.Global
         public static bool IsMatch(this Voucher voucher, Voucher filter)
         {
             if (filter.ID != null)

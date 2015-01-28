@@ -5,10 +5,9 @@ using System.Data.OleDb;
 using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
-using AccountingServer.Console;
 using AccountingServer.Entities;
 
-namespace AccountingServer
+namespace AccountingServer.Console
 {
     public partial class THUInfo
     {
@@ -48,6 +47,7 @@ namespace AccountingServer
                                                          v.Details.Any(
                                                                        d =>
                                                                        d.Title == 1012 && d.SubTitle == 05 &&
+                                                                       // ReSharper disable once PossibleInvalidOperationException
                                                                        Math.Abs(-d.Fund.Value - group.Key.Item4) <
                                                                        Accountant.Tolerance))
                                                   .ToList();
@@ -62,6 +62,7 @@ namespace AccountingServer
                                                          v.Details.Any(
                                                                        d =>
                                                                        d.Title == 1012 && d.SubTitle == 05 &&
+                                                                       // ReSharper disable once PossibleInvalidOperationException
                                                                        Math.Abs(-d.Fund.Value - group.Key.Item4) <
                                                                        Accountant.Tolerance))
                                                   .ToList();
@@ -76,11 +77,13 @@ namespace AccountingServer
                                                  v.Details.Any(
                                                                d =>
                                                                d.Title == 1221 && d.SubTitle == null &&
+                                                               // ReSharper disable once PossibleInvalidOperationException
                                                                Math.Abs(-d.Fund.Value - group.Key.Item4) <
                                                                Accountant.Tolerance) &&
                                                  v.Details.Any(
                                                                d =>
                                                                d.Title == 1012 && d.SubTitle == 05 &&
+                                                               // ReSharper disable once PossibleInvalidOperationException
                                                                Math.Abs(d.Fund.Value - group.Key.Item4) <
                                                                Accountant.Tolerance))
                                           .ToList();
@@ -92,11 +95,13 @@ namespace AccountingServer
                                                  v.Details.Any(
                                                                d =>
                                                                d.Title == 1002 && d.SubTitle == null &&
+                                                               // ReSharper disable once PossibleInvalidOperationException
                                                                Math.Abs(-d.Fund.Value - group.Key.Item4) <
                                                                Accountant.Tolerance) &&
                                                  v.Details.Any(
                                                                d =>
                                                                d.Title == 1012 && d.SubTitle == 05 &&
+                                                               // ReSharper disable once PossibleInvalidOperationException
                                                                Math.Abs(d.Fund.Value - group.Key.Item4) <
                                                                Accountant.Tolerance))
                                           .ToList();
@@ -108,11 +113,13 @@ namespace AccountingServer
                                                  v.Details.Any(
                                                                d =>
                                                                d.Title == 1123 && d.SubTitle == null &&
+                                                               // ReSharper disable once PossibleInvalidOperationException
                                                                Math.Abs(d.Fund.Value - group.Key.Item4) <
                                                                Accountant.Tolerance) &&
                                                  v.Details.Any(
                                                                d =>
                                                                d.Title == 1012 && d.SubTitle == 05 &&
+                                                               // ReSharper disable once PossibleInvalidOperationException
                                                                Math.Abs(-d.Fund.Value - group.Key.Item4) <
                                                                Accountant.Tolerance))
                                           .ToList();
@@ -139,6 +146,7 @@ namespace AccountingServer
                                                   v.Details.Any(
                                                                 d =>
                                                                 d.Title == 1012 && d.SubTitle == 05 &&
+                                                                // ReSharper disable once PossibleInvalidOperationException
                                                                 Math.Abs(-d.Fund.Value - group.Key.Item4) <
                                                                 Accountant.Tolerance))
                                            .ToList();

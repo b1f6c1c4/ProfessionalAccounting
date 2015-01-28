@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Xml;
 using AccountingServer.Entities;
@@ -12,14 +13,21 @@ namespace AccountingServer.BLL
 
         static TitleManager()
         {
-            using (
-                var stream = Assembly.GetExecutingAssembly()
-                                     .GetManifestResourceStream("AccountingServer.BLL.Resources.Titles.xml"))
+            try
             {
-                if (stream == null)
-                    return;
-                XmlDoc = new XmlDocument();
-                XmlDoc.Load(stream);
+                using (
+                    var stream = Assembly.GetExecutingAssembly()
+                                         .GetManifestResourceStream("AccountingServer.BLL.Resources.Titles.xml"))
+                {
+                    if (stream == null)
+                        return;
+                    XmlDoc = new XmlDocument();
+                    XmlDoc.Load(stream);
+                }
+            }
+            catch (Exception)
+            {
+                XmlDoc = null;
             }
         }
 
@@ -29,6 +37,10 @@ namespace AccountingServer.BLL
         /// <returns>编号和科目名称</returns>
         public static IEnumerable<Tuple<int, int?, string>> GetTitles()
         {
+            if (XmlDoc == null)
+                throw new IOException("AccountingServer.BLL.Resources.Titles.xml");
+            if (XmlDoc.DocumentElement == null)
+                throw new IOException("AccountingServer.BLL.Resources.Titles.xml");
             foreach (XmlElement title in XmlDoc.DocumentElement.ChildNodes)
             {
                 yield return new Tuple<int, int?, string>(
@@ -51,6 +63,8 @@ namespace AccountingServer.BLL
         /// <returns>名称</returns>
         public static string GetTitleName(int? title, int? subtitle = null)
         {
+            if (XmlDoc == null)
+                throw new IOException("AccountingServer.BLL.Resources.Titles.xml");
             if (!title.HasValue)
                 return null;
 
@@ -88,6 +102,8 @@ namespace AccountingServer.BLL
         /// <returns>名称</returns>
         public static string GetTitleName(VoucherDetail detail)
         {
+            if (XmlDoc == null)
+                throw new IOException("AccountingServer.BLL.Resources.Titles.xml");
             return detail.SubTitle.HasValue
                        ? GetTitleName(detail.Title) + "-" + GetTitleName(detail.Title, detail.SubTitle)
                        : GetTitleName(detail.Title);
@@ -100,6 +116,8 @@ namespace AccountingServer.BLL
         /// <returns>名称</returns>
         public static string GetTitleName(Balance balance)
         {
+            if (XmlDoc == null)
+                throw new IOException("AccountingServer.BLL.Resources.Titles.xml");
             return balance.SubTitle.HasValue
                        ? GetTitleName(balance.Title) + "-" + GetTitleName(balance.Title, balance.SubTitle)
                        : GetTitleName(balance.Title);

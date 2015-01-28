@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using AccountingServer.Console;
 using AccountingServer.Entities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -11,11 +12,13 @@ namespace AccountingServer.UnitTest
         [TestMethod]
         public void ParseQuery()
         {
+            // ReSharper disable JoinDeclarationAndInitializer
             object[] pars;
             VoucherDetail vd;
+            // ReSharper restore JoinDeclarationAndInitializer
 
             var method =
-                Assembly.GetAssembly(typeof(AccountingServer.Console.AccountingConsole))
+                Assembly.GetAssembly(typeof(AccountingConsole))
                         .GetType("AccountingServer.Console.AccountingConsole")
                         .GetMethod("ParseQuery", BindingFlags.Static | BindingFlags.NonPublic);
 
@@ -65,8 +68,10 @@ namespace AccountingServer.UnitTest
         [TestMethod]
         public void ParseDateQuery()
         {
+            // ReSharper disable JoinDeclarationAndInitializer
             object[] pars;
             DateFilter rng;
+            // ReSharper restore JoinDeclarationAndInitializer
 
             var method =
                 Assembly.GetAssembly(typeof(THUInfo))

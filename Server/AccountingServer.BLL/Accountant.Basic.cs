@@ -73,7 +73,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="entity">记账凭证</param>
         /// <returns>借方比贷方多出数</returns>
-        public double IsBalanced(Voucher entity)
+        public static double IsBalanced(Voucher entity)
         {
             // ReSharper disable once PossibleInvalidOperationException
             return entity.Details.Sum(d => d.Fund.Value);

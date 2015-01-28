@@ -157,7 +157,8 @@ namespace AccountingServer.BLL
                                                                            Title = filter.Title,
                                                                            SubTitle = filter.SubTitle,
                                                                            Content = c,
-                                                                           Fund = lst.Sum(d => d.Item2.Fund).Value
+                                                                           // ReSharper disable once PossibleInvalidOperationException
+                                                                           Fund = lst.Sum(d => d.Item2.Fund.Value)
                                                                        };
                                                         });
                     foreach (var balance in balances)
@@ -195,7 +196,7 @@ namespace AccountingServer.BLL
             }
         }
 
-        private PatternAttribute GetPatternAttr(MemberInfo pattern)
+        private static PatternAttribute GetPatternAttr(MemberInfo pattern)
         {
             var attr =
                 (PatternAttribute)

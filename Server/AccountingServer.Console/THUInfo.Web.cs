@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using AccountingServer.BLL;
 
-namespace AccountingServer
+namespace AccountingServer.Console
 {
     public partial class THUInfo : IDisposable
     {
