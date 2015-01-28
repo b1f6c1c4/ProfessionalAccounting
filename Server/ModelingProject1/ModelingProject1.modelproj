@@ -97,9 +97,6 @@
       <DependentUpon>UMLSequenceDiagram1.sequencediagram</DependentUpon>
     </Content>
     <Folder Include="ModelDefinition\" />
-    <Content Include="Db.txt">
-      <SubType>Content</SubType>
-    </Content>
     <Content Include="ModelDefinition\ModelingProject1.uml">
       <SubType>Content</SubType>
     </Content>
