@@ -25,6 +25,9 @@
     <Content Include="Graph1.dgml">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="ModelDefinition\Package1_1810.uml">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="ModelDefinition\Package1_1841.uml">
       <SubType>Content</SubType>
     </Content>
@@ -64,6 +67,12 @@
     <Content Include="ModelDefinition\Package5_1844.uml">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="ModelDefinition\Package_1809.uml">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="ModelDefinition\Package_1810.uml">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="ModelDefinition\Package_1841.uml">
       <SubType>Content</SubType>
     </Content>
@@ -99,6 +108,10 @@
     <ProjectReference Include="..\AccountingServer.BLL\AccountingServer.BLL.csproj">
       <Name>AccountingServer.BLL</Name>
       <Project>{4f938d5a-6b22-4150-a74c-8203fdf1d215}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\AccountingServer.Console\AccountingServer.Console.csproj">
+      <Name>AccountingServer.Console</Name>
+      <Project>{0ddc759f-23de-4443-a97c-4edc1c40690c}</Project>
     </ProjectReference>
     <ProjectReference Include="..\AccountingServer.DAL\AccountingServer.DAL.csproj">
       <Name>AccountingServer.DAL</Name>

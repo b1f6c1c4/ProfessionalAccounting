@@ -10,7 +10,10 @@ namespace AccountingServer.DAL
     internal class AmortizationSerializer : BsonBaseSerializer, IBsonIdProvider
     {
         public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
-                                           IBsonSerializationOptions options)
+                                           IBsonSerializationOptions options) { return Deserialize(bsonReader); }
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public static object Deserialize(BsonReader bsonReader)
         {
             string read = null;
 
@@ -56,17 +59,18 @@ namespace AccountingServer.DAL
         }
 
         public override void Serialize(BsonWriter bsonWriter, Type nominalType, object value,
-                                       IBsonSerializationOptions options)
-        {
-            var asset = (Amortization)value;
+                                       IBsonSerializationOptions options) { Serialize(bsonWriter, (Amortization)value); }
 
+        // ReSharper disable once MemberCanBePrivate.Global
+        public static void Serialize(BsonWriter bsonWriter, Amortization amort)
+        {
             bsonWriter.WriteStartDocument();
-            bsonWriter.Write("_id", asset.ID);
-            bsonWriter.Write("name", asset.Name);
-            bsonWriter.Write("value", asset.Value);
-            bsonWriter.Write("date", asset.Date);
-            bsonWriter.Write("tday", asset.TotalDays);
-            switch (asset.Interval)
+            bsonWriter.Write("_id", amort.ID);
+            bsonWriter.Write("name", amort.Name);
+            bsonWriter.Write("value", amort.Value);
+            bsonWriter.Write("date", amort.Date);
+            bsonWriter.Write("tday", amort.TotalDays);
+            switch (amort.Interval)
             {
                 case AmortizeInterval.EveryDay:
                     bsonWriter.Write("interval", "d");
@@ -90,19 +94,19 @@ namespace AccountingServer.DAL
                     bsonWriter.Write("interval", "Y");
                     break;
             }
-            if (asset.Template != null)
+            if (amort.Template != null)
             {
                 bsonWriter.WriteName("template");
-                VoucherSerializer.Serialize(bsonWriter, asset.Template);
+                VoucherSerializer.Serialize(bsonWriter, amort.Template);
             }
-            if (asset.Schedule != null)
+            if (amort.Schedule != null)
             {
                 bsonWriter.WriteStartArray("schedule");
-                foreach (var item in asset.Schedule)
+                foreach (var item in amort.Schedule)
                     AmortItemSerializer.Serialize(bsonWriter, item);
                 bsonWriter.WriteEndArray();
             }
-            bsonWriter.Write("remark", asset.Remark);
+            bsonWriter.Write("remark", amort.Remark);
             bsonWriter.WriteEndDocument();
         }
 
