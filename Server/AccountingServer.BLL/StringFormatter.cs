@@ -13,6 +13,7 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     左对齐补至指定长度
         /// </summary>
+        /// <param name="s">待格式化的字符串</param>
         /// <param name="length">长度</param>
         /// <param name="chr">补码</param>
         /// <returns>格式化的字符串</returns>
@@ -31,6 +32,7 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     右对齐补至指定长度
         /// </summary>
+        /// <param name="s">待格式化的字符串</param>
         /// <param name="length">长度</param>
         /// <param name="chr">补码</param>
         /// <returns>格式化的字符串</returns>

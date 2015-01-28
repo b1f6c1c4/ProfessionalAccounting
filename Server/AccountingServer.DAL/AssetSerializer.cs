@@ -12,6 +12,7 @@ namespace AccountingServer.DAL
         public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
                                            IBsonSerializationOptions options) { return Deserialize(bsonReader); }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public static object Deserialize(BsonReader bsonReader)
         {
             string read = null;
@@ -66,6 +67,7 @@ namespace AccountingServer.DAL
         public override void Serialize(BsonWriter bsonWriter, Type nominalType, object value,
                                        IBsonSerializationOptions options) { Serialize(bsonWriter, (Asset)value); }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public static void Serialize(BsonWriter bsonWriter, Asset asset)
         {
             bsonWriter.WriteStartDocument();

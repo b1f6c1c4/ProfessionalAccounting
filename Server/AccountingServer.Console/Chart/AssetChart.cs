@@ -25,6 +25,8 @@ namespace AccountingServer.Console.Chart
             var s = new Series(content) { ChartType = SeriesChartType.Line, ChartArea = "总资产" };
             var balances = Accountant.GetDailyBalance(filter, DateRange);
             foreach (var balance in balances)
+                // ReSharper disable once AssignNullToNotNullAttribute
+                // ReSharper disable once PossibleInvalidOperationException
                 s.Points.AddXY(balance.Date.Value, -balance.Fund);
             s.Color = color;
             return s;
@@ -35,6 +37,8 @@ namespace AccountingServer.Console.Chart
             var s = new Series(content) { ChartType = SeriesChartType.StackedArea, ChartArea = "总资产" };
             var balances = Accountant.GetDailyBalance(filter, DateRange);
             foreach (var balance in balances)
+                // ReSharper disable once AssignNullToNotNullAttribute
+                // ReSharper disable once PossibleInvalidOperationException
                 s.Points.AddXY(balance.Date.Value, balance.Fund);
             s.Color = color;
             return s;
@@ -110,19 +114,19 @@ namespace AccountingServer.Console.Chart
                                          },
                                      Color.Maroon);
             yield return GatherDebt(
-                                     "负债",
-                                     new[]
-                                         {
-                                             new Balance { Title = 2001 },
-                                             new Balance { Title = 2202 },
-                                             new Balance { Title = 2203 },
-                                             new Balance { Title = 2211 },
-                                             new Balance { Title = 2221 },
-                                             new Balance { Title = 2221, SubTitle = 05 },
-                                             new Balance { Title = 2241 },
-                                             new Balance { Title = 2241, SubTitle = 01 }
-                                         },
-                                     Color.Red);
+                                    "负债",
+                                    new[]
+                                        {
+                                            new Balance { Title = 2001 },
+                                            new Balance { Title = 2202 },
+                                            new Balance { Title = 2203 },
+                                            new Balance { Title = 2211 },
+                                            new Balance { Title = 2221 },
+                                            new Balance { Title = 2221, SubTitle = 05 },
+                                            new Balance { Title = 2241 },
+                                            new Balance { Title = 2241, SubTitle = 01 }
+                                        },
+                                    Color.Red);
         }
     }
 }

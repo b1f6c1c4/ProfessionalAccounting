@@ -51,7 +51,7 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     获取摊销的待摊额
         /// </summary>
-        /// <param name="asset">摊销</param>
+        /// <param name="amort">摊销</param>
         /// <param name="dt">日期，若为<c>null</c>则返回总额</param>
         /// <returns>指定日期的待摊额，若尚未开始则为<c>null</c></returns>
         public static double? GetBookValueOn(Amortization amort, DateTime? dt)
@@ -457,6 +457,8 @@ namespace AccountingServer.BLL
             sucess = false;
             modified = false;
 
+            if (!expected.Fund.HasValue)
+                throw new InvalidOperationException("expected");
             var fund = expected.Fund.Value;
             expected.Fund = null;
             var isEliminated = Math.Abs(fund) < Tolerance;
@@ -495,6 +497,7 @@ namespace AccountingServer.BLL
                 return;
             }
 
+            // ReSharper disable once PossibleInvalidOperationException
             if (!(Math.Abs(ds[0].Fund.Value - fund) > Tolerance))
             {
                 sucess = true;

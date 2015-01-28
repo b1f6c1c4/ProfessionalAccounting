@@ -122,6 +122,7 @@ namespace AccountingServer.Console
                     var curDate = DateTime.Now.Date;
 
                     ChartData chartData;
+                    // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
                     if (sp[0].StartsWith("c-a", StringComparison.OrdinalIgnoreCase))
                         chartData = new ChartData(new AssetChart(m_Accountant, startDate, endDate, curDate));
                     else

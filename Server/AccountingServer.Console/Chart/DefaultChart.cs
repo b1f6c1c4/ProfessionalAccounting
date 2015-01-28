@@ -43,6 +43,8 @@ namespace AccountingServer.Console.Chart
             var s = new Series(content) { ChartType = SeriesChartType.StackedArea, ChartArea = "投资资产" };
             var balances = Accountant.GetDailyBalance(filter, DateRange);
             foreach (var balance in balances)
+                // ReSharper disable once AssignNullToNotNullAttribute
+                // ReSharper disable once PossibleInvalidOperationException
                 s.Points.AddXY(balance.Date.Value, balance.Fund);
             s.Color = color;
             return s;
@@ -53,6 +55,8 @@ namespace AccountingServer.Console.Chart
             var s = new Series(content) { ChartType = SeriesChartType.StackedArea, ChartArea = "投资资产" };
             var balances = Accountant.GetDailyBalance(filter, DateRange);
             foreach (var balance in balances)
+                // ReSharper disable once AssignNullToNotNullAttribute
+                // ReSharper disable once PossibleInvalidOperationException
                 s.Points.AddXY(balance.Date.Value, balance.Fund);
             s.Color = color;
             return s;
@@ -111,6 +115,8 @@ namespace AccountingServer.Console.Chart
             var s = new Series(content) { ChartType = SeriesChartType.StackedArea, ChartArea = "生活资产" };
             var balances = Accountant.GetDailyBalance(filter, DateRange);
             foreach (var balance in balances)
+                // ReSharper disable once AssignNullToNotNullAttribute
+                // ReSharper disable once PossibleInvalidOperationException
                 s.Points.AddXY(balance.Date.Value, balance.Fund);
             s.Color = color;
             return s;
@@ -146,6 +152,8 @@ namespace AccountingServer.Console.Chart
             var s = new Series(content) { ChartType = SeriesChartType.StackedArea, ChartArea = "其他资产" };
             var balances = Accountant.GetDailyBalance(filters, DateRange);
             foreach (var balance in balances)
+                // ReSharper disable once AssignNullToNotNullAttribute
+                // ReSharper disable once PossibleInvalidOperationException
                 s.Points.AddXY(balance.Date.Value, balance.Fund);
             s.Color = color;
             return s;
@@ -262,6 +270,8 @@ namespace AccountingServer.Console.Chart
                 s.Color = Color.FromArgb(200, s.Color);
                 for (var i = 0; i < balance1.Length; i++)
                     s.Points.AddXY(
+                                   // ReSharper disable once AssignNullToNotNullAttribute
+                                   // ReSharper disable once PossibleInvalidOperationException
                                    balance1[i].Date.Value,
                                    (balance1[i].Fund - balance1[0].Fund)
                                    + (balance2[i].Fund - balance2[0].Fund));
@@ -277,6 +287,8 @@ namespace AccountingServer.Console.Chart
                 s.Color = Color.FromArgb(200, s.Color);
                 for (var i = 0; i < balance1.Length; i++)
                     s.Points.AddXY(
+                                   // ReSharper disable once AssignNullToNotNullAttribute
+                                   // ReSharper disable once PossibleInvalidOperationException
                                    balance1[i].Date.Value,
                                    (balance3[i].Fund - balance3[0].Fund)
                                    + (balance4[i].Fund - balance4[0].Fund)
@@ -293,6 +305,8 @@ namespace AccountingServer.Console.Chart
                 s.Color = Color.FromArgb(200, s.Color);
                 for (var i = 0; i < balance1.Length; i++)
                     s.Points.AddXY(
+                                   // ReSharper disable once AssignNullToNotNullAttribute
+                                   // ReSharper disable once PossibleInvalidOperationException
                                    balance1[i].Date.Value,
                                    (balance5[i].Fund - balance5[0].Fund));
                 yield return s;
@@ -307,6 +321,8 @@ namespace AccountingServer.Console.Chart
                 s.Color = Color.FromArgb(200, s.Color);
                 for (var i = 0; i < balance1.Length; i++)
                     s.Points.AddXY(
+                                   // ReSharper disable once AssignNullToNotNullAttribute
+                                   // ReSharper disable once PossibleInvalidOperationException
                                    balance1[i].Date.Value,
                                    (balance6[i].Fund - balance6[0].Fund)
                                    - (balance3[i].Fund - balance3[0].Fund));
@@ -357,10 +373,12 @@ namespace AccountingServer.Console.Chart
                                 Color = Color.Fuchsia
                             };
                 s.Color = Color.FromArgb(200, s.Color);
-                for (var i = 0; i < balance8.Length; i++)
+                foreach (var balance in balance8)
                     s.Points.AddXY(
-                                   balance8[i].Date.Value,
-                                   (balance8[i].Fund - balance8[0].Fund));
+                                   // ReSharper disable once AssignNullToNotNullAttribute
+                                   // ReSharper disable once PossibleInvalidOperationException
+                                   balance.Date.Value,
+                                   (balance.Fund - balance8[0].Fund));
                 yield return s;
             }
             {
@@ -371,10 +389,12 @@ namespace AccountingServer.Console.Chart
                                 Color = Color.Orchid
                             };
                 s.Color = Color.FromArgb(200, s.Color);
-                for (var i = 0; i < balance7.Length; i++)
+                foreach (var balance in balance7)
                     s.Points.AddXY(
-                                   balance7[i].Date.Value,
-                                   (balance7[i].Fund - balance7[0].Fund));
+                                   // ReSharper disable once AssignNullToNotNullAttribute
+                                   // ReSharper disable once PossibleInvalidOperationException
+                                   balance.Date.Value,
+                                   (balance.Fund - balance7[0].Fund));
                 yield return s;
             }
         }
@@ -420,6 +440,8 @@ namespace AccountingServer.Console.Chart
                             };
                 s.Color = Color.FromArgb(200, s.Color);
                 for (var i = 0; i < balance9.Length; i++)
+                    // ReSharper disable once AssignNullToNotNullAttribute
+                    // ReSharper disable once PossibleInvalidOperationException
                     s.Points.AddXY(balance9[i].Date.Value, balance10[i].Fund - balance9[i].Fund);
                 yield return s;
             }
@@ -431,8 +453,10 @@ namespace AccountingServer.Console.Chart
                                 Color = Color.OrangeRed
                             };
                 s.Color = Color.FromArgb(200, s.Color);
-                for (var i = 0; i < balance10.Length; i++)
-                    s.Points.AddXY(balance10[i].Date.Value, -balance10[i].Fund);
+                foreach (var balance in balance10)
+                    // ReSharper disable once AssignNullToNotNullAttribute
+                    // ReSharper disable once PossibleInvalidOperationException
+                    s.Points.AddXY(balance.Date.Value, -balance.Fund);
                 yield return s;
             }
         }

@@ -38,7 +38,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">¹ýÂËÆ÷</param>
         /// <returns>Bson²éÑ¯</returns>
-        public static IMongoQuery GetAtomQuery(Voucher filter)
+        private static IMongoQuery GetAtomQuery(Voucher filter)
         {
             if (filter == null)
                 return null;

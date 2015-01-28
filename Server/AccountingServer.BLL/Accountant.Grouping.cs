@@ -35,6 +35,7 @@ namespace AccountingServer.BLL
             var res = m_Db.FilteredSelect(filter: dFilter);
             if (filter.Date.HasValue)
                 res = res.Where(v => v.Date <= filter.Date);
+            // ReSharper disable once PossibleInvalidOperationException
             filter.Fund = res.SelectMany(v => v.Details).Where(d => d.IsMatch(dFilter)).Sum(d => d.Fund.Value);
             return filter.Fund;
         }
@@ -64,6 +65,7 @@ namespace AccountingServer.BLL
                                   SubTitle = filter.SubTitle,
                                   Content = filter.Content
                               };
+            // ReSharper disable once PossibleInvalidOperationException
             filter.Fund = m_Db.FilteredSelectDetails(filter: dFilter).Sum(d => d.Fund.Value);
             return filter.Fund;
         }
@@ -109,6 +111,7 @@ namespace AccountingServer.BLL
                                         Fund =
                                             vs.SelectMany(v => v.Details)
                                               .Where(d => d.IsMatch(dFilter))
+                                            // ReSharper disable once PossibleInvalidOperationException
                                               .Sum(d => d.Fund.Value)
                                     });
         }
@@ -306,6 +309,7 @@ namespace AccountingServer.BLL
                                                vs.SelectMany(v => v.Details)
                                                  .Where(d => d.IsMatch(dFilter))
                                                  .Where(d => dir == 0 || (dir > 0 ? d.Fund > 0 : d.Fund < 0))
+                                               // ReSharper disable once PossibleInvalidOperationException
                                                  .Sum(d => d.Fund.Value)
                                        }).ToList();
             resx.Sort(new BalanceComparer());
@@ -363,6 +367,7 @@ namespace AccountingServer.BLL
                                                vs.SelectMany(v => v.Details)
                                                  .Where(d => dFilters.Any(d.IsMatch))
                                                  .Where(d => dir == 0 || (dir > 0 ? d.Fund > 0 : d.Fund < 0))
+                                               // ReSharper disable once PossibleInvalidOperationException
                                                  .Sum(d => d.Fund.Value)
                                        }).ToList();
             resx.Sort(new BalanceComparer());
@@ -408,6 +413,7 @@ namespace AccountingServer.BLL
                                                    Title = filter.Title,
                                                    SubTitle = filter.SubTitle,
                                                    Content = c,
+                                                   // ReSharper disable once PossibleInvalidOperationException
                                                    Fund = ds.Sum(d => d.Fund.Value)
                                                }));
         }
@@ -442,6 +448,7 @@ namespace AccountingServer.BLL
                                         Title = filter.Title,
                                         SubTitle = filter.SubTitle,
                                         Content = c,
+                                        // ReSharper disable once PossibleInvalidOperationException
                                         Fund = ds.Sum(d => d.Fund.Value)
                                     });
         }
@@ -476,6 +483,7 @@ namespace AccountingServer.BLL
                                         Title = filter.Title,
                                         SubTitle = filter.SubTitle,
                                         Content = c,
+                                        // ReSharper disable once PossibleInvalidOperationException
                                         Fund = ds.Sum(d => d.Fund.Value)
                                     });
         }

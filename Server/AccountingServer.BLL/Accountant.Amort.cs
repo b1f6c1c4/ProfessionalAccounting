@@ -26,13 +26,9 @@ namespace AccountingServer.BLL
                         return the.AddDays(1);
                     return the;
                 case AmortizeInterval.SameDayOfMonth:
-                    if (the.Day > 28)
-                        return the.AddDays(1 - the.Day).AddMonths(1);
-                    return the;
+                    return the.Day > 28 ? the.AddDays(1 - the.Day).AddMonths(1) : the;
                 case AmortizeInterval.LastDayOfWeek:
-                    if (the.DayOfWeek == DayOfWeek.Sunday)
-                        return the;
-                    return the.AddDays(7 - (int)the.DayOfWeek); // 周日的DayOfWeek是0
+                    return the.DayOfWeek == DayOfWeek.Sunday ? the : the.AddDays(7 - (int)the.DayOfWeek);
                 case AmortizeInterval.LastDayOfMonth:
                     return LastDayOfMonth(the.Year, the.Month);
                 case AmortizeInterval.LastDayOfYear:
@@ -57,9 +53,7 @@ namespace AccountingServer.BLL
                 case AmortizeInterval.SameDayOfWeek:
                     return last.AddDays(7);
                 case AmortizeInterval.LastDayOfWeek:
-                    if (last.DayOfWeek == DayOfWeek.Sunday)
-                        return last.AddDays(7);
-                    return last.AddDays(14 - (int)last.DayOfWeek); // 周日的DayOfWeek是0
+                    return last.DayOfWeek == DayOfWeek.Sunday ? last.AddDays(7) : last.AddDays(14 - (int)last.DayOfWeek);
                 case AmortizeInterval.SameDayOfMonth:
                     return last.AddMonths(1);
                 case AmortizeInterval.LastDayOfMonth:
@@ -71,24 +65,6 @@ namespace AccountingServer.BLL
                 default:
                     throw new InvalidOperationException();
             }
-        }
-
-        /// <summary>
-        ///     获取摊销的待摊数额
-        /// </summary>
-        /// <param name="amort">摊销</param>
-        /// <param name="dt">日期，若为<c>null</c>则返回原值</param>
-        /// <returns>指定日期的待摊数额，若尚未购置则为<c>null</c></returns>
-        public static double? GetResidualValueOn(Amortization amort, DateTime? dt)
-        {
-            if (!dt.HasValue ||
-                amort.Schedule == null)
-                return amort.Value;
-
-            var last = amort.Schedule.LastOrDefault(item => DateHelper.CompareDate(item.Date, dt) <= 0);
-            if (last != null)
-                return last.Residue;
-            return null;
         }
 
         /// <summary>
@@ -233,18 +209,18 @@ namespace AccountingServer.BLL
         /// <returns>是否成功</returns>
         private bool GenerateVoucher(AmortItem item, bool isCollapsed, Voucher template)
         {
-            var lst = new List<VoucherDetail>();
-            foreach (var detail in template.Details)
-                lst.Add(
-                        new VoucherDetail
-                            {
-                                Title = detail.Title,
-                                SubTitle = detail.SubTitle,
-                                Content = detail.Content,
-                                Fund =
-                                    detail.Remark == AmortItem.IgnoranceMark ? detail.Fund : item.Amount * detail.Fund,
-                                Remark = item.Remark
-                            });
+            var lst = template.Details.Select(
+                                              detail => new VoucherDetail
+                                                            {
+                                                                Title = detail.Title,
+                                                                SubTitle = detail.SubTitle,
+                                                                Content = detail.Content,
+                                                                Fund =
+                                                                    detail.Remark == AmortItem.IgnoranceMark
+                                                                        ? detail.Fund
+                                                                        : item.Amount * detail.Fund,
+                                                                Remark = item.Remark
+                                                            }).ToList();
             var voucher = new Voucher
                               {
                                   Date = isCollapsed ? null : item.Date,

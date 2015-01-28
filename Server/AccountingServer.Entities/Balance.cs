@@ -43,6 +43,8 @@ namespace AccountingServer.Entities
 
         public override int GetHashCode(Balance obj)
         {
+            if (obj == null)
+                return 0;
             var t = obj.Title ?? Int32.MinValue;
             var s = obj.SubTitle ?? Int32.MaxValue;
             var c = obj.Content == null ? Int32.MinValue : obj.Content.GetHashCode();

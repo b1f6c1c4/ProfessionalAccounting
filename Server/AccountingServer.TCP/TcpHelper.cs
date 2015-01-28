@@ -27,6 +27,7 @@ namespace AccountingServer.TCP
         public event ClientDisconnectedEventHandler ClientDisconnected;
         public event DataArrivalEventHandler DataArrival;
 
+        // ReSharper disable once MemberCanBePrivate.Global
         protected void OnClientConnected(IPEndPoint ipEndPoint)
         {
             var handler = ClientConnected;
@@ -34,6 +35,7 @@ namespace AccountingServer.TCP
                 handler(ipEndPoint);
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         protected void OnClientDisconnected(IPEndPoint ipendpoint)
         {
             var handler = ClientDisconnected;
@@ -41,6 +43,7 @@ namespace AccountingServer.TCP
                 handler(ipendpoint);
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         protected void OnDataArrival(string str)
         {
             var handler = DataArrival;
@@ -168,7 +171,7 @@ namespace AccountingServer.TCP
 
                     Disconnect();
                 }
-                catch (ThreadAbortException e)
+                catch (ThreadAbortException)
                 {
                     Debug.WriteLine("[ListenTask Aborted]");
                     break;

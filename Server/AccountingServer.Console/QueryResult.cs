@@ -57,38 +57,29 @@ namespace AccountingServer.Console
 
     public class ChartData : IQueryResult
     {
-        private readonly IList<Series> m_Series;
-        private readonly IList<ChartArea> m_ChartAreas;
-
-        public ChartData(IList<ChartArea> chartAreas, IList<Series> series)
-        {
-            m_ChartAreas = chartAreas;
-            m_Series = series;
-        }
-
         public ChartData(AccountingChart chart)
         {
-            m_ChartAreas = new List<ChartArea>();
-            m_Series = new List<Series>();
-            m_ChartAreas.Add(chart.Setup());
+            ChartAreas = new List<ChartArea>();
+            Series = new List<Series>();
+            ChartAreas.Add(chart.Setup());
             foreach (var series in chart.GatherAsset())
-                m_Series.Add(series);
+                Series.Add(series);
         }
 
         public ChartData(IEnumerable<AccountingChart> accountingCharts)
         {
-            m_ChartAreas = new List<ChartArea>();
-            m_Series = new List<Series>();
+            ChartAreas = new List<ChartArea>();
+            Series = new List<Series>();
             foreach (var chart in accountingCharts)
             {
-                m_ChartAreas.Add(chart.Setup());
+                ChartAreas.Add(chart.Setup());
                 foreach (var series in chart.GatherAsset())
-                    m_Series.Add(series);
+                    Series.Add(series);
             }
         }
 
-        public IList<Series> Series { get { return m_Series; } }
-        public IList<ChartArea> ChartAreas { get { return m_ChartAreas; } }
+        public IList<Series> Series { get; private set; }
+        public IList<ChartArea> ChartAreas { get; private set; }
 
         public bool AutoReturn { get { return true; } }
     }

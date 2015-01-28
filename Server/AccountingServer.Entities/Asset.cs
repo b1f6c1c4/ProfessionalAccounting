@@ -123,6 +123,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     编号的标准存储格式
         /// </summary>
+        // ReSharper disable once UnusedMember.Global
         public string StringID { get { return ID.ToString().ToUpperInvariant(); } set { ID = Guid.Parse(value); } }
 
         /// <summary>

@@ -19,7 +19,7 @@ namespace AccountingServer.Console
             var sb = new StringBuilder();
             foreach (var voucher in m_Accountant.FilteredSelect(null, filter: null))
             {
-                var val = m_Accountant.IsBalanced(voucher);
+                var val = Accountant.IsBalanced(voucher);
                 if (Math.Abs(val) < Accountant.Tolerance)
                     continue;
 

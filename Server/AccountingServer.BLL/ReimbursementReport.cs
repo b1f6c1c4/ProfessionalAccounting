@@ -66,6 +66,7 @@ namespace AccountingServer.BLL
         ///     写入CSV文件
         /// </summary>
         /// <param name="path">文件路径</param>
+        // ReSharper disable once InconsistentNaming
         public void ToCSV(string path)
         {
             using (var fs = File.OpenWrite(path))
@@ -425,10 +426,14 @@ namespace AccountingServer.BLL
                         new ReportItem
                             {
                                 Title = TitleManager.GetTitleName(detail),
-                                Content = detail.Content != null && detail.Content.EndsWith("路") ? "（公交）" : detail.Content,
+                                Content =
+                                    detail.Content != null && detail.Content.EndsWith("路") ? "（公交）" : detail.Content,
                                 OrigContent = detail.Content,
                                 Fund = detail.Fund,
-                                Coefficient = detail.Content == "地铁" || detail.Content != null && detail.Content.EndsWith("路") ? 1.00 : 0.01
+                                Coefficient =
+                                    detail.Content == "地铁" || detail.Content != null && detail.Content.EndsWith("路")
+                                        ? 1.00
+                                        : 0.01
                             };
             }
             {
