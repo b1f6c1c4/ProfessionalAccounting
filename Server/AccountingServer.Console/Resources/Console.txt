@@ -76,6 +76,7 @@ a-q		a-query '(GUID)'				检索某资产
 a-reg	a-register '(GUID)'			注册所有凭证
 a-unr	a-unregister	 '(GUID)'		解除所有凭证
 a-rd		a-redep '(GUID)'				重新计算折旧
+a-reset-soft '(GUID)'				解除错误登记的凭证
 a-reset-hard '(GUID)'				保留获得和处置，清除账上其它所有和某资产相关的内容
 a-ap		a-apply						将本月的资产折旧/减值登记入账
 a-ap		a-apply '(GUID)' [yyyyMM]	将某月的某资产折旧/减值登记入账
@@ -92,6 +93,7 @@ o-q		o-query '(GUID)'				检索某摊销
 o-reg	o-register '(GUID)'			注册所有凭证
 o-unr	o-unregister	 '(GUID)'		解除所有凭证
 o-ra		o-reamo '(GUID)'				重新计算摊销
+o-reset-soft '(GUID)'				解除错误登记的凭证
 o-ap		o-apply						将本月的摊销登记入账
 o-ap		o-apply '(GUID)' [yyyyMM]	将某月的某摊销登记入账
 o-ap-co	o-apply-collapse [ yyyyMM]	将某月（含）以前的摊销一起登记入账，按无日期处理
