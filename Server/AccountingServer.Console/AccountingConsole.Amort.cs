@@ -145,6 +145,29 @@ namespace AccountingServer.Console
                 }
                 return new EditableText(sb.ToString());
             }
+            if (sp[0].Equals("o-reset-soft", StringComparison.OrdinalIgnoreCase))
+            {
+                var filter = ParseAmortQuery(query);
+                var cnt = 0L;
+                foreach (var a in m_Accountant.FilteredSelect(filter))
+                {
+                    if (a.Schedule == null)
+                        continue;
+                    var flag = false;
+                    foreach (
+                        var item in
+                            a.Schedule.Where(item => item.VoucherID != null)
+                             .Where(item => m_Accountant.SelectVoucher(item.VoucherID) == null))
+                    {
+                        item.VoucherID = null;
+                        cnt++;
+                        flag = true;
+                    }
+                    if (flag)
+                        m_Accountant.Upsert(a);
+                }
+                return new NumberAffected(cnt);
+            }
             if (sp[0].StartsWith("o-ap", StringComparison.OrdinalIgnoreCase))
             {
                 var isCollapsed = sp[0].EndsWith("-collapse", StringComparison.OrdinalIgnoreCase) ||
