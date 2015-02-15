@@ -8,6 +8,7 @@
 		<subTitle name="支付宝" id="3"/>
 		<subTitle name="存出投资款" id="4"/>
 		<subTitle name="学生卡" id="5"/>
+    <subTitle name="微信" id="6"/>
 	</title>
 	<title name="交易性金融资产" id="1101">
 		<subTitle name="成本" id="1"/>
