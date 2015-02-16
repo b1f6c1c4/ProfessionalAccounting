@@ -413,7 +413,6 @@ namespace AccountingServer.Console.Chart
             ar.AlignmentOrientation = AreaAlignmentOrientations.Vertical;
             ar.AlignmentStyle = AreaAlignmentStyles.All;
             ar.AxisY.Minimum = 0;
-            ar.AxisY.Maximum = 9000;
             return ar;
         }
 
