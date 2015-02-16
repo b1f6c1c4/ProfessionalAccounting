@@ -267,15 +267,15 @@ namespace AccountingServer.BLL
         ///         <item>2014-01-05 借：餐费 500元</item>
         ///     </list>
         ///     <code>
-        ///         GetDailyBalance(new Balance { Title = 6602, SubTitle = 03, Content = "A餐厅" }, null, null);
+        ///         GetDailyBalance(new Balance { Title = 6602, SubTitle = 03, Content = "A餐厅" }, null, 0);
         ///         // 2014-01-01 : 100
-        ///         GetDailyBalance(new Balance { Title = 6602, SubTitle = 03, Content = null }, null, null);
+        ///         GetDailyBalance(new Balance { Title = 6602, SubTitle = 03, Content = null }, null, 0);
         ///         // 2014-01-01 : 100
         ///         // 2014-01-02 : 300
         ///         // 2014-01-03 : 300
         ///         // 2014-01-04 : 300
         ///         // 2014-01-05 : 800
-        ///         GetDailyBalance(new Balance { Title = 6602, SubTitle = 03, Content = null }, null, null, true);
+        ///         GetDailyBalance(new Balance { Title = 6602, SubTitle = 03, Content = null }, null, 0, true);
         ///         // 2014-01-01 : 100
         ///         // 2014-01-02 : 300
         ///         // 2014-01-05 : 800
@@ -283,7 +283,7 @@ namespace AccountingServer.BLL
         /// </example>
         /// <param name="filter">过滤器</param>
         /// <param name="rng">日期过滤器</param>
-        /// <param name="dir">0表示同时考虑借贷方，大于0表示只考虑借方，小于0表示只考虑贷方</param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
         /// <param name="aggr">是否每变动日累加而非每日求余额</param>
         /// <returns>每日余额，借方为正，贷方为负</returns>
         public IEnumerable<Balance> GetDailyBalance(Balance filter, DateFilter rng, int dir = 0, bool aggr = false)
@@ -295,7 +295,7 @@ namespace AccountingServer.BLL
                                   Content = filter.Content
                               };
 
-            var res = m_Db.FilteredSelect(filter: dFilter, rng: new DateFilter(null, rng.EndDate));
+            var res = m_Db.FilteredSelect(filter: dFilter, rng: new DateFilter(null, rng.EndDate), dir: dir);
             var resx = res.GroupBy(
                                    v => v.Date,
                                    (dt, vs) =>
@@ -329,7 +329,7 @@ namespace AccountingServer.BLL
         ///     </list>
         ///     <code>
         ///         GetDailyBalance(new [] { new Balance { Title = 6602, SubTitle = 03, Content = "A餐厅" }
-        ///                                  new Balance { Title = 6602, SubTitle = 03, Content = "" } }, null, null);
+        ///                                  new Balance { Title = 6602, SubTitle = 03, Content = "" } }, null, 0);
         ///         // 2014-01-01 : 100
         ///         // 2014-01-02 : 100
         ///         // 2014-01-03 : 100
@@ -339,7 +339,7 @@ namespace AccountingServer.BLL
         /// </example>
         /// <param name="filters">过滤器</param>
         /// <param name="rng">日期过滤器</param>
-        /// <param name="dir">0表示同时考虑借贷方，大于0表示只考虑借方，小于0表示只考虑贷方</param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
         /// <returns>每日总余额，借方为正，贷方为负</returns>
         public IEnumerable<Balance> GetDailyBalance(IEnumerable<Balance> filters, DateFilter rng, int dir = 0)
         {
@@ -353,7 +353,7 @@ namespace AccountingServer.BLL
                                        Content = filter.Content
                                    }).ToArray();
 
-            var res = m_Db.FilteredSelect(filters: dFilters, rng: new DateFilter(null, rng.EndDate));
+            var res = m_Db.FilteredSelect(filters: dFilters, rng: new DateFilter(null, rng.EndDate), dir: dir);
             var resx = res.GroupBy(
                                    v => v.Date,
                                    (dt, vs) =>
@@ -394,16 +394,18 @@ namespace AccountingServer.BLL
         ///     </code>
         /// </example>
         /// <param name="filter">过滤器</param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
         /// <returns>各内容每日金额，借方为正，贷方为负</returns>
-        public IEnumerable<IEnumerable<Balance>> GetBalancesAcrossContent(Balance filter)
+        public IEnumerable<IEnumerable<Balance>> GetBalancesAcrossContent(Balance filter, int dir)
         {
             var dFilter = new VoucherDetail { Title = filter.Title, SubTitle = filter.SubTitle };
-            return m_Db.FilteredSelect(filter: dFilter)
+            return m_Db.FilteredSelect(filter: dFilter, dir: dir)
                        .GroupBy(
                                 v => v.Date,
                                 (dt, vs) =>
                                 vs.SelectMany(v => v.Details)
                                   .Where(d => d.IsMatch(dFilter))
+                                  .Where(d => dir == 0 || (dir > 0 ? d.Fund > 0 : d.Fund < 0))
                                   .GroupBy(
                                            d => d.Content,
                                            (c, ds) =>
@@ -435,11 +437,12 @@ namespace AccountingServer.BLL
         /// </example>
         /// <param name="filter">过滤器</param>
         /// <param name="rng">日期过滤器</param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
         /// <returns>各内容金额</returns>
-        public IEnumerable<Balance> GetBalancesAcrossContent(Balance filter, DateFilter rng)
+        public IEnumerable<Balance> GetBalancesAcrossContent(Balance filter, DateFilter rng, int dir = 0)
         {
             var dFilter = new VoucherDetail { Title = filter.Title, SubTitle = filter.SubTitle };
-            return m_Db.FilteredSelectDetails(filter: dFilter, rng: rng)
+            return m_Db.FilteredSelectDetails(filter: dFilter, rng: rng, dir: dir)
                        .GroupBy(
                                 d => d.Content,
                                 (c, ds) =>
@@ -449,42 +452,9 @@ namespace AccountingServer.BLL
                                         SubTitle = filter.SubTitle,
                                         Content = c,
                                         // ReSharper disable once PossibleInvalidOperationException
-                                        Fund = ds.Sum(d => d.Fund.Value)
-                                    });
-        }
-
-        /// <summary>
-        ///     按科目计算各内容余额
-        /// </summary>
-        /// <example>
-        ///     <list type="bullet">
-        ///         <item>2014-01-01 借：餐费-A餐厅 100元</item>
-        ///         <item>2014-01-02 借：餐费-B餐厅 200元</item>
-        ///         <item>2014-01-05 借：餐费 500元</item>
-        ///     </list>
-        ///     <code>
-        ///         GetFinalBalancesAcrossContent(new Balance { Title = 6602, SubTitle = 03 });
-        ///         // A餐厅 : 100
-        ///         // B餐厅 : 200
-        ///         // null : 500
-        ///     </code>
-        /// </example>
-        /// <param name="filter">过滤器</param>
-        /// <returns>各内容余额，借方为正，贷方为负</returns>
-        public IEnumerable<Balance> GetFinalBalancesAcrossContent(Balance filter)
-        {
-            var dFilter = new VoucherDetail { Title = filter.Title, SubTitle = filter.SubTitle };
-            return m_Db.FilteredSelectDetails(filter: dFilter)
-                       .GroupBy(
-                                d => d.Content,
-                                (c, ds) =>
-                                new Balance
-                                    {
-                                        Title = filter.Title,
-                                        SubTitle = filter.SubTitle,
-                                        Content = c,
-                                        // ReSharper disable once PossibleInvalidOperationException
-                                        Fund = ds.Sum(d => d.Fund.Value)
+                                        Fund = ds
+                                            .Where(d => dir == 0 || (dir > 0 ? d.Fund > 0 : d.Fund < 0))
+                                            .Sum(d => d.Fund.Value)
                                     });
         }
     }

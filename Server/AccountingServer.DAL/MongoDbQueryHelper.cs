@@ -145,13 +145,17 @@ namespace AccountingServer.DAL
         /// <param name="vfilter">过滤器</param>
         /// <param name="filter">细目过滤器</param>
         /// <param name="rng">日期过滤器</param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
         /// <returns>Bson查询</returns>
         public static IMongoQuery GetQuery(Voucher vfilter = null,
                                            VoucherDetail filter = null,
-                                           DateFilter? rng = null)
+                                           DateFilter? rng = null,
+                                           int dir = 0)
         {
             var queryVoucher = And(GetAtomQuery(vfilter), GetAtomQuery(rng));
             var queryFilter = GetAtomQuery(filter);
+            if (dir != 0)
+                queryFilter = And(queryFilter, dir > 0 ? Query.GT("fund", 0) : Query.LT("fund", 0));
             return queryFilter != null ? And(queryVoucher, Query.ElemMatch("detail", queryFilter)) : queryVoucher;
         }
 
@@ -162,14 +166,25 @@ namespace AccountingServer.DAL
         /// <param name="filters">细目过滤器</param>
         /// <param name="rng">日期过滤器</param>
         /// <param name="useAnd">各细目过滤器之间的关系为合取</param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
         /// <returns>Bson查询</returns>
         public static IMongoQuery GetQuery(Voucher vfilter = null,
                                            IEnumerable<VoucherDetail> filters = null,
                                            DateFilter? rng = null,
+                                           int dir = 0,
                                            bool useAnd = false)
         {
             var queryFilters = filters != null
-                                   ? filters.Select(f => Query.ElemMatch("detail", GetAtomQuery(f))).ToList()
+                                   ? filters.Select(
+                                                    f =>
+                                                    {
+                                                        var q = GetAtomQuery(f);
+                                                        if (dir != 0)
+                                                            q = And(
+                                                                    q,
+                                                                    dir > 0 ? Query.GT("fund", 0) : Query.LT("fund", 0));
+                                                        return Query.ElemMatch("detail", q);
+                                                    }).ToList()
                                    : null;
             var queryFilter = useAnd ? And(queryFilters) : Or(queryFilters);
             return And(GetAtomQuery(vfilter), queryFilter, GetAtomQuery(rng));

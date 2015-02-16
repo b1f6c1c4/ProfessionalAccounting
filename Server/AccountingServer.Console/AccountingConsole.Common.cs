@@ -63,12 +63,24 @@ namespace AccountingServer.Console
                 if (s.StartsWith("o", StringComparison.OrdinalIgnoreCase))
                     return ExecuteAmort(s);
 
+                var dir = 0;
+                if (s.EndsWith("+"))
+                {
+                    dir = +1;
+                    s = s.Substring(0, s.Length - 1).Trim();
+                }
+                else if (s.EndsWith("-"))
+                {
+                    dir = -1;
+                    s = s.Substring(0, s.Length - 1).Trim();
+                }
+
                 if (s.EndsWith("`"))
                 {
                     var sx = s.TrimEnd('`', '!');
                     return s.EndsWith("!`")
-                               ? SubtotalWith2Levels(sx, s.EndsWith("!``"))
-                               : SubtotalWith3Levels(sx, s.EndsWith("``"));
+                               ? SubtotalWith2Levels(sx, s.EndsWith("!``"), dir)
+                               : SubtotalWith3Levels(sx, s.EndsWith("``"), dir);
                 }
                 if (s.EndsWith("D", StringComparison.OrdinalIgnoreCase))
                 {
@@ -78,11 +90,13 @@ namespace AccountingServer.Console
                                                           sx,
                                                           s.EndsWith("!``D", StringComparison.OrdinalIgnoreCase),
                                                           s.EndsWith("D", StringComparison.Ordinal),
+                                                          dir,
                                                           false)
                                : DailySubtotalWith4Levels(
                                                           sx,
                                                           s.EndsWith("``D", StringComparison.OrdinalIgnoreCase),
                                                           s.EndsWith("D", StringComparison.Ordinal),
+                                                          dir,
                                                           false);
                 }
                 if (s.EndsWith("A", StringComparison.OrdinalIgnoreCase))
@@ -93,11 +107,13 @@ namespace AccountingServer.Console
                                                           sx,
                                                           s.EndsWith("!``A", StringComparison.OrdinalIgnoreCase),
                                                           s.EndsWith("A", StringComparison.Ordinal),
+                                                          dir,
                                                           true)
                                : DailySubtotalWith4Levels(
                                                           sx,
                                                           s.EndsWith("``A", StringComparison.OrdinalIgnoreCase),
                                                           s.EndsWith("A", StringComparison.Ordinal),
+                                                          dir,
                                                           true);
                 }
 
@@ -130,7 +146,7 @@ namespace AccountingServer.Console
                     return chartData;
                 }
 
-                return VouchersQuery(s);
+                return VouchersQuery(s, dir);
             }
             catch (Exception e)
             {
@@ -142,8 +158,9 @@ namespace AccountingServer.Console
         ///     对记账凭证执行检索表达式
         /// </summary>
         /// <param name="s">检索表达式</param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
         /// <returns>检索结果，若表达式无效则为<c>null</c></returns>
-        private IEnumerable<Voucher> ExecuteQuery(string s)
+        private IEnumerable<Voucher> ExecuteQuery(string s, int dir)
         {
             string dateQ;
             var detail = ParseQuery(s, out dateQ);
@@ -152,15 +169,16 @@ namespace AccountingServer.Console
 
             AutoConnect();
 
-            return m_Accountant.FilteredSelect(filter: detail, rng: rng);
+            return m_Accountant.FilteredSelect(filter: detail, rng: rng, dir: dir);
         }
 
         /// <summary>
         ///     对细目执行检索表达式
         /// </summary>
         /// <param name="s">检索表达式</param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
         /// <returns>检索结果，若表达式无效则为<c>null</c></returns>
-        private IEnumerable<VoucherDetail> ExecuteDetailQuery(string s)
+        private IEnumerable<VoucherDetail> ExecuteDetailQuery(string s, int dir)
         {
             string dateQ;
             var detail = ParseQuery(s, out dateQ);
@@ -169,18 +187,19 @@ namespace AccountingServer.Console
 
             AutoConnect();
 
-            return m_Accountant.FilteredSelectDetails(filter: detail, rng: rng);
+            return m_Accountant.FilteredSelectDetails(filter: detail, rng: rng, dir: dir);
         }
 
         /// <summary>
         ///     直接检索记账凭证
         /// </summary>
         /// <param name="s">检索表达式</param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
         /// <returns>记账凭证表达式</returns>
-        private IQueryResult VouchersQuery(string s)
+        private IQueryResult VouchersQuery(string s, int dir)
         {
             var sb = new StringBuilder();
-            var query = ExecuteQuery(s);
+            var query = ExecuteQuery(s, dir);
             if (query == null)
                 throw new InvalidOperationException("日期表达式无效");
 

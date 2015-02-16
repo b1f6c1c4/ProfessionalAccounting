@@ -14,7 +14,7 @@ namespace AccountingServer.Console
         /// </summary>
         /// <param name="t">按一级科目的汇总</param>
         /// <param name="tsc">按内容的汇总</param>
-        /// <returns></returns>
+        /// <returns>分类汇总结果</returns>
         // ReSharper disable once ParameterTypeCanBeEnumerable.Local
         private static string PresentSubtotal(List<Balance> t, List<Balance> tsc)
         {
@@ -48,7 +48,7 @@ namespace AccountingServer.Console
         /// <param name="t">按一级科目的汇总</param>
         /// <param name="ts">按二级科目的汇总</param>
         /// <param name="tsc">按内容的汇总</param>
-        /// <returns></returns>
+        /// <returns>分类汇总结果</returns>
         // ReSharper disable once ParameterTypeCanBeEnumerable.Local
         private static string PresentSubtotal(List<Balance> t, List<Balance> ts, List<Balance> tsc)
         {
@@ -96,10 +96,11 @@ namespace AccountingServer.Console
         /// </summary>
         /// <param name="sx">检索表达式</param>
         /// <param name="withZero">是否包含汇总为零的部分</param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
         /// <returns>报表</returns>
-        private IQueryResult SubtotalWith2Levels(string sx, bool withZero)
+        private IQueryResult SubtotalWith2Levels(string sx, bool withZero, int dir)
         {
-            var res = ExecuteDetailQuery(sx);
+            var res = ExecuteDetailQuery(sx, dir);
             if (res == null)
                 throw new InvalidOperationException("检索表达式无效");
 
@@ -140,10 +141,11 @@ namespace AccountingServer.Console
         /// </summary>
         /// <param name="sx">检索表达式</param>
         /// <param name="withZero">是否包含汇总为零的部分</param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
         /// <returns>报表</returns>
-        private IQueryResult SubtotalWith3Levels(string sx, bool withZero)
+        private IQueryResult SubtotalWith3Levels(string sx, bool withZero, int dir)
         {
-            var res = ExecuteDetailQuery(sx);
+            var res = ExecuteDetailQuery(sx, dir);
             if (res == null)
                 throw new InvalidOperationException("检索表达式无效");
 
@@ -200,9 +202,10 @@ namespace AccountingServer.Console
         /// <param name="sx">检索表达式</param>
         /// <param name="withZero">是否包含汇总为零的部分</param>
         /// <param name="reversed">是否将日期放在最外侧</param>
-        /// <param name="aggr"></param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
+        /// <param name="aggr">是否每变动日累加而非每日求余额</param>
         /// <returns>报表</returns>
-        private IQueryResult DailySubtotalWith4Levels(string sx, bool withZero, bool reversed, bool aggr)
+        private IQueryResult DailySubtotalWith4Levels(string sx, bool withZero, bool reversed, int dir, bool aggr)
         {
             string dateQ;
             var detail = ParseQuery(sx, out dateQ);
@@ -216,13 +219,13 @@ namespace AccountingServer.Console
                 if (detail.Title != null)
                     return new UnEditableText(
                         reversed
-                            ? SubtotalWith4Levels1X00Reversed(detail, rng, withZero)
-                            : SubtotalWith4Levels1X00(detail, rng, withZero, aggr));
+                            ? SubtotalWith4Levels1X00Reversed(detail, rng, withZero, dir)
+                            : SubtotalWith4Levels1X00(detail, rng, withZero, dir, aggr));
 
                 throw new NotImplementedException();
             }
             if (detail.Title != null)
-                return new UnEditableText(SubtotalWith4Levels1X10(withZero, detail, rng, aggr));
+                return new UnEditableText(SubtotalWith4Levels1X10(withZero, detail, rng, dir, aggr));
 
             throw new NotImplementedException();
         }
@@ -233,9 +236,10 @@ namespace AccountingServer.Console
         /// <param name="sx">检索表达式</param>
         /// <param name="withZero">是否包含汇总为零的部分</param>
         /// <param name="reversed">是否将日期放在最外侧</param>
-        /// <param name="aggr"></param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
+        /// <param name="aggr">是否每变动日累加而非每日求余额</param>
         /// <returns>报表</returns>
-        private IQueryResult DailySubtotalWith3Levels(string sx, bool withZero, bool reversed, bool aggr)
+        private IQueryResult DailySubtotalWith3Levels(string sx, bool withZero, bool reversed, int dir, bool aggr)
         {
             string dateQ;
             var detail = ParseQuery(sx, out dateQ);
@@ -249,13 +253,13 @@ namespace AccountingServer.Console
                 if (detail.Title != null)
                     return new UnEditableText(
                         reversed
-                            ? SubtotalWith4Levels1X00Reversed(detail, rng, withZero)
-                            : SubtotalWith4Levels1X00(detail, rng, withZero, aggr));
+                            ? SubtotalWith4Levels1X00Reversed(detail, rng, withZero, dir)
+                            : SubtotalWith4Levels1X00(detail, rng, withZero, dir, aggr));
 
                 throw new NotImplementedException();
             }
             if (detail.Title != null)
-                return new UnEditableText(SubtotalWith4Levels1X10(withZero, detail, rng, aggr));
+                return new UnEditableText(SubtotalWith4Levels1X10(withZero, detail, rng, dir, aggr));
 
             throw new NotImplementedException();
         }
@@ -263,9 +267,9 @@ namespace AccountingServer.Console
         /// <summary>
         ///     根据相关信息检索记账凭证并按内容、日期分类汇总，生成报表
         /// </summary>
-        private string SubtotalWith4Levels1X00(VoucherDetail filter, DateFilter rng, bool withZero, bool aggr)
+        private string SubtotalWith4Levels1X00(VoucherDetail filter, DateFilter rng, bool withZero, int dir, bool aggr)
         {
-            var vouchers = m_Accountant.FilteredSelect(filter: filter, rng: rng);
+            var vouchers = m_Accountant.FilteredSelect(filter: filter, rng: rng, dir: dir);
 
             var result = vouchers.SelectMany(
                                              v =>
@@ -324,9 +328,9 @@ namespace AccountingServer.Console
         /// <summary>
         ///     根据相关信息检索记账凭证并按日期、内容分类汇总，生成报表
         /// </summary>
-        private string SubtotalWith4Levels1X00Reversed(VoucherDetail filter, DateFilter rng, bool withZero)
+        private string SubtotalWith4Levels1X00Reversed(VoucherDetail filter, DateFilter rng, bool withZero, int dir)
         {
-            var vouchers = m_Accountant.FilteredSelect(filter: filter, rng: rng);
+            var vouchers = m_Accountant.FilteredSelect(filter: filter, rng: rng, dir: dir);
 
             var result = vouchers.GroupBy(
                                           v => v.Date,
@@ -376,7 +380,7 @@ namespace AccountingServer.Console
         /// <summary>
         ///     根据相关信息检索记账凭证并按日期分类汇总，生成报表
         /// </summary>
-        private string SubtotalWith4Levels1X10(bool withZero, VoucherDetail filter, DateFilter rng, bool aggr)
+        private string SubtotalWith4Levels1X10(bool withZero, VoucherDetail filter, DateFilter rng, int dir, bool aggr)
         {
             var result =
                 m_Accountant.GetDailyBalance(

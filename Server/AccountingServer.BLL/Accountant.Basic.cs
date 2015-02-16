@@ -137,12 +137,14 @@ namespace AccountingServer.BLL
         /// <param name="vfilter">过滤器</param>
         /// <param name="filter">细目过滤器</param>
         /// <param name="rng">日期过滤器</param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
         /// <returns>任一细目匹配过滤器的记账凭证</returns>
         public IEnumerable<Voucher> FilteredSelect(Voucher vfilter = null,
                                                    VoucherDetail filter = null,
-                                                   DateFilter? rng = null)
+                                                   DateFilter? rng = null,
+                                                   int dir = 0)
         {
-            return m_Db.FilteredSelect(vfilter, filter, rng);
+            return m_Db.FilteredSelect(vfilter, filter, rng, dir);
         }
 
         /// <summary>
@@ -151,14 +153,16 @@ namespace AccountingServer.BLL
         /// <param name="vfilter">过滤器</param>
         /// <param name="filters">细目过滤器</param>
         /// <param name="rng">日期过滤器</param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
         /// <param name="useAnd">各细目过滤器之间的关系为合取</param>
         /// <returns>任一细目匹配任一过滤器的记账凭证</returns>
         public IEnumerable<Voucher> FilteredSelect(Voucher vfilter = null,
                                                    IEnumerable<VoucherDetail> filters = null,
                                                    DateFilter? rng = null,
+                                                   int dir = 0,
                                                    bool useAnd = false)
         {
-            return m_Db.FilteredSelect(vfilter, filters, rng, useAnd);
+            return m_Db.FilteredSelect(vfilter, filters, rng, dir, useAnd);
         }
 
 
@@ -179,12 +183,14 @@ namespace AccountingServer.BLL
         /// <param name="vfilter">过滤器</param>
         /// <param name="filter">细目过滤器</param>
         /// <param name="rng">日期过滤器</param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
         /// <returns>匹配过滤器的细目</returns>
         public IEnumerable<VoucherDetail> FilteredSelectDetails(Voucher vfilter = null,
                                                                 VoucherDetail filter = null,
-                                                                DateFilter? rng = null)
+                                                                DateFilter? rng = null,
+                                                                int dir = 0)
         {
-            return m_Db.FilteredSelectDetails(vfilter, filter, rng);
+            return m_Db.FilteredSelectDetails(vfilter, filter, rng, dir);
         }
 
         /// <summary>
@@ -193,14 +199,16 @@ namespace AccountingServer.BLL
         /// <param name="vfilter">过滤器</param>
         /// <param name="filters">细目过滤器</param>
         /// <param name="rng">日期过滤器</param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
         /// <param name="useAnd">各细目过滤器之间的关系为合取</param>
         /// <returns>匹配过滤器的细目</returns>
         public IEnumerable<VoucherDetail> FilteredSelectDetails(Voucher vfilter = null,
                                                                 IEnumerable<VoucherDetail> filters = null,
                                                                 DateFilter? rng = null,
+                                                                int dir = 0,
                                                                 bool useAnd = false)
         {
-            return m_Db.FilteredSelectDetails(vfilter, filters, rng, useAnd);
+            return m_Db.FilteredSelectDetails(vfilter, filters, rng, dir, useAnd);
         }
 
         /// <summary>
