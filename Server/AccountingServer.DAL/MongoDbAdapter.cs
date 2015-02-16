@@ -14,6 +14,8 @@ namespace AccountingServer.DAL
     /// </summary>
     public class MongoDbAdapter : IDbAdapter, IDbServer
     {
+        #region member
+
         /// <summary>
         ///     MongoDb客户端
         /// </summary>
@@ -46,10 +48,7 @@ namespace AccountingServer.DAL
         /// </summary>
         private MongoCollection<Amortization> m_Amortizations;
 
-        /// <summary>
-        ///     是否已经连接到数据库
-        /// </summary>
-        public bool Connected { get; private set; }
+        #endregion
 
         public MongoDbAdapter() { Connected = false; }
 
@@ -64,6 +63,11 @@ namespace AccountingServer.DAL
         }
 
         #region server
+
+        /// <summary>
+        ///     是否已经连接到数据库
+        /// </summary>
+        public bool Connected { get; private set; }
 
         public void Launch()
         {

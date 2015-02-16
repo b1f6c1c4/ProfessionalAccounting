@@ -9,6 +9,8 @@ namespace AccountingServer.DAL
     /// </summary>
     public interface IDbAdapter
     {
+        #region server
+
         /// <summary>
         ///     是否已经连接到数据库
         /// </summary>
@@ -23,6 +25,10 @@ namespace AccountingServer.DAL
         ///     断开服务器
         /// </summary>
         void Disconnect();
+
+        #endregion
+
+        #region voucher
 
         /// <summary>
         ///     按编号查找记账凭证
@@ -113,6 +119,9 @@ namespace AccountingServer.DAL
         /// <returns>是否成功</returns>
         bool Upsert(Voucher entity);
 
+        #endregion
+
+        #region asset
 
         /// <summary>
         ///     按编号查找资产
@@ -150,6 +159,9 @@ namespace AccountingServer.DAL
         /// <returns>是否成功</returns>
         bool Upsert(Asset entity);
 
+        #endregion
+
+        #region amortization
 
         /// <summary>
         ///     按编号查找摊销
@@ -186,5 +198,7 @@ namespace AccountingServer.DAL
         /// <param name="entity">新摊销</param>
         /// <returns>是否成功</returns>
         bool Upsert(Amortization entity);
+
+        #endregion
     }
 }
