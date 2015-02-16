@@ -142,42 +142,48 @@ namespace AccountingServer.DAL
 
         public IEnumerable<Voucher> FilteredSelect(Voucher vfilter = null,
                                                    VoucherDetail filter = null,
-                                                   DateFilter? rng = null)
+                                                   DateFilter? rng = null,
+                                                   int dir = 0)
         {
-            return m_Vouchers.Find(MongoDbQueryHelper.GetQuery(vfilter, filter, rng));
+            return m_Vouchers.Find(MongoDbQueryHelper.GetQuery(vfilter, filter, rng, dir));
         }
 
 
         public IEnumerable<Voucher> FilteredSelect(Voucher vfilter = null,
                                                    IEnumerable<VoucherDetail> filters = null,
                                                    DateFilter? rng = null,
+                                                   int dir = 0,
                                                    bool useAnd = false)
         {
-            return m_Vouchers.Find(MongoDbQueryHelper.GetQuery(vfilter, filters, rng, useAnd));
+            return m_Vouchers.Find(MongoDbQueryHelper.GetQuery(vfilter, filters, rng, dir, useAnd));
         }
 
         public IEnumerable<VoucherDetail> FilteredSelectDetails(Voucher vfilter = null,
                                                                 VoucherDetail filter = null,
-                                                                DateFilter? rng = null)
+                                                                DateFilter? rng = null,
+                                                                int dir = 0)
         {
-            var res = m_Vouchers.Find(MongoDbQueryHelper.GetQuery(vfilter, filter, rng));
+            var res = m_Vouchers.Find(MongoDbQueryHelper.GetQuery(vfilter, filter, rng, dir));
 
             return from voucher in res
                    from detail in voucher.Details
                    where detail.IsMatch(filter)
+                   where dir == 0 || (dir > 0 ? detail.Fund > 0 : detail.Fund < 0)
                    select detail;
         }
 
         public IEnumerable<VoucherDetail> FilteredSelectDetails(Voucher vfilter = null,
                                                                 IEnumerable<VoucherDetail> filters = null,
                                                                 DateFilter? rng = null,
+                                                                int dir = 0,
                                                                 bool useAnd = false)
         {
-            var res = m_Vouchers.Find(MongoDbQueryHelper.GetQuery(vfilter, filters, rng, useAnd));
+            var res = m_Vouchers.Find(MongoDbQueryHelper.GetQuery(vfilter, filters, rng, dir, useAnd));
 
             return from voucher in res
                    from detail in voucher.Details
                    where detail.IsMatch(filters, useAnd)
+                   where dir == 0 || (dir > 0 ? detail.Fund > 0 : detail.Fund < 0)
                    select detail;
         }
 
