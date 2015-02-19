@@ -53,10 +53,12 @@
     <Compile Include="BsonHelper.cs" />
     <Compile Include="AmortItemSerializer.cs" />
     <Compile Include="IDbAdapter.cs" />
+    <Compile Include="IDbGrouping.cs" />
     <Compile Include="IDbServer.cs" />
     <Compile Include="MongoDbAdapter.cs" />
     <Compile Include="MongoDbQueryHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BalanceSerializer.cs" />
     <Compile Include="VoucherDetailSerializer.cs" />
     <Compile Include="VoucherSerializer.cs" />
   </ItemGroup>

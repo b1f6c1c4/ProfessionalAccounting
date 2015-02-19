@@ -92,24 +92,24 @@ namespace AccountingServer.BLL
             Action<string, string, double?> action =
                 (s, d, f) => m_Tcp.Write(String.Format("{0}={1}={2}", s, d, f.AsFullCurrency()));
 
-            action("库存现金", "1001.00", m_Accountant.GetFinalBalance(new Balance { Title = 1001 }));
+            action("库存现金", "1001.00", m_Accountant.GetBalance(new Balance { Title = 1001 }));
             action(
                    "学生卡",
                    "1012.05",
-                   m_Accountant.GetFinalBalance(new Balance { Title = 1012, SubTitle = 05 }));
+                   m_Accountant.GetBalance(new Balance { Title = 1012, SubTitle = 05 }));
             foreach (var s in new[] { "3593", "5184", "9767" })
                 action(
                        "借记卡" + s,
                        s,
-                       m_Accountant.GetFinalBalance(new Balance { Title = 1002, Content = s }));
+                       m_Accountant.GetBalance(new Balance { Title = 1002, Content = s }));
             action(
                    "贷记卡6439",
                    "2241.01",
-                   -m_Accountant.GetFinalBalance(new Balance { Title = 2241, SubTitle = 01, Content = "6439" }));
+                   -m_Accountant.GetBalance(new Balance { Title = 2241, SubTitle = 01, Content = "6439" }));
             action(
                    "公交卡",
                    "1012.01",
-                   m_Accountant.GetFinalBalance(new Balance { Title = 1012, SubTitle = 01, Content = "7094" }));
+                   m_Accountant.GetBalance(new Balance { Title = 1012, SubTitle = 01, Content = "7094" }));
             foreach (
                 var s in
                     new[]
@@ -121,7 +121,7 @@ namespace AccountingServer.BLL
                 action(
                        s,
                        s,
-                       m_Accountant.GetFinalBalance(new Balance { Title = 1101, Content = s }));
+                       m_Accountant.GetBalance(new Balance { Title = 1101, Content = s }));
 
             Action<string, int?, bool> actionGroup =
                 (description, title, b) =>

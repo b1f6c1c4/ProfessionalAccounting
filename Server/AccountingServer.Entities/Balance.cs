@@ -29,6 +29,11 @@ namespace AccountingServer.Entities
         public string Content { get; set; }
 
         /// <summary>
+        ///     备注
+        /// </summary>
+        public string Remark { get; set; }
+
+        /// <summary>
         ///     余额
         /// </summary>
         public double Fund { get; set; }
@@ -48,7 +53,8 @@ namespace AccountingServer.Entities
             var t = obj.Title ?? Int32.MinValue;
             var s = obj.SubTitle ?? Int32.MaxValue;
             var c = obj.Content == null ? Int32.MinValue : obj.Content.GetHashCode();
-            return t ^ (s << 3) ^ c;
+            var r = obj.Remark == null ? Int32.MinValue : obj.Remark.GetHashCode();
+            return t ^ (s << 3) ^ c ^ r;
         }
     }
 
