@@ -2,7 +2,7 @@
 
 财月：上月20-本月19
 
-检索某一范围内所有Voucher：不引起歧义的情况下，可以省略[]
+时间过滤器：不引起歧义的情况下，可以省略[]
 []					不作限制
 [.]					今日
 [..]				本周
@@ -21,36 +21,24 @@
 [null]				无日期
 
 
-检索关于某一Title 某一Content的所有Voucher：
-T1001 '' []			限制一级科目和内容
-T100101 '' []		限制科目和内容
-T100101 []			限制科目
-'' []				限制内容
+细目过滤器：
+T1001				限制一级科目
+T100101				限制科目
+''					限制内容
 
-
-命令修饰：
-`					按Title，SubTitle，Content分类汇总总额并制作报表（不含0）
-``					按Title，SubTitle，Content分类汇总总额并制作报表（含0）
-!`					按Title，Content分类汇总总额并制作报表（不含0）
-!``					按Title，Content分类汇总总额并制作报表（含0）
-
-`D					按Date，Title，SubTitle，Content分类汇总并制作报表（不含0）
-``D					按Date，Title，SubTitle，Content分类汇总并制作报表（含0）
-!`D					按Date，Title，Content分类汇总并制作报表（不含0）
-!``D				按Date，Title，Content分类汇总并制作报表（含0）
-
-`d					按Title，SubTitle，Content，Date分类汇总并制作报表（不含0）
-``d					按Title，SubTitle，Content，Date分类汇总并制作报表（含0）
-!`d					按Title，Content，Date分类汇总并制作报表（不含0）
-!``d				按Title，Content，Date分类汇总并制作报表（含0）
-
-`a					按Title，SubTitle，Content，Date分类汇总并制作报表（不含0，不含未改变日期）
-``a					按Title，SubTitle，Content，Date分类汇总并制作报表（含0，不含未改变日期）
-!`a					按Title，Content，Date分类汇总并制作报表（不含0，不含未改变日期）
-!``a				按Title，Content，Date分类汇总并制作报表（含0，不含未改变日期）
-
+借贷方向过滤器：
 +					仅计入借方
 -					仅计入贷方
+
+分类汇总：
+`tsc	`			按Title，SubTitle，Content分类汇总并制作报表（不含0）
+``tsc	``			按Title，SubTitle，Content分类汇总并制作报表（含0）
+`dtsc				按Date，Title，SubTitle，Content分类汇总（当日发生额）并制作报表（不含0）
+`tscD				按Title，SubTitle，Content，Date分类汇总（当日余额，不含未变动日，零变动属于变动）并制作报表（不含0余额日）
+`tscX				按Date，Title，SubTitle，Content分类汇总（当日累计发生额）并制作报表（含0累计发生额日）
+`cd					按Content，Date分类汇总（当日发生额）并制作报表（不含0）
+注：D和X之后不能再分类汇总
+
 
 检索所有科目：
 T	Titles	t		检索所有科目编号及其名称

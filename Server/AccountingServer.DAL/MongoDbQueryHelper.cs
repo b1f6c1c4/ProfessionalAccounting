@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using AccountingServer.Entities;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -338,6 +339,142 @@ namespace AccountingServer.DAL
         {
             while (queries.Remove(null)) { }
             return queries.Any() ? Query.Or(queries) : null;
+        }
+
+        /// <summary>
+        ///     过滤器的Javascript表示
+        /// </summary>
+        /// <param name="vfilter">过滤器</param>
+        /// <returns>Javascript表示</returns>
+        public static string GetJavascriptFilter(Voucher vfilter)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("function(v) {");
+            if (vfilter == null)
+                sb.AppendLine("    return true;");
+            else
+            {
+                if (vfilter.Date != null)
+                {
+                    sb.AppendFormat("    if (v.date != new Date('{0:yyyy-MM-dd}')) return false;", vfilter.Date);
+                    sb.AppendLine();
+                }
+                if (vfilter.Type != null)
+                    switch (vfilter.Type)
+                    {
+                        case VoucherType.Ordinal:
+                            sb.AppendLine("    if (v.special != undefined) return false;");
+                            break;
+                        case VoucherType.Amortization:
+                            sb.AppendLine("    if (v.special != 'amorz') return false;");
+                            break;
+                        case VoucherType.AnnualCarry:
+                            sb.AppendLine("    if (v.special != 'acarry') return false;");
+                            break;
+                        case VoucherType.Carry:
+                            sb.AppendLine("    if (v.special != 'carry') return false;");
+                            break;
+                        case VoucherType.Depreciation:
+                            sb.AppendLine("    if (v.special != 'dep') return false;");
+                            break;
+                        case VoucherType.Devalue:
+                            sb.AppendLine("    if (v.special != 'dev') return false;");
+                            break;
+                        case VoucherType.Uncertain:
+                            sb.AppendLine("    if (v.special != 'unc') return false;");
+                            break;
+                    }
+                if (vfilter.Remark != null)
+                    if (vfilter.Remark == String.Empty)
+                        sb.AppendLine("    if (v.remark != null) return false;");
+                    else
+                        sb.AppendFormat(
+                                        "    if (v.remark != '{0}') return false;",
+                                        vfilter.Remark.Replace("\'", "\\\'"));
+                sb.AppendLine("    return true;");
+            }
+            sb.AppendLine("}");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        ///     细目过滤器的Javascript表示
+        /// </summary>
+        /// <param name="filter">细目过滤器</param>
+        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
+        /// <returns>Javascript表示</returns>
+        public static string GetJavascriptFilter(VoucherDetail filter, int dir)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("function(d) {");
+            if (dir != 0)
+                sb.AppendLine(dir > 0 ? "    if (d.fund <= 0) return false;" : "    if (d.fund >= 0) return false;");
+            if (filter == null)
+                sb.AppendLine("    return true;");
+            else
+            {
+                if (filter.Title != null)
+                {
+                    sb.AppendFormat("    if (d.title != {0})) return false;", filter.Title);
+                    sb.AppendLine();
+                }
+                if (filter.SubTitle != null)
+                {
+                    sb.AppendFormat("    if (d.subtitle != {0})) return false;", filter.SubTitle);
+                    sb.AppendLine();
+                }
+                if (filter.Content != null)
+                    if (filter.Content == String.Empty)
+                        sb.AppendLine("    if (d.content != null) return false;");
+                    else
+                        sb.AppendFormat(
+                                        "    if (d.content != '{0}') return false;",
+                                        filter.Content.Replace("\'", "\\\'"));
+                if (filter.Remark != null)
+                    if (filter.Remark == String.Empty)
+                        sb.AppendLine("    if (d.remark != null) return false;");
+                    else
+                        sb.AppendFormat(
+                                        "    if (d.remark != '{0}') return false;",
+                                        filter.Remark.Replace("\'", "\\\'"));
+                if (filter.Fund != null)
+                {
+                    sb.AppendFormat("    if (Math.abs(d.fund - {0:r}) > 1e-8)) return false;", filter.Fund);
+                    sb.AppendLine();
+                }
+                sb.AppendLine("    return true;");
+            }
+            sb.AppendLine("}");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        ///     日期过滤器的Javascript表示
+        /// </summary>
+        /// <param name="rng">日期过滤器</param>
+        /// <returns>Javascript表示</returns>
+        public static string GetJavascriptFilter(DateFilter? rng)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("function(v) {");
+            if (rng == null)
+                sb.AppendLine("    return true;");
+            else if (rng.Value.NullOnly)
+                sb.AppendLine("    return v.date == null;");
+            else
+            {
+                sb.Append("    if (v.date == null) return ");
+                sb.AppendLine(rng.Value.Nullable ? "true;" : "false;");
+
+                if (rng.Value.StartDate.HasValue)
+                    sb.AppendFormat("    if (v.date < new Date('{0:yyyy-MM-dd}')) return false;", rng.Value.StartDate);
+                if (rng.Value.EndDate.HasValue)
+                    sb.AppendFormat("    if (v.date > new Date('{0:yyyy-MM-dd}')) return false;", rng.Value.EndDate);
+
+                sb.AppendLine("    return true;");
+            }
+            sb.AppendLine("}");
+            return sb.ToString();
         }
     }
 }
