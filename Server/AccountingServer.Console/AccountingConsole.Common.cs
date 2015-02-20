@@ -4,6 +4,8 @@ using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Console.Chart;
 using AccountingServer.Entities;
+using Antlr4.Runtime;
+using Antlr4.Runtime.Tree;
 
 namespace AccountingServer.Console
 {
@@ -23,10 +25,15 @@ namespace AccountingServer.Console
         /// <returns>执行结果</returns>
         public IQueryResult Execute(string s)
         {
-            try
+            var lexer = new ConsoleLexer(new AntlrInputStream(s));
+            var parser = new ConsoleParser(new CommonTokenStream(lexer));
+            var result = parser.command();
+            if (result.exception != null)
+                throw new Exception(result.exception.ToString());
+
+            if (result.GetChild(0) is ConsoleParser.OtherCommandContext)
             {
-                s = s.Trim();
-                switch (s.ToLowerInvariant())
+                switch (result.GetChild(0).GetText().ToLowerInvariant())
                 {
                     case "launch":
                     case "lau":
@@ -34,10 +41,9 @@ namespace AccountingServer.Console
                     case "connect":
                     case "con":
                         return ConnectServer();
-                        //case "mobile":
-                        //case "mob":
-                        //    ToggleMobile();
-                        //    return null;
+                    case "mobile":
+                    case "mob":
+                        throw new NotImplementedException();
                     case "backup":
                         return Backup();
                     case "fetch":
@@ -57,138 +63,19 @@ namespace AccountingServer.Console
                         // ReSharper disable once HeuristicUnreachableCode
                         return new Suceed();
                 }
-
-                if (s.StartsWith("a", StringComparison.OrdinalIgnoreCase))
-                    return ExecuteAsset(s);
-                if (s.StartsWith("o", StringComparison.OrdinalIgnoreCase))
-                    return ExecuteAmort(s);
-
-                var dir = 0;
-                if (s.EndsWith("+"))
-                {
-                    dir = +1;
-                    s = s.Substring(0, s.Length - 1).Trim();
-                }
-                else if (s.EndsWith("-"))
-                {
-                    dir = -1;
-                    s = s.Substring(0, s.Length - 1).Trim();
-                }
-
-                if (s.EndsWith("`"))
-                {
-                    var sx = s.TrimEnd('`', '!');
-                    return s.EndsWith("!`")
-                               ? SubtotalWith2Levels(sx, s.EndsWith("!``"), dir)
-                               : SubtotalWith3Levels(sx, s.EndsWith("``"), dir);
-                }
-                if (s.EndsWith("D", StringComparison.OrdinalIgnoreCase))
-                {
-                    var sx = s.TrimEnd('`', '!', 'D', 'd');
-                    return s.EndsWith("!`D")
-                               ? DailySubtotalWith3Levels(
-                                                          sx,
-                                                          s.EndsWith("!``D", StringComparison.OrdinalIgnoreCase),
-                                                          s.EndsWith("D", StringComparison.Ordinal),
-                                                          dir,
-                                                          false)
-                               : DailySubtotalWith4Levels(
-                                                          sx,
-                                                          s.EndsWith("``D", StringComparison.OrdinalIgnoreCase),
-                                                          s.EndsWith("D", StringComparison.Ordinal),
-                                                          dir,
-                                                          false);
-                }
-                if (s.EndsWith("A", StringComparison.OrdinalIgnoreCase))
-                {
-                    var sx = s.TrimEnd('`', '!', 'A', 'a');
-                    return s.EndsWith("!`A")
-                               ? DailySubtotalWith3Levels(
-                                                          sx,
-                                                          s.EndsWith("!``A", StringComparison.OrdinalIgnoreCase),
-                                                          s.EndsWith("A", StringComparison.Ordinal),
-                                                          dir,
-                                                          true)
-                               : DailySubtotalWith4Levels(
-                                                          sx,
-                                                          s.EndsWith("``A", StringComparison.OrdinalIgnoreCase),
-                                                          s.EndsWith("A", StringComparison.Ordinal),
-                                                          dir,
-                                                          true);
-                }
-
-                if (s.StartsWith("R", StringComparison.OrdinalIgnoreCase))
-                    return GenerateReport(s);
-
-                if (s.StartsWith("c", StringComparison.OrdinalIgnoreCase))
-                {
-                    var sp = s.Split(new[] { ' ' }, 2);
-                    var dq = sp[1];
-
-                    var rng = ParseDateQuery(dq);
-                    if (!rng.Constrained)
-                        throw new InvalidOperationException("日期表达式无效");
-
-                    AutoConnect();
-
-                    // ReSharper disable once PossibleInvalidOperationException
-                    var startDate = rng.StartDate.Value;
-                    // ReSharper disable once PossibleInvalidOperationException
-                    var endDate = rng.EndDate.Value;
-                    var curDate = DateTime.Now.Date;
-
-                    ChartData chartData;
-                    // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
-                    if (sp[0].StartsWith("c-a", StringComparison.OrdinalIgnoreCase))
-                        chartData = new ChartData(new AssetChart(m_Accountant, startDate, endDate, curDate));
-                    else
-                        chartData = new ChartData(DefaultChart.Enumerate(m_Accountant, startDate, endDate, curDate));
-                    return chartData;
-                }
-
-                return VouchersQuery(s, dir);
+                throw new InvalidOperationException();
             }
-            catch (Exception e)
+            if (result.GetChild(0) is ConsoleParser.VouchersContext)
             {
-                return new Failed(e);
+                AutoConnect();
+
+                var sb = new StringBuilder();
+                foreach (var voucher in m_Accountant.FilteredSelect(result.GetChild(0) as IVoucherQueryCompounded))
+                    sb.Append(CSharpHelper.PresentVoucher(voucher));
+                return new EditableText(sb.ToString());
             }
         }
 
-        /// <summary>
-        ///     对记账凭证执行检索表达式
-        /// </summary>
-        /// <param name="s">检索表达式</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <returns>检索结果，若表达式无效则为<c>null</c></returns>
-        private IEnumerable<Voucher> ExecuteQuery(string s, int dir)
-        {
-            string dateQ;
-            var detail = ParseQuery(s, out dateQ);
-
-            var rng = ParseDateQuery(dateQ);
-
-            AutoConnect();
-
-            return m_Accountant.FilteredSelect(filter: detail, rng: rng, dir: dir);
-        }
-
-        /// <summary>
-        ///     对细目执行检索表达式
-        /// </summary>
-        /// <param name="s">检索表达式</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <returns>检索结果，若表达式无效则为<c>null</c></returns>
-        private IEnumerable<VoucherDetail> ExecuteDetailQuery(string s, int dir)
-        {
-            string dateQ;
-            var detail = ParseQuery(s, out dateQ);
-
-            var rng = ParseDateQuery(dateQ);
-
-            AutoConnect();
-
-            return m_Accountant.FilteredSelectDetails(filter: detail, rng: rng, dir: dir);
-        }
 
         /// <summary>
         ///     直接检索记账凭证

@@ -136,7 +136,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>任一细目匹配检索式的记账凭证</returns>
-        public IEnumerable<Voucher> FilteredSelect(IVoucherQuery query)
+        public IEnumerable<Voucher> FilteredSelect(IVoucherQueryCompounded query)
         {
             return m_Db.FilteredSelect(query);
         }
@@ -146,9 +146,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>匹配检索式的细目</returns>
-        public IEnumerable<VoucherDetail> FilteredSelectDetails(IVoucherQuery query)
+        public IEnumerable<VoucherDetail> FilteredSelect(IVoucherDetailQuery query)
         {
-            return m_Db.FilteredSelectDetails(query);
+            return m_Db.FilteredSelect(query);
         }
 
         /// <summary>
@@ -156,9 +156,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>分类汇总结果</returns>
-        public IEnumerable<Balance> FilteredGroup(IGroupingQuery query)
+        public IEnumerable<Balance> FilteredSelect(IGroupedQuery query)
         {
-            return m_Db.FilteredGroup(query);
+            return m_Db.FilteredSelect(query);
         }
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>已删除的细目总数</returns>
-        public long FilteredDelete(IVoucherQuery query)
+        public long FilteredDelete(IVoucherQueryCompounded query)
         {
             return m_Db.FilteredDelete(query);
         }

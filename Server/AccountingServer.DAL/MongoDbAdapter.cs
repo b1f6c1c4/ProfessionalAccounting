@@ -7,6 +7,7 @@ using AccountingServer.Entities;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
+using MongoDB.Driver.Builders;
 
 namespace AccountingServer.DAL
 {
@@ -146,76 +147,37 @@ namespace AccountingServer.DAL
 
         public Voucher SelectVoucher(string id) { return m_Vouchers.FindOneById(ObjectId.Parse(id)); }
 
-        public IEnumerable<Voucher> FilteredSelect(IVoucherQuery query)
+        public IEnumerable<Voucher> FilteredSelect(IVoucherQueryCompounded query)
         {
-            return m_Vouchers.Find(MongoDbQueryHelper.GetQuery(query));
+            return m_Vouchers.Find(Query.Where(new BsonJavaScript(MongoDbQueryHelper.GetJavascriptFilter(query))));
         }
 
-        public IEnumerable<VoucherDetail> FilteredSelectDetails(IVoucherQuery query)
+        public IEnumerable<VoucherDetail> FilteredSelect(IVoucherDetailQuery query)
         {
-            return m_Vouchers.Find(MongoDbQueryHelper.GetQuery(query))
-                             .SelectMany(v => v.Details)
-                             .Where(d => d.IsMatch(query.DetailFilter));
+            return m_Vouchers.MapReduce(
+                                        new MapReduceArgs
+                                            {
+                                                MapFunction =
+                                                    new BsonJavaScript(GetEmitJavascript(query, SubtotalLevel.None))
+                                            }).GetResultsAs<VoucherDetail>();
         }
 
-        public IEnumerable<Balance> FilteredGroup(IGroupingQuery query)
+        public IEnumerable<Balance> FilteredSelect(IGroupedQuery query)
         {
-            var level = query.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
-            if (query.AggrType != AggregationType.None)
+            var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
+            if (query.Subtotal.AggrType != AggregationType.None)
                 level |= SubtotalLevel.Day;
 
-            var emit = GetEmitJavascript(level);
-
-            var sbMap = new StringBuilder();
-            sbMap.AppendLine("function() {");
-
-            // vfilter
-            sbMap.Append("    var vfilter = ");
-            sbMap.Append(MongoDbQueryHelper.GetJavascriptFilter(query.VoucherFilter));
-            sbMap.AppendLine(";");
-            sbMap.AppendLine("    if (!vfilter(this)) return;");
-
-            // rng
-            sbMap.Append("    var rng = ");
-            sbMap.Append(MongoDbQueryHelper.GetJavascriptFilter(query.Range));
-            sbMap.AppendLine(";");
-            sbMap.AppendLine("    if (!rng(this)) return;");
-
-            // filters
-            sbMap.AppendLine("    var chk = ");
-            sbMap.Append(MongoDbQueryHelper.GetJavascriptFilter(query.DetailFilter));
-            sbMap.AppendLine(";");
-
-            if (query.All)
-            {
-                sbMap.AppendLine("    var i = 0;");
-                sbMap.AppendLine("    for (i = 0;i < this.detail.length;i++)");
-                sbMap.AppendLine("        if (chk(this.detail[i]))");
-                sbMap.AppendLine("            break;");
-                sbMap.AppendLine("    if (i >= this.detail.length");
-                sbMap.AppendLine("        return;");
-            }
-
-            sbMap.Append(GetTheDateJavascript(level));
-            sbMap.AppendLine("    this.detail.forEach(function(d) {");
-
-            if (!query.All)
-                sbMap.AppendLine("    if (chk(d))");
-            sbMap.AppendLine(emit);
-            sbMap.AppendLine("    });");
-
-            sbMap.AppendLine("}");
             const string reduce =
                 "function(key, values) { var total = 0; for (var i = 0; i < values.length; i++) total += values[i].balance; return { balance: total };}";
             var args = new MapReduceArgs
                            {
-                               MapFunction = new BsonJavaScript(sbMap.ToString()),
+                               MapFunction = new BsonJavaScript(GetEmitJavascript(query.VoucherEmitQuery, level)),
                                ReduceFunction = new BsonJavaScript(reduce)
                            };
             var res = m_Vouchers.MapReduce(args);
             return res.GetResultsAs<Balance>();
         }
-
 
         public bool DeleteVoucher(string id)
         {
@@ -223,7 +185,11 @@ namespace AccountingServer.DAL
             return res.DocumentsAffected == 1;
         }
 
-        public long FilteredDelete(IVoucherQuery query) { throw new NotImplementedException(); }
+        public long FilteredDelete(IVoucherQueryCompounded query)
+        {
+            var res = m_Vouchers.Remove(Query.Where(new BsonJavaScript(MongoDbQueryHelper.GetJavascriptFilter(query))));
+            return res.DocumentsAffected;
+        }
 
         public bool Upsert(Voucher entity)
         {
@@ -349,23 +315,53 @@ namespace AccountingServer.DAL
             return sb.ToString();
         }
 
-        private static string GetEmitJavascript(SubtotalLevel subtotalLevel)
+        private static string GetEmitFilterJavascript(IEmit emitQuery)
+        {
+            if (emitQuery.DetailFilter == null)
+                return "function(d) { return true; }";
+            return MongoDbQueryHelper.GetJavascriptFilter(emitQuery.DetailFilter);
+        }
+
+        private static string GetEmitJavascript(IVoucherDetailQuery query, SubtotalLevel subtotalLevel)
         {
             var sb = new StringBuilder();
-            sb.Append("emit({");
-            if (subtotalLevel.HasFlag(SubtotalLevel.Title))
-                sb.Append("title: d.title,");
-            if (subtotalLevel.HasFlag(SubtotalLevel.SubTitle))
-                sb.Append("subtitle: d.subtitle,");
-            if (subtotalLevel.HasFlag(SubtotalLevel.Content))
-                sb.Append("content: d.content,");
-            if (subtotalLevel.HasFlag(SubtotalLevel.Remark))
-                sb.Append("remark: d.remark,");
-            if (subtotalLevel.HasFlag(SubtotalLevel.Day))
-                sb.Append("date: theDate,");
-            sb.Append("}, { balance: d.fund });");
-            var emit = sb.ToString();
-            return emit;
+            sb.AppendLine("function() {");
+            sb.AppendLine("    var chk = ");
+            if (query.DetailEmitFilter != null)
+                sb.Append(GetEmitFilterJavascript(query.DetailEmitFilter));
+            else
+            {
+                var dQuery = query.VoucherQuery as IVoucherQueryAtom;
+                if (dQuery == null)
+                    throw new InvalidOperationException();
+                sb.Append(MongoDbQueryHelper.GetJavascriptFilter(dQuery.DetailFilter));
+            }
+            sb.AppendLine("    if ((");
+            sb.Append(MongoDbQueryHelper.GetJavascriptFilter(query.VoucherQuery));
+            sb.AppendLine(")(this)) {");
+            sb.AppendLine(GetTheDateJavascript(subtotalLevel));
+            sb.AppendLine("        this.detail.forEach(function(d) {");
+            sb.AppendLine("            if (chk(d))");
+            {
+                sb.Append("emit({");
+                if (subtotalLevel.HasFlag(SubtotalLevel.Title))
+                    sb.Append("title: d.title,");
+                if (subtotalLevel.HasFlag(SubtotalLevel.SubTitle))
+                    sb.Append("subtitle: d.subtitle,");
+                if (subtotalLevel.HasFlag(SubtotalLevel.Content))
+                    sb.Append("content: d.content,");
+                if (subtotalLevel.HasFlag(SubtotalLevel.Remark))
+                    sb.Append("remark: d.remark,");
+                if (subtotalLevel.HasFlag(SubtotalLevel.Day))
+                    sb.Append("date: theDate,");
+                sb.Append("}, { balance: d.fund });");
+            }
+            sb.AppendLine("            });");
+            sb.AppendLine("        });");
+            sb.AppendLine("    }");
+            sb.AppendLine("}");
+
+            return sb.ToString();
         }
 
         #endregion

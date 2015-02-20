@@ -2,25 +2,10 @@
 
 namespace AccountingServer.Entities
 {
-    public interface IDetailQueryCompounded { }
-
-    public interface IDetailQueryAtom : IDetailQueryCompounded
-    {
-        VoucherDetail Filter { get; }
-
-        int Dir { get; }
-    }
-
     public enum UnaryOperatorType
     {
+        Identity,
         Complement,
-    }
-
-    public interface IDetailQueryUnary : IDetailQueryCompounded
-    {
-        UnaryOperatorType Operator { get; }
-
-        IDetailQueryCompounded Filter1 { get; }
     }
 
     public enum BinaryOperatorType
@@ -30,6 +15,22 @@ namespace AccountingServer.Entities
         Interect,
     }
 
+    public interface IDetailQueryCompounded { }
+
+    public interface IDetailQueryAtom : IDetailQueryCompounded
+    {
+        VoucherDetail Filter { get; }
+
+        int Dir { get; }
+    }
+
+    public interface IDetailQueryUnary : IDetailQueryCompounded
+    {
+        UnaryOperatorType Operator { get; }
+
+        IDetailQueryCompounded Filter1 { get; }
+    }
+
     public interface IDetailQueryBinary : IDetailQueryCompounded
     {
         BinaryOperatorType Operator { get; }
@@ -37,16 +38,49 @@ namespace AccountingServer.Entities
         IDetailQueryCompounded Filter2 { get; }
     }
 
+
     public interface IDateRange
     {
         DateFilter Range { get; }
     }
 
-    public interface IVoucherQuery : IDateRange
+    public interface IVoucherQueryCompounded { }
+
+    public interface IVoucherQueryAtom : IVoucherQueryCompounded
     {
+        bool ForAll { get; }
+
         Voucher VoucherFilter { get; }
 
+        DateFilter Range { get; }
+
         IDetailQueryCompounded DetailFilter { get; }
+    }
+
+    public interface IVoucherQueryUnary : IVoucherQueryCompounded
+    {
+        UnaryOperatorType Operator { get; }
+
+        IVoucherQueryCompounded Filter1 { get; }
+    }
+
+    public interface IVoucherQueryBinary : IVoucherQueryCompounded
+    {
+        BinaryOperatorType Operator { get; }
+        IVoucherQueryCompounded Filter1 { get; }
+        IVoucherQueryCompounded Filter2 { get; }
+    }
+
+    public interface IEmit
+    {
+        IDetailQueryCompounded DetailFilter { get; }
+    }
+
+    public interface IVoucherDetailQuery
+    {
+        IVoucherQueryCompounded VoucherQuery { get; }
+
+        IEmit DetailEmitFilter { get; }
     }
 
     public enum AggregationType
@@ -60,10 +94,14 @@ namespace AccountingServer.Entities
     public interface ISubtotal
     {
         bool NonZero { get; }
-        bool All { get; }
         IList<SubtotalLevel> Levels { get; }
         AggregationType AggrType { get; }
     }
 
-    public interface IGroupingQuery : IVoucherQuery, ISubtotal { }
+    public interface IGroupedQuery
+    {
+        IVoucherDetailQuery VoucherEmitQuery { get; }
+
+        ISubtotal Subtotal { get; }
+    }
 }
