@@ -14,6 +14,7 @@ namespace AccountingServer.Entities
         Week = 0x30,
         Month = 0x70,
         FinancialMonth = 0xB0,
-        Year = 0xF0
+        BillingMonth = 0xF0,
+        Year = 0x110
     }
 }

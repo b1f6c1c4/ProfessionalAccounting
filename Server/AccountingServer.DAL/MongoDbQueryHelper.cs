@@ -141,55 +141,59 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     按过滤器、细目过滤器和日期查询
+        ///     按细目检索式查询
         /// </summary>
-        /// <param name="vfilter">过滤器</param>
-        /// <param name="filter">细目过滤器</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
+        /// <param name="query">检索式</param>
         /// <returns>Bson查询</returns>
-        public static IMongoQuery GetQuery(Voucher vfilter = null,
-                                           VoucherDetail filter = null,
-                                           DateFilter? rng = null,
-                                           int dir = 0)
+        private static IMongoQuery GetAtomQuery(IDetailQueryCompounded query)
         {
-            var queryVoucher = And(GetAtomQuery(vfilter), GetAtomQuery(rng));
-            var queryFilter = GetAtomQuery(filter);
-            if (dir != 0)
-                queryFilter = And(queryFilter, dir > 0 ? Query.GT("fund", 0) : Query.LT("fund", 0));
-            return queryFilter != null ? And(queryVoucher, Query.ElemMatch("detail", queryFilter)) : queryVoucher;
+            if (query is IDetailQueryAtom)
+            {
+                var f = query as IDetailQueryAtom;
+                var queryFilter = GetAtomQuery(f.Filter);
+                if (f.Dir != 0)
+                    queryFilter = And(queryFilter, f.Dir > 0 ? Query.GT("fund", 0) : Query.LT("fund", 0));
+                return queryFilter;
+            }
+            if (query is IDetailQueryUnary)
+            {
+                var f = query as IDetailQueryUnary;
+                switch (f.Operator)
+                {
+                    case UnaryOperatorType.Complement:
+                        return Not(GetAtomQuery(f.Filter1));
+                }
+                throw new InvalidOperationException();
+            }
+            if (query is IDetailQueryBinary)
+            {
+                var f = query as IDetailQueryBinary;
+                switch (f.Operator)
+                {
+                    case BinaryOperatorType.Union:
+                        return Or(GetAtomQuery(f.Filter1), GetAtomQuery(f.Filter2));
+                    case BinaryOperatorType.Interect:
+                        return And(GetAtomQuery(f.Filter1), GetAtomQuery(f.Filter2));
+                    case BinaryOperatorType.Substract:
+                        return And(GetAtomQuery(f.Filter1), Not(GetAtomQuery(f.Filter2)));
+                }
+                throw new InvalidOperationException();
+            }
+            throw new InvalidOperationException();
         }
 
         /// <summary>
-        ///     按过滤器、多细目过滤器和日期查询
+        ///     按检索式查询
         /// </summary>
-        /// <param name="vfilter">过滤器</param>
-        /// <param name="filters">细目过滤器</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="useAnd">各细目过滤器之间的关系为合取</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
+        /// <param name="query">检索式</param>
         /// <returns>Bson查询</returns>
-        public static IMongoQuery GetQuery(Voucher vfilter = null,
-                                           IEnumerable<VoucherDetail> filters = null,
-                                           DateFilter? rng = null,
-                                           int dir = 0,
-                                           bool useAnd = false)
+        public static IMongoQuery GetQuery(IVoucherQuery query)
         {
-            var queryFilters = filters != null
-                                   ? filters.Select(
-                                                    f =>
-                                                    {
-                                                        var q = GetAtomQuery(f);
-                                                        if (dir != 0)
-                                                            q = And(
-                                                                    q,
-                                                                    dir > 0 ? Query.GT("fund", 0) : Query.LT("fund", 0));
-                                                        return Query.ElemMatch("detail", q);
-                                                    }).ToList()
-                                   : null;
-            var queryFilter = useAnd ? And(queryFilters) : Or(queryFilters);
-            return And(GetAtomQuery(vfilter), queryFilter, GetAtomQuery(rng));
+            var queryVoucher = And(GetAtomQuery(query.VoucherFilter), GetAtomQuery(query.Range));
+            var queryFilter = GetAtomQuery(query.DetailFilter);
+            return queryFilter != null ? And(queryVoucher, Query.ElemMatch("detail", queryFilter)) : queryVoucher;
         }
+
 
         /// <summary>
         ///     按资产过滤器查询
@@ -285,7 +289,7 @@ namespace AccountingServer.DAL
                 lst.Add(Query.EQ("date", filter.Date));
             if (filter.TotalDays != null)
                 lst.Add(Query.EQ("tday", filter.TotalDays));
-            //if (filter.Template != null)
+            //if (query.Template != null)
             //    throw new NotImplementedException(); TODO: query according to Template
             if (filter.Remark != null)
                 lst.Add(
@@ -339,6 +343,16 @@ namespace AccountingServer.DAL
         {
             while (queries.Remove(null)) { }
             return queries.Any() ? Query.Or(queries) : null;
+        }
+
+        /// <summary>
+        ///     非
+        /// </summary>
+        /// <param name="query">查询</param>
+        /// <returns>非</returns>
+        public static IMongoQuery Not(IMongoQuery query)
+        {
+            return Query.Not(query);
         }
 
         /// <summary>
@@ -475,6 +489,72 @@ namespace AccountingServer.DAL
             }
             sb.AppendLine("}");
             return sb.ToString();
+        }
+
+        /// <summary>
+        ///     细目检索式的Javascript表示
+        /// </summary>
+        /// <param name="query">检索式</param>
+        /// <returns>Javascript表示</returns>
+        public static string GetJavascriptFilter(IDetailQueryCompounded query)
+        {
+            if (query is IDetailQueryAtom)
+            {
+                var f = query as IDetailQueryAtom;
+                return GetJavascriptFilter(f.Filter, f.Dir);
+            }
+            if (query is IDetailQueryUnary)
+            {
+                var f = query as IDetailQueryUnary;
+
+                var sb = new StringBuilder();
+                sb.AppendLine("function (d) {");
+                sb.AppendLine("    return ");
+                switch (f.Operator)
+                {
+                    case UnaryOperatorType.Complement:
+                        sb.AppendLine("!");
+                        break;
+                    default:
+                        throw new InvalidOperationException();
+                }
+                sb.AppendLine("(");
+                sb.Append(GetJavascriptFilter(f.Filter1));
+                sb.AppendLine(")(d);");
+                sb.AppendLine("}");
+                return sb.ToString();
+            }
+            if (query is IDetailQueryBinary)
+            {
+                var f = query as IDetailQueryBinary;
+
+                var sb = new StringBuilder();
+                sb.AppendLine("function (d) {");
+                sb.AppendLine("    return (");
+                sb.Append(GetJavascriptFilter(f.Filter1));
+                sb.AppendLine(")(d) ");
+
+                switch (f.Operator)
+                {
+                    case BinaryOperatorType.Union:
+                        sb.AppendLine("&&");
+                        break;
+                    case BinaryOperatorType.Interect:
+                        sb.AppendLine("||");
+                        break;
+                    case BinaryOperatorType.Substract:
+                        sb.AppendLine("&& !");
+                        break;
+                    default:
+                        throw new InvalidOperationException();
+                }
+                sb.AppendLine(" (");
+                sb.Append(GetJavascriptFilter(f.Filter1));
+                sb.AppendLine(")(d);");
+                sb.AppendLine("}");
+                return sb.ToString();
+            }
+            throw new InvalidOperationException();
         }
     }
 }

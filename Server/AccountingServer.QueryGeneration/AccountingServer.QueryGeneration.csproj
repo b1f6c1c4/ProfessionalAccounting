@@ -55,7 +55,9 @@
     <None Include="App.config" />
     <Antlr4 Include="Console.g4">
       <Generator>MSBuild:Compile</Generator>
-      <CustomToolNamespace>AccountingServer.QueryGeneration</CustomToolNamespace>
+      <CustomToolNamespace>AccountingServer.Console</CustomToolNamespace>
+      <Listener>False</Listener>
+      <Visitor>False</Visitor>
     </Antlr4>
     <None Include="packages.config" />
   </ItemGroup>

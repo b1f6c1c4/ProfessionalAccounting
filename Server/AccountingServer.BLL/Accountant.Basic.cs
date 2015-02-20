@@ -36,8 +36,6 @@ namespace AccountingServer.BLL
         /// </summary>
         private readonly IDbAdapter m_Db;
 
-        private readonly IDbGrouping m_DbGrouping;
-
         private readonly IDbServer m_DbServer;
 
         /// <summary>
@@ -86,7 +84,6 @@ namespace AccountingServer.BLL
             var adapter = new MongoDbAdapter();
 
             m_Db = adapter;
-            m_DbGrouping = adapter;
             m_DbServer = adapter;
         }
 
@@ -128,101 +125,40 @@ namespace AccountingServer.BLL
         ///     按编号查找记账凭证
         /// </summary>
         /// <param name="id">编号</param>
-        /// <returns>记账凭证，如果没有则为null</returns>
+        /// <returns>记账凭证，如果没有则为<c>null</c></returns>
         public Voucher SelectVoucher(string id)
         {
             return m_Db.SelectVoucher(id);
         }
 
         /// <summary>
-        ///     按过滤器查找记账凭证
+        ///     按检索式查找记账凭证
         /// </summary>
-        /// <param name="vfilter">过滤器</param>
-        /// <param name="filter">细目过滤器</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <returns>任一细目匹配过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> FilteredSelect(Voucher vfilter = null,
-                                                   VoucherDetail filter = null,
-                                                   DateFilter? rng = null,
-                                                   int dir = 0)
+        /// <param name="query">检索式</param>
+        /// <returns>任一细目匹配检索式的记账凭证</returns>
+        public IEnumerable<Voucher> FilteredSelect(IVoucherQuery query)
         {
-            return m_Db.FilteredSelect(vfilter, filter, rng, dir);
+            return m_Db.FilteredSelect(query);
         }
 
         /// <summary>
-        ///     按过滤器查找记账凭证
+        ///     按检索式查找细目
         /// </summary>
-        /// <param name="vfilter">过滤器</param>
-        /// <param name="filters">细目过滤器</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <param name="useAnd">各细目过滤器之间的关系为合取</param>
-        /// <returns>任一细目匹配任一过滤器的记账凭证</returns>
-        public IEnumerable<Voucher> FilteredSelect(Voucher vfilter = null,
-                                                   IEnumerable<VoucherDetail> filters = null,
-                                                   DateFilter? rng = null,
-                                                   int dir = 0,
-                                                   bool useAnd = false)
+        /// <param name="query">检索式</param>
+        /// <returns>匹配检索式的细目</returns>
+        public IEnumerable<VoucherDetail> FilteredSelectDetails(IVoucherQuery query)
         {
-            return m_Db.FilteredSelect(vfilter, filters, rng, dir, useAnd);
-        }
-
-
-        /// <summary>
-        ///     添加或替换记账凭证
-        ///     <para>不能改变记账凭证的编号</para>
-        /// </summary>
-        /// <param name="entity">新记账凭证</param>
-        /// <returns>是否成功</returns>
-        public bool Update(Voucher entity)
-        {
-            return m_Db.Upsert(entity);
+            return m_Db.FilteredSelectDetails(query);
         }
 
         /// <summary>
-        ///     按过滤器查找细目
+        ///     按检索式执行分类汇总
         /// </summary>
-        /// <param name="vfilter">过滤器</param>
-        /// <param name="filter">细目过滤器</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <returns>匹配过滤器的细目</returns>
-        public IEnumerable<VoucherDetail> FilteredSelectDetails(Voucher vfilter = null,
-                                                                VoucherDetail filter = null,
-                                                                DateFilter? rng = null,
-                                                                int dir = 0)
+        /// <param name="query">检索式</param>
+        /// <returns>分类汇总结果</returns>
+        public IEnumerable<Balance> FilteredGroup(IGroupingQuery query)
         {
-            return m_Db.FilteredSelectDetails(vfilter, filter, rng, dir);
-        }
-
-        /// <summary>
-        ///     按过滤器查找细目
-        /// </summary>
-        /// <param name="vfilter">过滤器</param>
-        /// <param name="filters">细目过滤器</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <param name="useAnd">各细目过滤器之间的关系为合取</param>
-        /// <returns>匹配过滤器的细目</returns>
-        public IEnumerable<VoucherDetail> FilteredSelectDetails(Voucher vfilter = null,
-                                                                IEnumerable<VoucherDetail> filters = null,
-                                                                DateFilter? rng = null,
-                                                                int dir = 0,
-                                                                bool useAnd = false)
-        {
-            return m_Db.FilteredSelectDetails(vfilter, filters, rng, dir, useAnd);
-        }
-
-        /// <summary>
-        ///     添加或替换记账凭证
-        ///     <para>若无编号，则添加新编号</para>
-        /// </summary>
-        /// <param name="entity">新记账凭证</param>
-        /// <returns>是否成功</returns>
-        public bool Upsert(Voucher entity)
-        {
-            return m_Db.Upsert(entity);
+            return m_Db.FilteredGroup(query);
         }
 
         /// <summary>
@@ -236,14 +172,24 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     按过滤器删除记账凭证
+        ///     按检索式删除记账凭证
         /// </summary>
-        /// <param name="vfilter">过滤器</param>
-        /// <param name="filter">细目过滤器</param>
-        /// <returns>已删除的记账凭证总数</returns>
-        public long FilteredDelete(Voucher vfilter, VoucherDetail filter)
+        /// <param name="query">检索式</param>
+        /// <returns>已删除的细目总数</returns>
+        public long FilteredDelete(IVoucherQuery query)
         {
-            return m_Db.FilteredDelete(vfilter, filter);
+            return m_Db.FilteredDelete(query);
+        }
+
+        /// <summary>
+        ///     添加或替换记账凭证
+        ///     <para>若无编号，则添加新编号</para>
+        /// </summary>
+        /// <param name="entity">新记账凭证</param>
+        /// <returns>是否成功</returns>
+        public bool Upsert(Voucher entity)
+        {
+            return m_Db.Upsert(entity);
         }
 
         #endregion
@@ -388,86 +334,6 @@ namespace AccountingServer.BLL
         public bool Update(Amortization entity)
         {
             return m_Db.Upsert(entity);
-        }
-
-        #endregion
-
-        #region grouping
-
-        /// <summary>
-        ///     按过滤器查找记账凭证，并进行分类汇总
-        /// </summary>
-        /// <param name="vfilter">过滤器</param>
-        /// <param name="filter">细目过滤器</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <param name="subtotalLevel">要进行分类汇总的层级</param>
-        /// <returns>匹配过滤器的细目</returns>
-        public IEnumerable<Balance> FilteredGroupingAllDetails(Voucher vfilter = null,
-                                                               VoucherDetail filter = null,
-                                                               DateFilter? rng = null,
-                                                               int dir = 0,
-                                                               SubtotalLevel subtotalLevel = SubtotalLevel.None)
-        {
-            return m_DbGrouping.FilteredGroupingAllDetails(vfilter, new[] { filter }, rng, dir, false, subtotalLevel);
-        }
-
-        /// <summary>
-        ///     按过滤器查找记账凭证，并进行分类汇总
-        /// </summary>
-        /// <param name="vfilter">过滤器</param>
-        /// <param name="filters">细目过滤器</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <param name="useAnd">各细目过滤器之间的关系为合取</param>
-        /// <param name="subtotalLevel">要进行分类汇总的层级</param>
-        /// <returns>匹配过滤器的细目</returns>
-        public IEnumerable<Balance> FilteredGroupingAllDetails(Voucher vfilter = null,
-                                                               IEnumerable<VoucherDetail> filters = null,
-                                                               DateFilter? rng = null,
-                                                               int dir = 0,
-                                                               bool useAnd = false,
-                                                               SubtotalLevel subtotalLevel = SubtotalLevel.None)
-        {
-            return m_DbGrouping.FilteredGroupingAllDetails(vfilter, filters, rng, dir, useAnd, subtotalLevel);
-        }
-
-        /// <summary>
-        ///     按过滤器查找细目，并进行分类汇总
-        /// </summary>
-        /// <param name="vfilter">过滤器</param>
-        /// <param name="filter">细目过滤器</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <param name="subtotalLevel">要进行分类汇总的层级</param>
-        /// <returns>匹配过滤器的细目</returns>
-        public IEnumerable<Balance> FilteredGroupingDetails(Voucher vfilter = null,
-                                                            VoucherDetail filter = null,
-                                                            DateFilter? rng = null,
-                                                            int dir = 0,
-                                                               SubtotalLevel subtotalLevel = SubtotalLevel.None)
-        {
-            return m_DbGrouping.FilteredGroupingDetails(vfilter, new[] { filter }, rng, dir, false, subtotalLevel);
-        }
-
-        /// <summary>
-        ///     按过滤器查找细目，并进行分类汇总
-        /// </summary>
-        /// <param name="vfilter">过滤器</param>
-        /// <param name="filters">细目过滤器</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <param name="useAnd">各细目过滤器之间的关系为合取</param>
-        /// <param name="subtotalLevel">要进行分类汇总的层级</param>
-        /// <returns>匹配过滤器的细目</returns>
-        public IEnumerable<Balance> FilteredGroupingDetails(Voucher vfilter = null,
-                                                            IEnumerable<VoucherDetail> filters = null,
-                                                            DateFilter? rng = null,
-                                                            int dir = 0,
-                                                            bool useAnd = false,
-                                                               SubtotalLevel subtotalLevel = SubtotalLevel.None)
-        {
-            return m_DbGrouping.FilteredGroupingDetails(vfilter, filters, rng, dir, useAnd, subtotalLevel);
         }
 
         #endregion

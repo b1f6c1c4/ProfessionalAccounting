@@ -27,7 +27,7 @@ asset
 	:	assetList | assetQuery | assetRegister | assetUnregister | assetResetSoft | assetResetHard | assetApply | assetCheck
 	;
 assetList
-	:	'a' Modifier=(AOAll | AOList)? rangePoint? aoQ?
+	:	'a' (AOAll | AOList)? rangePoint? aoQ?
 	;
 assetQuery
 	:	'a' AOQuery aoQ?
@@ -48,7 +48,7 @@ assetResetHard
 	:	'a' AOResetHard aoQ? (':' voucherQuery)?
 	;
 assetApply
-	:	'a' AOApply Collapse=AOCollapse? aoQ? range?
+	:	'a' AOApply AOCollapse? aoQ? range?
 	;
 assetCheck
 	:	'a' AOCheck aoQ?
@@ -57,7 +57,7 @@ amort
 	:	amortList | amortQuery | amortRegister | amortUnregister | amortResetSoft | amortResetHard | amortApply | amortCheck
 	;
 amortList
-	:	'o' Modifier=(AOAll | AOList)? rangePoint? aoQ?
+	:	'o' (AOAll | AOList)? rangePoint? aoQ?
 	;
 amortQuery
 	:	'o' AOQuery aoQ?
@@ -78,14 +78,14 @@ amortResetHard
 	:	'o' AOResetHard aoQ? (':' voucherQuery)?
 	;
 amortApply
-	:	'o' AOApply Collapse=AOCollapse? aoQ? range?
+	:	'o' AOApply AOCollapse? aoQ? range?
 	;
 amortCheck
 	:	'o' AOCheck aoQ?
 	;
 
 aoQ
-	:	(aoQAtom ('+' aoQAtom)*)
+	:	aoQAtom ('+' aoQAtom)*
 	;
 
 aoQAtom
@@ -97,7 +97,9 @@ groupedQuery
 	;
 
 subtotal
-	:	SubtotalMark=('`' | '``' | '!' | '!!') SubtotalFields=('t' | '-' | 'c' | 'r' | 'd')* AggregationMethod=('D' | 'x' | 'X')?
+	:	SubtotalMark=('`' | '``' | '!' | '!!')
+		SubtotalFields=('t' | 's' | 'c' | 'r' | 'd' | 'w' | 'm' | 'f' | 'b' | 'y')*
+		AggregationMethod=('D' | 'x' | 'X')?
 	;
 
 voucherQuery
@@ -105,11 +107,11 @@ voucherQuery
 	;
 
 details
-	:	detailsX (Operator=('+' | '-') detailsX)*
+	:	detailsX (Op=('+' | '-') detailsX)*
 	;
 
 detailsX
-	:	detailAtom (Operator='*' detailAtom)*
+	:	detailAtom (Op='*' detailAtom)*
 	;
 
 detailAtom
@@ -118,28 +120,51 @@ detailAtom
 	;
 
 detailUnary
-	:	op='-' detailQuery
+	:	Op='-' detailQuery
 	|	detailQuery
 	;
 
 detailQuery
-	:	(DetailTitle | DetailTitleSubTitle)? SingleQuotedString? DoubleQuotedString? Dir=('d' | 'c')?
+	:	(DetailTitle | DetailTitleSubTitle)? SingleQuotedString? DoubleQuotedString? Direction=('d' | 'c')?
 	;
 
 range
-	:	RangeNull | RangeAllNotNull | RangeAllNotNull | RangeAll
-	|	RangeDays | RangeWeeks
-	|	RangeFMonth | RangeOneFMonth | RangeMultiFMonth | RangeFromFMonth | RangeToFMonth | RangeToFMonth
-	|	RangeMonth | RangeOneMonth | RangeMultiMonth | RangeFromMonth | RangeToMonth | RangeToMonth
-	|	RangeBMonth | RangeOneBMonth | RangeMultiBMonth | RangeFromBMonth | RangeToBMonth | RangeToBMonth
+	:	'[]' | Core=rangeCore | '[' Core=rangeCore ']'
 	;
 
+rangeCore
+	:	RangeNull | RangeAllNotNull
+	|	Begin=rangeCertainPoint ('~'|'-') End=rangeCertainPoint?
+	|	Op=('~'|'-') End=rangeCertainPoint
+	|	Certain=rangeCertainPoint
+	;
+	
 rangePoint
-	:	RangeNull | RangeAll
-	|	RangeDays | RangeWeeks
-	|	RangeFMonth | RangeOneFMonth
-	|	RangeMonth | RangeOneMonth
-	|	RangeBMonth | RangeOneBMonth
+	:	RangeNull | All='[]'
+	|	rangeCertainPoint
+	;
+
+rangeCertainPoint
+	:	rangeYear
+	|	rangeMonth
+	|	rangeWeek
+	|	rangeDay
+	;
+
+rangeYear
+	:	RangeAYear
+	;
+	
+rangeMonth
+	:	Modifier=('@'|'#')? (RangeAMonth | RangeDeltaMonth)
+	;
+
+rangeWeek
+	:	RangeDeltaWeek
+	;
+
+rangeDay
+	:	RangeADay | RangeDeltaDay
 	;
 	
 /*
@@ -237,133 +262,32 @@ fragment H
 	;
 
 RangeNull
-	:	'[null]'
-	|	'null'
+	:	'null'
 	;
 RangeAllNotNull
-	:	'[~null]'
-	|	'~null'
-	;
-RangeAll
-	:	'[]'
+	:	'~null'
 	;
 
-RangeDays
-	:	'[' '.'+ ']'
-	|	'.'+
+RangeAYear
+	:	[1-2] [0-9] [0-9] [0-9]
 	;
-RangeWeeks
-	:	'[' '-'+ ']'
-	|	'-'+
+RangeAMonth
+	:	[1-2] [0-9] [0-9] [0-9] [0-1] [0-9]
 	;
-
-RangeFMonth
-	:	'[0]'
-	|	'0'
-	|	'[-' [1-9] [0-9]* ']'
+RangeDeltaMonth
+	:	'0'
 	|	'-' [1-9] [0-9]*
-	|	'[+' [1-9] [0-9]* ']'
-	|	'+' [1-9] [0-9]*
 	;
-RangeOneFMonth
-	:	'[' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] ']'
-	|	[1-2] [0-9] [0-9] [0-9] [0-1] [0-9]
+RangeADay
+	:	[1-2] [0-9] [0-9] [0-9] [0-1] [0-9] [0-3] [0-9]
 	;
-RangeMultiFMonth
-	:	'[' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] '~' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] ']'
-	|	[1-2] [0-9] [0-9] [0-9] [0-1] [0-9] '~' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9]
+RangeDeltaDay
+	:	'.'+
 	;
-RangeFromFMonth
-	:	'[' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] '~]'
-	|	[1-2] [0-9] [0-9] [0-9] [0-1] [0-9] '~'
-	;
-RangeToFMonth
-	:	'[~' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] ']'
-	|	'~' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9]
-	;
-RangeXToFMonth
-	:	'[-' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] ']'
-	|	'-' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9]
+RangeDeltaWeek
+	:	'-'+
 	;
 	
-RangeMonth
-	:	'[@0]'
-	|	'@0'
-	|	'[@-' [1-9] [0-9]* ']'
-	|	 '@-' [1-9] [0-9]*
-	|	'[@+' [1-9] [0-9]* ']'
-	|	'@+' [1-9] [0-9]*
-	;
-RangeOneMonth
-	:	'[@' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] ']'
-	|	'@' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9]
-	;
-RangeMultiMonth
-	:	'[@' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] '~@' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] ']'
-	|	'@' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] '~@' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9]
-	;
-RangeFromMonth
-	:	'[@' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] '~]'
-	|	'@' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] '~'
-	;
-RangeToMonth
-	:	'[~@' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] ']'
-	|	'~@' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9]
-	;
-RangeXToMonth
-	:	'[-@' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] ']'
-	|	'-@' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9]
-	;
-	
-RangeBMonth
-	:	'[#0]'
-	|	'#0'
-	|	'[#-' [1-9] [0-9]* ']'
-	|	 '#-' [1-9] [0-9]*
-	|	'[#+' [1-9] [0-9]* ']'
-	|	'#+' [1-9] [0-9]*
-	;
-RangeOneBMonth
-	:	'[#' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] ']'
-	|	'#' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9]
-	;
-RangeMultiBMonth
-	:	'[#' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] '~@' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] ']'
-	|	'#' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] '~@' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9]
-	;
-RangeFromBMonth
-	:	'[#' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] '~]'
-	|	'#' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] '~'
-	;
-RangeToBMonth
-	:	'[~#' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] ']'
-	|	'~#' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9]
-	;
-RangeXToBMonth
-	:	'[-#' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] ']'
-	|	'-#' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9]
-	;
-
-RangeOneDay
-	:	'[' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] [0-3] [0-9] ']'
-	|	[1-2] [0-9] [0-9] [0-9] [0-1] [0-9] [0-3] [0-9]
-	;
-RangeMultiDay
-	:	'[' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] [0-3] [0-9] '~' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] [0-3] [0-9] ']'
-	|	[1-2] [0-9] [0-9] [0-9] [0-1] [0-9] [0-3] [0-9] '~' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] [0-3] [0-9]
-	;
-RangeFromDay
-	:	'[' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] [0-3] [0-9] '~]'
-	|	[1-2] [0-9] [0-9] [0-9] [0-1] [0-9] [0-3] [0-9] '~'
-	;
-RangeToDay
-	:	'[~' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] [0-3] [0-9] ']'
-	|	'~' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] [0-3] [0-9]
-	;
-RangeXToDay
-	:	'[-' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] [0-3] [0-9] ']'
-	|	'-' [1-2] [0-9] [0-9] [0-9] [0-1] [0-9] [0-3] [0-9]
-	;
 
 VoucherRemark
 	:	'%' ('%%'|~('%'))* '%'
