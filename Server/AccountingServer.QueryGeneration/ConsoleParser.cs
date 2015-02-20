@@ -1,6 +1,4 @@
-﻿namespace AccountingServer.QueryGeneration
+﻿namespace AccountingServer.Entities.Query
 {
-    // ReSharper disable once PartialTypeWithSinglePart
-    // ReSharper disable once UnusedMember.Global
     public partial class ConsoleParser { }
 }

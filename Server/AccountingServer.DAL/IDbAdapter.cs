@@ -38,60 +38,25 @@ namespace AccountingServer.DAL
         Voucher SelectVoucher(string id);
 
         /// <summary>
-        ///     按过滤器查找记账凭证
+        ///     按检索式查找记账凭证
         /// </summary>
-        /// <param name="vfilter">过滤器</param>
-        /// <param name="filter">细目过滤器</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <returns>任一细目匹配过滤器的记账凭证</returns>
-        IEnumerable<Voucher> FilteredSelect(Voucher vfilter = null,
-                                            VoucherDetail filter = null,
-                                            DateFilter? rng = null,
-                                            int dir = 0);
+        /// <param name="query">检索式</param>
+        /// <returns>任一细目匹配检索式的记账凭证</returns>
+        IEnumerable<Voucher> FilteredSelect(IVoucherQuery query);
 
         /// <summary>
-        ///     按过滤器查找记账凭证
+        ///     按检索式查找细目
         /// </summary>
-        /// <param name="vfilter">过滤器</param>
-        /// <param name="filters">细目过滤器</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <param name="useAnd">各细目过滤器之间的关系为合取</param>
-        /// <returns>任一细目匹配任一过滤器的记账凭证</returns>
-        IEnumerable<Voucher> FilteredSelect(Voucher vfilter = null,
-                                            IEnumerable<VoucherDetail> filters = null,
-                                            DateFilter? rng = null,
-                                            int dir = 0,
-                                            bool useAnd = false);
+        /// <param name="query">检索式</param>
+        /// <returns>匹配检索式的细目</returns>
+        IEnumerable<VoucherDetail> FilteredSelectDetails(IVoucherQuery query);
 
         /// <summary>
-        ///     按过滤器查找细目
+        ///     按检索式执行分类汇总
         /// </summary>
-        /// <param name="vfilter">过滤器</param>
-        /// <param name="filter">细目过滤器</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <returns>匹配过滤器的细目</returns>
-        IEnumerable<VoucherDetail> FilteredSelectDetails(Voucher vfilter = null,
-                                                         VoucherDetail filter = null,
-                                                         DateFilter? rng = null,
-                                                         int dir = 0);
-
-        /// <summary>
-        ///     按过滤器查找细目
-        /// </summary>
-        /// <param name="vfilter">过滤器</param>
-        /// <param name="filters">细目过滤器</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <param name="useAnd">各细目过滤器之间的关系为合取</param>
-        /// <returns>匹配过滤器的细目</returns>
-        IEnumerable<VoucherDetail> FilteredSelectDetails(Voucher vfilter = null,
-                                                         IEnumerable<VoucherDetail> filters = null,
-                                                         DateFilter? rng = null,
-                                                         int dir = 0,
-                                                         bool useAnd = false);
+        /// <param name="query">检索式</param>
+        /// <returns>分类汇总结果</returns>
+        IEnumerable<Balance> FilteredGroup(IGroupingQuery query);
 
         /// <summary>
         ///     按编号删除记账凭证
@@ -101,15 +66,11 @@ namespace AccountingServer.DAL
         bool DeleteVoucher(string id);
 
         /// <summary>
-        ///     按过滤器删除记账凭证
+        ///     按检索式删除记账凭证
         /// </summary>
-        /// <param name="vfilter">过滤器</param>
-        /// <param name="filter">细目过滤器</param>
-        /// <param name="rng">日期过滤器</param>
+        /// <param name="query">检索式</param>
         /// <returns>已删除的细目总数</returns>
-        long FilteredDelete(Voucher vfilter = null,
-                            VoucherDetail filter = null,
-                            DateFilter? rng = null);
+        long FilteredDelete(IVoucherQuery query);
 
         /// <summary>
         ///     添加或替换记账凭证

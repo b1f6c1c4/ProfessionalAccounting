@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace AccountingServer.Entities
 {
@@ -83,16 +81,45 @@ namespace AccountingServer.Entities
         }
 
         /// <summary>
-        ///     判断细目是否符合过滤器
+        ///     判断细目是否符合检索式
         /// </summary>
         /// <param name="voucherDetail">细目</param>
-        /// <param name="filters">过滤器</param>
-        /// <param name="useAnd">各细目过滤器之间的关系为合取</param>
+        /// <param name="query">细目检索式</param>
         /// <returns>是否符合</returns>
-        public static bool IsMatch(this VoucherDetail voucherDetail, IEnumerable<VoucherDetail> filters,
-                                   bool useAnd = false)
+        public static bool IsMatch(this VoucherDetail voucherDetail, IDetailQueryCompounded query)
         {
-            return useAnd ? filters.All(voucherDetail.IsMatch) : filters.Any(voucherDetail.IsMatch);
+            if (query is IDetailQueryAtom)
+            {
+                var f = query as IDetailQueryAtom;
+                if (!IsMatch(voucherDetail, f.Filter))
+                    return false;
+                return f.Dir == 0 || f.Dir > 0 && voucherDetail.Fund > 0 || f.Dir < 0 && voucherDetail.Fund < 0;
+            }
+            if (query is IDetailQueryUnary)
+            {
+                var f = query as IDetailQueryUnary;
+                switch (f.Operator)
+                {
+                    case UnaryOperatorType.Complement:
+                        return !IsMatch(voucherDetail, f.Filter1);
+                }
+                throw new InvalidOperationException();
+            }
+            if (query is IDetailQueryBinary)
+            {
+                var f = query as IDetailQueryBinary;
+                switch (f.Operator)
+                {
+                    case BinaryOperatorType.Union:
+                        return IsMatch(voucherDetail, f.Filter1) || IsMatch(voucherDetail, f.Filter2);
+                    case BinaryOperatorType.Interect:
+                        return IsMatch(voucherDetail, f.Filter1) && IsMatch(voucherDetail, f.Filter2);
+                    case BinaryOperatorType.Substract:
+                        return IsMatch(voucherDetail, f.Filter1) && !IsMatch(voucherDetail, f.Filter2);
+                }
+                throw new InvalidOperationException();
+            }
+            throw new InvalidOperationException();
         }
     }
 }

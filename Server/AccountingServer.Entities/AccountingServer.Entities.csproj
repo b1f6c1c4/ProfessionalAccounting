@@ -42,6 +42,7 @@
     <Compile Include="Amortization.cs" />
     <Compile Include="Asset.cs" />
     <Compile Include="Balance.cs" />
+    <Compile Include="Interface.cs" />
     <Compile Include="SubtotalLevel.cs" />
     <Compile Include="Date.cs" />
     <Compile Include="MatchHelper.cs" />
