@@ -54,9 +54,8 @@
     <Compile Include="AccountingConsole.Subtotal.cs" />
     <Compile Include="AccountingConsole.Voucher.cs" />
     <Compile Include="Chart\AccountingChart.cs" />
-    <Compile Include="Chart\AssetChart.cs" />
-    <Compile Include="Chart\DefaultChart.cs" />
-    <Compile Include="ConsoleParser.Proxy.cs" />
+    <Compile Include="ConsoleParser.Proxy.Voucher.cs" />
+    <Compile Include="ConsoleParser.Proxy.Detail.cs" />
     <Compile Include="ConsoleLexer.cs" />
     <Compile Include="ConsoleParser.cs" />
     <Compile Include="CSharpHelper.cs" />
@@ -90,6 +89,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ConsoleParser.Proxy.Range.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

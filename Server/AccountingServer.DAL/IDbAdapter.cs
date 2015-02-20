@@ -42,21 +42,21 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>任一细目匹配检索式的记账凭证</returns>
-        IEnumerable<Voucher> FilteredSelect(IVoucherQuery query);
+        IEnumerable<Voucher> FilteredSelect(IVoucherQueryCompounded query);
 
         /// <summary>
         ///     按检索式查找细目
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>匹配检索式的细目</returns>
-        IEnumerable<VoucherDetail> FilteredSelectDetails(IVoucherQuery query);
+        IEnumerable<VoucherDetail> FilteredSelect(IVoucherDetailQuery query);
 
         /// <summary>
         ///     按检索式执行分类汇总
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>分类汇总结果</returns>
-        IEnumerable<Balance> FilteredGroup(IGroupingQuery query);
+        IEnumerable<Balance> FilteredSelect(IGroupedQuery query);
 
         /// <summary>
         ///     按编号删除记账凭证
@@ -70,7 +70,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>已删除的细目总数</returns>
-        long FilteredDelete(IVoucherQuery query);
+        long FilteredDelete(IVoucherQueryCompounded query);
 
         /// <summary>
         ///     添加或替换记账凭证

@@ -35,167 +35,6 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     按过滤器查询
-        /// </summary>
-        /// <param name="filter">过滤器</param>
-        /// <returns>Bson查询</returns>
-        private static IMongoQuery GetAtomQuery(Voucher filter)
-        {
-            if (filter == null)
-                return null;
-
-            var lst = new List<IMongoQuery>();
-
-            if (filter.Date != null)
-                lst.Add(Query.EQ("date", filter.Date));
-            if (filter.Type != null)
-                switch (filter.Type)
-                {
-                    case VoucherType.Amortization:
-                        lst.Add(Query.EQ("special", "amorz"));
-                        break;
-                    case VoucherType.AnnualCarry:
-                        lst.Add(Query.EQ("special", "acarry"));
-                        break;
-                    case VoucherType.Carry:
-                        lst.Add(Query.EQ("special", "carry"));
-                        break;
-                    case VoucherType.Depreciation:
-                        lst.Add(Query.EQ("special", "dep"));
-                        break;
-                    case VoucherType.Devalue:
-                        lst.Add(Query.EQ("special", "dev"));
-                        break;
-                    case VoucherType.Uncertain:
-                        lst.Add(Query.EQ("special", "unc"));
-                        break;
-                }
-            if (filter.Remark != null)
-                lst.Add(
-                        filter.Remark == String.Empty
-                            ? Query.EQ("remark", BsonNull.Value)
-                            : Query.EQ("remark", filter.Remark));
-
-            return And(lst);
-        }
-
-        /// <summary>
-        ///     按日期查询
-        /// </summary>
-        /// <param name="rng">日期过滤器</param>
-        /// <returns>Bson查询</returns>
-        private static IMongoQuery GetAtomQuery(DateFilter? rng)
-        {
-            if (!rng.HasValue)
-                return null;
-
-            if (rng.Value.NullOnly)
-                return Query.EQ("date", BsonNull.Value);
-
-            IMongoQuery q;
-            if (rng.Value.Constrained)
-                q = Query.And(Query.GTE("date", rng.Value.StartDate), Query.LTE("date", rng.Value.EndDate));
-            else if (rng.Value.StartDate.HasValue)
-                q = Query.GTE("date", rng.Value.StartDate);
-            else if (rng.Value.EndDate.HasValue)
-                q = Query.LTE("date", rng.Value.EndDate);
-            else
-                return rng.Value.Nullable ? null : Query.NE("date", BsonNull.Value);
-
-            return rng.Value.Nullable ? Query.Or(q, Query.EQ("date", BsonNull.Value)) : q;
-        }
-
-        /// <summary>
-        ///     按细目过滤器查询
-        /// </summary>
-        /// <param name="filter">细目过滤器</param>
-        /// <returns>Bson查询</returns>
-        private static IMongoQuery GetAtomQuery(VoucherDetail filter)
-        {
-            if (filter == null)
-                return null;
-
-            var lst = new List<IMongoQuery>();
-
-            if (filter.Title != null)
-                lst.Add(Query.EQ("title", filter.Title));
-            if (filter.SubTitle != null)
-                lst.Add(
-                        filter.SubTitle == 0
-                            ? Query.EQ("subtitle", BsonNull.Value)
-                            : Query.EQ("subtitle", filter.SubTitle));
-            if (filter.Content != null)
-                lst.Add(
-                        filter.Content == String.Empty
-                            ? Query.EQ("content", BsonNull.Value)
-                            : Query.EQ("content", filter.Content));
-            if (filter.Remark != null)
-                lst.Add(
-                        filter.Remark == String.Empty
-                            ? Query.EQ("remark", BsonNull.Value)
-                            : Query.EQ("remark", filter.Remark));
-            if (filter.Fund != null)
-                lst.Add(Query.EQ("fund", filter.Fund));
-
-            return And(lst);
-        }
-
-        /// <summary>
-        ///     按细目检索式查询
-        /// </summary>
-        /// <param name="query">检索式</param>
-        /// <returns>Bson查询</returns>
-        private static IMongoQuery GetAtomQuery(IDetailQueryCompounded query)
-        {
-            if (query is IDetailQueryAtom)
-            {
-                var f = query as IDetailQueryAtom;
-                var queryFilter = GetAtomQuery(f.Filter);
-                if (f.Dir != 0)
-                    queryFilter = And(queryFilter, f.Dir > 0 ? Query.GT("fund", 0) : Query.LT("fund", 0));
-                return queryFilter;
-            }
-            if (query is IDetailQueryUnary)
-            {
-                var f = query as IDetailQueryUnary;
-                switch (f.Operator)
-                {
-                    case UnaryOperatorType.Complement:
-                        return Not(GetAtomQuery(f.Filter1));
-                }
-                throw new InvalidOperationException();
-            }
-            if (query is IDetailQueryBinary)
-            {
-                var f = query as IDetailQueryBinary;
-                switch (f.Operator)
-                {
-                    case BinaryOperatorType.Union:
-                        return Or(GetAtomQuery(f.Filter1), GetAtomQuery(f.Filter2));
-                    case BinaryOperatorType.Interect:
-                        return And(GetAtomQuery(f.Filter1), GetAtomQuery(f.Filter2));
-                    case BinaryOperatorType.Substract:
-                        return And(GetAtomQuery(f.Filter1), Not(GetAtomQuery(f.Filter2)));
-                }
-                throw new InvalidOperationException();
-            }
-            throw new InvalidOperationException();
-        }
-
-        /// <summary>
-        ///     按检索式查询
-        /// </summary>
-        /// <param name="query">检索式</param>
-        /// <returns>Bson查询</returns>
-        public static IMongoQuery GetQuery(IVoucherQuery query)
-        {
-            var queryVoucher = And(GetAtomQuery(query.VoucherFilter), GetAtomQuery(query.Range));
-            var queryFilter = GetAtomQuery(query.DetailFilter);
-            return queryFilter != null ? And(queryVoucher, Query.ElemMatch("detail", queryFilter)) : queryVoucher;
-        }
-
-
-        /// <summary>
         ///     按资产过滤器查询
         /// </summary>
         /// <param name="filter">资产过滤器</param>
@@ -305,54 +144,10 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="queries">查询</param>
         /// <returns>合取</returns>
-        private static IMongoQuery And(params IMongoQuery[] queries)
-        {
-            var lst = queries.ToList();
-            return And(lst);
-        }
-
-        /// <summary>
-        ///     合取
-        /// </summary>
-        /// <param name="queries">查询</param>
-        /// <returns>合取</returns>
         private static IMongoQuery And(ICollection<IMongoQuery> queries)
         {
             while (queries.Remove(null)) { }
             return queries.Any() ? Query.And(queries) : null;
-        }
-
-        /// <summary>
-        ///     析取
-        /// </summary>
-        /// <param name="queries">查询</param>
-        /// <returns>析取</returns>
-        // ReSharper disable once UnusedMember.Global
-        public static IMongoQuery Or(params IMongoQuery[] queries)
-        {
-            var lst = queries.ToList();
-            return Or(lst);
-        }
-
-        /// <summary>
-        ///     析取
-        /// </summary>
-        /// <param name="queries">查询</param>
-        /// <returns>析取</returns>
-        private static IMongoQuery Or(ICollection<IMongoQuery> queries)
-        {
-            while (queries.Remove(null)) { }
-            return queries.Any() ? Query.Or(queries) : null;
-        }
-
-        /// <summary>
-        ///     非
-        /// </summary>
-        /// <param name="query">查询</param>
-        /// <returns>非</returns>
-        public static IMongoQuery Not(IMongoQuery query)
-        {
-            return Query.Not(query);
         }
 
         /// <summary>
@@ -368,6 +163,11 @@ namespace AccountingServer.DAL
                 sb.AppendLine("    return true;");
             else
             {
+                if (vfilter.ID != null)
+                {
+                    sb.AppendFormat("    if (v._id.toString() != '{0}')) return false;", vfilter.ID);
+                    sb.AppendLine();
+                }
                 if (vfilter.Date != null)
                 {
                     sb.AppendFormat("    if (v.date != new Date('{0:yyyy-MM-dd}')) return false;", vfilter.Date);
@@ -512,6 +312,8 @@ namespace AccountingServer.DAL
                 sb.AppendLine("    return ");
                 switch (f.Operator)
                 {
+                    case UnaryOperatorType.Identity:
+                        break;
                     case UnaryOperatorType.Complement:
                         sb.AppendLine("!");
                         break;
@@ -549,8 +351,115 @@ namespace AccountingServer.DAL
                         throw new InvalidOperationException();
                 }
                 sb.AppendLine(" (");
-                sb.Append(GetJavascriptFilter(f.Filter1));
+                sb.Append(GetJavascriptFilter(f.Filter2));
                 sb.AppendLine(")(d);");
+                sb.AppendLine("}");
+                return sb.ToString();
+            }
+            throw new InvalidOperationException();
+        }
+
+        /// <summary>
+        ///     检索式的Javascript表示
+        /// </summary>
+        /// <param name="query">检索式</param>
+        /// <returns>Javascript表示</returns>
+        public static string GetJavascriptFilter(IVoucherQueryCompounded query)
+        {
+            if (query is IVoucherQueryAtom)
+            {
+                var f = query as IVoucherQueryAtom;
+
+                var sb = new StringBuilder();
+                sb.AppendLine("function (v) {");
+
+                sb.Append("    var vfilter = ");
+                sb.Append(GetJavascriptFilter(f.VoucherFilter));
+                sb.AppendLine(";");
+                sb.AppendLine("    if (!vfilter(v)) return false;");
+
+                sb.Append("    var rng = ");
+                sb.Append(GetJavascriptFilter(f.Range));
+                sb.AppendLine(";");
+                sb.AppendLine("    if (!rng(v)) return false;");
+
+                if (f.ForAll)
+                {
+                    sb.AppendLine("    var i = 0;");
+                    sb.AppendLine("    for (i = 0;i < v.detail.length;i++)");
+                    sb.AppendLine("        if (!(");
+                    sb.Append(GetJavascriptFilter(f.DetailFilter));
+                    sb.AppendLine(")(v.detail[i]))");
+                    sb.AppendLine("            break;");
+                    sb.AppendLine("    if (i < v.detail.length");
+                    sb.AppendLine("        return false;");
+                }
+                else
+                {
+                    sb.AppendLine("    var i = 0;");
+                    sb.AppendLine("    for (i = 0;i < v.detail.length;i++)");
+                    sb.AppendLine("        if ((");
+                    sb.Append(GetJavascriptFilter(f.DetailFilter));
+                    sb.AppendLine(")(this.detail[i]))");
+                    sb.AppendLine("            break;");
+                    sb.AppendLine("    if (i >= v.detail.length");
+                    sb.AppendLine("        return false;");
+                }
+                sb.AppendLine("    return true;");
+                sb.AppendLine("}");
+                return sb.ToString();
+
+            }
+            if (query is IVoucherQueryUnary)
+            {
+                var f = query as IVoucherQueryUnary;
+
+                var sb = new StringBuilder();
+                sb.AppendLine("function (v) {");
+                sb.AppendLine("    return ");
+                switch (f.Operator)
+                {
+                    case UnaryOperatorType.Identity:
+                        break;
+                    case UnaryOperatorType.Complement:
+                        sb.AppendLine("!");
+                        break;
+                    default:
+                        throw new InvalidOperationException();
+                }
+                sb.AppendLine("(");
+                sb.Append(GetJavascriptFilter(f.Filter1));
+                sb.AppendLine(")(v);");
+                sb.AppendLine("}");
+                return sb.ToString();
+            }
+            if (query is IVoucherQueryBinary)
+            {
+                var f = query as IVoucherQueryBinary;
+
+                var sb = new StringBuilder();
+                sb.AppendLine("function (v) {");
+                sb.AppendLine("    return (");
+                sb.Append(GetJavascriptFilter(f.Filter1));
+                sb.AppendLine(")(v) ");
+
+                switch (f.Operator)
+                {
+                    case BinaryOperatorType.Union:
+                        sb.AppendLine("&&");
+                        break;
+                    case BinaryOperatorType.Interect:
+                        sb.AppendLine("||");
+                        break;
+                    case BinaryOperatorType.Substract:
+                        sb.AppendLine("&& !");
+                        break;
+                    default:
+                        throw new InvalidOperationException();
+                }
+                sb.AppendLine(" (");
+                sb.Append(GetJavascriptFilter(f.Filter2));
+                sb.AppendLine(")(v);");
                 sb.AppendLine("}");
                 return sb.ToString();
             }

@@ -13,12 +13,7 @@ namespace AccountingServer.Console
         {
             var voucher = CSharpHelper.ParseVoucher(code);
 
-            if (voucher.ID == null)
-            {
-                if (!m_Accountant.Upsert(voucher))
-                    throw new Exception();
-            }
-            else if (!m_Accountant.Update(voucher))
+            if (!m_Accountant.Upsert(voucher))
                 throw new Exception();
 
             return CSharpHelper.PresentVoucher(voucher);
