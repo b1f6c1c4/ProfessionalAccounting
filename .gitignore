@@ -19,6 +19,8 @@ Server/AccountingServer.TCP/bin/
 Server/AccountingServer.TCP/obj/
 Server/AccountingServer.Entities/bin/
 Server/AccountingServer.Entities/obj/
+Server/AccountingServer.QueryGeneration/bin/
+Server/AccountingServer.QueryGeneration/obj/
 Server/AccountingServer.UnitTest/bin/
 Server/AccountingServer.UnitTest/obj/
 Server/ModelingProject1/bin/
