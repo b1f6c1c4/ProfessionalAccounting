@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AccountingServer.Entities;
 
 namespace AccountingServer.BLL
@@ -166,7 +167,11 @@ namespace AccountingServer.BLL
                 double? fund;
                 if (sp[id + 1].StartsWith(":"))
                 {
-                    var orig = helper.GetBalance(new Balance { Title = 1101, Content = content, Date = dt });
+                    var orig =
+                        helper.SelectVoucherDetailsGrouped(
+                                              new GroupedQueryBase(
+                                                  filter: new VoucherDetail { Title = 1101, Content = content },
+                                                  rng: new DateFilter(null, dt))).Single().Fund;
                     fund = sp[id + 1].Substring(1).AsCurrency() - orig;
                     if (fund == 0)
                         continue;
@@ -255,7 +260,11 @@ namespace AccountingServer.BLL
             double? fund;
             if (sp[1].StartsWith(":"))
             {
-                var orig = helper.GetBalance(new Balance { Title = 1123, Content = contentC, Date = dt });
+                var orig =
+                    helper.SelectVoucherDetailsGrouped(
+                                          new GroupedQueryBase(
+                                              filter: new VoucherDetail { Title = 1123, Content = contentC },
+                                              rng: new DateFilter(null, dt))).Single().Fund;
                 fund = orig - sp[1].Substring(1).AsCurrency();
             }
             else

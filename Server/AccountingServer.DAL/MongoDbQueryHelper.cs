@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using AccountingServer.Entities;
 using MongoDB.Bson;
@@ -35,127 +33,11 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     按资产过滤器查询
-        /// </summary>
-        /// <param name="filter">资产过滤器</param>
-        /// <returns>Bson查询</returns>
-        public static IMongoQuery GetQuery(Asset filter)
-        {
-            if (filter == null)
-                return null;
-
-            var lst = new List<IMongoQuery>();
-
-            if (filter.ID != null)
-                lst.Add(Query.EQ("_id", filter.ID.Value.ToBsonValue()));
-            if (filter.Name != null)
-                lst.Add(
-                        filter.Name == String.Empty
-                            ? Query.EQ("name", BsonNull.Value)
-                            : Query.EQ("name", filter.Name));
-            if (filter.Date != null)
-                lst.Add(Query.EQ("date", filter.Date));
-            if (filter.Value != null)
-                lst.Add(Query.EQ("value", filter.Value));
-            if (filter.Salvge != null)
-                lst.Add(Query.EQ("salvge", filter.Salvge));
-            if (filter.Life != null)
-                lst.Add(Query.EQ("life", filter.Life));
-            if (filter.Title != null)
-                lst.Add(Query.EQ("title", filter.Title));
-            if (filter.DepreciationTitle != null)
-                lst.Add(Query.EQ("deptitle", filter.DepreciationTitle));
-            if (filter.DevaluationTitle != null)
-                lst.Add(Query.EQ("devtitle", filter.DevaluationTitle));
-            if (filter.DepreciationExpenseTitle != null)
-                lst.Add(
-                        Query.EQ(
-                                 "exptitle",
-                                 filter.DepreciationExpenseSubTitle != null
-                                     ? filter.DepreciationExpenseTitle * 100 + filter.DepreciationExpenseSubTitle
-                                     : filter.DepreciationExpenseTitle));
-            if (filter.DevaluationExpenseTitle != null)
-                lst.Add(
-                        Query.EQ(
-                                 "exvtitle",
-                                 filter.DevaluationExpenseSubTitle != null
-                                     ? filter.DevaluationExpenseTitle * 100 + filter.DevaluationExpenseSubTitle
-                                     : filter.DevaluationExpenseTitle));
-            if (filter.Method.HasValue)
-                switch (filter.Method.Value)
-                {
-                    case DepreciationMethod.StraightLine:
-                        lst.Add(Query.EQ("method", "sl"));
-                        break;
-                    case DepreciationMethod.SumOfTheYear:
-                        lst.Add(Query.EQ("method", "sy"));
-                        break;
-                    case DepreciationMethod.DoubleDeclineMethod:
-                        lst.Add(Query.EQ("method", "dd"));
-                        break;
-                }
-            if (filter.Remark != null)
-                lst.Add(
-                        filter.Remark == String.Empty
-                            ? Query.EQ("remark", BsonNull.Value)
-                            : Query.EQ("remark", filter.Remark));
-
-            return And(lst);
-        }
-
-        /// <summary>
-        ///     按摊销过滤器查询
-        /// </summary>
-        /// <param name="filter">资产过滤器</param>
-        /// <returns>Bson查询</returns>
-        public static IMongoQuery GetQuery(Amortization filter)
-        {
-            if (filter == null)
-                return null;
-
-            var lst = new List<IMongoQuery>();
-
-            if (filter.ID != null)
-                lst.Add(Query.EQ("_id", filter.ID.Value.ToBsonValue()));
-            if (filter.Name != null)
-                lst.Add(
-                        filter.Name == String.Empty
-                            ? Query.EQ("name", BsonNull.Value)
-                            : Query.EQ("name", filter.Name));
-            if (filter.Value != null)
-                lst.Add(Query.EQ("value", filter.Value));
-            if (filter.Date != null)
-                lst.Add(Query.EQ("date", filter.Date));
-            if (filter.TotalDays != null)
-                lst.Add(Query.EQ("tday", filter.TotalDays));
-            //if (query.Template != null)
-            //    throw new NotImplementedException(); TODO: query according to Template
-            if (filter.Remark != null)
-                lst.Add(
-                        filter.Remark == String.Empty
-                            ? Query.EQ("remark", BsonNull.Value)
-                            : Query.EQ("remark", filter.Remark));
-
-            return And(lst);
-        }
-
-        /// <summary>
-        ///     合取
-        /// </summary>
-        /// <param name="queries">查询</param>
-        /// <returns>合取</returns>
-        private static IMongoQuery And(ICollection<IMongoQuery> queries)
-        {
-            while (queries.Remove(null)) { }
-            return queries.Any() ? Query.And(queries) : null;
-        }
-
-        /// <summary>
         ///     过滤器的Javascript表示
         /// </summary>
         /// <param name="vfilter">过滤器</param>
         /// <returns>Javascript表示</returns>
-        public static string GetJavascriptFilter(Voucher vfilter)
+        private static string GetJavascriptFilter(Voucher vfilter)
         {
             var sb = new StringBuilder();
             sb.AppendLine("function(v) {");
@@ -170,7 +52,7 @@ namespace AccountingServer.DAL
                 }
                 if (vfilter.Date != null)
                 {
-                    sb.AppendFormat("    if (v.date != new Date('{0:yyyy-MM-dd}')) return false;", vfilter.Date);
+                    sb.AppendFormat("    if (v.date != new ISODate('{0:yyyy-MM-ddTHH:mm:sszzz}')) return false;", vfilter.Date);
                     sb.AppendLine();
                 }
                 if (vfilter.Type != null)
@@ -212,62 +94,11 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     细目过滤器的Javascript表示
-        /// </summary>
-        /// <param name="filter">细目过滤器</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <returns>Javascript表示</returns>
-        public static string GetJavascriptFilter(VoucherDetail filter, int dir)
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine("function(d) {");
-            if (dir != 0)
-                sb.AppendLine(dir > 0 ? "    if (d.fund <= 0) return false;" : "    if (d.fund >= 0) return false;");
-            if (filter == null)
-                sb.AppendLine("    return true;");
-            else
-            {
-                if (filter.Title != null)
-                {
-                    sb.AppendFormat("    if (d.title != {0})) return false;", filter.Title);
-                    sb.AppendLine();
-                }
-                if (filter.SubTitle != null)
-                {
-                    sb.AppendFormat("    if (d.subtitle != {0})) return false;", filter.SubTitle);
-                    sb.AppendLine();
-                }
-                if (filter.Content != null)
-                    if (filter.Content == String.Empty)
-                        sb.AppendLine("    if (d.content != null) return false;");
-                    else
-                        sb.AppendFormat(
-                                        "    if (d.content != '{0}') return false;",
-                                        filter.Content.Replace("\'", "\\\'"));
-                if (filter.Remark != null)
-                    if (filter.Remark == String.Empty)
-                        sb.AppendLine("    if (d.remark != null) return false;");
-                    else
-                        sb.AppendFormat(
-                                        "    if (d.remark != '{0}') return false;",
-                                        filter.Remark.Replace("\'", "\\\'"));
-                if (filter.Fund != null)
-                {
-                    sb.AppendFormat("    if (Math.abs(d.fund - {0:r}) > 1e-8)) return false;", filter.Fund);
-                    sb.AppendLine();
-                }
-                sb.AppendLine("    return true;");
-            }
-            sb.AppendLine("}");
-            return sb.ToString();
-        }
-
-        /// <summary>
         ///     日期过滤器的Javascript表示
         /// </summary>
         /// <param name="rng">日期过滤器</param>
         /// <returns>Javascript表示</returns>
-        public static string GetJavascriptFilter(DateFilter? rng)
+        private static string GetJavascriptFilter(DateFilter? rng)
         {
             var sb = new StringBuilder();
             sb.AppendLine("function(v) {");
@@ -281,9 +112,9 @@ namespace AccountingServer.DAL
                 sb.AppendLine(rng.Value.Nullable ? "true;" : "false;");
 
                 if (rng.Value.StartDate.HasValue)
-                    sb.AppendFormat("    if (v.date < new Date('{0:yyyy-MM-dd}')) return false;", rng.Value.StartDate);
+                    sb.AppendFormat("    if (v.date < new ISODate('{0:yyyy-MM-ddTHH:mm:sszzz}')) return false;", rng.Value.StartDate);
                 if (rng.Value.EndDate.HasValue)
-                    sb.AppendFormat("    if (v.date > new Date('{0:yyyy-MM-dd}')) return false;", rng.Value.EndDate);
+                    sb.AppendFormat("    if (v.date > new ISODate('{0:yyyy-MM-ddTHH:mm:sszzz}')) return false;", rng.Value.EndDate);
 
                 sb.AppendLine("    return true;");
             }
@@ -294,70 +125,118 @@ namespace AccountingServer.DAL
         /// <summary>
         ///     细目检索式的Javascript表示
         /// </summary>
-        /// <param name="query">检索式</param>
+        /// <param name="query">细目检索式</param>
         /// <returns>Javascript表示</returns>
-        public static string GetJavascriptFilter(IDetailQueryCompounded query)
+        public static string GetJavascriptFilter(IQueryCompunded<IDetailQueryAtom> query)
         {
-            if (query is IDetailQueryAtom)
-            {
-                var f = query as IDetailQueryAtom;
-                return GetJavascriptFilter(f.Filter, f.Dir);
-            }
-            if (query is IDetailQueryAry)
-            {
-                var f = query as IDetailQueryAry;
+            return GetJavascriptFilter(query, GetJavascriptFilter);
+        }
 
-                var sb = new StringBuilder();
-                sb.AppendLine("function (d) {");
-                sb.AppendLine("    return ");
-                switch (f.Operator)
+        /// <summary>
+        ///     细目检索式的Javascript表示
+        /// </summary>
+        /// <param name="f">细目检索式</param>
+        /// <returns>Javascript表示</returns>
+        private static string GetJavascriptFilter(IDetailQueryAtom f)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("function(d) {");
+            if (f.Dir != 0)
+                sb.AppendLine(f.Dir > 0 ? "    if (d.fund <= 0) return false;" : "    if (d.fund >= 0) return false;");
+            if (f.Filter == null)
+                sb.AppendLine("    return true;");
+            else
+            {
+                if (f.Filter.Title != null)
                 {
-                    case OperatorType.None:
-                    case OperatorType.Identity:
-                        sb.AppendLine("(");
-                        sb.Append(GetJavascriptFilter(f.Filter1));
-                        sb.AppendLine(")(d)");
-                        break;
-                    case OperatorType.Complement:
-                        sb.AppendLine("!(");
-                        sb.Append(GetJavascriptFilter(f.Filter1));
-                        sb.AppendLine(")(d)");
-                        break;
-                    case OperatorType.Union:
-                        sb.AppendLine("(");
-                        sb.Append(GetJavascriptFilter(f.Filter1));
-                        sb.AppendLine(")(d) ");
-                        sb.AppendLine("&&");
-                        sb.AppendLine(" (");
-                        sb.Append(GetJavascriptFilter(f.Filter2));
-                        sb.AppendLine(")(d)");
-                        break;
-                    case OperatorType.Interect:
-                        sb.AppendLine("(");
-                        sb.Append(GetJavascriptFilter(f.Filter1));
-                        sb.AppendLine(")(d) ");
-                        sb.AppendLine("||");
-                        sb.AppendLine(" (");
-                        sb.Append(GetJavascriptFilter(f.Filter2));
-                        sb.AppendLine(")(d)");
-                        break;
-                    case OperatorType.Substract:
-                        sb.AppendLine("(");
-                        sb.Append(GetJavascriptFilter(f.Filter1));
-                        sb.AppendLine(")(d) ");
-                        sb.AppendLine("&& !");
-                        sb.AppendLine(" (");
-                        sb.Append(GetJavascriptFilter(f.Filter2));
-                        sb.AppendLine(")(d)");
-                        break;
-                    default:
-                        throw new InvalidOperationException();
+                    sb.AppendFormat("    if (d.title != {0})) return false;", f.Filter.Title);
+                    sb.AppendLine();
                 }
-                sb.AppendLine(";");
-                sb.AppendLine("}");
-                return sb.ToString();
+                if (f.Filter.SubTitle != null)
+                {
+                    sb.AppendFormat("    if (d.subtitle != {0})) return false;", f.Filter.SubTitle);
+                    sb.AppendLine();
+                }
+                if (f.Filter.Content != null)
+                    if (f.Filter.Content == String.Empty)
+                        sb.AppendLine("    if (d.content != null) return false;");
+                    else
+                        sb.AppendFormat(
+                                        "    if (d.content != '{0}') return false;",
+                                        f.Filter.Content.Replace("\'", "\\\'"));
+                if (f.Filter.Remark != null)
+                    if (f.Filter.Remark == String.Empty)
+                        sb.AppendLine("    if (d.remark != null) return false;");
+                    else
+                        sb.AppendFormat(
+                                        "    if (d.remark != '{0}') return false;",
+                                        f.Filter.Remark.Replace("\'", "\\\'"));
+                if (f.Filter.Fund != null)
+                {
+                    sb.AppendFormat("    if (Math.abs(d.fund - {0:r}) > 1e-8)) return false;", f.Filter.Fund);
+                    sb.AppendLine();
+                }
+                sb.AppendLine("    return true;");
             }
-            throw new InvalidOperationException();
+            sb.AppendLine("}");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        ///     记账凭证检索式的Javascript表示
+        /// </summary>
+        /// <param name="query">记账凭证检索式</param>
+        /// <returns>Javascript表示</returns>
+        public static string GetJavascriptFilter(IQueryCompunded<IVoucherQueryAtom> query)
+        {
+            return GetJavascriptFilter(query, GetJavascriptFilter);
+        }
+
+        /// <summary>
+        ///     记账凭证检索式的Javascript表示
+        /// </summary>
+        /// <param name="f">记账凭证检索式</param>
+        /// <returns>Javascript表示</returns>
+        private static string GetJavascriptFilter(IVoucherQueryAtom f)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("function (v) {");
+
+            sb.Append("    var vfilter = ");
+            sb.Append(GetJavascriptFilter(f.VoucherFilter));
+            sb.AppendLine(";");
+            sb.AppendLine("    if (!vfilter(v)) return false;");
+
+            sb.Append("    var rng = ");
+            sb.Append(GetJavascriptFilter(f.Range));
+            sb.AppendLine(";");
+            sb.AppendLine("    if (!rng(v)) return false;");
+
+            if (f.ForAll)
+            {
+                sb.AppendLine("    var i = 0;");
+                sb.AppendLine("    for (i = 0;i < v.detail.length;i++)");
+                sb.AppendLine("        if (!(");
+                sb.Append(GetJavascriptFilter(f.DetailFilter, GetJavascriptFilter));
+                sb.AppendLine(")(v.detail[i]))");
+                sb.AppendLine("            break;");
+                sb.AppendLine("    if (i < v.detail.length)");
+                sb.AppendLine("        return false;");
+            }
+            else
+            {
+                sb.AppendLine("    var i = 0;");
+                sb.AppendLine("    for (i = 0;i < v.detail.length;i++)");
+                sb.AppendLine("        if ((");
+                sb.Append(GetJavascriptFilter(f.DetailFilter, GetJavascriptFilter));
+                sb.AppendLine(")(this.detail[i]))");
+                sb.AppendLine("            break;");
+                sb.AppendLine("    if (i >= v.detail.length)");
+                sb.AppendLine("        return false;");
+            }
+            sb.AppendLine("    return true;");
+            sb.AppendLine("}");
+            return sb.ToString();
         }
 
         /// <summary>
@@ -365,97 +244,108 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>Javascript表示</returns>
-        public static string GetJavascriptFilter(IVoucherQueryCompounded query)
+        public static string GetJavascriptFilter(IQueryCompunded<IDistributedQueryAtom> query)
         {
-            if (query is IVoucherQueryAtom)
-            {
-                var f = query as IVoucherQueryAtom;
+            return GetJavascriptFilter(query, GetJavascriptFilter);
+        }
 
-                var sb = new StringBuilder();
-                sb.AppendLine("function (v) {");
-
-                sb.Append("    var vfilter = ");
-                sb.Append(GetJavascriptFilter(f.VoucherFilter));
-                sb.AppendLine(";");
-                sb.AppendLine("    if (!vfilter(v)) return false;");
-
-                sb.Append("    var rng = ");
-                sb.Append(GetJavascriptFilter(f.Range));
-                sb.AppendLine(";");
-                sb.AppendLine("    if (!rng(v)) return false;");
-
-                if (f.ForAll)
-                {
-                    sb.AppendLine("    var i = 0;");
-                    sb.AppendLine("    for (i = 0;i < v.detail.length;i++)");
-                    sb.AppendLine("        if (!(");
-                    sb.Append(GetJavascriptFilter(f.DetailFilter));
-                    sb.AppendLine(")(v.detail[i]))");
-                    sb.AppendLine("            break;");
-                    sb.AppendLine("    if (i < v.detail.length");
-                    sb.AppendLine("        return false;");
-                }
-                else
-                {
-                    sb.AppendLine("    var i = 0;");
-                    sb.AppendLine("    for (i = 0;i < v.detail.length;i++)");
-                    sb.AppendLine("        if ((");
-                    sb.Append(GetJavascriptFilter(f.DetailFilter));
-                    sb.AppendLine(")(this.detail[i]))");
-                    sb.AppendLine("            break;");
-                    sb.AppendLine("    if (i >= v.detail.length");
-                    sb.AppendLine("        return false;");
-                }
+        /// <summary>
+        ///     检索式的Javascript表示
+        /// </summary>
+        /// <param name="f">检索式</param>
+        /// <returns>Javascript表示</returns>
+        private static string GetJavascriptFilter(IDistributedQueryAtom f)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("function(a) {");
+            if (f.Filter == null)
                 sb.AppendLine("    return true;");
-                sb.AppendLine("}");
-                return sb.ToString();
-            }
-            if (query is IVoucherQueryAry)
+            else
             {
-                var f = query as IVoucherQueryAry;
+                if (f.Filter.ID.HasValue)
+                {
+                    sb.AppendFormat(
+                                    "    if (v._id.toString() != BinData(3,'{0}'))) return false;",
+                                    Convert.ToBase64String(f.Filter.ID.Value.ToByteArray()));
+                    sb.AppendLine();
+                }
+                if (f.Filter.Name != null)
+                    if (f.Filter.Name == String.Empty)
+                        sb.AppendLine("    if (d.name != null) return false;");
+                    else
+                        sb.AppendFormat(
+                                        "    if (d.name != '{0}') return false;",
+                                        f.Filter.Name.Replace("\'", "\\\'"));
+                if (f.Filter.Remark != null)
+                    if (f.Filter.Remark == String.Empty)
+                        sb.AppendLine("    if (d.remark != null) return false;");
+                    else
+                        sb.AppendFormat(
+                                        "    if (d.remark != '{0}') return false;",
+                                        f.Filter.Remark.Replace("\'", "\\\'"));
+                sb.AppendLine("    return true;");
+            }
+            sb.AppendLine("}");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        ///     一般检索式的Javascript表示
+        /// </summary>
+        /// <param name="query">检索式</param>
+        /// <param name="atomFilter">原子检索式的Javascript表示</param>
+        /// <returns>Javascript表示</returns>
+        private static string GetJavascriptFilter<TAtom>(IQueryCompunded<TAtom> query, Func<TAtom, string> atomFilter)
+            where TAtom : class
+        {
+            if (query is TAtom)
+                return atomFilter(query as TAtom);
+            if (query is IQueryAry<TAtom>)
+            {
+                var f = query as IQueryAry<TAtom>;
 
                 var sb = new StringBuilder();
-                sb.AppendLine("function (v) {");
+                sb.AppendLine("function (entity) {");
                 sb.AppendLine("    return ");
                 switch (f.Operator)
                 {
                     case OperatorType.None:
                     case OperatorType.Identity:
                         sb.AppendLine("(");
-                        sb.Append(GetJavascriptFilter(f.Filter1));
-                        sb.AppendLine(")(v)");
+                        sb.Append(GetJavascriptFilter(f.Filter1, atomFilter));
+                        sb.AppendLine(")(entity)");
                         break;
                     case OperatorType.Complement:
                         sb.AppendLine("!(");
-                        sb.Append(GetJavascriptFilter(f.Filter1));
-                        sb.AppendLine(")(v)");
+                        sb.Append(GetJavascriptFilter(f.Filter1, atomFilter));
+                        sb.AppendLine(")(entity)");
                         break;
                     case OperatorType.Union:
                         sb.AppendLine("(");
-                        sb.Append(GetJavascriptFilter(f.Filter1));
-                        sb.AppendLine(")(v) ");
+                        sb.Append(GetJavascriptFilter(f.Filter1, atomFilter));
+                        sb.AppendLine(")(entity) ");
                         sb.AppendLine("&&");
                         sb.AppendLine(" (");
-                        sb.Append(GetJavascriptFilter(f.Filter2));
-                        sb.AppendLine(")(v)");
+                        sb.Append(GetJavascriptFilter(f.Filter2, atomFilter));
+                        sb.AppendLine(")(entity)");
                         break;
-                    case OperatorType.Interect:
+                    case OperatorType.Intersect:
                         sb.AppendLine("(");
-                        sb.Append(GetJavascriptFilter(f.Filter1));
-                        sb.AppendLine(")(v) ");
+                        sb.Append(GetJavascriptFilter(f.Filter1, atomFilter));
+                        sb.AppendLine(")(entity) ");
                         sb.AppendLine("||");
                         sb.AppendLine(" (");
-                        sb.Append(GetJavascriptFilter(f.Filter2));
-                        sb.AppendLine(")(v)");
+                        sb.Append(GetJavascriptFilter(f.Filter2, atomFilter));
+                        sb.AppendLine(")(entity)");
                         break;
                     case OperatorType.Substract:
                         sb.AppendLine("(");
-                        sb.Append(GetJavascriptFilter(f.Filter1));
-                        sb.AppendLine(")(v) ");
+                        sb.Append(GetJavascriptFilter(f.Filter1, atomFilter));
+                        sb.AppendLine(")(entity) ");
                         sb.AppendLine("&& !");
                         sb.AppendLine(" (");
-                        sb.Append(GetJavascriptFilter(f.Filter2));
-                        sb.AppendLine(")(v)");
+                        sb.Append(GetJavascriptFilter(f.Filter2, atomFilter));
+                        sb.AppendLine(")(entity)");
                         break;
                     default:
                         throw new InvalidOperationException();

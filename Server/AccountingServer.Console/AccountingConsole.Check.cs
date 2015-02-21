@@ -17,9 +17,10 @@ namespace AccountingServer.Console
             AutoConnect();
 
             var sb = new StringBuilder();
-            foreach (var voucher in m_Accountant.FilteredSelect(null, filter: null))
+            foreach (var voucher in m_Accountant.SelectVouchers(null))
             {
-                var val = Accountant.IsBalanced(voucher);
+                // ReSharper disable once PossibleInvalidOperationException
+                var val = voucher.Details.Sum(d => d.Fund.Value);
                 if (Math.Abs(val) < Accountant.Tolerance)
                     continue;
 
@@ -43,93 +44,101 @@ namespace AccountingServer.Console
         {
             AutoConnect();
 
+            var res =
+                m_Accountant.SelectVoucherDetailsGrouped(
+                                                         new GroupedQueryBase(
+                                                             filter: null,
+                                                             subtotal: new SubtotalBase
+                                                                           {
+                                                                               AggrEnabled = true,
+                                                                               Levels = new[]
+                                                                                            {
+                                                                                                SubtotalLevel.Title,
+                                                                                                SubtotalLevel.SubTitle,
+                                                                                                SubtotalLevel.Content,
+                                                                                                SubtotalLevel.Day
+                                                                                            }
+                                                                           }));
+
             var sb = new StringBuilder();
-            var flag = false;
-            foreach (var title in TitleManager.GetTitles())
-                if (Accountant.IsAsset(title.Item1) &&
-                    title.Item1 != 1602 &&
-                    title.Item1 != 1603 &&
-                    title.Item1 != 1702 &&
-                    title.Item1 != 1703 &&
-                    !(title.Item1 == 1101 && title.Item2 == 02))
+            foreach (var grpTitle in Accountant.GroupByTitle(res))
+            {
+                if (grpTitle.Key >= 4000 &&
+                    grpTitle.Key < 5000)
+                    continue;
+
+                if (grpTitle.Key == 1901)
+                    continue;
+
+                foreach (var grpSubTitle in Accountant.GroupBySubTitle(grpTitle))
                 {
-                    foreach (
-                        var content in
-                            m_Accountant.FilteredSelectDetails(
-                                                               filter:
-                                                                   new VoucherDetail
-                                                                       {
-                                                                           Title = title.Item1,
-                                                                           SubTitle = title.Item2
-                                                                       })
-                                        .Select(d => d.Content)
-                                        .Distinct())
-                        foreach (
-                            var balance in
-                                m_Accountant.GetDailyBalance(
-                                                             new Balance
-                                                                 {
-                                                                     Title = title.Item1,
-                                                                     SubTitle = title.Item2,
-                                                                     Content = content
-                                                                 },
-                                                             DateFilter.Unconstrained))
-                            if (balance.Fund < -Accountant.Tolerance)
-                            {
-                                flag = true;
-                                sb.AppendFormat(
-                                                "{0:yyyyMMdd} {1}{2} {3} {4}:{5:R}",
-                                                balance.Date,
-                                                title.Item1.AsTitle(),
-                                                title.Item2.AsSubTitle(),
-                                                title.Item3,
-                                                content,
-                                                balance.Fund);
-                                sb.AppendLine();
-                                break;
-                            }
+                    if (grpTitle.Key == 1101 &&
+                        grpSubTitle.Key == 02)
+                        continue;
+                    if (grpTitle.Key == 1501 &&
+                        grpSubTitle.Key == 02)
+                        continue;
+                    if (grpTitle.Key == 1503 &&
+                        grpSubTitle.Key == 02)
+                        continue;
+                    if (grpTitle.Key == 1511 &&
+                        grpSubTitle.Key == 02)
+                        continue;
+                    if (grpTitle.Key == 1511 &&
+                        grpSubTitle.Key == 03)
+                        continue;
+                    if (grpTitle.Key == 6603 &&
+                        grpSubTitle.Key == null)
+                        continue;
+                    if (grpTitle.Key == 6603 &&
+                        grpSubTitle.Key == 03)
+                        continue;
+                    if (grpTitle.Key == 6603 &&
+                        grpSubTitle.Key == 99)
+                        continue;
+                    if (grpTitle.Key == 6711 &&
+                        grpSubTitle.Key == 10)
+                        continue;
+
+                    var isPositive = grpTitle.Key < 2000 || grpTitle.Key >= 6400;
+                    if (grpTitle.Key == 1502 ||
+                        grpTitle.Key == 1504 ||
+                        grpTitle.Key == 1504 ||
+                        grpTitle.Key == 1504 ||
+                        grpTitle.Key == 1504 ||
+                        grpTitle.Key == 1512 ||
+                        grpTitle.Key == 1602 ||
+                        grpTitle.Key == 1603 ||
+                        grpTitle.Key == 1702 ||
+                        grpTitle.Key == 1703 ||
+                        grpTitle.Key == 1602 ||
+                        grpTitle.Key == 1602)
+                        isPositive = false;
+                    else if (grpTitle.Key == 6603 &&
+                             grpSubTitle.Key == 02)
+                        isPositive = true;
+
+                    foreach (var grpContent in Accountant.GroupByContent(grpSubTitle))
+                        foreach (var balance in Accountant.GroupByDateAggr(grpContent))
+                        {
+                            if (isPositive && balance.Fund > -Accountant.Tolerance)
+                                continue;
+                            if (!isPositive &&
+                                balance.Fund < Accountant.Tolerance)
+                                continue;
+
+                            sb.AppendFormat(
+                                            "{0:yyyyMMdd} {1}{2} {3}:{4:R}",
+                                            balance.Date,
+                                            grpTitle.Key.AsTitle(),
+                                            grpSubTitle.Key.AsSubTitle(),
+                                            grpContent.Key,
+                                            balance.Fund);
+                        }
                 }
-                else if (Accountant.IsDebt(title.Item1) ||
-                         title.Item1 == 1602 ||
-                         title.Item1 == 1603 ||
-                         title.Item1 == 1702 ||
-                         title.Item1 == 1703)
-                    foreach (
-                        var content in
-                            m_Accountant.FilteredSelectDetails(
-                                                               filter:
-                                                                   new VoucherDetail
-                                                                       {
-                                                                           Title = title.Item1,
-                                                                           SubTitle = title.Item2
-                                                                       })
-                                        .Select(d => d.Content)
-                                        .Distinct())
-                        foreach (
-                            var balance in
-                                m_Accountant.GetDailyBalance(
-                                                             new Balance
-                                                                 {
-                                                                     Title = title.Item1,
-                                                                     SubTitle = title.Item2,
-                                                                     Content = content
-                                                                 },
-                                                             DateFilter.Unconstrained))
-                            if (balance.Fund > Accountant.Tolerance)
-                            {
-                                flag = true;
-                                sb.AppendFormat(
-                                                "{0:yyyyMMdd} {1}{2} {3} {4}:{5:R}",
-                                                balance.Date,
-                                                title.Item1.AsTitle(),
-                                                title.Item2.AsSubTitle(),
-                                                title.Item3,
-                                                content,
-                                                balance.Fund);
-                                sb.AppendLine();
-                                break;
-                            }
-            if (flag)
+            }
+
+            if (sb.Length > 0)
                 return new EditableText(sb.ToString());
             return new Suceed();
         }

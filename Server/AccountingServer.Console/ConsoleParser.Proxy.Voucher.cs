@@ -40,14 +40,14 @@ namespace AccountingServer.Console
             }
 
             public DateFilter Range { get { return range().Range; } }
-            public IDetailQueryCompounded DetailFilter { get { return details(); } }
+            public IQueryCompunded<IDetailQueryAtom> DetailFilter { get { return details(); } }
         }
 
-        public partial class VouchersContext : IVoucherQueryAry
+        public partial class VouchersContext : IQueryAry<IVoucherQueryAtom>
         {
             public OperatorType Operator { get { return OperatorType.None; } }
 
-            public IVoucherQueryCompounded Filter1
+            public IQueryCompunded<IVoucherQueryAtom> Filter1
             {
                 get
                 {
@@ -57,10 +57,10 @@ namespace AccountingServer.Console
                 }
             }
 
-            public IVoucherQueryCompounded Filter2 { get { throw new NotImplementedException(); } }
+            public IQueryCompunded<IVoucherQueryAtom> Filter2 { get { throw new NotImplementedException(); } }
         }
 
-        public partial class VouchersBContext : IVoucherQueryAry
+        public partial class VouchersBContext : IQueryAry<IVoucherQueryAtom>
         {
             public OperatorType Operator
             {
@@ -81,12 +81,12 @@ namespace AccountingServer.Console
                     if (Op.Text == "-")
                         return OperatorType.Substract;
                     if (Op.Text == "*")
-                        return OperatorType.Interect;
+                        return OperatorType.Intersect;
                     throw new InvalidOperationException();
                 }
             }
 
-            public IVoucherQueryCompounded Filter1
+            public IQueryCompunded<IVoucherQueryAtom> Filter1
             {
                 get
                 {
@@ -98,7 +98,7 @@ namespace AccountingServer.Console
                 }
             }
 
-            public IVoucherQueryCompounded Filter2 { get { return vouchersB(1); } }
+            public IQueryCompunded<IVoucherQueryAtom> Filter2 { get { return vouchersB(1); } }
         }
 
         public partial class SubtotalContext : ISubtotal
@@ -109,6 +109,8 @@ namespace AccountingServer.Console
             {
                 get
                 {
+                    if (SubtotalFields == null)
+                        return new[] { SubtotalLevel.Title, SubtotalLevel.SubTitle, SubtotalLevel.Content };
                     return SubtotalFields.Text.Select(
                                                       ch =>
                                                       {
@@ -145,7 +147,7 @@ namespace AccountingServer.Console
                 get { return Aggregation != null; }
             }
 
-            public IDateRange AggrRage
+            public IDateRange AggrRange
             {
                 get
                 {
@@ -160,12 +162,12 @@ namespace AccountingServer.Console
 
         public partial class EmitContext : IEmit
         {
-            public IDetailQueryCompounded DetailFilter { get { return details(); } }
+            public IQueryCompunded<IDetailQueryAtom> DetailFilter { get { return details(); } }
         }
 
         public partial class VoucherDetailQueryContext : IVoucherDetailQuery
         {
-            public IVoucherQueryCompounded VoucherQuery
+            public IQueryCompunded<IVoucherQueryAtom> VoucherQuery
             {
                 get
                 {

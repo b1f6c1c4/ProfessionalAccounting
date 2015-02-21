@@ -100,13 +100,21 @@ namespace AccountingServer.BLL
         ///     找出未在摊销计算表中注册的凭证，并尝试建立引用
         /// </summary>
         /// <param name="amort">摊销</param>
+        /// <param name="rng">日期过滤器</param>
+        /// <param name="query">检索式</param>
         /// <returns>未注册的凭证</returns>
-        public IEnumerable<Voucher> RegisterVouchers(Amortization amort)
+        public IEnumerable<Voucher> RegisterVouchers(Amortization amort, DateFilter rng,
+                                                     IQueryCompunded<IVoucherQueryAtom> query)
         {
             if (amort.Remark == Amortization.IgnoranceMark)
                 yield break;
 
-            foreach (var voucher in m_Db.FilteredSelect(amort.Template, amort.Template.Details, useAnd: true))
+            foreach (
+                var voucher in
+                    m_Db.SelectVouchers(
+                                        new VoucherQueryAryBase(
+                                            OperatorType.Intersect,
+                                            new[] { query, new VoucherQueryAtomBase(amort.Template, amort.Template.Details){ForAll = true} })))
             {
                 if (voucher.Remark == Amortization.IgnoranceMark)
                     continue;
@@ -114,11 +122,13 @@ namespace AccountingServer.BLL
                 if (amort.Schedule.Any(item => item.VoucherID == voucher.ID))
                     continue;
 
-                if (voucher.Details.Zip(amort.Template.Details, MatchHelper.IsMatch).Contains(false))
+                if (voucher.Details.Zip(amort.Template.Details, (d1,d2)=>d1.IsMatch(d2)).Contains(false))
                     yield return voucher;
                 else
                 {
-                    var lst = amort.Schedule.Where(item => item.Date == voucher.Date).ToList();
+                    var lst = amort.Schedule
+                        .Where(item => item.Date.Within(rng))
+                        .Where(item => item.Date == voucher.Date).ToList();
 
                     if (lst.Count == 1)
                         lst[0].VoucherID = voucher.ID;

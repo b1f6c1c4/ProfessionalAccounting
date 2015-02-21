@@ -42,21 +42,21 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>任一细目匹配检索式的记账凭证</returns>
-        IEnumerable<Voucher> FilteredSelect(IVoucherQueryCompounded query);
+        IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query);
 
         /// <summary>
         ///     按检索式查找细目
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>匹配检索式的细目</returns>
-        IEnumerable<VoucherDetail> FilteredSelect(IVoucherDetailQuery query);
+        IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query);
 
         /// <summary>
         ///     按检索式执行分类汇总
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>分类汇总结果</returns>
-        IEnumerable<Balance> FilteredSelect(IGroupedQuery query);
+        IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query);
 
         /// <summary>
         ///     按编号删除记账凭证
@@ -70,7 +70,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>已删除的细目总数</returns>
-        long FilteredDelete(IVoucherQueryCompounded query);
+        long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query);
 
         /// <summary>
         ///     添加或替换记账凭证
@@ -96,7 +96,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>匹配过滤器的资产</returns>
-        IEnumerable<Asset> FilteredSelect(Asset filter);
+        IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter);
 
         /// <summary>
         ///     按编号删除资产
@@ -110,7 +110,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>已删除的资产总数</returns>
-        long FilteredDelete(Asset filter);
+        long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter);
 
         /// <summary>
         ///     添加或替换资产
@@ -136,7 +136,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>匹配过滤器的摊销</returns>
-        IEnumerable<Amortization> FilteredSelect(Amortization filter);
+        IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter);
 
         /// <summary>
         ///     按编号删除摊销
@@ -150,7 +150,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>已删除的摊销总数</returns>
-        long FilteredDelete(Amortization filter);
+        long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter);
 
         /// <summary>
         ///     添加或替换摊销

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace AccountingServer.Entities
 {
@@ -13,9 +14,10 @@ namespace AccountingServer.Entities
         /// <param name="voucher">凭证</param>
         /// <param name="filter">过滤器</param>
         /// <returns>是否符合</returns>
-        // ReSharper disable once UnusedMember.Global
         public static bool IsMatch(this Voucher voucher, Voucher filter)
         {
+            if (filter == null)
+                return true;
             if (filter.ID != null)
                 if (filter.ID != voucher.ID)
                     return false;
@@ -41,9 +43,12 @@ namespace AccountingServer.Entities
         /// </summary>
         /// <param name="voucherDetail">细目</param>
         /// <param name="filter">过滤器</param>
+        /// <param name="dir">借贷方向</param>
         /// <returns>是否符合</returns>
-        public static bool IsMatch(this VoucherDetail voucherDetail, VoucherDetail filter)
+        public static bool IsMatch(this VoucherDetail voucherDetail, VoucherDetail filter, int dir = 0)
         {
+            if (filter == null)
+                return true;
             if (filter.Item != null)
                 if (filter.Item != voucherDetail.Item)
                     return false;
@@ -69,6 +74,10 @@ namespace AccountingServer.Entities
             if (filter.Fund != null)
                 if (filter.Fund != voucherDetail.Fund)
                     return false;
+            if (dir != 0)
+                if (dir > 0 && filter.Fund < 0 ||
+                    dir < 0 && filter.Fund > 0)
+                    return false;
             if (filter.Remark != null)
                 if (filter.Remark == String.Empty)
                 {
@@ -81,38 +90,53 @@ namespace AccountingServer.Entities
         }
 
         /// <summary>
-        ///     判断细目是否符合检索式
+        ///     判断凭证是否符合检索式
         /// </summary>
-        /// <param name="voucherDetail">细目</param>
-        /// <param name="query">细目检索式</param>
+        /// <param name="voucher">凭证</param>
+        /// <param name="query">检索式</param>
         /// <returns>是否符合</returns>
-        public static bool IsMatch(this VoucherDetail voucherDetail, IDetailQueryCompounded query)
+        public static bool IsMatch(this Voucher voucher, IVoucherQueryAtom query)
         {
-            if (query is IDetailQueryAtom)
+            if (!voucher.IsMatch(query.VoucherFilter))
+                return false;
+            if (!voucher.Date.Within(query.Range))
+                return false;
+            return query.ForAll
+                       ? voucher.Details.All(d => IsMatch(query.DetailFilter, q => d.IsMatch(q.Filter, q.Dir)))
+                       : voucher.Details.Any(d => IsMatch(query.DetailFilter, q => d.IsMatch(q.Filter, q.Dir)));
+        }
+
+        /// <summary>
+        ///     判断一般检索式是否成立
+        /// </summary>
+        /// <param name="query">检索式</param>
+        /// <param name="atomPredictor">原子检索式成立条件</param>
+        /// <returns>是否成立</returns>
+        public static bool IsMatch<TAtom>(IQueryCompunded<TAtom> query, Func<TAtom, bool> atomPredictor)
+            where TAtom : class
+        {
+            if (query is TAtom)
+                return atomPredictor(query as TAtom);
+            if (query is IQueryAry<TAtom>)
             {
-                var f = query as IDetailQueryAtom;
-                if (!IsMatch(voucherDetail, f.Filter))
-                    return false;
-                return f.Dir == 0 || f.Dir > 0 && voucherDetail.Fund > 0 || f.Dir < 0 && voucherDetail.Fund < 0;
-            }
-            if (query is IDetailQueryAry)
-            {
-                var f = query as IDetailQueryAry;
+                var f = query as IQueryAry<TAtom>;
+
                 switch (f.Operator)
                 {
                     case OperatorType.None:
                     case OperatorType.Identity:
-                        return IsMatch(voucherDetail, f.Filter1);
+                        return IsMatch(f.Filter1, atomPredictor);
                     case OperatorType.Complement:
-                        return !IsMatch(voucherDetail, f.Filter1);
+                        return !IsMatch(f.Filter1, atomPredictor);
                     case OperatorType.Union:
-                        return IsMatch(voucherDetail, f.Filter1) || IsMatch(voucherDetail, f.Filter2);
-                    case OperatorType.Interect:
-                        return IsMatch(voucherDetail, f.Filter1) && IsMatch(voucherDetail, f.Filter2);
+                        return IsMatch(f.Filter1, atomPredictor) || IsMatch(f.Filter2, atomPredictor);
+                    case OperatorType.Intersect:
+                        return IsMatch(f.Filter1, atomPredictor) && IsMatch(f.Filter2, atomPredictor);
                     case OperatorType.Substract:
-                        return IsMatch(voucherDetail, f.Filter1) && !IsMatch(voucherDetail, f.Filter2);
+                        return IsMatch(f.Filter1, atomPredictor) && ! IsMatch(f.Filter2, atomPredictor);
+                    default:
+                        throw new InvalidOperationException();
                 }
-                throw new InvalidOperationException();
             }
             throw new InvalidOperationException();
         }

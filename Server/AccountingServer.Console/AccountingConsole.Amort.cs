@@ -47,117 +47,109 @@ namespace AccountingServer.Console
         /// <summary>
         ///     执行表达式（摊销）
         /// </summary>
-        /// <param name="s">表达式</param>
+        /// <param name="expr">表达式</param>
         /// <returns>执行结果</returns>
-        public IQueryResult ExecuteAmort(string s)
+        public IQueryResult ExecuteAmort(ConsoleParser.AmortContext expr)
         {
             AutoConnect();
 
-            var sp = s.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
-            var query = sp.Length == 1 ? String.Empty : sp[1];
-
-            if (sp[0].Equals("o", StringComparison.OrdinalIgnoreCase))
+            if (expr.amortList() != null)
             {
+                var dt = expr.amortList().AOAll() != null
+                             ? null
+                             : expr.amortList().rangePoint() != null
+                                   ? expr.amortList().rangePoint().Range.EndDate
+                                   : DateTime.Now.Date;
+
                 var sb = new StringBuilder();
-                var filter = ParseAmortQuery(query);
-                foreach (var o in Sort(m_Accountant.FilteredSelect(filter)))
-                    sb.Append(ListAmort(o, DateTime.Now.Date, false));
+                foreach (var a in Sort(m_Accountant.SelectAmortizations(expr.amortList().distributedQ())))
+                    sb.Append(ListAmort(a, dt, expr.amortList().AOList() != null));
 
                 return new UnEditableText(sb.ToString());
             }
-            if (sp[0].StartsWith("o@", StringComparison.OrdinalIgnoreCase))
-            {
-                var dt = DateTime.ParseExact(sp[0] + "01", "o@yyyyMMdd", null).AddMonths(1).AddDays(-1);
-
-                var sb = new StringBuilder();
-                var filter = ParseAmortQuery(query);
-                foreach (var o in Sort(m_Accountant.FilteredSelect(filter)))
-                    sb.Append(ListAmort(o, dt, false));
-
-                return new UnEditableText(sb.ToString());
-            }
-            if (sp[0].Equals("o-all", StringComparison.OrdinalIgnoreCase))
+            if (expr.amortQuery() != null)
             {
                 var sb = new StringBuilder();
-                var filter = ParseAmortQuery(query);
-                foreach (var o in Sort(m_Accountant.FilteredSelect(filter)))
-                    sb.Append(ListAmort(o, null, false));
-
-                return new UnEditableText(sb.ToString());
-            }
-            if (sp[0].StartsWith("o-li", StringComparison.OrdinalIgnoreCase))
-            {
-                var sb = new StringBuilder();
-                var filter = ParseAmortQuery(query);
-                foreach (var o in Sort(m_Accountant.FilteredSelect(filter)))
-                    sb.Append(ListAmort(o));
-
-                return new UnEditableText(sb.ToString());
-            }
-            if (sp[0].StartsWith("o-q", StringComparison.OrdinalIgnoreCase))
-            {
-                var sb = new StringBuilder();
-                var filter = ParseAmortQuery(query);
-                foreach (var o in Sort(m_Accountant.FilteredSelect(filter)))
-                    sb.Append(CSharpHelper.PresentAmort(o));
+                foreach (var a in Sort(m_Accountant.SelectAmortizations(expr.amortQuery().distributedQ())))
+                    sb.Append(CSharpHelper.PresentAmort(a));
 
                 return new EditableText(sb.ToString());
             }
-            if (sp[0].StartsWith("o-reg", StringComparison.OrdinalIgnoreCase))
+            if (expr.amortRegister() != null)
             {
+                var rng = expr.amortRegister().range() != null
+                              ? expr.amortRegister().range().Range
+                              : DateFilter.Unconstrained;
+                var query = expr.amortRegister().vouchers();
+
                 var sb = new StringBuilder();
-                var filter = ParseAmortQuery(query);
-                foreach (var o in Sort(m_Accountant.FilteredSelect(filter)))
+                foreach (var a in Sort(m_Accountant.SelectAmortizations(expr.amortRegister().distributedQ())))
                 {
-                    foreach (var voucher in m_Accountant.RegisterVouchers(o))
+                    foreach (var voucher in m_Accountant.RegisterVouchers(a, rng, query))
                         sb.Append(CSharpHelper.PresentVoucher(voucher));
 
-                    m_Accountant.Update(o);
+                    m_Accountant.Update(a);
                 }
                 if (sb.Length > 0)
                     return new EditableText(sb.ToString());
                 return new Suceed();
             }
-            if (sp[0].StartsWith("o-unr", StringComparison.OrdinalIgnoreCase))
+            if (expr.amortUnregister() != null)
             {
-                var sb = new StringBuilder();
-                var filter = ParseAmortQuery(query);
-                foreach (var o in Sort(m_Accountant.FilteredSelect(filter)))
-                {
-                    foreach (var item in o.Schedule)
-                        item.VoucherID = null;
+                var rng = expr.amortUnregister().range() != null
+                              ? expr.amortUnregister().range().Range
+                              : DateFilter.Unconstrained;
+                var query = expr.amortRegister().vouchers();
 
-                    sb.Append(ListAmort(o));
-                    m_Accountant.Update(o);
+                var sb = new StringBuilder();
+                foreach (var a in Sort(m_Accountant.SelectAmortizations(expr.amortUnregister().distributedQ())))
+                {
+                    foreach (var item in a.Schedule.Where(item => item.Date.Within(rng)))
+                    {
+                        if (query != null)
+                        {
+                            if (item.VoucherID == null)
+                                continue;
+
+                            var voucher = m_Accountant.SelectVoucher(item.VoucherID);
+                            if (voucher != null)
+                                if (!MatchHelper.IsMatch(query, voucher.IsMatch))
+                                    continue;
+                        }
+                        item.VoucherID = null;
+                    }
+
+                    sb.Append(ListAmort(a));
+                    m_Accountant.Update(a);
                 }
                 return new EditableText(sb.ToString());
             }
-            if (sp[0].Equals("o-ra", StringComparison.OrdinalIgnoreCase) ||
-                sp[0].Equals("o-reamo", StringComparison.OrdinalIgnoreCase))
+            if (expr.amortReamo() != null)
             {
                 var sb = new StringBuilder();
-                var filter = ParseAmortQuery(query);
-                foreach (var o in m_Accountant.FilteredSelect(filter))
+                foreach (var a in Sort(m_Accountant.SelectAmortizations(expr.amortReamo().distributedQ())))
                 {
-                    Accountant.Amortize(o);
-                    sb.Append(CSharpHelper.PresentAmort(o));
-                    m_Accountant.Update(o);
+                    Accountant.Amortize(a);
+                    sb.Append(CSharpHelper.PresentAmort(a));
+                    m_Accountant.Update(a);
                 }
                 return new EditableText(sb.ToString());
             }
-            if (sp[0].Equals("o-reset-soft", StringComparison.OrdinalIgnoreCase))
+            if (expr.amortResetSoft() != null)
             {
-                var filter = ParseAmortQuery(query);
+                var rng = expr.amortResetSoft().range() != null
+                              ? expr.amortResetSoft().range().Range
+                              : DateFilter.Unconstrained;
+
                 var cnt = 0L;
-                foreach (var a in m_Accountant.FilteredSelect(filter))
+                foreach (var a in m_Accountant.SelectAmortizations(expr.amortResetSoft().distributedQ()))
                 {
                     if (a.Schedule == null)
                         continue;
                     var flag = false;
-                    foreach (
-                        var item in
-                            a.Schedule.Where(item => item.VoucherID != null)
-                             .Where(item => m_Accountant.SelectVoucher(item.VoucherID) == null))
+                    foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
+                                          .Where(item => item.VoucherID != null)
+                                          .Where(item => m_Accountant.SelectVoucher(item.VoucherID) == null))
                     {
                         item.VoucherID = null;
                         cnt++;
@@ -168,56 +160,44 @@ namespace AccountingServer.Console
                 }
                 return new NumberAffected(cnt);
             }
-            if (sp[0].StartsWith("o-ap", StringComparison.OrdinalIgnoreCase))
+            if (expr.amortApply() != null)
             {
-                var isCollapsed = sp[0].EndsWith("-collapse", StringComparison.OrdinalIgnoreCase) ||
-                                  sp[0].EndsWith("-co", StringComparison.OrdinalIgnoreCase);
+                var isCollapsed = expr.amortApply().AOCollapse() != null;
 
-                string dq;
-                Amortization filter = null;
-                if (query.LastIndexOf('\'') >= 0)
-                {
-                    var spx = query.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
-                    dq = spx.Length <= 1 ? String.Empty : spx[1];
-                    filter = ParseAmortQuery(spx[0]);
-                }
-                else
-                    dq = query;
-
-                var rng = String.IsNullOrWhiteSpace(dq) ? ParseDateQuery("[0]", true) : ParseDateQuery(dq, true);
+                var rng = expr.amortUnregister().range() != null
+                              ? expr.amortUnregister().range().Range
+                              : DateFilter.Unconstrained;
 
                 var sb = new StringBuilder();
-                foreach (var o in m_Accountant.FilteredSelect(filter))
+                foreach (var a in Sort(m_Accountant.SelectAmortizations(expr.amortApply().distributedQ())))
                 {
-                    foreach (var item in m_Accountant.Update(o, rng, isCollapsed))
+                    foreach (var item in m_Accountant.Update(a, rng, isCollapsed))
                         sb.AppendLine(ListAmortItem(item));
 
-                    m_Accountant.Update(o);
+                    m_Accountant.Update(a);
                 }
                 if (sb.Length > 0)
                     return new EditableText(sb.ToString());
                 return new Suceed();
             }
-            if (sp[0].StartsWith("o-chk", StringComparison.OrdinalIgnoreCase))
+            if (expr.amortCheck() != null)
             {
-                var filter = ParseAmortQuery(query);
-
                 var rng = new DateFilter(null, DateTime.Now.Date);
 
                 var sb = new StringBuilder();
-                foreach (var o in m_Accountant.FilteredSelect(filter))
+                foreach (var a in Sort(m_Accountant.SelectAmortizations(expr.amortCheck().distributedQ())))
                 {
                     var sbi = new StringBuilder();
-                    foreach (var item in m_Accountant.Update(o, rng, false, true))
+                    foreach (var item in m_Accountant.Update(a, rng, false, true))
                         sbi.AppendLine(ListAmortItem(item));
 
                     if (sbi.Length != 0)
                     {
-                        sb.AppendLine(ListAmort(o, null, false));
+                        sb.AppendLine(ListAmort(a, null, false));
                         sb.AppendLine(sbi.ToString());
                     }
 
-                    m_Accountant.Update(o);
+                    m_Accountant.Update(a);
                 }
                 if (sb.Length > 0)
                     return new EditableText(sb.ToString());

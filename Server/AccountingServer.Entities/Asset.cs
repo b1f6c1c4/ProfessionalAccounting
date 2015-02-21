@@ -108,7 +108,7 @@ namespace AccountingServer.Entities
     /// <summary>
     ///     资产
     /// </summary>
-    public class Asset
+    public class Asset : IDistributed
     {
         /// <summary>
         ///     规范忽略标志

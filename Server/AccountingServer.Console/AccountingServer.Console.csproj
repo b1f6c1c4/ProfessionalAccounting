@@ -54,6 +54,7 @@
     <Compile Include="AccountingConsole.Subtotal.cs" />
     <Compile Include="AccountingConsole.Voucher.cs" />
     <Compile Include="Chart\AccountingChart.cs" />
+    <Compile Include="ConsoleParser.Proxy.Distributed.cs" />
     <Compile Include="ConsoleParser.Proxy.Voucher.cs" />
     <Compile Include="ConsoleParser.Proxy.Detail.cs" />
     <Compile Include="ConsoleLexer.cs" />
@@ -88,10 +89,10 @@
     </AntlrTokens>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="packages.config" />
+    <Compile Include="ConsoleParser.Proxy.Range.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConsoleParser.Proxy.Range.cs" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

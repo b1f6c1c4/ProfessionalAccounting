@@ -12,9 +12,9 @@ namespace AccountingServer.BLL
             return source.GroupBy(b => b.Title.Value);
         }
 
-        public static IEnumerable<IGrouping<int, Balance>> GroupBySubTitle(IEnumerable<Balance> source)
+        public static IEnumerable<IGrouping<int?, Balance>> GroupBySubTitle(IEnumerable<Balance> source)
         {
-            return source.GroupBy(b => b.SubTitle.Value);
+            return source.GroupBy(b => b.SubTitle);
         }
 
         public static IEnumerable<IGrouping<string, Balance>> GroupByContent(IEnumerable<Balance> source)
@@ -34,10 +34,10 @@ namespace AccountingServer.BLL
 
 
         /// <summary>
-        ///     计算每日累计发生额
+        ///     计算每变动日累计发生额
         /// </summary>
-        /// <param name="source">每日发生额</param>
-        /// <returns>每日余额</returns>
+        /// <param name="source">每变动日发生额</param>
+        /// <returns>每变动日余额</returns>
         public static IEnumerable<Balance> GroupByDateAggr(IEnumerable<Balance> source)
         {
             var resx =
@@ -59,10 +59,10 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     计算每日余额
+        ///     计算每日累计发生额
         /// </summary>
         /// <param name="source">每日发生额</param>
-        /// <param name="rng">日期过滤器</param>
+        /// <param name="rng">累计区间</param>
         /// <returns>每日余额</returns>
         public static IEnumerable<Balance> GroupByDateBal(IEnumerable<Balance> source, DateFilter rng)
         {
