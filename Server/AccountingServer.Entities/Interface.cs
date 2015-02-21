@@ -2,14 +2,11 @@
 
 namespace AccountingServer.Entities
 {
-    public enum UnaryOperatorType
+    public enum OperatorType
     {
+        None,
         Identity,
         Complement,
-    }
-
-    public enum BinaryOperatorType
-    {
         Union,
         Substract,
         Interect,
@@ -24,16 +21,9 @@ namespace AccountingServer.Entities
         int Dir { get; }
     }
 
-    public interface IDetailQueryUnary : IDetailQueryCompounded
+    public interface IDetailQueryAry : IDetailQueryCompounded
     {
-        UnaryOperatorType Operator { get; }
-
-        IDetailQueryCompounded Filter1 { get; }
-    }
-
-    public interface IDetailQueryBinary : IDetailQueryCompounded
-    {
-        BinaryOperatorType Operator { get; }
+        OperatorType Operator { get; }
         IDetailQueryCompounded Filter1 { get; }
         IDetailQueryCompounded Filter2 { get; }
     }
@@ -57,16 +47,9 @@ namespace AccountingServer.Entities
         IDetailQueryCompounded DetailFilter { get; }
     }
 
-    public interface IVoucherQueryUnary : IVoucherQueryCompounded
+    public interface IVoucherQueryAry : IVoucherQueryCompounded
     {
-        UnaryOperatorType Operator { get; }
-
-        IVoucherQueryCompounded Filter1 { get; }
-    }
-
-    public interface IVoucherQueryBinary : IVoucherQueryCompounded
-    {
-        BinaryOperatorType Operator { get; }
+        OperatorType Operator { get; }
         IVoucherQueryCompounded Filter1 { get; }
         IVoucherQueryCompounded Filter2 { get; }
     }
@@ -95,7 +78,8 @@ namespace AccountingServer.Entities
     {
         bool NonZero { get; }
         IList<SubtotalLevel> Levels { get; }
-        AggregationType AggrType { get; }
+        bool AggrEnabled { get; }
+        IDateRange AggrRage { get; }
     }
 
     public interface IGroupedQuery

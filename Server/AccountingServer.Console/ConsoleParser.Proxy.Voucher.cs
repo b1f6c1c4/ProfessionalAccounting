@@ -16,15 +16,15 @@ namespace AccountingServer.Console
                 get
                 {
                     var vfilter = new Voucher();
-                    if (VoucherID() != null)
+                    if (DollarQuotedString() != null)
                     {
-                        var s = VoucherID().GetText();
+                        var s = DollarQuotedString().GetText();
                         s = s.Substring(1, s.Length - 2);
                         vfilter.ID = s.Replace("$$", "$");
                     }
-                    if (VoucherRemark() != null)
+                    if (PercentQuotedString() != null)
                     {
-                        var s = VoucherRemark().GetText();
+                        var s = PercentQuotedString().GetText();
                         s = s.Substring(1, s.Length - 2);
                         vfilter.Remark = s.Replace("%%", "%");
                     }
@@ -43,48 +43,62 @@ namespace AccountingServer.Console
             public IDetailQueryCompounded DetailFilter { get { return details(); } }
         }
 
-        public partial class VoucherAtomContext : IVoucherQueryCompounded { }
-
-        public partial class VouchersXContext : IVoucherQueryBinary
+        public partial class VouchersContext : IVoucherQueryAry
         {
-            public BinaryOperatorType Operator { get { return BinaryOperatorType.Interect; } }
-            public IVoucherQueryCompounded Filter1 { get { return voucherAtom(0); } }
-            public IVoucherQueryCompounded Filter2 { get { return voucherAtom(1); } }
-        }
+            public OperatorType Operator { get { return OperatorType.None; } }
 
-        public partial class VouchersContext : IVoucherQueryBinary
-        {
-            public BinaryOperatorType Operator
+            public IVoucherQueryCompounded Filter1
             {
                 get
                 {
+                    if (voucherQuery() != null)
+                        return voucherQuery();
+                    return vouchersB();
+                }
+            }
+
+            public IVoucherQueryCompounded Filter2 { get { throw new NotImplementedException(); } }
+        }
+
+        public partial class VouchersBContext : IVoucherQueryAry
+        {
+            public OperatorType Operator
+            {
+                get
+                {
+                    if (Op == null)
+                        return OperatorType.None;
+                    if (vouchersB().Count == 1)
+                    {
+                        if (Op.Text == "+")
+                            return OperatorType.Identity;
+                        if (Op.Text == "-")
+                            return OperatorType.Complement;
+                        throw new InvalidOperationException();
+                    }
                     if (Op.Text == "+")
-                        return BinaryOperatorType.Union;
+                        return OperatorType.Union;
                     if (Op.Text == "-")
-                        return BinaryOperatorType.Substract;
+                        return OperatorType.Substract;
+                    if (Op.Text == "*")
+                        return OperatorType.Interect;
                     throw new InvalidOperationException();
                 }
             }
 
-            public IVoucherQueryCompounded Filter1 { get { return vouchersX(0); } }
-            public IVoucherQueryCompounded Filter2 { get { return vouchersX(1); } }
-        }
-
-        public partial class VoucherUnaryContext : IVoucherQueryUnary
-        {
-            public UnaryOperatorType Operator
+            public IVoucherQueryCompounded Filter1
             {
                 get
                 {
-                    if (Op.Text == "-")
-                        return UnaryOperatorType.Complement;
-                    if (Op.Text == "+")
-                        return UnaryOperatorType.Identity;
-                    throw new InvalidOperationException();
+                    if (voucherQuery() != null)
+                        return voucherQuery();
+                    //if (Op == null)
+                    //    return vouchers(0);
+                    return vouchersB(0);
                 }
             }
 
-            public IVoucherQueryCompounded Filter1 { get { return voucherQuery(); } }
+            public IVoucherQueryCompounded Filter2 { get { return vouchersB(1); } }
         }
 
         public partial class SubtotalContext : ISubtotal
@@ -126,20 +140,20 @@ namespace AccountingServer.Console
                 }
             }
 
-            public AggregationType AggrType
+            public bool AggrEnabled
+            {
+                get { return Aggregation != null; }
+            }
+
+            public IDateRange AggrRage
             {
                 get
                 {
-                    switch (AggregationMethod.Text)
-                    {
-                        case "X":
-                            return AggregationType.ExtendedEveryDay;
-                        case "x":
-                            return AggregationType.EveryDay;
-                        case "D":
-                            return AggregationType.ChangedDay;
-                    }
-                    throw new InvalidOperationException();
+                    if (rangeCore() != null)
+                        return rangeCore();
+                    if (Ranged == null)
+                        return null;
+                    return DateFilter.Unconstrained;
                 }
             }
         }

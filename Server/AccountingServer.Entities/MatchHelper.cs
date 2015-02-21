@@ -95,26 +95,21 @@ namespace AccountingServer.Entities
                     return false;
                 return f.Dir == 0 || f.Dir > 0 && voucherDetail.Fund > 0 || f.Dir < 0 && voucherDetail.Fund < 0;
             }
-            if (query is IDetailQueryUnary)
+            if (query is IDetailQueryAry)
             {
-                var f = query as IDetailQueryUnary;
+                var f = query as IDetailQueryAry;
                 switch (f.Operator)
                 {
-                    case UnaryOperatorType.Complement:
+                    case OperatorType.None:
+                    case OperatorType.Identity:
+                        return IsMatch(voucherDetail, f.Filter1);
+                    case OperatorType.Complement:
                         return !IsMatch(voucherDetail, f.Filter1);
-                }
-                throw new InvalidOperationException();
-            }
-            if (query is IDetailQueryBinary)
-            {
-                var f = query as IDetailQueryBinary;
-                switch (f.Operator)
-                {
-                    case BinaryOperatorType.Union:
+                    case OperatorType.Union:
                         return IsMatch(voucherDetail, f.Filter1) || IsMatch(voucherDetail, f.Filter2);
-                    case BinaryOperatorType.Interect:
+                    case OperatorType.Interect:
                         return IsMatch(voucherDetail, f.Filter1) && IsMatch(voucherDetail, f.Filter2);
-                    case BinaryOperatorType.Substract:
+                    case OperatorType.Substract:
                         return IsMatch(voucherDetail, f.Filter1) && !IsMatch(voucherDetail, f.Filter2);
                 }
                 throw new InvalidOperationException();

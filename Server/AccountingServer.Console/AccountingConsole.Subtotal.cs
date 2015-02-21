@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
@@ -9,409 +8,103 @@ namespace AccountingServer.Console
 {
     public partial class AccountingConsole
     {
-        /// <summary>
-        ///     显示二层分类汇总的结果
-        /// </summary>
-        /// <param name="t">按一级科目的汇总</param>
-        /// <param name="tsc">按内容的汇总</param>
-        /// <returns>分类汇总结果</returns>
-        // ReSharper disable once ParameterTypeCanBeEnumerable.Local
-        private static string PresentSubtotal(List<Balance> t, List<Balance> tsc)
+        private IQueryResult PresentSubtotal(IGroupedQuery query)
         {
+            AutoConnect();
+            var result = m_Accountant.FilteredSelect(query);
             var sb = new StringBuilder();
-            foreach (var balanceT in t)
-            {
-                var copiedT = balanceT;
-                sb.AppendFormat(
-                                "{0}-{1}:{2}",
-                                copiedT.Title.AsTitle(),
-                                TitleManager.GetTitleName(copiedT.Title).CPadRight(28),
-                                copiedT.Fund.AsCurrency().CPadLeft(15));
-                sb.AppendLine();
-                foreach (var balanceC in tsc.Where(cx => cx.Title == copiedT.Title))
-                {
-                    var copiedC = balanceC;
-                    sb.AppendFormat(
-                                    "        {0}:{1}   ({2:00.0%})",
-                                    copiedC.Content.CPadRight(25),
-                                    copiedC.Fund.AsCurrency().CPadLeft(15),
-                                    copiedC.Fund / copiedT.Fund);
-                    sb.AppendLine();
-                }
-            }
-            return sb.ToString();
+            PresentSubtotal(result, 0, query.Subtotal, sb);
+            return new UnEditableText(sb.ToString());
         }
 
-        /// <summary>
-        ///     显示三层分类汇总的结果
-        /// </summary>
-        /// <param name="t">按一级科目的汇总</param>
-        /// <param name="ts">按二级科目的汇总</param>
-        /// <param name="tsc">按内容的汇总</param>
-        /// <returns>分类汇总结果</returns>
-        // ReSharper disable once ParameterTypeCanBeEnumerable.Local
-        private static string PresentSubtotal(List<Balance> t, List<Balance> ts, List<Balance> tsc)
+        private void PresentSubtotal(IEnumerable<Balance> res, int depth, ISubtotal args, StringBuilder sb)
         {
-            var sb = new StringBuilder();
-            foreach (var balanceT in t)
+            const int ident = 4;
+
+            if (depth >= args.Levels.Count)
             {
-                var copiedT = balanceT;
-                sb.AppendFormat(
-                                "{0}-{1}:{2}",
-                                copiedT.Title.AsTitle(),
-                                TitleManager.GetTitleName(copiedT.Title).CPadRight(28),
-                                copiedT.Fund.AsCurrency().CPadLeft(15));
-                sb.AppendLine();
-                foreach (var balanceS in ts.Where(sx => sx.Title == copiedT.Title))
+                if (!args.AggrEnabled)
                 {
-                    var copiedS = balanceS;
-                    sb.AppendFormat(
-                                    "  {0}-{1}:{2}   ({3:00.0%})",
-                                    copiedS.SubTitle.HasValue ? copiedS.SubTitle.AsSubTitle() : "  ",
-                                    TitleManager.GetTitleName(copiedS).CPadRight(28),
-                                    copiedS.Fund.AsCurrency().CPadLeft(15),
-                                    copiedS.Fund / copiedT.Fund);
+                    sb.AppendLine(res.Sum(b => b.Fund).AsCurrency());
+                    return;
+                }
+                if (args.AggrRage == null)
+                {
                     sb.AppendLine();
-                    foreach (var balanceC in tsc.Where(
-                                                       cx => cx.Title == copiedS.Title
-                                                             && cx.SubTitle == copiedS.SubTitle))
+                    foreach (var b in Accountant.GroupByDateAggr(res))
                     {
-                        var copiedC = balanceC;
-                        sb.AppendFormat(
-                                        "        {0}:{1}   ({2:00.0%}, {3:00.0%})",
-                                        copiedC.Content.CPadRight(25),
-                                        copiedC.Fund.AsCurrency().CPadLeft(15),
-                                        copiedC.Fund / copiedS.Fund,
-                                        copiedC.Fund / copiedT.Fund);
+                        sb.Append(depth * ident);
+                        sb.AppendFormat("{0}:{1}", b.Date.AsDate(), b.Fund.AsCurrency().PadLeft(ident * 4));
                         sb.AppendLine();
                     }
+                    return;
                 }
-            }
-            return sb.ToString();
-        }
-
-
-        /// <summary>
-        ///     检索记账凭证并按一级科目、内容三层分类汇总，生成报表
-        /// </summary>
-        /// <param name="sx">检索表达式</param>
-        /// <param name="withZero">是否包含汇总为零的部分</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <returns>报表</returns>
-        private IQueryResult SubtotalWith2Levels(string sx, bool withZero, int dir)
-        {
-            var res = ExecuteDetailQuery(sx, dir);
-            if (res == null)
-                throw new InvalidOperationException("检索表达式无效");
-
-            var tscX = res.GroupBy(
-                                   d =>
-                                   new Balance { Title = d.Title, Content = d.Content },
-                                   (b, bs) =>
-                                   new Balance
-                                       {
-                                           Title = b.Title,
-                                           Content = b.Content,
-                                           // ReSharper disable once PossibleInvalidOperationException
-                                           Fund = bs.Sum(d => d.Fund.Value)
-                                       },
-                                   new BalanceEqualityComparer());
-            var tsc = !withZero
-                          ? tscX.Where(d => Math.Abs(d.Fund) > Accountant.Tolerance).ToList()
-                          : tscX.ToList();
-            tsc.Sort(new BalanceComparer());
-            var tX = tsc.GroupBy(
-                                 d => d.Title,
-                                 (b, bs) =>
-                                 new Balance
-                                     {
-                                         Title = b,
-                                         Fund = bs.Sum(d => d.Fund)
-                                     },
-                                 EqualityComparer<int?>.Default);
-            var t = !withZero
-                        ? tX.Where(d => Math.Abs(d.Fund) > Accountant.Tolerance).ToList()
-                        : tX.ToList();
-
-            return new UnEditableText(PresentSubtotal(t, tsc));
-        }
-
-        /// <summary>
-        ///     检索记账凭证并按一级科目、二级科目、内容三层分类汇总，生成报表
-        /// </summary>
-        /// <param name="sx">检索表达式</param>
-        /// <param name="withZero">是否包含汇总为零的部分</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <returns>报表</returns>
-        private IQueryResult SubtotalWith3Levels(string sx, bool withZero, int dir)
-        {
-            var res = ExecuteDetailQuery(sx, dir);
-            if (res == null)
-                throw new InvalidOperationException("检索表达式无效");
-
-            var tscX = res.GroupBy(
-                                   d =>
-                                   new Balance { Title = d.Title, SubTitle = d.SubTitle, Content = d.Content },
-                                   (b, bs) =>
-                                   new Balance
-                                       {
-                                           Title = b.Title,
-                                           SubTitle = b.SubTitle,
-                                           Content = b.Content,
-                                           // ReSharper disable once PossibleInvalidOperationException
-                                           Fund = bs.Sum(d => d.Fund.Value)
-                                       },
-                                   new BalanceEqualityComparer());
-            var tsc = !withZero
-                          ? tscX.Where(d => Math.Abs(d.Fund) > Accountant.Tolerance).ToList()
-                          : tscX.ToList();
-            tsc.Sort(new BalanceComparer());
-            var tsX = tsc.GroupBy(
-                                  d =>
-                                  new Balance { Title = d.Title, SubTitle = d.SubTitle },
-                                  (b, bs) =>
-                                  new Balance
-                                      {
-                                          Title = b.Title,
-                                          SubTitle = b.SubTitle,
-                                          Fund = bs.Sum(d => d.Fund)
-                                      },
-                                  new BalanceEqualityComparer());
-            var ts = !withZero
-                         ? tsX.Where(d => Math.Abs(d.Fund) > Accountant.Tolerance).ToList()
-                         : tsX.ToList();
-            var tX = ts.GroupBy(
-                                d => d.Title,
-                                (b, bs) =>
-                                new Balance
-                                    {
-                                        Title = b,
-                                        Fund = bs.Sum(d => d.Fund)
-                                    },
-                                EqualityComparer<int?>.Default);
-            var t = !withZero
-                        ? tX.Where(d => Math.Abs(d.Fund) > Accountant.Tolerance).ToList()
-                        : tX.ToList();
-
-            return new UnEditableText(PresentSubtotal(t, ts, tsc));
-        }
-
-        /// <summary>
-        ///     检索记账凭证并按日期、一级科目、二级科目、内容四层分类汇总，生成报表
-        /// </summary>
-        /// <param name="sx">检索表达式</param>
-        /// <param name="withZero">是否包含汇总为零的部分</param>
-        /// <param name="reversed">是否将日期放在最外侧</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <param name="aggr">是否每变动日累加而非每日求余额</param>
-        /// <returns>报表</returns>
-        private IQueryResult DailySubtotalWith4Levels(string sx, bool withZero, bool reversed, int dir, bool aggr)
-        {
-            string dateQ;
-            var detail = ParseQuery(sx, out dateQ);
-
-            var rng = ParseDateQuery(dateQ);
-
-            AutoConnect();
-
-            if (detail.Content == null)
-            {
-                if (detail.Title != null)
-                    return new UnEditableText(
-                        reversed
-                            ? SubtotalWith4Levels1X00Reversed(detail, rng, withZero, dir)
-                            : SubtotalWith4Levels1X00(detail, rng, withZero, dir, aggr));
-
-                throw new NotImplementedException();
-            }
-            if (detail.Title != null)
-                return new UnEditableText(SubtotalWith4Levels1X10(withZero, detail, rng, dir, aggr));
-
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        ///     检索记账凭证并按日期、一级科目、内容三层分类汇总，生成报表
-        /// </summary>
-        /// <param name="sx">检索表达式</param>
-        /// <param name="withZero">是否包含汇总为零的部分</param>
-        /// <param name="reversed">是否将日期放在最外侧</param>
-        /// <param name="dir">+1表示只考虑借方，-1表示只考虑贷方，0表示同时考虑借方和贷方</param>
-        /// <param name="aggr">是否每变动日累加而非每日求余额</param>
-        /// <returns>报表</returns>
-        private IQueryResult DailySubtotalWith3Levels(string sx, bool withZero, bool reversed, int dir, bool aggr)
-        {
-            string dateQ;
-            var detail = ParseQuery(sx, out dateQ);
-
-            var rng = ParseDateQuery(dateQ);
-
-            AutoConnect();
-
-            if (detail.Content == null)
-            {
-                if (detail.Title != null)
-                    return new UnEditableText(
-                        reversed
-                            ? SubtotalWith4Levels1X00Reversed(detail, rng, withZero, dir)
-                            : SubtotalWith4Levels1X00(detail, rng, withZero, dir, aggr));
-
-                throw new NotImplementedException();
-            }
-            if (detail.Title != null)
-                return new UnEditableText(SubtotalWith4Levels1X10(withZero, detail, rng, dir, aggr));
-
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        ///     根据相关信息检索记账凭证并按内容、日期分类汇总，生成报表
-        /// </summary>
-        private string SubtotalWith4Levels1X00(VoucherDetail filter, DateFilter rng, bool withZero, int dir, bool aggr)
-        {
-            var vouchers = m_Accountant.FilteredSelect(filter: filter, rng: rng, dir: dir);
-
-            var result = vouchers.SelectMany(
-                                             v =>
-                                             v.Details.Where(d => d.IsMatch(filter))
-                                              .Select(d => new Tuple<DateTime?, VoucherDetail>(v.Date, d)))
-                                 .GroupBy(
-                                          t => t.Item2.Content,
-                                          (c, ts) =>
-                                          {
-                                              var tmp = ts.GroupBy(
-                                                                   t => t.Item1,
-                                                                   (d, tss) =>
-                                                                   new Balance
-                                                                       {
-                                                                           Date = d,
-                                                                           //Content = c,
-                                                                           // ReSharper disable once PossibleInvalidOperationException
-                                                                           Fund = tss.Sum(t => t.Item2.Fund.Value)
-                                                                       }).ToList();
-                                              tmp.Sort(new BalanceComparer());
-                                              return new Tuple<string, IEnumerable<Balance>>(
-                                                  c,
-                                                  aggr
-                                                      ? Accountant.ProcessAccumulatedBalance(tmp, rng)
-                                                      : Accountant.ProcessDailyBalance(tmp, rng));
-                                          });
-
-            var sb = new StringBuilder();
-            var flag = false;
-            foreach (var balances in result)
-            {
-                sb.AppendFormat("    {0}:", balances.Item1);
-                sb.AppendLine();
-
-                foreach (var balance in balances.Item2)
+                //else
                 {
-                    if (withZero)
-                        if (Math.Abs(balance.Fund) < Accountant.Tolerance)
-                        {
-                            flag = true;
-                            sb.Append("~");
-                            continue;
-                        }
-                    if (flag)
+                    sb.AppendLine();
+                    foreach (var b in Accountant.GroupByDateBal(res, args.AggrRage.Range))
                     {
+                        sb.Append(depth * ident);
+                        sb.AppendFormat("{0}:{1}", b.Date.AsDate(), b.Fund.AsCurrency().PadLeft(ident * 4));
                         sb.AppendLine();
-                        flag = false;
                     }
-                    sb.AppendFormat("{0:yyyyMMdd} {1}", balance.Date, balance.Fund.AsCurrency().CPadLeft(12));
-                    sb.AppendLine();
+                    return;
                 }
             }
-            return sb.ToString();
-        }
 
-        /// <summary>
-        ///     根据相关信息检索记账凭证并按日期、内容分类汇总，生成报表
-        /// </summary>
-        private string SubtotalWith4Levels1X00Reversed(VoucherDetail filter, DateFilter rng, bool withZero, int dir)
-        {
-            var vouchers = m_Accountant.FilteredSelect(filter: filter, rng: rng, dir: dir);
-
-            var result = vouchers.GroupBy(
-                                          v => v.Date,
-                                          (dt, vs) => new Tuple<DateTime?, IEnumerable<Balance>>(
-                                                          dt,
-                                                          vs.SelectMany(v => v.Details)
-                                                            .Where(d => d.IsMatch(filter))
-                                                            .GroupBy(
-                                                                     d => new Balance { Content = d.Content },
-                                                                     (b, ds) =>
-                                                                     new Balance
-                                                                         {
-                                                                             Date = dt,
-                                                                             Title = filter.Title,
-                                                                             SubTitle = filter.SubTitle,
-                                                                             Content = b.Content,
-                                                                             // ReSharper disable once PossibleInvalidOperationException
-                                                                             Fund = ds.Sum(d => d.Fund.Value)
-                                                                         }))).ToList();
-
-            result.Sort((t1, t2) => DateHelper.CompareDate(t1.Item1, t2.Item1));
-
-            var cuml = Accountant.ProcessDailyBalance(result, rng);
-
-            var sb = new StringBuilder();
-            foreach (var b in cuml)
+            sb.AppendLine();
+            switch (args.Levels[depth])
             {
-                var balances = b.ToList();
-                sb.AppendFormat("{0:yyyyMMdd}:", balances.First().Date);
-                sb.AppendLine();
-
-                foreach (var balance in balances)
-                {
-                    if (withZero)
-                        if (Math.Abs(balance.Fund) < Accountant.Tolerance)
-                            continue;
-                    sb.AppendFormat(
-                                    "    {0}:{1}",
-                                    balance.Content.CPadRight(25),
-                                    balance.Fund.AsCurrency().CPadLeft(12));
-                    sb.AppendLine();
-                }
-            }
-            return sb.ToString();
-        }
-
-        /// <summary>
-        ///     根据相关信息检索记账凭证并按日期分类汇总，生成报表
-        /// </summary>
-        private string SubtotalWith4Levels1X10(bool withZero, VoucherDetail filter, DateFilter rng, int dir, bool aggr)
-        {
-            var result =
-                m_Accountant.GetDailyBalance(
-                                             new Balance
-                                                 {
-                                                     Title = filter.Title,
-                                                     SubTitle = filter.SubTitle,
-                                                     Content = filter.Content
-                                                 },
-                                             rng,
-                                             aggr: aggr);
-            var sb = new StringBuilder();
-            var flag = false;
-            foreach (var balance in result)
-            {
-                if (withZero)
-                    if (Math.Abs(balance.Fund) < Accountant.Tolerance)
+                case SubtotalLevel.Title:
+                    foreach (var grp in Accountant.GroupByTitle(res))
                     {
-                        flag = true;
-                        sb.Append("~");
-                        continue;
+                        sb.Append(depth * ident);
+                        sb.AppendFormat("{0}:", grp.Key.AsTitle());
+                        PresentSubtotal(grp, depth + 1, args, sb);
                     }
-                if (flag)
-                {
-                    sb.AppendLine();
-                    flag = false;
-                }
-                sb.AppendFormat("{0:yyyyMMdd} {1}", balance.Date, balance.Fund.AsCurrency().CPadLeft(12));
-                sb.AppendLine();
+                    break;
+                case SubtotalLevel.SubTitle:
+                    foreach (var grp in Accountant.GroupBySubTitle(res))
+                    {
+                        sb.Append(depth * ident);
+                        sb.AppendFormat("{0}:", grp.Key.AsSubTitle());
+                        PresentSubtotal(grp, depth + 1, args, sb);
+                    }
+                    break;
+                case SubtotalLevel.Content:
+                    foreach (var grp in Accountant.GroupByContent(res))
+                    {
+                        sb.Append(depth * ident);
+                        sb.AppendFormat("{0}:", grp.Key);
+                        PresentSubtotal(grp, depth + 1, args, sb);
+                    }
+                    break;
+                case SubtotalLevel.Remark:
+                    foreach (var grp in Accountant.GroupByRemark(res))
+                    {
+                        sb.Append(depth * ident);
+                        sb.AppendFormat("{0}:", grp.Key);
+                        PresentSubtotal(grp, depth + 1, args, sb);
+                    }
+                    break;
+                case SubtotalLevel.Day:
+                case SubtotalLevel.Week:
+                    foreach (var grp in Accountant.GroupByDate(res))
+                    {
+                        sb.Append(depth * ident);
+                        sb.AppendFormat("{0}:", grp.Key);
+                        PresentSubtotal(grp, depth + 1, args, sb);
+                    }
+                    break;
+                case SubtotalLevel.FinancialMonth:
+                    foreach (var grp in Accountant.GroupByDate(res))
+                    {
+                        sb.Append(depth * ident);
+                        sb.AppendFormat("{0}:", grp.Key);
+                        PresentSubtotal(grp, depth + 1, args, sb);
+                    }
+                    break;
             }
-            return sb.ToString();
         }
     }
 }

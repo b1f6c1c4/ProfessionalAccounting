@@ -33,12 +33,11 @@ T100101				限制科目
 分类汇总：
 `tsc	`			按Title，SubTitle，Content分类汇总并制作报表（不含0）
 ``tsc	``			按Title，SubTitle，Content分类汇总并制作报表（含0）
-`dtsc				按Date，Title，SubTitle，Content分类汇总（当日发生额）并制作报表（不含0发生额日）
-`tscD				按Date，Title，SubTitle，Content分类汇总（当日累计发生额）并制作报表（不含0累计发生额日）
-`tscx				按Title，SubTitle，Content，Date分类汇总（当日余额，不含未变动日，零变动属于变动）并制作报表（不含0余额日）
-`tscX				按Date，Title，SubTitle，Content分类汇总（当日余额，含未变动日）并制作报表（不含0累计发生额日）
+`dtsc				按Date，Title，SubTitle，Content分类汇总（每日发生额）并制作报表（不含0发生额日）
+`tscD				按Date，Title，SubTitle，Content分类汇总（每日累计发生额，只显示发生）并制作报表（不含0累计发生额日）
+`tscD[]				按Date，Title，SubTitle，Content分类汇总（每日累计发生额，只显示部分）并制作报表（不含0累计发生额日）
 `cd					按Content，Date分类汇总（当日发生额）并制作报表（不含0）
-注：D/x/X之后不能再分类汇总
+注：D之后不能再分类汇总
 
 
 检索所有科目：

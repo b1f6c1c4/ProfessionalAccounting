@@ -303,56 +303,57 @@ namespace AccountingServer.DAL
                 var f = query as IDetailQueryAtom;
                 return GetJavascriptFilter(f.Filter, f.Dir);
             }
-            if (query is IDetailQueryUnary)
+            if (query is IDetailQueryAry)
             {
-                var f = query as IDetailQueryUnary;
+                var f = query as IDetailQueryAry;
 
                 var sb = new StringBuilder();
                 sb.AppendLine("function (d) {");
                 sb.AppendLine("    return ");
                 switch (f.Operator)
                 {
-                    case UnaryOperatorType.Identity:
+                    case OperatorType.None:
+                    case OperatorType.Identity:
+                        sb.AppendLine("(");
+                        sb.Append(GetJavascriptFilter(f.Filter1));
+                        sb.AppendLine(")(d)");
                         break;
-                    case UnaryOperatorType.Complement:
-                        sb.AppendLine("!");
+                    case OperatorType.Complement:
+                        sb.AppendLine("!(");
+                        sb.Append(GetJavascriptFilter(f.Filter1));
+                        sb.AppendLine(")(d)");
                         break;
-                    default:
-                        throw new InvalidOperationException();
-                }
-                sb.AppendLine("(");
-                sb.Append(GetJavascriptFilter(f.Filter1));
-                sb.AppendLine(")(d);");
-                sb.AppendLine("}");
-                return sb.ToString();
-            }
-            if (query is IDetailQueryBinary)
-            {
-                var f = query as IDetailQueryBinary;
-
-                var sb = new StringBuilder();
-                sb.AppendLine("function (d) {");
-                sb.AppendLine("    return (");
-                sb.Append(GetJavascriptFilter(f.Filter1));
-                sb.AppendLine(")(d) ");
-
-                switch (f.Operator)
-                {
-                    case BinaryOperatorType.Union:
+                    case OperatorType.Union:
+                        sb.AppendLine("(");
+                        sb.Append(GetJavascriptFilter(f.Filter1));
+                        sb.AppendLine(")(d) ");
                         sb.AppendLine("&&");
+                        sb.AppendLine(" (");
+                        sb.Append(GetJavascriptFilter(f.Filter2));
+                        sb.AppendLine(")(d)");
                         break;
-                    case BinaryOperatorType.Interect:
+                    case OperatorType.Interect:
+                        sb.AppendLine("(");
+                        sb.Append(GetJavascriptFilter(f.Filter1));
+                        sb.AppendLine(")(d) ");
                         sb.AppendLine("||");
+                        sb.AppendLine(" (");
+                        sb.Append(GetJavascriptFilter(f.Filter2));
+                        sb.AppendLine(")(d)");
                         break;
-                    case BinaryOperatorType.Substract:
+                    case OperatorType.Substract:
+                        sb.AppendLine("(");
+                        sb.Append(GetJavascriptFilter(f.Filter1));
+                        sb.AppendLine(")(d) ");
                         sb.AppendLine("&& !");
+                        sb.AppendLine(" (");
+                        sb.Append(GetJavascriptFilter(f.Filter2));
+                        sb.AppendLine(")(d)");
                         break;
                     default:
                         throw new InvalidOperationException();
                 }
-                sb.AppendLine(" (");
-                sb.Append(GetJavascriptFilter(f.Filter2));
-                sb.AppendLine(")(d);");
+                sb.AppendLine(";");
                 sb.AppendLine("}");
                 return sb.ToString();
             }
@@ -408,58 +409,58 @@ namespace AccountingServer.DAL
                 sb.AppendLine("    return true;");
                 sb.AppendLine("}");
                 return sb.ToString();
-
             }
-            if (query is IVoucherQueryUnary)
+            if (query is IVoucherQueryAry)
             {
-                var f = query as IVoucherQueryUnary;
+                var f = query as IVoucherQueryAry;
 
                 var sb = new StringBuilder();
                 sb.AppendLine("function (v) {");
                 sb.AppendLine("    return ");
                 switch (f.Operator)
                 {
-                    case UnaryOperatorType.Identity:
+                    case OperatorType.None:
+                    case OperatorType.Identity:
+                        sb.AppendLine("(");
+                        sb.Append(GetJavascriptFilter(f.Filter1));
+                        sb.AppendLine(")(v)");
                         break;
-                    case UnaryOperatorType.Complement:
-                        sb.AppendLine("!");
+                    case OperatorType.Complement:
+                        sb.AppendLine("!(");
+                        sb.Append(GetJavascriptFilter(f.Filter1));
+                        sb.AppendLine(")(v)");
                         break;
-                    default:
-                        throw new InvalidOperationException();
-                }
-                sb.AppendLine("(");
-                sb.Append(GetJavascriptFilter(f.Filter1));
-                sb.AppendLine(")(v);");
-                sb.AppendLine("}");
-                return sb.ToString();
-            }
-            if (query is IVoucherQueryBinary)
-            {
-                var f = query as IVoucherQueryBinary;
-
-                var sb = new StringBuilder();
-                sb.AppendLine("function (v) {");
-                sb.AppendLine("    return (");
-                sb.Append(GetJavascriptFilter(f.Filter1));
-                sb.AppendLine(")(v) ");
-
-                switch (f.Operator)
-                {
-                    case BinaryOperatorType.Union:
+                    case OperatorType.Union:
+                        sb.AppendLine("(");
+                        sb.Append(GetJavascriptFilter(f.Filter1));
+                        sb.AppendLine(")(v) ");
                         sb.AppendLine("&&");
+                        sb.AppendLine(" (");
+                        sb.Append(GetJavascriptFilter(f.Filter2));
+                        sb.AppendLine(")(v)");
                         break;
-                    case BinaryOperatorType.Interect:
+                    case OperatorType.Interect:
+                        sb.AppendLine("(");
+                        sb.Append(GetJavascriptFilter(f.Filter1));
+                        sb.AppendLine(")(v) ");
                         sb.AppendLine("||");
+                        sb.AppendLine(" (");
+                        sb.Append(GetJavascriptFilter(f.Filter2));
+                        sb.AppendLine(")(v)");
                         break;
-                    case BinaryOperatorType.Substract:
+                    case OperatorType.Substract:
+                        sb.AppendLine("(");
+                        sb.Append(GetJavascriptFilter(f.Filter1));
+                        sb.AppendLine(")(v) ");
                         sb.AppendLine("&& !");
+                        sb.AppendLine(" (");
+                        sb.Append(GetJavascriptFilter(f.Filter2));
+                        sb.AppendLine(")(v)");
                         break;
                     default:
                         throw new InvalidOperationException();
                 }
-                sb.AppendLine(" (");
-                sb.Append(GetJavascriptFilter(f.Filter2));
-                sb.AppendLine(")(v);");
+                sb.AppendLine(";");
                 sb.AppendLine("}");
                 return sb.ToString();
             }
