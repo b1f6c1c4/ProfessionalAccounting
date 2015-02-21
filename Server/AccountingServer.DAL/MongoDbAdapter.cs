@@ -7,7 +7,6 @@ using AccountingServer.Entities;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
 
 namespace AccountingServer.DAL
 {
@@ -149,7 +148,7 @@ namespace AccountingServer.DAL
 
         public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query)
         {
-            return m_Vouchers.Find(Query.Where(new BsonJavaScript(MongoDbQueryHelper.GetJavascriptFilter(query))));
+            return m_Vouchers.Find(query.GetQuery());
         }
 
         public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
@@ -187,7 +186,7 @@ namespace AccountingServer.DAL
 
         public long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query)
         {
-            var res = m_Vouchers.Remove(Query.Where(new BsonJavaScript(MongoDbQueryHelper.GetJavascriptFilter(query))));
+            var res = m_Vouchers.Remove(query.GetQuery());
             return res.DocumentsAffected;
         }
 
@@ -205,7 +204,7 @@ namespace AccountingServer.DAL
 
         public IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            return m_Assets.Find(Query.Where(new BsonJavaScript(MongoDbQueryHelper.GetJavascriptFilter(filter))));
+            return m_Assets.Find(filter.GetQuery());
         }
 
         public bool DeleteAsset(Guid id)
@@ -222,7 +221,7 @@ namespace AccountingServer.DAL
 
         public long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            var res = m_Assets.Remove(Query.Where(new BsonJavaScript(MongoDbQueryHelper.GetJavascriptFilter(filter))));
+            var res = m_Assets.Remove(filter.GetQuery());
             return res.DocumentsAffected;
         }
 
@@ -237,7 +236,7 @@ namespace AccountingServer.DAL
 
         public IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            return m_Amortizations.Find(Query.Where(new BsonJavaScript(MongoDbQueryHelper.GetJavascriptFilter(filter))));
+            return m_Amortizations.Find(filter.GetQuery());
         }
 
         public bool DeleteAmortization(Guid id)
@@ -255,7 +254,7 @@ namespace AccountingServer.DAL
         public long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
         {
             var res =
-                m_Amortizations.Remove(Query.Where(new BsonJavaScript(MongoDbQueryHelper.GetJavascriptFilter(filter))));
+                m_Amortizations.Remove(filter.GetQuery());
             return res.DocumentsAffected;
         }
 
@@ -320,7 +319,7 @@ namespace AccountingServer.DAL
         {
             if (emitQuery.DetailFilter == null)
                 return "function(d) { return true; }";
-            return MongoDbQueryHelper.GetJavascriptFilter(emitQuery.DetailFilter);
+            return emitQuery.DetailFilter.GetJavascriptFilter();
         }
 
         private static string GetEmitJavascript(IVoucherDetailQuery query, SubtotalLevel subtotalLevel)
@@ -335,10 +334,10 @@ namespace AccountingServer.DAL
                 var dQuery = query.VoucherQuery as IVoucherQueryAtom;
                 if (dQuery == null)
                     throw new InvalidOperationException();
-                sb.Append(MongoDbQueryHelper.GetJavascriptFilter(dQuery.DetailFilter));
+                sb.Append(dQuery.DetailFilter.GetJavascriptFilter());
             }
             sb.AppendLine("    if ((");
-            sb.Append(MongoDbQueryHelper.GetJavascriptFilter(query.VoucherQuery));
+            sb.Append(query.VoucherQuery.GetJavascriptFilter());
             sb.AppendLine(")(this)) {");
             sb.AppendLine(GetTheDateJavascript(subtotalLevel));
             sb.AppendLine("        this.detail.forEach(function(d) {");

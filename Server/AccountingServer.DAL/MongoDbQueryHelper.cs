@@ -52,7 +52,9 @@ namespace AccountingServer.DAL
                 }
                 if (vfilter.Date != null)
                 {
-                    sb.AppendFormat("    if (v.date != new ISODate('{0:yyyy-MM-ddTHH:mm:sszzz}')) return false;", vfilter.Date);
+                    sb.AppendFormat(
+                                    "    if (v.date != new ISODate('{0:yyyy-MM-ddTHH:mm:sszzz}')) return false;",
+                                    vfilter.Date);
                     sb.AppendLine();
                 }
                 if (vfilter.Type != null)
@@ -112,9 +114,13 @@ namespace AccountingServer.DAL
                 sb.AppendLine(rng.Value.Nullable ? "true;" : "false;");
 
                 if (rng.Value.StartDate.HasValue)
-                    sb.AppendFormat("    if (v.date < new ISODate('{0:yyyy-MM-ddTHH:mm:sszzz}')) return false;", rng.Value.StartDate);
+                    sb.AppendFormat(
+                                    "    if (v.date < new ISODate('{0:yyyy-MM-ddTHH:mm:sszzz}')) return false;",
+                                    rng.Value.StartDate);
                 if (rng.Value.EndDate.HasValue)
-                    sb.AppendFormat("    if (v.date > new ISODate('{0:yyyy-MM-ddTHH:mm:sszzz}')) return false;", rng.Value.EndDate);
+                    sb.AppendFormat(
+                                    "    if (v.date > new ISODate('{0:yyyy-MM-ddTHH:mm:sszzz}')) return false;",
+                                    rng.Value.EndDate);
 
                 sb.AppendLine("    return true;");
             }
@@ -127,7 +133,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">细目检索式</param>
         /// <returns>Javascript表示</returns>
-        public static string GetJavascriptFilter(IQueryCompunded<IDetailQueryAtom> query)
+        public static string GetJavascriptFilter(this IQueryCompunded<IDetailQueryAtom> query)
         {
             return GetJavascriptFilter(query, GetJavascriptFilter);
         }
@@ -187,9 +193,19 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">记账凭证检索式</param>
         /// <returns>Javascript表示</returns>
-        public static string GetJavascriptFilter(IQueryCompunded<IVoucherQueryAtom> query)
+        public static string GetJavascriptFilter(this IQueryCompunded<IVoucherQueryAtom> query)
         {
             return GetJavascriptFilter(query, GetJavascriptFilter);
+        }
+
+        /// <summary>
+        ///     记账凭证检索式的查询
+        /// </summary>
+        /// <param name="query">记账凭证检索式</param>
+        /// <returns>查询</returns>
+        public static IMongoQuery GetQuery(this IQueryCompunded<IVoucherQueryAtom> query)
+        {
+            return ToWhere(GetJavascriptFilter(query));
         }
 
         /// <summary>
@@ -229,7 +245,7 @@ namespace AccountingServer.DAL
                 sb.AppendLine("    for (i = 0;i < v.detail.length;i++)");
                 sb.AppendLine("        if ((");
                 sb.Append(GetJavascriptFilter(f.DetailFilter, GetJavascriptFilter));
-                sb.AppendLine(")(this.detail[i]))");
+                sb.AppendLine(")(v.detail[i]))");
                 sb.AppendLine("            break;");
                 sb.AppendLine("    if (i >= v.detail.length)");
                 sb.AppendLine("        return false;");
@@ -244,9 +260,19 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>Javascript表示</returns>
-        public static string GetJavascriptFilter(IQueryCompunded<IDistributedQueryAtom> query)
+        public static string GetJavascriptFilter(this IQueryCompunded<IDistributedQueryAtom> query)
         {
             return GetJavascriptFilter(query, GetJavascriptFilter);
+        }
+
+        /// <summary>
+        ///     检索式的查询
+        /// </summary>
+        /// <param name="query">检索式</param>
+        /// <returns>查询</returns>
+        public static IMongoQuery GetQuery(this IQueryCompunded<IDistributedQueryAtom> query)
+        {
+            return ToWhere(GetJavascriptFilter(query));
         }
 
         /// <summary>
@@ -355,6 +381,16 @@ namespace AccountingServer.DAL
                 return sb.ToString();
             }
             throw new InvalidOperationException();
+        }
+
+        /// <summary>
+        ///     将检索式的Javascript表示转换为查询
+        /// </summary>
+        /// <param name="js">Javascript表示</param>
+        /// <returns>查询</returns>
+        private static IMongoQuery ToWhere(string js)
+        {
+            return Query.Where(String.Format("function() {{ return ({0})(this); }}", js));
         }
     }
 }
