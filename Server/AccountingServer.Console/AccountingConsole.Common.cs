@@ -31,7 +31,7 @@ namespace AccountingServer.Console
             if (result.GetChild(0) is ConsoleParser.VouchersContext)
             {
 
-                return PresentVoucherQuery(result.GetChild(0) as IVoucherQueryCompounded);
+                return PresentVoucherQuery(result.GetChild(0) as IQueryCompunded<IVoucherQueryAtom>);
             }
             if (result.GetChild(0) is ConsoleParser.GroupedQueryContext)
             {
@@ -84,12 +84,12 @@ namespace AccountingServer.Console
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>记账凭证的C#表达式</returns>
-        private IQueryResult PresentVoucherQuery(IVoucherQueryCompounded query)
+        private IQueryResult PresentVoucherQuery(IQueryCompunded<IVoucherQueryAtom> query)
         {
             AutoConnect();
 
             var sb = new StringBuilder();
-            foreach (var voucher in m_Accountant.FilteredSelect(query))
+            foreach (var voucher in m_Accountant.SelectVouchers(query))
                 sb.Append(CSharpHelper.PresentVoucher(voucher));
             return new EditableText(sb.ToString());
         }

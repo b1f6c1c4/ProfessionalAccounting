@@ -147,8 +147,11 @@ namespace AccountingServer.BLL
         ///     找出未在资产计算表中注册的凭证，并尝试建立引用
         /// </summary>
         /// <param name="asset">资产</param>
+        /// <param name="rng">日期过滤器</param>
+        /// <param name="query">检索式</param>
         /// <returns>未注册的凭证</returns>
-        public IEnumerable<Voucher> RegisterVouchers(Asset asset)
+        public IEnumerable<Voucher> RegisterVouchers(Asset asset, DateFilter rng,
+                                                     IQueryCompunded<IVoucherQueryAtom> query)
         {
             if (asset.Remark == Asset.IgnoranceMark)
                 yield break;
@@ -159,7 +162,12 @@ namespace AccountingServer.BLL
                                      Title = asset.Title,
                                      Content = asset.StringID
                                  };
-                foreach (var voucher in m_Db.FilteredSelect(filter: filter))
+                foreach (
+                    var voucher in
+                        m_Db.SelectVouchers(
+                                            new VoucherQueryAryBase(
+                                                OperatorType.Intersect,
+                                                new[] { query, new VoucherQueryAtomBase(filter: filter) })))
                 {
                     if (voucher.Remark == Asset.IgnoranceMark)
                         continue;
@@ -172,11 +180,12 @@ namespace AccountingServer.BLL
 
                     if (value > 0)
                     {
-                        var lst = asset.Schedule.Where(
-                                                       item =>
-                                                       item is AcquisationItem &&
-                                                       (!voucher.Date.HasValue || item.Date == voucher.Date) &&
-                                                       Math.Abs((item as AcquisationItem).OrigValue - value) < Tolerance)
+                        var lst = asset.Schedule.Where(item => item.Date.Within(rng))
+                                       .Where(
+                                              item =>
+                                              item is AcquisationItem &&
+                                              (!voucher.Date.HasValue || item.Date == voucher.Date) &&
+                                              Math.Abs((item as AcquisationItem).OrigValue - value) < Tolerance)
                                        .ToList();
 
                         if (lst.Count == 1)
@@ -186,10 +195,11 @@ namespace AccountingServer.BLL
                     }
                     else if (value < 0)
                     {
-                        var lst = asset.Schedule.Where(
-                                                       item =>
-                                                       item is DispositionItem &&
-                                                       (!voucher.Date.HasValue || item.Date == voucher.Date))
+                        var lst = asset.Schedule.Where(item => item.Date.Within(rng))
+                                       .Where(
+                                              item =>
+                                              item is DispositionItem &&
+                                              (!voucher.Date.HasValue || item.Date == voucher.Date))
                                        .ToList();
 
                         if (lst.Count == 1)
@@ -207,7 +217,7 @@ namespace AccountingServer.BLL
                                      Title = asset.DepreciationTitle,
                                      Content = asset.StringID
                                  };
-                foreach (var voucher in m_Db.FilteredSelect(filter: filter))
+                foreach (var voucher in m_Db.SelectVouchers(new VoucherQueryAtomBase(filter: filter)))
                 {
                     if (voucher.Remark == Asset.IgnoranceMark)
                         continue;
@@ -233,7 +243,7 @@ namespace AccountingServer.BLL
                                      Title = asset.DevaluationTitle,
                                      Content = asset.StringID
                                  };
-                foreach (var voucher in m_Db.FilteredSelect(filter: filter))
+                foreach (var voucher in m_Db.SelectVouchers(new VoucherQueryAtomBase(filter: filter)))
                 {
                     if (voucher.Remark == Asset.IgnoranceMark)
                         continue;

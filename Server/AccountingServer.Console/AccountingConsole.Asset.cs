@@ -46,69 +46,45 @@ namespace AccountingServer.Console
         /// <summary>
         ///     执行表达式（资产）
         /// </summary>
-        /// <param name="s">表达式</param>
+        /// <param name="expr">表达式</param>
         /// <returns>执行结果</returns>
-        public IQueryResult ExecuteAsset(string s)
+        public IQueryResult ExecuteAsset(ConsoleParser.AssetContext expr)
         {
             AutoConnect();
 
-            var sp = s.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
-            var query = sp.Length == 1 ? String.Empty : sp[1];
-
-            if (sp[0].Equals("a", StringComparison.OrdinalIgnoreCase))
+            if (expr.assetList() != null)
             {
+                var dt = expr.assetList().AOAll() != null
+                             ? null
+                             : expr.assetList().rangePoint() != null
+                                   ? expr.assetList().rangePoint().Range.EndDate
+                                   : DateTime.Now.Date;
+
                 var sb = new StringBuilder();
-                var filter = ParseAssetQuery(query);
-                foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
-                    sb.Append(ListAsset(a, DateTime.Now.Date, false));
+                foreach (var a in Sort(m_Accountant.SelectAssets(expr.assetList().distributedQ())))
+                    sb.Append(ListAsset(a, dt, expr.assetList().AOList() != null));
 
                 return new UnEditableText(sb.ToString());
             }
-            if (sp[0].StartsWith("a@", StringComparison.OrdinalIgnoreCase))
-            {
-                var dt = DateTime.ParseExact(sp[0] + "01", "a@yyyyMMdd", null).AddMonths(1).AddDays(-1);
-
-                var sb = new StringBuilder();
-                var filter = ParseAssetQuery(query);
-                foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
-                    sb.Append(ListAsset(a, dt, false));
-
-                return new UnEditableText(sb.ToString());
-            }
-            if (sp[0].Equals("a-all", StringComparison.OrdinalIgnoreCase))
+            if (expr.assetQuery() != null)
             {
                 var sb = new StringBuilder();
-                var filter = ParseAssetQuery(query);
-                foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
-                    sb.Append(ListAsset(a, null, false));
-
-                return new UnEditableText(sb.ToString());
-            }
-            if (sp[0].StartsWith("a-li", StringComparison.OrdinalIgnoreCase))
-            {
-                var sb = new StringBuilder();
-                var filter = ParseAssetQuery(query);
-                foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
-                    sb.Append(ListAsset(a));
-
-                return new UnEditableText(sb.ToString());
-            }
-            if (sp[0].StartsWith("a-q", StringComparison.OrdinalIgnoreCase))
-            {
-                var sb = new StringBuilder();
-                var filter = ParseAssetQuery(query);
-                foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
+                foreach (var a in Sort(m_Accountant.SelectAssets(expr.assetQuery().distributedQ())))
                     sb.Append(CSharpHelper.PresentAsset(a));
 
                 return new EditableText(sb.ToString());
             }
-            if (sp[0].StartsWith("a-reg", StringComparison.OrdinalIgnoreCase))
+            if (expr.assetRegister() != null)
             {
+                var rng = expr.assetRegister().range() != null
+                              ? expr.assetRegister().range().Range
+                              : DateFilter.Unconstrained;
+                var query = expr.assetRegister().vouchers();
+
                 var sb = new StringBuilder();
-                var filter = ParseAssetQuery(query);
-                foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
+                foreach (var a in Sort(m_Accountant.SelectAssets(expr.assetRegister().distributedQ())))
                 {
-                    foreach (var voucher in m_Accountant.RegisterVouchers(a))
+                    foreach (var voucher in m_Accountant.RegisterVouchers(a, rng, query))
                         sb.Append(CSharpHelper.PresentVoucher(voucher));
 
                     m_Accountant.Update(a);
@@ -117,26 +93,40 @@ namespace AccountingServer.Console
                     return new EditableText(sb.ToString());
                 return new Suceed();
             }
-            if (sp[0].StartsWith("a-unr", StringComparison.OrdinalIgnoreCase))
+            if (expr.assetUnregister() != null)
             {
+                var rng = expr.assetUnregister().range() != null
+                              ? expr.assetUnregister().range().Range
+                              : DateFilter.Unconstrained;
+                var query = expr.assetRegister().vouchers();
+
                 var sb = new StringBuilder();
-                var filter = ParseAssetQuery(query);
-                foreach (var a in Sort(m_Accountant.FilteredSelect(filter)))
+                foreach (var a in Sort(m_Accountant.SelectAssets(expr.assetUnregister().distributedQ())))
                 {
-                    foreach (var item in a.Schedule)
+                    foreach (var item in a.Schedule.Where(item => item.Date.Within(rng)))
+                    {
+                        if (query != null)
+                        {
+                            if (item.VoucherID == null)
+                                continue;
+
+                            var voucher = m_Accountant.SelectVoucher(item.VoucherID);
+                            if (voucher != null)
+                                if (!MatchHelper.IsMatch(query, voucher.IsMatch))
+                                    continue;
+                        }
                         item.VoucherID = null;
+                    }
 
                     sb.Append(ListAsset(a));
                     m_Accountant.Update(a);
                 }
                 return new EditableText(sb.ToString());
             }
-            if (sp[0].Equals("a-rd", StringComparison.OrdinalIgnoreCase) ||
-                sp[0].Equals("a-redep", StringComparison.OrdinalIgnoreCase))
+            if (expr.assetRedep() != null)
             {
                 var sb = new StringBuilder();
-                var filter = ParseAssetQuery(query);
-                foreach (var a in m_Accountant.FilteredSelect(filter))
+                foreach (var a in Sort(m_Accountant.SelectAssets(expr.assetRedep().distributedQ())))
                 {
                     Accountant.Depreciate(a);
                     sb.Append(CSharpHelper.PresentAsset(a));
@@ -144,19 +134,21 @@ namespace AccountingServer.Console
                 }
                 return new EditableText(sb.ToString());
             }
-            if (sp[0].Equals("a-reset-soft", StringComparison.OrdinalIgnoreCase))
+            if (expr.assetResetSoft() != null)
             {
-                var filter = ParseAssetQuery(query);
+                var rng = expr.assetResetSoft().range() != null
+                              ? expr.assetResetSoft().range().Range
+                              : DateFilter.Unconstrained;
+
                 var cnt = 0L;
-                foreach (var a in m_Accountant.FilteredSelect(filter))
+                foreach (var a in m_Accountant.SelectAssets(expr.assetResetSoft().distributedQ()))
                 {
                     if (a.Schedule == null)
                         continue;
                     var flag = false;
-                    foreach (
-                        var item in
-                            a.Schedule.Where(item => item.VoucherID != null)
-                             .Where(item => m_Accountant.SelectVoucher(item.VoucherID) == null))
+                    foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
+                                          .Where(item => item.VoucherID != null)
+                                          .Where(item => m_Accountant.SelectVoucher(item.VoucherID) == null))
                     {
                         item.VoucherID = null;
                         cnt++;
@@ -167,49 +159,60 @@ namespace AccountingServer.Console
                 }
                 return new NumberAffected(cnt);
             }
-            if (sp[0].Equals("a-reset-hard", StringComparison.OrdinalIgnoreCase))
+            if (expr.assetResetHard() != null)
             {
-                var filter = ParseAssetQuery(query);
-                var cnt = 0L;
-                foreach (var a in m_Accountant.FilteredSelect(filter))
-                {
-                    cnt += m_Accountant.FilteredDelete(
-                                                       new Voucher { Type = VoucherType.Depreciation },
-                                                       new VoucherDetail
-                                                           {
-                                                               Title = a.DepreciationTitle,
-                                                               Content = a.StringID
-                                                           });
-                    cnt += m_Accountant.FilteredDelete(
-                                                       new Voucher { Type = VoucherType.Devalue },
-                                                       new VoucherDetail
-                                                           {
-                                                               Title = a.DevaluationTitle,
-                                                               Content = a.StringID
-                                                           });
-                }
-                return new NumberAffected(cnt);
+                var query = expr.assetResetHard().vouchers();
+
+                return new NumberAffected(
+                    m_Accountant.SelectAssets(expr.assetResetHard().distributedQ())
+                                .Sum(
+                                     a =>
+                                     {
+                                         var mainQuery = new VoucherQueryAryBase(
+                                             OperatorType.Union,
+                                             new IQueryCompunded<IVoucherQueryAtom>[]
+                                                 {
+                                                     new VoucherQueryAtomBase(
+                                                         new Voucher
+                                                             {
+                                                                 Type = VoucherType.Depreciation
+                                                             },
+                                                         new VoucherDetail
+                                                             {
+                                                                 Title = a.DepreciationTitle,
+                                                                 Content = a.StringID
+                                                             }),
+                                                     new VoucherQueryAtomBase(
+                                                         new Voucher
+                                                             {
+                                                                 Type = VoucherType.Devalue
+                                                             },
+                                                         new VoucherDetail
+                                                             {
+                                                                 Title = a.DevaluationTitle,
+                                                                 Content = a.StringID
+                                                             })
+                                                 });
+                                         return m_Accountant.DeleteVouchers(
+                                                                            new VoucherQueryAryBase(
+                                                                                OperatorType.Intersect,
+                                                                                new IQueryCompunded<IVoucherQueryAtom>[]
+                                                                                    {
+                                                                                        query,
+                                                                                        mainQuery
+                                                                                    }));
+                                     }));
             }
-            if (sp[0].StartsWith("a-ap", StringComparison.OrdinalIgnoreCase))
+            if (expr.assetApply() != null)
             {
-                var isCollapsed = sp[0].EndsWith("-collapse", StringComparison.OrdinalIgnoreCase) ||
-                                  sp[0].EndsWith("-co", StringComparison.OrdinalIgnoreCase);
+                var isCollapsed = expr.assetApply().AOCollapse() != null;
 
-                string dq;
-                Asset filter = null;
-                if (query.LastIndexOf('\'') >= 0)
-                {
-                    var spx = query.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
-                    dq = spx.Length <= 1 ? String.Empty : spx[1];
-                    filter = ParseAssetQuery(spx[0]);
-                }
-                else
-                    dq = query;
-
-                var rng = String.IsNullOrWhiteSpace(dq) ? ParseDateQuery("[0]", true) : ParseDateQuery(dq, true);
+                var rng = expr.assetUnregister().range() != null
+                              ? expr.assetUnregister().range().Range
+                              : DateFilter.Unconstrained;
 
                 var sb = new StringBuilder();
-                foreach (var a in m_Accountant.FilteredSelect(filter))
+                foreach (var a in Sort(m_Accountant.SelectAssets(expr.assetApply().distributedQ())))
                 {
                     foreach (var item in m_Accountant.Update(a, rng, isCollapsed))
                         sb.AppendLine(ListAssetItem(item));
@@ -220,14 +223,12 @@ namespace AccountingServer.Console
                     return new EditableText(sb.ToString());
                 return new Suceed();
             }
-            if (sp[0].StartsWith("a-chk", StringComparison.OrdinalIgnoreCase))
+            if (expr.assetCheck() != null)
             {
-                var filter = ParseAssetQuery(query);
-
                 var rng = new DateFilter(null, DateTime.Now.Date);
 
                 var sb = new StringBuilder();
-                foreach (var a in m_Accountant.FilteredSelect(filter))
+                foreach (var a in Sort(m_Accountant.SelectAssets(expr.assetCheck().distributedQ())))
                 {
                     var sbi = new StringBuilder();
                     foreach (var item in m_Accountant.Update(a, rng, false, true))

@@ -44,16 +44,18 @@ namespace AccountingServer.Console
             {
                 get
                 {
+                    if (Direction == null)
+                        return 0;
                     if (Direction.Text == "d")
                         return 1;
                     if (Direction.Text == "c")
                         return -1;
-                    return 0;
+                    throw new InvalidOperationException();
                 }
             }
         }
 
-        public partial class DetailsContext : IDetailQueryAry
+        public partial class DetailsContext : IQueryAry<IDetailQueryAtom>
         {
             public OperatorType Operator
             {
@@ -74,12 +76,12 @@ namespace AccountingServer.Console
                     if (Op.Text == "-")
                         return OperatorType.Substract;
                     if (Op.Text == "*")
-                        return OperatorType.Interect;
+                        return OperatorType.Intersect;
                     throw new InvalidOperationException();
                 }
             }
 
-            public IDetailQueryCompounded Filter1
+            public IQueryCompunded<IDetailQueryAtom> Filter1
             {
                 get
                 {
@@ -91,7 +93,7 @@ namespace AccountingServer.Console
                 }
             }
 
-            public IDetailQueryCompounded Filter2 { get { return details(1); } }
+            public IQueryCompunded<IDetailQueryAtom> Filter2 { get { return details(1); } }
         }
     }
 }

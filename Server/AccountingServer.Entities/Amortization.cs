@@ -57,7 +57,7 @@ namespace AccountingServer.Entities
     /// <summary>
     ///     摊销
     /// </summary>
-    public class Amortization
+    public class Amortization : IDistributed
     {
         /// <summary>
         ///     规范忽略标志

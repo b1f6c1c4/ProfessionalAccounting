@@ -144,72 +144,72 @@ rangeDay
 	;
 	
 asset
-	:	assetList | assetQuery | assetRegister | assetUnregister | assetResetSoft | assetResetHard | assetApply | assetCheck
+	:	assetList | assetQuery | assetRegister | assetUnregister | assetRedep | assetResetSoft | assetResetHard | assetApply | assetCheck
 	;
 assetList
-	:	'a' (AOAll | AOList)? rangePoint? aoQ?
+	:	'a' (AOAll | AOList)? rangePoint? distributedQ?
 	;
 assetQuery
-	:	'a' AOQuery aoQ?
+	:	'a' AOQuery distributedQ?
 	;
 assetRegister
-	:	'a' AORegister aoQ? (':' voucherDetailQuery)?
+	:	'a' AORegister distributedQ? range? (':' vouchers)?
 	;
 assetUnregister
-	:	'a' AOUnregister aoQ? range?
+	:	'a' AOUnregister distributedQ? range? (':' vouchers)?
 	;
 assetRedep
-	:	'a' ARedep aoQ?
+	:	'a' ARedep distributedQ?
 	;
 assetResetSoft
-	:	'a' AOResetSoft aoQ? range?
+	:	'a' AOResetSoft distributedQ? range?
 	;
 assetResetHard
-	:	'a' AOResetHard aoQ? (':' voucherDetailQuery)?
+	:	'a' AOResetHard distributedQ? (':' vouchers)?
 	;
 assetApply
-	:	'a' AOApply AOCollapse? aoQ? range?
+	:	'a' AOApply AOCollapse? distributedQ? range?
 	;
 assetCheck
-	:	'a' AOCheck aoQ?
+	:	'a' AOCheck distributedQ?
 	;
 amort
-	:	amortList | amortQuery | amortRegister | amortUnregister | amortResetSoft | amortResetHard | amortApply | amortCheck
+	:	amortList | amortQuery | amortRegister | amortUnregister | amortReamo | amortResetSoft | amortApply | amortCheck
 	;
 amortList
-	:	'o' (AOAll | AOList)? rangePoint? aoQ?
+	:	'o' (AOAll | AOList)? rangePoint? distributedQ?
 	;
 amortQuery
-	:	'o' AOQuery aoQ?
+	:	'o' AOQuery distributedQ?
 	;
 amortRegister
-	:	'o' AORegister aoQ? (':' voucherDetailQuery)?
+	:	'o' AORegister distributedQ? range? (':' vouchers)?
 	;
 amortUnregister
-	:	'o' AOUnregister aoQ? range?
+	:	'o' AOUnregister distributedQ? range? (':' vouchers)?
 	;
 amortReamo
-	:	'o' OReamo aoQ?
+	:	'o' OReamo distributedQ?
 	;
 amortResetSoft
-	:	'o' AOResetSoft aoQ? range?
-	;
-amortResetHard
-	:	'o' AOResetHard aoQ? (':' voucherDetailQuery)?
+	:	'o' AOResetSoft distributedQ? range?
 	;
 amortApply
-	:	'o' AOApply AOCollapse? aoQ? range?
+	:	'o' AOApply AOCollapse? distributedQ? range?
 	;
 amortCheck
-	:	'o' AOCheck aoQ?
+	:	'o' AOCheck distributedQ?
 	;
 
-aoQ
-	:	aoQAtom ('+' aoQAtom)*
+distributedQ
+	:	distributedQ Op='*' distributedQ
+	|	distributedQ Op=('+' | '-') distributedQ
+	|	Op=('+' | '-') distributedQ
+	|	distributedQAtom
+	|	'(' distributedQ ')'
 	;
-
-aoQAtom
-	:	SingleQuotedString | DoubleQuotedString | Guid
+distributedQAtom
+	:	Guid? DollarQuotedString? PercentQuotedString? ('[[' rangeCore ']]')?
 	;
 	
 /*

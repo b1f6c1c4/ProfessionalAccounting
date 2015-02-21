@@ -16,16 +16,6 @@ namespace AccountingServer.BLL
         ///// </summary>
         //public const int FullYearProfit = 4103;
 
-        /// <summary>
-        ///     资产类科目
-        /// </summary>
-        public const int Asset0 = 1000;
-
-        /// <summary>
-        ///     负债类科目
-        /// </summary>
-        public const int Debt0 = 2000;
-
         ///// <summary>
         /////     费用
         ///// </summary>
@@ -47,37 +37,6 @@ namespace AccountingServer.BLL
         ///     获取是否已经连接到数据库
         /// </summary>
         public bool Connected { get { return m_Db.Connected; } }
-
-        /// <summary>
-        ///     是否为资产类科目
-        /// </summary>
-        /// <param name="id">科目编号</param>
-        /// <returns>是否为资产</returns>
-        public static bool IsAsset(int? id)
-        {
-            return id / 1000 == Asset0 / 1000;
-        }
-
-        /// <summary>
-        ///     是否为负债类科目
-        /// </summary>
-        /// <param name="id">科目编号</param>
-        /// <returns>是否为负债</returns>
-        public static bool IsDebt(int? id)
-        {
-            return id / 1000 == Debt0 / 1000;
-        }
-
-        /// <summary>
-        ///     检查记账凭证借贷方数额是否相等
-        /// </summary>
-        /// <param name="entity">记账凭证</param>
-        /// <returns>借方比贷方多出数</returns>
-        public static double IsBalanced(Voucher entity)
-        {
-            // ReSharper disable once PossibleInvalidOperationException
-            return entity.Details.Sum(d => d.Fund.Value);
-        }
 
         public Accountant()
         {
@@ -136,9 +95,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>任一细目匹配检索式的记账凭证</returns>
-        public IEnumerable<Voucher> FilteredSelect(IVoucherQueryCompounded query)
+        public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query)
         {
-            return m_Db.FilteredSelect(query);
+            return m_Db.SelectVouchers(query);
         }
 
         /// <summary>
@@ -146,9 +105,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>匹配检索式的细目</returns>
-        public IEnumerable<VoucherDetail> FilteredSelect(IVoucherDetailQuery query)
+        public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
         {
-            return m_Db.FilteredSelect(query);
+            return m_Db.SelectVoucherDetails(query);
         }
 
         /// <summary>
@@ -156,9 +115,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>分类汇总结果</returns>
-        public IEnumerable<Balance> FilteredSelect(IGroupedQuery query)
+        public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
-            return m_Db.FilteredSelect(query);
+            return m_Db.SelectVoucherDetailsGrouped(query);
         }
 
         /// <summary>
@@ -176,9 +135,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>已删除的细目总数</returns>
-        public long FilteredDelete(IVoucherQueryCompounded query)
+        public long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query)
         {
-            return m_Db.FilteredDelete(query);
+            return m_Db.DeleteVouchers(query);
         }
 
         /// <summary>
@@ -213,9 +172,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>匹配过滤器的资产</returns>
-        public IEnumerable<Asset> FilteredSelect(Asset filter)
+        public IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            foreach (var asset in m_Db.FilteredSelect(filter))
+            foreach (var asset in m_Db.SelectAssets(filter))
             {
                 InternalRegular(asset);
                 yield return asset;
@@ -248,9 +207,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>已删除的资产总数</returns>
-        public long FilteredDelete(Asset filter)
+        public long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            return m_Db.FilteredDelete(filter);
+            return m_Db.DeleteAssets(filter);
         }
 
         /// <summary>
@@ -285,9 +244,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>匹配过滤器的摊销</returns>
-        public IEnumerable<Amortization> FilteredSelect(Amortization filter)
+        public IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            foreach (var amort in m_Db.FilteredSelect(filter))
+            foreach (var amort in m_Db.SelectAmortizations(filter))
             {
                 InternalRegular(amort);
                 yield return amort;
@@ -320,9 +279,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns>已删除的摊销总数</returns>
-        public long FilteredDelete(Amortization filter)
+        public long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            return m_Db.FilteredDelete(filter);
+            return m_Db.DeleteAmortizations(filter);
         }
 
         /// <summary>
