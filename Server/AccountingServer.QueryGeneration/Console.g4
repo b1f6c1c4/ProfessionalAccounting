@@ -28,9 +28,9 @@ groupedQuery
 	;
 	
 chart
-	:	'c::' NameString
+	:	'c::' DollarQuotedString
 	|	'c||' chartArea ('||' hyperItem)+
-	|	'c:' NameString ':' chartArea ('||' hyperItem)+
+	|	'c:' DollarQuotedString ':' chartArea ('||' hyperItem)+
 	;
 
 chartArea
@@ -38,9 +38,9 @@ chartArea
 	;
 
 report
-	:	'r::' NameString
+	:	'r::' DollarQuotedString
 	|	'r||' hyperItem
-	|	'r:' NameString ':' chartArea ('||' hyperItem)+
+	|	'r:' DollarQuotedString ':' chartArea ('||' hyperItem)+
 	;
 
 hyperItem
@@ -63,7 +63,7 @@ coef
 subtotal
 	:	SubtotalMark=('`' | '``')
 		SubtotalFields=('t' | 's' | 'c' | 'r' | 'd' | 'w' | 'm' | 'f' | 'b' | 'y')*
-		AggregationMethod=('D' | 'x' | 'X')?
+		(Aggregation='D' (Ranged='[' rangeCore? ']')?)?
 	;
 	
 voucherDetailQuery

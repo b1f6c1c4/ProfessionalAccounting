@@ -6,7 +6,7 @@ namespace AccountingServer.Entities
     /// <summary>
     ///     日期过滤器
     /// </summary>
-    public struct DateFilter
+    public struct DateFilter : IDateRange
     {
         /// <summary>
         ///     是否只允许无日期（若为<c>true</c>，则无须考虑<c>Nullable</c>）
@@ -83,6 +83,8 @@ namespace AccountingServer.Entities
         }
 
         public bool Constrained { get { return StartDate.HasValue && EndDate.HasValue; } }
+
+        public DateFilter Range { get { return this; } }
     }
 
     public class DateComparer : Comparer<DateTime?>

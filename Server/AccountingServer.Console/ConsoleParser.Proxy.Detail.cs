@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using AccountingServer.Entities;
 
 namespace AccountingServer.Console
@@ -55,49 +53,45 @@ namespace AccountingServer.Console
             }
         }
 
-        public partial class DetailAtomContext : IDetailQueryCompounded { }
-
-        public partial class DetailsXContext : IDetailQueryBinary
+        public partial class DetailsContext : IDetailQueryAry
         {
-            public BinaryOperatorType Operator { get { return BinaryOperatorType.Interect; } }
-            public IDetailQueryCompounded Filter1 { get { return detailAtom(0); } }
-            public IDetailQueryCompounded Filter2 { get { return detailAtom(1); } }
-        }
-
-        public partial class DetailsContext : IDetailQueryBinary
-        {
-            public BinaryOperatorType Operator
+            public OperatorType Operator
             {
                 get
                 {
+                    if (Op == null)
+                        return OperatorType.None;
+                    if (details().Count == 1)
+                    {
+                        if (Op.Text == "+")
+                            return OperatorType.Identity;
+                        if (Op.Text == "-")
+                            return OperatorType.Complement;
+                        throw new InvalidOperationException();
+                    }
                     if (Op.Text == "+")
-                        return BinaryOperatorType.Union;
+                        return OperatorType.Union;
                     if (Op.Text == "-")
-                        return BinaryOperatorType.Substract;
+                        return OperatorType.Substract;
+                    if (Op.Text == "*")
+                        return OperatorType.Interect;
                     throw new InvalidOperationException();
                 }
             }
 
-            public IDetailQueryCompounded Filter1 { get { return detailsX(0); } }
-            public IDetailQueryCompounded Filter2 { get { return detailsX(1); } }
-        }
-
-        public partial class DetailUnaryContext : IDetailQueryUnary
-        {
-            public UnaryOperatorType Operator
+            public IDetailQueryCompounded Filter1
             {
                 get
                 {
-                    if (Op.Text == "-")
-                        return UnaryOperatorType.Complement;
-                    if (Op.Text == "+")
-                        return UnaryOperatorType.Identity;
-                    throw new InvalidOperationException();
+                    if (detailQuery() != null)
+                        return detailQuery();
+                    //if (Op == null)
+                    //    return details(0);
+                    return details(0);
                 }
             }
 
-            public IDetailQueryCompounded Filter1 { get { return detailQuery(); } }
+            public IDetailQueryCompounded Filter2 { get { return details(1); } }
         }
-
     }
 }
