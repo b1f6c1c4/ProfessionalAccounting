@@ -50,7 +50,7 @@ namespace AccountingServer
             //                           };
         }
 
-        private bool GetCSharpCode(out int begin, out int end, out string typeName)
+        private bool GetEditableText(out int begin, out int end, out string typeName)
         {
             begin = textBoxResult.Text.LastIndexOf(
                                                    "@new",
@@ -96,7 +96,7 @@ namespace AccountingServer
             int begin;
             int end;
             string typeName;
-            if (!GetCSharpCode(out begin, out end, out typeName))
+            if (!GetEditableText(out begin, out end, out typeName))
                 return false;
 
             try
@@ -113,6 +113,9 @@ namespace AccountingServer
                         break;
                     case "Amortization":
                         result = m_Console.ExecuteAmortUpsert(s);
+                        break;
+                    case "NamedQueryTemplate":
+                        result = m_Console.ExecuteNamedQueryTemplateUpsert(s.Substring(24, s.Length - 25));
                         break;
                     default:
                         return false;
@@ -138,7 +141,7 @@ namespace AccountingServer
             int begin;
             int end;
             string typeName;
-            if (!GetCSharpCode(out begin, out end, out typeName))
+            if (!GetEditableText(out begin, out end, out typeName))
                 return false;
 
             try
@@ -155,6 +158,9 @@ namespace AccountingServer
                         break;
                     case "Amortization":
                         result = m_Console.ExecuteAmortRemoval(s);
+                        break;
+                    case "NamedQueryTemplate":
+                        result = m_Console.ExecuteNamedQueryTemplateRemoval(s.Substring(24, s.Length - 25));
                         break;
                     default:
                         return false;

@@ -301,6 +301,41 @@ namespace AccountingServer.BLL
 
         #endregion
 
+        #region namedqurey
+
+        /// <summary>
+        ///     按名称查找命名查询模板
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <returns>命名查询模板</returns>
+        public string SelectNamedQueryTemplate(string name) { return m_Db.SelectNamedQueryTemplate(name); }
+
+        /// <summary>
+        ///     查找全部命名查询模板
+        /// </summary>
+        /// <returns>命名查询模板</returns>
+        public IEnumerable<KeyValuePair<string, string>> SelectNamedQueryTemplates()
+        {
+            return m_Db.SelectNamedQueryTemplates();
+        }
+
+        /// <summary>
+        ///     按名称删除命名查询模板
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <returns>是否成功</returns>
+        public bool DeleteNamedQueryTemplate(string name) { return m_Db.DeleteNamedQueryTemplate(name); }
+
+        /// <summary>
+        ///     添加或替换命名查询模板
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <param name="value">值</param>
+        /// <returns>是否成功</returns>
+        public bool Upsert(string name, string value) { return m_Db.Upsert(name, value); }
+
+        #endregion
+
         /// <summary>
         ///     合并记账凭证上相同的细目
         /// </summary>

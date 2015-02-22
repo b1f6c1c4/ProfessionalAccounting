@@ -154,11 +154,10 @@ namespace AccountingServer.Console
                         s = Begin.Range.StartDate;
                     if (End != null)
                         e = End.Range.EndDate;
-                    if (!s.HasValue &&
-                        Op != null &&
-                        Op.Text == "~")
-                        return new DateFilter(s, e) { Nullable = false };
-                    return new DateFilter(s, e);
+                    var f = new DateFilter(s, e);
+                    if (Op.Text == "=")
+                        f.Nullable ^= true;
+                    return f;
                 }
             }
         }

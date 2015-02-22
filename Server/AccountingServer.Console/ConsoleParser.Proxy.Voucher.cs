@@ -15,25 +15,19 @@ namespace AccountingServer.Console
             {
                 get
                 {
-                    var vfilter = new Voucher();
-                    if (DollarQuotedString() != null)
-                    {
-                        var s = DollarQuotedString().GetText();
-                        s = s.Substring(1, s.Length - 2);
-                        vfilter.ID = s.Replace("$$", "$");
-                    }
-                    if (PercentQuotedString() != null)
-                    {
-                        var s = PercentQuotedString().GetText();
-                        s = s.Substring(1, s.Length - 2);
-                        vfilter.Remark = s.Replace("%%", "%");
-                    }
+                    var vfilter = new Voucher
+                                      {
+                                          ID = DollarQuotedString().Dequotation(),
+                                          Remark = PercentQuotedString().Dequotation()
+                                      };
                     if (VoucherType() != null)
                     {
                         var s = VoucherType().GetText();
                         VoucherType type;
-                        Enum.TryParse(s, out type);
-                        vfilter.Type = type;
+                        if (Enum.TryParse(s, out type))
+                            vfilter.Type = type;
+                        else
+                            throw new InvalidOperationException();
                     }
                     return vfilter;
                 }
@@ -101,8 +95,6 @@ namespace AccountingServer.Console
                 {
                     if (voucherQuery() != null)
                         return voucherQuery();
-                    //if (Op == null)
-                    //    return vouchers(0);
                     return vouchersB(0);
                 }
             }

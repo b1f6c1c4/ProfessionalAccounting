@@ -11,7 +11,11 @@ namespace AccountingServer.Console
             {
                 get
                 {
-                    var filter = new VoucherDetail();
+                    var filter = new VoucherDetail
+                                     {
+                                         Content = SingleQuotedString().Dequotation(),
+                                         Remark = DoubleQuotedString().Dequotation()
+                                     };
                     if (DetailTitle() != null)
                     {
                         var t = Int32.Parse(DetailTitle().GetText().TrimStart('T'));
@@ -22,18 +26,6 @@ namespace AccountingServer.Console
                         var t = Int32.Parse(DetailTitleSubTitle().GetText().TrimStart('T'));
                         filter.Title = t / 100;
                         filter.SubTitle = t % 100;
-                    }
-                    if (SingleQuotedString() != null)
-                    {
-                        var s = SingleQuotedString().GetText();
-                        s = s.Substring(1, s.Length - 2);
-                        filter.Content = s.Replace("''", "'");
-                    }
-                    if (DoubleQuotedString() != null)
-                    {
-                        var s = DoubleQuotedString().GetText();
-                        s = s.Substring(1, s.Length - 2);
-                        filter.Remark = s.Replace("\"\"", "\"");
                     }
                     return filter;
                 }
@@ -86,8 +78,6 @@ namespace AccountingServer.Console
                 {
                     if (detailQuery() != null)
                         return detailQuery();
-                    //if (Op == null)
-                    //    return details(0);
                     return details(0);
                 }
             }

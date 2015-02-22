@@ -16,7 +16,7 @@ grammar Console;
  */
 
 command
-	:	(vouchers | groupedQuery | namedQuery | asset | amort | otherCommand) EOF
+	:	(vouchers | groupedQuery | chart | report | asset | amort | otherCommand) EOF
 	;
 
 otherCommand
@@ -24,7 +24,21 @@ otherCommand
 	;
 	
 chart
-	:	'ch' namedQuery
+	:	'ch' name range?
+	|	'ch' namedQ
+	|	'ch' namedQueries
+	|	'ch' groupedQuery
+	;
+
+report
+	:	'rp' name range?
+	|	'rp' namedQ
+	|	'rp' namedQueries
+	|	'rp' groupedQuery
+	;
+
+namedQueryTemplate
+	:	name ':'
 	;
 
 namedQuery
@@ -42,7 +56,7 @@ namedQ
 	;
 
 namedQueryReference
-	:	name coef? ';'
+	:	name ';'
 	;
 
 name
@@ -110,8 +124,8 @@ range
 
 rangeCore
 	:	RangeNull | RangeAllNotNull
-	|	Begin=rangeCertainPoint ('~'|'-') End=rangeCertainPoint?
-	|	Op=('~'|'-') End=rangeCertainPoint
+	|	Begin=rangeCertainPoint Op=('~'|'=') End=rangeCertainPoint?
+	|	Op=('~'|'=') End=rangeCertainPoint
 	|	Certain=rangeCertainPoint
 	;
 	

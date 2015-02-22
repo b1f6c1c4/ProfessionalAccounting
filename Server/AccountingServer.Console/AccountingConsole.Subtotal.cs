@@ -18,7 +18,7 @@ namespace AccountingServer.Console
             return new UnEditableText(sb.ToString());
         }
 
-        private void PresentSubtotal(IEnumerable<Balance> res, int depth, ISubtotal args, StringBuilder sb)
+        private static void PresentSubtotal(IEnumerable<Balance> res, int depth, ISubtotal args, StringBuilder sb)
         {
             const int ident = 4;
 
