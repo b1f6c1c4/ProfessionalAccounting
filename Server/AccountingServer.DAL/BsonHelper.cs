@@ -24,109 +24,91 @@ namespace AccountingServer.DAL
             return bsonReader.State == BsonReaderState.EndOfArray;
         }
 
-        public static string ReadObjectId(this BsonReader bsonReader, string expected, ref string read)
+        private static bool ReadName(this BsonReader bsonReader, string expected, ref string read)
         {
             if (bsonReader.IsEndOfDocument())
-                return null;
+                return false;
             if (read == null)
                 read = bsonReader.ReadName();
             if (read != expected)
-                return null;
+                return false;
 
             read = null;
-            return bsonReader.ReadObjectId().ToString();
+            return true;
+        }
+
+        private static bool ReadPrep(this BsonReader bsonReader, string expected, ref string read)
+        {
+            if (!bsonReader.ReadName(expected, ref read))
+                return false;
+
+            if (bsonReader.CurrentBsonType == BsonType.Null)
+            {
+                bsonReader.ReadNull();
+                return false;
+            }
+            if (
+                bsonReader.CurrentBsonType == BsonType.Undefined)
+            {
+                bsonReader.ReadUndefined();
+                return false;
+            }
+
+            return true;
+        }
+
+        private static T ReadClass<T>(this BsonReader bsonReader, string expected, ref string read,
+                                      Func<T> readFunc) where T : class
+        {
+            return ReadPrep(bsonReader, expected, ref read) ? readFunc() : null;
+        }
+
+        private static T? ReadStruct<T>(this BsonReader bsonReader, string expected, ref string read,
+                                        Func<T> readFunc) where T : struct
+        {
+            return ReadPrep(bsonReader, expected, ref read) ? readFunc() : (T?)null;
+        }
+
+        public static string ReadObjectId(this BsonReader bsonReader, string expected, ref string read)
+        {
+            return ReadClass(bsonReader, expected, ref read, () => bsonReader.ReadObjectId().ToString());
         }
 
         public static int? ReadInt32(this BsonReader bsonReader, string expected, ref string read)
         {
-            if (bsonReader.IsEndOfDocument())
-                return null;
-            if (read == null)
-                read = bsonReader.ReadName();
-            if (read != expected)
-                return null;
-
-            read = null;
-            return bsonReader.ReadInt32();
+            return ReadStruct(bsonReader, expected, ref read, bsonReader.ReadInt32);
         }
 
         public static double? ReadDouble(this BsonReader bsonReader, string expected, ref string read)
         {
-            if (bsonReader.IsEndOfDocument())
-                return null;
-            if (read == null)
-                read = bsonReader.ReadName();
-            if (read != expected)
-                return null;
-
-            read = null;
-            return bsonReader.ReadDouble();
+            return ReadStruct(bsonReader, expected, ref read, bsonReader.ReadDouble);
         }
 
         public static string ReadString(this BsonReader bsonReader, string expected, ref string read)
         {
-            if (bsonReader.IsEndOfDocument())
-                return null;
-            if (read == null)
-                read = bsonReader.ReadName();
-            if (read != expected)
-                return null;
-
-            read = null;
-            if (bsonReader.CurrentBsonType == BsonType.Null)
-            {
-                bsonReader.ReadNull();
-                return null;
-            }
-            return bsonReader.ReadString();
+            return ReadClass(bsonReader, expected, ref read, bsonReader.ReadString);
         }
 
         public static Guid? ReadGuid(this BsonReader bsonReader, string expected, ref string read)
         {
-            if (bsonReader.IsEndOfDocument())
-                return null;
-            if (read == null)
-                read = bsonReader.ReadName();
-            if (read != expected)
-                return null;
-
-            read = null;
-            if (bsonReader.CurrentBsonType == BsonType.Null)
-            {
-                bsonReader.ReadNull();
-                return null;
-            }
-            return bsonReader.ReadBinaryData().AsGuid;
+            return ReadStruct(bsonReader, expected, ref read, () => bsonReader.ReadBinaryData().AsGuid);
         }
 
         public static DateTime? ReadDateTime(this BsonReader bsonReader, string expected, ref string read)
         {
-            if (bsonReader.IsEndOfDocument())
-                return null;
-            if (read == null)
-                read = bsonReader.ReadName();
-            if (read != expected)
-                return null;
-
-            read = null;
-            if (bsonReader.CurrentBsonType == BsonType.Null)
-            {
-                bsonReader.ReadNull();
-                return null;
-            }
-            return BsonUtils.ToDateTimeFromMillisecondsSinceEpoch(bsonReader.ReadDateTime()).ToLocalTime();
+            return ReadStruct(
+                              bsonReader,
+                              expected,
+                              ref read,
+                              () =>
+                              BsonUtils.ToDateTimeFromMillisecondsSinceEpoch(bsonReader.ReadDateTime()).ToLocalTime());
         }
 
         public static bool ReadNull(this BsonReader bsonReader, string expected, ref string read)
         {
-            if (bsonReader.IsEndOfDocument())
-                return false;
-            if (read == null)
-                read = bsonReader.ReadName();
-            if (read != expected)
+            if (!bsonReader.ReadName(expected, ref read))
                 return false;
 
-            read = null;
             bsonReader.ReadNull();
             return true;
         }
@@ -134,31 +116,15 @@ namespace AccountingServer.DAL
         public static T ReadDocument<T>(this BsonReader bsonReader, string expected, ref string read,
                                         Func<BsonReader, T> parser) where T : class
         {
-            if (bsonReader.IsEndOfDocument())
-                return null;
-            if (read == null)
-                read = bsonReader.ReadName();
-            if (read != expected)
-                return null;
-
-            read = null;
-            //bsonReader.ReadStartDocument();
-            var res = parser(bsonReader);
-            //bsonReader.ReadEndDocument();
-            return res;
+            return ReadPrep(bsonReader, expected, ref read) ? parser(bsonReader) : null;
         }
 
         public static List<T> ReadArray<T>(this BsonReader bsonReader, string expected, ref string read,
                                            Func<BsonReader, T> parser)
         {
-            if (bsonReader.IsEndOfDocument())
-                return null;
-            if (read == null)
-                read = bsonReader.ReadName();
-            if (read != expected)
+            if (!ReadPrep(bsonReader, expected, ref read))
                 return null;
 
-            read = null;
             var lst = new List<T>();
             bsonReader.ReadStartArray();
             while (!bsonReader.IsEndOfArray())

@@ -47,7 +47,7 @@ namespace AccountingServer.DAL
             {
                 if (vfilter.ID != null)
                 {
-                    sb.AppendFormat("    if (v._id.toString() != '{0}')) return false;", vfilter.ID);
+                    sb.AppendFormat("    if (v._id != '{0}')) return false;", vfilter.ID);
                     sb.AppendLine();
                 }
                 if (vfilter.Date != null)
@@ -155,12 +155,12 @@ namespace AccountingServer.DAL
             {
                 if (f.Filter.Title != null)
                 {
-                    sb.AppendFormat("    if (d.title != {0})) return false;", f.Filter.Title);
+                    sb.AppendFormat("    if (d.title != {0}) return false;", f.Filter.Title);
                     sb.AppendLine();
                 }
                 if (f.Filter.SubTitle != null)
                 {
-                    sb.AppendFormat("    if (d.subtitle != {0})) return false;", f.Filter.SubTitle);
+                    sb.AppendFormat("    if (d.subtitle != {0}) return false;", f.Filter.SubTitle);
                     sb.AppendLine();
                 }
                 if (f.Filter.Content != null)
@@ -350,7 +350,7 @@ namespace AccountingServer.DAL
                         sb.AppendLine("(");
                         sb.Append(GetJavascriptFilter(f.Filter1, atomFilter));
                         sb.AppendLine(")(entity) ");
-                        sb.AppendLine("&&");
+                        sb.AppendLine("||");
                         sb.AppendLine(" (");
                         sb.Append(GetJavascriptFilter(f.Filter2, atomFilter));
                         sb.AppendLine(")(entity)");
@@ -359,7 +359,7 @@ namespace AccountingServer.DAL
                         sb.AppendLine("(");
                         sb.Append(GetJavascriptFilter(f.Filter1, atomFilter));
                         sb.AppendLine(")(entity) ");
-                        sb.AppendLine("||");
+                        sb.AppendLine("&&");
                         sb.AppendLine(" (");
                         sb.Append(GetJavascriptFilter(f.Filter2, atomFilter));
                         sb.AppendLine(")(entity)");
@@ -390,7 +390,8 @@ namespace AccountingServer.DAL
         /// <returns>≤È—Ø</returns>
         private static IMongoQuery ToWhere(string js)
         {
-            return Query.Where(String.Format("function() {{ return ({0})(this); }}", js));
+            var code = String.Format("function() {{ return ({0})(this); }}", js);
+            return new QueryDocument("$where", code.Replace(Environment.NewLine, String.Empty));
         }
     }
 }

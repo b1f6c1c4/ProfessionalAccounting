@@ -10,7 +10,10 @@ namespace AccountingServer.DAL
     internal class AmortizationSerializer : BsonBaseSerializer, IBsonIdProvider
     {
         public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
-                                           IBsonSerializationOptions options) { return Deserialize(bsonReader); }
+                                           IBsonSerializationOptions options)
+        {
+            return Deserialize(bsonReader);
+        }
 
         // ReSharper disable once MemberCanBePrivate.Global
         public static object Deserialize(BsonReader bsonReader)
@@ -59,7 +62,10 @@ namespace AccountingServer.DAL
         }
 
         public override void Serialize(BsonWriter bsonWriter, Type nominalType, object value,
-                                       IBsonSerializationOptions options) { Serialize(bsonWriter, (Amortization)value); }
+                                       IBsonSerializationOptions options)
+        {
+            Serialize(bsonWriter, (Amortization)value);
+        }
 
         // ReSharper disable once MemberCanBePrivate.Global
         public static void Serialize(BsonWriter bsonWriter, Amortization amort)

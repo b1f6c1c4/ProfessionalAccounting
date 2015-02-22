@@ -117,7 +117,11 @@ namespace AccountingServer.BLL
         /// <returns>分类汇总结果</returns>
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
-            return m_Db.SelectVoucherDetailsGrouped(query);
+            var res = m_Db.SelectVoucherDetailsGrouped(query);
+            if (query.Subtotal.AggrType != AggregationType.ChangedDay &&
+                query.Subtotal.NonZero)
+                return res.Where(b => Math.Abs(b.Fund) >= Tolerance);
+            return res;
         }
 
         /// <summary>

@@ -157,21 +157,21 @@ namespace AccountingServer.DAL
                                         new MapReduceArgs
                                             {
                                                 MapFunction =
-                                                    new BsonJavaScript(GetEmitJavascript(query, SubtotalLevel.None))
+                                                    new BsonJavaScript(GetMapJavascript(query, SubtotalLevel.None))
                                             }).GetResultsAs<VoucherDetail>();
         }
 
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
             var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
-            if (query.Subtotal.AggrEnabled)
+            if (query.Subtotal.AggrType != AggregationType.None)
                 level |= SubtotalLevel.Day;
 
             const string reduce =
-                "function(key, values) { var total = 0; for (var i = 0; i < values.length; i++) total += values[i].balance; return { balance: total };}";
+                "function(key, values) { var total = 0; for (var i = 0; i < values.length; i++) total += values[i]; return total; }";
             var args = new MapReduceArgs
                            {
-                               MapFunction = new BsonJavaScript(GetEmitJavascript(query.VoucherEmitQuery, level)),
+                               MapFunction = new BsonJavaScript(GetMapJavascript(query.VoucherEmitQuery, level)),
                                ReduceFunction = new BsonJavaScript(reduce)
                            };
             var res = m_Vouchers.MapReduce(args);
@@ -322,7 +322,7 @@ namespace AccountingServer.DAL
             return emitQuery.DetailFilter.GetJavascriptFilter();
         }
 
-        private static string GetEmitJavascript(IVoucherDetailQuery query, SubtotalLevel subtotalLevel)
+        private static string GetMapJavascript(IVoucherDetailQuery query, SubtotalLevel subtotalLevel)
         {
             var sb = new StringBuilder();
             sb.AppendLine("function() {");
@@ -336,6 +336,7 @@ namespace AccountingServer.DAL
                     throw new InvalidOperationException();
                 sb.Append(dQuery.DetailFilter.GetJavascriptFilter());
             }
+            sb.AppendLine(";");
             sb.AppendLine("    if ((");
             sb.Append(query.VoucherQuery.GetJavascriptFilter());
             sb.AppendLine(")(this)) {");
@@ -344,6 +345,8 @@ namespace AccountingServer.DAL
             sb.AppendLine("            if (chk(d))");
             {
                 sb.Append("emit({");
+                if (subtotalLevel.HasFlag(SubtotalLevel.Day))
+                    sb.Append("date: theDate,");
                 if (subtotalLevel.HasFlag(SubtotalLevel.Title))
                     sb.Append("title: d.title,");
                 if (subtotalLevel.HasFlag(SubtotalLevel.SubTitle))
@@ -352,16 +355,13 @@ namespace AccountingServer.DAL
                     sb.Append("content: d.content,");
                 if (subtotalLevel.HasFlag(SubtotalLevel.Remark))
                     sb.Append("remark: d.remark,");
-                if (subtotalLevel.HasFlag(SubtotalLevel.Day))
-                    sb.Append("date: theDate,");
-                sb.Append("}, { balance: d.fund });");
+                sb.Append("}, d.fund);");
             }
-            sb.AppendLine("            });");
             sb.AppendLine("        });");
             sb.AppendLine("    }");
             sb.AppendLine("}");
 
-            return sb.ToString();
+            return sb.Replace(Environment.NewLine, String.Empty).ToString();
         }
 
         #endregion

@@ -12,6 +12,7 @@ namespace AccountingServer.Entities
         Intersect,
     }
 
+    // ReSharper disable once UnusedTypeParameter
     public interface IQueryCompunded<TAtom> where TAtom : class { }
 
     public interface IQueryAry<TAtom> : IQueryCompunded<TAtom> where TAtom : class
@@ -57,12 +58,19 @@ namespace AccountingServer.Entities
         IEmit DetailEmitFilter { get; }
     }
 
+    public enum AggregationType
+    {
+        None,
+        ChangedDay,
+        EveryDay,
+    }
+
     public interface ISubtotal
     {
         bool NonZero { get; }
         IList<SubtotalLevel> Levels { get; }
-        bool AggrEnabled { get; }
-        IDateRange AggrRange { get; }
+        AggregationType AggrType { get; }
+        IDateRange EveryDayRange { get; }
     }
 
     public interface IGroupedQuery

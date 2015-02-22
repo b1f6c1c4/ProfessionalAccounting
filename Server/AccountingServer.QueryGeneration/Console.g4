@@ -26,22 +26,6 @@ otherCommand
 groupedQuery
 	:	voucherDetailQuery subtotal
 	;
-	
-chart
-	:	'c::' DollarQuotedString
-	|	'c||' chartArea ('||' hyperItem)+
-	|	'c:' DollarQuotedString ':' chartArea ('||' hyperItem)+
-	;
-
-chartArea
-	:	hyperItemAtom ('|' hyperItemAtom)* '|' ('_' Float)? ('^' Float)?
-	;
-
-report
-	:	'r::' DollarQuotedString
-	|	'r||' hyperItem
-	|	'r:' DollarQuotedString ':' chartArea ('||' hyperItem)+
-	;
 
 hyperItem
 	:	name hyperItem ('|' hyperItem)+
@@ -61,9 +45,12 @@ coef
 	;
 
 subtotal
-	:	SubtotalMark=('`' | '``')
-		SubtotalFields=('t' | 's' | 'c' | 'r' | 'd' | 'w' | 'm' | 'f' | 'b' | 'y')*
-		(Aggregation='D' (Ranged='[' rangeCore? ']')?)?
+	:	SubtotalMark=('`' | '``') SubtotalFields? subtotalAggr?
+	;
+
+subtotalAggr
+	:	'D' IsAll='[]'?
+	|	'D' '[' rangeCore ']'
 	;
 	
 voucherDetailQuery
@@ -101,7 +88,7 @@ details
 	;
 
 detailQuery
-	:	(DetailTitle | DetailTitleSubTitle)? SingleQuotedString? DoubleQuotedString? Direction=('d' | 'c')?
+	:	(DetailTitle | DetailTitleSubTitle)? SingleQuotedString? DoubleQuotedString? Direction=('>' | '<')?
 	;
 
 range
@@ -296,6 +283,11 @@ AOCollapse
 	;
 AOCheck
 	:	'-chk'
+	;
+
+SubtotalFields
+	:	('t' | 's' | 'c' | 'r' | 'd' | 'w' | 'm' | 'f' | 'b' | 'y')+
+	|	'v'
 	;
 
 Guid

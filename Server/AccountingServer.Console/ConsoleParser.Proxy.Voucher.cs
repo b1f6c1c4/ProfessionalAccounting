@@ -39,7 +39,16 @@ namespace AccountingServer.Console
                 }
             }
 
-            public DateFilter Range { get { return range().Range; } }
+            public DateFilter Range
+            {
+                get
+                {
+                    if (range() == null)
+                        return DateFilter.Unconstrained;
+                    return range().Range;
+                }
+            }
+
             public IQueryCompunded<IDetailQueryAtom> DetailFilter { get { return details(); } }
         }
 
@@ -57,7 +66,7 @@ namespace AccountingServer.Console
                 }
             }
 
-            public IQueryCompunded<IVoucherQueryAtom> Filter2 { get { throw new NotImplementedException(); } }
+            public IQueryCompunded<IVoucherQueryAtom> Filter2 { get { throw new InvalidOperationException(); } }
         }
 
         public partial class VouchersBContext : IQueryAry<IVoucherQueryAtom>
@@ -109,53 +118,64 @@ namespace AccountingServer.Console
             {
                 get
                 {
-                    if (SubtotalFields == null)
+                    if (SubtotalFields() == null)
                         return new[] { SubtotalLevel.Title, SubtotalLevel.SubTitle, SubtotalLevel.Content };
-                    return SubtotalFields.Text.Select(
-                                                      ch =>
-                                                      {
-                                                          switch (ch)
-                                                          {
-                                                              case 't':
-                                                                  return SubtotalLevel.Title;
-                                                              case 's':
-                                                                  return SubtotalLevel.SubTitle;
-                                                              case 'c':
-                                                                  return SubtotalLevel.Content;
-                                                              case 'r':
-                                                                  return SubtotalLevel.Remark;
-                                                              case 'd':
-                                                                  return SubtotalLevel.Day;
-                                                              case 'w':
-                                                                  return SubtotalLevel.Week;
-                                                              case 'm':
-                                                                  return SubtotalLevel.Month;
-                                                              case 'f':
-                                                                  return SubtotalLevel.FinancialMonth;
-                                                              case 'b':
-                                                                  return SubtotalLevel.BillingMonth;
-                                                              case 'y':
-                                                                  return SubtotalLevel.Year;
-                                                          }
-                                                          throw new InvalidOperationException();
-                                                      }).ToList();
+
+                    if (SubtotalFields().GetText() == "v")
+                        return new SubtotalLevel[0];
+
+                    return SubtotalFields().GetText()
+                                           .Select(
+                                                   ch =>
+                                                   {
+                                                       switch (ch)
+                                                       {
+                                                           case 't':
+                                                               return SubtotalLevel.Title;
+                                                           case 's':
+                                                               return SubtotalLevel.SubTitle;
+                                                           case 'c':
+                                                               return SubtotalLevel.Content;
+                                                           case 'r':
+                                                               return SubtotalLevel.Remark;
+                                                           case 'd':
+                                                               return SubtotalLevel.Day;
+                                                           case 'w':
+                                                               return SubtotalLevel.Week;
+                                                           case 'm':
+                                                               return SubtotalLevel.Month;
+                                                           case 'f':
+                                                               return SubtotalLevel.FinancialMonth;
+                                                           case 'b':
+                                                               return SubtotalLevel.BillingMonth;
+                                                           case 'y':
+                                                               return SubtotalLevel.Year;
+                                                       }
+                                                       throw new InvalidOperationException();
+                                                   }).ToList();
                 }
             }
 
-            public bool AggrEnabled
-            {
-                get { return Aggregation != null; }
-            }
-
-            public IDateRange AggrRange
+            public AggregationType AggrType
             {
                 get
                 {
-                    if (rangeCore() != null)
-                        return rangeCore();
-                    if (Ranged == null)
-                        return null;
-                    return DateFilter.Unconstrained;
+                    if (subtotalAggr() == null)
+                        return AggregationType.None;
+                    if (subtotalAggr().IsAll == null &&
+                        subtotalAggr().rangeCore() == null)
+                        return AggregationType.ChangedDay;
+                    return AggregationType.EveryDay;
+                }
+            }
+
+            public IDateRange EveryDayRange
+            {
+                get
+                {
+                    if (subtotalAggr().IsAll != null)
+                        return DateFilter.Unconstrained;
+                    return subtotalAggr().rangeCore();
                 }
             }
         }

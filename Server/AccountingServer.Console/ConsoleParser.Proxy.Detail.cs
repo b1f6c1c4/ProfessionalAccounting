@@ -15,8 +15,7 @@ namespace AccountingServer.Console
                     if (DetailTitle() != null)
                     {
                         var t = Int32.Parse(DetailTitle().GetText().TrimStart('T'));
-                        filter.Title = t / 100;
-                        filter.SubTitle = t % 100;
+                        filter.Title = t;
                     }
                     else if (DetailTitleSubTitle() != null)
                     {
@@ -24,17 +23,17 @@ namespace AccountingServer.Console
                         filter.Title = t / 100;
                         filter.SubTitle = t % 100;
                     }
-                    if (DoubleQuotedString() != null)
-                    {
-                        var s = DoubleQuotedString().GetText();
-                        s = s.Substring(1, s.Length - 2);
-                        filter.Content = s.Replace("\"\"", "\"");
-                    }
                     if (SingleQuotedString() != null)
                     {
                         var s = SingleQuotedString().GetText();
                         s = s.Substring(1, s.Length - 2);
-                        filter.Remark = s.Replace("''", "'");
+                        filter.Content = s.Replace("''", "'");
+                    }
+                    if (DoubleQuotedString() != null)
+                    {
+                        var s = DoubleQuotedString().GetText();
+                        s = s.Substring(1, s.Length - 2);
+                        filter.Remark = s.Replace("\"\"", "\"");
                     }
                     return filter;
                 }
@@ -46,9 +45,9 @@ namespace AccountingServer.Console
                 {
                     if (Direction == null)
                         return 0;
-                    if (Direction.Text == "d")
+                    if (Direction.Text == ">")
                         return 1;
-                    if (Direction.Text == "c")
+                    if (Direction.Text == "<")
                         return -1;
                     throw new InvalidOperationException();
                 }

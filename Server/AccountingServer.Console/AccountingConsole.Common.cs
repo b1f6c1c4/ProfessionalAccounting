@@ -29,15 +29,9 @@ namespace AccountingServer.Console
                 throw new Exception(result.exception.ToString());
 
             if (result.GetChild(0) is ConsoleParser.VouchersContext)
-            {
-
                 return PresentVoucherQuery(result.GetChild(0) as IQueryCompunded<IVoucherQueryAtom>);
-            }
             if (result.GetChild(0) is ConsoleParser.GroupedQueryContext)
-            {
-
                 return PresentSubtotal(result.GetChild(0) as IGroupedQuery);
-            }
             if (result.GetChild(0) is ConsoleParser.AssetContext)
                 return ExecuteAsset(result.GetChild(0) as ConsoleParser.AssetContext);
             if (result.GetChild(0) is ConsoleParser.AmortContext)
