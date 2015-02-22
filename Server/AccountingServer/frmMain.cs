@@ -10,11 +10,20 @@ namespace AccountingServer
     // ReSharper disable once InconsistentNaming
     public partial class frmMain : Form
     {
+        /// <summary>
+        ///     基本会计业务处理类
+        /// </summary>
         // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
         private readonly Accountant m_Accountant;
 
+        /// <summary>
+        ///     控制台
+        /// </summary>
         private readonly AccountingConsole m_Console;
 
+        /// <summary>
+        ///     当前文本是否可编辑
+        /// </summary>
         private bool m_Editable;
 
         [DllImport("user32.dll")]
@@ -50,6 +59,13 @@ namespace AccountingServer
             //                           };
         }
 
+        /// <summary>
+        ///     获取当前正在编辑的文本
+        /// </summary>
+        /// <param name="begin">起位置</param>
+        /// <param name="end">止位置</param>
+        /// <param name="typeName">类型</param>
+        /// <returns></returns>
         private bool GetEditableText(out int begin, out int end, out string typeName)
         {
             begin = textBoxResult.Text.LastIndexOf(
@@ -91,6 +107,10 @@ namespace AccountingServer
             textBoxCommand.ForeColor = textBoxCommand.Text.StartsWith("+") ? Color.White : Color.Black;
         }
 
+        /// <summary>
+        ///     更新或添加
+        /// </summary>
+        /// <returns>是否成功</returns>
         private bool PerformUpsert()
         {
             int begin;
@@ -136,6 +156,10 @@ namespace AccountingServer
             return true;
         }
 
+        /// <summary>
+        ///     删除
+        /// </summary>
+        /// <returns>是否成功</returns>
         private bool PerformRemoval()
         {
             int begin;
@@ -186,6 +210,10 @@ namespace AccountingServer
             return true;
         }
 
+        /// <summary>
+        ///     执行表达式
+        /// </summary>
+        /// <returns></returns>
         private bool ExecuteCommand()
         {
             var text = textBoxCommand.Text;
@@ -271,6 +299,10 @@ namespace AccountingServer
             }
         }
 
+        /// <summary>
+        ///     处理图表
+        /// </summary>
+        /// <param name="chartArgs">图表数据</param>
         private void ProcessChart(ChartData chartArgs)
         {
             chart1.ChartAreas.SuspendUpdates();
@@ -292,6 +324,9 @@ namespace AccountingServer
             SwitchToChart();
         }
 
+        /// <summary>
+        ///     显示文本
+        /// </summary>
         private void SwitchToText()
         {
             chart1.Visible = false;
@@ -299,6 +334,9 @@ namespace AccountingServer
             pictureBox1.Visible = false;
         }
 
+        /// <summary>
+        ///     显示图表
+        /// </summary>
         private void SwitchToChart()
         {
             chart1.Visible = true;
@@ -306,6 +344,9 @@ namespace AccountingServer
             pictureBox1.Visible = false;
         }
 
+        /// <summary>
+        ///     准备输入表达式
+        /// </summary>
         private void FocusTextBoxCommand()
         {
             textBoxCommand.Focus();
@@ -321,6 +362,7 @@ namespace AccountingServer
             textBoxCommand.SelectionLength = textBoxCommand.Text.Length;
         }
 
+        /// <inheritdoc />
         protected override bool ProcessDialogKey(Keys keyData)
         {
             if (textBoxCommand.Focused)

@@ -119,7 +119,7 @@ namespace AccountingServer.Console
                         isPositive = true;
 
                     foreach (var grpContent in Accountant.GroupByContent(grpSubTitle))
-                        foreach (var balance in Accountant.GroupByDateAggr(grpContent))
+                        foreach (var balance in Accountant.AggregateChangedDay(grpContent))
                         {
                             if (isPositive && balance.Fund > -Accountant.Tolerance)
                                 continue;
@@ -134,6 +134,7 @@ namespace AccountingServer.Console
                                             grpSubTitle.Key.AsSubTitle(),
                                             grpContent.Key,
                                             balance.Fund);
+                            break;
                         }
                 }
             }

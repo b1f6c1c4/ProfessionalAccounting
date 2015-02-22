@@ -43,7 +43,11 @@ namespace AccountingServer.Console
             return m_Accountant.DeleteNamedQueryTemplate(name);
         }
 
-        public IQueryResult ListNamedQueryTemplates()
+        /// <summary>
+        ///     显示所有命名查询模板
+        /// </summary>
+        /// <returns>格式化的信息</returns>
+        private IQueryResult ListNamedQueryTemplates()
         {
             AutoConnect();
 
@@ -59,7 +63,13 @@ namespace AccountingServer.Console
             return new EditableText(sb.ToString());
         }
 
-        public INamedQuery Dereference(string reference, DateFilter rng)
+        /// <summary>
+        ///     对命名查询模板的名称解引用
+        /// </summary>
+        /// <param name="reference">名称</param>
+        /// <param name="rng">用于赋值的日期过滤器</param>
+        /// <returns>命名查询模板</returns>
+        private INamedQuery Dereference(string reference, DateFilter rng)
         {
             string range, leftExtendedRange;
             if (rng.NullOnly)
@@ -90,7 +100,13 @@ namespace AccountingServer.Console
             return template;
         }
 
-        public INamedQuery Dereference(INamedQueryReference reference, DateFilter rng)
+        /// <summary>
+        ///     对命名查询模板引用解引用
+        /// </summary>
+        /// <param name="reference">命名查询模板引用</param>
+        /// <param name="rng">用于赋值的日期过滤器</param>
+        /// <returns>命名查询模板</returns>
+        private INamedQuery Dereference(INamedQueryReference reference, DateFilter rng)
         {
             return Dereference(reference.Name, rng);
         }

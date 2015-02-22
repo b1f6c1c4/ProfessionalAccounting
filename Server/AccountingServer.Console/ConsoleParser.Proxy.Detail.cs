@@ -7,6 +7,7 @@ namespace AccountingServer.Console
     {
         public partial class DetailQueryContext : IDetailQueryAtom
         {
+            /// <inheritdoc />
             public VoucherDetail Filter
             {
                 get
@@ -31,6 +32,7 @@ namespace AccountingServer.Console
                 }
             }
 
+            /// <inheritdoc />
             public int Dir
             {
                 get
@@ -48,6 +50,7 @@ namespace AccountingServer.Console
 
         public partial class DetailsContext : IQueryAry<IDetailQueryAtom>
         {
+            /// <inheritdoc />
             public OperatorType Operator
             {
                 get
@@ -72,6 +75,7 @@ namespace AccountingServer.Console
                 }
             }
 
+            /// <inheritdoc />
             public IQueryCompunded<IDetailQueryAtom> Filter1
             {
                 get
@@ -82,6 +86,7 @@ namespace AccountingServer.Console
                 }
             }
 
+            /// <inheritdoc />
             public IQueryCompunded<IDetailQueryAtom> Filter2 { get { return details(1); } }
         }
     }

@@ -10,13 +10,18 @@ namespace AccountingServer.Console
 {
     public partial class AccountingConsole
     {
-        public IQueryResult ExecuteReportQuery(ConsoleParser.ReportContext query)
+        /// <summary>
+        ///     执行报告表达式
+        /// </summary>
+        /// <param name="expr">表达式</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult ExecuteReportQuery(ConsoleParser.ReportContext expr)
         {
             AutoConnect();
 
             DateFilter rng;
-            if (query.range() != null)
-                rng = query.range().Range;
+            if (expr.range() != null)
+                rng = expr.range().Range;
             else
             {
                 var parser = new ConsoleParser(new CommonTokenStream(new ConsoleLexer(new AntlrInputStream("[0]"))));
@@ -25,15 +30,15 @@ namespace AccountingServer.Console
 
             INamedQuery q;
 
-            if (query.name() != null)
+            if (expr.name() != null)
             {
-                var s = query.name().DollarQuotedString().GetText();
+                var s = expr.name().DollarQuotedString().GetText();
                 q = Dereference(s.Substring(1, s.Length - 2).Replace("$$", "$"), rng);
             }
-            else if (query.namedQ() != null)
-                q = query.namedQ();
-            else if (query.namedQueries() != null)
-                q = query.namedQueries();
+            else if (expr.namedQ() != null)
+                q = expr.namedQ();
+            else if (expr.namedQueries() != null)
+                q = expr.namedQueries();
             else
                 throw new InvalidOperationException();
 
@@ -42,6 +47,14 @@ namespace AccountingServer.Console
             return new UnEditableText(sb.ToString());
         }
 
+        /// <summary>
+        ///     呈现报告条目
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="query">命名查询</param>
+        /// <param name="rng">日期过滤器</param>
+        /// <param name="sb">输出</param>
+        /// <param name="coefficient">路径上累计的系数</param>
         private void PresentReport(string path, INamedQuery query, DateFilter rng, StringBuilder sb, double coefficient)
         {
             while (query is ConsoleParser.NamedQueryContext)
@@ -72,6 +85,15 @@ namespace AccountingServer.Console
             throw new InvalidOperationException();
         }
 
+        /// <summary>
+        ///     在报告上呈现分类汇总条目
+        /// </summary>
+        /// <param name="res">分类汇总结果</param>
+        /// <param name="path">路径</param>
+        /// <param name="depth">深度</param>
+        /// <param name="args">分类汇总参数</param>
+        /// <param name="sb">输出</param>
+        /// <param name="coefficient">路径上累计的系数</param>
         private static void PresentReport(IEnumerable<Balance> res, string path, int depth, ISubtotal args,
                                           StringBuilder sb, double coefficient)
         {

@@ -7,26 +7,51 @@ namespace AccountingServer.BLL
 {
     public partial class Accountant
     {
-        public static IEnumerable<IGrouping<int, Balance>> GroupByTitle(IEnumerable<Balance> source)
+        /// <summary>
+        ///     按一级科目分类
+        /// </summary>
+        /// <param name="source">待分类的余额表条目</param>
+        /// <returns>类</returns>
+        public static IEnumerable<IGrouping<int?, Balance>> GroupByTitle(IEnumerable<Balance> source)
         {
-            return source.GroupBy(b => b.Title.Value);
+            return source.GroupBy(b => b.Title);
         }
 
+        /// <summary>
+        ///     按二级科目分类
+        /// </summary>
+        /// <param name="source">待分类的余额表条目</param>
+        /// <returns>类</returns>
         public static IEnumerable<IGrouping<int?, Balance>> GroupBySubTitle(IEnumerable<Balance> source)
         {
             return source.GroupBy(b => b.SubTitle);
         }
 
+        /// <summary>
+        ///     按内容分类
+        /// </summary>
+        /// <param name="source">待分类的余额表条目</param>
+        /// <returns>类</returns>
         public static IEnumerable<IGrouping<string, Balance>> GroupByContent(IEnumerable<Balance> source)
         {
             return source.GroupBy(b => b.Content);
         }
 
+        /// <summary>
+        ///     按备注分类
+        /// </summary>
+        /// <param name="source">待分类的余额表条目</param>
+        /// <returns>类</returns>
         public static IEnumerable<IGrouping<string, Balance>> GroupByRemark(IEnumerable<Balance> source)
         {
             return source.GroupBy(b => b.Remark);
         }
 
+        /// <summary>
+        ///     按日期分类
+        /// </summary>
+        /// <param name="source">待分类的余额表条目</param>
+        /// <returns>类</returns>
         public static IEnumerable<IGrouping<DateTime?, Balance>> GroupByDate(IEnumerable<Balance> source)
         {
             return source.GroupBy(b => b.Date);
@@ -34,11 +59,11 @@ namespace AccountingServer.BLL
 
 
         /// <summary>
-        ///     计算每变动日累计发生额
+        ///     计算变动日累计发生额
         /// </summary>
-        /// <param name="source">每变动日发生额</param>
-        /// <returns>每变动日余额</returns>
-        public static IEnumerable<Balance> GroupByDateAggr(IEnumerable<Balance> source)
+        /// <param name="source">变动日发生额</param>
+        /// <returns>变动日余额</returns>
+        public static IEnumerable<Balance> AggregateChangedDay(IEnumerable<Balance> source)
         {
             var resx =
                 GroupByDate(source)
@@ -61,10 +86,10 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     计算每日累计发生额
         /// </summary>
-        /// <param name="source">每日发生额</param>
-        /// <param name="rng">累计区间</param>
+        /// <param name="source">变动日发生额</param>
+        /// <param name="rng">返回区间</param>
         /// <returns>每日余额</returns>
-        public static IEnumerable<Balance> GroupByDateBal(IEnumerable<Balance> source, DateFilter rng)
+        public static IEnumerable<Balance> AggregateEveryDay(IEnumerable<Balance> source, DateFilter rng)
         {
             var resx =
                 GroupByDate(source)

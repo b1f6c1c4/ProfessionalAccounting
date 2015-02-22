@@ -3,10 +3,21 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.Console
 {
+    internal static class NullDateRangeHelper
+    {
+        public static DateFilter TheRange(this IDateRange range)
+        {
+            if (range == null)
+                return DateFilter.Unconstrained;
+            return range.Range;
+        }
+    }
+
     public partial class ConsoleParser
     {
         public partial class RangeDayContext : IDateRange
         {
+            /// <inheritdoc />
             public DateFilter Range
             {
                 get
@@ -21,6 +32,7 @@ namespace AccountingServer.Console
 
         public partial class RangeWeekContext : IDateRange
         {
+            /// <inheritdoc />
             public DateFilter Range
             {
                 get
@@ -36,6 +48,7 @@ namespace AccountingServer.Console
 
         public partial class RangeMonthContext : IDateRange
         {
+            /// <inheritdoc />
             public DateFilter Range
             {
                 get
@@ -92,6 +105,7 @@ namespace AccountingServer.Console
 
         public partial class RangeYearContext : IDateRange
         {
+            /// <inheritdoc />
             public DateFilter Range
             {
                 get
@@ -104,6 +118,7 @@ namespace AccountingServer.Console
 
         public partial class RangeCertainPointContext : IDateRange
         {
+            /// <inheritdoc />
             public DateFilter Range
             {
                 get
@@ -123,6 +138,7 @@ namespace AccountingServer.Console
 
         public partial class RangePointContext : IDateRange
         {
+            /// <inheritdoc />
             public DateFilter Range
             {
                 get
@@ -138,6 +154,7 @@ namespace AccountingServer.Console
 
         public partial class RangeCoreContext : IDateRange
         {
+            /// <inheritdoc />
             public DateFilter Range
             {
                 get
@@ -164,10 +181,8 @@ namespace AccountingServer.Console
 
         public partial class RangeContext : IDateRange
         {
-            public DateFilter Range
-            {
-                get { return rangeCore() == null ? DateFilter.Unconstrained : rangeCore().Range; }
-            }
+            /// <inheritdoc />
+            public DateFilter Range { get { return rangeCore().TheRange(); } }
         }
     }
 }

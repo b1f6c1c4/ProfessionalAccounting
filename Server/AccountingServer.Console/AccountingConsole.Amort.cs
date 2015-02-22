@@ -19,12 +19,7 @@ namespace AccountingServer.Console
         {
             var amort = CSharpHelper.ParseAmort(code);
 
-            if (!amort.ID.HasValue)
-            {
-                if (!m_Accountant.Upsert(amort))
-                    throw new Exception();
-            }
-            else if (!m_Accountant.Update(amort))
+            if (!m_Accountant.Upsert(amort))
                 throw new Exception();
 
             return CSharpHelper.PresentAmort(amort);
@@ -38,6 +33,7 @@ namespace AccountingServer.Console
         public bool ExecuteAmortRemoval(string code)
         {
             var amort = CSharpHelper.ParseAmort(code);
+
             if (!amort.ID.HasValue)
                 throw new Exception();
 
@@ -45,11 +41,11 @@ namespace AccountingServer.Console
         }
 
         /// <summary>
-        ///     执行表达式（摊销）
+        ///     执行摊销表达式
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>执行结果</returns>
-        public IQueryResult ExecuteAmort(ConsoleParser.AmortContext expr)
+        private IQueryResult ExecuteAmort(ConsoleParser.AmortContext expr)
         {
             AutoConnect();
 
@@ -88,7 +84,7 @@ namespace AccountingServer.Console
                     foreach (var voucher in m_Accountant.RegisterVouchers(a, rng, query))
                         sb.Append(CSharpHelper.PresentVoucher(voucher));
 
-                    m_Accountant.Update(a);
+                    m_Accountant.Upsert(a);
                 }
                 if (sb.Length > 0)
                     return new EditableText(sb.ToString());
@@ -120,7 +116,7 @@ namespace AccountingServer.Console
                     }
 
                     sb.Append(ListAmort(a));
-                    m_Accountant.Update(a);
+                    m_Accountant.Upsert(a);
                 }
                 return new EditableText(sb.ToString());
             }
@@ -131,7 +127,7 @@ namespace AccountingServer.Console
                 {
                     Accountant.Amortize(a);
                     sb.Append(CSharpHelper.PresentAmort(a));
-                    m_Accountant.Update(a);
+                    m_Accountant.Upsert(a);
                 }
                 return new EditableText(sb.ToString());
             }
@@ -174,7 +170,7 @@ namespace AccountingServer.Console
                     foreach (var item in m_Accountant.Update(a, rng, isCollapsed))
                         sb.AppendLine(ListAmortItem(item));
 
-                    m_Accountant.Update(a);
+                    m_Accountant.Upsert(a);
                 }
                 if (sb.Length > 0)
                     return new EditableText(sb.ToString());
@@ -197,7 +193,7 @@ namespace AccountingServer.Console
                         sb.AppendLine(sbi.ToString());
                     }
 
-                    m_Accountant.Update(a);
+                    m_Accountant.Upsert(a);
                 }
                 if (sb.Length > 0)
                     return new EditableText(sb.ToString());
@@ -244,6 +240,11 @@ namespace AccountingServer.Console
             return sb.ToString();
         }
 
+        /// <summary>
+        ///     显示摊销计算表条目
+        /// </summary>
+        /// <param name="amortItem">摊销计算表条目</param>
+        /// <returns>格式化的信息</returns>
         private static string ListAmortItem(AmortItem amortItem)
         {
             return String.Format(
@@ -254,6 +255,11 @@ namespace AccountingServer.Console
                                  amortItem.Residue.AsCurrency().CPadLeft(13));
         }
 
+        /// <summary>
+        ///     对摊销进行排序
+        /// </summary>
+        /// <param name="enumerable">摊销</param>
+        /// <returns>排序后的摊销</returns>
         private static IEnumerable<Amortization> Sort(IEnumerable<Amortization> enumerable)
         {
             return enumerable.OrderBy(o => o.Date, new DateComparer()).ThenBy(o => o.Name).ThenBy(o => o.ID);

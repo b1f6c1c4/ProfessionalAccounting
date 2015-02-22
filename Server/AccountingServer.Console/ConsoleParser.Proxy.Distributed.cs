@@ -7,13 +7,22 @@ namespace AccountingServer.Console
     {
         public partial class DistributedQAtomContext : IDistributedQueryAtom
         {
+            /// <summary>
+            ///     分期过滤器
+            /// </summary>
             private class MyDistributedFilter : IDistributed
             {
+                /// <inheritdoc />
                 public Guid? ID { get; set; }
+
+                /// <inheritdoc />
                 public string Name { get; set; }
+
+                /// <inheritdoc />
                 public string Remark { get; set; }
             }
 
+            /// <inheritdoc />
             public IDistributed Filter
             {
                 get
@@ -31,6 +40,7 @@ namespace AccountingServer.Console
 
         public partial class DistributedQContext : IQueryAry<IDistributedQueryAtom>
         {
+            /// <inheritdoc />
             public OperatorType Operator
             {
                 get
@@ -55,6 +65,7 @@ namespace AccountingServer.Console
                 }
             }
 
+            /// <inheritdoc />
             public IQueryCompunded<IDistributedQueryAtom> Filter1
             {
                 get
@@ -65,6 +76,7 @@ namespace AccountingServer.Console
                 }
             }
 
+            /// <inheritdoc />
             public IQueryCompunded<IDistributedQueryAtom> Filter2 { get { return distributedQ(1); } }
         }
     }

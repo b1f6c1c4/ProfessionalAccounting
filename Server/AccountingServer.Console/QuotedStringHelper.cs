@@ -3,13 +3,26 @@ using Antlr4.Runtime.Tree;
 
 namespace AccountingServer.Console
 {
+    /// <summary>
+    ///     带引号的字符串辅助类
+    /// </summary>
     internal static class QuotedStringHelper
     {
+        /// <summary>
+        ///     给标识符解除引号
+        /// </summary>
+        /// <param name="quoted">标识符</param>
+        /// <returns>原字符串</returns>
         public static string Dequotation(this ITerminalNode quoted)
         {
             return quoted == null ? null : quoted.GetText().Dequotation();
         }
 
+        /// <summary>
+        ///     给字符串解除引号
+        /// </summary>
+        /// <param name="quoted">字符串</param>
+        /// <returns>原字符串</returns>
         private static string Dequotation(this string quoted)
         {
             if (quoted == null)

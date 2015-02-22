@@ -4,9 +4,11 @@ namespace AccountingServer.Console
 {
     public partial class AccountingConsole
     {
-        public IQueryResult ExecuteChartQuery(ConsoleParser.ChartContext query)
-        {
-            throw new NotImplementedException();
-        }
+        /// <summary>
+        ///     执行图表表达式
+        /// </summary>
+        /// <param name="expr">表达式</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult ExecuteChartQuery(ConsoleParser.ChartContext expr) { throw new NotImplementedException(); }
     }
 }

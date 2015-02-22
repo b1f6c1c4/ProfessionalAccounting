@@ -7,10 +7,19 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.BLL
 {
+    /// <summary>
+    ///     会计科目管理
+    /// </summary>
     public static class TitleManager
     {
+        /// <summary>
+        ///     会计科目信息文档
+        /// </summary>
         private static readonly XmlDocument XmlDoc;
 
+        /// <summary>
+        ///     读取会计科目信息
+        /// </summary>
         static TitleManager()
         {
             try
@@ -107,20 +116,6 @@ namespace AccountingServer.BLL
             return detail.SubTitle.HasValue
                        ? GetTitleName(detail.Title) + "-" + GetTitleName(detail.Title, detail.SubTitle)
                        : GetTitleName(detail.Title);
-        }
-
-        /// <summary>
-        ///     返回余额对应的会计科目名称
-        /// </summary>
-        /// <param name="balance">余额</param>
-        /// <returns>名称</returns>
-        public static string GetTitleName(Balance balance)
-        {
-            if (XmlDoc == null)
-                throw new IOException("AccountingServer.BLL.Resources.Titles.xml");
-            return balance.SubTitle.HasValue
-                       ? GetTitleName(balance.Title) + "-" + GetTitleName(balance.Title, balance.SubTitle)
-                       : GetTitleName(balance.Title);
         }
     }
 }

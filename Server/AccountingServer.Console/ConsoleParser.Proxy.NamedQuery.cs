@@ -9,6 +9,7 @@ namespace AccountingServer.Console
     {
         public partial class NamedQueryContext : INamedQuery
         {
+            /// <inheritdoc />
             public INamedQuery InnerQuery
             {
                 get
@@ -23,18 +24,22 @@ namespace AccountingServer.Console
                 }
             }
 
+            /// <inheritdoc />
             public string Name { get { return InnerQuery.Name; } }
         }
 
         public partial class NamedQueryReferenceContext : INamedQueryReference
         {
+            /// <inheritdoc />
             public string Name { get { return name().DollarQuotedString().Dequotation(); } }
         }
 
         public partial class NamedQueriesContext : INamedQueries
         {
+            /// <inheritdoc />
             public string Name { get { return name().DollarQuotedString().Dequotation(); } }
 
+            /// <inheritdoc />
             public double Coefficient
             {
                 get
@@ -55,15 +60,19 @@ namespace AccountingServer.Console
                 }
             }
 
+            /// <inheritdoc />
             public string Remark { get { return DoubleQuotedString().Dequotation(); } }
 
+            /// <inheritdoc />
             public IReadOnlyList<INamedQuery> Items { get { return namedQuery(); } }
         }
 
         public partial class NamedQContext : INamedQ
         {
+            /// <inheritdoc />
             public string Name { get { return name().DollarQuotedString().Dequotation(); } }
 
+            /// <inheritdoc />
             public double Coefficient
             {
                 get
@@ -84,8 +93,10 @@ namespace AccountingServer.Console
                 }
             }
 
+            /// <inheritdoc />
             public string Remark { get { return DoubleQuotedString().Dequotation(); } }
 
+            /// <inheritdoc />
             public IGroupedQuery GroupingQuery { get { return groupedQuery(); } }
         }
     }
