@@ -4,15 +4,15 @@ using System.Linq;
 namespace AccountingServer.Entities
 {
     /// <summary>
-    ///     判断实体是否符合过滤器
+    ///     判断实体是否符合各过滤器
     /// </summary>
     public static class MatchHelper
     {
         /// <summary>
-        ///     判断凭证是否符合过滤器
+        ///     判断记账凭证是否符合记账凭证过滤器
         /// </summary>
-        /// <param name="voucher">凭证</param>
-        /// <param name="filter">过滤器</param>
+        /// <param name="voucher">记账凭证</param>
+        /// <param name="filter">记账凭证过滤器</param>
         /// <returns>是否符合</returns>
         public static bool IsMatch(this Voucher voucher, Voucher filter)
         {
@@ -39,19 +39,16 @@ namespace AccountingServer.Entities
         }
 
         /// <summary>
-        ///     判断细目是否符合过滤器
+        ///     判断细目是否符合细目过滤器
         /// </summary>
         /// <param name="voucherDetail">细目</param>
-        /// <param name="filter">过滤器</param>
+        /// <param name="filter">细目过滤器</param>
         /// <param name="dir">借贷方向</param>
         /// <returns>是否符合</returns>
         public static bool IsMatch(this VoucherDetail voucherDetail, VoucherDetail filter, int dir = 0)
         {
             if (filter == null)
                 return true;
-            if (filter.Item != null)
-                if (filter.Item != voucherDetail.Item)
-                    return false;
             if (filter.Title != null)
                 if (filter.Title != voucherDetail.Title)
                     return false;
@@ -90,10 +87,10 @@ namespace AccountingServer.Entities
         }
 
         /// <summary>
-        ///     判断凭证是否符合检索式
+        ///     判断记账凭证是否符合记账凭证检索式
         /// </summary>
-        /// <param name="voucher">凭证</param>
-        /// <param name="query">检索式</param>
+        /// <param name="voucher">记账凭证</param>
+        /// <param name="query">记账凭证检索式</param>
         /// <returns>是否符合</returns>
         public static bool IsMatch(this Voucher voucher, IVoucherQueryAtom query)
         {

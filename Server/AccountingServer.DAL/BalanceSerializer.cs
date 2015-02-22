@@ -6,13 +6,13 @@ using MongoDB.Bson.Serialization.Serializers;
 
 namespace AccountingServer.DAL
 {
+    /// <summary>
+    ///     余额表条目反序列化器（从MapReduce的结果中反序列化）
+    /// </summary>
     internal class BalanceSerializer : BsonBaseSerializer
     {
         public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
-                                           IBsonSerializationOptions options)
-        {
-            return Deserialize(bsonReader);
-        }
+                                           IBsonSerializationOptions options) { return Deserialize(bsonReader); }
 
         public static Balance Deserialize(BsonReader bsonReader)
         {
@@ -37,6 +37,7 @@ namespace AccountingServer.DAL
                                                       bR.ReadEndDocument();
                                                       return bal;
                                                   });
+            // ReSharper disable once PossibleInvalidOperationException
             balance.Fund = bsonReader.ReadDouble("value", ref read).Value;
             bsonReader.ReadEndDocument();
 

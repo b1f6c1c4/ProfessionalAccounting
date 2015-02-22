@@ -97,12 +97,12 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     找出未在摊销计算表中注册的凭证，并尝试建立引用
+        ///     找出未在摊销计算表中注册的记账凭证，并尝试建立引用
         /// </summary>
         /// <param name="amort">摊销</param>
         /// <param name="rng">日期过滤器</param>
         /// <param name="query">检索式</param>
-        /// <returns>未注册的凭证</returns>
+        /// <returns>未注册的记账凭证</returns>
         public IEnumerable<Voucher> RegisterVouchers(Amortization amort, DateFilter rng,
                                                      IQueryCompunded<IVoucherQueryAtom> query)
         {
@@ -175,7 +175,7 @@ namespace AccountingServer.BLL
         /// <param name="item">计算表条目</param>
         /// <param name="isCollapsed">是否压缩</param>
         /// <param name="editOnly">是否只允许更新</param>
-        /// <param name="template">凭证模板</param>
+        /// <param name="template">记账凭证模板</param>
         /// <returns>是否成功</returns>
         private bool UpdateVoucher(AmortItem item, bool isCollapsed, bool editOnly, Voucher template)
         {
@@ -221,11 +221,11 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     生成凭证、插入数据库并注册
+        ///     生成记账凭证、插入数据库并注册
         /// </summary>
         /// <param name="item">计算表条目</param>
         /// <param name="isCollapsed">是否压缩</param>
-        /// <param name="template">凭证模板</param>
+        /// <param name="template">记账凭证模板</param>
         /// <returns>是否成功</returns>
         private bool GenerateVoucher(AmortItem item, bool isCollapsed, Voucher template)
         {

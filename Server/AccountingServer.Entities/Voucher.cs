@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace AccountingServer.Entities
 {
     /// <summary>
-    ///     记账凭证的类别
+    ///     记账凭证类别
     /// </summary>
     public enum VoucherType
     {
@@ -85,11 +85,6 @@ namespace AccountingServer.Entities
     /// </summary>
     public class VoucherDetail
     {
-        /// <summary>
-        ///     所属记账凭证编号
-        /// </summary>
-        public string Item { get; set; }
-
         /// <summary>
         ///     会计科目一级科目代码
         /// </summary>

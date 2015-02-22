@@ -9,9 +9,9 @@ namespace AccountingServer.Console
     public partial class AccountingConsole
     {
         /// <summary>
-        ///     检查每张会计凭证借贷方是否相等
+        ///     检查每张会计记账凭证借贷方是否相等
         /// </summary>
-        /// <returns>有误的会计凭证表达式</returns>
+        /// <returns>有误的会计记账凭证表达式</returns>
         private IQueryResult BasicCheck()
         {
             AutoConnect();

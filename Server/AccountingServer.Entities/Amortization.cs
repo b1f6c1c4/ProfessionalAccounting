@@ -8,12 +8,39 @@ namespace AccountingServer.Entities
     /// </summary>
     public enum AmortizeInterval
     {
+        /// <summary>
+        ///     每日
+        /// </summary>
         EveryDay,
+
+        /// <summary>
+        ///     每周同一天
+        /// </summary>
         SameDayOfWeek,
+
+        /// <summary>
+        ///     每周日
+        /// </summary>
         LastDayOfWeek,
+
+        /// <summary>
+        ///     每月同一天
+        /// </summary>
         SameDayOfMonth,
+
+        /// <summary>
+        ///     每月最后一天
+        /// </summary>
         LastDayOfMonth,
+
+        /// <summary>
+        ///     每年同一天
+        /// </summary>
         SameDayOfYear,
+
+        /// <summary>
+        ///     每年最后一天
+        /// </summary>
         LastDayOfYear,
     }
 
@@ -23,7 +50,7 @@ namespace AccountingServer.Entities
     public class AmortItem
     {
         /// <summary>
-        ///     规范忽略标志
+        ///     忽略标志
         /// </summary>
         public const string IgnoranceMark = "reconciliation";
 
@@ -60,7 +87,7 @@ namespace AccountingServer.Entities
     public class Amortization : IDistributed
     {
         /// <summary>
-        ///     规范忽略标志
+        ///     忽略标志
         /// </summary>
         public const string IgnoranceMark = "reconciliation";
 

@@ -28,6 +28,9 @@ namespace AccountingServer.Entities
         /// </summary>
         public DateTime? EndDate;
 
+        /// <summary>
+        ///     任意日期
+        /// </summary>
         public static DateFilter Unconstrained = new DateFilter
                                                      {
                                                          NullOnly = false,
@@ -36,6 +39,9 @@ namespace AccountingServer.Entities
                                                          EndDate = null
                                                      };
 
+        /// <summary>
+        ///     仅限无日期
+        /// </summary>
         public static DateFilter TheNullOnly = new DateFilter
                                                    {
                                                        NullOnly = true,
@@ -46,60 +52,35 @@ namespace AccountingServer.Entities
 
         public DateFilter(DateTime? startDate, DateTime? endDate)
         {
-            if (startDate.HasValue &&
-                endDate.HasValue)
-            {
-                NullOnly = false;
-                Nullable = false;
-                StartDate = startDate;
-                EndDate = endDate;
-                return;
-            }
-
-            if (startDate.HasValue)
-            {
-                NullOnly = false;
-                Nullable = false;
-                StartDate = startDate;
-                EndDate = null;
-                return;
-            }
-
-            if (endDate.HasValue)
-            {
-                NullOnly = false;
-                Nullable = true;
-                StartDate = null;
-                EndDate = endDate;
-                return;
-            }
-
-            {
-                NullOnly = false;
-                Nullable = true;
-                StartDate = null;
-                EndDate = null;
-            }
+            NullOnly = false;
+            Nullable = !startDate.HasValue;
+            StartDate = startDate;
+            EndDate = endDate;
         }
 
-        public bool Constrained { get { return StartDate.HasValue && EndDate.HasValue; } }
-
+        /// <inheritdoc />
         public DateFilter Range { get { return this; } }
     }
 
+    /// <summary>
+    ///     日期比较器
+    /// </summary>
     public class DateComparer : Comparer<DateTime?>
     {
         public override int Compare(DateTime? x, DateTime? y) { return DateHelper.CompareDate(x, y); }
     }
 
+    /// <summary>
+    ///     日期辅助类
+    /// </summary>
     public static class DateHelper
     {
         /// <summary>
-        ///     比较两日期（可以为无日期）的早晚
+        ///     比较两日期（可以为无日期）的先后
         /// </summary>
         /// <param name="b1Date">第一个日期</param>
         /// <param name="b2Date">第二个日期</param>
-        /// <returns>相等为0，第一个早为-1，第二个早为1（无日期按无穷长时间以前考虑）</returns>
+        /// <returns>相等为0，第一个先为-1，第二个先为1（无日期按无穷长时间以前考虑）</returns>
         public static int CompareDate(DateTime? b1Date, DateTime? b2Date)
         {
             if (b1Date.HasValue &&
@@ -112,6 +93,12 @@ namespace AccountingServer.Entities
             return 0;
         }
 
+        /// <summary>
+        ///     判断日期是否符合日期过滤器
+        /// </summary>
+        /// <param name="dt">日期</param>
+        /// <param name="rng">日期过滤器</param>
+        /// <returns>是否符合</returns>
         public static bool Within(this DateTime? dt, DateFilter rng)
         {
             if (rng.NullOnly)

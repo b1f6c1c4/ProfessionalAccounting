@@ -2,6 +2,9 @@
 
 namespace AccountingServer.Entities
 {
+    /// <summary>
+    ///     分期
+    /// </summary>
     public interface IDistributed
     {
         /// <summary>
