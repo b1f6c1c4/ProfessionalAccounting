@@ -9,15 +9,30 @@ namespace AccountingServer.Console
 {
     public partial class AccountingConsole
     {
+        /// <summary>
+        ///     执行分类汇总检索式并呈现结果
+        /// </summary>
+        /// <param name="query">分类汇总检索式</param>
+        /// <returns>执行结果</returns>
         private IQueryResult PresentSubtotal(IGroupedQuery query)
         {
             AutoConnect();
+
             var result = m_Accountant.SelectVoucherDetailsGrouped(query);
+
             var sb = new StringBuilder();
             PresentSubtotal(result, 0, query.Subtotal, sb);
+
             return new UnEditableText(sb.ToString());
         }
 
+        /// <summary>
+        ///     呈现分类汇总
+        /// </summary>
+        /// <param name="res">分类汇总结果</param>
+        /// <param name="depth">深度</param>
+        /// <param name="args">分类汇总参数</param>
+        /// <param name="sb">输出</param>
         private static void PresentSubtotal(IEnumerable<Balance> res, int depth, ISubtotal args, StringBuilder sb)
         {
             const int ident = 4;
@@ -33,7 +48,7 @@ namespace AccountingServer.Console
                 if (args.AggrType == AggregationType.ChangedDay)
                 {
                     sb.AppendLine();
-                    foreach (var b in Accountant.GroupByDateAggr(res))
+                    foreach (var b in Accountant.AggregateChangedDay(res))
                     {
                         if (args.NonZero &&
                             Math.Abs(b.Fund) < Accountant.Tolerance)
@@ -48,7 +63,7 @@ namespace AccountingServer.Console
                 if (args.AggrType == AggregationType.EveryDay)
                 {
                     sb.AppendLine();
-                    foreach (var b in Accountant.GroupByDateBal(res, args.EveryDayRange.Range))
+                    foreach (var b in Accountant.AggregateEveryDay(res, args.EveryDayRange.Range))
                     {
                         if (args.NonZero &&
                             Math.Abs(b.Fund) < Accountant.Tolerance)

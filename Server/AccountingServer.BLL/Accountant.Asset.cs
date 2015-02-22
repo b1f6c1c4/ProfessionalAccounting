@@ -7,6 +7,9 @@ namespace AccountingServer.BLL
 {
     public partial class Accountant
     {
+        /// <summary>
+        ///     固定资产清理
+        /// </summary>
         private const int DefaultDispositionTitle = 1606;
 
         /// <summary>

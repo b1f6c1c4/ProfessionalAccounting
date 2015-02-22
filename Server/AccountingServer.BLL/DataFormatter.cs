@@ -9,7 +9,7 @@ namespace AccountingServer.BLL
     public static class DataFormatter
     {
         /// <summary>
-        ///     格式化金额
+        ///     格式化金额，用空格代替末尾的零
         /// </summary>
         /// <param name="value">金额</param>
         /// <returns>格式化后的金额</returns>
@@ -20,17 +20,7 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     格式化金额
-        /// </summary>
-        /// <param name="value">金额</param>
-        /// <returns>格式化后的金额</returns>
-        public static string AsFullCurrency(this double value)
-        {
-            return String.Format("￥{0:0.0000}", value);
-        }
-
-        /// <summary>
-        ///     格式化金额
+        ///     格式化金额，用空格代替末尾的零
         /// </summary>
         /// <param name="value">金额</param>
         /// <returns>格式化后的金额</returns>
@@ -38,37 +28,6 @@ namespace AccountingServer.BLL
         {
             return value.HasValue ? AsCurrency(value.Value) : String.Empty;
         }
-
-        /// <summary>
-        ///     格式化金额
-        /// </summary>
-        /// <param name="value">金额</param>
-        /// <returns>格式化后的金额</returns>
-        public static string AsFullCurrency(this double? value)
-        {
-            return value.HasValue ? AsFullCurrency(value.Value) : String.Empty;
-        }
-
-        /// <summary>
-        ///     格式化金额（不含符号）
-        /// </summary>
-        /// <param name="value">金额</param>
-        /// <returns>格式化后的金额</returns>
-        public static string AsPureCurrency(this double value)
-        {
-            return String.Format("{0:0.0000}", value);
-        }
-
-        /// <summary>
-        ///     格式化金额（不含符号）
-        /// </summary>
-        /// <param name="value">金额</param>
-        /// <returns>格式化后的金额</returns>
-        public static string AsPureCurrency(this double? value)
-        {
-            return value.HasValue ? AsPureCurrency(value.Value) : String.Empty;
-        }
-
 
         /// <summary>
         ///     格式化一级科目编号
@@ -95,9 +54,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="value">二级科目编号</param>
         /// <returns>格式化后的编号</returns>
-        public static string AsSubTitle(this int? value)
+        public static string AsSubTitle(this int value)
         {
-            return value.HasValue ? AsSubTitle(value.Value) : String.Empty;
+            return String.Format("{0:00}", value);
         }
 
         /// <summary>
@@ -105,9 +64,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="value">二级科目编号</param>
         /// <returns>格式化后的编号</returns>
-        public static string AsSubTitle(this int value)
+        public static string AsSubTitle(this int? value)
         {
-            return String.Format("{0:00}", value);
+            return value.HasValue ? AsSubTitle(value.Value) : String.Empty;
         }
 
 

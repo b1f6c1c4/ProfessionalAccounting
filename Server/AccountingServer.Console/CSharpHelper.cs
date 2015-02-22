@@ -71,7 +71,7 @@ namespace AccountingServer.Console
                               .Invoke(null, null);
         }
 
-        #region voucher
+        #region Voucher
 
         /// <summary>
         ///     将记账凭证用C#表示
@@ -143,7 +143,7 @@ namespace AccountingServer.Console
 
         #endregion
 
-        #region asset
+        #region Asset
 
         /// <summary>
         ///     将资产用C#表示
@@ -245,7 +245,7 @@ namespace AccountingServer.Console
 
         #endregion
 
-        #region amort
+        #region Amort
 
         /// <summary>
         ///     将摊销用C#表示

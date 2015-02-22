@@ -11,6 +11,10 @@ namespace AccountingServer.Console
 {
     public partial class THUInfo
     {
+        /// <summary>
+        ///     对账
+        /// </summary>
+        /// <returns>有差异处</returns>
         public string Compare()
         {
             var sb = new StringBuilder();
@@ -198,6 +202,10 @@ namespace AccountingServer.Console
             return sb.Length > 0 ? sb.ToString() : "OK";
         }
 
+        /// <summary>
+        ///     读取xls数据
+        /// </summary>
+        /// <returns></returns>
         private IEnumerable<Tuple<string, DateTime, string, string, double>> GetData()
         {
             var strCon = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + m_FileName +

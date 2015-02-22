@@ -18,12 +18,7 @@ namespace AccountingServer.Console
         {
             var asset = CSharpHelper.ParseAsset(code);
 
-            if (!asset.ID.HasValue)
-            {
-                if (!m_Accountant.Upsert(asset))
-                    throw new Exception();
-            }
-            else if (!m_Accountant.Update(asset))
+            if (!m_Accountant.Upsert(asset))
                 throw new Exception();
 
             return CSharpHelper.PresentAsset(asset);
@@ -37,6 +32,7 @@ namespace AccountingServer.Console
         public bool ExecuteAssetRemoval(string code)
         {
             var asset = CSharpHelper.ParseAsset(code);
+
             if (!asset.ID.HasValue)
                 throw new Exception();
 
@@ -44,11 +40,11 @@ namespace AccountingServer.Console
         }
 
         /// <summary>
-        ///     执行表达式（资产）
+        ///     执行资产表达式
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>执行结果</returns>
-        public IQueryResult ExecuteAsset(ConsoleParser.AssetContext expr)
+        private IQueryResult ExecuteAsset(ConsoleParser.AssetContext expr)
         {
             AutoConnect();
 
@@ -87,7 +83,7 @@ namespace AccountingServer.Console
                     foreach (var voucher in m_Accountant.RegisterVouchers(a, rng, query))
                         sb.Append(CSharpHelper.PresentVoucher(voucher));
 
-                    m_Accountant.Update(a);
+                    m_Accountant.Upsert(a);
                 }
                 if (sb.Length > 0)
                     return new EditableText(sb.ToString());
@@ -119,7 +115,7 @@ namespace AccountingServer.Console
                     }
 
                     sb.Append(ListAsset(a));
-                    m_Accountant.Update(a);
+                    m_Accountant.Upsert(a);
                 }
                 return new EditableText(sb.ToString());
             }
@@ -130,7 +126,7 @@ namespace AccountingServer.Console
                 {
                     Accountant.Depreciate(a);
                     sb.Append(CSharpHelper.PresentAsset(a));
-                    m_Accountant.Update(a);
+                    m_Accountant.Upsert(a);
                 }
                 return new EditableText(sb.ToString());
             }
@@ -217,7 +213,7 @@ namespace AccountingServer.Console
                     foreach (var item in m_Accountant.Update(a, rng, isCollapsed))
                         sb.AppendLine(ListAssetItem(item));
 
-                    m_Accountant.Update(a);
+                    m_Accountant.Upsert(a);
                 }
                 if (sb.Length > 0)
                     return new EditableText(sb.ToString());
@@ -240,7 +236,7 @@ namespace AccountingServer.Console
                         sb.AppendLine(sbi.ToString());
                     }
 
-                    m_Accountant.Update(a);
+                    m_Accountant.Upsert(a);
                 }
                 if (sb.Length > 0)
                     return new EditableText(sb.ToString());
@@ -251,11 +247,11 @@ namespace AccountingServer.Console
         }
 
         /// <summary>
-        ///     显示资产及其计算表
+        ///     显示资产及其折旧计算表
         /// </summary>
         /// <param name="asset">资产</param>
         /// <param name="dt">计算账面价值的时间</param>
-        /// <param name="showSchedule">是否显示计算表</param>
+        /// <param name="showSchedule">是否显示折旧计算表</param>
         /// <returns>格式化的信息</returns>
         private string ListAsset(Asset asset, DateTime? dt = null, bool showSchedule = true)
         {
@@ -293,6 +289,11 @@ namespace AccountingServer.Console
             return sb.ToString();
         }
 
+        /// <summary>
+        ///     显示折旧计算表条目
+        /// </summary>
+        /// <param name="assetItem">折旧计算表条目</param>
+        /// <returns>格式化的信息</returns>
         private static string ListAssetItem(AssetItem assetItem)
         {
             if (assetItem is AcquisationItem)
@@ -326,6 +327,11 @@ namespace AccountingServer.Console
             return null;
         }
 
+        /// <summary>
+        ///     对资产进行排序
+        /// </summary>
+        /// <param name="enumerable">资产</param>
+        /// <returns>排序后的资产</returns>
         private static IEnumerable<Asset> Sort(IEnumerable<Asset> enumerable)
         {
             return enumerable.OrderBy(a => a.Date, new DateComparer()).ThenBy(a => a.Name).ThenBy(a => a.ID);

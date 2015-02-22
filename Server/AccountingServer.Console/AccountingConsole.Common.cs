@@ -1,15 +1,16 @@
 ﻿using System;
-using System.Text;
 using AccountingServer.BLL;
-using AccountingServer.Entities;
 using Antlr4.Runtime;
 
 namespace AccountingServer.Console
 {
+    /// <summary>
+    ///     控制台
+    /// </summary>
     public partial class AccountingConsole
     {
         /// <summary>
-        ///     会计业务处理类
+        ///     基本会计业务处理类
         /// </summary>
         private readonly Accountant m_Accountant;
 
@@ -76,21 +77,6 @@ namespace AccountingServer.Console
                 throw new InvalidOperationException();
             }
             throw new InvalidOperationException();
-        }
-
-        /// <summary>
-        ///     执行检索式并呈现记账凭证
-        /// </summary>
-        /// <param name="query">检索式</param>
-        /// <returns>记账凭证的C#表达式</returns>
-        private IQueryResult PresentVoucherQuery(IQueryCompunded<IVoucherQueryAtom> query)
-        {
-            AutoConnect();
-
-            var sb = new StringBuilder();
-            foreach (var voucher in m_Accountant.SelectVouchers(query))
-                sb.Append(CSharpHelper.PresentVoucher(voucher));
-            return new EditableText(sb.ToString());
         }
     }
 }

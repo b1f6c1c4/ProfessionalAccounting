@@ -7,15 +7,33 @@ using AccountingServer.BLL;
 
 namespace AccountingServer.Console
 {
+    /// <summary>
+    ///     从info.tsinghua.edu.cn更新账户
+    /// </summary>
     public partial class THUInfo : IDisposable
     {
+        /// <summary>
+        ///     基本会计业务处理类
+        /// </summary>
         private readonly Accountant m_Accountant;
+
+        /// <summary>
+        ///     Cookies容器
+        /// </summary>
         private readonly CookieContainer m_CookieContainer = new CookieContainer();
 
+        /// <summary>
+        ///     临时文件文件名
+        /// </summary>
         private string m_FileName;
 
         public THUInfo(Accountant accountant) { m_Accountant = accountant; }
 
+        /// <summary>
+        ///     获取数据
+        /// </summary>
+        /// <param name="username">用户名</param>
+        /// <param name="password">密码</param>
         public void FetchData(string username, string password)
         {
             ServicePointManager.DefaultConnectionLimit = 20;
@@ -30,12 +48,17 @@ namespace AccountingServer.Console
                 m_FileName = SaveTempFile(stream);
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             if (m_FileName != null)
                 File.Delete(m_FileName);
         }
 
+        /// <summary>
+        ///     下载xls文档
+        /// </summary>
+        /// <returns>流</returns>
         private Stream DownloadXls()
         {
             var buf =
@@ -66,6 +89,10 @@ namespace AccountingServer.Console
             return stream;
         }
 
+        /// <summary>
+        ///     登录学生卡管理系统
+        /// </summary>
+        /// <param name="url">令牌</param>
         private void LoginECard(string url)
         {
             var req = WebRequest.Create(url) as HttpWebRequest;
@@ -86,6 +113,10 @@ namespace AccountingServer.Console
             req.GetResponse();
         }
 
+        /// <summary>
+        ///     获取令牌
+        /// </summary>
+        /// <returns>令牌</returns>
         private string GetUrl()
         {
             string url;
@@ -125,6 +156,11 @@ namespace AccountingServer.Console
             return url;
         }
 
+        /// <summary>
+        ///     登录信息门户
+        /// </summary>
+        /// <param name="username">用户名</param>
+        /// <param name="password">密码</param>
         private void LoginInfo(string username, string password)
         {
             var buf =
@@ -152,6 +188,11 @@ namespace AccountingServer.Console
             req.GetResponse();
         }
 
+        /// <summary>
+        ///     保存临时文件
+        /// </summary>
+        /// <param name="stream">流</param>
+        /// <returns>临时文件名</returns>
         private static string SaveTempFile(Stream stream)
         {
             var buf = new byte[1024];

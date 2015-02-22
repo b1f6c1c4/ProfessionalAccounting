@@ -88,6 +88,7 @@ namespace AccountingServer.BLL
 
             m_Tcp.Write("ClearBalances");
 
+            throw new NotImplementedException();
 
             m_Tcp.Write("FINISHED");
         }
