@@ -110,7 +110,7 @@ namespace AccountingServer.Entities
     public struct SubtotalBase : ISubtotal
     {
         public bool NonZero { get; set; }
-        public IList<SubtotalLevel> Levels { get; set; }
+        public IReadOnlyList<SubtotalLevel> Levels { get; set; }
         public AggregationType AggrType { get; set; }
         public IDateRange EveryDayRange { get; set; }
     }

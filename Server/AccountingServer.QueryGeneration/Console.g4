@@ -16,32 +16,45 @@ grammar Console;
  */
 
 command
-	:	(vouchers | groupedQuery | asset | amort | otherCommand) EOF
+	:	(vouchers | groupedQuery | namedQuery | asset | amort | otherCommand) EOF
 	;
 
 otherCommand
-	:	Check | Titles | Launch | Connect | Shutdown | Backup | Mobile | Fetch | Help | Exit
+	:	EditNamedQueries | Check | Titles | Launch | Connect | Shutdown | Backup | Mobile | Fetch | Help | Exit
+	;
+	
+chart
+	:	'ch' namedQuery
 	;
 
-groupedQuery
-	:	voucherDetailQuery subtotal
+namedQuery
+	:	namedQueries
+	|	namedQ
+	|	namedQueryReference
 	;
 
-hyperItem
-	:	name hyperItem ('|' hyperItem)+
-	|	hyperItemAtom
+namedQueries
+	:	name coef? (':' DoubleQuotedString)? ':' namedQuery ('|' namedQuery)+
 	;
 
-hyperItemAtom
-	:	name groupedQuery coef?
+namedQ
+	:	name coef? (':' DoubleQuotedString)? ':' groupedQuery
+	;
+
+namedQueryReference
+	:	name coef? ';'
 	;
 
 name
-	:	DollarQuotedString ':'
+	:	DollarQuotedString
 	;
 
 coef
 	:	'*' (Float | Percent)
+	;
+
+groupedQuery
+	:	voucherDetailQuery subtotal
 	;
 
 subtotal
@@ -238,6 +251,9 @@ Exit
 	;
 Check
 	:	'chk' [1-2]
+	;
+EditNamedQueries
+	:	'nq'
 	;
 	
 AOAll
