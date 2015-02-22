@@ -24,15 +24,13 @@ namespace AccountingServer.Console
 
             if (depth >= args.Levels.Count)
             {
-                if (!args.AggrEnabled)
+                if (args.AggrType == AggregationType.None)
                 {
                     var val = res.Sum(b => b.Fund);
-                    if (!args.NonZero ||
-                        Math.Abs(val) >= Accountant.Tolerance)
-                        sb.AppendLine(val.AsCurrency());
+                    sb.AppendLine(val.AsCurrency().CPadLeft(ident * 4));
                     return;
                 }
-                if (args.AggrRange == null)
+                if (args.AggrType == AggregationType.ChangedDay)
                 {
                     sb.AppendLine();
                     foreach (var b in Accountant.GroupByDateAggr(res))
@@ -41,36 +39,38 @@ namespace AccountingServer.Console
                             Math.Abs(b.Fund) < Accountant.Tolerance)
                             continue;
 
-                        sb.Append(depth * ident);
-                        sb.AppendFormat("{0}:{1}", b.Date.AsDate(), b.Fund.AsCurrency().PadLeft(ident * 4));
+                        sb.Append(' ', depth * ident);
+                        sb.AppendFormat("{0}:{1}", b.Date.AsDate(), b.Fund.AsCurrency().CPadLeft(ident * 4));
                         sb.AppendLine();
                     }
                     return;
                 }
-                //else
+                if (args.AggrType == AggregationType.EveryDay)
                 {
                     sb.AppendLine();
-                    foreach (var b in Accountant.GroupByDateBal(res, args.AggrRange.Range))
+                    foreach (var b in Accountant.GroupByDateBal(res, args.EveryDayRange.Range))
                     {
                         if (args.NonZero &&
                             Math.Abs(b.Fund) < Accountant.Tolerance)
                             continue;
 
-                        sb.Append(depth * ident);
-                        sb.AppendFormat("{0}:{1}", b.Date.AsDate(), b.Fund.AsCurrency().PadLeft(ident * 4));
+                        sb.Append(' ', depth * ident);
+                        sb.AppendFormat("{0}:{1}", b.Date.AsDate(), b.Fund.AsCurrency().CPadLeft(ident * 4));
                         sb.AppendLine();
                     }
                     return;
                 }
+                throw new InvalidOperationException();
             }
 
-            sb.AppendLine();
+            if (depth > 0)
+                sb.AppendLine();
             switch (args.Levels[depth])
             {
                 case SubtotalLevel.Title:
                     foreach (var grp in Accountant.GroupByTitle(res))
                     {
-                        sb.Append(depth * ident);
+                        sb.Append(' ', depth * ident);
                         sb.AppendFormat("{0}:", grp.Key.AsTitle());
                         PresentSubtotal(grp, depth + 1, args, sb);
                     }
@@ -78,7 +78,7 @@ namespace AccountingServer.Console
                 case SubtotalLevel.SubTitle:
                     foreach (var grp in Accountant.GroupBySubTitle(res))
                     {
-                        sb.Append(depth * ident);
+                        sb.Append(' ', depth * ident);
                         sb.AppendFormat("{0}:", grp.Key.AsSubTitle());
                         PresentSubtotal(grp, depth + 1, args, sb);
                     }
@@ -86,15 +86,15 @@ namespace AccountingServer.Console
                 case SubtotalLevel.Content:
                     foreach (var grp in Accountant.GroupByContent(res))
                     {
-                        sb.Append(depth * ident);
-                        sb.AppendFormat("{0}:", grp.Key);
+                        sb.Append(' ', depth * ident);
+                        sb.AppendFormat("{0}:", grp.Key.CPadRight(25));
                         PresentSubtotal(grp, depth + 1, args, sb);
                     }
                     break;
                 case SubtotalLevel.Remark:
                     foreach (var grp in Accountant.GroupByRemark(res))
                     {
-                        sb.Append(depth * ident);
+                        sb.Append(' ', depth * ident);
                         sb.AppendFormat("{0}:", grp.Key);
                         PresentSubtotal(grp, depth + 1, args, sb);
                     }
@@ -103,15 +103,15 @@ namespace AccountingServer.Console
                 case SubtotalLevel.Week:
                     foreach (var grp in Accountant.GroupByDate(res))
                     {
-                        sb.Append(depth * ident);
-                        sb.AppendFormat("{0}:", grp.Key);
+                        sb.Append(' ', depth * ident);
+                        sb.AppendFormat("{0}:", grp.Key.AsDate());
                         PresentSubtotal(grp, depth + 1, args, sb);
                     }
                     break;
                 case SubtotalLevel.FinancialMonth:
                     foreach (var grp in Accountant.GroupByDate(res))
                     {
-                        sb.Append(depth * ident);
+                        sb.Append(' ', depth * ident);
                         if (grp.Key.HasValue)
                             sb.AppendFormat("{0:D4}{1:D2}:", grp.Key.Value.Year, grp.Key.Value.Month);
                         else
@@ -122,7 +122,7 @@ namespace AccountingServer.Console
                 case SubtotalLevel.Month:
                     foreach (var grp in Accountant.GroupByDate(res))
                     {
-                        sb.Append(depth * ident);
+                        sb.Append(' ', depth * ident);
                         if (grp.Key.HasValue)
                             sb.AppendFormat("@{0:D4}{1:D2}:", grp.Key.Value.Year, grp.Key.Value.Month);
                         else
@@ -133,7 +133,7 @@ namespace AccountingServer.Console
                 case SubtotalLevel.BillingMonth:
                     foreach (var grp in Accountant.GroupByDate(res))
                     {
-                        sb.Append(depth * ident);
+                        sb.Append(' ', depth * ident);
                         if (grp.Key.HasValue)
                             sb.AppendFormat("#{0:D4}{1:D2}:", grp.Key.Value.Year, grp.Key.Value.Month);
                         else
@@ -144,7 +144,7 @@ namespace AccountingServer.Console
                 case SubtotalLevel.Year:
                     foreach (var grp in Accountant.GroupByDate(res))
                     {
-                        sb.Append(depth * ident);
+                        sb.Append(' ', depth * ident);
                         if (grp.Key.HasValue)
                             sb.AppendFormat("{0:D4}:", grp.Key.Value.Year);
                         else

@@ -114,7 +114,17 @@ namespace AccountingServer.BLL
                     m_Db.SelectVouchers(
                                         new VoucherQueryAryBase(
                                             OperatorType.Intersect,
-                                            new[] { query, new VoucherQueryAtomBase(amort.Template, amort.Template.Details){ForAll = true} })))
+                                            new[]
+                                                {
+                                                    query,
+                                                    new VoucherQueryAtomBase(amort.Template, amort.Template.Details)
+                                                        {
+                                                            ForAll
+                                                                =
+                                                                true
+                                                        }
+                                                }))
+                )
             {
                 if (voucher.Remark == Amortization.IgnoranceMark)
                     continue;
@@ -122,13 +132,13 @@ namespace AccountingServer.BLL
                 if (amort.Schedule.Any(item => item.VoucherID == voucher.ID))
                     continue;
 
-                if (voucher.Details.Zip(amort.Template.Details, (d1,d2)=>d1.IsMatch(d2)).Contains(false))
+                if (voucher.Details.Zip(amort.Template.Details, (d1, d2) => d1.IsMatch(d2)).Contains(false))
                     yield return voucher;
                 else
                 {
                     var lst = amort.Schedule
-                        .Where(item => item.Date.Within(rng))
-                        .Where(item => item.Date == voucher.Date).ToList();
+                                   .Where(item => item.Date.Within(rng))
+                                   .Where(item => item.Date == voucher.Date).ToList();
 
                     if (lst.Count == 1)
                         lst[0].VoucherID = voucher.ID;

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
-using AccountingServer.Entities;
 using AccountingServer.TCP;
 using ZXing;
 using ZXing.QrCode;

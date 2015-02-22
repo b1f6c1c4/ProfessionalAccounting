@@ -50,7 +50,7 @@ namespace AccountingServer.Console
                                                              filter: null,
                                                              subtotal: new SubtotalBase
                                                                            {
-                                                                               AggrEnabled = true,
+                                                                               AggrType = AggregationType.ChangedDay,
                                                                                Levels = new[]
                                                                                             {
                                                                                                 SubtotalLevel.Title,

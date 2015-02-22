@@ -196,7 +196,7 @@ namespace AccountingServer.Console
                     (item, str) =>
                     {
                         sb.Append("        new ");
-                        sb.Append(item.GetType().Name.PadRight(16));
+                        sb.Append(item.GetType().Name.CPadRight(16));
                         sb.Append("{ ");
                         if (item.Date.HasValue)
                             sb.AppendFormat(
@@ -204,14 +204,14 @@ namespace AccountingServer.Console
                                             item.Date);
                         else
                             sb.Append("Date = null, ");
-                        sb.AppendFormat("VoucherID = {0}", (ProcessString(item.VoucherID) + ",").PadRight(27));
-                        sb.Append(str.PadRight(30));
+                        sb.AppendFormat("VoucherID = {0}", (ProcessString(item.VoucherID) + ",").CPadRight(27));
+                        sb.Append(str.CPadRight(30));
                         sb.AppendFormat(
                                         "BookValue = {0} ",
-                                        item.BookValue.ToString(CultureInfo.InvariantCulture).PadRight(16));
+                                        item.BookValue.ToString(CultureInfo.InvariantCulture).CPadRight(16));
                         if (item.Remark != null)
                         {
-                            sb.Append("".PadLeft(30));
+                            sb.Append("".CPadLeft(30));
                             sb.AppendFormat(", Remark = {0} ", ProcessString(item.Remark));
                         }
                         sb.AppendLine("},");
@@ -294,16 +294,16 @@ namespace AccountingServer.Console
                                         item.Date);
                     else
                         sb.Append("Date = null, ");
-                    sb.AppendFormat("VoucherID = {0}", (ProcessString(item.VoucherID) + ",").PadRight(27));
+                    sb.AppendFormat("VoucherID = {0}", (ProcessString(item.VoucherID) + ",").CPadRight(27));
                     sb.AppendFormat(
                                     "Amount = {0}",
-                                    (item.Amount.ToString(CultureInfo.InvariantCulture) + ",").PadRight(19));
+                                    (item.Amount.ToString(CultureInfo.InvariantCulture) + ",").CPadRight(19));
                     sb.AppendFormat(
                                     "Residue = {0} ",
-                                    item.Residue.ToString(CultureInfo.InvariantCulture).PadRight(16));
+                                    item.Residue.ToString(CultureInfo.InvariantCulture).CPadRight(16));
                     if (item.Remark != null)
                     {
-                        sb.Append("".PadLeft(30));
+                        sb.Append("".CPadLeft(30));
                         sb.AppendFormat(", Remark = {0} ", ProcessString(item.Remark));
                     }
                     sb.AppendLine("},");

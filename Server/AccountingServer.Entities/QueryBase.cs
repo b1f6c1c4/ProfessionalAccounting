@@ -111,8 +111,8 @@ namespace AccountingServer.Entities
     {
         public bool NonZero { get; set; }
         public IList<SubtotalLevel> Levels { get; set; }
-        public bool AggrEnabled { get; set; }
-        public IDateRange AggrRange { get; set; }
+        public AggregationType AggrType { get; set; }
+        public IDateRange EveryDayRange { get; set; }
     }
 
     public struct GroupedQueryBase : IGroupedQuery

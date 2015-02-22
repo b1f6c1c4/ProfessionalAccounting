@@ -16,7 +16,7 @@ namespace AccountingServer.BLL
         public static string AsCurrency(this double value)
         {
             var s = String.Format("￥{0:0.0000}", value);
-            return s.TrimEnd('0').PadRight(s.Length);
+            return s.TrimEnd('0').CPadRight(s.Length);
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace AccountingServer.BLL
         /// <returns>格式化后的日期</returns>
         public static string AsDate(this DateTime? value)
         {
-            return value.HasValue ? AsDate(value.Value) : "无日期";
+            return value.HasValue ? AsDate(value.Value) : "[null]";
         }
 
         /// <summary>
