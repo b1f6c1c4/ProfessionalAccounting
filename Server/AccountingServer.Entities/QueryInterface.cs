@@ -68,7 +68,7 @@ namespace AccountingServer.Entities
     public interface ISubtotal
     {
         bool NonZero { get; }
-        IList<SubtotalLevel> Levels { get; }
+        IReadOnlyList<SubtotalLevel> Levels { get; }
         AggregationType AggrType { get; }
         IDateRange EveryDayRange { get; }
     }

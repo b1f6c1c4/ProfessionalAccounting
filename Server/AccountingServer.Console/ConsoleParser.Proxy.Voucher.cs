@@ -114,7 +114,7 @@ namespace AccountingServer.Console
         {
             public bool NonZero { get { return SubtotalMark.Text.Length < 2; } }
 
-            public IList<SubtotalLevel> Levels
+            public IReadOnlyList<SubtotalLevel> Levels
             {
                 get
                 {

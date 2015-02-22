@@ -32,6 +32,10 @@ namespace AccountingServer.Console
                 return PresentVoucherQuery(result.GetChild(0) as IQueryCompunded<IVoucherQueryAtom>);
             if (result.GetChild(0) is ConsoleParser.GroupedQueryContext)
                 return PresentSubtotal(result.GetChild(0) as IGroupedQuery);
+            if (result.GetChild(0) is ConsoleParser.NamedQueryContext)
+                return ExecuteNamedQuery(result.GetChild(0) as ConsoleParser.NamedQueryContext);
+            if (result.GetChild(0) is ConsoleParser.ChartContext)
+                return ExecuteChartQuery(result.GetChild(0) as ConsoleParser.ChartContext);
             if (result.GetChild(0) is ConsoleParser.AssetContext)
                 return ExecuteAsset(result.GetChild(0) as ConsoleParser.AssetContext);
             if (result.GetChild(0) is ConsoleParser.AmortContext)
@@ -63,6 +67,8 @@ namespace AccountingServer.Console
                         return BasicCheck();
                     case "chk2":
                         return AdvancedCheck();
+                    case "nq":
+                        return ListNamedQueries();
                     case "exit":
                         Environment.Exit(0);
                         // ReSharper disable once HeuristicUnreachableCode

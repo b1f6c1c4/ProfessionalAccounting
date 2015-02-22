@@ -49,11 +49,14 @@
     <Compile Include="AccountingConsole.Check.cs" />
     <Compile Include="AccountingConsole.Common.cs" />
     <Compile Include="AccountingConsole.Miscellaneous.cs" />
+    <Compile Include="AccountingConsole.Chart.cs" />
     <Compile Include="AccountingConsole.Parse.cs" />
+    <Compile Include="AccountingConsole.NamedQuery.cs" />
     <Compile Include="AccountingConsole.Server.cs" />
     <Compile Include="AccountingConsole.Subtotal.cs" />
     <Compile Include="AccountingConsole.Voucher.cs" />
     <Compile Include="Chart\AccountingChart.cs" />
+    <Compile Include="ConsoleParser.Proxy.NamedQuery.cs" />
     <Compile Include="ConsoleParser.Proxy.Distributed.cs" />
     <Compile Include="ConsoleParser.Proxy.Voucher.cs" />
     <Compile Include="ConsoleParser.Proxy.Detail.cs" />

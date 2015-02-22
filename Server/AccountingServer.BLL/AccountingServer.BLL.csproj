@@ -52,6 +52,7 @@
     <Compile Include="Accountant.Grouping.cs" />
     <Compile Include="MobileComm.cs" />
     <Compile Include="MobilePatterns.cs" />
+    <Compile Include="NamedQuery.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringFormatter.cs" />
     <Compile Include="TitleManager.cs" />
