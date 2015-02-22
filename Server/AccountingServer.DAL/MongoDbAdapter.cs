@@ -16,7 +16,7 @@ namespace AccountingServer.DAL
     /// </summary>
     public class MongoDbAdapter : IDbAdapter, IDbServer
     {
-        #region member
+        #region Member
 
         /// <summary>
         ///     MongoDb客户端
@@ -59,6 +59,9 @@ namespace AccountingServer.DAL
 
         public MongoDbAdapter() { Connected = false; }
 
+        /// <summary>
+        ///     注册Bson序列化器
+        /// </summary>
         static MongoDbAdapter()
         {
             BsonSerializer.RegisterSerializer(typeof(Voucher), new VoucherSerializer());
@@ -70,13 +73,12 @@ namespace AccountingServer.DAL
             BsonSerializer.RegisterSerializer(typeof(Balance), new BalanceSerializer());
         }
 
-        #region server
+        #region Server
 
-        /// <summary>
-        ///     是否已经连接到数据库
-        /// </summary>
+        /// <inheritdoc />
         public bool Connected { get; private set; }
 
+        /// <inheritdoc />
         public void Launch()
         {
             var startinfo = new ProcessStartInfo
@@ -96,6 +98,7 @@ namespace AccountingServer.DAL
                 throw new Exception();
         }
 
+        /// <inheritdoc />
         public void Connect()
         {
             m_Client = new MongoClient("mongodb://localhost");
@@ -111,6 +114,7 @@ namespace AccountingServer.DAL
             Connected = true;
         }
 
+        /// <inheritdoc />
         public void Disconnect()
         {
             if (!Connected)
@@ -129,6 +133,7 @@ namespace AccountingServer.DAL
             Connected = false;
         }
 
+        /// <inheritdoc />
         public void Backup()
         {
             var startinfo = new ProcessStartInfo
@@ -150,15 +155,21 @@ namespace AccountingServer.DAL
 
         #endregion
 
-        #region voucher
+        #region Voucher
 
-        public Voucher SelectVoucher(string id) { return m_Vouchers.FindOneById(ObjectId.Parse(id)); }
+        /// <inheritdoc />
+        public Voucher SelectVoucher(string id)
+        {
+            return m_Vouchers.FindOneById(ObjectId.Parse(id));
+        }
 
+        /// <inheritdoc />
         public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query)
         {
             return m_Vouchers.Find(query.GetQuery());
         }
 
+        /// <inheritdoc />
         public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
         {
             return m_Vouchers.MapReduce(
@@ -169,6 +180,7 @@ namespace AccountingServer.DAL
                                             }).GetResultsAs<VoucherDetail>();
         }
 
+        /// <inheritdoc />
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
             var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
@@ -186,18 +198,21 @@ namespace AccountingServer.DAL
             return res.GetResultsAs<Balance>();
         }
 
+        /// <inheritdoc />
         public bool DeleteVoucher(string id)
         {
-            var res = m_Vouchers.Remove(MongoDbQueryHelper.GetUniqueQuery(id));
+            var res = m_Vouchers.Remove(MongoDbQueryHelper.GetQuery(id));
             return res.DocumentsAffected == 1;
         }
 
+        /// <inheritdoc />
         public long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query)
         {
             var res = m_Vouchers.Remove(query.GetQuery());
             return res.DocumentsAffected;
         }
 
+        /// <inheritdoc />
         public bool Upsert(Voucher entity)
         {
             var res = m_Vouchers.Save(entity);
@@ -206,27 +221,35 @@ namespace AccountingServer.DAL
 
         #endregion
 
-        #region asset
+        #region Asset
 
-        public Asset SelectAsset(Guid id) { return m_Assets.FindOne(MongoDbQueryHelper.GetUniqueQuery(id)); }
+        /// <inheritdoc />
+        public Asset SelectAsset(Guid id)
+        {
+            return m_Assets.FindOne(MongoDbQueryHelper.GetQuery(id));
+        }
 
+        /// <inheritdoc />
         public IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter)
         {
             return m_Assets.Find(filter.GetQuery());
         }
 
+        /// <inheritdoc />
         public bool DeleteAsset(Guid id)
         {
-            var res = m_Assets.Remove(MongoDbQueryHelper.GetUniqueQuery(id));
+            var res = m_Assets.Remove(MongoDbQueryHelper.GetQuery(id));
             return res.DocumentsAffected == 1;
         }
 
+        /// <inheritdoc />
         public bool Upsert(Asset entity)
         {
             var res = m_Assets.Save(entity);
             return res.DocumentsAffected == 1;
         }
 
+        /// <inheritdoc />
         public long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter)
         {
             var res = m_Assets.Remove(filter.GetQuery());
@@ -235,30 +258,35 @@ namespace AccountingServer.DAL
 
         #endregion
 
-        #region amortization
+        #region Amortization
 
+        /// <inheritdoc />
         public Amortization SelectAmortization(Guid id)
         {
-            return m_Amortizations.FindOne(MongoDbQueryHelper.GetUniqueQuery(id));
+            return m_Amortizations.FindOne(MongoDbQueryHelper.GetQuery(id));
         }
 
+        /// <inheritdoc />
         public IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
         {
             return m_Amortizations.Find(filter.GetQuery());
         }
 
+        /// <inheritdoc />
         public bool DeleteAmortization(Guid id)
         {
-            var res = m_Amortizations.Remove(MongoDbQueryHelper.GetUniqueQuery(id));
+            var res = m_Amortizations.Remove(MongoDbQueryHelper.GetQuery(id));
             return res.DocumentsAffected == 1;
         }
 
+        /// <inheritdoc />
         public bool Upsert(Amortization entity)
         {
             var res = m_Amortizations.Save(entity);
             return res.DocumentsAffected == 1;
         }
 
+        /// <inheritdoc />
         public long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
         {
             var res =
@@ -268,13 +296,15 @@ namespace AccountingServer.DAL
 
         #endregion
 
-        #region namedqurey
+        #region NamedQurey
 
+        /// <inheritdoc />
         public string SelectNamedQueryTemplate(string name)
         {
             return m_NamedQueryTemplates.FindOneById(new BsonString(name))["value"].AsString;
         }
 
+        /// <inheritdoc />
         public IEnumerable<KeyValuePair<string, string>> SelectNamedQueryTemplates()
         {
             return
@@ -284,12 +314,14 @@ namespace AccountingServer.DAL
                                              new KeyValuePair<string, string>(d["_id"].AsString, d["value"].AsString));
         }
 
+        /// <inheritdoc />
         public bool DeleteNamedQueryTemplate(string name)
         {
             var res = m_NamedQueryTemplates.Remove(Query.EQ("_id", new BsonString(name)));
             return res.DocumentsAffected == 1;
         }
 
+        /// <inheritdoc />
         public bool Upsert(string name, string value)
         {
             var res = m_NamedQueryTemplates.Save(
@@ -303,8 +335,13 @@ namespace AccountingServer.DAL
 
         #endregion
 
-        #region javascript
+        #region Javascript
 
+        /// <summary>
+        ///     根据分类要求，将日期进行转化
+        /// </summary>
+        /// <param name="subtotalLevel">分类汇总层次</param>
+        /// <returns>转化的Javascript代码</returns>
         private static string GetTheDateJavascript(SubtotalLevel subtotalLevel)
         {
             var sb = new StringBuilder();
@@ -358,6 +395,11 @@ namespace AccountingServer.DAL
             return sb.ToString();
         }
 
+        /// <summary>
+        ///     细目映射检索式的Javascript表示
+        /// </summary>
+        /// <param name="emitQuery">细目映射检索式</param>
+        /// <returns>Javascript表示</returns>
         private static string GetEmitFilterJavascript(IEmit emitQuery)
         {
             if (emitQuery.DetailFilter == null)
@@ -365,6 +407,12 @@ namespace AccountingServer.DAL
             return emitQuery.DetailFilter.GetJavascriptFilter();
         }
 
+        /// <summary>
+        ///     映射函数的Javascript表示
+        /// </summary>
+        /// <param name="query">记账凭证检索式</param>
+        /// <param name="subtotalLevel">分类汇总层次</param>
+        /// <returns>Javascript表示</returns>
         private static string GetMapJavascript(IVoucherDetailQuery query, SubtotalLevel subtotalLevel)
         {
             var sb = new StringBuilder();

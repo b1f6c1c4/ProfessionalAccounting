@@ -144,12 +144,12 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     找出未在资产计算表中注册的凭证，并尝试建立引用
+        ///     找出未在资产计算表中注册的记账凭证，并尝试建立引用
         /// </summary>
         /// <param name="asset">资产</param>
         /// <param name="rng">日期过滤器</param>
         /// <param name="query">检索式</param>
-        /// <returns>未注册的凭证</returns>
+        /// <returns>未注册的记账凭证</returns>
         public IEnumerable<Voucher> RegisterVouchers(Asset asset, DateFilter rng,
                                                      IQueryCompunded<IVoucherQueryAtom> query)
         {
@@ -408,7 +408,7 @@ namespace AccountingServer.BLL
         /// <param name="item">计算表条目</param>
         /// <param name="isCollapsed">是否压缩</param>
         /// <param name="editOnly">是否只允许更新</param>
-        /// <param name="voucherType">凭证类型</param>
+        /// <param name="voucherType">记账凭证类型</param>
         /// <param name="expectedDetails">应填细目</param>
         /// <returns>是否成功</returns>
         private bool UpdateVoucher(AssetItem item, bool isCollapsed, bool editOnly, VoucherType voucherType,
@@ -454,12 +454,12 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     更新凭证的细目
+        ///     更新记账凭证的细目
         /// </summary>
         /// <param name="expected">应填细目</param>
-        /// <param name="voucher">凭证</param>
+        /// <param name="voucher">记账凭证</param>
         /// <param name="sucess">是否成功</param>
-        /// <param name="modified">是否更改了凭证</param>
+        /// <param name="modified">是否更改了记账凭证</param>
         /// <param name="editOnly">是否只允许更新</param>
         private static void UpdateDetail(VoucherDetail expected, Voucher voucher,
                                          out bool sucess, out bool modified, bool editOnly = false)
@@ -519,11 +519,11 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     生成凭证、插入数据库并注册
+        ///     生成记账凭证、插入数据库并注册
         /// </summary>
         /// <param name="item">计算表条目</param>
         /// <param name="isCollapsed">是否压缩</param>
-        /// <param name="voucherType">凭证类型</param>
+        /// <param name="voucherType">记账凭证类型</param>
         /// <param name="details">细目</param>
         /// <returns>是否成功</returns>
         private bool GenerateVoucher(AssetItem item, bool isCollapsed, VoucherType voucherType,

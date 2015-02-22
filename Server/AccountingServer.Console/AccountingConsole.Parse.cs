@@ -11,7 +11,7 @@ namespace AccountingServer.Console
         /// </summary>
         /// <param name="s">检索表达式</param>
         /// <param name="dateQuery">日期表达式</param>
-        /// <returns>过滤器</returns>
+        /// <returns>记账凭证过滤器</returns>
         private static VoucherDetail ParseQuery(string s, out string dateQuery)
         {
             var detail = new VoucherDetail();
@@ -257,7 +257,7 @@ namespace AccountingServer.Console
         ///     解析资产检索表达式
         /// </summary>
         /// <param name="s">资产检索表达式</param>
-        /// <returns>过滤器</returns>
+        /// <returns>记账凭证过滤器</returns>
         private static Asset ParseAssetQuery(string s)
         {
             var begin = s.IndexOf('\'');
@@ -278,7 +278,7 @@ namespace AccountingServer.Console
         ///     解析摊销检索表达式
         /// </summary>
         /// <param name="s">摊销检索表达式</param>
-        /// <returns>过滤器</returns>
+        /// <returns>记账凭证过滤器</returns>
         private static Amortization ParseAmortQuery(string s)
         {
             var begin = s.IndexOf('\'');

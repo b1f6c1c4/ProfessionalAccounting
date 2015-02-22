@@ -9,7 +9,7 @@ namespace AccountingServer.DAL
     /// </summary>
     public interface IDbAdapter
     {
-        #region server
+        #region Server
 
         /// <summary>
         ///     是否已经连接到数据库
@@ -28,7 +28,7 @@ namespace AccountingServer.DAL
 
         #endregion
 
-        #region voucher
+        #region Voucher
 
         /// <summary>
         ///     按编号查找记账凭证
@@ -82,7 +82,7 @@ namespace AccountingServer.DAL
 
         #endregion
 
-        #region asset
+        #region Asset
 
         /// <summary>
         ///     按编号查找资产
@@ -92,10 +92,10 @@ namespace AccountingServer.DAL
         Asset SelectAsset(Guid id);
 
         /// <summary>
-        ///     按过滤器查找资产
+        ///     按记账凭证过滤器查找资产
         /// </summary>
-        /// <param name="filter">过滤器</param>
-        /// <returns>匹配过滤器的资产</returns>
+        /// <param name="filter">记账凭证过滤器</param>
+        /// <returns>匹配记账凭证过滤器的资产</returns>
         IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter);
 
         /// <summary>
@@ -106,9 +106,9 @@ namespace AccountingServer.DAL
         bool DeleteAsset(Guid id);
 
         /// <summary>
-        ///     按过滤器删除资产
+        ///     按记账凭证过滤器删除资产
         /// </summary>
-        /// <param name="filter">过滤器</param>
+        /// <param name="filter">记账凭证过滤器</param>
         /// <returns>已删除的资产总数</returns>
         long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter);
 
@@ -122,7 +122,7 @@ namespace AccountingServer.DAL
 
         #endregion
 
-        #region amortization
+        #region Amortization
 
         /// <summary>
         ///     按编号查找摊销
@@ -132,10 +132,10 @@ namespace AccountingServer.DAL
         Amortization SelectAmortization(Guid id);
 
         /// <summary>
-        ///     按过滤器查找摊销
+        ///     按记账凭证过滤器查找摊销
         /// </summary>
-        /// <param name="filter">过滤器</param>
-        /// <returns>匹配过滤器的摊销</returns>
+        /// <param name="filter">记账凭证过滤器</param>
+        /// <returns>匹配记账凭证过滤器的摊销</returns>
         IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter);
 
         /// <summary>
@@ -146,9 +146,9 @@ namespace AccountingServer.DAL
         bool DeleteAmortization(Guid id);
 
         /// <summary>
-        ///     按过滤器删除摊销
+        ///     按记账凭证过滤器删除摊销
         /// </summary>
-        /// <param name="filter">过滤器</param>
+        /// <param name="filter">记账凭证过滤器</param>
         /// <returns>已删除的摊销总数</returns>
         long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter);
 
@@ -162,7 +162,7 @@ namespace AccountingServer.DAL
 
         #endregion
 
-        #region namedqurey
+        #region NamedQurey
 
         /// <summary>
         ///     按名称查找命名查询模板

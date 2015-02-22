@@ -7,6 +7,9 @@ using MongoDB.Bson.Serialization.Serializers;
 
 namespace AccountingServer.DAL
 {
+    /// <summary>
+    ///     Ì¯ÏúÐòÁÐ»¯Æ÷
+    /// </summary>
     internal class AmortizationSerializer : BsonBaseSerializer, IBsonIdProvider
     {
         public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,

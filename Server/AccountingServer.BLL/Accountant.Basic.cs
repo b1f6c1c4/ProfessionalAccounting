@@ -172,10 +172,10 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     按过滤器查找资产
+        ///     按记账凭证过滤器查找资产
         /// </summary>
-        /// <param name="filter">过滤器</param>
-        /// <returns>匹配过滤器的资产</returns>
+        /// <param name="filter">记账凭证过滤器</param>
+        /// <returns>匹配记账凭证过滤器的资产</returns>
         public IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter)
         {
             foreach (var asset in m_Db.SelectAssets(filter))
@@ -207,9 +207,9 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     按过滤器删除资产
+        ///     按记账凭证过滤器删除资产
         /// </summary>
-        /// <param name="filter">过滤器</param>
+        /// <param name="filter">记账凭证过滤器</param>
         /// <returns>已删除的资产总数</returns>
         public long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter)
         {
@@ -244,10 +244,10 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     按过滤器查找摊销
+        ///     按记账凭证过滤器查找摊销
         /// </summary>
-        /// <param name="filter">过滤器</param>
-        /// <returns>匹配过滤器的摊销</returns>
+        /// <param name="filter">记账凭证过滤器</param>
+        /// <returns>匹配记账凭证过滤器的摊销</returns>
         public IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
         {
             foreach (var amort in m_Db.SelectAmortizations(filter))
@@ -279,9 +279,9 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     按过滤器删除摊销
+        ///     按记账凭证过滤器删除摊销
         /// </summary>
-        /// <param name="filter">过滤器</param>
+        /// <param name="filter">记账凭证过滤器</param>
         /// <returns>已删除的摊销总数</returns>
         public long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
         {
@@ -347,7 +347,6 @@ namespace AccountingServer.BLL
                                               d => new VoucherDetail { Title = d.Title, Content = d.Content },
                                               (key, grp) =>
                                               {
-                                                  key.Item = voucher.ID;
                                                   key.Fund =
                                                       grp.Sum(
                                                               d =>

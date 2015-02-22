@@ -4,12 +4,12 @@ using System.Collections.Generic;
 namespace AccountingServer.Entities
 {
     /// <summary>
-    ///     资产折旧计算表栏目
+    ///     资产折旧计算表条目
     /// </summary>
     public abstract class AssetItem
     {
         /// <summary>
-        ///     规范忽略标志
+        ///     忽略标志
         /// </summary>
         public const string IgnoranceMark = "reconciliation";
 
@@ -111,7 +111,7 @@ namespace AccountingServer.Entities
     public class Asset : IDistributed
     {
         /// <summary>
-        ///     规范忽略标志
+        ///     忽略标志
         /// </summary>
         public const string IgnoranceMark = "reconciliation";
 
@@ -202,8 +202,12 @@ namespace AccountingServer.Entities
         public string Remark { get; set; }
     }
 
+    /// <summary>
+    ///     资产折旧计算表条目比较器
+    /// </summary>
     public class AssetItemComparer : IComparer<AssetItem>
     {
+        /// <inheritdoc />
         public int Compare(AssetItem x, AssetItem y)
         {
             var res = DateHelper.CompareDate(x.Date, y.Date);
@@ -215,7 +219,7 @@ namespace AccountingServer.Entities
                                                if (t is AcquisationItem)
                                                    return 0;
                                                if (t is DispositionItem)
-                                                   return 0; // Undistinguished
+                                                   return 0; // 不对资产的取得和处置加以区分
                                                if (t is DepreciateItem)
                                                    return 2;
                                                if (t is DevalueItem)

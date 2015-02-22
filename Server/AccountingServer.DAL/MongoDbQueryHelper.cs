@@ -13,29 +13,29 @@ namespace AccountingServer.DAL
     internal static class MongoDbQueryHelper
     {
         /// <summary>
-        ///     按编号唯一查询
+        ///     按编号查询<c>ObjectId</c>
         /// </summary>
         /// <param name="id">编号</param>
         /// <returns>Bson查询</returns>
-        public static IMongoQuery GetUniqueQuery(string id)
+        public static IMongoQuery GetQuery(string id)
         {
             return Query.EQ("_id", ObjectId.Parse(id));
         }
 
         /// <summary>
-        ///     按编号唯一查询
+        ///     按编号查询<c>Guid</c>
         /// </summary>
         /// <param name="id">编号</param>
         /// <returns>Bson查询</returns>
-        public static IMongoQuery GetUniqueQuery(Guid? id)
+        public static IMongoQuery GetQuery(Guid? id)
         {
             return Query.EQ("_id", id.HasValue ? id.Value.ToBsonValue() as BsonValue : BsonNull.Value);
         }
 
         /// <summary>
-        ///     过滤器的Javascript表示
+        ///     记账凭证过滤器的Javascript表示
         /// </summary>
-        /// <param name="vfilter">过滤器</param>
+        /// <param name="vfilter">记账凭证过滤器</param>
         /// <returns>Javascript表示</returns>
         private static string GetJavascriptFilter(Voucher vfilter)
         {
@@ -139,7 +139,7 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     细目检索式的Javascript表示
+        ///     原子细目检索式的Javascript表示
         /// </summary>
         /// <param name="f">细目检索式</param>
         /// <returns>Javascript表示</returns>
@@ -209,7 +209,7 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     记账凭证检索式的Javascript表示
+        ///     原子记账凭证检索式的Javascript表示
         /// </summary>
         /// <param name="f">记账凭证检索式</param>
         /// <returns>Javascript表示</returns>
@@ -256,9 +256,9 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     检索式的Javascript表示
+        ///     分期检索式的Javascript表示
         /// </summary>
-        /// <param name="query">检索式</param>
+        /// <param name="query">分期检索式</param>
         /// <returns>Javascript表示</returns>
         public static string GetJavascriptFilter(this IQueryCompunded<IDistributedQueryAtom> query)
         {
@@ -266,9 +266,9 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     检索式的查询
+        ///     分期检索式的查询
         /// </summary>
-        /// <param name="query">检索式</param>
+        /// <param name="query">分期检索式</param>
         /// <returns>查询</returns>
         public static IMongoQuery GetQuery(this IQueryCompunded<IDistributedQueryAtom> query)
         {
@@ -276,9 +276,9 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     检索式的Javascript表示
+        ///     原子分期检索式的Javascript表示
         /// </summary>
-        /// <param name="f">检索式</param>
+        /// <param name="f">分期检索式</param>
         /// <returns>Javascript表示</returns>
         private static string GetJavascriptFilter(IDistributedQueryAtom f)
         {
