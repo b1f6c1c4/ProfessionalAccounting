@@ -6,14 +6,13 @@ namespace AccountingServer.BLL
     public interface INamedQuery
     {
         string Name { get; }
-
-        double Coefficient { get; }
     }
 
     public interface INamedQueryReference : INamedQuery { }
 
     public interface INamedQueryConcrete : INamedQuery
     {
+        double Coefficient { get; }
         string Remark { get; }
     }
 

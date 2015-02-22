@@ -7,6 +7,7 @@ using AccountingServer.Entities;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
+using MongoDB.Driver.Builders;
 
 namespace AccountingServer.DAL
 {
@@ -48,6 +49,11 @@ namespace AccountingServer.DAL
         ///     摊销集合
         /// </summary>
         private MongoCollection<Amortization> m_Amortizations;
+
+        /// <summary>
+        ///     命名查询模板集合
+        /// </summary>
+        private MongoCollection<BsonDocument> m_NamedQueryTemplates;
 
         #endregion
 
@@ -100,6 +106,7 @@ namespace AccountingServer.DAL
             m_Vouchers = m_Db.GetCollection<Voucher>("voucher");
             m_Assets = m_Db.GetCollection<Asset>("asset");
             m_Amortizations = m_Db.GetCollection<Amortization>("amortization");
+            m_NamedQueryTemplates = m_Db.GetCollection<BsonDocument>("namedQuery");
 
             Connected = true;
         }
@@ -113,6 +120,7 @@ namespace AccountingServer.DAL
             m_Vouchers = null;
             m_Assets = null;
             m_Amortizations = null;
+            m_NamedQueryTemplates = null;
 
             m_Server.Disconnect();
             m_Server = null;
@@ -256,6 +264,41 @@ namespace AccountingServer.DAL
             var res =
                 m_Amortizations.Remove(filter.GetQuery());
             return res.DocumentsAffected;
+        }
+
+        #endregion
+
+        #region namedqurey
+
+        public string SelectNamedQueryTemplate(string name)
+        {
+            return m_NamedQueryTemplates.FindOneById(new BsonString(name))["value"].AsString;
+        }
+
+        public IEnumerable<KeyValuePair<string, string>> SelectNamedQueryTemplates()
+        {
+            return
+                m_NamedQueryTemplates.FindAll()
+                                     .Select(
+                                             d =>
+                                             new KeyValuePair<string, string>(d["_id"].AsString, d["value"].AsString));
+        }
+
+        public bool DeleteNamedQueryTemplate(string name)
+        {
+            var res = m_NamedQueryTemplates.Remove(Query.EQ("_id", new BsonString(name)));
+            return res.DocumentsAffected == 1;
+        }
+
+        public bool Upsert(string name, string value)
+        {
+            var res = m_NamedQueryTemplates.Save(
+                                                 new BsonDocument
+                                                     {
+                                                         { "_id", name },
+                                                         { "value", value }
+                                                     });
+            return res.DocumentsAffected == 1;
         }
 
         #endregion

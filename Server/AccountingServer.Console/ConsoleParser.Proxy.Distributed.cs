@@ -18,21 +18,12 @@ namespace AccountingServer.Console
             {
                 get
                 {
-                    var filter = new MyDistributedFilter();
-                    if (Guid() != null)
-                        filter.ID = System.Guid.Parse(Guid().GetText());
-                    if (DollarQuotedString() != null)
-                    {
-                        var s = DollarQuotedString().GetText();
-                        s = s.Substring(1, s.Length - 2);
-                        filter.Name = s.Replace("\"\"", "\"");
-                    }
-                    if (PercentQuotedString() != null)
-                    {
-                        var s = PercentQuotedString().GetText();
-                        s = s.Substring(1, s.Length - 2);
-                        filter.Remark = s.Replace("''", "'");
-                    }
+                    var filter = new MyDistributedFilter
+                                     {
+                                         ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : (Guid?)null,
+                                         Name = DollarQuotedString().Dequotation(),
+                                         Remark = PercentQuotedString().Dequotation()
+                                     };
                     return filter;
                 }
             }
@@ -70,8 +61,6 @@ namespace AccountingServer.Console
                 {
                     if (distributedQAtom() != null)
                         return distributedQAtom();
-                    //if (Op == null)
-                    //    return details(0);
                     return distributedQ(0);
                 }
             }

@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="AccountingConsole.Amort.cs" />
     <Compile Include="AccountingConsole.Asset.cs" />
+    <Compile Include="AccountingConsole.Report.cs" />
     <Compile Include="AccountingConsole.Check.cs" />
     <Compile Include="AccountingConsole.Common.cs" />
     <Compile Include="AccountingConsole.Miscellaneous.cs" />
@@ -56,6 +57,7 @@
     <Compile Include="AccountingConsole.Subtotal.cs" />
     <Compile Include="AccountingConsole.Voucher.cs" />
     <Compile Include="Chart\AccountingChart.cs" />
+    <Compile Include="QuotedStringHelper.cs" />
     <Compile Include="ConsoleParser.Proxy.NamedQuery.cs" />
     <Compile Include="ConsoleParser.Proxy.Distributed.cs" />
     <Compile Include="ConsoleParser.Proxy.Voucher.cs" />

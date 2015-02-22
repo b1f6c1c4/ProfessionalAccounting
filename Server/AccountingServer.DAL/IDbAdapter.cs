@@ -161,5 +161,37 @@ namespace AccountingServer.DAL
         bool Upsert(Amortization entity);
 
         #endregion
+
+        #region namedqurey
+
+        /// <summary>
+        ///     按名称查找命名查询模板
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <returns>命名查询模板</returns>
+        string SelectNamedQueryTemplate(string name);
+
+        /// <summary>
+        ///     查找全部命名查询模板
+        /// </summary>
+        /// <returns>命名查询模板</returns>
+        IEnumerable<KeyValuePair<string, string>> SelectNamedQueryTemplates();
+
+        /// <summary>
+        ///     按名称删除命名查询模板
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <returns>是否成功</returns>
+        bool DeleteNamedQueryTemplate(string name);
+
+        /// <summary>
+        ///     添加或替换命名查询模板
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <param name="value">值</param>
+        /// <returns>是否成功</returns>
+        bool Upsert(string name, string value);
+
+        #endregion
     }
 }

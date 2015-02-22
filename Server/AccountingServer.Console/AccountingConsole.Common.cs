@@ -22,25 +22,24 @@ namespace AccountingServer.Console
         /// <returns>执行结果</returns>
         public IQueryResult Execute(string s)
         {
-            var lexer = new ConsoleLexer(new AntlrInputStream(s));
-            var parser = new ConsoleParser(new CommonTokenStream(lexer));
+            var parser = new ConsoleParser(new CommonTokenStream(new ConsoleLexer(new AntlrInputStream(s))));
             var result = parser.command();
             if (result.exception != null)
                 throw new Exception(result.exception.ToString());
 
-            if (result.GetChild(0) is ConsoleParser.VouchersContext)
-                return PresentVoucherQuery(result.GetChild(0) as IQueryCompunded<IVoucherQueryAtom>);
-            if (result.GetChild(0) is ConsoleParser.GroupedQueryContext)
-                return PresentSubtotal(result.GetChild(0) as IGroupedQuery);
-            if (result.GetChild(0) is ConsoleParser.NamedQueryContext)
-                return ExecuteNamedQuery(result.GetChild(0) as ConsoleParser.NamedQueryContext);
-            if (result.GetChild(0) is ConsoleParser.ChartContext)
-                return ExecuteChartQuery(result.GetChild(0) as ConsoleParser.ChartContext);
-            if (result.GetChild(0) is ConsoleParser.AssetContext)
-                return ExecuteAsset(result.GetChild(0) as ConsoleParser.AssetContext);
-            if (result.GetChild(0) is ConsoleParser.AmortContext)
-                return ExecuteAmort(result.GetChild(0) as ConsoleParser.AmortContext);
-            if (result.GetChild(0) is ConsoleParser.OtherCommandContext)
+            if (result.vouchers() != null)
+                return PresentVoucherQuery(result.vouchers());
+            if (result.groupedQuery() != null)
+                return PresentSubtotal(result.groupedQuery());
+            if (result.chart() != null)
+                return ExecuteChartQuery(result.chart());
+            if (result.report() != null)
+                return ExecuteReportQuery(result.report());
+            if (result.asset() != null)
+                return ExecuteAsset(result.asset());
+            if (result.amort() != null)
+                return ExecuteAmort(result.amort());
+            if (result.otherCommand() != null)
             {
                 switch (result.GetChild(0).GetText().ToLowerInvariant())
                 {
@@ -68,7 +67,7 @@ namespace AccountingServer.Console
                     case "chk2":
                         return AdvancedCheck();
                     case "nq":
-                        return ListNamedQueries();
+                        return ListNamedQueryTemplates();
                     case "exit":
                         Environment.Exit(0);
                         // ReSharper disable once HeuristicUnreachableCode
