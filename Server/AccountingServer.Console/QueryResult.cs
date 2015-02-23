@@ -117,6 +117,12 @@ namespace AccountingServer.Console
     /// </summary>
     public class ChartData : IQueryResult
     {
+        public ChartData(IList<Series> series, IList<ChartArea> chartAreas)
+        {
+            ChartAreas = chartAreas;
+            Series = series;
+        }
+
         /// <summary>
         ///     系列
         /// </summary>

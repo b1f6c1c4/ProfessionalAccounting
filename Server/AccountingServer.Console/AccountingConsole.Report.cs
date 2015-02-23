@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using Antlr4.Runtime;
@@ -26,10 +24,19 @@ namespace AccountingServer.Console
                 rng = parser.range().Range;
             }
 
+            var helper = new NamedQueryTraver<string, string>(m_Accountant, rng)
+                             {
+                                 Leaf = PresentReport,
+                                 Map = (path, query, coefficient) =>
+                                       path.Length == 0 ? query.Name : path + "-" + query.Name,
+                                 Reduce = (path, query, coefficient, results) =>
+                                          String.Join(Environment.NewLine, results),
+                             };
+
             INamedQuery q;
 
             if (expr.name() != null)
-                q = Dereference(expr.name().DollarQuotedString().Dequotation(), rng);
+                q = helper.Dereference(expr.name().DollarQuotedString().Dequotation());
             else if (expr.namedQ() != null)
                 q = expr.namedQ();
             else if (expr.namedQueries() != null)
@@ -37,9 +44,7 @@ namespace AccountingServer.Console
             else
                 throw new InvalidOperationException();
 
-            var sb = new StringBuilder();
-            PresentReport(String.Empty, q, rng, sb, 1);
-            return new UnEditableText(sb.ToString());
+            return new UnEditableText(helper.Traversal(String.Empty, q));
         }
 
         /// <summary>
@@ -47,155 +52,38 @@ namespace AccountingServer.Console
         /// </summary>
         /// <param name="path">路径</param>
         /// <param name="query">命名查询</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="sb">输出</param>
         /// <param name="coefficient">路径上累计的系数</param>
-        private void PresentReport(string path, INamedQuery query, DateFilter rng, StringBuilder sb, double coefficient)
+        private string PresentReport(string path, INamedQ query, double coefficient)
         {
-            while (query is ConsoleParser.NamedQueryContext)
-                query = (query as ConsoleParser.NamedQueryContext).InnerQuery;
-            while (query is INamedQueryReference)
-                query = Dereference(query as INamedQueryReference, rng);
+            var args = query.GroupingQuery.Subtotal;
 
-            var q = query as INamedQueryConcrete;
-            if (q == null)
+            if (args.AggrType != AggregationType.None)
                 throw new InvalidOperationException();
 
-            var newPath = (path.Length == 0 ? String.Empty : (path + "-")) + q.Name;
-            var newCoefficient = coefficient * q.Coefficient;
-            if (q is INamedQ)
-            {
-                var nq = q as INamedQ;
-                var res = m_Accountant.SelectVoucherDetailsGrouped(nq.GroupingQuery);
-                PresentReport(res, newPath, 0, nq.GroupingQuery.Subtotal, sb, newCoefficient);
-                return;
-            }
-            if (q is INamedQueries)
-            {
-                foreach (var namedQuery in (q as INamedQueries).Items)
-                    PresentReport(newPath, namedQuery, rng, sb, newCoefficient);
-                return;
-            }
+            var res = m_Accountant.SelectVoucherDetailsGrouped(query.GroupingQuery);
 
-            throw new InvalidOperationException();
-        }
+            var helper =
+                new SubtotalTraver<Tuple<double, string>>(args)
+                    {
+                        LeafNoneAggr =
+                            (cat, depth, val) =>
+                            new Tuple<double, string>(
+                                val * coefficient,
+                                String.Format("{0} {1:R} {2:R} {3:R}", path, val, coefficient, val * coefficient)),
+                        // TODO: 显示分类汇总时的路径
+                        MediumLevel = (cat, depth, level, r) => r,
+                        Reduce =
+                            (cat, depth, level, results) =>
+                            results.Aggregate(
+                                              (r1, r2) =>
+                                              new Tuple<double, string>(
+                                                  r1.Item1 + r2.Item1,
+                                                  r1.Item2 + Environment.NewLine + r2.Item2)),
+                    };
 
-        /// <summary>
-        ///     在报告上呈现分类汇总条目
-        /// </summary>
-        /// <param name="res">分类汇总结果</param>
-        /// <param name="path">路径</param>
-        /// <param name="depth">深度</param>
-        /// <param name="args">分类汇总参数</param>
-        /// <param name="sb">输出</param>
-        /// <param name="coefficient">路径上累计的系数</param>
-        private static void PresentReport(IEnumerable<Balance> res, string path, int depth, ISubtotal args,
-                                          StringBuilder sb, double coefficient)
-        {
-            if (depth >= args.Levels.Count)
-            {
-                if (args.AggrType == AggregationType.None)
-                {
-                    var val = res.Sum(b => b.Fund);
-                    var fVal = val * coefficient;
-                    sb.AppendFormat("{0:R} {1:R} {2:R}", val, coefficient, fVal);
-                    return;
-                }
-                throw new InvalidOperationException();
-            }
+            var traversal = helper.Traversal(res);
 
-            if (depth > 0)
-                sb.AppendLine();
-            switch (args.Levels[depth])
-            {
-                case SubtotalLevel.Title:
-                    foreach (var grp in Accountant.GroupByTitle(res))
-                    {
-                        var newPath = path + "-" + grp.Key.AsTitle();
-                        sb.Append(newPath);
-                        PresentReport(grp, newPath, depth + 1, args, sb, coefficient);
-                    }
-                    break;
-                case SubtotalLevel.SubTitle:
-                    foreach (var grp in Accountant.GroupBySubTitle(res))
-                    {
-                        var newPath = path + "-" + grp.Key.AsSubTitle();
-                        sb.Append(newPath);
-                        PresentReport(grp, newPath, depth + 1, args, sb, coefficient);
-                    }
-                    break;
-                case SubtotalLevel.Content:
-                    foreach (var grp in Accountant.GroupByContent(res))
-                    {
-                        var newPath = path + "-" + grp.Key;
-                        sb.Append(newPath);
-                        PresentReport(grp, newPath, depth + 1, args, sb, coefficient);
-                    }
-                    break;
-                case SubtotalLevel.Remark:
-                    foreach (var grp in Accountant.GroupByRemark(res))
-                    {
-                        var newPath = path + "-" + grp.Key;
-                        sb.Append(newPath);
-                        PresentReport(grp, newPath, depth + 1, args, sb, coefficient);
-                    }
-                    break;
-                case SubtotalLevel.Day:
-                case SubtotalLevel.Week:
-                    foreach (var grp in Accountant.GroupByDate(res))
-                    {
-                        var newPath = path + "-" + grp.Key.AsDate();
-                        sb.Append(newPath);
-                        PresentReport(grp, newPath, depth + 1, args, sb, coefficient);
-                    }
-                    break;
-                case SubtotalLevel.FinancialMonth:
-                    foreach (var grp in Accountant.GroupByDate(res))
-                    {
-                        var newPath = path + "-" +
-                                      (grp.Key.HasValue
-                                           ? String.Format("{0:D4}{1:D2}", grp.Key.Value.Year, grp.Key.Value.Month)
-                                           : "-[null]");
-                        sb.Append(newPath);
-                        PresentReport(grp, newPath, depth + 1, args, sb, coefficient);
-                    }
-                    break;
-                case SubtotalLevel.Month:
-                    foreach (var grp in Accountant.GroupByDate(res))
-                    {
-                        var newPath = path + "-" +
-                                      (grp.Key.HasValue
-                                           ? String.Format("@{0:D4}{1:D2}", grp.Key.Value.Year, grp.Key.Value.Month)
-                                           : "-[null]");
-                        sb.Append(newPath);
-                        PresentReport(grp, newPath, depth + 1, args, sb, coefficient);
-                    }
-                    break;
-                case SubtotalLevel.BillingMonth:
-                    foreach (var grp in Accountant.GroupByDate(res))
-                    {
-                        var newPath = path + "-" +
-                                      (grp.Key.HasValue
-                                           ? String.Format("#{0:D4}{1:D2}", grp.Key.Value.Year, grp.Key.Value.Month)
-                                           : "-[null]");
-                        sb.Append(newPath);
-                        PresentReport(grp, newPath, depth + 1, args, sb, coefficient);
-                    }
-                    break;
-                case SubtotalLevel.Year:
-                    foreach (var grp in Accountant.GroupByDate(res))
-                    {
-                        var newPath = path + "-" +
-                                      (grp.Key.HasValue
-                                           ? String.Format("{0:D4}", grp.Key.Value.Year)
-                                           : "-[null]");
-                        sb.Append(newPath);
-                        PresentReport(grp, newPath, depth + 1, args, sb, coefficient);
-                    }
-                    break;
-                default:
-                    throw new InvalidOperationException();
-            }
+            return traversal.Item2;
         }
     }
 }

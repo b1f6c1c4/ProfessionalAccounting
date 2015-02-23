@@ -188,7 +188,7 @@ namespace AccountingServer.BLL
                                               item =>
                                               item is AcquisationItem &&
                                               (!voucher.Date.HasValue || item.Date == voucher.Date) &&
-                                              Math.Abs((item as AcquisationItem).OrigValue - value) < Tolerance)
+                                              IsZero((item as AcquisationItem).OrigValue - value))
                                        .ToList();
 
                         if (lst.Count == 1)
@@ -474,7 +474,7 @@ namespace AccountingServer.BLL
                 throw new InvalidOperationException("expected");
             var fund = expected.Fund.Value;
             expected.Fund = null;
-            var isEliminated = Math.Abs(fund) < Tolerance;
+            var isEliminated = IsZero(fund);
 
             var ds = voucher.Details.Where(d => d.IsMatch(expected)).ToList();
 
@@ -511,7 +511,7 @@ namespace AccountingServer.BLL
             }
 
             // ReSharper disable once PossibleInvalidOperationException
-            if (!(Math.Abs(ds[0].Fund.Value - fund) > Tolerance))
+            if (IsZero(ds[0].Fund.Value - fund))
             {
                 sucess = true;
                 return;
@@ -609,7 +609,7 @@ namespace AccountingServer.BLL
                             var amount = items[i - 1].BookValue - asset.Salvge.Value;
                             var monthes = 12 * (lastYear - dt.Year) + lastMonth - dt.Month;
 
-                            if (amount <= Tolerance ||
+                            if (IsZero(amount) ||
                                 monthes < 0) // Ended, Over-depreciated or Dispositoned
                             {
                                 if (i < items.Count)

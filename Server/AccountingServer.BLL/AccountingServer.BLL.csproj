@@ -55,6 +55,7 @@
     <Compile Include="NamedQuery.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringFormatter.cs" />
+    <Compile Include="SubtotalTraver.cs" />
     <Compile Include="TitleManager.cs" />
   </ItemGroup>
   <ItemGroup>

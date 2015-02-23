@@ -23,6 +23,8 @@ namespace AccountingServer.BLL
         /// </summary>
         public const double Tolerance = 1e-8;
 
+        public static bool IsZero(double value) { return Math.Abs(value) < Tolerance; }
+
         /// <summary>
         ///     获取是否已经连接到数据库
         /// </summary>
@@ -67,7 +69,7 @@ namespace AccountingServer.BLL
             var res = m_Db.SelectVoucherDetailsGrouped(query);
             if (query.Subtotal.AggrType != AggregationType.ChangedDay &&
                 query.Subtotal.NonZero)
-                return res.Where(b => Math.Abs(b.Fund) >= Tolerance);
+                return res.Where(b => !IsZero(b.Fund));
             return res;
         }
 

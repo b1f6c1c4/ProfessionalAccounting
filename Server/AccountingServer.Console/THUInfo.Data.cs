@@ -54,8 +54,7 @@ namespace AccountingServer.Console
                                                                        d =>
                                                                        d.Title == 1012 && d.SubTitle == 05 &&
                                                                        // ReSharper disable once PossibleInvalidOperationException
-                                                                       Math.Abs(-d.Fund.Value - group.Key.Item4) <
-                                                                       Accountant.Tolerance))
+                                                                       Accountant.IsZero(-d.Fund.Value - group.Key.Item4)))
                                                   .ToList();
                                 break;
                             case "紫荆服务楼超市":
@@ -69,8 +68,7 @@ namespace AccountingServer.Console
                                                                        d =>
                                                                        d.Title == 1012 && d.SubTitle == 05 &&
                                                                        // ReSharper disable once PossibleInvalidOperationException
-                                                                       Math.Abs(-d.Fund.Value - group.Key.Item4) <
-                                                                       Accountant.Tolerance))
+                                                                       Accountant.IsZero(-d.Fund.Value - group.Key.Item4)))
                                                   .ToList();
                                 break;
                         }
@@ -84,14 +82,12 @@ namespace AccountingServer.Console
                                                                d =>
                                                                d.Title == 1221 && d.SubTitle == null &&
                                                                // ReSharper disable once PossibleInvalidOperationException
-                                                               Math.Abs(-d.Fund.Value - group.Key.Item4) <
-                                                               Accountant.Tolerance) &&
+                                                               Accountant.IsZero(-d.Fund.Value - group.Key.Item4)) &&
                                                  v.Details.Any(
                                                                d =>
                                                                d.Title == 1012 && d.SubTitle == 05 &&
                                                                // ReSharper disable once PossibleInvalidOperationException
-                                                               Math.Abs(d.Fund.Value - group.Key.Item4) <
-                                                               Accountant.Tolerance))
+                                                               Accountant.IsZero(d.Fund.Value - group.Key.Item4)))
                                           .ToList();
                         break;
                     case "领取圈存":
@@ -102,14 +98,12 @@ namespace AccountingServer.Console
                                                                d =>
                                                                d.Title == 1002 && d.SubTitle == null &&
                                                                // ReSharper disable once PossibleInvalidOperationException
-                                                               Math.Abs(-d.Fund.Value - group.Key.Item4) <
-                                                               Accountant.Tolerance) &&
+                                                               Accountant.IsZero(-d.Fund.Value - group.Key.Item4)) &&
                                                  v.Details.Any(
                                                                d =>
                                                                d.Title == 1012 && d.SubTitle == 05 &&
                                                                // ReSharper disable once PossibleInvalidOperationException
-                                                               Math.Abs(d.Fund.Value - group.Key.Item4) <
-                                                               Accountant.Tolerance))
+                                                               Accountant.IsZero(d.Fund.Value - group.Key.Item4)))
                                           .ToList();
                         break;
                     case "自助缴费(学生公寓水费)":
@@ -120,14 +114,12 @@ namespace AccountingServer.Console
                                                                d =>
                                                                d.Title == 1123 && d.SubTitle == null &&
                                                                // ReSharper disable once PossibleInvalidOperationException
-                                                               Math.Abs(d.Fund.Value - group.Key.Item4) <
-                                                               Accountant.Tolerance) &&
+                                                               Accountant.IsZero(d.Fund.Value - group.Key.Item4)) &&
                                                  v.Details.Any(
                                                                d =>
                                                                d.Title == 1012 && d.SubTitle == 05 &&
                                                                // ReSharper disable once PossibleInvalidOperationException
-                                                               Math.Abs(-d.Fund.Value - group.Key.Item4) <
-                                                               Accountant.Tolerance))
+                                                               Accountant.IsZero(-d.Fund.Value - group.Key.Item4)))
                                           .ToList();
                         break;
                 }
@@ -153,8 +145,7 @@ namespace AccountingServer.Console
                                                                 d =>
                                                                 d.Title == 1012 && d.SubTitle == 05 &&
                                                                 // ReSharper disable once PossibleInvalidOperationException
-                                                                Math.Abs(-d.Fund.Value - group.Key.Item4) <
-                                                                Accountant.Tolerance))
+                                                                Accountant.IsZero(-d.Fund.Value - group.Key.Item4)))
                                            .ToList();
                     if (vouchers2.Count == group.Count())
                     {
