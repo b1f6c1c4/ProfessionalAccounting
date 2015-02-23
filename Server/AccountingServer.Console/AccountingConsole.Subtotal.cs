@@ -16,8 +16,6 @@ namespace AccountingServer.Console
         /// <returns>执行结果</returns>
         private IQueryResult PresentSubtotal(IGroupedQuery query)
         {
-            AutoConnect();
-
             var result = m_Accountant.SelectVoucherDetailsGrouped(query);
 
             var sb = new StringBuilder();

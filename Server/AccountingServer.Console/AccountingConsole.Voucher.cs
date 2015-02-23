@@ -43,8 +43,6 @@ namespace AccountingServer.Console
         /// <returns>记账凭证的C#表达式</returns>
         private IQueryResult PresentVoucherQuery(IQueryCompunded<IVoucherQueryAtom> query)
         {
-            AutoConnect();
-
             var sb = new StringBuilder();
             foreach (var voucher in m_Accountant.SelectVouchers(query))
                 sb.Append(CSharpHelper.PresentVoucher(voucher));

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Forms.DataVisualization.Charting;
-using AccountingServer.Console.Chart;
 
 namespace AccountingServer.Console
 {
@@ -80,6 +79,9 @@ namespace AccountingServer.Console
         /// </summary>
         private readonly string m_Text;
 
+        /// <summary>
+        ///     文字内容
+        /// </summary>
         protected Text(string text) { m_Text = text; }
 
         public override string ToString() { return m_Text; }
@@ -115,27 +117,6 @@ namespace AccountingServer.Console
     /// </summary>
     public class ChartData : IQueryResult
     {
-        public ChartData(AccountingChart chart)
-        {
-            ChartAreas = new List<ChartArea>();
-            Series = new List<Series>();
-            ChartAreas.Add(chart.Setup());
-            foreach (var series in chart.GatherAsset())
-                Series.Add(series);
-        }
-
-        public ChartData(IEnumerable<AccountingChart> accountingCharts)
-        {
-            ChartAreas = new List<ChartArea>();
-            Series = new List<Series>();
-            foreach (var chart in accountingCharts)
-            {
-                ChartAreas.Add(chart.Setup());
-                foreach (var series in chart.GatherAsset())
-                    Series.Add(series);
-            }
-        }
-
         /// <summary>
         ///     系列
         /// </summary>

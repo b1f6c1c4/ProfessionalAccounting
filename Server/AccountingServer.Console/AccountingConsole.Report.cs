@@ -17,8 +17,6 @@ namespace AccountingServer.Console
         /// <returns>执行结果</returns>
         private IQueryResult ExecuteReportQuery(ConsoleParser.ReportContext expr)
         {
-            AutoConnect();
-
             DateFilter rng;
             if (expr.range() != null)
                 rng = expr.range().Range;
@@ -31,10 +29,7 @@ namespace AccountingServer.Console
             INamedQuery q;
 
             if (expr.name() != null)
-            {
-                var s = expr.name().DollarQuotedString().GetText();
-                q = Dereference(s.Substring(1, s.Length - 2).Replace("$$", "$"), rng);
-            }
+                q = Dereference(expr.name().DollarQuotedString().Dequotation(), rng);
             else if (expr.namedQ() != null)
                 q = expr.namedQ();
             else if (expr.namedQueries() != null)

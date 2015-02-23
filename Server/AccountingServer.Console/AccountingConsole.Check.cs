@@ -14,8 +14,6 @@ namespace AccountingServer.Console
         /// <returns>有误的会计记账凭证表达式</returns>
         private IQueryResult BasicCheck()
         {
-            AutoConnect();
-
             var sb = new StringBuilder();
             foreach (var voucher in m_Accountant.SelectVouchers(null))
             {
@@ -42,8 +40,6 @@ namespace AccountingServer.Console
         /// <returns>发生错误的第一日及其信息</returns>
         private IQueryResult AdvancedCheck()
         {
-            AutoConnect();
-
             var res =
                 m_Accountant.SelectVoucherDetailsGrouped(
                                                          new GroupedQueryBase(

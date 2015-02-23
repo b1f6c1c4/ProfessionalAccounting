@@ -46,8 +46,6 @@ namespace AccountingServer.Console
         /// <returns>执行结果</returns>
         private IQueryResult ExecuteAsset(ConsoleParser.AssetContext expr)
         {
-            AutoConnect();
-
             if (expr.assetList() != null)
             {
                 var dt = expr.assetList().AOAll() != null

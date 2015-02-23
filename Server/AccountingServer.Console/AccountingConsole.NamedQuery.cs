@@ -49,8 +49,6 @@ namespace AccountingServer.Console
         /// <returns>格式化的信息</returns>
         private IQueryResult ListNamedQueryTemplates()
         {
-            AutoConnect();
-
             var sb = new StringBuilder();
 
             foreach (var kvp in m_Accountant.SelectNamedQueryTemplates())
