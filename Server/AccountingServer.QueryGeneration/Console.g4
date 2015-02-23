@@ -48,7 +48,7 @@ namedQuery
 	;
 
 namedQueries
-	:	name coef? DoubleQuotedString? ':' namedQuery ('|' namedQuery)*
+	:	name coef? DoubleQuotedString? '::' namedQuery (('|' namedQuery)+ ';')?
 	;
 
 namedQ
