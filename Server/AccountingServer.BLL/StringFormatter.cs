@@ -8,7 +8,7 @@ namespace AccountingServer.BLL
     /// </summary>
     public static class StringFormatter
     {
-        private static readonly Regex Reg = new Regex(@"[\uFF00-\uFFFF\u4e00-\u9fa5]");
+        private static readonly Regex Reg = new Regex(@"[\uFF00-\uFFFF\u4e00-\u9fa5￥]");
 
         /// <summary>
         ///     左对齐补至指定长度

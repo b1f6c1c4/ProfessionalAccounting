@@ -18,156 +18,143 @@ namespace AccountingServer.Console
         {
             var result = m_Accountant.SelectVoucherDetailsGrouped(query);
 
-            var sb = new StringBuilder();
-            PresentSubtotal(result, 0, query.Subtotal, sb);
-
-            return new UnEditableText(sb.ToString());
+            return new UnEditableText(PresentSubtotal(result, query.Subtotal));
         }
+
 
         /// <summary>
         ///     呈现分类汇总
         /// </summary>
         /// <param name="res">分类汇总结果</param>
-        /// <param name="depth">深度</param>
         /// <param name="args">分类汇总参数</param>
-        /// <param name="sb">输出</param>
-        private static void PresentSubtotal(IEnumerable<Balance> res, int depth, ISubtotal args, StringBuilder sb)
+        /// <returns>分类汇总结果</returns>
+        private static string PresentSubtotal(IEnumerable<Balance> res, ISubtotal args)
         {
             const int ident = 4;
 
-            if (depth >= args.Levels.Count)
-            {
-                if (args.AggrType == AggregationType.None)
-                {
-                    var val = res.Sum(b => b.Fund);
-                    sb.AppendLine(val.AsCurrency().CPadLeft(ident * 4));
-                    return;
-                }
-                if (args.AggrType == AggregationType.ChangedDay)
-                {
-                    sb.AppendLine();
-                    foreach (var b in Accountant.AggregateChangedDay(res))
+            var helper =
+                new SubtotalTraver<Tuple<double, string>>(args)
                     {
-                        if (args.NonZero &&
-                            Math.Abs(b.Fund) < Accountant.Tolerance)
-                            continue;
+                        LeafNoneAggr =
+                            (cat, depth, val) =>
+                            new Tuple<double, string>(val, val.AsCurrency()),
+                        LeafAggregated =
+                            (cat, depth, bal) =>
+                            new Tuple<double, string>(
+                                bal.Fund,
+                                String.Format(
+                                              "{0}{1}{2}",
+                                              new String(' ', depth * ident),
+                                              bal.Date.AsDate().CPadRight(38),
+                                              bal.Fund.AsCurrency().CPadLeft(12 + 2 * depth))),
+                        MediumLevel =
+                            (cat, depth, level, r) =>
+                            {
+                                string str;
+                                switch (level)
+                                {
+                                    case SubtotalLevel.Title:
+                                        str = String.Format(
+                                                            "{0} {1}:",
+                                                            cat.Title.AsTitle(),
+                                                            TitleManager.GetTitleName(cat.Title));
+                                        break;
+                                    case SubtotalLevel.SubTitle:
+                                        str = String.Format(
+                                                            "{0} {1}:",
+                                                            cat.SubTitle.AsSubTitle(),
+                                                            TitleManager.GetTitleName(cat.Title, cat.SubTitle));
+                                        break;
+                                    case SubtotalLevel.Content:
+                                        str = String.Format("{0}:", cat.Content);
+                                        break;
+                                    case SubtotalLevel.Remark:
+                                        str = String.Format("{0}:", cat.Remark);
+                                        break;
+                                    case SubtotalLevel.Day:
+                                    case SubtotalLevel.Week:
+                                        str = String.Format("{0}:", cat.Date.AsDate());
+                                        break;
+                                    case SubtotalLevel.FinancialMonth:
+                                        str = cat.Date.HasValue
+                                                  ? String.Format(
+                                                                  "{0:D4}{1:D2}:",
+                                                                  cat.Date.Value.Year,
+                                                                  cat.Date.Value.Month)
+                                                  : "[null]:";
+                                        break;
+                                    case SubtotalLevel.Month:
+                                        str = cat.Date.HasValue
+                                                  ? String.Format(
+                                                                  "@{0:D4}{1:D2}:",
+                                                                  cat.Date.Value.Year,
+                                                                  cat.Date.Value.Month)
+                                                  : "[null]:";
+                                        break;
+                                    case SubtotalLevel.BillingMonth:
+                                        str = cat.Date.HasValue
+                                                  ? String.Format(
+                                                                  "#{0:D4}{1:D2}:",
+                                                                  cat.Date.Value.Year,
+                                                                  cat.Date.Value.Month)
+                                                  : "[null]:";
+                                        break;
+                                    case SubtotalLevel.Year:
+                                        str = cat.Date.HasValue
+                                                  ? String.Format("{0:D4}:", cat.Date.Value.Year)
+                                                  : "[null]:";
+                                        break;
+                                    default:
+                                        throw new InvalidOperationException();
+                                }
+                                if (depth == args.Levels.Count - 1 &&
+                                    args.AggrType == AggregationType.None)
+                                    return new Tuple<double, string>(
+                                        r.Item1,
+                                        String.Format(
+                                                      "{0}{1}{2}",
+                                                      new String(' ', depth * ident),
+                                                      str.CPadRight(38),
+                                                      r.Item2.CPadLeft(12 + 2 * depth)));
+                                return new Tuple<double, string>(
+                                    r.Item1,
+                                    String.Format(
+                                                  "{0}{1}{2}{3}{4}",
+                                                  new String(' ', depth * ident),
+                                                  str.CPadRight(38),
+                                                  r.Item1.AsCurrency().CPadLeft(12 + 2 * depth),
+                                                  Environment.NewLine,
+                                                  r.Item2));
+                            },
+                        Reduce =
+                            (cat, depth, level, results) =>
+                            results.Aggregate(
+                                              (r1, r2) =>
+                                              new Tuple<double, string>(
+                                                  r1.Item1 + r2.Item1,
+                                                  r1.Item2 + Environment.NewLine + r2.Item2)),
+                        ReduceA =
+                            (cat, depth, level, results) =>
+                            {
+                                var val = (double?)null;
+                                var sb = new StringBuilder();
+                                foreach (var result in results)
+                                {
+                                    val = result.Item1;
+                                    sb.AppendLine(result.Item2);
+                                }
+                                return new Tuple<double, string>(
+                                    val ?? 0,
+                                    sb.ToString(0, sb.Length - Environment.NewLine.Length));
+                            }
+                    };
 
-                        sb.Append(' ', depth * ident);
-                        sb.AppendFormat("{0}:{1}", b.Date.AsDate(), b.Fund.AsCurrency().CPadLeft(ident * 4));
-                        sb.AppendLine();
-                    }
-                    return;
-                }
-                if (args.AggrType == AggregationType.EveryDay)
-                {
-                    sb.AppendLine();
-                    foreach (var b in Accountant.AggregateEveryDay(res, args.EveryDayRange.Range))
-                    {
-                        if (args.NonZero &&
-                            Math.Abs(b.Fund) < Accountant.Tolerance)
-                            continue;
+            var traversal = helper.Traversal(res);
 
-                        sb.Append(' ', depth * ident);
-                        sb.AppendFormat("{0}:{1}", b.Date.AsDate(), b.Fund.AsCurrency().CPadLeft(ident * 4));
-                        sb.AppendLine();
-                    }
-                    return;
-                }
-                throw new InvalidOperationException();
-            }
-
-            if (depth > 0)
-                sb.AppendLine();
-            switch (args.Levels[depth])
-            {
-                case SubtotalLevel.Title:
-                    foreach (var grp in Accountant.GroupByTitle(res))
-                    {
-                        sb.Append(' ', depth * ident);
-                        sb.AppendFormat("{0}:", grp.Key.AsTitle());
-                        PresentSubtotal(grp, depth + 1, args, sb);
-                    }
-                    break;
-                case SubtotalLevel.SubTitle:
-                    foreach (var grp in Accountant.GroupBySubTitle(res))
-                    {
-                        sb.Append(' ', depth * ident);
-                        sb.AppendFormat("{0}:", grp.Key.AsSubTitle());
-                        PresentSubtotal(grp, depth + 1, args, sb);
-                    }
-                    break;
-                case SubtotalLevel.Content:
-                    foreach (var grp in Accountant.GroupByContent(res))
-                    {
-                        sb.Append(' ', depth * ident);
-                        sb.AppendFormat("{0}:", grp.Key.CPadRight(25));
-                        PresentSubtotal(grp, depth + 1, args, sb);
-                    }
-                    break;
-                case SubtotalLevel.Remark:
-                    foreach (var grp in Accountant.GroupByRemark(res))
-                    {
-                        sb.Append(' ', depth * ident);
-                        sb.AppendFormat("{0}:", grp.Key);
-                        PresentSubtotal(grp, depth + 1, args, sb);
-                    }
-                    break;
-                case SubtotalLevel.Day:
-                case SubtotalLevel.Week:
-                    foreach (var grp in Accountant.GroupByDate(res))
-                    {
-                        sb.Append(' ', depth * ident);
-                        sb.AppendFormat("{0}:", grp.Key.AsDate());
-                        PresentSubtotal(grp, depth + 1, args, sb);
-                    }
-                    break;
-                case SubtotalLevel.FinancialMonth:
-                    foreach (var grp in Accountant.GroupByDate(res))
-                    {
-                        sb.Append(' ', depth * ident);
-                        if (grp.Key.HasValue)
-                            sb.AppendFormat("{0:D4}{1:D2}:", grp.Key.Value.Year, grp.Key.Value.Month);
-                        else
-                            sb.Append("[null]:");
-                        PresentSubtotal(grp, depth + 1, args, sb);
-                    }
-                    break;
-                case SubtotalLevel.Month:
-                    foreach (var grp in Accountant.GroupByDate(res))
-                    {
-                        sb.Append(' ', depth * ident);
-                        if (grp.Key.HasValue)
-                            sb.AppendFormat("@{0:D4}{1:D2}:", grp.Key.Value.Year, grp.Key.Value.Month);
-                        else
-                            sb.Append("[null]:");
-                        PresentSubtotal(grp, depth + 1, args, sb);
-                    }
-                    break;
-                case SubtotalLevel.BillingMonth:
-                    foreach (var grp in Accountant.GroupByDate(res))
-                    {
-                        sb.Append(' ', depth * ident);
-                        if (grp.Key.HasValue)
-                            sb.AppendFormat("#{0:D4}{1:D2}:", grp.Key.Value.Year, grp.Key.Value.Month);
-                        else
-                            sb.Append("[null]:");
-                        PresentSubtotal(grp, depth + 1, args, sb);
-                    }
-                    break;
-                case SubtotalLevel.Year:
-                    foreach (var grp in Accountant.GroupByDate(res))
-                    {
-                        sb.Append(' ', depth * ident);
-                        if (grp.Key.HasValue)
-                            sb.AppendFormat("{0:D4}:", grp.Key.Value.Year);
-                        else
-                            sb.Append("[null]:");
-                        PresentSubtotal(grp, depth + 1, args, sb);
-                    }
-                    break;
-                default:
-                    throw new InvalidOperationException();
-            }
+            if (args.Levels.Count == 0 &&
+                args.AggrType == AggregationType.None)
+                return traversal.Item2;
+            return traversal.Item1.AsCurrency() + ":" + Environment.NewLine + traversal.Item2;
         }
     }
 }

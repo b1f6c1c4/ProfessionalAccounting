@@ -19,7 +19,7 @@ namespace AccountingServer.Console
             {
                 // ReSharper disable once PossibleInvalidOperationException
                 var val = voucher.Details.Sum(d => d.Fund.Value);
-                if (Math.Abs(val) < Accountant.Tolerance)
+                if (Accountant.IsZero(val))
                     continue;
 
                 if (val > 0)

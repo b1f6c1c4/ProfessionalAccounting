@@ -48,11 +48,11 @@ namedQuery
 	;
 
 namedQueries
-	:	name coef? (':' DoubleQuotedString)? ':' namedQuery ('|' namedQuery)+
+	:	name coef? DoubleQuotedString? ':' namedQuery ('|' namedQuery)*
 	;
 
 namedQ
-	:	name coef? (':' DoubleQuotedString)? ':' groupedQuery
+	:	name coef? DoubleQuotedString? ':' groupedQuery
 	;
 
 namedQueryReference
@@ -258,7 +258,7 @@ Help
 	;
 Titles
 	:	'titles'
-	|	'T' | 't'
+	|	'T'
 	;
 Exit
 	:	'exit'

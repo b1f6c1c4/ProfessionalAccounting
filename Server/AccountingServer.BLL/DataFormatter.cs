@@ -15,8 +15,8 @@ namespace AccountingServer.BLL
         /// <returns>格式化后的金额</returns>
         public static string AsCurrency(this double value)
         {
-            var s = String.Format("￥{0:0.0000}", value);
-            return s.TrimEnd('0').CPadRight(s.Length);
+            var s = String.Format("{0:0.0000}", value);
+            return "￥" + s.TrimEnd('0').CPadRight(s.Length);
         }
 
         /// <summary>

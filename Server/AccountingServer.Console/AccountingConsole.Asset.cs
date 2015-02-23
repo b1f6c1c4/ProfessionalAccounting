@@ -257,7 +257,7 @@ namespace AccountingServer.Console
 
             var bookValue = Accountant.GetBookValueOn(asset, dt);
             if (dt.HasValue &&
-                (!bookValue.HasValue || bookValue < Accountant.Tolerance))
+                (!bookValue.HasValue || Accountant.IsZero(bookValue.Value)))
                 return null;
             sb.AppendFormat(
                             "{0} {1}{2:yyyyMMdd}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}",

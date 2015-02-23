@@ -60,53 +60,5 @@ namespace AccountingServer.Console
 
             return new EditableText(sb.ToString());
         }
-
-        /// <summary>
-        ///     对命名查询模板的名称解引用
-        /// </summary>
-        /// <param name="reference">名称</param>
-        /// <param name="rng">用于赋值的日期过滤器</param>
-        /// <returns>命名查询模板</returns>
-        private INamedQuery Dereference(string reference, DateFilter rng)
-        {
-            string range, leftExtendedRange;
-            if (rng.NullOnly)
-                range = leftExtendedRange = "[null]";
-            else
-            {
-                if (rng.StartDate.HasValue)
-                    range = rng.EndDate.HasValue
-                                ? String.Format(
-                                                "[{0:yyyyMMdd}{2}{1:yyyyMMdd}]",
-                                                rng.StartDate,
-                                                rng.EndDate,
-                                                rng.Nullable ? "=" : "~")
-                                : String.Format("[{0:yyyyMMdd}{1}]", rng.StartDate, rng.Nullable ? "=" : "~");
-                else if (rng.Nullable)
-                    range = rng.EndDate.HasValue ? String.Format("[~{0:yyyyMMdd}]", rng.EndDate) : "[]";
-                else
-                    range = rng.EndDate.HasValue ? String.Format("[={0:yyyyMMdd}]", rng.EndDate) : "[~null]";
-                leftExtendedRange = !rng.EndDate.HasValue ? "[]" : String.Format("[~{0:yyyyMMdd}]", rng.EndDate);
-            }
-
-            var templateStr = m_Accountant.SelectNamedQueryTemplate(reference)
-                                          .Replace("[&RANGE&]", range)
-                                          .Replace("[&LEFTEXTENDEDRANGE&]", leftExtendedRange);
-
-            var parser = new ConsoleParser(new CommonTokenStream(new ConsoleLexer(new AntlrInputStream(templateStr))));
-            var template = parser.namedQuery();
-            return template;
-        }
-
-        /// <summary>
-        ///     对命名查询模板引用解引用
-        /// </summary>
-        /// <param name="reference">命名查询模板引用</param>
-        /// <param name="rng">用于赋值的日期过滤器</param>
-        /// <returns>命名查询模板</returns>
-        private INamedQuery Dereference(INamedQueryReference reference, DateFilter rng)
-        {
-            return Dereference(reference.Name, rng);
-        }
     }
 }
