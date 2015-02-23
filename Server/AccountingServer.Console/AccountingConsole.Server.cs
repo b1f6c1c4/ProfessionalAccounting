@@ -5,13 +5,14 @@
         /// <summary>
         ///     检查是否已连接；若未连接，尝试连接
         /// </summary>
-        private void AutoConnect()
+        public IQueryResult AutoConnect()
         {
             if (!m_Accountant.Connected)
             {
                 m_Accountant.Launch();
                 m_Accountant.Connect();
             }
+            return new Suceed();
         }
 
         /// <summary>

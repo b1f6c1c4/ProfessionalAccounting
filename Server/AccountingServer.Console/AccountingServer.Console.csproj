@@ -55,7 +55,6 @@
     <Compile Include="AccountingConsole.Server.cs" />
     <Compile Include="AccountingConsole.Subtotal.cs" />
     <Compile Include="AccountingConsole.Voucher.cs" />
-    <Compile Include="Chart\AccountingChart.cs" />
     <Compile Include="QuotedStringHelper.cs" />
     <Compile Include="ConsoleParser.Proxy.NamedQuery.cs" />
     <Compile Include="ConsoleParser.Proxy.Distributed.cs" />

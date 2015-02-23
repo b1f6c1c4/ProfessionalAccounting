@@ -67,8 +67,6 @@ namespace AccountingServer.Console
         /// <returns></returns>
         private IQueryResult FetchInfo()
         {
-            AutoConnect();
-
             var thuInfo = new THUInfo(m_Accountant);
             thuInfo.FetchData(@"2014010914", @"MTQyODU3");
             return new EditableText(thuInfo.Compare());

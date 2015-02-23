@@ -47,8 +47,6 @@ namespace AccountingServer.Console
         /// <returns>执行结果</returns>
         private IQueryResult ExecuteAmort(ConsoleParser.AmortContext expr)
         {
-            AutoConnect();
-
             if (expr.amortList() != null)
             {
                 var dt = expr.amortList().AOAll() != null
