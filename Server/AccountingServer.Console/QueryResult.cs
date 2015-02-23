@@ -117,21 +117,15 @@ namespace AccountingServer.Console
     /// </summary>
     public class ChartData : IQueryResult
     {
-        public ChartData(IList<Series> series, IList<ChartArea> chartAreas)
-        {
-            ChartAreas = chartAreas;
-            Series = series;
-        }
-
         /// <summary>
         ///     系列
         /// </summary>
-        public IList<Series> Series { get; private set; }
+        public IList<Series> Series { get; set; }
 
         /// <summary>
         ///     图表区域
         /// </summary>
-        public IList<ChartArea> ChartAreas { get; private set; }
+        public IList<ChartArea> ChartAreas { get; set; }
 
         /// <inheritdoc />
         public bool AutoReturn { get { return true; } }
