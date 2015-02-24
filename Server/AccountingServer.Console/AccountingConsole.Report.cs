@@ -2,7 +2,6 @@
 using System.Linq;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
-using Antlr4.Runtime;
 
 namespace AccountingServer.Console
 {
@@ -15,65 +14,68 @@ namespace AccountingServer.Console
         /// <returns>执行结果</returns>
         private IQueryResult ExecuteReportQuery(ConsoleParser.ReportContext expr)
         {
-            DateFilter rng;
-            if (expr.range() != null)
-                rng = expr.range().Range;
-            else
-            {
-                var parser = new ConsoleParser(new CommonTokenStream(new ConsoleLexer(new AntlrInputStream("[0]"))));
-                rng = parser.range().Range;
-            }
+            var rng = expr.range() != null ? expr.range().Range : ConsoleParser.From("[0]").range().Range;
 
             var helper = new NamedQueryTraver<string, string>(m_Accountant, rng)
                              {
-                                 Leaf = PresentReport,
+                                 Leaf =
+                                     (path, query, coefficient) => PresentReport(path, query.GroupingQuery, coefficient),
                                  Map = (path, query, coefficient) =>
                                        path.Length == 0 ? query.Name : path + "-" + query.Name,
-                                 Reduce = (path, query, coefficient, results) =>
+                                 Reduce = (path, newPath, query, coefficient, results) =>
                                           String.Join(Environment.NewLine, results),
                              };
 
-            INamedQuery q;
+            if (expr.namedQuery() != null)
+                return new UnEditableText(helper.Traversal(String.Empty, expr.namedQuery()));
+            if (expr.groupedQuery() != null)
+                return new UnEditableText(PresentReport(String.Empty, expr.groupedQuery(), 1));
 
-            if (expr.name() != null)
-                q = helper.Dereference(expr.name().DollarQuotedString().Dequotation());
-            else if (expr.namedQ() != null)
-                q = expr.namedQ();
-            else if (expr.namedQueries() != null)
-                q = expr.namedQueries();
-            else
-                throw new InvalidOperationException();
-
-            return new UnEditableText(helper.Traversal(String.Empty, q));
+            throw new InvalidOperationException();
         }
 
         /// <summary>
         ///     呈现报告条目
         /// </summary>
-        /// <param name="path">路径</param>
-        /// <param name="query">命名查询</param>
+        /// <param name="path0">路径</param>
+        /// <param name="query">分类汇总检索式</param>
         /// <param name="coefficient">路径上累计的系数</param>
-        private string PresentReport(string path, INamedQ query, double coefficient)
+        private string PresentReport(string path0, IGroupedQuery query, double coefficient)
         {
-            var args = query.GroupingQuery.Subtotal;
+            var args = query.Subtotal;
 
             if (args.AggrType != AggregationType.None)
                 throw new InvalidOperationException();
 
-            var res = m_Accountant.SelectVoucherDetailsGrouped(query.GroupingQuery);
+            var res = m_Accountant.SelectVoucherDetailsGrouped(query);
 
             var helper =
-                new SubtotalTraver<Tuple<double, string>>(args)
+                new SubtotalTraver<string, Tuple<double, string>>(args)
                     {
                         LeafNoneAggr =
-                            (cat, depth, val) =>
+                            (path, cat, depth, val) =>
                             new Tuple<double, string>(
                                 val * coefficient,
                                 String.Format("{0} {1:R} {2:R} {3:R}", path, val, coefficient, val * coefficient)),
-                        // TODO: 显示分类汇总时的路径
-                        MediumLevel = (cat, depth, level, r) => r,
+                        Map = (path, cat, depth, level) =>
+                              {
+                                  switch (level)
+                                  {
+                                      case SubtotalLevel.Title:
+                                          return path.Merge(TitleManager.GetTitleName(cat.Title));
+                                      case SubtotalLevel.SubTitle:
+                                          return path.Merge(TitleManager.GetTitleName(cat.Title, cat.SubTitle));
+                                      case SubtotalLevel.Content:
+                                          return path.Merge(cat.Content);
+                                      case SubtotalLevel.Remark:
+                                          return path.Merge(cat.Remark);
+                                      default:
+                                          return path.Merge(cat.Date.AsDate(level));
+                                  }
+                              },
+                        MediumLevel = (path, newPath, cat, depth, level, r) => r,
                         Reduce =
-                            (cat, depth, level, results) =>
+                            (path, cat, depth, level, results) =>
                             results.Aggregate(
                                               (r1, r2) =>
                                               new Tuple<double, string>(
@@ -81,7 +83,7 @@ namespace AccountingServer.Console
                                                   r1.Item2 + Environment.NewLine + r2.Item2)),
                     };
 
-            var traversal = helper.Traversal(res);
+            var traversal = helper.Traversal(path0, res);
 
             return traversal.Item2;
         }

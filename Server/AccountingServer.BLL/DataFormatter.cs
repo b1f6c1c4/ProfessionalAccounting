@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using AccountingServer.Entities;
 
 namespace AccountingServer.BLL
 {
@@ -88,6 +89,35 @@ namespace AccountingServer.BLL
         public static string AsDate(this DateTime? value)
         {
             return value.HasValue ? AsDate(value.Value) : "[null]";
+        }
+
+        /// <summary>
+        ///     格式化日期
+        /// </summary>
+        /// <param name="value">日期</param>
+        /// <param name="level">分类层次</param>
+        /// <returns>格式化后的日期</returns>
+        public static string AsDate(this DateTime? value, SubtotalLevel level)
+        {
+            if (!value.HasValue)
+                return "[null]";
+
+            switch (level)
+            {
+                case SubtotalLevel.Day:
+                case SubtotalLevel.Week:
+                    return value.AsDate();
+                case SubtotalLevel.Month:
+                    return String.Format("@{0:D4}{1:D2}",value.Value.Year,value.Value.Month);
+                case SubtotalLevel.FinancialMonth:
+                    return String.Format("{0:D4}{1:D2}",value.Value.Year,value.Value.Month);
+                case SubtotalLevel.BillingMonth:
+                    return String.Format("#{0:D4}{1:D2}",value.Value.Year,value.Value.Month);
+                case SubtotalLevel.Year:
+                    return String.Format("{0:D4}", value.Value.Year);
+                default:
+                    throw new InvalidOperationException();
+            }
         }
 
         /// <summary>

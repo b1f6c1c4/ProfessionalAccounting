@@ -15,8 +15,7 @@ namespace AccountingServer.Console
         /// <returns>命名查询模板</returns>
         public string ExecuteNamedQueryTemplateUpsert(string code)
         {
-            var parser = new ConsoleParser(new CommonTokenStream(new ConsoleLexer(new AntlrInputStream(code))));
-            var template = parser.namedQueryTemplate();
+            var template = ConsoleParser.From(code).namedQueryTemplate();
 
             var s = template.GetChild(0).GetText();
             var name = s.Substring(1, s.Length - 2).Replace("$$", "$");
@@ -34,8 +33,7 @@ namespace AccountingServer.Console
         /// <returns>是否成功</returns>
         public bool ExecuteNamedQueryTemplateRemoval(string code)
         {
-            var parser = new ConsoleParser(new CommonTokenStream(new ConsoleLexer(new AntlrInputStream(code))));
-            var template = parser.namedQueryTemplate();
+            var template = ConsoleParser.From(code).namedQueryTemplate();
 
             var s = template.GetChild(0).GetText();
             var name = s.Substring(1, s.Length - 2).Replace("$$", "$");

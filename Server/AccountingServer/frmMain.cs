@@ -260,8 +260,8 @@ namespace AccountingServer
                 }
             // else
             {
-                try
-                {
+                //try
+                //{
                     var res = m_Console.Execute(text);
                     if (res == null)
                         return true;
@@ -289,14 +289,14 @@ namespace AccountingServer
                     if (res.AutoReturn)
                         FocusTextBoxCommand();
                     return true;
-                }
-                catch (Exception exception)
-                {
-                    textBoxResult.Text = exception.ToString();
-                    textBoxCommand.BackColor = Color.FromArgb(255, 70, 70);
-                    SwitchToText();
-                    return false;
-                }
+                //}
+                //catch (Exception exception)
+                //{
+                //    textBoxResult.Text = exception.ToString();
+                //    textBoxCommand.BackColor = Color.FromArgb(255, 70, 70);
+                //    SwitchToText();
+                //    return false;
+                //}
             }
         }
 

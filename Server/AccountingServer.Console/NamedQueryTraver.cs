@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
-using Antlr4.Runtime;
 
 namespace AccountingServer.Console
 {
@@ -19,7 +18,7 @@ namespace AccountingServer.Console
         public delegate TMedium MapFunc(TMedium path, INamedQueries query, double coefficient);
 
         public delegate TResult ReduceFunc(
-            TMedium path, INamedQueries query, double coefficient, IEnumerable<TResult> results);
+            TMedium path, TMedium newPath, INamedQueries query, double coefficient, IEnumerable<TResult> results);
 
         public LeafFunc Leaf { get; set; }
 
@@ -42,10 +41,21 @@ namespace AccountingServer.Console
 
         private INamedQueryConcrete GetConcreteQuery(INamedQuery query)
         {
-            while (query is ConsoleParser.NamedQueryContext)
-                query = (query as ConsoleParser.NamedQueryContext).InnerQuery;
-            while (query is INamedQueryReference)
-                query = Dereference(query as INamedQueryReference);
+            var flag = true;
+            while (flag)
+            {
+                flag = false;
+                while (query is ConsoleParser.NamedQueryContext)
+                {
+                    query = (query as ConsoleParser.NamedQueryContext).InnerQuery;
+                    flag = true;
+                }
+                while (query is INamedQueryReference)
+                {
+                    query = Dereference(query as INamedQueryReference);
+                    flag = true;
+                }
+            }
 
             return query as INamedQueryConcrete;
         }
@@ -65,6 +75,7 @@ namespace AccountingServer.Console
                 var newPath = Map(path, qs, coefficient);
                 return Reduce(
                               path,
+                              newPath,
                               qs,
                               coefficient,
                               qs.Items.Select(nq => Traversal(newPath, nq, coefficient * qs.Coefficient)));
@@ -104,8 +115,7 @@ namespace AccountingServer.Console
                                           .Replace("[&RANGE&]", range)
                                           .Replace("[&LEFTEXTENDEDRANGE&]", leftExtendedRange);
 
-            var parser = new ConsoleParser(new CommonTokenStream(new ConsoleLexer(new AntlrInputStream(templateStr))));
-            var template = parser.namedQuery();
+            var template = ConsoleParser.From(templateStr).namedQuery();
             return template;
         }
 
@@ -114,9 +124,6 @@ namespace AccountingServer.Console
         /// </summary>
         /// <param name="reference">命名查询模板引用</param>
         /// <returns>命名查询模板</returns>
-        private INamedQuery Dereference(INamedQueryReference reference)
-        {
-            return Dereference(reference.Name);
-        }
+        private INamedQuery Dereference(INamedQueryReference reference) { return Dereference(reference.Name); }
     }
 }

@@ -33,13 +33,13 @@ namespace AccountingServer.Console
             const int ident = 4;
 
             var helper =
-                new SubtotalTraver<Tuple<double, string>>(args)
+                new SubtotalTraver<object, Tuple<double, string>>(args)
                     {
                         LeafNoneAggr =
-                            (cat, depth, val) =>
+                            (path, cat, depth, val) =>
                             new Tuple<double, string>(val, val.AsCurrency()),
                         LeafAggregated =
-                            (cat, depth, bal) =>
+                            (path, cat, depth, bal) =>
                             new Tuple<double, string>(
                                 bal.Fund,
                                 String.Format(
@@ -47,8 +47,10 @@ namespace AccountingServer.Console
                                               new String(' ', depth * ident),
                                               bal.Date.AsDate().CPadRight(38),
                                               bal.Fund.AsCurrency().CPadLeft(12 + 2 * depth))),
+                        Map = (path, cat, depth, level) => null,
+                        MapA = (path, cat, depth, type) => null,
                         MediumLevel =
-                            (cat, depth, level, r) =>
+                            (path, newPath, cat, depth, level, r) =>
                             {
                                 string str;
                                 switch (level)
@@ -71,41 +73,9 @@ namespace AccountingServer.Console
                                     case SubtotalLevel.Remark:
                                         str = String.Format("{0}:", cat.Remark);
                                         break;
-                                    case SubtotalLevel.Day:
-                                    case SubtotalLevel.Week:
-                                        str = String.Format("{0}:", cat.Date.AsDate());
-                                        break;
-                                    case SubtotalLevel.FinancialMonth:
-                                        str = cat.Date.HasValue
-                                                  ? String.Format(
-                                                                  "{0:D4}{1:D2}:",
-                                                                  cat.Date.Value.Year,
-                                                                  cat.Date.Value.Month)
-                                                  : "[null]:";
-                                        break;
-                                    case SubtotalLevel.Month:
-                                        str = cat.Date.HasValue
-                                                  ? String.Format(
-                                                                  "@{0:D4}{1:D2}:",
-                                                                  cat.Date.Value.Year,
-                                                                  cat.Date.Value.Month)
-                                                  : "[null]:";
-                                        break;
-                                    case SubtotalLevel.BillingMonth:
-                                        str = cat.Date.HasValue
-                                                  ? String.Format(
-                                                                  "#{0:D4}{1:D2}:",
-                                                                  cat.Date.Value.Year,
-                                                                  cat.Date.Value.Month)
-                                                  : "[null]:";
-                                        break;
-                                    case SubtotalLevel.Year:
-                                        str = cat.Date.HasValue
-                                                  ? String.Format("{0:D4}:", cat.Date.Value.Year)
-                                                  : "[null]:";
-                                        break;
                                     default:
-                                        throw new InvalidOperationException();
+                                        str = String.Format("{0}:", cat.Date.AsDate(level));
+                                        break;
                                 }
                                 if (depth == args.Levels.Count - 1 &&
                                     args.AggrType == AggregationType.None)
@@ -127,14 +97,14 @@ namespace AccountingServer.Console
                                                   r.Item2));
                             },
                         Reduce =
-                            (cat, depth, level, results) =>
+                            (path, cat, depth, level, results) =>
                             results.Aggregate(
                                               (r1, r2) =>
                                               new Tuple<double, string>(
                                                   r1.Item1 + r2.Item1,
                                                   r1.Item2 + Environment.NewLine + r2.Item2)),
                         ReduceA =
-                            (cat, depth, level, results) =>
+                            (path, newPath, cat, depth, level, results) =>
                             {
                                 var val = (double?)null;
                                 var sb = new StringBuilder();
@@ -149,7 +119,7 @@ namespace AccountingServer.Console
                             }
                     };
 
-            var traversal = helper.Traversal(res);
+            var traversal = helper.Traversal(null, res);
 
             if (args.Levels.Count == 0 &&
                 args.AggrType == AggregationType.None)

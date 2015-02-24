@@ -23,8 +23,7 @@ namespace AccountingServer.Console
         /// <returns>执行结果</returns>
         public IQueryResult Execute(string s)
         {
-            var parser = new ConsoleParser(new CommonTokenStream(new ConsoleLexer(new AntlrInputStream(s))));
-            var result = parser.command();
+            var result = ConsoleParser.From(s).command();
             if (result.exception != null)
                 throw new Exception(result.exception.ToString());
 
