@@ -47,7 +47,7 @@ namespace AccountingServer.DAL
             {
                 if (vfilter.ID != null)
                 {
-                    sb.AppendFormat("    if (v._id != '{0}')) return false;", vfilter.ID);
+                    sb.AppendFormat("    if (v._id != '{0}') return false;", vfilter.ID);
                     sb.AppendLine();
                 }
                 if (vfilter.Date != null)
