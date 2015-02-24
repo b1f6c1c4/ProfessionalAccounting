@@ -24,16 +24,19 @@ otherCommand
 	;
 	
 chart
-	:	'ch' name range?
-	|	'ch' namedQ
-	|	'ch' namedQueries
-	|	'ch' groupedQuery
+	:	'ch' namedQuery range?
+	;
+
+chartLevels
+	:	chartLevel (';' chartLevel)*
+	;
+
+chartLevel
+	:	(ChartArea | Series | Ignore) (':' (SingleQuotedString '=' SingleQuotedString)*)?
 	;
 
 report
-	:	'rp' name range?
-	|	'rp' namedQ
-	|	'rp' namedQueries
+	:	'rp' namedQuery range?
 	|	'rp' groupedQuery
 	;
 
@@ -48,7 +51,7 @@ namedQuery
 	;
 
 namedQueries
-	:	name coef? DoubleQuotedString? '::' namedQuery (('|' namedQuery)+ ';')?
+	:	name coef? DoubleQuotedString? '::' namedQuery ('|' namedQuery)* ';'
 	;
 
 namedQ
@@ -103,7 +106,7 @@ vouchersB
 	;
 
 voucherQuery
-	:	details? Op=('A' | 'E')? range? DollarQuotedString? PercentQuotedString? VoucherType?
+	:	details? Op=('A' | 'E')? range? CaretQuotedString? PercentQuotedString? VoucherType?
 	;
 
 details
@@ -229,6 +232,18 @@ distributedQAtom
 /*
  * Lexer Rules
  */
+ 
+ChartArea
+	:	'chartArea'
+	;
+
+Series
+	:	'series'
+	;
+
+Ignore
+	:	'ignore'
+	;
  
 Launch
 	:	'lan'
@@ -357,6 +372,10 @@ RangeDeltaWeek
 
 VoucherType
 	:	'Ordinal' | 'Carry' | 'Amortization' | 'Depreciation' | 'Devalue' | 'AnnualCarry' | 'Uncertain'
+	;
+
+CaretQuotedString
+	:	'^' ('^^'|~('^'))* '^'
 	;
 
 PercentQuotedString

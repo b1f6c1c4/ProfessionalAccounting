@@ -19,7 +19,7 @@ namespace AccountingServer.Console
                 {
                     var vfilter = new Voucher
                                       {
-                                          ID = DollarQuotedString().Dequotation(),
+                                          ID = CaretQuotedString().Dequotation(),
                                           Remark = PercentQuotedString().Dequotation()
                                       };
                     if (VoucherType() != null)
