@@ -32,16 +32,32 @@ namespace AccountingServer.BLL
         /// <returns>输出</returns>
         public delegate TResult LeafAggregatedFunc(TMedium path, Balance cat, int depth, Balance bal);
 
+        /// <summary>
+        ///     路径映射器
+        /// </summary>
+        /// <param name="path">当前路径</param>
+        /// <param name="cat">当前分类项</param>
+        /// <param name="depth">当前深度</param>
+        /// <param name="level">新增分类项</param>
+        /// <returns>新路径</returns>
         public delegate TMedium MapFunc(TMedium path, Balance cat, int depth, SubtotalLevel level);
 
+        /// <summary>
+        ///     累加路径映射器
+        /// </summary>
+        /// <param name="path">当前路径</param>
+        /// <param name="cat">当前分类项</param>
+        /// <param name="depth">当前深度</param>
+        /// <param name="type">累加类型</param>
+        /// <returns>新路径</returns>
         public delegate TMedium MapAFunc(TMedium path, Balance cat, int depth, AggregationType type);
 
         /// <summary>
         ///     中间层汇总项处理器
         /// </summary>
-        /// <param name="path">路径</param>
-        /// <param name="cat">分类项</param>
-        /// <param name="depth">深度</param>
+        /// <param name="path">当前路径</param>
+        /// <param name="cat">当前分类项</param>
+        /// <param name="depth">当前深度</param>
         /// <param name="level">新增分类项</param>
         /// <param name="r">子汇总项输出汇聚</param>
         /// <returns>输出</returns>
@@ -75,35 +91,49 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     原子汇总项处理器
         /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
         public LeafNoneAggrFunc LeafNoneAggr { get; set; }
 
         /// <summary>
         ///     原子累加汇总项处理器
         /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
         public LeafAggregatedFunc LeafAggregated { get; set; }
 
+        /// <summary>
+        ///     路径映射器
+        /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
         public MapFunc Map { get; set; }
 
+        /// <summary>
+        ///     累加路径映射器
+        /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
         public MapAFunc MapA { get; set; }
 
         /// <summary>
         ///     中间层汇总项处理器
         /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
         public MediumLevelFunc MediumLevel { get; set; }
 
         /// <summary>
         ///     中间层汇总项汇聚器
         /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
         public ReduceFunc Reduce { get; set; }
 
         /// <summary>
         ///     累加汇总项汇聚器
         /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
         public ReduceAFunc ReduceA { get; set; }
 
         /// <summary>
         ///     分类汇总参数
         /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
         public ISubtotal SubtotalArgs { get; set; }
 
         public SubtotalTraver(ISubtotal args) { SubtotalArgs = args; }
@@ -122,10 +152,10 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     遍历某层分类汇总结果
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="path">当前路径</param>
         /// <param name="res">分类汇总结果</param>
-        /// <param name="cat">分类项</param>
-        /// <param name="depth">深度</param>
+        /// <param name="cat">当前分类项</param>
+        /// <param name="depth">当前深度</param>
         /// <returns>输出</returns>
         private TResult TraversalSubtotal(TMedium path, IEnumerable<Balance> res, Balance cat, int depth)
         {

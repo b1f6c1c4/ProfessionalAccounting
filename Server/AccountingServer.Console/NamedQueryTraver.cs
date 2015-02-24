@@ -7,25 +7,63 @@ using AccountingServer.Entities;
 namespace AccountingServer.Console
 {
     /// <summary>
-    ///     命名查询模板遍历器
+    ///     命名查询遍历器
     /// </summary>
     /// <typeparam name="TMedium">中间类型</typeparam>
     /// <typeparam name="TResult">输出类型</typeparam>
     public class NamedQueryTraver<TMedium, TResult>
     {
+        /// <summary>
+        ///     原子查询处理器
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="query">查询</param>
+        /// <param name="coefficient">系数</param>
+        /// <returns>输出</returns>
         public delegate TResult LeafFunc(TMedium path, INamedQ query, double coefficient);
 
+        /// <summary>
+        ///     路径映射器
+        /// </summary>
+        /// <param name="path">当前路径</param>
+        /// <param name="query">当前查询</param>
+        /// <param name="coefficient">当前系数</param>
+        /// <returns>新路径</returns>
         public delegate TMedium MapFunc(TMedium path, INamedQueries query, double coefficient);
 
+        /// <summary>
+        ///     复合查询汇聚器
+        /// </summary>
+        /// <param name="path">当前路径</param>
+        /// <param name="newPath">次级路径</param>
+        /// <param name="query">当前查询</param>
+        /// <param name="coefficient">当前系数</param>
+        /// <param name="results">次级查询输出</param>
+        /// <returns>输出</returns>
         public delegate TResult ReduceFunc(
             TMedium path, TMedium newPath, INamedQueries query, double coefficient, IEnumerable<TResult> results);
 
+        /// <summary>
+        ///     原子查询处理器
+        /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
         public LeafFunc Leaf { get; set; }
 
+        /// <summary>
+        ///     路径映射器
+        /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
         public MapFunc Map { get; set; }
 
+        /// <summary>
+        ///     复合查询汇聚器
+        /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
         public ReduceFunc Reduce { get; set; }
 
+        /// <summary>
+        ///     基本会计业务处理类
+        /// </summary>
         private readonly Accountant m_Accountant;
 
         public NamedQueryTraver(Accountant accountant, DateFilter rng)
@@ -37,8 +75,14 @@ namespace AccountingServer.Console
         /// <summary>
         ///     用于赋值的日期过滤器
         /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
         public DateFilter Range { get; set; }
 
+        /// <summary>
+        ///     获取内层命名查询并解引用
+        /// </summary>
+        /// <param name="query">命名查询</param>
+        /// <returns>最内层的命名查询（非引用）</returns>
         private INamedQueryConcrete GetConcreteQuery(INamedQuery query)
         {
             var flag = true;
@@ -60,8 +104,21 @@ namespace AccountingServer.Console
             return query as INamedQueryConcrete;
         }
 
+        /// <summary>
+        ///     遍历命名查询同时应用模板
+        /// </summary>
+        /// <param name="initialPath">初始路径</param>
+        /// <param name="query">命名查询模板</param>
+        /// <returns>输出</returns>
         public TResult Traversal(TMedium initialPath, INamedQuery query) { return Traversal(initialPath, query, 1); }
 
+        /// <summary>
+        ///     遍历命名查询
+        /// </summary>
+        /// <param name="path">当前路径</param>
+        /// <param name="query">当前查询</param>
+        /// <param name="coefficient">当前系数</param>
+        /// <returns>输出</returns>
         private TResult Traversal(TMedium path, INamedQuery query, double coefficient)
         {
             var q = GetConcreteQuery(query);
@@ -89,7 +146,7 @@ namespace AccountingServer.Console
         /// </summary>
         /// <param name="reference">名称</param>
         /// <returns>命名查询模板</returns>
-        public INamedQuery Dereference(string reference)
+        private INamedQuery Dereference(string reference)
         {
             string range, leftExtendedRange;
             if (Range.NullOnly)
