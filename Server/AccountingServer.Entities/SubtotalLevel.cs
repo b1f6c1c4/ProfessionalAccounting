@@ -61,6 +61,6 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     按年分类
         /// </summary>
-        Year = 0x110
+        Year = 0x130
     }
 }

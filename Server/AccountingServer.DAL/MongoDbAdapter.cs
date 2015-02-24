@@ -345,9 +345,10 @@ namespace AccountingServer.DAL
         private static string GetTheDateJavascript(SubtotalLevel subtotalLevel)
         {
             var sb = new StringBuilder();
-            sb.AppendLine("    var theDate = this.date;");
+            sb.AppendLine("var theDate = this.date;");
             if (!subtotalLevel.HasFlag(SubtotalLevel.Week))
                 return sb.ToString();
+            sb.AppendLine("if (theDate != null && theDate != undefined) {");
             sb.AppendLine("    theDate.setHours(0);");
             sb.AppendLine("    theDate.setMinutes(0);");
             sb.AppendLine("    theDate.setSeconds(0);");
@@ -391,6 +392,7 @@ namespace AccountingServer.DAL
                 sb.AppendLine("    else");
                 sb.AppendLine("        theDate.setDate(theDate.getDate() + 1 - theDate.getDay());");
             }
+            sb.AppendLine("}");
             sb.AppendLine();
             return sb.ToString();
         }
