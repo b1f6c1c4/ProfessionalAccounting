@@ -71,7 +71,7 @@ namespace AccountingServer.Console
                                  {
                                      var lst = results.ToList();
 
-                                     if (lst[0] is string)
+                                     if (lst.Count > 0 && lst[0] is string)
                                      {
                                          var series = path as Series;
                                          if (series != null)
