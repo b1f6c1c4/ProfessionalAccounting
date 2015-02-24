@@ -91,7 +91,7 @@ namespace AccountingServer.Console
                             dt = new DateTime(
                                 DateTime.Now.Year,
                                 DateTime.Now.Day >= 9 ? DateTime.Now.Month + 1 : DateTime.Now.Month,
-                                19);
+                                8);
                             dt = dt.AddMonths(-delta);
                         }
                         else
