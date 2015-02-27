@@ -291,23 +291,23 @@ namespace AccountingServer.DAL
                 if (f.Filter.ID.HasValue)
                 {
                     sb.AppendFormat(
-                                    "    if (v._id.toString() != BinData(3,'{0}'))) return false;",
+                                    "    if (a._id.toString() != BinData(3,'{0}')) return false;",
                                     Convert.ToBase64String(f.Filter.ID.Value.ToByteArray()));
                     sb.AppendLine();
                 }
                 if (f.Filter.Name != null)
                     if (f.Filter.Name == String.Empty)
-                        sb.AppendLine("    if (d.name != null) return false;");
+                        sb.AppendLine("    if (a.name != null) return false;");
                     else
                         sb.AppendFormat(
-                                        "    if (d.name != '{0}') return false;",
+                                        "    if (a.name != '{0}') return false;",
                                         f.Filter.Name.Replace("\'", "\\\'"));
                 if (f.Filter.Remark != null)
                     if (f.Filter.Remark == String.Empty)
-                        sb.AppendLine("    if (d.remark != null) return false;");
+                        sb.AppendLine("    if (a.remark != null) return false;");
                     else
                         sb.AppendFormat(
-                                        "    if (d.remark != '{0}') return false;",
+                                        "    if (a.remark != '{0}') return false;",
                                         f.Filter.Remark.Replace("\'", "\\\'"));
                 sb.AppendLine("    return true;");
             }

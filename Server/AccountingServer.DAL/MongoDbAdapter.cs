@@ -289,8 +289,7 @@ namespace AccountingServer.DAL
         /// <inheritdoc />
         public long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            var res =
-                m_Amortizations.Remove(filter.GetQuery());
+            var res = m_Amortizations.Remove(filter.GetQuery());
             return res.DocumentsAffected;
         }
 
