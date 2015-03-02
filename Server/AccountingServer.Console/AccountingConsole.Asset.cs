@@ -201,8 +201,8 @@ namespace AccountingServer.Console
             {
                 var isCollapsed = expr.assetApply().AOCollapse() != null;
 
-                var rng = expr.assetUnregister().range() != null
-                              ? expr.assetUnregister().range().Range
+                var rng = expr.assetApply().range() != null
+                              ? expr.assetApply().range().Range
                               : DateFilter.Unconstrained;
 
                 var sb = new StringBuilder();

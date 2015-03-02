@@ -158,8 +158,8 @@ namespace AccountingServer.Console
             {
                 var isCollapsed = expr.amortApply().AOCollapse() != null;
 
-                var rng = expr.amortUnregister().range() != null
-                              ? expr.amortUnregister().range().Range
+                var rng = expr.amortApply().range() != null
+                              ? expr.amortApply().range().Range
                               : DateFilter.Unconstrained;
 
                 var sb = new StringBuilder();
