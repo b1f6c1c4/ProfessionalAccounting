@@ -41,9 +41,7 @@ namespace AccountingServer.DAL
         {
             var sb = new StringBuilder();
             sb.AppendLine("function(v) {");
-            if (vfilter == null)
-                sb.AppendLine("    return true;");
-            else
+            if (vfilter != null)
             {
                 if (vfilter.ID != null)
                 {
@@ -89,8 +87,8 @@ namespace AccountingServer.DAL
                         sb.AppendFormat(
                                         "    if (v.remark != '{0}') return false;",
                                         vfilter.Remark.Replace("\'", "\\\'"));
-                sb.AppendLine("    return true;");
             }
+            sb.AppendLine("    return true;");
             sb.AppendLine("}");
             return sb.ToString();
         }
@@ -147,43 +145,47 @@ namespace AccountingServer.DAL
         {
             var sb = new StringBuilder();
             sb.AppendLine("function(d) {");
-            if (f.Dir != 0)
-                sb.AppendLine(f.Dir > 0 ? "    if (d.fund <= 0) return false;" : "    if (d.fund >= 0) return false;");
-            if (f.Filter == null)
-                sb.AppendLine("    return true;");
-            else
+            if (f != null)
             {
-                if (f.Filter.Title != null)
+                if (f.Dir != 0)
+                    sb.AppendLine(
+                                  f.Dir > 0
+                                      ? "    if (d.fund <= 0) return false;"
+                                      : "    if (d.fund >= 0) return false;");
+                if (f.Filter != null)
                 {
-                    sb.AppendFormat("    if (d.title != {0}) return false;", f.Filter.Title);
-                    sb.AppendLine();
+                    if (f.Filter.Title != null)
+                    {
+                        sb.AppendFormat("    if (d.title != {0}) return false;", f.Filter.Title);
+                        sb.AppendLine();
+                    }
+                    if (f.Filter.SubTitle != null)
+                    {
+                        sb.AppendFormat("    if (d.subtitle != {0}) return false;", f.Filter.SubTitle);
+                        sb.AppendLine();
+                    }
+                    if (f.Filter.Content != null)
+                        if (f.Filter.Content == String.Empty)
+                            sb.AppendLine("    if (d.content != null) return false;");
+                        else
+                            sb.AppendFormat(
+                                            "    if (d.content != '{0}') return false;",
+                                            f.Filter.Content.Replace("\'", "\\\'"));
+                    if (f.Filter.Remark != null)
+                        if (f.Filter.Remark == String.Empty)
+                            sb.AppendLine("    if (d.remark != null) return false;");
+                        else
+                            sb.AppendFormat(
+                                            "    if (d.remark != '{0}') return false;",
+                                            f.Filter.Remark.Replace("\'", "\\\'"));
+                    if (f.Filter.Fund != null)
+                    {
+                        sb.AppendFormat("    if (Math.abs(d.fund - {0:r}) > 1e-8)) return false;", f.Filter.Fund);
+                        sb.AppendLine();
+                    }
                 }
-                if (f.Filter.SubTitle != null)
-                {
-                    sb.AppendFormat("    if (d.subtitle != {0}) return false;", f.Filter.SubTitle);
-                    sb.AppendLine();
-                }
-                if (f.Filter.Content != null)
-                    if (f.Filter.Content == String.Empty)
-                        sb.AppendLine("    if (d.content != null) return false;");
-                    else
-                        sb.AppendFormat(
-                                        "    if (d.content != '{0}') return false;",
-                                        f.Filter.Content.Replace("\'", "\\\'"));
-                if (f.Filter.Remark != null)
-                    if (f.Filter.Remark == String.Empty)
-                        sb.AppendLine("    if (d.remark != null) return false;");
-                    else
-                        sb.AppendFormat(
-                                        "    if (d.remark != '{0}') return false;",
-                                        f.Filter.Remark.Replace("\'", "\\\'"));
-                if (f.Filter.Fund != null)
-                {
-                    sb.AppendFormat("    if (Math.abs(d.fund - {0:r}) > 1e-8)) return false;", f.Filter.Fund);
-                    sb.AppendLine();
-                }
-                sb.AppendLine("    return true;");
             }
+            sb.AppendLine("    return true;");
             sb.AppendLine("}");
             return sb.ToString();
         }
@@ -216,39 +218,41 @@ namespace AccountingServer.DAL
         private static string GetJavascriptFilter(IVoucherQueryAtom f)
         {
             var sb = new StringBuilder();
-            sb.AppendLine("function (v) {");
-
-            sb.Append("    var vfilter = ");
-            sb.Append(GetJavascriptFilter(f.VoucherFilter));
-            sb.AppendLine(";");
-            sb.AppendLine("    if (!vfilter(v)) return false;");
-
-            sb.Append("    var rng = ");
-            sb.Append(GetJavascriptFilter(f.Range));
-            sb.AppendLine(";");
-            sb.AppendLine("    if (!rng(v)) return false;");
-
-            if (f.ForAll)
+            sb.AppendLine("function(v) {");
+            if (f != null)
             {
-                sb.AppendLine("    var i = 0;");
-                sb.AppendLine("    for (i = 0;i < v.detail.length;i++)");
-                sb.AppendLine("        if (!(");
-                sb.Append(GetJavascriptFilter(f.DetailFilter, GetJavascriptFilter));
-                sb.AppendLine(")(v.detail[i]))");
-                sb.AppendLine("            break;");
-                sb.AppendLine("    if (i < v.detail.length)");
-                sb.AppendLine("        return false;");
-            }
-            else
-            {
-                sb.AppendLine("    var i = 0;");
-                sb.AppendLine("    for (i = 0;i < v.detail.length;i++)");
-                sb.AppendLine("        if ((");
-                sb.Append(GetJavascriptFilter(f.DetailFilter, GetJavascriptFilter));
-                sb.AppendLine(")(v.detail[i]))");
-                sb.AppendLine("            break;");
-                sb.AppendLine("    if (i >= v.detail.length)");
-                sb.AppendLine("        return false;");
+                sb.Append("    var vfilter = ");
+                sb.Append(GetJavascriptFilter(f.VoucherFilter));
+                sb.AppendLine(";");
+                sb.AppendLine("    if (!vfilter(v)) return false;");
+
+                sb.Append("    var rng = ");
+                sb.Append(GetJavascriptFilter(f.Range));
+                sb.AppendLine(";");
+                sb.AppendLine("    if (!rng(v)) return false;");
+
+                if (f.ForAll)
+                {
+                    sb.AppendLine("    var i = 0;");
+                    sb.AppendLine("    for (i = 0;i < v.detail.length;i++)");
+                    sb.AppendLine("        if (!(");
+                    sb.Append(GetJavascriptFilter(f.DetailFilter, GetJavascriptFilter));
+                    sb.AppendLine(")(v.detail[i]))");
+                    sb.AppendLine("            break;");
+                    sb.AppendLine("    if (i < v.detail.length)");
+                    sb.AppendLine("        return false;");
+                }
+                else
+                {
+                    sb.AppendLine("    var i = 0;");
+                    sb.AppendLine("    for (i = 0;i < v.detail.length;i++)");
+                    sb.AppendLine("        if ((");
+                    sb.Append(GetJavascriptFilter(f.DetailFilter, GetJavascriptFilter));
+                    sb.AppendLine(")(v.detail[i]))");
+                    sb.AppendLine("            break;");
+                    sb.AppendLine("    if (i >= v.detail.length)");
+                    sb.AppendLine("        return false;");
+                }
             }
             sb.AppendLine("    return true;");
             sb.AppendLine("}");
@@ -260,6 +264,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">分期检索式</param>
         /// <returns>Javascript表示</returns>
+        // ReSharper disable once MemberCanBePrivate.Global
         public static string GetJavascriptFilter(this IQueryCompunded<IDistributedQueryAtom> query)
         {
             return GetJavascriptFilter(query, GetJavascriptFilter);
@@ -284,7 +289,8 @@ namespace AccountingServer.DAL
         {
             var sb = new StringBuilder();
             sb.AppendLine("function(a) {");
-            if (f.Filter == null)
+            if (f == null ||
+                f.Filter == null)
                 sb.AppendLine("    return true;");
             else
             {
@@ -324,7 +330,8 @@ namespace AccountingServer.DAL
         private static string GetJavascriptFilter<TAtom>(IQueryCompunded<TAtom> query, Func<TAtom, string> atomFilter)
             where TAtom : class
         {
-            if (query is TAtom)
+            if (query == null ||
+                query is TAtom)
                 return atomFilter(query as TAtom);
             if (query is IQueryAry<TAtom>)
             {
