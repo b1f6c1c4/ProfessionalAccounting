@@ -6,32 +6,26 @@ namespace AccountingServer.Entities
     /// <summary>
     ///     资产折旧计算表条目
     /// </summary>
-    public abstract class AssetItem
+    public abstract class AssetItem : IDistributedItem
     {
         /// <summary>
         ///     忽略标志
         /// </summary>
         public const string IgnoranceMark = "reconciliation";
 
-        /// <summary>
-        ///     记账凭证编号
-        /// </summary>
+        /// <inheritdoc />
         public string VoucherID { get; set; }
 
-        /// <summary>
-        ///     记账日期
-        /// </summary>
+        /// <inheritdoc />
         public DateTime? Date { get; set; }
 
         /// <summary>
         ///     账面价值
         ///     <para>不存储在数据库中</para>
         /// </summary>
-        public double BookValue { get; set; }
+        public double Value { get; set; }
 
-        /// <summary>
-        ///     备注
-        /// </summary>
+        /// <inheritdoc />
         public string Remark { get; set; }
     }
 
@@ -115,9 +109,7 @@ namespace AccountingServer.Entities
         /// </summary>
         public const string IgnoranceMark = "reconciliation";
 
-        /// <summary>
-        ///     编号
-        /// </summary>
+        /// <inheritdoc />
         public Guid? ID { get; set; }
 
         /// <summary>
@@ -126,14 +118,10 @@ namespace AccountingServer.Entities
         // ReSharper disable once UnusedMember.Global
         public string StringID { get { return ID.ToString().ToUpperInvariant(); } set { ID = Guid.Parse(value); } }
 
-        /// <summary>
-        ///     名称
-        /// </summary>
+        /// <inheritdoc />
         public string Name { get; set; }
 
-        /// <summary>
-        ///     入账日期
-        /// </summary>
+        /// <inheritdoc />
         public DateTime? Date { get; set; }
 
         /// <summary>
@@ -196,10 +184,10 @@ namespace AccountingServer.Entities
         /// </summary>
         public IList<AssetItem> Schedule { get; set; }
 
-        /// <summary>
-        ///     备注
-        /// </summary>
+        /// <inheritdoc />
         public string Remark { get; set; }
+
+        public IEnumerable<IDistributedItem> TheSchedule { get { return Schedule; } }
     }
 
     /// <summary>

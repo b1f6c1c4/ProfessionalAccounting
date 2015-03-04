@@ -47,37 +47,40 @@ namespace AccountingServer.Console
         /// <returns>执行结果</returns>
         private IQueryResult ExecuteAmort(ConsoleParser.AmortContext expr)
         {
-            if (expr.amortList() != null)
+            var amortListContext = expr.amortList();
+            if (amortListContext != null)
             {
-                var dt = expr.amortList().AOAll() != null
+                var dt = amortListContext.AOAll() != null
                              ? null
-                             : expr.amortList().rangePoint() != null
-                                   ? expr.amortList().rangePoint().Range.EndDate
+                             : amortListContext.rangePoint() != null
+                                   ? amortListContext.rangePoint().Range.EndDate
                                    : DateTime.Now.Date;
 
                 var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAmortizations(expr.amortList().distributedQ())))
-                    sb.Append(ListAmort(a, dt, expr.amortList().AOList() != null));
+                foreach (var a in Sort(m_Accountant.SelectAmortizations(amortListContext.distributedQ())))
+                    sb.Append(ListAmort(a, dt, amortListContext.AOList() != null));
 
                 return new UnEditableText(sb.ToString());
             }
-            if (expr.amortQuery() != null)
+            var amortQueryContext = expr.amortQuery();
+            if (amortQueryContext != null)
             {
                 var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAmortizations(expr.amortQuery().distributedQ())))
+                foreach (var a in Sort(m_Accountant.SelectAmortizations(amortQueryContext.distributedQ())))
                     sb.Append(CSharpHelper.PresentAmort(a));
 
                 return new EditableText(sb.ToString());
             }
-            if (expr.amortRegister() != null)
+            var amortRegisterContext = expr.amortRegister();
+            if (amortRegisterContext != null)
             {
-                var rng = expr.amortRegister().range() != null
-                              ? expr.amortRegister().range().Range
+                var rng = amortRegisterContext.range() != null
+                              ? amortRegisterContext.range().Range
                               : DateFilter.Unconstrained;
-                var query = expr.amortRegister().vouchers();
+                var query = amortRegisterContext.vouchers();
 
                 var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAmortizations(expr.amortRegister().distributedQ())))
+                foreach (var a in Sort(m_Accountant.SelectAmortizations(amortRegisterContext.distributedQ())))
                 {
                     foreach (var voucher in m_Accountant.RegisterVouchers(a, rng, query))
                         sb.Append(CSharpHelper.PresentVoucher(voucher));
@@ -88,15 +91,16 @@ namespace AccountingServer.Console
                     return new EditableText(sb.ToString());
                 return new Suceed();
             }
-            if (expr.amortUnregister() != null)
+            var amortUnregisterContext = expr.amortUnregister();
+            if (amortUnregisterContext != null)
             {
-                var rng = expr.amortUnregister().range() != null
-                              ? expr.amortUnregister().range().Range
+                var rng = amortUnregisterContext.range() != null
+                              ? amortUnregisterContext.range().Range
                               : DateFilter.Unconstrained;
-                var query = expr.amortRegister().vouchers();
+                var query = amortRegisterContext.vouchers();
 
                 var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAmortizations(expr.amortUnregister().distributedQ())))
+                foreach (var a in Sort(m_Accountant.SelectAmortizations(amortUnregisterContext.distributedQ())))
                 {
                     foreach (var item in a.Schedule.Where(item => item.Date.Within(rng)))
                     {
@@ -118,10 +122,11 @@ namespace AccountingServer.Console
                 }
                 return new EditableText(sb.ToString());
             }
-            if (expr.amortReamo() != null)
+            var amortReamoContext = expr.amortReamo();
+            if (amortReamoContext != null)
             {
                 var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAmortizations(expr.amortReamo().distributedQ())))
+                foreach (var a in Sort(m_Accountant.SelectAmortizations(amortReamoContext.distributedQ())))
                 {
                     Accountant.Amortize(a);
                     sb.Append(CSharpHelper.PresentAmort(a));
@@ -129,14 +134,15 @@ namespace AccountingServer.Console
                 }
                 return new EditableText(sb.ToString());
             }
-            if (expr.amortResetSoft() != null)
+            var amortResetSoftContext = expr.amortResetSoft();
+            if (amortResetSoftContext != null)
             {
-                var rng = expr.amortResetSoft().range() != null
-                              ? expr.amortResetSoft().range().Range
+                var rng = amortResetSoftContext.range() != null
+                              ? amortResetSoftContext.range().Range
                               : DateFilter.Unconstrained;
 
                 var cnt = 0L;
-                foreach (var a in m_Accountant.SelectAmortizations(expr.amortResetSoft().distributedQ()))
+                foreach (var a in m_Accountant.SelectAmortizations(amortResetSoftContext.distributedQ()))
                 {
                     if (a.Schedule == null)
                         continue;
@@ -154,14 +160,15 @@ namespace AccountingServer.Console
                 }
                 return new NumberAffected(cnt);
             }
-            if (expr.amortResetMixed() != null)
+            var amortResetMixedContext = expr.amortResetMixed();
+            if (amortResetMixedContext != null)
             {
-                var rng = expr.amortResetMixed().range() != null
-                              ? expr.amortResetMixed().range().Range
+                var rng = amortResetMixedContext.range() != null
+                              ? amortResetMixedContext.range().Range
                               : DateFilter.Unconstrained;
 
                 var cnt = 0L;
-                foreach (var a in m_Accountant.SelectAmortizations(expr.amortResetMixed().distributedQ()))
+                foreach (var a in m_Accountant.SelectAmortizations(amortResetMixedContext.distributedQ()))
                 {
                     if (a.Schedule == null)
                         continue;
@@ -191,16 +198,17 @@ namespace AccountingServer.Console
                 }
                 return new NumberAffected(cnt);
             }
-            if (expr.amortApply() != null)
+            var amortApplyContext = expr.amortApply();
+            if (amortApplyContext != null)
             {
-                var isCollapsed = expr.amortApply().AOCollapse() != null;
+                var isCollapsed = amortApplyContext.AOCollapse() != null;
 
-                var rng = expr.amortApply().range() != null
-                              ? expr.amortApply().range().Range
+                var rng = amortApplyContext.range() != null
+                              ? amortApplyContext.range().Range
                               : DateFilter.Unconstrained;
 
                 var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAmortizations(expr.amortApply().distributedQ())))
+                foreach (var a in Sort(m_Accountant.SelectAmortizations(amortApplyContext.distributedQ())))
                 {
                     foreach (var item in m_Accountant.Update(a, rng, isCollapsed))
                         sb.AppendLine(ListAmortItem(item));
@@ -211,12 +219,13 @@ namespace AccountingServer.Console
                     return new EditableText(sb.ToString());
                 return new Suceed();
             }
-            if (expr.amortCheck() != null)
+            var amortCheckContext = expr.amortCheck();
+            if (amortCheckContext != null)
             {
                 var rng = new DateFilter(null, DateTime.Now.Date);
 
                 var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAmortizations(expr.amortCheck().distributedQ())))
+                foreach (var a in Sort(m_Accountant.SelectAmortizations(amortCheckContext.distributedQ())))
                 {
                     var sbi = new StringBuilder();
                     foreach (var item in m_Accountant.Update(a, rng, false, true))
@@ -287,7 +296,7 @@ namespace AccountingServer.Console
                                  amortItem.Date,
                                  amortItem.Amount.AsCurrency().CPadLeft(13),
                                  amortItem.VoucherID,
-                                 amortItem.Residue.AsCurrency().CPadLeft(13));
+                                 amortItem.Value.AsCurrency().CPadLeft(13));
         }
 
         /// <summary>

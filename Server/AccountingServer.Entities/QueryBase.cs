@@ -99,9 +99,11 @@ namespace AccountingServer.Entities
     public struct VoucherDetailQueryBase : IVoucherDetailQuery
     {
         public IQueryCompunded<IVoucherQueryAtom> VoucherQuery { get; set; }
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public IEmit DetailEmitFilter { get; set; }
     }
 
+    // ReSharper disable once UnusedMember.Global
     public struct EmitBase : IEmit
     {
         public IQueryCompunded<IDetailQueryAtom> DetailFilter { get; set; }
@@ -134,6 +136,7 @@ namespace AccountingServer.Entities
             VoucherEmitQuery = new VoucherDetailQueryBase { VoucherQuery = v };
         }
 
+        // ReSharper disable once UnusedMember.Global
         public GroupedQueryBase(Voucher vfilter = null, IEnumerable<VoucherDetail> filters = null,
                                 DateFilter? rng = null, bool useAnd = false, int dir = 0,
                                 bool forAll = false, ISubtotal subtotal = null)

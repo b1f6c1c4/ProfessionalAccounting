@@ -91,7 +91,7 @@ namespace AccountingServer.BLL
 
             var resiValue = amort.Value.Value;
             foreach (var item in lst)
-                item.Residue = (resiValue -= item.Amount);
+                item.Value = (resiValue -= item.Amount);
 
             amort.Schedule = lst;
         }

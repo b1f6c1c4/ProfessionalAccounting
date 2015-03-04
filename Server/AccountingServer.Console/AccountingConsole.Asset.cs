@@ -46,37 +46,40 @@ namespace AccountingServer.Console
         /// <returns>执行结果</returns>
         private IQueryResult ExecuteAsset(ConsoleParser.AssetContext expr)
         {
-            if (expr.assetList() != null)
+            var assetListContext = expr.assetList();
+            if (assetListContext != null)
             {
-                var dt = expr.assetList().AOAll() != null
+                var dt = assetListContext.AOAll() != null
                              ? null
-                             : expr.assetList().rangePoint() != null
-                                   ? expr.assetList().rangePoint().Range.EndDate
+                             : assetListContext.rangePoint() != null
+                                   ? assetListContext.rangePoint().Range.EndDate
                                    : DateTime.Now.Date;
 
                 var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAssets(expr.assetList().distributedQ())))
-                    sb.Append(ListAsset(a, dt, expr.assetList().AOList() != null));
+                foreach (var a in Sort(m_Accountant.SelectAssets(assetListContext.distributedQ())))
+                    sb.Append(ListAsset(a, dt, assetListContext.AOList() != null));
 
                 return new UnEditableText(sb.ToString());
             }
-            if (expr.assetQuery() != null)
+            var assetQueryContext = expr.assetQuery();
+            if (assetQueryContext != null)
             {
                 var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAssets(expr.assetQuery().distributedQ())))
+                foreach (var a in Sort(m_Accountant.SelectAssets(assetQueryContext.distributedQ())))
                     sb.Append(CSharpHelper.PresentAsset(a));
 
                 return new EditableText(sb.ToString());
             }
-            if (expr.assetRegister() != null)
+            var assetRegisterContext = expr.assetRegister();
+            if (assetRegisterContext != null)
             {
-                var rng = expr.assetRegister().range() != null
-                              ? expr.assetRegister().range().Range
+                var rng = assetRegisterContext.range() != null
+                              ? assetRegisterContext.range().Range
                               : DateFilter.Unconstrained;
-                var query = expr.assetRegister().vouchers();
+                var query = assetRegisterContext.vouchers();
 
                 var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAssets(expr.assetRegister().distributedQ())))
+                foreach (var a in Sort(m_Accountant.SelectAssets(assetRegisterContext.distributedQ())))
                 {
                     foreach (var voucher in m_Accountant.RegisterVouchers(a, rng, query))
                         sb.Append(CSharpHelper.PresentVoucher(voucher));
@@ -87,15 +90,16 @@ namespace AccountingServer.Console
                     return new EditableText(sb.ToString());
                 return new Suceed();
             }
-            if (expr.assetUnregister() != null)
+            var assetUnregisterContext = expr.assetUnregister();
+            if (assetUnregisterContext != null)
             {
-                var rng = expr.assetUnregister().range() != null
-                              ? expr.assetUnregister().range().Range
+                var rng = assetUnregisterContext.range() != null
+                              ? assetUnregisterContext.range().Range
                               : DateFilter.Unconstrained;
-                var query = expr.assetRegister().vouchers();
+                var query = assetRegisterContext.vouchers();
 
                 var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAssets(expr.assetUnregister().distributedQ())))
+                foreach (var a in Sort(m_Accountant.SelectAssets(assetUnregisterContext.distributedQ())))
                 {
                     foreach (var item in a.Schedule.Where(item => item.Date.Within(rng)))
                     {
@@ -117,10 +121,11 @@ namespace AccountingServer.Console
                 }
                 return new EditableText(sb.ToString());
             }
-            if (expr.assetRedep() != null)
+            var assetRedepContext = expr.assetRedep();
+            if (assetRedepContext != null)
             {
                 var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAssets(expr.assetRedep().distributedQ())))
+                foreach (var a in Sort(m_Accountant.SelectAssets(assetRedepContext.distributedQ())))
                 {
                     Accountant.Depreciate(a);
                     sb.Append(CSharpHelper.PresentAsset(a));
@@ -128,14 +133,15 @@ namespace AccountingServer.Console
                 }
                 return new EditableText(sb.ToString());
             }
-            if (expr.assetResetSoft() != null)
+            var assetResetSoftContext = expr.assetResetSoft();
+            if (assetResetSoftContext != null)
             {
-                var rng = expr.assetResetSoft().range() != null
-                              ? expr.assetResetSoft().range().Range
+                var rng = assetResetSoftContext.range() != null
+                              ? assetResetSoftContext.range().Range
                               : DateFilter.Unconstrained;
 
                 var cnt = 0L;
-                foreach (var a in m_Accountant.SelectAssets(expr.assetResetSoft().distributedQ()))
+                foreach (var a in m_Accountant.SelectAssets(assetResetSoftContext.distributedQ()))
                 {
                     if (a.Schedule == null)
                         continue;
@@ -153,14 +159,15 @@ namespace AccountingServer.Console
                 }
                 return new NumberAffected(cnt);
             }
-            if (expr.assetResetMixed() != null)
+            var assetResetMixedContext = expr.assetResetMixed();
+            if (assetResetMixedContext != null)
             {
-                var rng = expr.assetResetMixed().range() != null
-                              ? expr.assetResetMixed().range().Range
+                var rng = assetResetMixedContext.range() != null
+                              ? assetResetMixedContext.range().Range
                               : DateFilter.Unconstrained;
 
                 var cnt = 0L;
-                foreach (var a in m_Accountant.SelectAssets(expr.assetResetMixed().distributedQ()))
+                foreach (var a in m_Accountant.SelectAssets(assetResetMixedContext.distributedQ()))
                 {
                     if (a.Schedule == null)
                         continue;
@@ -190,12 +197,13 @@ namespace AccountingServer.Console
                 }
                 return new NumberAffected(cnt);
             }
-            if (expr.assetResetHard() != null)
+            var assetResetHardContext = expr.assetResetHard();
+            if (assetResetHardContext != null)
             {
-                var query = expr.assetResetHard().vouchers();
+                var query = assetResetHardContext.vouchers();
 
                 return new NumberAffected(
-                    m_Accountant.SelectAssets(expr.assetResetHard().distributedQ())
+                    m_Accountant.SelectAssets(assetResetHardContext.distributedQ())
                                 .Sum(
                                      a =>
                                      {
@@ -234,16 +242,17 @@ namespace AccountingServer.Console
                                                                                     }));
                                      }));
             }
-            if (expr.assetApply() != null)
+            var assetApplyContext = expr.assetApply();
+            if (assetApplyContext != null)
             {
-                var isCollapsed = expr.assetApply().AOCollapse() != null;
+                var isCollapsed = assetApplyContext.AOCollapse() != null;
 
-                var rng = expr.assetApply().range() != null
-                              ? expr.assetApply().range().Range
+                var rng = assetApplyContext.range() != null
+                              ? assetApplyContext.range().Range
                               : DateFilter.Unconstrained;
 
                 var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAssets(expr.assetApply().distributedQ())))
+                foreach (var a in Sort(m_Accountant.SelectAssets(assetApplyContext.distributedQ())))
                 {
                     foreach (var item in m_Accountant.Update(a, rng, isCollapsed))
                         sb.AppendLine(ListAssetItem(item));
@@ -254,12 +263,13 @@ namespace AccountingServer.Console
                     return new EditableText(sb.ToString());
                 return new Suceed();
             }
-            if (expr.assetCheck() != null)
+            var assetCheckContext = expr.assetCheck();
+            if (assetCheckContext != null)
             {
                 var rng = new DateFilter(null, DateTime.Now.Date);
 
                 var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAssets(expr.assetCheck().distributedQ())))
+                foreach (var a in Sort(m_Accountant.SelectAssets(assetCheckContext.distributedQ())))
                 {
                     var sbi = new StringBuilder();
                     foreach (var item in m_Accountant.Update(a, rng, false, true))
@@ -337,28 +347,28 @@ namespace AccountingServer.Console
                                      assetItem.Date,
                                      (assetItem as AcquisationItem).OrigValue.AsCurrency().CPadLeft(13),
                                      assetItem.VoucherID,
-                                     assetItem.BookValue.AsCurrency().CPadLeft(13));
+                                     assetItem.Value.AsCurrency().CPadLeft(13));
             if (assetItem is DepreciateItem)
                 return String.Format(
                                      "   {0:yyyMMdd} DEP:{1} ={3} ({2})",
                                      assetItem.Date,
                                      (assetItem as DepreciateItem).Amount.AsCurrency().CPadLeft(13),
                                      assetItem.VoucherID,
-                                     assetItem.BookValue.AsCurrency().CPadLeft(13));
+                                     assetItem.Value.AsCurrency().CPadLeft(13));
             if (assetItem is DevalueItem)
                 return String.Format(
                                      "   {0:yyyMMdd} DEV:{1} ={3} ({2})",
                                      assetItem.Date,
                                      (assetItem as DevalueItem).Amount.AsCurrency().CPadLeft(13),
                                      assetItem.VoucherID,
-                                     assetItem.BookValue.AsCurrency().CPadLeft(13));
+                                     assetItem.Value.AsCurrency().CPadLeft(13));
             if (assetItem is DispositionItem)
                 return String.Format(
                                      "   {0:yyyMMdd} DSP:{1} ={3} ({2})",
                                      assetItem.Date,
                                      "ALL".CPadLeft(13),
                                      assetItem.VoucherID,
-                                     assetItem.BookValue.AsCurrency().CPadLeft(13));
+                                     assetItem.Value.AsCurrency().CPadLeft(13));
             return null;
         }
 
