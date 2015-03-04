@@ -161,7 +161,7 @@ rangeDay
 	;
 	
 asset
-	:	assetList | assetQuery | assetRegister | assetUnregister | assetRedep | assetResetSoft | assetResetHard | assetApply | assetCheck
+	:	assetList | assetQuery | assetRegister | assetUnregister | assetRedep | assetResetSoft | assetResetMixed | assetResetHard | assetApply | assetCheck
 	;
 assetList
 	:	'a' (AOAll | AOList)? rangePoint? distributedQ?
@@ -181,6 +181,9 @@ assetRedep
 assetResetSoft
 	:	'a' AOResetSoft distributedQ? range?
 	;
+assetResetMixed
+	:	'a' AOResetMixed distributedQ? range? (':' vouchers)?
+	;
 assetResetHard
 	:	'a' AOResetHard distributedQ? (':' vouchers)?
 	;
@@ -191,7 +194,7 @@ assetCheck
 	:	'a' AOCheck distributedQ?
 	;
 amort
-	:	amortList | amortQuery | amortRegister | amortUnregister | amortReamo | amortResetSoft | amortApply | amortCheck
+	:	amortList | amortQuery | amortRegister | amortUnregister | amortReamo | amortResetSoft | amortResetMixed | amortApply | amortCheck
 	;
 amortList
 	:	'o' (AOAll | AOList)? rangePoint? distributedQ?
@@ -210,6 +213,9 @@ amortReamo
 	;
 amortResetSoft
 	:	'o' AOResetSoft distributedQ? range?
+	;
+amortResetMixed
+	:	'o' AOResetMixed distributedQ? range? (':' vouchers)?
 	;
 amortApply
 	:	'o' AOApply AOCollapse? distributedQ? range?
@@ -317,6 +323,9 @@ AOResetSoft
 	;
 AOResetHard
 	:	'-reset-hard'
+	;
+AOResetMixed
+	:	'-reset-mixed'
 	;
 AOApply
 	:	'-ap'

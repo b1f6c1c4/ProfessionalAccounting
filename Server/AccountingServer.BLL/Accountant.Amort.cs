@@ -266,29 +266,27 @@ namespace AccountingServer.BLL
 
             var lst = new List<AmortItem>();
 
-            var dtCur = ThisAmortizationDate(amort.Interval.Value, amort.Date.Value);
-            var dtEnd = amort.Date.Value.AddDays(amort.TotalDays.Value - 1);
-            var n = 1;
-            while (dtCur < dtEnd)
-            {
-                dtCur = NextAmortizationDate(amort.Interval.Value, dtCur);
-                n++;
-            }
-
-            var a = amort.Value.Value / n;
+            var a = amort.Value.Value / amort.TotalDays.Value;
             var residue = amort.Value.Value;
 
-            dtCur = ThisAmortizationDate(amort.Interval.Value, amort.Date.Value);
+            var dtCur = amort.Date.Value;
+            var dtEnd = amort.Date.Value.AddDays(amort.TotalDays.Value - 1);
             while (true)
             {
-                if (dtCur >= dtEnd)
+                var dtNxt = dtCur == amort.Date.Value
+                                ? ThisAmortizationDate(amort.Interval.Value, amort.Date.Value)
+                                : NextAmortizationDate(amort.Interval.Value, dtCur);
+
+                if (dtNxt >= dtEnd)
                 {
-                    lst.Add(new AmortItem { Date = dtCur, Amount = residue });
+                    lst.Add(new AmortItem { Date = dtNxt, Amount = residue });
                     break;
                 }
-                lst.Add(new AmortItem { Date = dtCur, Amount = a });
-                residue -= a;
-                dtCur = NextAmortizationDate(amort.Interval.Value, dtCur);
+                var n = dtNxt.Subtract(dtCur).TotalDays;
+
+                residue -= a * n;
+                lst.Add(new AmortItem { Date = dtNxt, Amount = a * n });
+                dtCur = dtNxt;
             }
 
             amort.Schedule = lst;
