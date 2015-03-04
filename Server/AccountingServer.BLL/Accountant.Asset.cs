@@ -66,6 +66,8 @@ namespace AccountingServer.BLL
             var last = amort.Schedule.LastOrDefault(item => DateHelper.CompareDate(item.Date, dt) <= 0);
             if (last != null)
                 return last.Residue;
+            if (DateHelper.CompareDate(amort.Date, dt) <= 0)
+                return amort.Value;
             return null;
         }
 

@@ -153,6 +153,43 @@ namespace AccountingServer.Console
                 }
                 return new NumberAffected(cnt);
             }
+            if (expr.assetResetMixed() != null)
+            {
+                var rng = expr.assetResetMixed().range() != null
+                              ? expr.assetResetMixed().range().Range
+                              : DateFilter.Unconstrained;
+
+                var cnt = 0L;
+                foreach (var a in m_Accountant.SelectAssets(expr.assetResetMixed().distributedQ()))
+                {
+                    if (a.Schedule == null)
+                        continue;
+                    var flag = false;
+                    foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
+                                          .Where(item => item.VoucherID != null))
+                    {
+                        var voucher = m_Accountant.SelectVoucher(item.VoucherID);
+                        if (voucher == null)
+                        {
+                            item.VoucherID = null;
+                            cnt++;
+                            flag = true;
+                        }
+                        else
+                        {
+                            if (m_Accountant.DeleteVoucher(voucher.ID))
+                            {
+                                item.VoucherID = null;
+                                cnt++;
+                                flag = true;
+                            }
+                        }
+                    }
+                    if (flag)
+                        m_Accountant.Upsert(a);
+                }
+                return new NumberAffected(cnt);
+            }
             if (expr.assetResetHard() != null)
             {
                 var query = expr.assetResetHard().vouchers();
