@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AccountingServer.Entities;
 
 namespace AccountingServer.Console
@@ -19,7 +20,18 @@ namespace AccountingServer.Console
                 public string Name { get; set; }
 
                 /// <inheritdoc />
+                public DateTime? Date { get; set; }
+
+                /// <inheritdoc />
+                // ReSharper disable once UnusedAutoPropertyAccessor.Local
+                public double? Value { get; set; }
+
+                /// <inheritdoc />
                 public string Remark { get; set; }
+
+                /// <inheritdoc />
+                // ReSharper disable once UnusedAutoPropertyAccessor.Local
+                public IEnumerable<IDistributedItem> TheSchedule { get; set; }
             }
 
             /// <inheritdoc />

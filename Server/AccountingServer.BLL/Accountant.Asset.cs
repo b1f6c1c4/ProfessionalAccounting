@@ -34,40 +34,22 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
-        ///     获取资产的账面价值
+        ///     获取分期的剩余
         /// </summary>
-        /// <param name="asset">资产</param>
-        /// <param name="dt">日期，若为<c>null</c>则返回原值</param>
-        /// <returns>指定日期的账面价值，若尚未购置则为<c>null</c></returns>
-        public static double? GetBookValueOn(Asset asset, DateTime? dt)
-        {
-            if (!dt.HasValue ||
-                asset.Schedule == null)
-                return asset.Value;
-
-            var last = asset.Schedule.LastOrDefault(item => DateHelper.CompareDate(item.Date, dt) <= 0);
-            if (last != null)
-                return last.BookValue;
-            return null;
-        }
-
-        /// <summary>
-        ///     获取摊销的待摊额
-        /// </summary>
-        /// <param name="amort">摊销</param>
+        /// <param name="dist">分期</param>
         /// <param name="dt">日期，若为<c>null</c>则返回总额</param>
-        /// <returns>指定日期的待摊额，若尚未开始则为<c>null</c></returns>
-        public static double? GetBookValueOn(Amortization amort, DateTime? dt)
+        /// <returns>指定日期的总额，若早于日期则为<c>null</c></returns>
+        public static double? GetBookValueOn(IDistributed dist, DateTime? dt)
         {
             if (!dt.HasValue ||
-                amort.Schedule == null)
-                return amort.Value;
+                dist.TheSchedule == null)
+                return dist.Value;
 
-            var last = amort.Schedule.LastOrDefault(item => DateHelper.CompareDate(item.Date, dt) <= 0);
+            var last = dist.TheSchedule.LastOrDefault(item => DateHelper.CompareDate(item.Date, dt) <= 0);
             if (last != null)
-                return last.Residue;
-            if (DateHelper.CompareDate(amort.Date, dt) <= 0)
-                return amort.Value;
+                return last.Value;
+            if (DateHelper.CompareDate(dist.Date, dt) <= 0)
+                return dist.Value;
             return null;
         }
 
@@ -121,12 +103,12 @@ namespace AccountingServer.BLL
                 if (item is AcquisationItem)
                 {
                     bookValue += (item as AcquisationItem).OrigValue;
-                    item.BookValue = bookValue;
+                    item.Value = bookValue;
                 }
                 else if (item is DepreciateItem)
                 {
                     bookValue -= (item as DepreciateItem).Amount;
-                    item.BookValue = bookValue;
+                    item.Value = bookValue;
                 }
                 else if (item is DevalueItem)
                 {
@@ -139,7 +121,7 @@ namespace AccountingServer.BLL
                     }
                     (item as DevalueItem).Amount = bookValue - (item as DevalueItem).FairValue;
                     bookValue = (item as DevalueItem).FairValue;
-                    item.BookValue = (item as DevalueItem).FairValue;
+                    item.Value = (item as DevalueItem).FairValue;
                 }
                 else if (item is DispositionItem)
                     bookValue = 0;
@@ -290,7 +272,7 @@ namespace AccountingServer.BLL
                 if (item.Date.Within(rng))
                     if (!UpdateItem(asset, item, bookValue, isCollapsed, editOnly))
                         yield return item;
-                bookValue = item.BookValue;
+                bookValue = item.Value;
             }
         }
 
@@ -608,7 +590,7 @@ namespace AccountingServer.BLL
                                 continue;
                             }
 
-                            var amount = items[i - 1].BookValue - asset.Salvge.Value;
+                            var amount = items[i - 1].Value - asset.Salvge.Value;
                             var monthes = 12 * (lastYear - dt.Year) + lastMonth - dt.Month;
 
                             if (IsZero(amount) ||
@@ -625,7 +607,7 @@ namespace AccountingServer.BLL
                                              {
                                                  Date = dt,
                                                  Amount = amount / (monthes + 1),
-                                                 BookValue = items[i - 1].BookValue - amount / (monthes + 1)
+                                                 Value = items[i - 1].Value - amount / (monthes + 1)
                                              });
 
                             dt = LastDayOfMonth(dt.Year, dt.Month + 1);

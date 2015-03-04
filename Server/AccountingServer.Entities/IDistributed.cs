@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace AccountingServer.Entities
 {
@@ -10,16 +11,58 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     编号
         /// </summary>
-        Guid? ID { get; set; }
+        Guid? ID { get; }
 
         /// <summary>
         ///     名称
         /// </summary>
-        string Name { get; set; }
+        string Name { get; }
+
+        /// <summary>
+        ///     入账日期
+        /// </summary>
+        DateTime? Date { get; set; }
+
+        /// <summary>
+        ///     全体
+        /// </summary>
+        double? Value { get; }
 
         /// <summary>
         ///     备注
         /// </summary>
-        string Remark { get; set; }
+        string Remark { get; }
+
+        /// <summary>
+        ///     计算表
+        /// </summary>
+        IEnumerable<IDistributedItem> TheSchedule { get; }
+    }
+
+    /// <summary>
+    ///     分期计算表条目
+    /// </summary>
+    public interface IDistributedItem
+    {
+        /// <summary>
+        ///     记账凭证编号
+        /// </summary>
+        string VoucherID { get; }
+
+        /// <summary>
+        ///     记账日期
+        /// </summary>
+        DateTime? Date { get; }
+
+        /// <summary>
+        ///     剩余
+        ///     <para>不存储在数据库中</para>
+        /// </summary>
+        double Value { get; }
+
+        /// <summary>
+        ///     备注
+        /// </summary>
+        string Remark { get; }
     }
 }

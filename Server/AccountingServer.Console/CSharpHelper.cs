@@ -207,8 +207,8 @@ namespace AccountingServer.Console
                         sb.AppendFormat("VoucherID = {0}", (ProcessString(item.VoucherID) + ",").CPadRight(27));
                         sb.Append(str.CPadRight(30));
                         sb.AppendFormat(
-                                        "BookValue = {0} ",
-                                        item.BookValue.ToString(CultureInfo.InvariantCulture).CPadRight(16));
+                                        "Value = {0} ",
+                                        item.Value.ToString(CultureInfo.InvariantCulture).CPadRight(16));
                         if (item.Remark != null)
                         {
                             sb.Append("".CPadLeft(30));
@@ -299,8 +299,8 @@ namespace AccountingServer.Console
                                     "Amount = {0}",
                                     (item.Amount.ToString(CultureInfo.InvariantCulture) + ",").CPadRight(19));
                     sb.AppendFormat(
-                                    "Residue = {0} ",
-                                    item.Residue.ToString(CultureInfo.InvariantCulture).CPadRight(16));
+                                    "Value = {0} ",
+                                    item.Value.ToString(CultureInfo.InvariantCulture).CPadRight(16));
                     if (item.Remark != null)
                     {
                         sb.Append("".CPadLeft(30));
