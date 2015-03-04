@@ -176,7 +176,7 @@ assetUnregister
 	:	'a' AOUnregister distributedQ? range? (':' vouchers)?
 	;
 assetRedep
-	:	'a' ARedep distributedQ?
+	:	'a' AORecalc distributedQ?
 	;
 assetResetSoft
 	:	'a' AOResetSoft distributedQ? range?
@@ -209,7 +209,7 @@ amortUnregister
 	:	'o' AOUnregister distributedQ? range? (':' vouchers)?
 	;
 amortReamo
-	:	'o' OReamo distributedQ?
+	:	'o' AORecalc distributedQ?
 	;
 amortResetSoft
 	:	'o' AOResetSoft distributedQ? range?
@@ -310,13 +310,8 @@ AOUnregister
 	:	'-unr'
 	|	'-unregister'
 	;
-ARedep
-	:	'-rd'
-	|	'-redep'
-	;
-OReamo
-	:	'-ra'
-	|	'-reamo'
+AORecalc
+	:	'-recal'
 	;
 AOResetSoft
 	:	'-reset-soft'
