@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 
@@ -7,6 +9,29 @@ namespace AccountingServer.Console
 {
     public partial class AccountingConsole
     {
+        /// <summary>
+        ///     用换行回车连接非空字符串
+        /// </summary>
+        /// <param name="strings">字符串</param>
+        /// <returns>新字符串，如无非空字符串则为空</returns>
+        private string NotNullJoin(IEnumerable<string> strings)
+        {
+            var flag = false;
+
+            var sb = new StringBuilder();
+            foreach (var s in strings)
+            {
+                if (s == null)
+                    continue;
+                if (sb.Length > 0)
+                    sb.AppendLine();
+                sb.Append(s);
+                flag = true;
+            }
+
+            return flag ? sb.ToString() : null;
+        }
+
         /// <summary>
         ///     执行报告表达式
         /// </summary>
@@ -19,11 +44,14 @@ namespace AccountingServer.Console
             var helper = new NamedQueryTraver<string, string>(m_Accountant, rng)
                              {
                                  Leaf =
-                                     (path, query, coefficient) => PresentReport(path, query.GroupingQuery, coefficient),
+                                     (path, query, coefficient) =>
+                                     PresentReport(
+                                                   path.Length == 0 ? query.Name : path + "-" + query.Name,
+                                                   query.GroupingQuery,
+                                                   coefficient * query.Coefficient),
                                  Map = (path, query, coefficient) =>
                                        path.Length == 0 ? query.Name : path + "-" + query.Name,
-                                 Reduce = (path, newPath, query, coefficient, results) =>
-                                          String.Join(Environment.NewLine, results),
+                                 Reduce = (path, newPath, query, coefficient, results) => NotNullJoin(results),
                              };
 
             if (expr.namedQuery() != null)
@@ -56,7 +84,7 @@ namespace AccountingServer.Console
                             (path, cat, depth, val) =>
                             new Tuple<double, string>(
                                 val * coefficient,
-                                String.Format("{0} {1:R} {2:R} {3:R}", path, val, coefficient, val * coefficient)),
+                                String.Format("{0}\t{1:R}\t{2:R}\t{3:R}", path, val, coefficient, val * coefficient)),
                         Map = (path, cat, depth, level) =>
                               {
                                   switch (level)
@@ -74,13 +102,13 @@ namespace AccountingServer.Console
                                   }
                               },
                         MediumLevel = (path, newPath, cat, depth, level, r) => r,
-                        Reduce =
-                            (path, cat, depth, level, results) =>
-                            results.Aggregate(
-                                              (r1, r2) =>
-                                              new Tuple<double, string>(
-                                                  r1.Item1 + r2.Item1,
-                                                  r1.Item2 + Environment.NewLine + r2.Item2)),
+                        Reduce = (path, cat, depth, level, results) =>
+                                 {
+                                     var r = results.ToList();
+                                     return new Tuple<double, string>(
+                                         r.Sum(t => t.Item1),
+                                         NotNullJoin(r.Select(t => t.Item2)));
+                                 }
                     };
 
             var traversal = helper.Traversal(path0, res);
