@@ -68,7 +68,7 @@ namespace AccountingServer.BLL
         {
             var res = m_Db.SelectVoucherDetailsGrouped(query);
             if (query.Subtotal.AggrType != AggregationType.ChangedDay &&
-                query.Subtotal.NonZero)
+                query.Subtotal.GatherType == GatheringType.NonZero)
                 return res.Where(b => !IsZero(b.Fund));
             return res;
         }

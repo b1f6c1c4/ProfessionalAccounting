@@ -107,7 +107,23 @@ namespace AccountingServer.Console
         public partial class SubtotalContext : ISubtotal
         {
             /// <inheritdoc />
-            public bool NonZero { get { return SubtotalMark.Text.Length < 2; } }
+            public GatheringType GatherType
+            {
+                get
+                {
+                    switch (SubtotalMark.Text)
+                    {
+                        case "`":
+                            return GatheringType.NonZero;
+                        case "``":
+                            return GatheringType.Zero;
+                        case "!":
+                            return GatheringType.Count;
+                        default:
+                            throw new InvalidOperationException();
+                    }
+                }
+            }
 
             /// <inheritdoc />
             public IReadOnlyList<SubtotalLevel> Levels

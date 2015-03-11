@@ -172,7 +172,10 @@ namespace AccountingServer.BLL
                                    depth + 1,
                                    SubtotalArgs.AggrType,
                                    Accountant.AggregateChangedDay(res)
-                                             .Where(b => !SubtotalArgs.NonZero || !Accountant.IsZero(b.Fund))
+                                             .Where(
+                                                    b =>
+                                                    SubtotalArgs.GatherType != GatheringType.NonZero ||
+                                                    !Accountant.IsZero(b.Fund))
                                              .Select(b => LeafAggregated(newPath, cat, depth, b)));
                 if (SubtotalArgs.AggrType == AggregationType.EveryDay)
                     return ReduceA(
@@ -182,7 +185,10 @@ namespace AccountingServer.BLL
                                    depth + 1,
                                    SubtotalArgs.AggrType,
                                    Accountant.AggregateEveryDay(res, SubtotalArgs.EveryDayRange.Range)
-                                             .Where(b => !SubtotalArgs.NonZero || !Accountant.IsZero(b.Fund))
+                                             .Where(
+                                                    b =>
+                                                    SubtotalArgs.GatherType != GatheringType.NonZero ||
+                                                    !Accountant.IsZero(b.Fund))
                                              .Select(b => LeafAggregated(newPath, cat, depth, b)));
                 throw new InvalidOperationException();
             }

@@ -111,7 +111,7 @@ namespace AccountingServer.Entities
 
     public struct SubtotalBase : ISubtotal
     {
-        public bool NonZero { get; set; }
+        public GatheringType GatherType { get; set; }
         public IReadOnlyList<SubtotalLevel> Levels { get; set; }
         public AggregationType AggrType { get; set; }
         public IDateRange EveryDayRange { get; set; }
@@ -124,7 +124,7 @@ namespace AccountingServer.Entities
                                 bool forAll = false, ISubtotal subtotal = null)
             : this()
         {
-            Subtotal = subtotal ?? new SubtotalBase { Levels = new SubtotalLevel[0], NonZero = false };
+            Subtotal = subtotal ?? new SubtotalBase { Levels = new SubtotalLevel[0], GatherType = GatheringType.Zero };
             var d = new DetailQueryAtomBase(filter, dir);
             var v = new VoucherQueryAtomBase
                         {
@@ -142,7 +142,7 @@ namespace AccountingServer.Entities
                                 bool forAll = false, ISubtotal subtotal = null)
             : this()
         {
-            Subtotal = subtotal ?? new SubtotalBase { Levels = new SubtotalLevel[0], NonZero = false };
+            Subtotal = subtotal ?? new SubtotalBase { Levels = new SubtotalLevel[0], GatherType = GatheringType.Zero };
             var d = new DetailQueryAryBase(filters, useAnd, dir);
             var v = new VoucherQueryAtomBase
                         {

@@ -32,12 +32,16 @@ namespace AccountingServer.Console
         {
             const int ident = 4;
 
+            Func<double, string> ts = f => (args.GatherType == GatheringType.Count
+                                                ? f.ToString("N0")
+                                                : f.AsCurrency());
+
             var helper =
                 new SubtotalTraver<object, Tuple<double, string>>(args)
                     {
                         LeafNoneAggr =
                             (path, cat, depth, val) =>
-                            new Tuple<double, string>(val, val.AsCurrency()),
+                            new Tuple<double, string>(val, ts(val)),
                         LeafAggregated =
                             (path, cat, depth, bal) =>
                             new Tuple<double, string>(
@@ -46,7 +50,7 @@ namespace AccountingServer.Console
                                               "{0}{1}{2}",
                                               new String(' ', depth * ident),
                                               bal.Date.AsDate().CPadRight(38),
-                                              bal.Fund.AsCurrency().CPadLeft(12 + 2 * depth))),
+                                              ts(bal.Fund).CPadLeft(12 + 2 * depth))),
                         Map = (path, cat, depth, level) => null,
                         MapA = (path, cat, depth, type) => null,
                         MediumLevel =
@@ -92,7 +96,7 @@ namespace AccountingServer.Console
                                                   "{0}{1}{2}{3}{4}",
                                                   new String(' ', depth * ident),
                                                   str.CPadRight(38),
-                                                  r.Item1.AsCurrency().CPadLeft(12 + 2 * depth),
+                                                  ts(r.Item1).CPadLeft(12 + 2 * depth),
                                                   Environment.NewLine,
                                                   r.Item2));
                             },
@@ -124,7 +128,7 @@ namespace AccountingServer.Console
             if (args.Levels.Count == 0 &&
                 args.AggrType == AggregationType.None)
                 return traversal.Item2;
-            return traversal.Item1.AsCurrency() + ":" + Environment.NewLine + traversal.Item2;
+            return ts(traversal.Item1) + ":" + Environment.NewLine + traversal.Item2;
         }
     }
 }

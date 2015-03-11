@@ -148,6 +148,25 @@ namespace AccountingServer.Entities
     }
 
     /// <summary>
+    ///     汇总类型
+    /// </summary>
+    public enum GatheringType
+    {
+        /// <summary>
+        ///     求和，不显示零汇总项
+        /// </summary>
+        NonZero,
+        /// <summary>
+        ///     求和，显示零汇总项
+        /// </summary>
+        Zero,
+        /// <summary>
+        ///     计数
+        /// </summary>
+        Count,
+    }
+
+    /// <summary>
     ///     日期累加类型
     /// </summary>
     public enum AggregationType
@@ -174,9 +193,9 @@ namespace AccountingServer.Entities
     public interface ISubtotal
     {
         /// <summary>
-        ///     不显示零汇总项
+        ///     汇总类型
         /// </summary>
-        bool NonZero { get; }
+        GatheringType GatherType { get; }
 
         /// <summary>
         ///     分类汇总层次
