@@ -6,7 +6,10 @@ namespace AccountingServer.Console
     {
         public static ConsoleParser From(string str)
         {
-            return new ConsoleParser(new CommonTokenStream(new ConsoleLexer(new AntlrInputStream(str))));
+            return new ConsoleParser(new CommonTokenStream(new ConsoleLexer(new AntlrInputStream(str))))
+                       {
+                           ErrorHandler = new BailErrorStrategy()
+                       };
         }
     }
 }
