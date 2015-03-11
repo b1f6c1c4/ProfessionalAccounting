@@ -59,6 +59,8 @@ namespace AccountingServer.Console
                 foreach (var a in Sort(m_Accountant.SelectAssets(assetListContext.distributedQ())))
                     sb.Append(ListAsset(a, dt, assetListContext.AOList() != null));
 
+                if (assetListContext.AOList() != null)
+                    return new EditableText(sb.ToString());
                 return new UnEditableText(sb.ToString());
             }
             var assetQueryContext = expr.assetQuery();

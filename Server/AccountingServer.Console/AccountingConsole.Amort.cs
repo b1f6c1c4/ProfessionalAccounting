@@ -60,6 +60,8 @@ namespace AccountingServer.Console
                 foreach (var a in Sort(m_Accountant.SelectAmortizations(amortListContext.distributedQ())))
                     sb.Append(ListAmort(a, dt, amortListContext.AOList() != null));
 
+                if (amortListContext.AOList() != null)
+                    return new EditableText(sb.ToString());
                 return new UnEditableText(sb.ToString());
             }
             var amortQueryContext = expr.amortQuery();
