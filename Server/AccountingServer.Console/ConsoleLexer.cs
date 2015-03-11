@@ -61,10 +61,6 @@ public partial class ConsoleLexer : Lexer {
 	};
 
 
-		protected const int EOF = Eof;
-		protected const int HIDDEN = Hidden;
-
-
 	public ConsoleLexer(ICharStream input)
 		: base(input)
 	{

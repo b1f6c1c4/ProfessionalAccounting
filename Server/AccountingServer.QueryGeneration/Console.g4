@@ -1,22 +1,17 @@
 grammar Console;
 
-@parser::members
-{
-	protected const int EOF = Eof;
-}
-
-@lexer::members
-{
-	protected const int EOF = Eof;
-	protected const int HIDDEN = Hidden;
-}
-
 /*
  * Parser Rules
  */
 
 command
-	:	(vouchers | groupedQuery | chart | report | asset | amort | otherCommand) EOF
+	:	vouchers EOF
+	| groupedQuery EOF
+	| chart EOF
+	| report EOF
+	| asset EOF
+	| amort EOF
+	| otherCommand EOF
 	;
 
 otherCommand

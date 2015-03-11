@@ -22,6 +22,9 @@ namespace AccountingServer.Console
         /// <returns>执行结果</returns>
         public IQueryResult Execute(string s)
         {
+            if (String.IsNullOrWhiteSpace(s))
+                throw new Exception();
+
             var result = ConsoleParser.From(s).command();
             if (result.exception != null)
                 throw new Exception(result.exception.ToString());
