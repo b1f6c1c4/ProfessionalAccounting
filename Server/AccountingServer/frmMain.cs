@@ -215,88 +215,66 @@ namespace AccountingServer
         ///     执行表达式
         /// </summary>
         /// <returns></returns>
-        private bool ExecuteCommand()
+        private bool ExecuteCommand(bool append)
         {
-            var text = textBoxCommand.Text;
-            if (text.StartsWith("+"))
-                try
+            try
+            {
+                var res = m_Console.Execute(textBoxCommand.Text);
+                if (res == null)
+                    return true;
+
+                if (res is ChartData)
                 {
-                    var res = m_Console.Execute(text.Substring(1));
-                    if (res == null)
-                        return true;
+                    ProcessChart(res as ChartData);
+                    FocusTextBoxCommand();
+                    return true;
+                }
 
-                    if (res is ChartData)
-                    {
-                        ProcessChart(res as ChartData);
-                        FocusTextBoxCommand();
-                        return true;
-                    }
+                m_Editable |= res is EditableText;
 
-                    m_Editable |= res is EditableText;
+                var result = res.ToString();
 
-                    var result = res.ToString();
+                SwitchToText();
 
-                    SwitchToText();
+                textBoxResult.Focus();
 
-                    var lng = textBoxResult.Text.Length;
-                    textBoxResult.Focus();
+                if (append)
+                {
                     textBoxResult.AppendText(result);
+                    var lng = textBoxResult.Text.Length;
                     textBoxResult.SelectionStart = lng;
                     textBoxResult.SelectionLength = 0;
                     textBoxCommand.BackColor = m_Editable
                                                    ? Color.FromArgb(0, 200, 0)
                                                    : Color.FromArgb(200, 220, 0);
-
-                    if (res.AutoReturn)
-                        FocusTextBoxCommand();
-                    return true;
                 }
-                catch (Exception exception)
+                else
                 {
-                    textBoxResult.Text = exception.ToString();
-                    textBoxCommand.BackColor = Color.FromArgb(255, 70, 70);
-                    SwitchToText();
-                    return false;
-                }
-            // else
-            {
-                //try
-                //{
-                    var res = m_Console.Execute(text);
-                    if (res == null)
-                        return true;
-
-                    if (res is ChartData)
-                    {
-                        ProcessChart(res as ChartData);
-                        FocusTextBoxCommand();
-                        return true;
-                    }
-
-                    m_Editable = res is EditableText;
-
-                    var result = res.ToString();
-
-                    SwitchToText();
-
-                    textBoxResult.Focus();
                     textBoxResult.Text = result;
                     textBoxResult.SelectionLength = 0;
                     textBoxCommand.BackColor = m_Editable
                                                    ? Color.FromArgb(75, 255, 75)
                                                    : Color.FromArgb(250, 250, 0);
+                }
 
-                    if (res.AutoReturn)
-                        FocusTextBoxCommand();
-                    return true;
-                //}
-                //catch (Exception exception)
-                //{
-                //    textBoxResult.Text = exception.ToString();
-                //    textBoxCommand.BackColor = Color.FromArgb(255, 70, 70);
-                //    SwitchToText();
-                //    return false;
-                //}
+                if (res.AutoReturn)
+                    FocusTextBoxCommand();
+                return true;
+            }
+            catch (Exception exception)
+            {
+                if (append)
+                {
+                    textBoxResult.AppendText(exception.ToString());
+                    var lng = textBoxResult.Text.Length;
+                    textBoxResult.SelectionStart = lng;
+                    textBoxResult.SelectionLength = 0;
+                }
+                else
+                    textBoxResult.Text = exception.ToString();
+                textBoxCommand.BackColor = Color.FromArgb(255, 70, 70);
+                SwitchToText();
+                return false;
             }
         }
 
@@ -351,14 +329,6 @@ namespace AccountingServer
         private void FocusTextBoxCommand()
         {
             textBoxCommand.Focus();
-            if (textBoxCommand.Text.StartsWith("+"))
-                if (textBoxCommand.SelectionLength != textBoxCommand.Text.Length - 1 ||
-                    textBoxCommand.SelectionStart != 1)
-                {
-                    textBoxCommand.SelectionStart = 1;
-                    textBoxCommand.SelectionLength = textBoxCommand.Text.Length - 1;
-                }
-
             textBoxCommand.SelectionStart = 0;
             textBoxCommand.SelectionLength = textBoxCommand.Text.Length;
         }
@@ -366,37 +336,28 @@ namespace AccountingServer
         /// <inheritdoc />
         protected override bool ProcessDialogKey(Keys keyData)
         {
+            if (keyData == Keys.Escape)
+            {
+                FocusTextBoxCommand();
+                return true;
+            }
             if (textBoxCommand.Focused)
             {
-                if (keyData == Keys.Escape)
-                {
-                    FocusTextBoxCommand();
-                    return true;
-                }
-
                 if (keyData == Keys.Enter)
-                    if (ExecuteCommand())
+                    if (ExecuteCommand(false))
+                        return true;
+                if (keyData == (Keys.Enter | Keys.Shift))
+                    if (ExecuteCommand(true))
                         return true;
             }
-            else if (textBoxResult.Focused)
+            else if (textBoxResult.Focused && m_Editable)
             {
-                if (keyData == Keys.Escape)
-                {
-                    FocusTextBoxCommand();
-                    return true;
-                }
-
-                if (m_Editable)
-                {
-                    if (keyData.HasFlag(Keys.Enter) &&
-                        keyData.HasFlag(Keys.Alt))
-                        if (PerformUpsert())
-                            return true;
-                    if (keyData.HasFlag(Keys.Delete) &&
-                        keyData.HasFlag(Keys.Alt))
-                        if (PerformRemoval())
-                            return true;
-                }
+                if (keyData == (Keys.Enter | Keys.Alt))
+                    if (PerformUpsert())
+                        return true;
+                if (keyData == (Keys.Delete | Keys.Alt))
+                    if (PerformRemoval())
+                        return true;
             }
             return base.ProcessDialogKey(keyData);
         }

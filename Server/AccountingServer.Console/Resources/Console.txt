@@ -1,5 +1,9 @@
 ﻿控制台帮助文档
 
+命令：
+Enter						执行
+Shift+Enter					执行并将结果添加在后方
+
 编辑：
 Alt+Enter					保存
 Alt+Delete					删除
