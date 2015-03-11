@@ -176,22 +176,19 @@ namespace AccountingServer.DAL
                                         new MapReduceArgs
                                             {
                                                 MapFunction =
-                                                    new BsonJavaScript(GetMapJavascript(query, SubtotalLevel.None))
+                                                    new BsonJavaScript(GetMapJavascript(query, null))
                                             }).GetResultsAs<VoucherDetail>();
         }
 
         /// <inheritdoc />
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
-            var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
-            if (query.Subtotal.AggrType != AggregationType.None)
-                level |= SubtotalLevel.Day;
-
             const string reduce =
                 "function(key, values) { var total = 0; for (var i = 0; i < values.length; i++) total += values[i]; return total; }";
             var args = new MapReduceArgs
                            {
-                               MapFunction = new BsonJavaScript(GetMapJavascript(query.VoucherEmitQuery, level)),
+                               MapFunction =
+                                   new BsonJavaScript(GetMapJavascript(query.VoucherEmitQuery, query.Subtotal)),
                                ReduceFunction = new BsonJavaScript(reduce)
                            };
             var res = m_Vouchers.MapReduce(args);
@@ -412,10 +409,18 @@ namespace AccountingServer.DAL
         ///     映射函数的Javascript表示
         /// </summary>
         /// <param name="query">记账凭证检索式</param>
-        /// <param name="subtotalLevel">分类汇总层次</param>
+        /// <param name="args">分类汇总层次</param>
         /// <returns>Javascript表示</returns>
-        private static string GetMapJavascript(IVoucherDetailQuery query, SubtotalLevel subtotalLevel)
+        private static string GetMapJavascript(IVoucherDetailQuery query, ISubtotal args)
         {
+            SubtotalLevel level;
+            if (args == null)
+                level = SubtotalLevel.None;
+            else if (args.AggrType != AggregationType.None)
+                level = args.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l) | SubtotalLevel.Day;
+            else
+                level = args.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
+
             var sb = new StringBuilder();
             sb.AppendLine("function() {");
             sb.AppendLine("    var chk = ");
@@ -432,22 +437,26 @@ namespace AccountingServer.DAL
             sb.AppendLine("    if ((");
             sb.Append(query.VoucherQuery.GetJavascriptFilter());
             sb.AppendLine(")(this)) {");
-            sb.AppendLine(GetTheDateJavascript(subtotalLevel));
+            sb.AppendLine(GetTheDateJavascript(level));
             sb.AppendLine("        this.detail.forEach(function(d) {");
             sb.AppendLine("            if (chk(d))");
             {
                 sb.Append("emit({");
-                if (subtotalLevel.HasFlag(SubtotalLevel.Day))
+                if (level.HasFlag(SubtotalLevel.Day))
                     sb.Append("date: theDate,");
-                if (subtotalLevel.HasFlag(SubtotalLevel.Title))
+                if (level.HasFlag(SubtotalLevel.Title))
                     sb.Append("title: d.title,");
-                if (subtotalLevel.HasFlag(SubtotalLevel.SubTitle))
+                if (level.HasFlag(SubtotalLevel.SubTitle))
                     sb.Append("subtitle: d.subtitle,");
-                if (subtotalLevel.HasFlag(SubtotalLevel.Content))
+                if (level.HasFlag(SubtotalLevel.Content))
                     sb.Append("content: d.content,");
-                if (subtotalLevel.HasFlag(SubtotalLevel.Remark))
+                if (level.HasFlag(SubtotalLevel.Remark))
                     sb.Append("remark: d.remark,");
-                sb.Append("}, d.fund);");
+                if (args != null &&
+                    args.GatherType == GatheringType.Count)
+                    sb.Append("}, 1);");
+                else
+                    sb.Append("}, d.fund);");
             }
             sb.AppendLine("        });");
             sb.AppendLine("    }");
