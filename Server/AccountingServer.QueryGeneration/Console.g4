@@ -312,6 +312,7 @@ AOUnregister
 	;
 AORecalc
 	:	'-recal'
+	|	'-recalc'
 	;
 AOResetSoft
 	:	'-reset-soft'

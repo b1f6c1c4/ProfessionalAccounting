@@ -78,10 +78,10 @@ public partial class ConsoleParser : Parser {
 		"')'", "'>'", "'<'", "'~'", "'@'", "'#'", "'a'", "'o'", "'[['", "']]'", 
 		"'chartArea'", "'series'", "'ignore'", null, null, null, "'backup'", null, 
 		"'fetch'", null, null, "'exit'", null, "'nq'", "'-all'", null, null, null, 
-		null, "'-recal'", "'-reset-soft'", "'-reset-hard'", "'-reset-mixed'", 
-		null, null, "'-chk'", null, null, "'null'", "'~null'", null, null, null, 
+		null, null, "'-reset-soft'", "'-reset-hard'", "'-reset-mixed'", null, 
+		null, "'-chk'", null, null, "'null'", "'~null'", null, null, null, null, 
 		null, null, null, null, null, null, null, null, null, null, null, null, 
-		null, "'*'", "'+'", "'-'", "' '"
+		"'*'", "'+'", "'-'", "' '"
 	};
 	private static readonly string[] _SymbolicNames = {
 		null, null, null, null, null, null, null, null, null, null, null, null, 

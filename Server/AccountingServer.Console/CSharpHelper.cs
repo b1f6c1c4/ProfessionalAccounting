@@ -52,6 +52,10 @@ namespace AccountingServer.Console
             sb.AppendLine("        {");
             sb.AppendLine("            return DateTime.Parse(s);");
             sb.AppendLine("        }");
+            sb.AppendLine("        private static string G()");
+            sb.AppendLine("        {");
+            sb.AppendLine("            return Guid.NewGuid().ToString().ToUpper();");
+            sb.AppendLine("        }");
             sb.AppendFormat("        public static {0} GetObject()", type.FullName);
             sb.AppendLine();
             sb.AppendLine("        {");
