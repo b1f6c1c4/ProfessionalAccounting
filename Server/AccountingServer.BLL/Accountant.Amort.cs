@@ -270,12 +270,14 @@ namespace AccountingServer.BLL
             var residue = amort.Value.Value;
 
             var dtCur = amort.Date.Value;
-            var dtEnd = amort.Date.Value.AddDays(amort.TotalDays.Value - 1);
+            var dtEnd = amort.Date.Value.AddDays(amort.TotalDays.Value);
+            var flag = true;
             while (true)
             {
-                var dtNxt = dtCur == amort.Date.Value
+                var dtNxt = flag
                                 ? ThisAmortizationDate(amort.Interval.Value, amort.Date.Value)
                                 : NextAmortizationDate(amort.Interval.Value, dtCur);
+                flag = false;
 
                 if (dtNxt >= dtEnd)
                 {
@@ -284,8 +286,10 @@ namespace AccountingServer.BLL
                 }
                 var n = dtNxt.Subtract(dtCur).TotalDays;
 
-                residue -= a * n;
-                lst.Add(new AmortItem { Date = dtNxt, Amount = a * n });
+                var amount = a * n;
+                residue -= amount;
+                if (Math.Abs(amount) > Tolerance)
+                    lst.Add(new AmortItem { Date = dtNxt, Amount = amount });
                 dtCur = dtNxt;
             }
 
