@@ -10,29 +10,6 @@ namespace AccountingServer.Console
     public partial class AccountingConsole
     {
         /// <summary>
-        ///     用换行回车连接非空字符串
-        /// </summary>
-        /// <param name="strings">字符串</param>
-        /// <returns>新字符串，如无非空字符串则为空</returns>
-        private string NotNullJoin(IEnumerable<string> strings)
-        {
-            var flag = false;
-
-            var sb = new StringBuilder();
-            foreach (var s in strings)
-            {
-                if (s == null)
-                    continue;
-                if (sb.Length > 0)
-                    sb.AppendLine();
-                sb.Append(s);
-                flag = true;
-            }
-
-            return flag ? sb.ToString() : null;
-        }
-
-        /// <summary>
         ///     执行报告表达式
         /// </summary>
         /// <param name="expr">表达式</param>
