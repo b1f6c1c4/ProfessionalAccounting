@@ -10,6 +10,29 @@ namespace AccountingServer.Console
     public partial class AccountingConsole
     {
         /// <summary>
+        ///     用换行回车连接非空字符串
+        /// </summary>
+        /// <param name="strings">字符串</param>
+        /// <returns>新字符串，如无非空字符串则为空</returns>
+        private static string NotNullJoin(IEnumerable<string> strings)
+        {
+            var flag = false;
+
+            var sb = new StringBuilder();
+            foreach (var s in strings)
+            {
+                if (s == null)
+                    continue;
+                if (sb.Length > 0)
+                    sb.AppendLine();
+                sb.Append(s);
+                flag = true;
+            }
+
+            return flag ? sb.ToString() : null;
+        }
+
+        /// <summary>
         ///     执行分类汇总检索式并呈现结果
         /// </summary>
         /// <param name="query">分类汇总检索式</param>
@@ -102,24 +125,20 @@ namespace AccountingServer.Console
                             },
                         Reduce =
                             (path, cat, depth, level, results) =>
-                            results.Aggregate(
-                                              (r1, r2) =>
-                                              new Tuple<double, string>(
-                                                  r1.Item1 + r2.Item1,
-                                                  r1.Item2 + Environment.NewLine + r2.Item2)),
+                            {
+                                var r = results.ToList();
+                                return new Tuple<double, string>(
+                                    r.Sum(t => t.Item1),
+                                    NotNullJoin(r.Select(t => t.Item2)));
+                            },
                         ReduceA =
                             (path, newPath, cat, depth, level, results) =>
                             {
-                                var val = (double?)null;
-                                var sb = new StringBuilder();
-                                foreach (var result in results)
-                                {
-                                    val = result.Item1;
-                                    sb.AppendLine(result.Item2);
-                                }
+                                var r = results.ToList();
+                                var last = r.LastOrDefault();
                                 return new Tuple<double, string>(
-                                    val ?? 0,
-                                    sb.ToString(0, sb.Length - Environment.NewLine.Length));
+                                    last == null ? 0 : last.Item1,
+                                    NotNullJoin(r.Select(t => t.Item2)));
                             }
                     };
 
