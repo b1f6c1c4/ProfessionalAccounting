@@ -23,7 +23,7 @@ namespace AccountingServer.Console
         /// </summary>
         /// <param name="quoted">字符串</param>
         /// <returns>原字符串</returns>
-        private static string Dequotation(this string quoted)
+        public static string Dequotation(this string quoted)
         {
             if (quoted == null)
                 return null;

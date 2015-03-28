@@ -35,10 +35,6 @@ report
 	|	'rp' groupedQuery
 	;
 
-namedQueryTemplate
-	:	name ':'
-	;
-
 namedQuery
 	:	namedQueries
 	|	namedQ

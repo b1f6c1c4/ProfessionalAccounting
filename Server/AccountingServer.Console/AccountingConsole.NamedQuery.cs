@@ -1,10 +1,21 @@
 ﻿using System;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace AccountingServer.Console
 {
     public partial class AccountingConsole
     {
+        private static string ParseNamedQueryTemplate(string code, out string name)
+        {
+            var regex = new Regex(@"^new\s+NamedQueryTemplate\s*\{(?<all>(?<name>\$(?:[^\$]|\$\$)*\$):[\s\S]*)\}$");
+            var m = regex.Match(code);
+            if (m.Length == 0)
+                throw new InvalidOperationException();
+            name = m.Groups["name"].Value.Dequotation();
+            return m.Groups["all"].Value;
+        }
+
         /// <summary>
         ///     更新或添加命名查询模板
         /// </summary>
@@ -12,15 +23,13 @@ namespace AccountingServer.Console
         /// <returns>命名查询模板</returns>
         public string ExecuteNamedQueryTemplateUpsert(string code)
         {
-            var template = ConsoleParser.From(code).namedQueryTemplate();
+            string name;
+            var all = ParseNamedQueryTemplate(code, out name);
 
-            var s = template.GetChild(0).GetText();
-            var name = s.Substring(1, s.Length - 2).Replace("$$", "$");
-
-            if (!m_Accountant.Upsert(name, code))
+            if (!m_Accountant.Upsert(name, all))
                 throw new Exception();
 
-            return String.Format("@new NamedQueryTemplate {{{0}}}@", code);
+            return String.Format("@new NamedQueryTemplate {{{0}}}@", all);
         }
 
         /// <summary>
@@ -30,10 +39,8 @@ namespace AccountingServer.Console
         /// <returns>是否成功</returns>
         public bool ExecuteNamedQueryTemplateRemoval(string code)
         {
-            var template = ConsoleParser.From(code).namedQueryTemplate();
-
-            var s = template.GetChild(0).GetText();
-            var name = s.Substring(1, s.Length - 2).Replace("$$", "$");
+            string name;
+            var all = ParseNamedQueryTemplate(code, out name);
 
             return m_Accountant.DeleteNamedQueryTemplate(name);
         }
