@@ -136,7 +136,7 @@ namespace AccountingServer
                         result = m_Console.ExecuteAmortUpsert(s);
                         break;
                     case "NamedQueryTemplate":
-                        result = m_Console.ExecuteNamedQueryTemplateUpsert(s.Substring(24, s.Length - 25));
+                        result = m_Console.ExecuteNamedQueryTemplateUpsert(s);
                         break;
                     default:
                         return false;
@@ -185,7 +185,7 @@ namespace AccountingServer
                         result = m_Console.ExecuteAmortRemoval(s);
                         break;
                     case "NamedQueryTemplate":
-                        result = m_Console.ExecuteNamedQueryTemplateRemoval(s.Substring(24, s.Length - 25));
+                        result = m_Console.ExecuteNamedQueryTemplateRemoval(s);
                         break;
                     default:
                         return false;
