@@ -38,18 +38,6 @@ namespace AccountingServer.Console
                                 vouchers = account.Where(
                                                          v =>
                                                          v.Date == group.Key.Item1 &&
-                                                         (v.Details.Any(
-                                                                        d =>
-                                                                        d.Title == 6602 && d.SubTitle == 03) ||
-                                                          v.Details.Any(
-                                                                        d =>
-                                                                        d.Title == 6602 && d.SubTitle == 06) ||
-                                                          v.Details.Any(
-                                                                        d =>
-                                                                        d.Title == 6602 && d.SubTitle == 10) ||
-                                                          v.Details.Any(
-                                                                        d =>
-                                                                        d.Title == 1221 && d.SubTitle == null)) &&
                                                          v.Details.Any(
                                                                        d =>
                                                                        d.Title == 1012 && d.SubTitle == 05 &&

@@ -129,6 +129,7 @@ namespace AccountingServer.Console
                                             grpSubTitle.Key.AsSubTitle(),
                                             grpContent.Key,
                                             balance.Fund);
+                            sb.AppendLine();
                             break;
                         }
                 }
