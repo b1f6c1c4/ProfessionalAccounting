@@ -141,14 +141,19 @@ namespace AccountingServer
                     default:
                         return false;
                 }
-                textBoxResult.Text = textBoxResult.Text.Remove(begin, end - begin + 1)
-                                                  .Insert(begin, result);
+                if (textBoxResult.Text[end] == '\n' &&
+                    result[result.Length - 1] != '\n')
+                    textBoxResult.Text = textBoxResult.Text.Remove(begin, end - begin - 1)
+                                                      .Insert(begin, result);
+                else
+                    textBoxResult.Text = textBoxResult.Text.Remove(begin, end - begin + 1)
+                                                      .Insert(begin, result);
                 textBoxResult.SelectionStart = begin;
                 textBoxResult.SelectionLength = result.Length;
             }
             catch (Exception exception)
             {
-                textBoxResult.Text = textBoxResult.Text.Insert(end, exception.ToString());
+                textBoxResult.Text = textBoxResult.Text.Insert(end + 1, exception.ToString());
                 textBoxResult.SelectionStart = begin;
                 textBoxResult.SelectionLength = end - begin + 1;
             }
