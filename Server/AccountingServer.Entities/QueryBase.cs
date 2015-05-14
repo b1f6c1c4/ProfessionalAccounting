@@ -23,20 +23,23 @@ namespace AccountingServer.Entities
             Operator = op;
             if (queries.Count == 0)
                 throw new InvalidOperationException();
-            if (queries.Count == 1)
-                Filter1 = queries[0];
-            if (queries.Count == 2)
-            {
-                Filter1 = queries[0];
-                Filter2 = queries[1];
-            }
+            Filter1 = queries[0];
             switch (op)
             {
+                case OperatorType.Identity:
+                case OperatorType.Complement:
+                    break;
+                case OperatorType.Substract:
+                    Filter2 = queries[1];
+                    break;
                 case OperatorType.Union:
                 case OperatorType.Intersect:
-                    Operator = op;
-                    Filter1 = queries[0];
-                    Filter2 = new QueryAryBase<TAtom>(op, queries.Skip(1).ToList());
+                    if (queries.Count == 1)
+                        Operator=OperatorType.Identity;
+                    else if (queries.Count == 2)
+                        Filter2 = queries[1];
+                    else
+                        Filter2 = new QueryAryBase<TAtom>(op, queries.Skip(1).ToList());
                     break;
                 default:
                     throw new InvalidOperationException();
