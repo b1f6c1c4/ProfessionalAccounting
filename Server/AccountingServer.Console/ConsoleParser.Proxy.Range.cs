@@ -41,7 +41,7 @@ namespace AccountingServer.Console
                     var dt = DateTime.Now.Date;
                     dt = dt.AddDays(dt.DayOfWeek == DayOfWeek.Sunday ? -6 : 1 - (int)dt.DayOfWeek);
                     dt = dt.AddDays(delta * 7);
-                    return new DateFilter(dt, dt);
+                    return new DateFilter(dt, dt.AddDays(7));
                 }
             }
         }
