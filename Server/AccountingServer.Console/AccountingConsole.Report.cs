@@ -23,11 +23,11 @@ namespace AccountingServer.Console
                                  Leaf =
                                      (path, query, coefficient) =>
                                      PresentReport(
-                                                   path.Length == 0 ? query.Name : path + "-" + query.Name,
+                                                   path.Length == 0 ? query.Name : path + "/" + query.Name,
                                                    query.GroupingQuery,
                                                    coefficient * query.Coefficient),
                                  Map = (path, query, coefficient) =>
-                                       path.Length == 0 ? query.Name : path + "-" + query.Name,
+                                       path.Length == 0 ? query.Name : path + "/" + query.Name,
                                  Reduce = (path, newPath, query, coefficient, results) => NotNullJoin(results),
                              };
 
