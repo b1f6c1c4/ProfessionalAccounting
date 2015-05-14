@@ -108,11 +108,11 @@ namespace AccountingServer.BLL
                 case SubtotalLevel.Week:
                     return value.AsDate();
                 case SubtotalLevel.Month:
-                    return String.Format("@{0:D4}{1:D2}",value.Value.Year,value.Value.Month);
+                    return String.Format("@{0:D4}{1:D2}", value.Value.Year, value.Value.Month);
                 case SubtotalLevel.FinancialMonth:
-                    return String.Format("{0:D4}{1:D2}",value.Value.Year,value.Value.Month);
+                    return String.Format("{0:D4}{1:D2}", value.Value.Year, value.Value.Month);
                 case SubtotalLevel.BillingMonth:
-                    return String.Format("#{0:D4}{1:D2}",value.Value.Year,value.Value.Month);
+                    return String.Format("#{0:D4}{1:D2}", value.Value.Year, value.Value.Month);
                 case SubtotalLevel.Year:
                     return String.Format("{0:D4}", value.Value.Year);
                 default:

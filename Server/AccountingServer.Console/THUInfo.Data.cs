@@ -42,7 +42,8 @@ namespace AccountingServer.Console
                                                                        d =>
                                                                        d.Title == 1012 && d.SubTitle == 05 &&
                                                                        // ReSharper disable once PossibleInvalidOperationException
-                                                                       Accountant.IsZero(-d.Fund.Value - group.Key.Item4)))
+                                                                       Accountant.IsZero(
+                                                                                         -d.Fund.Value - group.Key.Item4)))
                                                   .ToList();
                                 break;
                             case "紫荆服务楼超市":
@@ -56,7 +57,8 @@ namespace AccountingServer.Console
                                                                        d =>
                                                                        d.Title == 1012 && d.SubTitle == 05 &&
                                                                        // ReSharper disable once PossibleInvalidOperationException
-                                                                       Accountant.IsZero(-d.Fund.Value - group.Key.Item4)))
+                                                                       Accountant.IsZero(
+                                                                                         -d.Fund.Value - group.Key.Item4)))
                                                   .ToList();
                                 break;
                         }

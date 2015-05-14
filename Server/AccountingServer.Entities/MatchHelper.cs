@@ -53,7 +53,7 @@ namespace AccountingServer.Entities
                 if (filter.Title != voucherDetail.Title)
                     return false;
             if (filter.SubTitle != null)
-                if (filter.SubTitle == 0)
+                if (filter.SubTitle == 00)
                 {
                     if (voucherDetail.SubTitle != null)
                         return false;

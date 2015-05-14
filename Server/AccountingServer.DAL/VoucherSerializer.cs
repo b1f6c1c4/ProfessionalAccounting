@@ -24,7 +24,7 @@ namespace AccountingServer.DAL
                               {
                                   ID = bsonReader.ReadObjectId("_id", ref read),
                                   Date = bsonReader.ReadDateTime("date", ref read),
-                                  Type = VoucherType.Ordinal,
+                                  Type = VoucherType.Ordinary,
                               };
             switch (bsonReader.ReadString("special", ref read))
             {
@@ -47,7 +47,7 @@ namespace AccountingServer.DAL
                     voucher.Type = VoucherType.Uncertain;
                     break;
                 default:
-                    voucher.Type = VoucherType.Ordinal;
+                    voucher.Type = VoucherType.Ordinary;
                     break;
             }
             voucher.Details = bsonReader.ReadArray("detail", ref read, VoucherDetailSerializer.Deserialize);
@@ -65,7 +65,7 @@ namespace AccountingServer.DAL
             bsonWriter.WriteStartDocument();
             bsonWriter.WriteObjectId("_id", voucher.ID);
             bsonWriter.Write("date", voucher.Date);
-            if (voucher.Type != VoucherType.Ordinal)
+            if (voucher.Type != VoucherType.Ordinary)
                 switch (voucher.Type)
                 {
                     case VoucherType.Amortization:

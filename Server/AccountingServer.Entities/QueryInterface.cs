@@ -156,10 +156,12 @@ namespace AccountingServer.Entities
         ///     求和，不显示零汇总项
         /// </summary>
         NonZero,
+
         /// <summary>
         ///     求和，显示零汇总项
         /// </summary>
         Zero,
+
         /// <summary>
         ///     计数
         /// </summary>

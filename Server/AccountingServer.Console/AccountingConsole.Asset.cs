@@ -184,14 +184,11 @@ namespace AccountingServer.Console
                             cnt++;
                             flag = true;
                         }
-                        else
+                        else if (m_Accountant.DeleteVoucher(voucher.ID))
                         {
-                            if (m_Accountant.DeleteVoucher(voucher.ID))
-                            {
-                                item.VoucherID = null;
-                                cnt++;
-                                flag = true;
-                            }
+                            item.VoucherID = null;
+                            cnt++;
+                            flag = true;
                         }
                     }
                     if (flag)

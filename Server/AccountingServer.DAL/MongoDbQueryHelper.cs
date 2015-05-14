@@ -58,8 +58,15 @@ namespace AccountingServer.DAL
                 if (vfilter.Type != null)
                     switch (vfilter.Type)
                     {
-                        case VoucherType.Ordinal:
+                        case VoucherType.Ordinary:
                             sb.AppendLine("    if (v.special != undefined) return false;");
+                            break;
+                        case VoucherType.General:
+                            sb.AppendLine("    if (v.special != undefined)");
+                            sb.AppendLine("    {");
+                            sb.AppendLine("        if (v.special == 'acarry') return false;");
+                            sb.AppendLine("        if (v.special == 'carry') return false;");
+                            sb.AppendLine("    }");
                             break;
                         case VoucherType.Amortization:
                             sb.AppendLine("    if (v.special != 'amorz') return false;");
@@ -160,10 +167,13 @@ namespace AccountingServer.DAL
                         sb.AppendLine();
                     }
                     if (f.Filter.SubTitle != null)
-                    {
-                        sb.AppendFormat("    if (d.subtitle != {0}) return false;", f.Filter.SubTitle);
-                        sb.AppendLine();
-                    }
+                        if (f.Filter.SubTitle == 00)
+                            sb.AppendLine("    if (d.subtitle != null) return false;");
+                        else
+                        {
+                            sb.AppendLine();
+                            sb.AppendFormat("    if (d.subtitle != {0}) return false;", f.Filter.SubTitle);
+                        }
                     if (f.Filter.Content != null)
                         if (f.Filter.Content == String.Empty)
                             sb.AppendLine("    if (d.content != null) return false;");

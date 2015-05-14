@@ -28,6 +28,8 @@ namespace AccountingServer.Console
                         VoucherType type;
                         if (Enum.TryParse(s, out type))
                             vfilter.Type = type;
+                        else if (s == "G")
+                            vfilter.Type = Entities.VoucherType.General;
                         else
                             throw new InvalidOperationException();
                     }

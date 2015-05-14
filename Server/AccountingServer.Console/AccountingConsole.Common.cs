@@ -41,6 +41,8 @@ namespace AccountingServer.Console
                 return ExecuteAsset(result.asset());
             if (result.amort() != null)
                 return ExecuteAmort(result.amort());
+            if (result.carry() != null)
+                return ExecuteCarry(result.carry());
             if (result.otherCommand() != null)
             {
                 switch (result.GetChild(0).GetText().ToLowerInvariant())

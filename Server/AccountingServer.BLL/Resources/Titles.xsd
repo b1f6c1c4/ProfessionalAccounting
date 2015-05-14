@@ -27,6 +27,7 @@
                 </xs:restriction>
             </xs:simpleType>
         </xs:attribute>
+        <xs:attribute name="virtual" use="optional" fixed="true" type="xs:boolean"/>
         <xs:attribute name="name" use="required" type="xs:string"/>
     </xs:attributeGroup>
     <xs:attributeGroup name="t2">
