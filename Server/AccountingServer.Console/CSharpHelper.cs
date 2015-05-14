@@ -98,7 +98,7 @@ namespace AccountingServer.Console
             }
             else
                 sb.AppendLine("    Date = null,");
-            if ((voucher.Type ?? VoucherType.Ordinal) != VoucherType.Ordinal)
+            if ((voucher.Type ?? VoucherType.Ordinary) != VoucherType.Ordinary)
             {
                 sb.AppendFormat("    Type = VoucherType.{0},", voucher.Type);
                 sb.AppendLine();

@@ -11,7 +11,13 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     普通记账凭证
         /// </summary>
-        Ordinal,
+        Ordinary,
+
+        /// <summary>
+        ///     非结转记账凭证
+        ///     <remarks>仅检索时使用</remarks>
+        /// </summary>
+        General,
 
         /// <summary>
         ///     期末结转记账凭证
@@ -34,7 +40,7 @@ namespace AccountingServer.Entities
         Devalue,
 
         /// <summary>
-        ///     年度结转记账凭证
+        ///     结转记账凭证
         /// </summary>
         AnnualCarry,
 

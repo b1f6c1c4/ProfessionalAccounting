@@ -8,7 +8,9 @@ namespace AccountingServer.Console
     {
         private static string ParseNamedQueryTemplate(string code, out string name)
         {
-            var regex = new Regex(@"^new\s+NamedQueryTemplate\s*\{(?<all>(?<name>\$(?:[^\$]|\$\$)*\$)(?:\*F[+-]?\d*.?\d*(?:[Ee][+-]?\d+)?|\*P[+-]?\d*.?\d*)?(?:""(?:[^""]|"""")*"")?::?[\s\S]*)\}$");
+            var regex =
+                new Regex(
+                    @"^new\s+NamedQueryTemplate\s*\{(?<all>(?<name>\$(?:[^\$]|\$\$)*\$)(?:\*F[+-]?\d*.?\d*(?:[Ee][+-]?\d+)?|\*P[+-]?\d*.?\d*)?(?:""(?:[^""]|"""")*"")?::?[\s\S]*)\}$");
             var m = regex.Match(code);
             if (m.Length == 0)
                 throw new InvalidOperationException();

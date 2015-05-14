@@ -35,7 +35,7 @@ namespace AccountingServer.Entities
                 case OperatorType.Union:
                 case OperatorType.Intersect:
                     if (queries.Count == 1)
-                        Operator=OperatorType.Identity;
+                        Operator = OperatorType.Identity;
                     else if (queries.Count == 2)
                         Filter2 = queries[1];
                     else

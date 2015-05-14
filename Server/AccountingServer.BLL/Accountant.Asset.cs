@@ -293,7 +293,7 @@ namespace AccountingServer.BLL
                                      item,
                                      isCollapsed,
                                      editOnly,
-                                     VoucherType.Ordinal,
+                                     VoucherType.Ordinary,
                                      new VoucherDetail
                                          {
                                              Title = asset.Title,
@@ -357,7 +357,7 @@ namespace AccountingServer.BLL
                                      item,
                                      isCollapsed,
                                      editOnly,
-                                     VoucherType.Ordinal,
+                                     VoucherType.Ordinary,
                                      new VoucherDetail
                                          {
                                              Title = asset.Title,

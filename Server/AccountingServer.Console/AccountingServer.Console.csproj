@@ -52,6 +52,7 @@
     <Compile Include="AccountingConsole.Miscellaneous.cs" />
     <Compile Include="AccountingConsole.Chart.cs" />
     <Compile Include="AccountingConsole.NamedQuery.cs" />
+    <Compile Include="AccountingConsole.Carry.cs" />
     <Compile Include="AccountingConsole.Server.cs" />
     <Compile Include="AccountingConsole.Subtotal.cs" />
     <Compile Include="AccountingConsole.Voucher.cs" />

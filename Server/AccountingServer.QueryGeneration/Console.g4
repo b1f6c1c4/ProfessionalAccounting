@@ -11,6 +11,7 @@ command
 	| report EOF
 	| asset EOF
 	| amort EOF
+	| carry EOF
 	| otherCommand EOF
 	;
 
@@ -225,6 +226,26 @@ distributedQ
 distributedQAtom
 	:	Guid? DollarQuotedString? PercentQuotedString? ('[[' rangeCore ']]')?
 	;
+
+carry
+	:	carryMonthResetHard | carryMonth | carryYearResetHard | carryYear
+	;
+
+carryMonthResetHard
+	:	'ca' AOResetHard range?
+	;
+
+carryMonth
+	:	'ca' AOApply range?
+	;
+
+carryYearResetHard
+	:	'caa' AOResetHard range?
+	;
+
+carryYear
+	:	'caa' AOApply range?
+	;
 	
 /*
  * Lexer Rules
@@ -367,7 +388,7 @@ RangeDeltaWeek
 	;
 
 VoucherType
-	:	'Ordinal' | 'Carry' | 'Amortization' | 'Depreciation' | 'Devalue' | 'AnnualCarry' | 'Uncertain'
+	:	'Ordinary' | 'G' | 'General' | 'Carry' | 'Amortization' | 'Depreciation' | 'Devalue' | 'AnnualCarry' | 'Uncertain'
 	;
 
 CaretQuotedString
