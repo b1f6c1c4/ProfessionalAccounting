@@ -71,7 +71,8 @@ namespace AccountingServer.Console
                                  {
                                      var lst = results.ToList();
 
-                                     if (lst.Count > 0 && lst[0] is string)
+                                     if (lst.Count > 0 && lst[0] is string
+                                         || lvs == null)
                                      {
                                          var series = path as Series;
                                          if (series != null)
@@ -80,9 +81,6 @@ namespace AccountingServer.Console
                                              return series;
                                          }
                                      }
-
-                                     if (lvs == null)
-                                         throw new InvalidOperationException();
 
                                      var lv = lvs[depth];
                                      return Reduce(path, lst, lv.Series() != null);
