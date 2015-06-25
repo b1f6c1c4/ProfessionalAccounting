@@ -5,18 +5,23 @@ grammar Console;
  */
 
 command
-	:	vouchers EOF
-	| groupedQuery EOF
-	| chart EOF
-	| report EOF
-	| asset EOF
-	| amort EOF
-	| carry EOF
-	| otherCommand EOF
+	:	autoCommand EOF
+	|	vouchers EOF
+	|	groupedQuery EOF
+	|	chart EOF
+	|	report EOF
+	|	asset EOF
+	|	amort EOF
+	|	carry EOF
+	|	otherCommand EOF
+	;
+
+autoCommand
+	:	Auto DollarQuotedString (SingleQuotedString)*
 	;
 
 otherCommand
-	:	EditNamedQueries | Check | Titles | Launch | Connect | Shutdown | Backup | Mobile | Fetch | Help | Exit
+	:	EditNamedQueries | Check | Titles | Launch | Connect | Shutdown | Backup | Help | Exit
 	;
 	
 chart
@@ -278,12 +283,8 @@ Shutdown
 Backup
 	:	'backup'
 	;
-Mobile
-	:	'mob'
-	|	'mobile'
-	;
-Fetch
-	:	'fetch'
+Auto
+	:	'auto'
 	;
 Help
 	:	'help'

@@ -29,6 +29,8 @@ namespace AccountingServer.Console
             if (result.exception != null)
                 throw new Exception(result.exception.ToString());
 
+            if (result.autoCommand() != null)
+                return ExecuteAuto(result.autoCommand());
             if (result.vouchers() != null)
                 return PresentVoucherQuery(result.vouchers());
             if (result.groupedQuery() != null)
@@ -58,8 +60,6 @@ namespace AccountingServer.Console
                         throw new NotImplementedException();
                     case "backup":
                         return Backup();
-                    case "fetch":
-                        return FetchInfo();
                     case "titles":
                     case "t":
                         return ListTitles();
