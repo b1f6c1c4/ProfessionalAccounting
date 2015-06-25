@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using AccountingServer.BLL;
 using AccountingServer.Console;
+using AccountingServer.Plugins.THUInfo;
 
 namespace AccountingServer
 {
@@ -42,8 +44,12 @@ namespace AccountingServer
 
             m_Accountant = new Accountant();
 
+            var thu = new THUInfo(m_Accountant);
+            Task.Run(() => thu.FetchData(@"2014010914", @"MTQyODU3"));
+
             m_Console = new AccountingConsole(m_Accountant);
             m_Console.AutoConnect();
+            m_Console.AddPlugin(thu);
             //m_Console.PresentQRCode += qrCode =>
             //                           {
             //                               if (qrCode == null)

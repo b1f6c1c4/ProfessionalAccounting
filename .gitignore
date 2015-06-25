@@ -11,6 +11,8 @@ Server/AccountingServer/bin/
 Server/AccountingServer/obj/
 Server/AccountingServer.Console/bin/
 Server/AccountingServer.Console/obj/
+Server/AccountingServer.Plugins.THUInfo/bin/
+Server/AccountingServer.Plugins.THUInfo/obj/
 Server/AccountingServer.BLL/bin/
 Server/AccountingServer.BLL/obj/
 Server/AccountingServer.DAL/bin/
