@@ -288,7 +288,7 @@ namespace AccountingServer.BLL
 
                 var amount = a * n;
                 residue -= amount;
-                if (Math.Abs(amount) > Tolerance)
+                if (!IsZero(amount))
                     lst.Add(new AmortItem { Date = dtNxt, Amount = amount });
                 dtCur = dtNxt;
             }
