@@ -172,12 +172,15 @@ namespace AccountingServer.DAL
         /// <inheritdoc />
         public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
         {
-            return m_Vouchers.MapReduce(
-                                        new MapReduceArgs
-                                            {
-                                                MapFunction =
-                                                    new BsonJavaScript(GetMapJavascript(query, null))
-                                            }).GetResultsAs<VoucherDetail>();
+            return
+                SelectVouchers(query.VoucherQuery)
+                    .SelectMany(
+                                v =>
+                                v.Details.Where(
+                                                d =>
+                                                MatchHelper.IsMatch(
+                                                                    query.DetailEmitFilter.DetailFilter??(query.VoucherQuery as IVoucherQueryAtom).DetailFilter,
+                                                                    q => d.IsMatch(q.Filter, q.Dir))));
         }
 
         /// <inheritdoc />
@@ -409,7 +412,7 @@ namespace AccountingServer.DAL
         ///     映射函数的Javascript表示
         /// </summary>
         /// <param name="query">记账凭证检索式</param>
-        /// <param name="args">分类汇总层次</param>
+        /// <param name="args">分类汇总层次，若为<c>null</c>表示不汇总</param>
         /// <returns>Javascript表示</returns>
         private static string GetMapJavascript(IVoucherDetailQuery query, ISubtotal args)
         {
@@ -441,22 +444,26 @@ namespace AccountingServer.DAL
             sb.AppendLine("        this.detail.forEach(function(d) {");
             sb.AppendLine("            if (chk(d))");
             {
-                sb.Append("emit({");
-                if (level.HasFlag(SubtotalLevel.Day))
-                    sb.Append("date: theDate,");
-                if (level.HasFlag(SubtotalLevel.Title))
-                    sb.Append("title: d.title,");
-                if (level.HasFlag(SubtotalLevel.SubTitle))
-                    sb.Append("subtitle: d.subtitle,");
-                if (level.HasFlag(SubtotalLevel.Content))
-                    sb.Append("content: d.content,");
-                if (level.HasFlag(SubtotalLevel.Remark))
-                    sb.Append("remark: d.remark,");
-                if (args != null &&
-                    args.GatherType == GatheringType.Count)
-                    sb.Append("}, 1);");
+                if (args == null)
+                    sb.Append("emit(d, 0);");
                 else
-                    sb.Append("}, d.fund);");
+                {
+                    sb.Append("emit({");
+                    if (level.HasFlag(SubtotalLevel.Day))
+                        sb.Append("date: theDate,");
+                    if (level.HasFlag(SubtotalLevel.Title))
+                        sb.Append("title: d.title,");
+                    if (level.HasFlag(SubtotalLevel.SubTitle))
+                        sb.Append("subtitle: d.subtitle,");
+                    if (level.HasFlag(SubtotalLevel.Content))
+                        sb.Append("content: d.content,");
+                    if (level.HasFlag(SubtotalLevel.Remark))
+                        sb.Append("remark: d.remark,");
+                    if (args.GatherType == GatheringType.Count)
+                        sb.Append("}, 1);");
+                    else
+                        sb.Append("}, d.fund);");
+                }
             }
             sb.AppendLine("        });");
             sb.AppendLine("    }");
