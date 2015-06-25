@@ -8,7 +8,7 @@ using Microsoft.CSharp;
 
 namespace AccountingServer.Console
 {
-    internal static class CSharpHelper
+    public static class CSharpHelper
     {
         /// <summary>
         ///     转义字符串

@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="AccountingConsole.Amort.cs" />
     <Compile Include="AccountingConsole.Asset.cs" />
+    <Compile Include="AccountingConsole.Plugin.cs" />
     <Compile Include="AccountingConsole.Report.cs" />
     <Compile Include="AccountingConsole.Check.cs" />
     <Compile Include="AccountingConsole.Common.cs" />
@@ -58,6 +59,8 @@
     <Compile Include="AccountingConsole.Voucher.cs" />
     <Compile Include="ConsoleParser.Creator.cs" />
     <Compile Include="NamedQueryTraver.cs" />
+    <Compile Include="Plugin\Attribute.cs" />
+    <Compile Include="Plugin\IPlugin.cs" />
     <Compile Include="QuotedStringHelper.cs" />
     <Compile Include="ConsoleParser.Proxy.NamedQuery.cs" />
     <Compile Include="ConsoleParser.Proxy.Distributed.cs" />
@@ -68,8 +71,6 @@
     <Compile Include="CSharpHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryResult.cs" />
-    <Compile Include="THUInfo.Data.cs" />
-    <Compile Include="THUInfo.Web.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AccountingServer.BLL\AccountingServer.BLL.csproj">
