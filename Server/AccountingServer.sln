@@ -29,6 +29,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Other", "Other", "{A3156D54
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.QueryGeneration", "AccountingServer.QueryGeneration\AccountingServer.QueryGeneration.csproj", "{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.Plugins.THUInfo", "AccountingServer.Plugins.THUInfo\AccountingServer.Plugins.THUInfo.csproj", "{BD4F3271-7880-4AF3-BB2E-93D8E357D471}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +72,10 @@ Global
 		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD4F3271-7880-4AF3-BB2E-93D8E357D471}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD4F3271-7880-4AF3-BB2E-93D8E357D471}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD4F3271-7880-4AF3-BB2E-93D8E357D471}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD4F3271-7880-4AF3-BB2E-93D8E357D471}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -84,5 +90,6 @@ Global
 		{B1AB5807-B9AC-4E70-9568-6C91329BCDB2} = {A3156D54-41A5-4265-A07B-0E80030A4EE6}
 		{0DDC759F-23DE-4443-A97C-4EDC1C40690C} = {A75E43E2-65F1-4826-8B28-D90DDC15777D}
 		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F} = {A3156D54-41A5-4265-A07B-0E80030A4EE6}
+		{BD4F3271-7880-4AF3-BB2E-93D8E357D471} = {A75E43E2-65F1-4826-8B28-D90DDC15777D}
 	EndGlobalSection
 EndGlobal
