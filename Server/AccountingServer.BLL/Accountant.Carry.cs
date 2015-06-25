@@ -156,6 +156,7 @@ namespace AccountingServer.BLL
                                                                      new VoucherDetail { Title = 6301, SubTitle = 02 },
                                                                      new VoucherDetail { Title = 6301, SubTitle = 99 },
                                                                      new VoucherDetail { Title = 6603, SubTitle = 00 },
+                                                                     new VoucherDetail { Title = 6603, SubTitle = 01 },
                                                                      new VoucherDetail { Title = 6603, SubTitle = 02 },
                                                                      new VoucherDetail { Title = 6603, SubTitle = 03 }
                                                                  },
