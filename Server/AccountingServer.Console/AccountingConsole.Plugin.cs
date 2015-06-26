@@ -7,9 +7,9 @@ namespace AccountingServer.Console
 {
     public partial class AccountingConsole
     {
-        private readonly ICollection<IPlugin> m_Plugins = new List<IPlugin>();
+        private readonly ICollection<PluginBase> m_Plugins = new List<PluginBase>();
 
-        public void AddPlugin(IPlugin plg) { m_Plugins.Add(plg); }
+        public void AddPlugin(PluginBase plg) { m_Plugins.Add(plg); }
 
         /// <summary>
         ///     调用插件
