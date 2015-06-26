@@ -170,20 +170,6 @@ namespace AccountingServer.DAL
         }
 
         /// <inheritdoc />
-        public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
-        {
-            return
-                SelectVouchers(query.VoucherQuery)
-                    .SelectMany(
-                                v =>
-                                v.Details.Where(
-                                                d =>
-                                                MatchHelper.IsMatch(
-                                                                    query.DetailEmitFilter.DetailFilter??(query.VoucherQuery as IVoucherQueryAtom).DetailFilter,
-                                                                    q => d.IsMatch(q.Filter, q.Dir))));
-        }
-
-        /// <inheritdoc />
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
             const string reduce =

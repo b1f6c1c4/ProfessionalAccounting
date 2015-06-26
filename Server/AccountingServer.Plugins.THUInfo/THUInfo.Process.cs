@@ -381,29 +381,25 @@ namespace AccountingServer.Plugins.THUInfo
             var filter = new VoucherDetail { Title = 1012, SubTitle = 05 };
             var data = m_Data;
 
+            var detailQuery = new DetailQueryAryBase(
+                OperatorType.Substract,
+                new IQueryCompunded<IDetailQueryAtom>[]
+                    {
+                        new DetailQueryAtomBase(
+                            new VoucherDetail { Title = 1012, SubTitle = 05 }),
+                        new DetailQueryAtomBase(new VoucherDetail { Remark = "" })
+                    });
             var voucherQuery = new VoucherQueryAtomBase
                                    {
                                        DetailFilter =
-                                           new DetailQueryAryBase(
-                                           OperatorType.Substract,
-                                           new IQueryCompunded<IDetailQueryAtom>[]
-                                               {
-                                                   new DetailQueryAtomBase(
-                                                       new VoucherDetail { Title = 1012, SubTitle = 05 }),
-                                                   new DetailQueryAtomBase(new VoucherDetail { Remark = "" })
-                                               })
+                                           detailQuery
                                    };
-            foreach (var d in 
-                m_Accountant.SelectVoucherDetails(
-                                                  new VoucherDetailQueryBase
-                                                      {
-                                                          DetailEmitFilter = new EmitBase(),
-                                                          VoucherQuery = voucherQuery
-                                                      }))
-            {
-                var id = Convert.ToInt32(d.Remark);
+            foreach (
+                var id in
+                    m_Accountant.SelectVouchers(voucherQuery)
+                                .SelectMany(v => v.Details.Where(d => d.IsMatch(detailQuery)))
+                                .Select(d => Convert.ToInt32(d.Remark)))
                 data.RemoveAll(r => r.Index == id);
-            }
 
 
             var account =

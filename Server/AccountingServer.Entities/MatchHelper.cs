@@ -86,6 +86,11 @@ namespace AccountingServer.Entities
             return true;
         }
 
+        public static bool IsMatch(this VoucherDetail voucherDetail, IQueryCompunded<IDetailQueryAtom> query)
+        {
+            return IsMatch(query, q => IsMatch(voucherDetail, q.Filter, q.Dir));
+        }
+
         /// <summary>
         ///     判断记账凭证是否符合记账凭证检索式
         /// </summary>
@@ -99,8 +104,8 @@ namespace AccountingServer.Entities
             if (!voucher.Date.Within(query.Range))
                 return false;
             return query.ForAll
-                       ? voucher.Details.All(d => IsMatch(query.DetailFilter, q => d.IsMatch(q.Filter, q.Dir)))
-                       : voucher.Details.Any(d => IsMatch(query.DetailFilter, q => d.IsMatch(q.Filter, q.Dir)));
+                       ? voucher.Details.All(d => d.IsMatch(query.DetailFilter))
+                       : voucher.Details.Any(d => d.IsMatch(query.DetailFilter));
         }
 
         /// <summary>
