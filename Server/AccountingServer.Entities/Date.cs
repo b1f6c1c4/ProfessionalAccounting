@@ -65,9 +65,9 @@ namespace AccountingServer.Entities
     /// <summary>
     ///     日期比较器
     /// </summary>
-    public class DateComparer : Comparer<DateTime?>
+    public class DateComparer : IComparer<DateTime?>
     {
-        public override int Compare(DateTime? x, DateTime? y) { return DateHelper.CompareDate(x, y); }
+        public int Compare(DateTime? x, DateTime? y) { return DateHelper.CompareDate(x, y); }
     }
 
     /// <summary>
