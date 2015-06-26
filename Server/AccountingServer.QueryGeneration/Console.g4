@@ -17,7 +17,7 @@ command
 	;
 
 autoCommand
-	:	Auto DollarQuotedString (SingleQuotedString)*
+	:	DollarQuotedString (SingleQuotedString)*
 	;
 
 otherCommand
@@ -282,9 +282,6 @@ Shutdown
 	;
 Backup
 	:	'backup'
-	;
-Auto
-	:	'auto'
 	;
 Help
 	:	'help'
