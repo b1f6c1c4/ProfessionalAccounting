@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using AccountingServer.BLL;
 using AccountingServer.Console;
+using AccountingServer.Plugins.Interest;
 using AccountingServer.Plugins.THUInfo;
 
 namespace AccountingServer
@@ -50,6 +51,7 @@ namespace AccountingServer
             m_Console = new AccountingConsole(m_Accountant);
             m_Console.AutoConnect();
             m_Console.AddPlugin(thu);
+            m_Console.AddPlugin(new InterestRevenue(m_Accountant));
             //m_Console.PresentQRCode += qrCode =>
             //                           {
             //                               if (qrCode == null)
