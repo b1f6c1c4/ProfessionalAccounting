@@ -72,8 +72,8 @@ namespace AccountingServer.Entities
                 if (filter.Fund != voucherDetail.Fund)
                     return false;
             if (dir != 0)
-                if (dir > 0 && filter.Fund < 0 ||
-                    dir < 0 && filter.Fund > 0)
+                if (dir > 0 && voucherDetail.Fund < 0 ||
+                    dir < 0 && voucherDetail.Fund > 0)
                     return false;
             if (filter.Remark != null)
                 if (filter.Remark == String.Empty)
