@@ -59,11 +59,6 @@ namespace AccountingServer.BLL
             return m_Db.SelectVouchers(query);
         }
 
-        public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
-        {
-            return m_Db.SelectVoucherDetails(query);
-        }
-
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
             var res = m_Db.SelectVoucherDetailsGrouped(query);
