@@ -116,12 +116,15 @@ namespace AccountingServer.Plugins.THUInfo
                 var lst = new List<TransactionRecord>();
                 foreach (var record in grp)
                 {
-                    var item = new VoucherDetail
+                    var rec = record;
+                    Func<int, VoucherDetail> item =
+                        dir => new VoucherDetail
                                    {
                                        Title = 1012,
                                        SubTitle = 05,
-                                       Fund = record.Fund,
-                                       Remark = record.Index.ToString(CultureInfo.InvariantCulture)
+                                       Fund = dir * rec.Fund,
+                                       Remark =
+                                           rec.Index.ToString(CultureInfo.InvariantCulture)
                                    };
                     switch (record.Type)
                     {
@@ -132,7 +135,7 @@ namespace AccountingServer.Plugins.THUInfo
                                             Date = grp.Key.Date,
                                             Details = new List<VoucherDetail>
                                                           {
-                                                              item,
+                                                              item(1),
                                                               new VoucherDetail
                                                                   {
                                                                       Title = 1221,
@@ -143,14 +146,13 @@ namespace AccountingServer.Plugins.THUInfo
                                         });
                             break;
                         case "自助缴费(学生公寓水费)":
-                            item.Fund = -item.Fund;
                             res.Add(
                                     new Voucher
                                         {
                                             Date = grp.Key.Date,
                                             Details = new List<VoucherDetail>
                                                           {
-                                                              item,
+                                                              item(-1),
                                                               new VoucherDetail
                                                                   {
                                                                       Title = 1123,
@@ -177,6 +179,18 @@ namespace AccountingServer.Plugins.THUInfo
                 {
                     if (id == lst.Count)
                         throw new Exception();
+                    var index = id;
+                    Func<int, VoucherDetail> newDetail =
+                        dir => new VoucherDetail
+                                   {
+                                       Title = 1012,
+                                       SubTitle = 05,
+                                       Fund = dir * lst[index].Fund,
+                                       Remark =
+                                           lst[index].Index.ToString(
+                                                                     CultureInfo
+                                                                         .InvariantCulture)
+                                   };
                     switch (inst.Item1)
                     {
                         case RegularType.Meals:
@@ -198,16 +212,7 @@ namespace AccountingServer.Plugins.THUInfo
                                                     Date = grp.Key.Date,
                                                     Details = new List<VoucherDetail>
                                                                   {
-                                                                      new VoucherDetail
-                                                                          {
-                                                                              Title = 1012,
-                                                                              SubTitle = 05,
-                                                                              Fund = -lst[id].Fund,
-                                                                              Remark =
-                                                                                  lst[id].Index.ToString(
-                                                                                                         CultureInfo
-                                                                                                             .InvariantCulture)
-                                                                          },
+                                                                      newDetail(-1),
                                                                       new VoucherDetail
                                                                           {
                                                                               Title = 6602,
@@ -233,16 +238,7 @@ namespace AccountingServer.Plugins.THUInfo
                                                 Date = grp.Key.Date,
                                                 Details = new List<VoucherDetail>
                                                               {
-                                                                  new VoucherDetail
-                                                                      {
-                                                                          Title = 1012,
-                                                                          SubTitle = 05,
-                                                                          Fund = lst[id].Fund,
-                                                                          Remark =
-                                                                              lst[id].Index.ToString(
-                                                                                                     CultureInfo
-                                                                                                         .InvariantCulture)
-                                                                      },
+                                                                  newDetail(1),
                                                                   new VoucherDetail
                                                                       {
                                                                           Title = 1002,
@@ -265,16 +261,7 @@ namespace AccountingServer.Plugins.THUInfo
                                                 Date = grp.Key.Date,
                                                 Details = new List<VoucherDetail>
                                                               {
-                                                                  new VoucherDetail
-                                                                      {
-                                                                          Title = 1012,
-                                                                          SubTitle = 05,
-                                                                          Fund = -lst[id].Fund,
-                                                                          Remark =
-                                                                              lst[id].Index.ToString(
-                                                                                                     CultureInfo
-                                                                                                         .InvariantCulture)
-                                                                      },
+                                                                  newDetail(-1),
                                                                   new VoucherDetail
                                                                       {
                                                                           Title = 6602,
@@ -310,7 +297,8 @@ namespace AccountingServer.Plugins.THUInfo
                 var lst = new List<Tuple<RegularType, string>>();
                 foreach (var s in sp)
                 {
-                    if (s.StartsWith("."))
+                    var ss = s.Trim().ToLowerInvariant();
+                    if (ss.StartsWith("."))
                     {
                         dt = DateTime.Now.Date.AddDays(1 - sp[0].Trim().Length);
                         continue;
@@ -333,33 +321,21 @@ namespace AccountingServer.Plugins.THUInfo
                                            { "zl", "芝兰园" }
                                        };
 
-                    if (canteens.ContainsKey(s.Trim().ToLowerInvariant()))
-                        lst.Add(
-                                new Tuple<RegularType, string>(
-                                    RegularType.Meals,
-                                    canteens[s.Trim().ToLowerInvariant()]));
+                    if (canteens.ContainsKey(ss))
+                        lst.Add(new Tuple<RegularType, string>(RegularType.Meals, canteens[ss]));
                     else
-                        switch (s.Trim().ToLowerInvariant())
+                        switch (ss)
                         {
                             case "sp":
-                                lst.Add(
-                                        new Tuple<RegularType, string>(
-                                            RegularType.Shopping,
-                                            "食品"));
+                                lst.Add(new Tuple<RegularType, string>(RegularType.Shopping, "食品"));
                                 break;
                             case "sh":
-                                lst.Add(
-                                        new Tuple<RegularType, string>(
-                                            RegularType.Shopping,
-                                            "生活用品"));
+                                lst.Add(new Tuple<RegularType, string>(RegularType.Shopping, "生活用品"));
                                 break;
                             case "5184":
                             case "3593":
                             case "9767":
-                                lst.Add(
-                                        new Tuple<RegularType, string>(
-                                            RegularType.Deposit,
-                                            s.Trim()));
+                                lst.Add(new Tuple<RegularType, string>(RegularType.Deposit, ss));
                                 break;
                             default:
                                 throw new InvalidOperationException();
@@ -385,31 +361,21 @@ namespace AccountingServer.Plugins.THUInfo
                 OperatorType.Substract,
                 new IQueryCompunded<IDetailQueryAtom>[]
                     {
-                        new DetailQueryAtomBase(
-                            new VoucherDetail { Title = 1012, SubTitle = 05 }),
+                        new DetailQueryAtomBase(new VoucherDetail { Title = 1012, SubTitle = 05 }),
                         new DetailQueryAtomBase(new VoucherDetail { Remark = "" })
                     });
-            var voucherQuery = new VoucherQueryAtomBase
-                                   {
-                                       DetailFilter =
-                                           detailQuery
-                                   };
-            foreach (
-                var id in
-                    m_Accountant.SelectVouchers(voucherQuery)
-                                .SelectMany(v => v.Details.Where(d => d.IsMatch(detailQuery)))
-                                .Select(d => Convert.ToInt32(d.Remark)))
+            var voucherQuery = new VoucherQueryAtomBase { DetailFilter = detailQuery };
+            foreach (var id in m_Accountant.SelectVouchers(voucherQuery)
+                                           .SelectMany(v => v.Details.Where(d => d.IsMatch(detailQuery)))
+                                           .Select(d => Convert.ToInt32(d.Remark)))
                 data.RemoveAll(r => r.Index == id);
 
 
-            var account =
-                m_Accountant.SelectVouchers(
-                                            new VoucherQueryAtomBase(
-                                                filter: filter))
-                            .SelectMany(
-                                        v =>
-                                        v.Details.Where(d => d.IsMatch(filter))
-                                         .Select(d => new { Detail = d, Voucher = v })).ToList();
+            var account = m_Accountant.SelectVouchers(new VoucherQueryAtomBase(filter: filter))
+                                      .SelectMany(
+                                                  v =>
+                                                  v.Details.Where(d => d.IsMatch(filter))
+                                                   .Select(d => new { Detail = d, Voucher = v })).ToList();
             noRemark = new List<Problem>();
             tooMuch = new List<Problem>();
             tooFew = new List<Problem>();
