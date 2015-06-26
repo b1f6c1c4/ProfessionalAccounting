@@ -14,17 +14,12 @@ using Problem = System.Tuple
 namespace AccountingServer.Plugins.THUInfo
 {
     [Plugin(Alias = "f")]
-    public partial class THUInfo : IPlugin
+    public partial class THUInfo : PluginBase
     {
-        /// <summary>
-        ///     基本会计业务处理类
-        /// </summary>
-        private readonly Accountant m_Accountant;
-
-        public THUInfo(Accountant accountant) { m_Accountant = accountant; }
+        public THUInfo(Accountant accountant):base(accountant) { }
 
         /// <inheritdoc />
-        public IQueryResult Execute(params string[] pars)
+        public override IQueryResult Execute(params string[] pars)
         {
             if (pars.Length >= 3)
                 if (String.IsNullOrEmpty(pars[0]))
@@ -78,7 +73,7 @@ namespace AccountingServer.Plugins.THUInfo
 
                 List<TransactionRecord> fail;
                 foreach (var voucher in AutoGenerate(tooFew.SelectMany(p => p.Item1), pars, out fail))
-                    m_Accountant.Upsert(voucher);
+                    Accountant.Upsert(voucher);
 
                 if (fail.Any())
                 {
@@ -365,13 +360,13 @@ namespace AccountingServer.Plugins.THUInfo
                         new DetailQueryAtomBase(new VoucherDetail { Remark = "" })
                     });
             var voucherQuery = new VoucherQueryAtomBase { DetailFilter = detailQuery };
-            foreach (var id in m_Accountant.SelectVouchers(voucherQuery)
+            foreach (var id in Accountant.SelectVouchers(voucherQuery)
                                            .SelectMany(v => v.Details.Where(d => d.IsMatch(detailQuery)))
                                            .Select(d => Convert.ToInt32(d.Remark)))
                 data.RemoveAll(r => r.Index == id);
 
 
-            var account = m_Accountant.SelectVouchers(new VoucherQueryAtomBase(filter: filter))
+            var account = Accountant.SelectVouchers(new VoucherQueryAtomBase(filter: filter))
                                       .SelectMany(
                                                   v =>
                                                   v.Details.Where(d => d.IsMatch(filter))
@@ -395,7 +390,7 @@ namespace AccountingServer.Plugins.THUInfo
                         if (acc.Count == 1)
                         {
                             acc.Single().Detail.Remark = grp.Single().Index.ToString(CultureInfo.InvariantCulture);
-                            m_Accountant.Upsert(acc.Single().Voucher);
+                            Accountant.Upsert(acc.Single().Voucher);
                         }
                         else
                             noRemark.Add(new Problem(grp.ToList(), acc.Select(d => d.Voucher).ToList()));

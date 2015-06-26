@@ -60,7 +60,7 @@
     <Compile Include="ConsoleParser.Creator.cs" />
     <Compile Include="NamedQueryTraver.cs" />
     <Compile Include="Plugin\Attribute.cs" />
-    <Compile Include="Plugin\IPlugin.cs" />
+    <Compile Include="Plugin\PluginBase.cs" />
     <Compile Include="QuotedStringHelper.cs" />
     <Compile Include="ConsoleParser.Proxy.NamedQuery.cs" />
     <Compile Include="ConsoleParser.Proxy.Distributed.cs" />
