@@ -2,6 +2,9 @@
 
 namespace AccountingServer.Console.Plugin
 {
+    /// <summary>
+    ///     插件基类
+    /// </summary>
     public abstract class PluginBase
     {
         /// <summary>
@@ -11,6 +14,11 @@ namespace AccountingServer.Console.Plugin
 
         protected PluginBase(Accountant accountant) { Accountant = accountant; }
 
+        /// <summary>
+        ///     执行插件表达式
+        /// </summary>
+        /// <param name="pars">参数</param>
+        /// <returns>执行结果</returns>
         public abstract IQueryResult Execute(params string[] pars);
     }
 }
