@@ -16,7 +16,7 @@ namespace AccountingServer.Plugins.THUInfo
     [Plugin(Alias = "f")]
     public partial class THUInfo : PluginBase
     {
-        public THUInfo(Accountant accountant):base(accountant) { }
+        public THUInfo(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
         public override IQueryResult Execute(params string[] pars)
@@ -118,8 +118,7 @@ namespace AccountingServer.Plugins.THUInfo
                                        Title = 1012,
                                        SubTitle = 05,
                                        Fund = dir * rec.Fund,
-                                       Remark =
-                                           rec.Index.ToString(CultureInfo.InvariantCulture)
+                                       Remark = rec.Index.ToString(CultureInfo.InvariantCulture)
                                    };
                     switch (record.Type)
                     {
@@ -174,18 +173,14 @@ namespace AccountingServer.Plugins.THUInfo
                 {
                     if (id == lst.Count)
                         throw new Exception();
-                    var index = id;
-                    Func<int, VoucherDetail> newDetail =
-                        dir => new VoucherDetail
-                                   {
-                                       Title = 1012,
-                                       SubTitle = 05,
-                                       Fund = dir * lst[index].Fund,
-                                       Remark =
-                                           lst[index].Index.ToString(
-                                                                     CultureInfo
-                                                                         .InvariantCulture)
-                                   };
+                    Func<TransactionRecord, int, VoucherDetail> newDetail =
+                        (tr, dir) => new VoucherDetail
+                                         {
+                                             Title = 1012,
+                                             SubTitle = 05,
+                                             Fund = dir * tr.Fund,
+                                             Remark = tr.Index.ToString(CultureInfo.InvariantCulture)
+                                         };
                     switch (inst.Item1)
                     {
                         case RegularType.Meals:
@@ -207,7 +202,7 @@ namespace AccountingServer.Plugins.THUInfo
                                                     Date = grp.Key.Date,
                                                     Details = new List<VoucherDetail>
                                                                   {
-                                                                      newDetail(-1),
+                                                                      newDetail(lst[id], -1),
                                                                       new VoucherDetail
                                                                           {
                                                                               Title = 6602,
@@ -233,7 +228,7 @@ namespace AccountingServer.Plugins.THUInfo
                                                 Date = grp.Key.Date,
                                                 Details = new List<VoucherDetail>
                                                               {
-                                                                  newDetail(1),
+                                                                  newDetail(lst[id], 1),
                                                                   new VoucherDetail
                                                                       {
                                                                           Title = 1002,
@@ -256,7 +251,7 @@ namespace AccountingServer.Plugins.THUInfo
                                                 Date = grp.Key.Date,
                                                 Details = new List<VoucherDetail>
                                                               {
-                                                                  newDetail(-1),
+                                                                  newDetail(lst[id], -1),
                                                                   new VoucherDetail
                                                                       {
                                                                           Title = 6602,
@@ -361,16 +356,16 @@ namespace AccountingServer.Plugins.THUInfo
                     });
             var voucherQuery = new VoucherQueryAtomBase { DetailFilter = detailQuery };
             foreach (var id in Accountant.SelectVouchers(voucherQuery)
-                                           .SelectMany(v => v.Details.Where(d => d.IsMatch(detailQuery)))
-                                           .Select(d => Convert.ToInt32(d.Remark)))
+                                         .SelectMany(v => v.Details.Where(d => d.IsMatch(detailQuery)))
+                                         .Select(d => Convert.ToInt32(d.Remark)))
                 data.RemoveAll(r => r.Index == id);
 
 
             var account = Accountant.SelectVouchers(new VoucherQueryAtomBase(filter: filter))
-                                      .SelectMany(
-                                                  v =>
-                                                  v.Details.Where(d => d.IsMatch(filter))
-                                                   .Select(d => new { Detail = d, Voucher = v })).ToList();
+                                    .SelectMany(
+                                                v =>
+                                                v.Details.Where(d => d.IsMatch(filter))
+                                                 .Select(d => new { Detail = d, Voucher = v })).ToList();
             noRemark = new List<Problem>();
             tooMuch = new List<Problem>();
             tooFew = new List<Problem>();
