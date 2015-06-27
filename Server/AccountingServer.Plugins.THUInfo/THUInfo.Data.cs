@@ -10,9 +10,6 @@ using System.Text.RegularExpressions;
 
 namespace AccountingServer.Plugins.THUInfo
 {
-    /// <summary>
-    ///     从info.tsinghua.edu.cn更新账户
-    /// </summary>
     public partial class THUInfo
     {
         /// <summary>
@@ -28,7 +25,7 @@ namespace AccountingServer.Plugins.THUInfo
         /// <summary>
         ///     锁对象
         /// </summary>
-        private readonly Object m_Lock = new object();
+        private readonly Object m_Lock = new Object();
 
         /// <summary>
         ///     临时文件文件名
