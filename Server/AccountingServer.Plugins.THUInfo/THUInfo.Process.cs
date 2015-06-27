@@ -7,18 +7,39 @@ using AccountingServer.BLL;
 using AccountingServer.Console;
 using AccountingServer.Console.Plugin;
 using AccountingServer.Entities;
-using Problem = System.Tuple
-    <System.Collections.Generic.List<AccountingServer.Plugins.THUInfo.TransactionRecord>,
-        System.Collections.Generic.List<AccountingServer.Entities.Voucher>>;
 
 namespace AccountingServer.Plugins.THUInfo
 {
+    /// <summary>
+    ///     从info.tsinghua.edu.cn更新账户
+    /// </summary>
     [Plugin(Alias = "f")]
     public partial class THUInfo : PluginBase
     {
+        /// <summary>
+        ///     对账忽略标志
+        /// </summary>
+        private const string IgnoranceMark = "reconciliation";
+
         public THUInfo(Accountant accountant) : base(accountant) { }
 
-        /// <inheritdoc />
+        /// <summary>
+        ///     执行插件表达式
+        ///     参数的个数和内容决定行为。
+        ///     <list type="bullet">
+        ///         <item>
+        ///             <description>若第一个参数为<c>String.Empty</c>且参数个数为3，则以第二个参数为用户名，第三个参数为密码更新消费记录；</description>
+        ///         </item>
+        ///         <item>
+        ///             <description>若无参数，则只进行对账；</description>
+        ///         </item>
+        ///         <item>
+        ///             <description>若第一个参数非空，则每个参数表示一天的消费情况。</description>
+        ///         </item>
+        ///     </list>
+        /// </summary>
+        /// <param name="pars">参数列表</param>
+        /// <returns>执行结果</returns>
         public override IQueryResult Execute(params string[] pars)
         {
             if (pars.Length >= 3)
@@ -29,40 +50,48 @@ namespace AccountingServer.Plugins.THUInfo
                 if (m_Data == null)
                     throw new NullReferenceException();
                 List<Problem> noRemark, tooMuch, tooFew;
-                Compare(out noRemark, out tooMuch, out tooFew);
+                List<VDetail> noRecord;
+                Compare(out noRemark, out tooMuch, out tooFew, out noRecord);
                 if (pars.Length == 0 ||
                     String.IsNullOrEmpty(pars[0]) ||
                     noRemark.Any() ||
                     tooMuch.Any() ||
-                    tooFew.Any(p => p.Item2.Any()))
+                    tooFew.Any(p => p.Details.Any()) ||
+                    noRecord.Any())
                 {
                     var sb = new StringBuilder();
                     foreach (var problem in noRemark)
                     {
                         sb.AppendLine("---No Remark");
-                        foreach (var r in problem.Item1)
+                        foreach (var r in problem.Records)
                             sb.AppendLine(r.ToString());
-                        foreach (var v in problem.Item2)
+                        foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
                             sb.AppendLine(CSharpHelper.PresentVoucher(v));
                         sb.AppendLine();
                     }
                     foreach (var problem in tooMuch)
                     {
                         sb.AppendLine("---Too Much Voucher");
-                        foreach (var r in problem.Item1)
+                        foreach (var r in problem.Records)
                             sb.AppendLine(r.ToString());
-                        foreach (var v in problem.Item2)
+                        foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
                             sb.AppendLine(CSharpHelper.PresentVoucher(v));
                         sb.AppendLine();
                     }
                     foreach (var problem in tooFew)
                     {
                         sb.AppendLine("---Too Few Voucher");
-                        foreach (var r in problem.Item1)
+                        foreach (var r in problem.Records)
                             sb.AppendLine(r.ToString());
-                        foreach (var v in problem.Item2)
+                        foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
                             sb.AppendLine(CSharpHelper.PresentVoucher(v));
                         sb.AppendLine();
+                    }
+                    if (noRecord.Any())
+                    {
+                        sb.AppendLine("---No Record");
+                        foreach (var v in noRecord.Select(d => d.Voucher).Distinct())
+                            sb.AppendLine(CSharpHelper.PresentVoucher(v));
                     }
                     if (sb.Length == 0)
                         return new Suceed();
@@ -72,7 +101,7 @@ namespace AccountingServer.Plugins.THUInfo
                     return new Suceed();
 
                 List<TransactionRecord> fail;
-                foreach (var voucher in AutoGenerate(tooFew.SelectMany(p => p.Item1), pars, out fail))
+                foreach (var voucher in AutoGenerate(tooFew.SelectMany(p => p.Records), pars, out fail))
                     Accountant.Upsert(voucher);
 
                 if (fail.Any())
@@ -87,10 +116,19 @@ namespace AccountingServer.Plugins.THUInfo
             }
         }
 
+        /// <summary>
+        ///     自动生成的记账凭证类型
+        /// </summary>
         private enum RegularType
         {
+            /// <summary>
+            ///     餐费
+            /// </summary>
             Meals,
-            Deposit,
+
+            /// <summary>
+            ///     超市购物
+            /// </summary>
             Shopping
         }
 
@@ -134,6 +172,23 @@ namespace AccountingServer.Plugins.THUInfo
                                                                   {
                                                                       Title = 1221,
                                                                       Content = "学生卡待领",
+                                                                      Fund = -record.Fund
+                                                                  }
+                                                          }
+                                        });
+                            break;
+                        case "领取圈存":
+                            res.Add(
+                                    new Voucher
+                                        {
+                                            Date = grp.Key.Date,
+                                            Details = new List<VoucherDetail>
+                                                          {
+                                                              item(1),
+                                                              new VoucherDetail
+                                                                  {
+                                                                      Title = 1002,
+                                                                      Content = "3593",
                                                                       Fund = -record.Fund
                                                                   }
                                                           }
@@ -219,27 +274,6 @@ namespace AccountingServer.Plugins.THUInfo
                                     break;
                             }
                             break;
-                        case RegularType.Deposit:
-                            if (lst[id].Type == "领取圈存")
-                            {
-                                res.Add(
-                                        new Voucher
-                                            {
-                                                Date = grp.Key.Date,
-                                                Details = new List<VoucherDetail>
-                                                              {
-                                                                  newDetail(lst[id], 1),
-                                                                  new VoucherDetail
-                                                                      {
-                                                                          Title = 1002,
-                                                                          Content = inst.Item2,
-                                                                          Fund = -lst[id].Fund
-                                                                      }
-                                                              }
-                                            });
-                                id++;
-                            }
-                            break;
                         case RegularType.Shopping:
                             if (lst[id].Type == "消费" &&
                                 (lst[id].Location == "紫荆服务楼超市" ||
@@ -322,11 +356,6 @@ namespace AccountingServer.Plugins.THUInfo
                             case "sh":
                                 lst.Add(new Tuple<RegularType, string>(RegularType.Shopping, "生活用品"));
                                 break;
-                            case "5184":
-                            case "3593":
-                            case "9767":
-                                lst.Add(new Tuple<RegularType, string>(RegularType.Deposit, ss));
-                                break;
                             default:
                                 throw new InvalidOperationException();
                         }
@@ -337,38 +366,130 @@ namespace AccountingServer.Plugins.THUInfo
         }
 
         /// <summary>
-        ///     对账
+        ///     包含记账凭证信息的细目
         /// </summary>
-        /// <param name="noRemark">无法补足备注的记账凭证</param>
+        private struct VDetail
+        {
+            /// <summary>
+            ///     细目
+            /// </summary>
+            public VoucherDetail Detail;
+
+            /// <summary>
+            ///     细目所在的记账凭证
+            /// </summary>
+            public Voucher Voucher;
+        }
+
+        /// <summary>
+        ///     对账问题
+        /// </summary>
+        private class Problem
+        {
+            /// <summary>
+            ///     消费记录组
+            /// </summary>
+            public List<TransactionRecord> Records { get; private set; }
+
+            /// <summary>
+            ///     记账凭证组
+            /// </summary>
+            public List<VDetail> Details { get; private set; }
+
+            public Problem(List<TransactionRecord> records, List<VDetail> details)
+            {
+                Records = records;
+                Details = details;
+            }
+        }
+
+        /// <summary>
+        ///     对账并自动补足备注
+        /// </summary>
+        /// <param name="noRemark">无法自动补足备注的记账凭证</param>
         /// <param name="tooMuch">一组交易记录对应的记账凭证过多</param>
         /// <param name="tooFew">一组交易记录对应的记账凭证过少</param>
-        private void Compare(out List<Problem> noRemark, out List<Problem> tooMuch, out List<Problem> tooFew)
+        /// <param name="noRecord">一个记账凭证没有可能对应的交易记录</param>
+        private void Compare(out List<Problem> noRemark, out List<Problem> tooMuch, out List<Problem> tooFew,
+                             out List<VDetail> noRecord)
         {
-            var filter = new VoucherDetail { Title = 1012, SubTitle = 05 };
-            var data = m_Data;
+            var data = new List<TransactionRecord>(m_Data);
 
-            var detailQuery = new DetailQueryAryBase(
-                OperatorType.Substract,
-                new IQueryCompunded<IDetailQueryAtom>[]
-                    {
-                        new DetailQueryAtomBase(new VoucherDetail { Title = 1012, SubTitle = 05 }),
-                        new DetailQueryAtomBase(new VoucherDetail { Remark = "" })
-                    });
+            var detailQuery =
+                new DetailQueryAryBase(
+                    OperatorType.Substract,
+                    new IQueryCompunded<IDetailQueryAtom>[]
+                        {
+                            new DetailQueryAtomBase(new VoucherDetail { Title = 1012, SubTitle = 05 }),
+                            new DetailQueryAryBase(
+                                OperatorType.Union,
+                                new IQueryCompunded<IDetailQueryAtom>[]
+                                    {
+                                        new DetailQueryAtomBase(new VoucherDetail { Remark = "" }),
+                                        new DetailQueryAtomBase(new VoucherDetail { Remark = IgnoranceMark })
+                                    }
+                                )
+                        });
             var voucherQuery = new VoucherQueryAtomBase { DetailFilter = detailQuery };
-            foreach (var id in Accountant.SelectVouchers(voucherQuery)
-                                         .SelectMany(v => v.Details.Where(d => d.IsMatch(detailQuery)))
-                                         .Select(d => Convert.ToInt32(d.Remark)))
-                data.RemoveAll(r => r.Index == id);
+            var bin = new HashSet<int>();
+            var binConflict = new HashSet<int>();
+            foreach (var d in Accountant.SelectVouchers(voucherQuery)
+                                        .SelectMany(
+                                                    v => v.Details.Where(d => d.IsMatch(detailQuery))
+                                                          .Select(d => new VDetail { Detail = d, Voucher = v })))
+            {
+                var id = Convert.ToInt32(d.Detail.Remark);
+                if (!bin.Add(id))
+                {
+                    binConflict.Add(id);
+                    continue;
+                }
+                var record = data.SingleOrDefault(r => r.Index == id);
+                if (record == null)
+                {
+                    d.Detail.Remark = null;
+                    Accountant.Upsert(d.Voucher);
+                    continue;
+                }
+                // ReSharper disable once PossibleInvalidOperationException
+                if (!Accountant.IsZero(Math.Abs(d.Detail.Fund.Value) - record.Fund))
+                {
+                    d.Detail.Remark = null;
+                    Accountant.Upsert(d.Voucher);
+                    continue;
+                }
+                data.Remove(record);
+            }
+            foreach (var id in binConflict)
+            {
+                var record = m_Data.SingleOrDefault(r => r.Index == id);
+                if (record != null)
+                    data.Add(record);
 
+                var fltr = new VoucherDetail
+                               {
+                                   Title = 1012,
+                                   SubTitle = 05,
+                                   Remark = id.ToString(CultureInfo.InvariantCulture)
+                               };
+                foreach (var voucher in Accountant.SelectVouchers(new VoucherQueryAtomBase(filter: fltr)))
+                {
+                    foreach (var d in voucher.Details.Where(d => d.IsMatch(fltr)))
+                        d.Remark = null;
+                    Accountant.Upsert(voucher);
+                }
+            }
 
-            var account = Accountant.SelectVouchers(new VoucherQueryAtomBase(filter: filter))
+            var filter0 = new VoucherDetail { Title = 1012, SubTitle = 05, Remark = "" };
+            var account = Accountant.SelectVouchers(new VoucherQueryAtomBase(filter: filter0))
                                     .SelectMany(
-                                                v =>
-                                                v.Details.Where(d => d.IsMatch(filter))
-                                                 .Select(d => new { Detail = d, Voucher = v })).ToList();
+                                                v => v.Details.Where(d => d.IsMatch(filter0))
+                                                      .Select(d => new VDetail { Detail = d, Voucher = v })).ToList();
+
             noRemark = new List<Problem>();
             tooMuch = new List<Problem>();
             tooFew = new List<Problem>();
+            noRecord = new List<VDetail>(account);
 
             foreach (var dfgrp in data.GroupBy(r => new { r.Date, r.Fund }))
             {
@@ -379,6 +500,7 @@ namespace AccountingServer.Plugins.THUInfo
                                   d.Voucher.Date == grp.Key.Date &&
                                   // ReSharper disable once PossibleInvalidOperationException
                                   Accountant.IsZero(Math.Abs(d.Detail.Fund.Value) - grp.Key.Fund)).ToList();
+                noRecord.RemoveAll(acc.Contains);
                 switch (acc.Count.CompareTo(grp.Count()))
                 {
                     case 0:
@@ -388,13 +510,13 @@ namespace AccountingServer.Plugins.THUInfo
                             Accountant.Upsert(acc.Single().Voucher);
                         }
                         else
-                            noRemark.Add(new Problem(grp.ToList(), acc.Select(d => d.Voucher).ToList()));
+                            noRemark.Add(new Problem(grp.ToList(), acc));
                         break;
                     case 1:
-                        tooMuch.Add(new Problem(grp.ToList(), acc.Select(d => d.Voucher).ToList()));
+                        tooMuch.Add(new Problem(grp.ToList(), acc));
                         break;
                     case -1:
-                        tooFew.Add(new Problem(grp.ToList(), acc.Select(d => d.Voucher).ToList()));
+                        tooFew.Add(new Problem(grp.ToList(), acc));
                         break;
                 }
             }

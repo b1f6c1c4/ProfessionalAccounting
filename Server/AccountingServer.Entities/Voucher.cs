@@ -56,11 +56,6 @@ namespace AccountingServer.Entities
     public class Voucher
     {
         /// <summary>
-        ///     ¶ÔÕËºöÂÔ±êÖ¾
-        /// </summary>
-        public const string ReconciliationMark = "reconciliation";
-
-        /// <summary>
         ///     ±àºÅ
         /// </summary>
         public string ID { get; set; }
