@@ -204,7 +204,7 @@ namespace AccountingServer
                         return false;
                 }
                 if (!result)
-                    throw new Exception();
+                    throw new ApplicationException("提交的内容类型未知");
                 // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
                 if (textBoxResult.Text[end] == '}')
                     textBoxResult.Text = textBoxResult.Text.Insert(end + 1, "*/").Insert(begin, "/*");

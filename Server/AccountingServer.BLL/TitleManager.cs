@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using System.Xml;
 using AccountingServer.Entities;
@@ -46,10 +45,8 @@ namespace AccountingServer.BLL
         /// <returns>编号和科目名称</returns>
         public static IEnumerable<Tuple<int, int?, string>> GetTitles()
         {
-            if (XmlDoc == null)
-                throw new IOException("AccountingServer.BLL.Resources.Titles.xml");
-            if (XmlDoc.DocumentElement == null)
-                throw new IOException("AccountingServer.BLL.Resources.Titles.xml");
+            CheckXml();
+            // ReSharper disable once PossibleNullReferenceException
             foreach (XmlElement title in XmlDoc.DocumentElement.ChildNodes)
             {
                 yield return new Tuple<int, int?, string>(
@@ -65,6 +62,15 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
+        ///     检查会计科目信息是否已加载
+        /// </summary>
+        private static void CheckXml()
+        {
+            if (XmlDoc == null)
+                throw new MethodAccessException("在加载AccountingServer.BLL.Resources.Titles.xml时失败，无法访问会计科目信息");
+        }
+
+        /// <summary>
         ///     返回编号对应的会计科目名称
         /// </summary>
         /// <param name="title">一级科目编号</param>
@@ -72,8 +78,7 @@ namespace AccountingServer.BLL
         /// <returns>名称</returns>
         public static string GetTitleName(int? title, int? subtitle = null)
         {
-            if (XmlDoc == null)
-                throw new IOException("AccountingServer.BLL.Resources.Titles.xml");
+            CheckXml();
             if (!title.HasValue)
                 return null;
 
@@ -111,8 +116,7 @@ namespace AccountingServer.BLL
         /// <returns>名称</returns>
         public static string GetTitleName(VoucherDetail detail)
         {
-            if (XmlDoc == null)
-                throw new IOException("AccountingServer.BLL.Resources.Titles.xml");
+            CheckXml();
             return detail.SubTitle.HasValue
                        ? GetTitleName(detail.Title) + "-" + GetTitleName(detail.Title, detail.SubTitle)
                        : GetTitleName(detail.Title);

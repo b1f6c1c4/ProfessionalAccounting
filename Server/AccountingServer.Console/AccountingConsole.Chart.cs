@@ -31,6 +31,13 @@ namespace AccountingServer.Console
             return (ChartData)helper.Traversal(null, expr.namedQuery());
         }
 
+        /// <summary>
+        ///     呈现图表
+        /// </summary>
+        /// <param name="path0">路径</param>
+        /// <param name="query">分类汇总检索式</param>
+        /// <param name="coefficient">路径上累计的系数</param>
+        /// <returns></returns>
         private object PresentChart(object path0, INamedQ query, double coefficient)
         {
             var lvs = (String.IsNullOrWhiteSpace(query.Remark))
@@ -62,7 +69,7 @@ namespace AccountingServer.Console
                                 {
                                     var lst = new List<Series>();
                                     if (!Reduce(r, lst))
-                                        throw new InvalidOperationException();
+                                        throw new ArgumentException("同一层级的路径之间不符", "query");
                                     return new ChartData { ChartAreas = new List<ChartArea>(), Series = lst };
                                 }
                                 return r;
@@ -71,8 +78,8 @@ namespace AccountingServer.Console
                                  {
                                      var lst = results.ToList();
 
-                                     if (lst.Count > 0 && lst[0] is string
-                                         || lvs == null)
+                                     if (lst.Count > 0 && lst[0] is string ||
+                                         lvs == null)
                                      {
                                          var series = path as Series;
                                          if (series != null)
@@ -82,6 +89,8 @@ namespace AccountingServer.Console
                                          }
                                      }
 
+                                     if (lvs == null)
+                                         throw new ArgumentException("汇总错误");
                                      var lv = lvs[depth];
                                      return Reduce(path, lst, lv.Series() != null);
                                  },
@@ -89,7 +98,7 @@ namespace AccountingServer.Console
                                   {
                                       var series = path as Series;
                                       if (series == null)
-                                          throw new InvalidOperationException();
+                                          throw new ArgumentException("底层路径不正确", "query");
 
                                       series.ChartType = SeriesChartType.StackedArea;
                                       foreach (var o in results)
@@ -105,6 +114,12 @@ namespace AccountingServer.Console
             return helper.Traversal(path0, m_Accountant.SelectVoucherDetailsGrouped(query.GroupingQuery));
         }
 
+        /// <summary>
+        ///     获取横轴标签
+        /// </summary>
+        /// <param name="level">分类汇总层次</param>
+        /// <param name="cat">累计类别</param>
+        /// <returns>标签</returns>
         private static object GetXValue(SubtotalLevel level, Balance cat)
         {
             switch (level)
@@ -125,10 +140,16 @@ namespace AccountingServer.Console
                 case SubtotalLevel.Year:
                     return cat.Date;
                 default:
-                    throw new InvalidOperationException();
+                    throw new ArgumentException("分类汇总层次未知", "cat");
             }
         }
 
+        /// <summary>
+        ///     获取系列名称
+        /// </summary>
+        /// <param name="level">分类汇总层次</param>
+        /// <param name="cat">类别</param>
+        /// <returns>系列名称</returns>
         private static string GetName(SubtotalLevel level, Balance cat)
         {
             switch (level)
@@ -146,6 +167,13 @@ namespace AccountingServer.Console
             }
         }
 
+        /// <summary>
+        ///     系列分裂
+        /// </summary>
+        /// <param name="lv">制图层次解析结果</param>
+        /// <param name="path">路径</param>
+        /// <param name="name">系列名称</param>
+        /// <returns>新路径</returns>
         private static object Fork(ConsoleParser.ChartLevelContext lv, object path, string name)
         {
             if (lv.Ignore() != null)
@@ -158,7 +186,7 @@ namespace AccountingServer.Console
 
                 var area = path as ChartArea;
                 if (area == null)
-                    throw new InvalidOperationException();
+                    throw new ArgumentException("制图层次与路径不符", "path");
 
                 return new ChartArea(area.Name.Merge(name));
             }
@@ -166,7 +194,7 @@ namespace AccountingServer.Console
             if (lv.Series() != null)
             {
                 if (path == null)
-                    throw new InvalidOperationException();
+                    throw new ArgumentException("制图层次与路径不符", "path");
 
                 var area = path as ChartArea;
                 if (area != null)
@@ -176,11 +204,17 @@ namespace AccountingServer.Console
                 if (series != null)
                     return new Series(series.Name.Merge(name)) { ChartArea = series.ChartArea };
 
-                throw new InvalidOperationException();
+                throw new ArgumentException("制图层次与路径不符", "path");
             }
-            throw new InvalidOperationException();
+            throw new ArgumentException("制图层次未知", "lv");
         }
 
+        /// <summary>
+        ///     汇总路径
+        /// </summary>
+        /// <param name="o">路径</param>
+        /// <param name="data">路径集</param>
+        /// <returns>是否并入路径集</returns>
         private static bool Reduce(object o, ICollection<Series> data)
         {
             var series = o as Series;
@@ -199,6 +233,13 @@ namespace AccountingServer.Console
             return false;
         }
 
+        /// <summary>
+        ///     汇总路径
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="lst">路径集</param>
+        /// <param name="edge">是否末级汇总</param>
+        /// <returns>路径</returns>
         private static object Reduce(object path, IEnumerable<object> lst, bool edge)
         {
             var lout = new List<Series>();
@@ -206,13 +247,13 @@ namespace AccountingServer.Console
             {
                 foreach (var o in lst)
                     if (!Reduce(o, lout))
-                        throw new InvalidOperationException();
+                        throw new ArgumentException("同一层级的路径之间不符", "lst");
                 return lout;
             }
 
             if (path != null &&
                 !(path is ChartArea))
-                throw new InvalidOperationException();
+                throw new ArgumentException("路径与上一层级的路径不符", "path");
 
             var aout = new List<ChartArea>();
             foreach (var o in lst)
@@ -222,7 +263,7 @@ namespace AccountingServer.Console
 
                 var d = o as ChartData;
                 if (d == null)
-                    throw new InvalidOperationException();
+                    throw new ArgumentException("同一层级的路径之间不符", "lst");
 
                 aout.AddRange(d.ChartAreas);
                 lout.AddRange(d.Series);
@@ -231,7 +272,7 @@ namespace AccountingServer.Console
             {
                 var area = path as ChartArea;
                 if (area == null)
-                    throw new InvalidOperationException();
+                    throw new ArgumentException("制图层次与路径不符", "path");
 
                 if (lout.Any(s => s.ChartType == SeriesChartType.StackedColumn))
                 {

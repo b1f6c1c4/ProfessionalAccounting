@@ -98,7 +98,7 @@ namespace AccountingServer.Console
                             dt = DateTime.ParseExact(RangeAMonth().GetText() + "08", "yyyyMMdd", null);
                         return new DateFilter(dt.AddMonths(-1).AddDays(1), dt);
                     }
-                    throw new InvalidOperationException();
+                    throw new MemberAccessException("表达式错误");
                 }
             }
         }
@@ -131,7 +131,7 @@ namespace AccountingServer.Console
                         return rangeMonth().Range;
                     if (rangeYear() != null)
                         return rangeYear().Range;
-                    throw new InvalidOperationException();
+                    throw new MemberAccessException("表达式错误");
                 }
             }
         }

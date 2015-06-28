@@ -391,13 +391,13 @@ namespace AccountingServer.DAL
                         sb.AppendLine(")(entity)");
                         break;
                     default:
-                        throw new InvalidOperationException();
+                        throw new ArgumentException("运算类型未知", "query");
                 }
                 sb.AppendLine(";");
                 sb.AppendLine("}");
                 return sb.ToString();
             }
-            throw new InvalidOperationException();
+            throw new ArgumentException("检索式类型未知", "query");
         }
 
         /// <summary>

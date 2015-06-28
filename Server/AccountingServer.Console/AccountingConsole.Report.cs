@@ -34,7 +34,7 @@ namespace AccountingServer.Console
             if (expr.groupedQuery() != null)
                 return new UnEditableText(PresentReport(String.Empty, expr.groupedQuery(), 1));
 
-            throw new InvalidOperationException();
+            throw new ArgumentException("表达式类型未知", "expr");
         }
 
         /// <summary>

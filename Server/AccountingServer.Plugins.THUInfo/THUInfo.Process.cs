@@ -48,7 +48,7 @@ namespace AccountingServer.Plugins.THUInfo
             lock (m_Lock)
             {
                 if (m_Data == null)
-                    throw new NullReferenceException();
+                    throw new InvalidOperationException("没有消费记录");
                 List<Problem> noRemark, tooMuch, tooFew;
                 List<VDetail> noRecord;
                 Compare(out noRemark, out tooMuch, out tooFew, out noRecord);
@@ -227,7 +227,7 @@ namespace AccountingServer.Plugins.THUInfo
                 foreach (var inst in ins)
                 {
                     if (id == lst.Count)
-                        throw new Exception();
+                        throw new ArgumentException("生成记账所需参数不足", "pars");
                     Func<TransactionRecord, int, VoucherDetail> newDetail =
                         (tr, dir) => new VoucherDetail
                                          {
@@ -357,7 +357,7 @@ namespace AccountingServer.Plugins.THUInfo
                                 lst.Add(new Tuple<RegularType, string>(RegularType.Shopping, "生活用品"));
                                 break;
                             default:
-                                throw new InvalidOperationException();
+                                throw new ArgumentException("未知参数", "pars");
                         }
                 }
                 dic.Add(dt, lst);

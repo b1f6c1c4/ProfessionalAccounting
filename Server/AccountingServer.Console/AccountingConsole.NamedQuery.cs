@@ -6,6 +6,12 @@ namespace AccountingServer.Console
 {
     public partial class AccountingConsole
     {
+        /// <summary>
+        ///     解析命名查询模板
+        /// </summary>
+        /// <param name="code">命名查询模板表达式</param>
+        /// <param name="name">名称</param>
+        /// <returns>命名查询模板</returns>
         private static string ParseNamedQueryTemplate(string code, out string name)
         {
             var regex =
@@ -13,7 +19,7 @@ namespace AccountingServer.Console
                     @"^new\s+NamedQueryTemplate\s*\{(?<all>(?<name>\$(?:[^\$]|\$\$)*\$)(?:\*F[+-]?\d*.?\d*(?:[Ee][+-]?\d+)?|\*P[+-]?\d*.?\d*)?(?:""(?:[^""]|"""")*"")?::?[\s\S]*)\}$");
             var m = regex.Match(code);
             if (m.Length == 0)
-                throw new InvalidOperationException();
+                throw new ArgumentException("语法错误", "code");
             name = m.Groups["name"].Value.Dequotation();
             return m.Groups["all"].Value;
         }
@@ -21,15 +27,15 @@ namespace AccountingServer.Console
         /// <summary>
         ///     更新或添加命名查询模板
         /// </summary>
-        /// <param name="code">命名查询模板</param>
-        /// <returns>命名查询模板</returns>
+        /// <param name="code">命名查询模板表达式</param>
+        /// <returns>命名查询模板表达式</returns>
         public string ExecuteNamedQueryTemplateUpsert(string code)
         {
             string name;
             var all = ParseNamedQueryTemplate(code, out name);
 
             if (!m_Accountant.Upsert(name, all))
-                throw new Exception();
+                throw new ApplicationException("更新或添加失败");
 
             return String.Format("@new NamedQueryTemplate {{{0}}}@", all);
         }
@@ -37,12 +43,12 @@ namespace AccountingServer.Console
         /// <summary>
         ///     删除命名查询模板
         /// </summary>
-        /// <param name="code">命名查询模板</param>
+        /// <param name="code">命名查询模板表达式</param>
         /// <returns>是否成功</returns>
         public bool ExecuteNamedQueryTemplateRemoval(string code)
         {
             string name;
-            var all = ParseNamedQueryTemplate(code, out name);
+            ParseNamedQueryTemplate(code, out name);
 
             return m_Accountant.DeleteNamedQueryTemplate(name);
         }

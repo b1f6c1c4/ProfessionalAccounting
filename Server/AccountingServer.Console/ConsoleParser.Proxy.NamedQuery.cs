@@ -20,7 +20,7 @@ namespace AccountingServer.Console
                         return namedQueries();
                     if (namedQueryReference() != null)
                         return namedQueryReference();
-                    throw new InvalidOperationException();
+                    throw new MemberAccessException("表达式错误");
                 }
             }
 
@@ -56,7 +56,7 @@ namespace AccountingServer.Console
                         var s = coef().Float().GetText();
                         return Double.Parse(s.Substring(1, s.Length - 1));
                     }
-                    throw new InvalidOperationException();
+                    throw new MemberAccessException("表达式错误");
                 }
             }
 
@@ -89,7 +89,7 @@ namespace AccountingServer.Console
                         var s = coef().Float().GetText();
                         return Double.Parse(s.Substring(1, s.Length - 1));
                     }
-                    throw new InvalidOperationException();
+                    throw new MemberAccessException("表达式错误");
                 }
             }
 

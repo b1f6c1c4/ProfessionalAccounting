@@ -19,7 +19,7 @@ namespace AccountingServer.Console
             var asset = CSharpHelper.ParseAsset(code);
 
             if (!m_Accountant.Upsert(asset))
-                throw new Exception();
+                throw new ApplicationException("更新或添加失败");
 
             return CSharpHelper.PresentAsset(asset);
         }
@@ -34,7 +34,7 @@ namespace AccountingServer.Console
             var asset = CSharpHelper.ParseAsset(code);
 
             if (!asset.ID.HasValue)
-                throw new Exception();
+                throw new ApplicationException("编号未知");
 
             return m_Accountant.DeleteAsset(asset.ID.Value);
         }

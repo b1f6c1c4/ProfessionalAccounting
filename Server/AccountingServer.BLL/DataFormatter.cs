@@ -116,7 +116,7 @@ namespace AccountingServer.BLL
                 case SubtotalLevel.Year:
                     return String.Format("{0:D4}", value.Value.Year);
                 default:
-                    throw new InvalidOperationException();
+                    throw new ArgumentException("分类层次并非基于日期", "level");
             }
         }
 

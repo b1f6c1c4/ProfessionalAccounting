@@ -72,7 +72,7 @@ namespace AccountingServer.Plugins.THUInfo
             var req = WebRequest.Create(@"http://ecard.tsinghua.edu.cn/user/ExDetailsDown.do?") as HttpWebRequest;
 
             if (req == null)
-                throw new WebException();
+                throw new WebException("下载xls文档时出现错误");
 
             req.Host = @"ecard.tsinghua.edu.cn";
             req.KeepAlive = false;
@@ -103,7 +103,7 @@ namespace AccountingServer.Plugins.THUInfo
             var req = WebRequest.Create(url) as HttpWebRequest;
 
             if (req == null)
-                throw new WebException();
+                throw new WebException("登录学生卡管理系统时出现错误");
 
             req.Host = @"ecard.tsinghua.edu.cn";
             req.KeepAlive = false;
@@ -129,7 +129,7 @@ namespace AccountingServer.Plugins.THUInfo
             var req = WebRequest.Create(@"http://info.tsinghua.edu.cn/render.userLayoutRootNode.uP") as HttpWebRequest;
 
             if (req == null)
-                throw new WebException();
+                throw new WebException("获取令牌时出现错误");
 
             req.Host = @"info.tsinghua.edu.cn";
             req.KeepAlive = false;
@@ -146,7 +146,7 @@ namespace AccountingServer.Plugins.THUInfo
             using (var stream = res.GetResponseStream())
             {
                 if (stream == null)
-                    throw new WebException();
+                    throw new WebException("获取令牌时出现错误");
 
                 using (var reader = new StreamReader(stream, Encoding.UTF8))
                 {
@@ -174,7 +174,7 @@ namespace AccountingServer.Plugins.THUInfo
             var req = WebRequest.Create(@"http://info.tsinghua.edu.cn/Login") as HttpWebRequest;
 
             if (req == null)
-                throw new WebException();
+                throw new WebException("登录信息门户时出现错误");
 
             req.Host = @"info.tsinghua.edu.cn";
             req.KeepAlive = false;

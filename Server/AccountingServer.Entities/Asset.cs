@@ -212,7 +212,7 @@ namespace AccountingServer.Entities
                                                    return 2;
                                                if (t is DevalueItem)
                                                    return 3;
-                                               throw new InvalidOperationException();
+                                               throw new ArgumentException("计算表条目类型未知");
                                            };
             return getType(x).CompareTo(getType(y));
         }

@@ -95,7 +95,7 @@ namespace AccountingServer.DAL
 
             var process = Process.Start(startinfo);
             if (process == null)
-                throw new Exception();
+                throw new ApplicationException("无法启动数据库");
         }
 
         /// <inheritdoc />
@@ -150,7 +150,7 @@ namespace AccountingServer.DAL
 
             var process = Process.Start(startinfo);
             if (process == null)
-                throw new Exception();
+                throw new ApplicationException("无法备份数据库");
         }
 
         #endregion
@@ -419,7 +419,7 @@ namespace AccountingServer.DAL
             {
                 var dQuery = query.VoucherQuery as IVoucherQueryAtom;
                 if (dQuery == null)
-                    throw new InvalidOperationException();
+                    throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", "query");
                 sb.Append(dQuery.DetailFilter.GetJavascriptFilter());
             }
             sb.AppendLine(";");

@@ -23,11 +23,11 @@ namespace AccountingServer.Console
         public IQueryResult Execute(string s)
         {
             if (String.IsNullOrWhiteSpace(s))
-                throw new Exception();
+                throw new ArgumentNullException("s");
 
             var result = ConsoleParser.From(s).command();
             if (result.exception != null)
-                throw new Exception(result.exception.ToString());
+                throw new ArgumentException(result.exception.ToString(), "s");
 
             if (result.autoCommand() != null)
                 return ExecuteAuto(result.autoCommand());
@@ -77,9 +77,8 @@ namespace AccountingServer.Console
                         // ReSharper disable once HeuristicUnreachableCode
                         return new Suceed();
                 }
-                throw new InvalidOperationException();
             }
-            throw new InvalidOperationException();
+            throw new ArgumentException("表达式类型未知");
         }
     }
 }
