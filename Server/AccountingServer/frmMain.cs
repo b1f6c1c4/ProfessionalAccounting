@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using AccountingServer.BLL;
+using AccountingServer.Plugins.Utilities;
 using AccountingServer.Shell;
 using AccountingServer.Plugins.Interest;
 using AccountingServer.Plugins.THUInfo;
@@ -53,7 +54,8 @@ namespace AccountingServer
                                   new PluginShell
                                       {
                                           thu,
-                                          new InterestRevenue(m_Accountant)
+                                          new InterestRevenue(m_Accountant),
+                                          new Utilities(m_Accountant)
                                       }
                           };
             m_Shell.AutoConnect();

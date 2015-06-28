@@ -27,6 +27,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugin", "Plugin", "{376C7C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.Plugins.Interest", "AccountingServer.Plugins.Interest\AccountingServer.Plugins.Interest.csproj", "{2A6865A5-D37E-406A-A51C-3EF4E8A5C9F4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.Plugins.Utilities", "AccountingServer.Plugins.Utilities\AccountingServer.Plugins.Utilities.csproj", "{ACFBB04D-BAD6-48A8-95FC-B04B5A6FD33B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +66,10 @@ Global
 		{2A6865A5-D37E-406A-A51C-3EF4E8A5C9F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A6865A5-D37E-406A-A51C-3EF4E8A5C9F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A6865A5-D37E-406A-A51C-3EF4E8A5C9F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACFBB04D-BAD6-48A8-95FC-B04B5A6FD33B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACFBB04D-BAD6-48A8-95FC-B04B5A6FD33B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACFBB04D-BAD6-48A8-95FC-B04B5A6FD33B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACFBB04D-BAD6-48A8-95FC-B04B5A6FD33B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -78,5 +84,6 @@ Global
 		{BD4F3271-7880-4AF3-BB2E-93D8E357D471} = {376C7C43-2BA3-4177-872E-13053716C8A5}
 		{376C7C43-2BA3-4177-872E-13053716C8A5} = {13C35141-C1A9-46DB-9ED4-3310DCD021FC}
 		{2A6865A5-D37E-406A-A51C-3EF4E8A5C9F4} = {376C7C43-2BA3-4177-872E-13053716C8A5}
+		{ACFBB04D-BAD6-48A8-95FC-B04B5A6FD33B} = {376C7C43-2BA3-4177-872E-13053716C8A5}
 	EndGlobalSection
 EndGlobal
