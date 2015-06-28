@@ -15,6 +15,8 @@ Server/AccountingServer.Plugins.Interest/bin/
 Server/AccountingServer.Plugins.Interest/obj/
 Server/AccountingServer.Plugins.THUInfo/bin/
 Server/AccountingServer.Plugins.THUInfo/obj/
+Server/AccountingServer.Plugins.Utilities/bin/
+Server/AccountingServer.Plugins.Utilities/obj/
 Server/AccountingServer.BLL/bin/
 Server/AccountingServer.BLL/obj/
 Server/AccountingServer.DAL/bin/
