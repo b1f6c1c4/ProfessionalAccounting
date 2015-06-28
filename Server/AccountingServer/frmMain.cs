@@ -48,10 +48,16 @@ namespace AccountingServer
             var thu = new THUInfo(m_Accountant);
             Task.Run(() => thu.FetchData(@"2014010914", @""));
 
-            m_Shell = new AccountingShell(m_Accountant);
+            m_Shell = new AccountingShell(m_Accountant)
+                          {
+                              PluginManager =
+                                  new PluginShell
+                                      {
+                                          thu,
+                                          new InterestRevenue(m_Accountant)
+                                      }
+                          };
             m_Shell.AutoConnect();
-            m_Shell.AddPlugin(thu);
-            m_Shell.AddPlugin(new InterestRevenue(m_Accountant));
             //m_Shell.PresentQRCode += qrCode =>
             //                           {
             //                               if (qrCode == null)

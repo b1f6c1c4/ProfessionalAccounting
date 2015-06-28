@@ -7,14 +7,17 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.Shell
 {
-    public partial class AccountingShell
+    /// <summary>
+    ///     分类汇总结果处理器
+    /// </summary>
+    internal static class SubtotalHelper
     {
         /// <summary>
         ///     用换行回车连接非空字符串
         /// </summary>
         /// <param name="strings">字符串</param>
         /// <returns>新字符串，如无非空字符串则为空</returns>
-        private static string NotNullJoin(IEnumerable<string> strings)
+        public static string NotNullJoin(IEnumerable<string> strings)
         {
             var flag = false;
 
@@ -33,25 +36,12 @@ namespace AccountingServer.Shell
         }
 
         /// <summary>
-        ///     执行分类汇总检索式并呈现结果
-        /// </summary>
-        /// <param name="query">分类汇总检索式</param>
-        /// <returns>执行结果</returns>
-        private IQueryResult PresentSubtotal(IGroupedQuery query)
-        {
-            var result = m_Accountant.SelectVoucherDetailsGrouped(query);
-
-            return new UnEditableText(PresentSubtotal(result, query.Subtotal));
-        }
-
-
-        /// <summary>
         ///     呈现分类汇总
         /// </summary>
         /// <param name="res">分类汇总结果</param>
         /// <param name="args">分类汇总参数</param>
         /// <returns>分类汇总结果</returns>
-        private static string PresentSubtotal(IEnumerable<Balance> res, ISubtotal args)
+        public static string PresentSubtotal(IEnumerable<Balance> res, ISubtotal args)
         {
             const int ident = 4;
 

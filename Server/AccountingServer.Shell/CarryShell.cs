@@ -1,17 +1,28 @@
 ﻿using System;
+using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Parsing;
 
 namespace AccountingServer.Shell
 {
-    public partial class AccountingShell
+    /// <summary>
+    ///     结转表达式解释器
+    /// </summary>
+    internal class CarryShell
     {
+        /// <summary>
+        ///     基本会计业务处理类
+        /// </summary>
+        private readonly Accountant m_Accountant;
+
+        public CarryShell(Accountant helper) { m_Accountant = helper; }
+
         /// <summary>
         ///     执行结转表达式
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>执行结果</returns>
-        private IQueryResult ExecuteCarry(ShellParser.CarryContext expr)
+        public IQueryResult ExecuteCarry(ShellParser.CarryContext expr)
         {
             if (expr.carryMonth() != null)
             {

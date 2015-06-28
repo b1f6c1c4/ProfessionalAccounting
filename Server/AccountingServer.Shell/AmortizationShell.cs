@@ -9,44 +9,24 @@ using AccountingServer.Shell.Parsing;
 
 namespace AccountingServer.Shell
 {
-    public partial class AccountingShell
+    /// <summary>
+    ///     摊销表达式解释器
+    /// </summary>
+    internal class AmortizationShell
     {
         /// <summary>
-        ///     更新或添加摊销
+        ///     基本会计业务处理类
         /// </summary>
-        /// <param name="code">摊销的C#代码</param>
-        /// <returns>新摊销的C#代码</returns>
-        public string ExecuteAmortUpsert(string code)
-        {
-            var amort = CSharpHelper.ParseAmort(code);
+        private readonly Accountant m_Accountant;
 
-            if (!m_Accountant.Upsert(amort))
-                throw new ApplicationException("更新或添加失败");
-
-            return CSharpHelper.PresentAmort(amort);
-        }
-
-        /// <summary>
-        ///     删除摊销
-        /// </summary>
-        /// <param name="code">摊销的C#代码</param>
-        /// <returns>是否成功</returns>
-        public bool ExecuteAmortRemoval(string code)
-        {
-            var amort = CSharpHelper.ParseAmort(code);
-
-            if (!amort.ID.HasValue)
-                throw new ApplicationException("编号未知");
-
-            return m_Accountant.DeleteAmortization(amort.ID.Value);
-        }
+        public AmortizationShell(Accountant helper) { m_Accountant = helper; }
 
         /// <summary>
         ///     执行摊销表达式
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>执行结果</returns>
-        private IQueryResult ExecuteAmort(ShellParser.AmortContext expr)
+        public IQueryResult ExecuteAmort(ShellParser.AmortContext expr)
         {
             var amortListContext = expr.amortList();
             if (amortListContext != null)

@@ -44,19 +44,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccountingShell.Amort.cs" />
-    <Compile Include="AccountingShell.Asset.cs" />
-    <Compile Include="AccountingShell.Plugin.cs" />
-    <Compile Include="AccountingShell.Report.cs" />
-    <Compile Include="AccountingShell.Check.cs" />
-    <Compile Include="AccountingShell.Common.cs" />
-    <Compile Include="AccountingShell.Miscellaneous.cs" />
-    <Compile Include="AccountingShell.Chart.cs" />
-    <Compile Include="AccountingShell.NamedQuery.cs" />
-    <Compile Include="AccountingShell.Carry.cs" />
-    <Compile Include="AccountingShell.Server.cs" />
-    <Compile Include="AccountingShell.Subtotal.cs" />
-    <Compile Include="AccountingShell.Voucher.cs" />
+    <Compile Include="AmortizationShell.cs" />
+    <Compile Include="AssetShell.cs" />
+    <Compile Include="PluginShell.cs" />
+    <Compile Include="ReportShell.cs" />
+    <Compile Include="CheckShell.cs" />
+    <Compile Include="AccountingShell.cs" />
+    <Compile Include="ChartShell.cs" />
+    <Compile Include="NamedQueryShell.cs" />
+    <Compile Include="CarryShell.cs" />
+    <Compile Include="SubtotalHelper.cs" />
     <Compile Include="NamedQueryTraver.cs" />
     <Compile Include="Parsing\ShellParser.Creator.cs" />
     <Compile Include="Plugin\Attribute.cs" />

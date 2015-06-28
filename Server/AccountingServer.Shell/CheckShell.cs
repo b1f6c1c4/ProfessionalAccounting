@@ -5,13 +5,23 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.Shell
 {
-    public partial class AccountingShell
+    /// <summary>
+    ///     检验表达式解释器
+    /// </summary>
+    internal class CheckShell
     {
+        /// <summary>
+        ///     基本会计业务处理类
+        /// </summary>
+        private readonly Accountant m_Accountant;
+
+        public CheckShell(Accountant helper) { m_Accountant = helper; }
+
         /// <summary>
         ///     检查每张会计记账凭证借贷方是否相等
         /// </summary>
         /// <returns>有误的会计记账凭证表达式</returns>
-        private IQueryResult BasicCheck()
+        public IQueryResult BasicCheck()
         {
             var sb = new StringBuilder();
             foreach (var voucher in m_Accountant.SelectVouchers(null))
@@ -37,7 +47,7 @@ namespace AccountingServer.Shell
         ///     检查每科目每内容每日资产无贷方余额，负债无借方余额
         /// </summary>
         /// <returns>发生错误的第一日及其信息</returns>
-        private IQueryResult AdvancedCheck()
+        public IQueryResult AdvancedCheck()
         {
             var res =
                 m_Accountant.SelectVoucherDetailsGrouped(
