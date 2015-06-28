@@ -127,7 +127,7 @@ namespace AccountingServer.Plugins.Utilities
                                                                        }))
                               .Single()
                               .Fund;
-                var fund = bal1 - bal2;
+                var fund = Math.Round(bal1 - bal2, 8);
                 return new Voucher
                            {
                                Date = date,
