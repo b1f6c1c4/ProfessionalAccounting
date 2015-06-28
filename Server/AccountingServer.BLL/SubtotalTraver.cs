@@ -190,7 +190,7 @@ namespace AccountingServer.BLL
                                                     SubtotalArgs.GatherType != GatheringType.NonZero ||
                                                     !Accountant.IsZero(b.Fund))
                                              .Select(b => LeafAggregated(newPath, cat, depth, b)));
-                throw new InvalidOperationException();
+                throw new ArgumentException("日期累加类型未知");
             }
             // else
             {
@@ -288,7 +288,7 @@ namespace AccountingServer.BLL
                                     });
                         break;
                     default:
-                        throw new InvalidOperationException();
+                        throw new ArgumentException("分类层次类型未知");
                 }
                 return Reduce(path, cat, depth, SubtotalArgs.Levels[depth], resx);
             }

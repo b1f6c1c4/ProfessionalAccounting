@@ -26,7 +26,7 @@ namespace AccountingServer.Console
 
                 if (!rng.StartDate.HasValue ||
                     !rng.EndDate.HasValue)
-                    throw new InvalidOperationException();
+                    throw new ArgumentException("时间范围无界", "expr");
 
                 var dt = new DateTime(rng.StartDate.Value.Year, rng.StartDate.Value.Month, 1);
 
@@ -59,7 +59,7 @@ namespace AccountingServer.Console
 
                 if (!rng.StartDate.HasValue ||
                     !rng.EndDate.HasValue)
-                    throw new InvalidOperationException();
+                    throw new ArgumentException("时间范围无界", "expr");
 
                 var count = 0L;
                 var dt = new DateTime(rng.StartDate.Value.Year, rng.StartDate.Value.Month, 1);
@@ -100,7 +100,7 @@ namespace AccountingServer.Console
                 }
 
                 if (!rng.EndDate.HasValue)
-                    throw new InvalidOperationException();
+                    throw new ArgumentException("时间范围无后界", "expr");
 
                 var dt = new DateTime((rng.StartDate ?? rng.EndDate.Value).Year, 1, 1);
 
@@ -129,7 +129,7 @@ namespace AccountingServer.Console
                 }
 
                 if (!rng.EndDate.HasValue)
-                    throw new InvalidOperationException();
+                    throw new ArgumentException("时间范围无后界", "expr");
 
                 var count = 0L;
                 var dt = new DateTime((rng.StartDate ?? rng.EndDate.Value).Year, 1, 1);
@@ -157,7 +157,7 @@ namespace AccountingServer.Console
 
                 return new NumberAffected(count);
             }
-            throw new InvalidOperationException();
+            throw new ArgumentException("表达式类型未知", "expr");
         }
     }
 }

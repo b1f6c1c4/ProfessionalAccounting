@@ -20,7 +20,7 @@ namespace AccountingServer.Console
             var amort = CSharpHelper.ParseAmort(code);
 
             if (!m_Accountant.Upsert(amort))
-                throw new Exception();
+                throw new ApplicationException("更新或添加失败");
 
             return CSharpHelper.PresentAmort(amort);
         }
@@ -35,7 +35,7 @@ namespace AccountingServer.Console
             var amort = CSharpHelper.ParseAmort(code);
 
             if (!amort.ID.HasValue)
-                throw new Exception();
+                throw new ApplicationException("编号未知");
 
             return m_Accountant.DeleteAmortization(amort.ID.Value);
         }

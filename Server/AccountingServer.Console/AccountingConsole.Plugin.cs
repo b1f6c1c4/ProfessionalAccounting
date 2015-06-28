@@ -9,6 +9,10 @@ namespace AccountingServer.Console
     {
         private readonly ICollection<PluginBase> m_Plugins = new List<PluginBase>();
 
+        /// <summary>
+        ///     添加插件
+        /// </summary>
+        /// <param name="plg">插件</param>
         public void AddPlugin(PluginBase plg) { m_Plugins.Add(plg); }
 
         /// <summary>
@@ -25,7 +29,7 @@ namespace AccountingServer.Console
                                 where attr.Alias.Equals(name, StringComparison.InvariantCultureIgnoreCase)
                                 select plg)
                 return plg.Execute(expr.SingleQuotedString().Select(n => n.Dequotation()).ToArray());
-            throw new Exception();
+            throw new ArgumentException("没有找到与之对应的插件", "expr");
         }
     }
 }

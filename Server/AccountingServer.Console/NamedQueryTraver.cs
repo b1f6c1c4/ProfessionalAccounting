@@ -138,7 +138,7 @@ namespace AccountingServer.Console
                               qs.Items.Select(nq => Traversal(newPath, nq, coefficient * qs.Coefficient)));
             }
 
-            throw new InvalidOperationException();
+            throw new ArgumentException("命名查询类型未知", "query");
         }
 
         /// <summary>

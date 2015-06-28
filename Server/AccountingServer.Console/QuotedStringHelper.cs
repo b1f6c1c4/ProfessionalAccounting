@@ -30,11 +30,11 @@ namespace AccountingServer.Console
             if (quoted.Length == 0)
                 return quoted;
             if (quoted.Length == 1)
-                throw new InvalidOperationException();
+                throw new ArgumentException("格式错误", "quoted");
 
             var chr = quoted[0];
             if (quoted[quoted.Length - 1] != chr)
-                throw new InvalidOperationException();
+                throw new ArgumentException("格式错误", "quoted");
 
             var s = quoted.Substring(1, quoted.Length - 2);
             return s.Replace(String.Format("{0}{0}", chr), String.Format("{0}", chr));

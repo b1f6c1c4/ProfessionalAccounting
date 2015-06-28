@@ -16,7 +16,7 @@ namespace AccountingServer.Console
             var voucher = CSharpHelper.ParseVoucher(code);
 
             if (!m_Accountant.Upsert(voucher))
-                throw new Exception();
+                throw new ApplicationException("更新或添加失败");
 
             return CSharpHelper.PresentVoucher(voucher);
         }
@@ -31,7 +31,7 @@ namespace AccountingServer.Console
             var voucher = CSharpHelper.ParseVoucher(code);
 
             if (voucher.ID == null)
-                throw new Exception();
+                throw new ApplicationException("编号未知");
 
             return m_Accountant.DeleteVoucher(voucher.ID);
         }

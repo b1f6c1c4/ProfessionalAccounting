@@ -22,7 +22,7 @@ namespace AccountingServer.Entities
         {
             Operator = op;
             if (queries.Count == 0)
-                throw new InvalidOperationException();
+                throw new ArgumentException("参与运算的检索式个数过少", "queries");
             Filter1 = queries[0];
             switch (op)
             {
@@ -42,7 +42,7 @@ namespace AccountingServer.Entities
                         Filter2 = new QueryAryBase<TAtom>(op, queries.Skip(1).ToList());
                     break;
                 default:
-                    throw new InvalidOperationException();
+                    throw new ArgumentException("运算类型未知", "op");
             }
         }
 

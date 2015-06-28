@@ -137,10 +137,10 @@ namespace AccountingServer.Entities
                     case OperatorType.Substract:
                         return IsMatch(f.Filter1, atomPredictor) && ! IsMatch(f.Filter2, atomPredictor);
                     default:
-                        throw new InvalidOperationException();
+                        throw new ArgumentException("运算类型未知", "query");
                 }
             }
-            throw new InvalidOperationException();
+            throw new ArgumentException("检索式类型未知", "query");
         }
     }
 }

@@ -43,7 +43,7 @@ namespace AccountingServer.Console
                         return 1;
                     if (Direction.Text == "<")
                         return -1;
-                    throw new InvalidOperationException();
+                    throw new MemberAccessException("表达式错误");
                 }
             }
         }
@@ -63,7 +63,7 @@ namespace AccountingServer.Console
                             return OperatorType.Identity;
                         if (Op.Text == "-")
                             return OperatorType.Complement;
-                        throw new InvalidOperationException();
+                        throw new MemberAccessException("表达式错误");
                     }
                     if (Op.Text == "+")
                         return OperatorType.Union;
@@ -71,7 +71,7 @@ namespace AccountingServer.Console
                         return OperatorType.Substract;
                     if (Op.Text == "*")
                         return OperatorType.Intersect;
-                    throw new InvalidOperationException();
+                    throw new MemberAccessException("表达式错误");
                 }
             }
 

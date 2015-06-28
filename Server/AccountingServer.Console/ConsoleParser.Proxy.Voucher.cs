@@ -31,7 +31,7 @@ namespace AccountingServer.Console
                         else if (s == "G")
                             vfilter.Type = Entities.VoucherType.General;
                         else
-                            throw new InvalidOperationException();
+                            throw new MemberAccessException("表达式错误");
                     }
                     return vfilter;
                 }
@@ -61,7 +61,7 @@ namespace AccountingServer.Console
             }
 
             /// <inheritdoc />
-            public IQueryCompunded<IVoucherQueryAtom> Filter2 { get { throw new InvalidOperationException(); } }
+            public IQueryCompunded<IVoucherQueryAtom> Filter2 { get { throw new MemberAccessException("表达式错误"); } }
         }
 
         public partial class VouchersBContext : IQueryAry<IVoucherQueryAtom>
@@ -79,7 +79,7 @@ namespace AccountingServer.Console
                             return OperatorType.Identity;
                         if (Op.Text == "-")
                             return OperatorType.Complement;
-                        throw new InvalidOperationException();
+                        throw new MemberAccessException("表达式错误");
                     }
                     if (Op.Text == "+")
                         return OperatorType.Union;
@@ -87,7 +87,7 @@ namespace AccountingServer.Console
                         return OperatorType.Substract;
                     if (Op.Text == "*")
                         return OperatorType.Intersect;
-                    throw new InvalidOperationException();
+                    throw new MemberAccessException("表达式错误");
                 }
             }
 
@@ -122,7 +122,7 @@ namespace AccountingServer.Console
                         case "!":
                             return GatheringType.Count;
                         default:
-                            throw new InvalidOperationException();
+                            throw new MemberAccessException("表达式错误");
                     }
                 }
             }
@@ -165,7 +165,7 @@ namespace AccountingServer.Console
                                                            case 'y':
                                                                return SubtotalLevel.Year;
                                                        }
-                                                       throw new InvalidOperationException();
+                                                       throw new MemberAccessException("表达式错误");
                                                    }).ToList();
                 }
             }
