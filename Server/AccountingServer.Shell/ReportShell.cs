@@ -6,14 +6,24 @@ using AccountingServer.Shell.Parsing;
 
 namespace AccountingServer.Shell
 {
-    public partial class AccountingShell
+    /// <summary>
+    ///     报告表达式解释器
+    /// </summary>
+    internal class ReportShell
     {
+        /// <summary>
+        ///     基本会计业务处理类
+        /// </summary>
+        private readonly Accountant m_Accountant;
+
+        public ReportShell(Accountant helper) { m_Accountant = helper; }
+
         /// <summary>
         ///     执行报告表达式
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>执行结果</returns>
-        private IQueryResult ExecuteReportQuery(ShellParser.ReportContext expr)
+        public IQueryResult ExecuteReportQuery(ShellParser.ReportContext expr)
         {
             var rng = expr.range() != null ? expr.range().Range : ShellParser.From("[0]").range().Range;
 
@@ -27,7 +37,8 @@ namespace AccountingServer.Shell
                                                    coefficient * query.Coefficient),
                                  Map = (path, query, coefficient) =>
                                        path.Length == 0 ? query.Name : path + "/" + query.Name,
-                                 Reduce = (path, newPath, query, coefficient, results) => NotNullJoin(results),
+                                 Reduce =
+                                     (path, newPath, query, coefficient, results) => SubtotalHelper.NotNullJoin(results),
                              };
 
             if (expr.namedQuery() != null)
@@ -83,7 +94,7 @@ namespace AccountingServer.Shell
                                      var r = results.ToList();
                                      return new Tuple<double, string>(
                                          r.Sum(t => t.Item1),
-                                         NotNullJoin(r.Select(t => t.Item2)));
+                                         SubtotalHelper.NotNullJoin(r.Select(t => t.Item2)));
                                  }
                     };
 

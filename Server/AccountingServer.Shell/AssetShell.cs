@@ -8,44 +8,24 @@ using AccountingServer.Shell.Parsing;
 
 namespace AccountingServer.Shell
 {
-    public partial class AccountingShell
+    /// <summary>
+    ///     资产表达式解释器
+    /// </summary>
+    internal class AssetShell
     {
         /// <summary>
-        ///     更新或添加资产
+        ///     基本会计业务处理类
         /// </summary>
-        /// <param name="code">资产的C#代码</param>
-        /// <returns>新资产的C#代码</returns>
-        public string ExecuteAssetUpsert(string code)
-        {
-            var asset = CSharpHelper.ParseAsset(code);
+        private readonly Accountant m_Accountant;
 
-            if (!m_Accountant.Upsert(asset))
-                throw new ApplicationException("更新或添加失败");
-
-            return CSharpHelper.PresentAsset(asset);
-        }
-
-        /// <summary>
-        ///     删除资产
-        /// </summary>
-        /// <param name="code">资产的C#代码</param>
-        /// <returns>是否成功</returns>
-        public bool ExecuteAssetRemoval(string code)
-        {
-            var asset = CSharpHelper.ParseAsset(code);
-
-            if (!asset.ID.HasValue)
-                throw new ApplicationException("编号未知");
-
-            return m_Accountant.DeleteAsset(asset.ID.Value);
-        }
+        public AssetShell(Accountant helper) { m_Accountant = helper; }
 
         /// <summary>
         ///     执行资产表达式
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>执行结果</returns>
-        private IQueryResult ExecuteAsset(ShellParser.AssetContext expr)
+        public IQueryResult ExecuteAsset(ShellParser.AssetContext expr)
         {
             var assetListContext = expr.assetList();
             if (assetListContext != null)

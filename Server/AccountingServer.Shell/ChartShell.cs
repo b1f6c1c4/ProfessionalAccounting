@@ -8,14 +8,24 @@ using AccountingServer.Shell.Parsing;
 
 namespace AccountingServer.Shell
 {
-    public partial class AccountingShell
+    /// <summary>
+    ///     图表表达式解释器
+    /// </summary>
+    internal class ChartShell
     {
+        /// <summary>
+        ///     基本会计业务处理类
+        /// </summary>
+        private readonly Accountant m_Accountant;
+
+        public ChartShell(Accountant helper) { m_Accountant = helper; }
+
         /// <summary>
         ///     执行图表表达式
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>执行结果</returns>
-        private IQueryResult ExecuteChartQuery(ShellParser.ChartContext expr)
+        public IQueryResult ExecuteChartQuery(ShellParser.ChartContext expr)
         {
             var rng = expr.range() != null ? expr.range().Range : ShellParser.From("[0]").range().Range;
 
