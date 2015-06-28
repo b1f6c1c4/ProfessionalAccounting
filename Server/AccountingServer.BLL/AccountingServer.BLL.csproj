@@ -50,8 +50,6 @@
     <Compile Include="Accountant.Asset.cs" />
     <Compile Include="DataFormatter.cs" />
     <Compile Include="Accountant.Grouping.cs" />
-    <Compile Include="MobileComm.cs" />
-    <Compile Include="MobilePatterns.cs" />
     <Compile Include="NamedQuery.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringFormatter.cs" />
@@ -66,10 +64,6 @@
     <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj">
       <Project>{7246deb7-bda2-49d8-9490-3ed074219106}</Project>
       <Name>AccountingServer.Entities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AccountingServer.TCP\AccountingServer.TCP.csproj">
-      <Project>{c3e7dd8b-88fc-4df2-ac1a-52f1c825e9c3}</Project>
-      <Name>AccountingServer.TCP</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
