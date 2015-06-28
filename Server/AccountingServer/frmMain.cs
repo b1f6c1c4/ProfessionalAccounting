@@ -36,7 +36,6 @@ namespace AccountingServer
         {
             InitializeComponent();
             chart1.Dock = DockStyle.Fill;
-            pictureBox1.Dock = DockStyle.Fill;
             textBoxResult.Dock = DockStyle.Fill;
 
             SetProcessDPIAware();
@@ -58,20 +57,6 @@ namespace AccountingServer
                                       }
                           };
             m_Shell.AutoConnect();
-            //m_Shell.PresentQRCode += qrCode =>
-            //                           {
-            //                               if (qrCode == null)
-            //                               {
-            //                                   pictureBox1.Visible = false;
-            //                                   textBoxResult.Visible = true;
-            //                               }
-            //                               else
-            //                               {
-            //                                   pictureBox1.Image = qrCode;
-            //                                   pictureBox1.Visible = true;
-            //                                   textBoxResult.Visible = false;
-            //                               }
-            //                           };
         }
 
         /// <summary>
@@ -329,7 +314,6 @@ namespace AccountingServer
         {
             chart1.Visible = false;
             textBoxResult.Visible = true;
-            pictureBox1.Visible = false;
         }
 
         /// <summary>
@@ -339,7 +323,6 @@ namespace AccountingServer
         {
             chart1.Visible = true;
             textBoxResult.Visible = false;
-            pictureBox1.Visible = false;
         }
 
         /// <summary>

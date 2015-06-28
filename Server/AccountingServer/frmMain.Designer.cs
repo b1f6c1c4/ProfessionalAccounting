@@ -30,14 +30,12 @@ namespace AccountingServer
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.textBoxCommand = new System.Windows.Forms.TextBox();
             this.textBoxResult = new System.Windows.Forms.TextBox();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -63,27 +61,19 @@ namespace AccountingServer
             this.textBoxResult.TabStop = false;
             this.textBoxResult.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.textBoxResult_MouseWheel);
             // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Location = new System.Drawing.Point(67, 71);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(665, 354);
-            this.pictureBox1.TabIndex = 6;
-            this.pictureBox1.TabStop = false;
-            // 
             // chart1
             // 
-            chartArea3.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea3);
-            legend3.Name = "Legend1";
-            this.chart1.Legends.Add(legend3);
+            chartArea1.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea1);
+            legend1.Name = "Legend1";
+            this.chart1.Legends.Add(legend1);
             this.chart1.Location = new System.Drawing.Point(654, 104);
             this.chart1.Name = "chart1";
             this.chart1.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.None;
-            series3.ChartArea = "ChartArea1";
-            series3.Legend = "Legend1";
-            series3.Name = "Series1";
-            this.chart1.Series.Add(series3);
+            series1.ChartArea = "ChartArea1";
+            series1.Legend = "Legend1";
+            series1.Name = "Series1";
+            this.chart1.Series.Add(series1);
             this.chart1.Size = new System.Drawing.Size(665, 354);
             this.chart1.TabIndex = 7;
             this.chart1.TabStop = false;
@@ -97,11 +87,9 @@ namespace AccountingServer
             this.ClientSize = new System.Drawing.Size(1455, 861);
             this.Controls.Add(this.chart1);
             this.Controls.Add(this.textBoxResult);
-            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.textBoxCommand);
             this.Name = "frmMain";
             this.Text = "Accounting Server";
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -112,7 +100,6 @@ namespace AccountingServer
 
         private System.Windows.Forms.TextBox textBoxCommand;
         private System.Windows.Forms.TextBox textBoxResult;
-        private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
 
 
