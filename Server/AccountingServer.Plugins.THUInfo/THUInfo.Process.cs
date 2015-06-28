@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Shell;
-using AccountingServer.Shell.Plugin;
+using AccountingServer.Plugin;
 using AccountingServer.Entities;
 
 namespace AccountingServer.Plugins.THUInfo
