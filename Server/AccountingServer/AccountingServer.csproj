@@ -79,10 +79,6 @@
       <Project>{4f938d5a-6b22-4150-a74c-8203fdf1d215}</Project>
       <Name>AccountingServer.BLL</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AccountingServer.Console\AccountingServer.Console.csproj">
-      <Project>{0ddc759f-23de-4443-a97c-4edc1c40690c}</Project>
-      <Name>AccountingServer.Console</Name>
-    </ProjectReference>
     <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj">
       <Project>{7246deb7-bda2-49d8-9490-3ed074219106}</Project>
       <Name>AccountingServer.Entities</Name>
@@ -94,6 +90,10 @@
     <ProjectReference Include="..\AccountingServer.Plugins.THUInfo\AccountingServer.Plugins.THUInfo.csproj">
       <Project>{bd4f3271-7880-4af3-bb2e-93d8e357d471}</Project>
       <Name>AccountingServer.Plugins.THUInfo</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AccountingServer.Shell\AccountingServer.Shell.csproj">
+      <Project>{0ddc759f-23de-4443-a97c-4edc1c40690c}</Project>
+      <Name>AccountingServer.Shell</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

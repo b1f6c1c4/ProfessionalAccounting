@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using AccountingServer.BLL;
-using AccountingServer.Console;
+using AccountingServer.Shell;
 using AccountingServer.Plugins.Interest;
 using AccountingServer.Plugins.THUInfo;
 
@@ -22,7 +22,7 @@ namespace AccountingServer
         /// <summary>
         ///     控制台
         /// </summary>
-        private readonly AccountingConsole m_Console;
+        private readonly AccountingShell m_Shell;
 
         /// <summary>
         ///     当前文本是否可编辑
@@ -48,11 +48,11 @@ namespace AccountingServer
             var thu = new THUInfo(m_Accountant);
             Task.Run(() => thu.FetchData(@"2014010914", @""));
 
-            m_Console = new AccountingConsole(m_Accountant);
-            m_Console.AutoConnect();
-            m_Console.AddPlugin(thu);
-            m_Console.AddPlugin(new InterestRevenue(m_Accountant));
-            //m_Console.PresentQRCode += qrCode =>
+            m_Shell = new AccountingShell(m_Accountant);
+            m_Shell.AutoConnect();
+            m_Shell.AddPlugin(thu);
+            m_Shell.AddPlugin(new InterestRevenue(m_Accountant));
+            //m_Shell.PresentQRCode += qrCode =>
             //                           {
             //                               if (qrCode == null)
             //                               {
@@ -135,16 +135,16 @@ namespace AccountingServer
                 switch (typeName)
                 {
                     case "Voucher":
-                        result = m_Console.ExecuteVoucherUpsert(s);
+                        result = m_Shell.ExecuteVoucherUpsert(s);
                         break;
                     case "Asset":
-                        result = m_Console.ExecuteAssetUpsert(s);
+                        result = m_Shell.ExecuteAssetUpsert(s);
                         break;
                     case "Amortization":
-                        result = m_Console.ExecuteAmortUpsert(s);
+                        result = m_Shell.ExecuteAmortUpsert(s);
                         break;
                     case "NamedQueryTemplate":
-                        result = m_Console.ExecuteNamedQueryTemplateUpsert(s);
+                        result = m_Shell.ExecuteNamedQueryTemplateUpsert(s);
                         break;
                     default:
                         return false;
@@ -189,16 +189,16 @@ namespace AccountingServer
                 switch (typeName)
                 {
                     case "Voucher":
-                        result = m_Console.ExecuteVoucherRemoval(s);
+                        result = m_Shell.ExecuteVoucherRemoval(s);
                         break;
                     case "Asset":
-                        result = m_Console.ExecuteAssetRemoval(s);
+                        result = m_Shell.ExecuteAssetRemoval(s);
                         break;
                     case "Amortization":
-                        result = m_Console.ExecuteAmortRemoval(s);
+                        result = m_Shell.ExecuteAmortRemoval(s);
                         break;
                     case "NamedQueryTemplate":
-                        result = m_Console.ExecuteNamedQueryTemplateRemoval(s);
+                        result = m_Shell.ExecuteNamedQueryTemplateRemoval(s);
                         break;
                     default:
                         return false;
@@ -232,7 +232,7 @@ namespace AccountingServer
         {
             try
             {
-                var res = m_Console.Execute(textBoxCommand.Text);
+                var res = m_Shell.Execute(textBoxCommand.Text);
                 if (res == null)
                     return true;
 

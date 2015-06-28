@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using AccountingServer.BLL;
-using AccountingServer.Console;
-using AccountingServer.Console.Plugin;
+using AccountingServer.Shell;
+using AccountingServer.Shell.Plugin;
 using AccountingServer.Entities;
 
 namespace AccountingServer.Plugins.Interest

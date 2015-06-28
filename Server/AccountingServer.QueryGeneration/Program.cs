@@ -12,9 +12,9 @@ namespace AccountingServer.QueryGeneration
             while (true)
             {
                 var input = new AntlrInputStream(inputStream.ReadLine());
-                var lexer = new AccountingServer.Console.ConsoleLexer(input);
+                var lexer = new AccountingServer.Shell.Parsing.ShellLexer(input);
                 var tokens = new CommonTokenStream(lexer);
-                var parser = new AccountingServer.Console.ConsoleParser(tokens);
+                var parser = new AccountingServer.Shell.Parsing.ShellParser(tokens);
                 IParseTree tree = parser.command();
                 System.Console.WriteLine(tree.ToStringTree(parser));
             }
