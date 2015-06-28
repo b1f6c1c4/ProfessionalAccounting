@@ -47,13 +47,13 @@
       <Project>{4F938D5A-6B22-4150-A74C-8203FDF1D215}</Project>
       <Name>AccountingServer.BLL</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AccountingServer.Console\AccountingServer.Console.csproj">
-      <Project>{0ddc759f-23de-4443-a97c-4edc1c40690c}</Project>
-      <Name>AccountingServer.Console</Name>
-    </ProjectReference>
     <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj">
       <Project>{7246deb7-bda2-49d8-9490-3ed074219106}</Project>
       <Name>AccountingServer.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AccountingServer.Shell\AccountingServer.Shell.csproj">
+      <Project>{0ddc759f-23de-4443-a97c-4edc1c40690c}</Project>
+      <Name>AccountingServer.Shell</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

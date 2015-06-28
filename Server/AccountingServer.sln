@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.BLL", "Acc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer", "AccountingServer\AccountingServer.csproj", "{28C2EDB0-CE1E-473E-9CA6-70E29A1408A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.Console", "AccountingServer.Console\AccountingServer.Console.csproj", "{0DDC759F-23DE-4443-A97C-4EDC1C40690C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.Shell", "AccountingServer.Shell\AccountingServer.Shell.csproj", "{0DDC759F-23DE-4443-A97C-4EDC1C40690C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interface", "Interface", "{A75E43E2-65F1-4826-8B28-D90DDC15777D}"
 EndProject
