@@ -55,9 +55,6 @@ namespace AccountingServer.Console
                     case "connect":
                     case "con":
                         return ConnectServer();
-                    case "mobile":
-                    case "mob":
-                        throw new NotImplementedException();
                     case "backup":
                         return Backup();
                     case "titles":

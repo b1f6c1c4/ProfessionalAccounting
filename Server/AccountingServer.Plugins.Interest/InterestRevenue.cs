@@ -40,7 +40,7 @@ namespace AccountingServer.Plugins.Interest
         {
             if (pars.Length > 4 ||
                 pars.Length < 3)
-                throw new ArgumentException();
+                throw new ArgumentException("参数个数不正确", "pars");
 
             var loans =
                 Accountant.SelectVoucherDetailsGrouped(
@@ -157,7 +157,7 @@ namespace AccountingServer.Plugins.Interest
                                           .GroupBy(v => v.Date).OrderBy(grp => grp.Key, new DateComparer()))
             {
                 if (!grp.Key.HasValue)
-                    throw new NullReferenceException();
+                    throw new ApplicationException("无法处理无穷长时间以前的利息收入");
                 if (!lastSettlementDate.HasValue)
                     lastSettlementDate = grp.Key;
 
@@ -208,7 +208,7 @@ namespace AccountingServer.Plugins.Interest
                 }
             }
             if (lastSettlementDate == null)
-                throw new NullReferenceException();
+                throw new ApplicationException("无法处理无穷长时间以前的利息收入");
 
             var today = DateTime.Now.Date;
             if (lastSettlementDate != today)
@@ -276,7 +276,7 @@ namespace AccountingServer.Plugins.Interest
             else if (!Accountant.IsZero(detail.Fund.Value - interest))
             {
                 if (!voucher.Details.All(d => d.IsMatch(interestPattern) || d.IsMatch(revenuePattern)))
-                    throw new InvalidOperationException();
+                    throw new ArgumentException("该记账凭证包含计息以外的细目", "voucher");
                 voucher.Details = create;
                 Accountant.Upsert(voucher);
             }
