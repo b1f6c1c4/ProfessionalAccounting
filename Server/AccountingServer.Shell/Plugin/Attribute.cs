@@ -1,6 +1,7 @@
 ﻿using System;
 
-namespace AccountingServer.Shell.Plugin
+// ReSharper disable once CheckNamespace
+namespace AccountingServer.Plugin
 {
     public class PluginAttribute : Attribute
     {

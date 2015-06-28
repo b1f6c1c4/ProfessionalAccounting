@@ -1,6 +1,8 @@
 ﻿using AccountingServer.BLL;
+using AccountingServer.Shell;
 
-namespace AccountingServer.Shell.Plugin
+// ReSharper disable once CheckNamespace
+namespace AccountingServer.Plugin
 {
     /// <summary>
     ///     插件基类
