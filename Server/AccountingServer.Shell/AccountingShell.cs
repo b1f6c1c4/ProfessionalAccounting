@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using System.Resources;
 using System.Text;
 using AccountingServer.BLL;
@@ -51,9 +50,12 @@ namespace AccountingServer.Shell
             if (String.IsNullOrWhiteSpace(s))
                 throw new ArgumentNullException("s");
 
-            var result = ShellParser.From(s).command();
-            if (result.exception != null)
-                throw new ArgumentException(result.exception.ToString(), "s");
+            var res = ShellParser.From(s + Environment.NewLine).commandEOF();
+            if (res.exception != null)
+                throw new ArgumentException(res.exception.ToString(), "s");
+            var result = res.command();
+            if (result.GetText() != s)
+                throw new ArgumentException("语法错误", "s");
 
             if (result.autoCommand() != null)
                 return PluginManager.ExecuteAuto(result.autoCommand());
@@ -97,15 +99,15 @@ namespace AccountingServer.Shell
                         case "chk2":
                             return m_CheckShell.AdvancedCheck();
                     }
-                    throw new ArgumentException("表达式类型未知");
+                    throw new ArgumentException("表达式类型未知", "s");
                 }
                 if (result.otherCommand().EditNamedQueries() != null)
                     return m_NamedQueryShell.ListNamedQueryTemplates();
                 if (result.otherCommand().Exit() != null)
                     Environment.Exit(0);
-                throw new ArgumentException("表达式类型未知");
+                throw new ArgumentException("表达式类型未知", "s");
             }
-            throw new ArgumentException("表达式类型未知");
+            throw new ArgumentException("表达式类型未知", "s");
         }
 
         /// <summary>
