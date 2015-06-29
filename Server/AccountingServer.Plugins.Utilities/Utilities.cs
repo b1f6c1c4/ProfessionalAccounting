@@ -161,17 +161,15 @@ namespace AccountingServer.Plugins.Utilities
                                              {
                                                  new VoucherDetail
                                                      {
-                                                         Title = 1123,
-                                                         Content = "学生卡小钱包",
+                                                         Title = 1001,
                                                          Fund = -fund
                                                      },
                                                  new VoucherDetail
                                                      {
-                                                         Title = 6602,
-                                                         SubTitle = 01,
-                                                         Content = "水费",
+                                                         Title = 6401,
+                                                         Content = "打印费",
                                                          Fund = fund
-                                                     }
+                                                     },
                                              }
                            };
             }
