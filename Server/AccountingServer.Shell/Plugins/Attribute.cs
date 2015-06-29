@@ -1,7 +1,7 @@
 ﻿using System;
 
 // ReSharper disable once CheckNamespace
-namespace AccountingServer.Plugin
+namespace AccountingServer.Plugins
 {
     public class PluginAttribute : Attribute
     {

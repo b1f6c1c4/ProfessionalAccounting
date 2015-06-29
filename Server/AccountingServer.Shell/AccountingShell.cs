@@ -72,33 +72,39 @@ namespace AccountingServer.Shell
             if (result.carry() != null)
                 return m_CarryShell.ExecuteCarry(result.carry());
             if (result.otherCommand() != null)
-                switch (result.GetChild(0).GetText().ToLowerInvariant())
+            {
+                if (result.otherCommand().Launch() != null)
+                    return LaunchServer();
+                if (result.otherCommand().Connect() != null)
+                    return ConnectServer();
+                if (result.otherCommand().Backup() != null)
+                    return Backup();
+                if (result.otherCommand().Titles() != null)
+                    return ListTitles();
+                if (result.otherCommand().Help() != null)
                 {
-                    case "launch":
-                    case "lau":
-                        return LaunchServer();
-                    case "connect":
-                    case "con":
-                        return ConnectServer();
-                    case "backup":
-                        return Backup();
-                    case "titles":
-                    case "t":
-                        return ListTitles();
-                    case "help":
-                    case "?":
-                        return ListHelp();
-                    case "chk1":
-                        return m_CheckShell.BasicCheck();
-                    case "chk2":
-                        return m_CheckShell.AdvancedCheck();
-                    case "nq":
-                        return m_NamedQueryShell.ListNamedQueryTemplates();
-                    case "exit":
-                        Environment.Exit(0);
-                        // ReSharper disable once HeuristicUnreachableCode
-                        return new Suceed();
+                    var plgName = result.otherCommand().DollarQuotedString();
+                    if (plgName != null)
+                        return new UnEditableText(PluginManager.GetHelp(plgName.Dequotation()));
+                    return ListHelp();
                 }
+                if (result.otherCommand().Check() != null)
+                {
+                    switch  (result.otherCommand().Check().GetText())
+                    {
+                        case "chk1":
+                            return m_CheckShell.BasicCheck();
+                        case "chk2":
+                            return m_CheckShell.AdvancedCheck();
+                    }
+                    throw new ArgumentException("表达式类型未知");
+                }
+                if (result.otherCommand().EditNamedQueries() != null)
+                    return m_NamedQueryShell.ListNamedQueryTemplates();
+                if (result.otherCommand().Exit() != null)
+                    Environment.Exit(0);
+                throw new ArgumentException("表达式类型未知");
+            }
             throw new ArgumentException("表达式类型未知");
         }
 
@@ -116,24 +122,6 @@ namespace AccountingServer.Shell
         }
 
         /// <summary>
-        ///     显示控制台帮助
-        /// </summary>
-        /// <returns>帮助内容</returns>
-        private static IQueryResult ListHelp()
-        {
-            using (
-                var stream =
-                    Assembly.GetExecutingAssembly()
-                            .GetManifestResourceStream("AccountingServer.Shell.Resources.Shell.txt"))
-            {
-                if (stream == null)
-                    throw new MissingManifestResourceException();
-                using (var reader = new StreamReader(stream))
-                    return new UnEditableText(reader.ReadToEnd());
-            }
-        }
-
-        /// <summary>
         ///     执行分类汇总检索式并呈现结果
         /// </summary>
         /// <param name="query">分类汇总检索式</param>
@@ -143,6 +131,22 @@ namespace AccountingServer.Shell
             var result = m_Accountant.SelectVoucherDetailsGrouped(query);
 
             return new UnEditableText(SubtotalHelper.PresentSubtotal(result, query.Subtotal));
+        }
+
+        /// <summary>
+        ///     显示控制台帮助
+        /// </summary>
+        /// <returns>帮助内容</returns>
+        private static IQueryResult ListHelp()
+        {
+            const string resName = "AccountingServer.Shell.Resources.Document.txt";
+            using (var stream = typeof(AccountingShell).Assembly.GetManifestResourceStream(resName))
+            {
+                if (stream == null)
+                    throw new MissingManifestResourceException();
+                using (var reader = new StreamReader(stream))
+                    return new UnEditableText(reader.ReadToEnd());
+            }
         }
 
         /// <summary>
