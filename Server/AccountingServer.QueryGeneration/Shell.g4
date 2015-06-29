@@ -4,16 +4,20 @@ grammar Shell;
  * Parser Rules
  */
 
+commandEOF
+	:	command EOF
+	;
+
 command
-	:	autoCommand EOF
-	|	vouchers EOF
-	|	groupedQuery EOF
-	|	chart EOF
-	|	report EOF
-	|	asset EOF
-	|	amort EOF
-	|	carry EOF
-	|	otherCommand EOF
+	:	autoCommand
+	|	vouchers
+	|	groupedQuery
+	|	chart
+	|	report
+	|	asset
+	|	amort
+	|	carry
+	|	otherCommand
 	;
 
 autoCommand
