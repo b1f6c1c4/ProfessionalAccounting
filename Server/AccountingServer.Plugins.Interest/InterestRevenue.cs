@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Linq;
 using AccountingServer.BLL;
-using AccountingServer.Shell;
-using AccountingServer.Plugin;
 using AccountingServer.Entities;
+using AccountingServer.Shell;
 
 namespace AccountingServer.Plugins.Interest
 {
@@ -15,27 +14,7 @@ namespace AccountingServer.Plugins.Interest
     {
         public InterestRevenue(Accountant accountant) : base(accountant) { }
 
-        /// <summary>
-        ///     执行插件表达式
-        /// </summary>
-        /// <param name="pars">
-        ///     参数列表，总共三个参数
-        ///     <list type="bullet">
-        ///         <item>
-        ///             <description>第一个参数为借款人；</description>
-        ///         </item>
-        ///         <item>
-        ///             <description>第二个参数为借款代码（模糊匹配）；</description>
-        ///         </item>
-        ///         <item>
-        ///             <description>第三个参数为利率；</description>
-        ///         </item>
-        ///         <item>
-        ///             <description>第四个参数可选，若没有表示只计算上次计息至今的部分。</description>
-        ///         </item>
-        ///     </list>
-        /// </param>
-        /// <returns>执行结果</returns>
+        /// <inheritdoc />
         public override IQueryResult Execute(params string[] pars)
         {
             if (pars.Length > 4 ||

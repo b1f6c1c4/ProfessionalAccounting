@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Shell;
-using AccountingServer.Plugin;
 using AccountingServer.Entities;
 
 namespace AccountingServer.Plugins.THUInfo
@@ -23,23 +22,7 @@ namespace AccountingServer.Plugins.THUInfo
 
         public THUInfo(Accountant accountant) : base(accountant) { }
 
-        /// <summary>
-        ///     执行插件表达式
-        ///     参数的个数和内容决定行为。
-        ///     <list type="bullet">
-        ///         <item>
-        ///             <description>若第一个参数为<c>String.Empty</c>且参数个数为3，则以第二个参数为用户名，第三个参数为密码更新消费记录；</description>
-        ///         </item>
-        ///         <item>
-        ///             <description>若无参数，则只进行对账；</description>
-        ///         </item>
-        ///         <item>
-        ///             <description>若第一个参数非空，则每个参数表示一天的消费情况。</description>
-        ///         </item>
-        ///     </list>
-        /// </summary>
-        /// <param name="pars">参数列表</param>
-        /// <returns>执行结果</returns>
+        /// <inheritdoc />
         public override IQueryResult Execute(params string[] pars)
         {
             if (pars.Length >= 3)

@@ -56,8 +56,8 @@
     <Compile Include="SubtotalHelper.cs" />
     <Compile Include="NamedQueryTraver.cs" />
     <Compile Include="Parsing\ShellParser.Creator.cs" />
-    <Compile Include="Plugin\Attribute.cs" />
-    <Compile Include="Plugin\PluginBase.cs" />
+    <Compile Include="Plugins\Attribute.cs" />
+    <Compile Include="Plugins\PluginBase.cs" />
     <Compile Include="QuotedStringHelper.cs" />
     <Compile Include="CSharpHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -81,7 +81,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Console.txt" />
+    <EmbeddedResource Include="Resources\Document.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

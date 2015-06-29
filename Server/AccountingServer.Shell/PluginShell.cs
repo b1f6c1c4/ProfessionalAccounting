@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.Shell.Parsing;
-using AccountingServer.Plugin;
+using AccountingServer.Plugins;
 
 namespace AccountingServer.Shell
 {
@@ -21,6 +21,22 @@ namespace AccountingServer.Shell
         public void Add(PluginBase plugin) { m_Plugins.Add(plugin); }
 
         /// <summary>
+        ///     根据名称检索插件
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <returns>插件</returns>
+        private PluginBase GetPlugin(string name)
+        {
+            foreach (var plg in from plg in m_Plugins
+                                from attribute in Attribute.GetCustomAttributes(plg.GetType(), typeof(PluginAttribute))
+                                let attr = (PluginAttribute)attribute
+                                where attr.Alias.Equals(name, StringComparison.InvariantCultureIgnoreCase)
+                                select plg)
+                return plg;
+            throw new ArgumentException("没有找到与之对应的插件", "name");
+        }
+
+        /// <summary>
         ///     调用插件
         /// </summary>
         /// <param name="expr">表达式</param>
@@ -28,14 +44,16 @@ namespace AccountingServer.Shell
         public IQueryResult ExecuteAuto(ShellParser.AutoCommandContext expr)
         {
             var name = expr.DollarQuotedString().Dequotation();
-            foreach (var plg in from plg in m_Plugins
-                                from attribute in Attribute.GetCustomAttributes(plg.GetType(), typeof(PluginAttribute))
-                                let attr = (PluginAttribute)attribute
-                                where attr.Alias.Equals(name, StringComparison.InvariantCultureIgnoreCase)
-                                select plg)
-                return plg.Execute(expr.SingleQuotedString().Select(n => n.Dequotation()).ToArray());
-            throw new ArgumentException("没有找到与之对应的插件", "expr");
+            var plugin = GetPlugin(name);
+            return plugin.Execute(expr.SingleQuotedString().Select(n => n.Dequotation()).ToArray());
         }
+
+        /// <summary>
+        ///     显示插件帮助
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <returns>帮助内容</returns>
+        public string GetHelp(string name) { return GetPlugin(name).ListHelp(); }
 
         /// <inheritdoc />
         public IEnumerator GetEnumerator() { return m_Plugins.GetEnumerator(); }

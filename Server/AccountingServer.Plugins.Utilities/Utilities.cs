@@ -2,40 +2,19 @@
 using System.Linq;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
-using AccountingServer.Plugin;
 using AccountingServer.Shell;
 
 namespace AccountingServer.Plugins.Utilities
 {
     /// <summary>
-    ///     自动计算利息收入和还款
+    ///     常见记账凭证自动填写
     /// </summary>
     [Plugin(Alias = "u")]
     public class Utilities : PluginBase
     {
         public Utilities(Accountant accountant) : base(accountant) { }
 
-        /// <summary>
-        ///     执行插件表达式
-        /// </summary>
-        /// <param name="pars">
-        ///     参数列表，每个参数独立作用，格式为(&lt;rng>.+)\s*(?&lt;nm>)，其中rng为日期，nm意义为
-        ///     <list type="bullet">
-        ///         <item>
-        ///             <description>wx___表示x元水费，默认0.42元；</description>
-        ///         </item>
-        ///         <item>
-        ///             <description>xy表示2.5元洗衣；</description>
-        ///         </item>
-        ///         <item>
-        ///             <description>z=x__表示洗澡至x元；</description>
-        ///         </item>
-        ///         <item>
-        ///             <description>px__表示x元打印费。</description>
-        ///         </item>
-        ///     </list>
-        /// </param>
-        /// <returns>执行结果</returns>
+        /// <inheritdoc />
         public override IQueryResult Execute(params string[] pars)
         {
             var count = 0;

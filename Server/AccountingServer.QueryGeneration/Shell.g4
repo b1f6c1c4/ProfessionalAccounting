@@ -21,7 +21,7 @@ autoCommand
 	;
 
 otherCommand
-	:	EditNamedQueries | Check | Titles | Launch | Connect | Shutdown | Backup | Help | Exit
+	:	EditNamedQueries | Check | Titles | Launch | Connect | Shutdown | Backup | Help DollarQuotedString? | Exit
 	;
 	
 chart
