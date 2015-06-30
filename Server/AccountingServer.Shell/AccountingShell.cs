@@ -54,8 +54,23 @@ namespace AccountingServer.Shell
             if (res.exception != null)
                 throw new ArgumentException(res.exception.ToString(), "s");
             var result = res.command();
-            if (result.GetText() != s)
+            var text = result.GetText();
+            var j = 0;
+            for (var i = 0; i < text.Length; i++,j++)
+            {
+                if (text[i] == s[j])
+                    continue;
+                if (s[j] != ' ' ||
+                    j == s.Length - 1)
+                    throw new ArgumentException("语法错误", "s");
+                i--;
+            }
+            while (j != s.Length &&
+                   s[j] == ' ')
+                j++;
+            if (j != s.Length)
                 throw new ArgumentException("语法错误", "s");
+
 
             if (result.autoCommand() != null)
                 return PluginManager.ExecuteAuto(result.autoCommand());
@@ -92,7 +107,7 @@ namespace AccountingServer.Shell
                 }
                 if (result.otherCommand().Check() != null)
                 {
-                    switch  (result.otherCommand().Check().GetText())
+                    switch (result.otherCommand().Check().GetText())
                     {
                         case "chk1":
                             return m_CheckShell.BasicCheck();
