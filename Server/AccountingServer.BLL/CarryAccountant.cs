@@ -67,7 +67,7 @@ namespace AccountingServer.BLL
                                                                    {
                                                                        Levels = new[] { SubtotalLevel.Content }
                                                                    }));
-                foreach (var balance in res.Where(b => b.Fund.IsZero()))
+                foreach (var balance in res.Where(b => !b.Fund.IsZero()))
                     switch (balance.Content)
                     {
                         case "706DA4F0-3674-4232-8C0B-92720BD30A57":
@@ -125,7 +125,7 @@ namespace AccountingServer.BLL
                                                                        Levels = new[] { SubtotalLevel.Content }
                                                                    }));
 
-                foreach (var balance in res.Where(b => b.Fund.IsZero()))
+                foreach (var balance in res.Where(b => !b.Fund.IsZero()))
                     switch (balance.Content)
                     {
                         case null:
@@ -183,7 +183,7 @@ namespace AccountingServer.BLL
                                                                                }
                                                                    }));
 
-                foreach (var balance in res.Where(b => b.Fund.IsZero()))
+                foreach (var balance in res.Where(b => !b.Fund.IsZero()))
                     voucher01.Details.Add(
                                           new VoucherDetail
                                               {
@@ -220,7 +220,7 @@ namespace AccountingServer.BLL
                                                                                }
                                                                    }));
 
-                foreach (var balance in res.Where(b => b.Fund.IsZero()))
+                foreach (var balance in res.Where(b => !b.Fund.IsZero()))
                     voucher02.Details.Add(
                                           new VoucherDetail
                                               {

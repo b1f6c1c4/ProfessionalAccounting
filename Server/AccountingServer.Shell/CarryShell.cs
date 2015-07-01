@@ -42,7 +42,7 @@ namespace AccountingServer.Shell
 
                 var dt = new DateTime(rng.StartDate.Value.Year, rng.StartDate.Value.Month, 1);
 
-                while (dt < rng.EndDate.Value)
+                while (dt <= rng.EndDate.Value)
                 {
                     m_Accountant.Carry(dt);
                     dt = dt.AddMonths(1);
