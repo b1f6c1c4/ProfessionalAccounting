@@ -17,11 +17,6 @@ namespace AccountingServer.Shell
     }
 
     /// <summary>
-    ///     更新或插入执行结果
-    /// </summary>
-    public interface IUpsertResult { }
-
-    /// <summary>
     ///     成功
     /// </summary>
     public class Suceed : IQueryResult
@@ -35,7 +30,7 @@ namespace AccountingServer.Shell
     /// <summary>
     ///     失败
     /// </summary>
-    public class Failed : IQueryResult, IUpsertResult
+    public class Failed : IQueryResult
     {
         /// <summary>
         ///     异常
@@ -50,7 +45,7 @@ namespace AccountingServer.Shell
         public bool AutoReturn { get { return true; } }
     }
 
-    public class NumberAffected : IQueryResult, IUpsertResult
+    public class NumberAffected : IQueryResult
     {
         /// <summary>
         ///     文档数
@@ -93,7 +88,7 @@ namespace AccountingServer.Shell
     /// <summary>
     ///     可编辑文本
     /// </summary>
-    public class EditableText : Text, IUpsertResult
+    public class EditableText : Text
     {
         public EditableText(string text) : base(text) { }
 
