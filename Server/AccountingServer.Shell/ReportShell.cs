@@ -58,10 +58,6 @@ namespace AccountingServer.Shell
         private string PresentReport(string path0, IGroupedQuery query, double coefficient)
         {
             var args = query.Subtotal;
-
-            if (args.AggrType != AggregationType.None)
-                throw new InvalidOperationException();
-
             var res = m_Accountant.SelectVoucherDetailsGrouped(query);
 
             var helper =
@@ -72,6 +68,10 @@ namespace AccountingServer.Shell
                             new Tuple<double, string>(
                                 val * coefficient,
                                 String.Format("{0}\t{1:R}\t{2:R}\t{3:R}", path, val, coefficient, val * coefficient)),
+                        LeafAggregated = (path, cat, depth, bal) =>
+                            new Tuple<double, string>(
+                                bal.Fund * coefficient,
+                                String.Format("{0}\t{1:R}\t{2:R}\t{3:R}", path.Merge(bal.Date.AsDate()), bal.Fund, coefficient, bal.Fund * coefficient)),
                         Map = (path, cat, depth, level) =>
                               {
                                   switch (level)
@@ -88,6 +88,7 @@ namespace AccountingServer.Shell
                                           return path.Merge(cat.Date.AsDate(level));
                                   }
                               },
+                        MapA = (path, cat, depth, type) => path,
                         MediumLevel = (path, newPath, cat, depth, level, r) => r,
                         Reduce = (path, cat, depth, level, results) =>
                                  {
@@ -95,7 +96,14 @@ namespace AccountingServer.Shell
                                      return new Tuple<double, string>(
                                          r.Sum(t => t.Item1),
                                          SubtotalHelper.NotNullJoin(r.Select(t => t.Item2)));
-                                 }
+                                 },
+                        ReduceA = (path, newPath, cat, depth, type, results) =>
+                                  {
+                                      var r = results.ToList();
+                                      return new Tuple<double, string>(
+                                          r.Sum(t => t.Item1),
+                                          SubtotalHelper.NotNullJoin(r.Select(t => t.Item2)));
+                                  }
                     };
 
             var traversal = helper.Traversal(path0, res);
