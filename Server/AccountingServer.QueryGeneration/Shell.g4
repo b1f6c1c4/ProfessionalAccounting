@@ -41,8 +41,7 @@ chartLevel
 	;
 
 report
-	:	'rp' namedQuery range?
-	|	'rp' groupedQuery
+	:	Op=('rp' | 'Rp') (namedQuery range? | groupedQuery)
 	;
 
 namedQuery
