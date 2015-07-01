@@ -1,63 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AccountingServer.DAL;
 using AccountingServer.Entities;
 
 namespace AccountingServer.BLL
 {
-    public partial class Accountant
+    /// <summary>
+    ///     资产会计业务处理类
+    /// </summary>
+    internal class AssetAccountant : DistributedAccountant
     {
+        public AssetAccountant(IDbAdapter db) : base(db) { }
+
         /// <summary>
         ///     固定资产清理
         /// </summary>
         private const int DefaultDispositionTitle = 1606;
 
         /// <summary>
-        ///     获取指定月的最后一天
-        /// </summary>
-        /// <param name="year">年</param>
-        /// <param name="month">月</param>
-        /// <returns>此月最后一天</returns>
-        private static DateTime LastDayOfMonth(int year, int month)
-        {
-            while (month > 12)
-            {
-                month -= 12;
-                year++;
-            }
-            while (month < 1)
-            {
-                month += 12;
-                year--;
-            }
-            return new DateTime(year, month, 1).AddMonths(1).AddDays(-1);
-        }
-
-        /// <summary>
-        ///     获取分期的剩余
-        /// </summary>
-        /// <param name="dist">分期</param>
-        /// <param name="dt">日期，若为<c>null</c>则返回总额</param>
-        /// <returns>指定日期的总额，若早于日期则为<c>null</c></returns>
-        public static double? GetBookValueOn(IDistributed dist, DateTime? dt)
-        {
-            if (!dt.HasValue ||
-                dist.TheSchedule == null)
-                return dist.Value;
-
-            var last = dist.TheSchedule.LastOrDefault(item => DateHelper.CompareDate(item.Date, dt) <= 0);
-            if (last != null)
-                return last.Value;
-            if (DateHelper.CompareDate(dist.Date, dt) <= 0)
-                return dist.Value;
-            return null;
-        }
-
-        /// <summary>
         ///     调整资产计算表
         /// </summary>
         /// <param name="asset">资产</param>
-        private static void InternalRegular(Asset asset)
+        public static void InternalRegular(Asset asset)
         {
             if (asset.Remark == Asset.IgnoranceMark)
                 return;
@@ -77,7 +42,9 @@ namespace AccountingServer.BLL
                 if (assetItem is DepreciateItem ||
                     assetItem is DevalueItem)
                     if (assetItem.Date.HasValue)
-                        assetItem.Date = LastDayOfMonth(assetItem.Date.Value.Year, assetItem.Date.Value.Month);
+                        assetItem.Date = AccountantHelper.LastDayOfMonth(
+                                                                   assetItem.Date.Value.Year,
+                                                                   assetItem.Date.Value.Month);
 
             lst.Sort(new AssetItemComparer());
 
@@ -151,10 +118,10 @@ namespace AccountingServer.BLL
                                  };
                 foreach (
                     var voucher in
-                        m_Db.SelectVouchers(
-                                            new VoucherQueryAryBase(
-                                                OperatorType.Intersect,
-                                                new[] { query, new VoucherQueryAtomBase(filter: filter) })))
+                        Db.SelectVouchers(
+                                          new VoucherQueryAryBase(
+                                              OperatorType.Intersect,
+                                              new[] { query, new VoucherQueryAtomBase(filter: filter) })))
                 {
                     if (voucher.Remark == Asset.IgnoranceMark)
                         continue;
@@ -172,7 +139,7 @@ namespace AccountingServer.BLL
                                               item =>
                                               item is AcquisationItem &&
                                               (!voucher.Date.HasValue || item.Date == voucher.Date) &&
-                                              IsZero((item as AcquisationItem).OrigValue - value))
+                                              ((item as AcquisationItem).OrigValue - value).IsZero())
                                        .ToList();
 
                         if (lst.Count == 1)
@@ -204,7 +171,7 @@ namespace AccountingServer.BLL
                                      Title = asset.DepreciationTitle,
                                      Content = asset.StringID
                                  };
-                foreach (var voucher in m_Db.SelectVouchers(new VoucherQueryAtomBase(filter: filter)))
+                foreach (var voucher in Db.SelectVouchers(new VoucherQueryAtomBase(filter: filter)))
                 {
                     if (voucher.Remark == Asset.IgnoranceMark)
                         continue;
@@ -230,7 +197,7 @@ namespace AccountingServer.BLL
                                      Title = asset.DevaluationTitle,
                                      Content = asset.StringID
                                  };
-                foreach (var voucher in m_Db.SelectVouchers(new VoucherQueryAtomBase(filter: filter)))
+                foreach (var voucher in Db.SelectVouchers(new VoucherQueryAtomBase(filter: filter)))
                 {
                     if (voucher.Remark == Asset.IgnoranceMark)
                         continue;
@@ -390,6 +357,29 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
+        ///     生成记账凭证、插入数据库并注册
+        /// </summary>
+        /// <param name="item">计算表条目</param>
+        /// <param name="isCollapsed">是否压缩</param>
+        /// <param name="voucherType">记账凭证类型</param>
+        /// <param name="details">细目</param>
+        /// <returns>是否成功</returns>
+        private bool GenerateVoucher(AssetItem item, bool isCollapsed, VoucherType voucherType,
+                                       params VoucherDetail[] details)
+        {
+            var voucher = new Voucher
+            {
+                Date = isCollapsed ? null : item.Date,
+                Type = voucherType,
+                Remark = "automatically generated",
+                Details = details
+            };
+            var res = Db.Upsert(voucher);
+            item.VoucherID = voucher.ID;
+            return res;
+        }
+
+        /// <summary>
         ///     根据资产计算表条目更新账面
         /// </summary>
         /// <param name="item">计算表条目</param>
@@ -404,7 +394,7 @@ namespace AccountingServer.BLL
             if (item.VoucherID == null)
                 return !editOnly && GenerateVoucher(item, isCollapsed, voucherType, expectedDetails);
 
-            var voucher = m_Db.SelectVoucher(item.VoucherID);
+            var voucher = Db.SelectVoucher(item.VoucherID);
             if (voucher == null)
                 return !editOnly && GenerateVoucher(item, isCollapsed, voucherType, expectedDetails);
 
@@ -435,97 +425,9 @@ namespace AccountingServer.BLL
             }
 
             if (modified)
-                m_Db.Upsert(voucher);
+                Db.Upsert(voucher);
 
             return true;
-        }
-
-        /// <summary>
-        ///     更新记账凭证的细目
-        /// </summary>
-        /// <param name="expected">应填细目</param>
-        /// <param name="voucher">记账凭证</param>
-        /// <param name="sucess">是否成功</param>
-        /// <param name="modified">是否更改了记账凭证</param>
-        /// <param name="editOnly">是否只允许更新</param>
-        private static void UpdateDetail(VoucherDetail expected, Voucher voucher,
-                                         out bool sucess, out bool modified, bool editOnly = false)
-        {
-            sucess = false;
-            modified = false;
-
-            if (!expected.Fund.HasValue)
-                throw new ArgumentException("应填细目的金额为null", "expected");
-            var fund = expected.Fund.Value;
-            expected.Fund = null;
-            var isEliminated = IsZero(fund);
-
-            var ds = voucher.Details.Where(d => d.IsMatch(expected)).ToList();
-
-            expected.Fund = fund;
-
-            if (ds.Count == 0)
-            {
-                if (isEliminated)
-                {
-                    sucess = true;
-                    return;
-                }
-
-                if (editOnly)
-                    return;
-
-                voucher.Details.Add(expected);
-                sucess = true;
-                modified = true;
-                return;
-            }
-            if (ds.Count > 1)
-                return;
-
-            if (isEliminated)
-            {
-                if (editOnly)
-                    return;
-
-                voucher.Details.Remove(ds[0]);
-                sucess = true;
-                modified = true;
-                return;
-            }
-
-            // ReSharper disable once PossibleInvalidOperationException
-            if (IsZero(ds[0].Fund.Value - fund))
-            {
-                sucess = true;
-                return;
-            }
-
-            ds[0].Fund = fund;
-            modified = true;
-        }
-
-        /// <summary>
-        ///     生成记账凭证、插入数据库并注册
-        /// </summary>
-        /// <param name="item">计算表条目</param>
-        /// <param name="isCollapsed">是否压缩</param>
-        /// <param name="voucherType">记账凭证类型</param>
-        /// <param name="details">细目</param>
-        /// <returns>是否成功</returns>
-        private bool GenerateVoucher(AssetItem item, bool isCollapsed, VoucherType voucherType,
-                                     params VoucherDetail[] details)
-        {
-            var voucher = new Voucher
-                              {
-                                  Date = isCollapsed ? null : item.Date,
-                                  Type = voucherType,
-                                  Remark = "automatically generated",
-                                  Details = details
-                              };
-            var res = m_Db.Upsert(voucher);
-            item.VoucherID = voucher.ID;
-            return res;
         }
 
         /// <summary>
@@ -584,7 +486,7 @@ namespace AccountingServer.BLL
                                 &&
                                 dt.Month == asset.Date.Value.Month)
                             {
-                                dt = LastDayOfMonth(dt.Year, dt.Month + 1);
+                                dt = AccountantHelper.LastDayOfMonth(dt.Year, dt.Month + 1);
                                 if (i == items.Count)
                                     i--;
                                 continue;
@@ -593,7 +495,7 @@ namespace AccountingServer.BLL
                             var amount = items[i - 1].Value - asset.Salvge.Value;
                             var monthes = 12 * (lastYear - dt.Year) + lastMonth - dt.Month;
 
-                            if (IsZero(amount) ||
+                            if (amount.IsZero() ||
                                 monthes < 0) // Ended, Over-depreciated or Dispositoned
                             {
                                 if (i < items.Count)
@@ -610,7 +512,7 @@ namespace AccountingServer.BLL
                                                  Value = items[i - 1].Value - amount / (monthes + 1)
                                              });
 
-                            dt = LastDayOfMonth(dt.Year, dt.Month + 1);
+                            dt = AccountantHelper.LastDayOfMonth(dt.Year, dt.Month + 1);
                         }
                     }
                     //if (mo < 12)
@@ -660,7 +562,7 @@ namespace AccountingServer.BLL
                                 items.Add(
                                           new DepreciateItem
                                               {
-                                                  Date = LastDayOfMonth(yr, mon),
+                                                  Date = AccountantHelper.LastDayOfMonth(yr, mon),
                                                   Amount = a / (12 - mo)
                                               });
                         }
@@ -669,7 +571,7 @@ namespace AccountingServer.BLL
                                 items.Add(
                                           new DepreciateItem
                                               {
-                                                  Date = LastDayOfMonth(yr + year, mon),
+                                                  Date = AccountantHelper.LastDayOfMonth(yr + year, mon),
                                                   Amount = amount * (nstar - year + 1) / zstar / 12
                                               });
                         // if (mo > 0)
@@ -678,7 +580,7 @@ namespace AccountingServer.BLL
                                 items.Add(
                                           new DepreciateItem
                                               {
-                                                  Date = LastDayOfMonth(yr + n, mon),
+                                                  Date = AccountantHelper.LastDayOfMonth(yr + n, mon),
                                                   Amount = amount * (nstar - (n + 1) + 2) / zstar / 12
                                               });
                         }

@@ -28,7 +28,7 @@ namespace AccountingServer.Shell
             {
                 // ReSharper disable once PossibleInvalidOperationException
                 var val = voucher.Details.Sum(d => d.Fund.Value);
-                if (Accountant.IsZero(val))
+                if (val.IsZero())
                     continue;
 
                 if (val > 0)
@@ -66,7 +66,7 @@ namespace AccountingServer.Shell
                                                                            }));
 
             var sb = new StringBuilder();
-            foreach (var grpTitle in Accountant.GroupByTitle(res))
+            foreach (var grpTitle in res.GroupByTitle())
             {
                 if (grpTitle.Key >= 4000 &&
                     grpTitle.Key < 5000)
@@ -75,7 +75,7 @@ namespace AccountingServer.Shell
                 if (grpTitle.Key == 1901)
                     continue;
 
-                foreach (var grpSubTitle in Accountant.GroupBySubTitle(grpTitle))
+                foreach (var grpSubTitle in grpTitle.GroupBySubTitle())
                 {
                     if (grpTitle.Key == 1101 &&
                         grpSubTitle.Key == 02)
@@ -123,13 +123,13 @@ namespace AccountingServer.Shell
                              grpSubTitle.Key == 02)
                         isPositive = true;
 
-                    foreach (var grpContent in Accountant.GroupByContent(grpSubTitle))
-                        foreach (var balance in Accountant.AggregateChangedDay(grpContent))
+                    foreach (var grpContent in grpSubTitle.GroupByContent())
+                        foreach (var balance in grpContent.AggregateChangedDay())
                         {
-                            if (isPositive && balance.Fund > -Accountant.Tolerance)
+                            if (isPositive && balance.Fund.IsNonNegative())
                                 continue;
                             if (!isPositive &&
-                                balance.Fund < Accountant.Tolerance)
+                                balance.Fund.IsNonPositive())
                                 continue;
 
                             sb.AppendFormat(

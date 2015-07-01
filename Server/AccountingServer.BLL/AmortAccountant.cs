@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AccountingServer.DAL;
 using AccountingServer.Entities;
 
 namespace AccountingServer.BLL
 {
-    public partial class Accountant
+    /// <summary>
+    ///     摊销会计业务处理类
+    /// </summary>
+    internal class AmortAccountant : DistributedAccountant
     {
+        public AmortAccountant(IDbAdapter db) : base(db) { }
+
         /// <summary>
         ///     获取本次摊销日期
         /// </summary>
@@ -30,7 +36,7 @@ namespace AccountingServer.BLL
                 case AmortizeInterval.LastDayOfWeek:
                     return the.DayOfWeek == DayOfWeek.Sunday ? the : the.AddDays(7 - (int)the.DayOfWeek);
                 case AmortizeInterval.LastDayOfMonth:
-                    return LastDayOfMonth(the.Year, the.Month);
+                    return AccountantHelper.LastDayOfMonth(the.Year, the.Month);
                 case AmortizeInterval.LastDayOfYear:
                     return new DateTime(the.Year + 1, 1, 1).AddDays(-1);
                 default:
@@ -57,7 +63,7 @@ namespace AccountingServer.BLL
                 case AmortizeInterval.SameDayOfMonth:
                     return last.AddMonths(1);
                 case AmortizeInterval.LastDayOfMonth:
-                    return LastDayOfMonth(last.Year, last.Month + 1);
+                    return AccountantHelper.LastDayOfMonth(last.Year, last.Month + 1);
                 case AmortizeInterval.SameDayOfYear:
                     return last.AddYears(1);
                 case AmortizeInterval.LastDayOfYear:
@@ -71,7 +77,7 @@ namespace AccountingServer.BLL
         ///     调整摊销计算表
         /// </summary>
         /// <param name="amort">摊销</param>
-        private static void InternalRegular(Amortization amort)
+        public static void InternalRegular(Amortization amort)
         {
             if (amort.Remark == Amortization.IgnoranceMark)
                 return;
@@ -111,19 +117,19 @@ namespace AccountingServer.BLL
 
             foreach (
                 var voucher in
-                    m_Db.SelectVouchers(
-                                        new VoucherQueryAryBase(
-                                            OperatorType.Intersect,
-                                            new[]
-                                                {
-                                                    query,
-                                                    new VoucherQueryAtomBase(amort.Template, amort.Template.Details)
-                                                        {
-                                                            ForAll
-                                                                =
-                                                                true
-                                                        }
-                                                }))
+                    Db.SelectVouchers(
+                                      new VoucherQueryAryBase(
+                                          OperatorType.Intersect,
+                                          new[]
+                                              {
+                                                  query,
+                                                  new VoucherQueryAtomBase(amort.Template, amort.Template.Details)
+                                                      {
+                                                          ForAll
+                                                              =
+                                                              true
+                                                      }
+                                              }))
                 )
             {
                 if (voucher.Remark == Amortization.IgnoranceMark)
@@ -182,7 +188,7 @@ namespace AccountingServer.BLL
             if (item.VoucherID == null)
                 return !editOnly && GenerateVoucher(item, isCollapsed, template);
 
-            var voucher = m_Db.SelectVoucher(item.VoucherID);
+            var voucher = Db.SelectVoucher(item.VoucherID);
             if (voucher == null)
                 return !editOnly && GenerateVoucher(item, isCollapsed, template);
 
@@ -215,7 +221,7 @@ namespace AccountingServer.BLL
             }
 
             if (modified)
-                m_Db.Upsert(voucher);
+                Db.Upsert(voucher);
 
             return true;
         }
@@ -248,7 +254,7 @@ namespace AccountingServer.BLL
                                   Type = template.Type,
                                   Details = lst
                               };
-            var res = m_Db.Upsert(voucher);
+            var res = Db.Upsert(voucher);
             item.VoucherID = voucher.ID;
             return res;
         }
@@ -288,7 +294,7 @@ namespace AccountingServer.BLL
 
                 var amount = a * n;
                 residue -= amount;
-                if (!IsZero(amount))
+                if (!amount.IsZero())
                     lst.Add(new AmortItem { Date = dtNxt, Amount = amount });
                 dtCur = dtNxt;
             }
