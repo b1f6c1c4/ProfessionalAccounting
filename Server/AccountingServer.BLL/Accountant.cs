@@ -9,7 +9,7 @@ namespace AccountingServer.BLL
     /// <summary>
     ///     基本会计业务处理类
     /// </summary>
-    public partial class Accountant
+    public class Accountant
     {
         /// <summary>
         ///     数据库访问
@@ -18,12 +18,11 @@ namespace AccountingServer.BLL
 
         private readonly IDbServer m_DbServer;
 
-        /// <summary>
-        ///     判断金额相等的误差
-        /// </summary>
-        public const double Tolerance = 1e-8;
+        private readonly CarryAccountant m_CarryAccountant;
 
-        public static bool IsZero(double value) { return Math.Abs(value) < Tolerance; }
+        private readonly AssetAccountant m_AssetAccountant;
+
+        private readonly AmortAccountant m_AmortAccountant;
 
         /// <summary>
         ///     获取是否已经连接到数据库
@@ -36,6 +35,10 @@ namespace AccountingServer.BLL
 
             m_Db = adapter;
             m_DbServer = adapter;
+
+            m_CarryAccountant = new CarryAccountant(m_Db);
+            m_AssetAccountant = new AssetAccountant(m_Db);
+            m_AmortAccountant = new AmortAccountant(m_Db);
         }
 
         #region Server
@@ -64,7 +67,7 @@ namespace AccountingServer.BLL
             var res = m_Db.SelectVoucherDetailsGrouped(query);
             if (query.Subtotal.AggrType != AggregationType.ChangedDay &&
                 query.Subtotal.GatherType == GatheringType.NonZero)
-                return res.Where(b => !IsZero(b.Fund));
+                return res.Where(b => !b.Fund.IsZero());
             return res;
         }
 
@@ -81,7 +84,7 @@ namespace AccountingServer.BLL
         public Asset SelectAsset(Guid id)
         {
             var result = m_Db.SelectAsset(id);
-            InternalRegular(result);
+            AssetAccountant.InternalRegular(result);
             return result;
         }
 
@@ -89,7 +92,7 @@ namespace AccountingServer.BLL
         {
             foreach (var asset in m_Db.SelectAssets(filter))
             {
-                InternalRegular(asset);
+                AssetAccountant.InternalRegular(asset);
                 yield return asset;
             }
         }
@@ -100,6 +103,20 @@ namespace AccountingServer.BLL
 
         public bool Upsert(Asset entity) { return m_Db.Upsert(entity); }
 
+        public IEnumerable<Voucher> RegisterVouchers(Asset asset, DateFilter rng,
+                                                     IQueryCompunded<IVoucherQueryAtom> query)
+        {
+            return m_AssetAccountant.RegisterVouchers(asset, rng, query);
+        }
+
+        public static void Depreciate(Asset asset) { AssetAccountant.Depreciate(asset); }
+
+        public IEnumerable<AssetItem> Update(Asset asset, DateFilter rng,
+                                             bool isCollapsed = false, bool editOnly = false)
+        {
+            return m_AssetAccountant.Update(asset, rng, isCollapsed, editOnly);
+        }
+
         #endregion
 
         #region Amort
@@ -107,7 +124,7 @@ namespace AccountingServer.BLL
         public Amortization SelectAmortization(Guid id)
         {
             var result = m_Db.SelectAmortization(id);
-            InternalRegular(result);
+            AmortAccountant.InternalRegular(result);
             return result;
         }
 
@@ -115,7 +132,7 @@ namespace AccountingServer.BLL
         {
             foreach (var amort in m_Db.SelectAmortizations(filter))
             {
-                InternalRegular(amort);
+                AmortAccountant.InternalRegular(amort);
                 yield return amort;
             }
         }
@@ -129,9 +146,28 @@ namespace AccountingServer.BLL
 
         public bool Upsert(Amortization entity) { return m_Db.Upsert(entity); }
 
+        public IEnumerable<Voucher> RegisterVouchers(Amortization amort, DateFilter rng,
+                                                     IQueryCompunded<IVoucherQueryAtom> query)
+        {
+            return m_AmortAccountant.RegisterVouchers(amort, rng, query);
+        }
+
+        public static void Amortize(Amortization amort) { AmortAccountant.Amortize(amort); }
+
+        public IEnumerable<AmortItem> Update(Amortization amort, DateFilter rng,
+                                             bool isCollapsed = false, bool editOnly = false)
+        {
+            return m_AmortAccountant.Update(amort, rng, isCollapsed, editOnly);
+        }
+
+        public static double? GetBookValueOn(IDistributed dist, DateTime? dt)
+        {
+            return DistributedAccountant.GetBookValueOn(dist, dt);
+        }
+
         #endregion
 
-        #region NamedQurey
+        #region NamedQueryTemplate
 
         public string SelectNamedQueryTemplate(string name) { return m_Db.SelectNamedQueryTemplate(name); }
 
@@ -143,6 +179,14 @@ namespace AccountingServer.BLL
         public bool DeleteNamedQueryTemplate(string name) { return m_Db.DeleteNamedQueryTemplate(name); }
 
         public bool Upsert(string name, string value) { return m_Db.Upsert(name, value); }
+
+        #endregion
+
+        #region Carry
+
+        public void Carry(DateTime? dt) { m_CarryAccountant.Carry(dt); }
+
+        public void CarryYear(DateTime? dt, bool includeNull = false) { m_CarryAccountant.CarryYear(dt, includeNull); }
 
         #endregion
     }

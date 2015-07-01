@@ -470,7 +470,7 @@ namespace AccountingServer.Plugins.THUInfo
                     continue;
                 }
                 // ReSharper disable once PossibleInvalidOperationException
-                if (!Accountant.IsZero(Math.Abs(d.Detail.Fund.Value) - record.Fund))
+                if (!(Math.Abs(d.Detail.Fund.Value) - record.Fund).IsZero())
                 {
                     d.Detail.Remark = null;
                     Accountant.Upsert(d.Voucher);
@@ -517,7 +517,7 @@ namespace AccountingServer.Plugins.THUInfo
                                   d =>
                                   d.Voucher.Date == grp.Key.Date &&
                                   // ReSharper disable once PossibleInvalidOperationException
-                                  Accountant.IsZero(Math.Abs(d.Detail.Fund.Value) - grp.Key.Fund)).ToList();
+                                  (Math.Abs(d.Detail.Fund.Value) - grp.Key.Fund).IsZero()).ToList();
                 noRecord.RemoveAll(acc.Contains);
                 switch (acc.Count.CompareTo(grp.Count()))
                 {

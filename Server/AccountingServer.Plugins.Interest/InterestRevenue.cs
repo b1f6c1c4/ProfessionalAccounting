@@ -173,7 +173,7 @@ namespace AccountingServer.Plugins.Interest
                         - voucher.Details.Where(d => d.IsMatch(capitalPattern, -1) || d.IsMatch(interestPattern, -1))
                                  .Select(d => d.Fund.Value)
                                  .Sum();
-                    if (-value + interestIntegral > -Accountant.Tolerance)
+                    if ((-value + interestIntegral).IsNonNegative())
                     {
                         RegularizeVoucherDetail(content, rmk, voucher, 0, interestIntegral);
                         interestIntegral -= value;
@@ -252,7 +252,7 @@ namespace AccountingServer.Plugins.Interest
                 Accountant.Upsert(voucher);
             }
                 // ReSharper disable once PossibleInvalidOperationException
-            else if (!Accountant.IsZero(detail.Fund.Value - interest))
+            else if (!(detail.Fund.Value - interest).IsZero())
             {
                 if (!voucher.Details.All(d => d.IsMatch(interestPattern) || d.IsMatch(revenuePattern)))
                     throw new ArgumentException("该记账凭证包含计息以外的细目", "voucher");
@@ -291,7 +291,7 @@ namespace AccountingServer.Plugins.Interest
             {
                 if (voucher.Details[i].IsMatch(capitalPattern, -1))
                 {
-                    if (capFlag || Accountant.IsZero(capVol))
+                    if (capFlag || capVol.IsZero())
                     {
                         voucher.Details.RemoveAt(i);
                         flag = true;
@@ -299,7 +299,7 @@ namespace AccountingServer.Plugins.Interest
                         continue;
                     }
                     // ReSharper disable once PossibleInvalidOperationException
-                    if (!Accountant.IsZero(voucher.Details[i].Fund.Value - capVol))
+                    if (!(voucher.Details[i].Fund.Value - capVol).IsZero())
                     {
                         voucher.Details[i].Fund = -capVol;
                         flag = true;
@@ -308,7 +308,7 @@ namespace AccountingServer.Plugins.Interest
                 }
                 if (voucher.Details[i].IsMatch(interestPattern, -1))
                 {
-                    if (intFlag || Accountant.IsZero(intVol))
+                    if (intFlag || intVol.IsZero())
                     {
                         voucher.Details.RemoveAt(i);
                         flag = true;
@@ -316,7 +316,7 @@ namespace AccountingServer.Plugins.Interest
                         continue;
                     }
                     // ReSharper disable once PossibleInvalidOperationException
-                    if (!Accountant.IsZero(voucher.Details[i].Fund.Value - intVol))
+                    if (!(voucher.Details[i].Fund.Value - intVol).IsZero())
                     {
                         voucher.Details[i].Fund = -intVol;
                         flag = true;
@@ -325,7 +325,7 @@ namespace AccountingServer.Plugins.Interest
                 }
             }
             if (!capFlag &&
-                !Accountant.IsZero(capVol))
+                !capVol.IsZero())
             {
                 voucher.Details.Add(
                                     new VoucherDetail
@@ -338,7 +338,7 @@ namespace AccountingServer.Plugins.Interest
                 flag = true;
             }
             if (!intFlag &&
-                !Accountant.IsZero(intVol))
+                !intVol.IsZero())
             {
                 voucher.Details.Add(
                                     new VoucherDetail

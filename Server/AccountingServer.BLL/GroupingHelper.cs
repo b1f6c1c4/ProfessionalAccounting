@@ -5,14 +5,14 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.BLL
 {
-    public partial class Accountant
+    public static class GroupingHelper
     {
         /// <summary>
         ///     按一级科目分类
         /// </summary>
         /// <param name="source">待分类的余额表条目</param>
         /// <returns>类</returns>
-        public static IEnumerable<IGrouping<int?, Balance>> GroupByTitle(IEnumerable<Balance> source)
+        public static IEnumerable<IGrouping<int?, Balance>> GroupByTitle(this IEnumerable<Balance> source)
         {
             return source.GroupBy(b => b.Title);
         }
@@ -22,7 +22,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="source">待分类的余额表条目</param>
         /// <returns>类</returns>
-        public static IEnumerable<IGrouping<int?, Balance>> GroupBySubTitle(IEnumerable<Balance> source)
+        public static IEnumerable<IGrouping<int?, Balance>> GroupBySubTitle(this IEnumerable<Balance> source)
         {
             return source.GroupBy(b => b.SubTitle);
         }
@@ -32,7 +32,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="source">待分类的余额表条目</param>
         /// <returns>类</returns>
-        public static IEnumerable<IGrouping<string, Balance>> GroupByContent(IEnumerable<Balance> source)
+        public static IEnumerable<IGrouping<string, Balance>> GroupByContent(this IEnumerable<Balance> source)
         {
             return source.GroupBy(b => b.Content);
         }
@@ -42,7 +42,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="source">待分类的余额表条目</param>
         /// <returns>类</returns>
-        public static IEnumerable<IGrouping<string, Balance>> GroupByRemark(IEnumerable<Balance> source)
+        public static IEnumerable<IGrouping<string, Balance>> GroupByRemark(this IEnumerable<Balance> source)
         {
             return source.GroupBy(b => b.Remark);
         }
@@ -52,7 +52,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="source">待分类的余额表条目</param>
         /// <returns>类</returns>
-        public static IEnumerable<IGrouping<DateTime?, Balance>> GroupByDate(IEnumerable<Balance> source)
+        public static IEnumerable<IGrouping<DateTime?, Balance>> GroupByDate(this IEnumerable<Balance> source)
         {
             return source.GroupBy(b => b.Date);
         }
@@ -63,7 +63,7 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="source">变动日发生额</param>
         /// <returns>变动日余额</returns>
-        public static IEnumerable<Balance> AggregateChangedDay(IEnumerable<Balance> source)
+        public static IEnumerable<Balance> AggregateChangedDay(this IEnumerable<Balance> source)
         {
             var resx =
                 GroupByDate(source)
@@ -89,7 +89,7 @@ namespace AccountingServer.BLL
         /// <param name="source">变动日发生额</param>
         /// <param name="rng">返回区间</param>
         /// <returns>每日余额</returns>
-        public static IEnumerable<Balance> AggregateEveryDay(IEnumerable<Balance> source, DateFilter rng)
+        public static IEnumerable<Balance> AggregateEveryDay(this IEnumerable<Balance> source, DateFilter rng)
         {
             var resx =
                 GroupByDate(source)

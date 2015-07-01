@@ -171,12 +171,12 @@ namespace AccountingServer.BLL
                                    cat,
                                    depth + 1,
                                    SubtotalArgs.AggrType,
-                                   Accountant.AggregateChangedDay(res)
-                                             .Where(
-                                                    b =>
-                                                    SubtotalArgs.GatherType != GatheringType.NonZero ||
-                                                    !Accountant.IsZero(b.Fund))
-                                             .Select(b => LeafAggregated(newPath, cat, depth, b)));
+                                   res.AggregateChangedDay()
+                                      .Where(
+                                             b =>
+                                             SubtotalArgs.GatherType != GatheringType.NonZero ||
+                                             !b.Fund.IsZero())
+                                      .Select(b => LeafAggregated(newPath, cat, depth, b)));
                 if (SubtotalArgs.AggrType == AggregationType.EveryDay)
                     return ReduceA(
                                    path,
@@ -184,12 +184,12 @@ namespace AccountingServer.BLL
                                    cat,
                                    depth + 1,
                                    SubtotalArgs.AggrType,
-                                   Accountant.AggregateEveryDay(res, SubtotalArgs.EveryDayRange.Range)
-                                             .Where(
-                                                    b =>
-                                                    SubtotalArgs.GatherType != GatheringType.NonZero ||
-                                                    !Accountant.IsZero(b.Fund))
-                                             .Select(b => LeafAggregated(newPath, cat, depth, b)));
+                                   res.AggregateEveryDay(SubtotalArgs.EveryDayRange.Range)
+                                      .Where(
+                                             b =>
+                                             SubtotalArgs.GatherType != GatheringType.NonZero ||
+                                             !b.Fund.IsZero())
+                                      .Select(b => LeafAggregated(newPath, cat, depth, b)));
                 throw new ArgumentException("日期累加类型未知");
             }
             // else
@@ -198,8 +198,8 @@ namespace AccountingServer.BLL
                 switch (SubtotalArgs.Levels[depth])
                 {
                     case SubtotalLevel.Title:
-                        resx = Accountant
-                            .GroupByTitle(res)
+                        resx = res
+                            .GroupByTitle()
                             .Select(
                                     grp =>
                                     {
@@ -215,8 +215,8 @@ namespace AccountingServer.BLL
                                     });
                         break;
                     case SubtotalLevel.SubTitle:
-                        resx = Accountant
-                            .GroupBySubTitle(res)
+                        resx = res
+                            .GroupBySubTitle()
                             .Select(
                                     grp =>
                                     {
@@ -232,8 +232,8 @@ namespace AccountingServer.BLL
                                     });
                         break;
                     case SubtotalLevel.Content:
-                        resx = Accountant
-                            .GroupByContent(res)
+                        resx = res
+                            .GroupByContent()
                             .Select(
                                     grp =>
                                     {
@@ -249,8 +249,8 @@ namespace AccountingServer.BLL
                                     });
                         break;
                     case SubtotalLevel.Remark:
-                        resx = Accountant
-                            .GroupByRemark(res)
+                        resx = res
+                            .GroupByRemark()
                             .Select(
                                     grp =>
                                     {
@@ -271,8 +271,8 @@ namespace AccountingServer.BLL
                     case SubtotalLevel.Month:
                     case SubtotalLevel.BillingMonth:
                     case SubtotalLevel.Year:
-                        resx = Accountant
-                            .GroupByDate(res)
+                        resx = res
+                            .GroupByDate()
                             .Select(
                                     grp =>
                                     {

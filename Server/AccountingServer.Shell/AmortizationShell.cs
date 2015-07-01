@@ -240,7 +240,7 @@ namespace AccountingServer.Shell
 
             var bookValue = Accountant.GetBookValueOn(amort, dt);
             if (dt.HasValue &&
-                (!bookValue.HasValue || Accountant.IsZero(bookValue.Value)))
+                (!bookValue.HasValue || bookValue.Value.IsZero()))
                 return null;
             sb.AppendFormat(
                             "{0} {1}{2:yyyyMMdd}{3}{4}{5}{6}",
