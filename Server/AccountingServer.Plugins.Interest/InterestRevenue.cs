@@ -37,7 +37,9 @@ namespace AccountingServer.Plugins.Interest
                                   !b.Remark.EndsWith("-利息"))
                      .Remark;
 
-            if (pars.Length == 3)
+            var endDate = pars.Length == 4 ? pars[3].AsDate() : null;
+            if (pars.Length == 3 ||
+                endDate.HasValue)
             {
                 var filter = new VoucherDetail { Title = 1221, Content = pars[0], Remark = rmk };
                 var filter0 = new VoucherDetail { Title = 1221, Content = pars[0], Remark = rmk + "-利息" };
@@ -48,12 +50,10 @@ namespace AccountingServer.Plugins.Interest
                 var rng = new DateFilter(null, lastD);
                 var capQuery = new VoucherDetailQueryBase
                                    {
-                                       DetailEmitFilter = new EmitBase(),
                                        VoucherQuery = new VoucherQueryAtomBase(filter: filter, rng: rng)
                                    };
                 var intQuery = new VoucherDetailQueryBase
                                    {
-                                       DetailEmitFilter = new EmitBase(),
                                        VoucherQuery = new VoucherQueryAtomBase(filter: filter0, rng: rng)
                                    };
                 var subtotal = new SubtotalBase
@@ -81,7 +81,8 @@ namespace AccountingServer.Plugins.Interest
                            Convert.ToDouble(pars[2]) / 10000D,
                            ref capitalIntegral,
                            ref interestIntegral,
-                           lastD);
+                           lastD,
+                           endDate ?? DateTime.Now.Date);
             }
             else
             {
@@ -93,7 +94,8 @@ namespace AccountingServer.Plugins.Interest
                            Convert.ToDouble(pars[2]) / 10000D,
                            ref capitalIntegral,
                            ref interestIntegral,
-                           null);
+                           null,
+                           DateTime.Now.Date);
             }
             return new Suceed();
         }
@@ -106,9 +108,10 @@ namespace AccountingServer.Plugins.Interest
         /// <param name="rate">利率</param>
         /// <param name="capitalIntegral">剩余本金</param>
         /// <param name="interestIntegral">剩余利息</param>
-        /// <param name="lastSettlementDate">上次计息日</param>
+        /// <param name="lastSettlement">上次计息日</param>
+        /// <param name="finalDay">截止日期</param>
         private void Regularize(string content, string rmk, double rate, ref double capitalIntegral,
-                                ref double interestIntegral, DateTime? lastSettlementDate)
+                                ref double interestIntegral, DateTime? lastSettlement, DateTime finalDay)
         {
             var capitalPattern = new VoucherDetail
                                      {
@@ -122,9 +125,9 @@ namespace AccountingServer.Plugins.Interest
                                           Content = content,
                                           Remark = rmk + "-利息"
                                       };
-            var rng = lastSettlementDate.HasValue
-                          ? new DateFilter(lastSettlementDate.Value.AddDays(1), null)
-                          : DateFilter.Unconstrained;
+            var rng = lastSettlement.HasValue
+                          ? new DateFilter(lastSettlement.Value.AddDays(1), finalDay)
+                          : new DateFilter(null, finalDay);
             foreach (var grp in Accountant.SelectVouchers(
                                                           new VoucherQueryAtomBase(
                                                               filters: new[]
@@ -137,8 +140,8 @@ namespace AccountingServer.Plugins.Interest
             {
                 if (!grp.Key.HasValue)
                     throw new ApplicationException("无法处理无穷长时间以前的利息收入");
-                if (!lastSettlementDate.HasValue)
-                    lastSettlementDate = grp.Key;
+                if (!lastSettlement.HasValue)
+                    lastSettlement = grp.Key;
 
                 // Settle Interest
                 interestIntegral += SettleInterest(
@@ -146,12 +149,12 @@ namespace AccountingServer.Plugins.Interest
                                                    rmk,
                                                    rate,
                                                    capitalIntegral,
-                                                   grp.Key.Value.Subtract(lastSettlementDate.Value).Days,
+                                                   grp.Key.Value.Subtract(lastSettlement.Value).Days,
                                                    grp.SingleOrDefault(
                                                                        v =>
                                                                        v.Details.Any(d => d.IsMatch(interestPattern, 1)))
                                                    ?? new Voucher { Date = grp.Key, Details = new VoucherDetail[0] });
-                lastSettlementDate = grp.Key;
+                lastSettlement = grp.Key;
 
                 // Settle Loan
                 // ReSharper disable once PossibleInvalidOperationException
@@ -186,18 +189,17 @@ namespace AccountingServer.Plugins.Interest
                     }
                 }
             }
-            if (lastSettlementDate == null)
+            if (lastSettlement == null)
                 throw new ApplicationException("无法处理无穷长时间以前的利息收入");
 
-            var today = DateTime.Now.Date;
-            if (lastSettlementDate != today)
+            if (lastSettlement != finalDay)
                 interestIntegral += SettleInterest(
                                                    content,
                                                    rmk,
                                                    rate,
                                                    capitalIntegral,
-                                                   today.Subtract(lastSettlementDate.Value).Days,
-                                                   new Voucher { Date = today, Details = new VoucherDetail[0] });
+                                                   finalDay.Subtract(lastSettlement.Value).Days,
+                                                   new Voucher { Date = finalDay, Details = new VoucherDetail[0] });
         }
 
         /// <summary>
