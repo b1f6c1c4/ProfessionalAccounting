@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using AccountingServer.BLL;
+using AccountingServer.Plugins.Interest;
+using AccountingServer.Plugins.THUInfo;
 using AccountingServer.Plugins.Utilities;
 using AccountingServer.Plugins.YieldRate;
 using AccountingServer.Shell;
-using AccountingServer.Plugins.Interest;
-using AccountingServer.Plugins.THUInfo;
 
 namespace AccountingServer
 {

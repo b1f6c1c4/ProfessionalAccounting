@@ -148,7 +148,7 @@ namespace AccountingServer.Plugins.Utilities
                                                          Title = 6401,
                                                          Content = "打印费",
                                                          Fund = fund
-                                                     },
+                                                     }
                                              }
                            };
             }
