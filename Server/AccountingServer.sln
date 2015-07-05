@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.Plugins.In
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.Plugins.Utilities", "AccountingServer.Plugins.Utilities\AccountingServer.Plugins.Utilities.csproj", "{ACFBB04D-BAD6-48A8-95FC-B04B5A6FD33B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.Plugins.YieldRate", "AccountingServer.Plugins.YieldRate\AccountingServer.Plugins.YieldRate.csproj", "{43A4879D-06D5-490C-A3AA-7C0041D40EBF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +72,10 @@ Global
 		{ACFBB04D-BAD6-48A8-95FC-B04B5A6FD33B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ACFBB04D-BAD6-48A8-95FC-B04B5A6FD33B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ACFBB04D-BAD6-48A8-95FC-B04B5A6FD33B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43A4879D-06D5-490C-A3AA-7C0041D40EBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43A4879D-06D5-490C-A3AA-7C0041D40EBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43A4879D-06D5-490C-A3AA-7C0041D40EBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43A4879D-06D5-490C-A3AA-7C0041D40EBF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -85,5 +91,6 @@ Global
 		{376C7C43-2BA3-4177-872E-13053716C8A5} = {13C35141-C1A9-46DB-9ED4-3310DCD021FC}
 		{2A6865A5-D37E-406A-A51C-3EF4E8A5C9F4} = {376C7C43-2BA3-4177-872E-13053716C8A5}
 		{ACFBB04D-BAD6-48A8-95FC-B04B5A6FD33B} = {376C7C43-2BA3-4177-872E-13053716C8A5}
+		{43A4879D-06D5-490C-A3AA-7C0041D40EBF} = {376C7C43-2BA3-4177-872E-13053716C8A5}
 	EndGlobalSection
 EndGlobal
