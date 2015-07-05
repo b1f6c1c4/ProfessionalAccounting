@@ -36,46 +36,63 @@ namespace AccountingServer.Plugins.YieldRate
         ///     试算净值
         /// </summary>
         /// <param name="b">收益率+1</param>
-        /// <returns>净值</returns>
-        private double Value(double b)
+        /// <param name="val">净值</param>
+        /// <param name="der">净值对收益率的偏导数</param>
+        private void Value(double b, out double val, out double der)
         {
-            var aggr = 0D;
+            val = 0D;
+            der = 0D;
             for (var i = 0; i < m_N; i++)
-                aggr += Math.Pow(b, m_Delta[i]) * m_Fund[i];
-            return aggr;
+            {
+                var v = Math.Pow(b, m_Delta[i] - 1);
+                val += v * b * m_Fund[i];
+                der += v * m_Delta[i] * m_Fund[i];
+            }
         }
 
         /// <summary>
-        ///     试算净值对收益率的偏导数
-        /// </summary>
-        /// <param name="b">收益率+1</param>
-        /// <returns>净值对收益率的偏导数</returns>
-        private double Derivative(double b)
-        {
-            var aggr = 0D;
-            for (var i = 0; i < m_N; i++)
-                aggr += Math.Pow(b, m_Delta[i] - 1) * m_Delta[i] * m_Fund[i];
-            return aggr;
-        }
-
-        /// <summary>
-        ///     采用牛顿迭代法求解收益率
+        ///     采用牛顿下山迭代法求解收益率
         /// </summary>
         /// <returns>收益率</returns>
         public double Solve()
         {
-            var b = 1D;
+            var lambda = 1D;
 
             while (true)
             {
-                var v = Value(b);
-                if (v.IsZero())
-                    break;
+                var b = 1D;
 
-                var d = Derivative(b);
-                b -= v / d;
+                var dir = 0;
+                var flag = false;
+                while (true)
+                {
+                    double v, d;
+                    Value(b, out v, out d);
+                    if (v.IsZero())
+                    {
+                        flag = true;
+                        break;
+                    }
+
+                    var del = v / d;
+                    if (dir > 0)
+                    {
+                        if (del < 0)
+                            break;
+                    }
+                    else if (dir < 0)
+                    {
+                        if (del > 0)
+                            break;
+                    }
+                    else
+                        dir = del > 0 ? 1 : -1;
+                    b -= lambda * del;
+                }
+                if (flag)
+                    return b - 1;
+                lambda /= 2;
             }
-            return b - 1;
         }
     }
 }
