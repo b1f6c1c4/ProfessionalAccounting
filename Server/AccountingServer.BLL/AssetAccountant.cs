@@ -43,8 +43,8 @@ namespace AccountingServer.BLL
                     assetItem is DevalueItem)
                     if (assetItem.Date.HasValue)
                         assetItem.Date = AccountantHelper.LastDayOfMonth(
-                                                                   assetItem.Date.Value.Year,
-                                                                   assetItem.Date.Value.Month);
+                                                                         assetItem.Date.Value.Year,
+                                                                         assetItem.Date.Value.Month);
 
             lst.Sort(new AssetItemComparer());
 
@@ -365,15 +365,15 @@ namespace AccountingServer.BLL
         /// <param name="details">细目</param>
         /// <returns>是否成功</returns>
         private bool GenerateVoucher(AssetItem item, bool isCollapsed, VoucherType voucherType,
-                                       params VoucherDetail[] details)
+                                     params VoucherDetail[] details)
         {
             var voucher = new Voucher
-            {
-                Date = isCollapsed ? null : item.Date,
-                Type = voucherType,
-                Remark = "automatically generated",
-                Details = details
-            };
+                              {
+                                  Date = isCollapsed ? null : item.Date,
+                                  Type = voucherType,
+                                  Remark = "automatically generated",
+                                  Details = details
+                              };
             var res = Db.Upsert(voucher);
             item.VoucherID = voucher.ID;
             return res;
