@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using AccountingServer.BLL;
 using AccountingServer.Plugins.Utilities;
+using AccountingServer.Plugins.YieldRate;
 using AccountingServer.Shell;
 using AccountingServer.Plugins.Interest;
 using AccountingServer.Plugins.THUInfo;
@@ -55,7 +56,8 @@ namespace AccountingServer
                                       {
                                           thu,
                                           new InterestRevenue(m_Accountant),
-                                          new Utilities(m_Accountant)
+                                          new Utilities(m_Accountant),
+                                          new YieldRate(m_Accountant)
                                       }
                           };
             m_Shell.AutoConnect();

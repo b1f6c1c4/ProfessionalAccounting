@@ -95,6 +95,10 @@
       <Project>{ACFBB04D-BAD6-48A8-95FC-B04B5A6FD33B}</Project>
       <Name>AccountingServer.Plugins.Utilities</Name>
     </ProjectReference>
+    <ProjectReference Include="..\AccountingServer.Plugins.YieldRate\AccountingServer.Plugins.YieldRate.csproj">
+      <Project>{43a4879d-06d5-490c-a3aa-7c0041d40ebf}</Project>
+      <Name>AccountingServer.Plugins.YieldRate</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AccountingServer.Shell\AccountingServer.Shell.csproj">
       <Project>{0ddc759f-23de-4443-a97c-4edc1c40690c}</Project>
       <Name>AccountingServer.Shell</Name>
