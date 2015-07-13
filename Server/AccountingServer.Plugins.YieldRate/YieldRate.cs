@@ -24,7 +24,7 @@ namespace AccountingServer.Plugins.YieldRate
                 endDate = pars[0].AsDate() ?? endDate;
             var rng = new DateFilter(null, endDate);
 
-            // {T1101}-{T1101+T611102+T610101 A} : T1101``cd
+            // {T1101}-{T1101+T611102+T610101 A} : T1101+T610101+T611102``cd
             var query1 = new VoucherQueryAtomBase(filter: new VoucherDetail { Title = 1101 }, rng: rng);
             var query2 =
                 new VoucherQueryAtomBase(
@@ -38,7 +38,18 @@ namespace AccountingServer.Plugins.YieldRate
             var voucherQuery = new VoucherQueryAryBase(
                 OperatorType.Substract,
                 new IQueryCompunded<IVoucherQueryAtom>[] { query1, query2 });
-            var emitFilter = new EmitBase { DetailFilter = new DetailQueryAtomBase(new VoucherDetail { Title = 1101 }) };
+            var emitFilter = new EmitBase
+                                 {
+                                     DetailFilter =
+                                         new DetailQueryAryBase(
+                                         new[]
+                                             {
+                                                 new VoucherDetail { Title = 1101 },
+                                                 new VoucherDetail { Title = 6101, SubTitle = 01},
+                                                 new VoucherDetail { Title = 6111, SubTitle = 02}
+                                             },
+                                         false)
+                                 };
             var result =
                 Accountant.SelectVoucherDetailsGrouped(
                                                        new GroupedQueryBase
