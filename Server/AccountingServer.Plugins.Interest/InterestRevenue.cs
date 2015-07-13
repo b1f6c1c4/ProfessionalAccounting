@@ -46,7 +46,7 @@ namespace AccountingServer.Plugins.Interest
                 // ReSharper disable once PossibleInvalidOperationException
                 var lastD = Accountant.SelectVouchers(new VoucherQueryAtomBase(filter: filter0, dir: 1))
                                       .OrderByDescending(v => v.Date, new DateComparer())
-                                      .First().Date.Value;
+                                      .First().Date.Value.AddDays(-1);
                 var rng = new DateFilter(null, lastD);
                 var capQuery = new VoucherDetailQueryBase
                                    {
