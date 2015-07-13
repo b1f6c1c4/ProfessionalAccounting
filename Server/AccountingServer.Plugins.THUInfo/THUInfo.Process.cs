@@ -112,7 +112,12 @@ namespace AccountingServer.Plugins.THUInfo
             /// <summary>
             ///     超市购物
             /// </summary>
-            Shopping
+            Shopping,
+
+            /// <summary>
+            ///     洗澡卡和洗衣卡充值
+            /// </summary>
+            Charging
         }
 
         /// <summary>
@@ -309,12 +314,34 @@ namespace AccountingServer.Plugins.THUInfo
                                                                  new VoucherDetail
                                                                      {
                                                                          Title = 6602,
-                                                                         SubTitle = 03,
+                                                                         SubTitle = 06,
                                                                          Content = inst.Item2,
                                                                          Fund = records[id].Fund
                                                                      }
                                                              }
                                            });
+                            id++;
+                        }
+                        break;
+                    case RegularType.Charging:
+                        if (records[id].Type == "消费" &&
+                            records[id].Location == "")
+                        {
+                            result.Add(
+                                       new Voucher
+                                       {
+                                           Date = date,
+                                           Details = new List<VoucherDetail>
+                                                             {
+                                                                 newDetail(records[id], -1),
+                                                                 new VoucherDetail
+                                                                     {
+                                                                         Title = 1123,
+                                                                         Content = inst.Item2,
+                                                                         Fund = records[id].Fund
+                                                                     }
+                                                             }
+                                       });
                             id++;
                         }
                         break;
@@ -373,6 +400,15 @@ namespace AccountingServer.Plugins.THUInfo
                                 break;
                             case "sh":
                                 lst.Add(new Tuple<RegularType, string>(RegularType.Shopping, "生活用品"));
+                                break;
+                            case "bg":
+                                lst.Add(new Tuple<RegularType, string>(RegularType.Shopping, "办公用品"));
+                                break;
+                            case "xz":
+                                lst.Add(new Tuple<RegularType, string>(RegularType.Charging, "洗澡卡"));
+                                break;
+                            case "xy":
+                                lst.Add(new Tuple<RegularType, string>(RegularType.Charging, "洗衣"));
                                 break;
                             default:
                                 throw new ArgumentException("未知参数", "pars");
