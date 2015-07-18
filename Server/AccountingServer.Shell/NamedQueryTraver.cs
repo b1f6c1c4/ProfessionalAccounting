@@ -15,13 +15,23 @@ namespace AccountingServer.Shell
     public class NamedQueryTraver<TMedium, TResult>
     {
         /// <summary>
+        ///     公共记账凭证处理器
+        /// </summary>
+        /// <param name="query">公共记账凭证检索式</param>
+        /// <returns>公共记账凭证</returns>
+        public delegate IReadOnlyList<Voucher> PreFunc(
+            IReadOnlyList<Voucher> preVouchers, IQueryCompunded<IVoucherQueryAtom> query);
+
+        /// <summary>
         ///     原子查询处理器
         /// </summary>
         /// <param name="path">路径</param>
         /// <param name="query">查询</param>
         /// <param name="coefficient">系数</param>
+        /// <param name="preVouchers">公共记账凭证</param>
         /// <returns>输出</returns>
-        public delegate TResult LeafFunc(TMedium path, INamedQ query, double coefficient);
+        public delegate TResult LeafFunc(
+            TMedium path, INamedQ query, double coefficient, IReadOnlyList<Voucher> preVouchers);
 
         /// <summary>
         ///     路径映射器
@@ -43,6 +53,12 @@ namespace AccountingServer.Shell
         /// <returns>输出</returns>
         public delegate TResult ReduceFunc(
             TMedium path, TMedium newPath, INamedQueries query, double coefficient, IEnumerable<TResult> results);
+
+        /// <summary>
+        ///     公共记账凭证处理器
+        /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
+        public PreFunc Pre { get; set; }
 
         /// <summary>
         ///     原子查询处理器
@@ -83,8 +99,10 @@ namespace AccountingServer.Shell
         ///     获取内层命名查询并解引用
         /// </summary>
         /// <param name="query">命名查询</param>
+        /// <param name="preVouchers">公共记账凭证</param>
         /// <returns>最内层的命名查询（非引用）</returns>
-        private INamedQueryConcrete GetConcreteQuery(INamedQuery query)
+        private INamedQueryConcrete GetConcreteQuery(INamedQuery query,
+                                                     ref IReadOnlyList<Voucher> preVouchers)
         {
             var flag = true;
             while (flag)
@@ -93,11 +111,15 @@ namespace AccountingServer.Shell
                 while (query is ShellParser.NamedQueryContext)
                 {
                     query = (query as ShellParser.NamedQueryContext).InnerQuery;
+                    if (!query.InheritQuery)
+                        preVouchers = null;
                     flag = true;
                 }
-                while (query is INamedQueryReference)
+                while (query is INamedQueryTemplateR)
                 {
-                    query = Dereference(query as INamedQueryReference);
+                    query = Dereference(query as INamedQueryTemplateR);
+                    if (!query.InheritQuery)
+                        preVouchers = null;
                     flag = true;
                 }
             }
@@ -111,7 +133,10 @@ namespace AccountingServer.Shell
         /// <param name="initialPath">初始路径</param>
         /// <param name="query">命名查询模板</param>
         /// <returns>输出</returns>
-        public TResult Traversal(TMedium initialPath, INamedQuery query) { return Traversal(initialPath, query, 1); }
+        public TResult Traversal(TMedium initialPath, INamedQuery query)
+        {
+            return Traversal(initialPath, query, 1, null);
+        }
 
         /// <summary>
         ///     遍历命名查询
@@ -119,34 +144,40 @@ namespace AccountingServer.Shell
         /// <param name="path">当前路径</param>
         /// <param name="query">当前查询</param>
         /// <param name="coefficient">当前系数</param>
+        /// <param name="preVouchers">公共记账凭证</param>
         /// <returns>输出</returns>
-        private TResult Traversal(TMedium path, INamedQuery query, double coefficient)
+        private TResult Traversal(TMedium path, INamedQuery query, double coefficient,
+                                  IReadOnlyList<Voucher> preVouchers)
         {
-            var q = GetConcreteQuery(query);
+            var q = GetConcreteQuery(query, ref preVouchers);
 
             if (q is INamedQ)
-                return Leaf(path, q as INamedQ, coefficient);
+                return Leaf(path, q as INamedQ, coefficient, preVouchers);
 
             if (q is INamedQueries)
             {
                 var qs = q as INamedQueries;
+                if (!qs.InheritQuery)
+                    preVouchers = Pre(null, qs.CommonQuery);
+                else if (qs.CommonQuery != null)
+                    preVouchers = Pre(preVouchers, qs.CommonQuery);
                 var newPath = Map(path, qs, coefficient);
                 return Reduce(
                               path,
                               newPath,
                               qs,
                               coefficient,
-                              qs.Items.Select(nq => Traversal(newPath, nq, coefficient * qs.Coefficient)));
+                              qs.Items.Select(nq => Traversal(newPath, nq, coefficient * qs.Coefficient, preVouchers)));
             }
 
             throw new ArgumentException("命名查询类型未知", "query");
         }
 
         /// <summary>
-        ///     对命名查询模板的名称解引用
+        ///     对命名查询模板的名称解引用并套用模板
         /// </summary>
         /// <param name="reference">名称</param>
-        /// <returns>命名查询模板</returns>
+        /// <returns>命名查询</returns>
         private INamedQuery Dereference(string reference)
         {
             string range, leftExtendedRange;
@@ -178,10 +209,13 @@ namespace AccountingServer.Shell
         }
 
         /// <summary>
-        ///     对命名查询模板引用解引用
+        ///     对命名查询模板引用解引用并套用模板
         /// </summary>
         /// <param name="reference">命名查询模板引用</param>
-        /// <returns>命名查询模板</returns>
-        private INamedQuery Dereference(INamedQueryReference reference) { return Dereference(reference.Name); }
+        /// <returns>命名查询</returns>
+        private INamedQuery Dereference(INamedQueryTemplateR reference)
+        {
+            return Dereference(reference.Name);
+        }
     }
 }

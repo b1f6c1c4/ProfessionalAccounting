@@ -32,13 +32,24 @@ namespace AccountingServer.Shell
             var helper =
                 new NamedQueryTraver<string, Tuple<double, string>>(m_Accountant, rng)
                     {
+                        Pre =
+                            (preVouchers, query) =>
+                            preVouchers == null
+                                ? m_Accountant.SelectVouchers(query).ToList()
+                                : preVouchers.Where(v => v.IsMatch(query)).ToList(),
                         Leaf =
-                            (path, query, coefficient) =>
-                            PresentReport(
-                                          path.Length == 0 ? query.Name : path + "/" + query.Name,
-                                          query.GroupingQuery,
-                                          coefficient * query.Coefficient,
-                                          withSubtotal),
+                            (path, query, coefficient, preVouchers) =>
+                            {
+                                var res = preVouchers == null
+                                              ? m_Accountant.SelectVoucherDetailsGrouped(query.GroupingQuery)
+                                              : preVouchers.SelectVoucherDetailsGrouped(query.GroupingQuery);
+                                return PresentReport(
+                                                     path.Length == 0 ? query.Name : path + "/" + query.Name,
+                                                     coefficient * query.Coefficient,
+                                                     query.GroupingQuery.Subtotal,
+                                                     res,
+                                                     withSubtotal);
+                            },
                         Map = (path, query, coefficient) => path.Length == 0 ? query.Name : path + "/" + query.Name,
                         Reduce = (path, newPath, query, coefficient, results) => Gather(path, results, withSubtotal),
                     };
@@ -47,7 +58,15 @@ namespace AccountingServer.Shell
             if (expr.namedQuery() != null)
                 result = helper.Traversal(String.Empty, expr.namedQuery());
             else if (expr.groupedQuery() != null)
-                result = PresentReport(String.Empty, expr.groupedQuery(), 1, withSubtotal);
+            {
+                IGroupedQuery query = expr.groupedQuery();
+                result = PresentReport(
+                                       String.Empty,
+                                       1,
+                                       query.Subtotal,
+                                       m_Accountant.SelectVoucherDetailsGrouped(query),
+                                       withSubtotal);
+            }
             else
                 throw new ArgumentException("表达式类型未知", "expr");
             return new UnEditableText(result.Item2);
@@ -57,16 +76,15 @@ namespace AccountingServer.Shell
         ///     呈现报告条目
         /// </summary>
         /// <param name="path0">路径</param>
-        /// <param name="query">分类汇总检索式</param>
         /// <param name="coefficient">路径上累计的系数</param>
+        /// <param name="args"></param>
+        /// <param name="res"></param>
         /// <param name="withSubtotal">是否包含分类汇总</param>
         /// <returns>累计值和报告部分</returns>
-        private Tuple<double, string> PresentReport(string path0, IGroupedQuery query, double coefficient,
+        private Tuple<double, string> PresentReport(string path0, double coefficient, ISubtotal args,
+                                                    IEnumerable<Balance> res,
                                                     bool withSubtotal = true)
         {
-            var args = query.Subtotal;
-            var res = m_Accountant.SelectVoucherDetailsGrouped(query);
-
             var helper =
                 new SubtotalTraver<string, Tuple<double, string>>(args)
                     {

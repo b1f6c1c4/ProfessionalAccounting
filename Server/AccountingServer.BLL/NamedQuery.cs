@@ -12,12 +12,17 @@ namespace AccountingServer.BLL
         ///     名称
         /// </summary>
         string Name { get; }
+
+        /// <summary>
+        ///     是否继承公共记账凭证检索式
+        /// </summary>
+        bool InheritQuery { get; }
     }
 
     /// <summary>
-    ///     命名查询引用
+    ///     命名查询模板引用
     /// </summary>
-    public interface INamedQueryReference : INamedQuery { }
+    public interface INamedQueryTemplateR : INamedQuery { }
 
     /// <summary>
     ///     命名查询（非引用）
@@ -56,5 +61,18 @@ namespace AccountingServer.BLL
         /// </summary>
         // ReSharper disable once ReturnTypeCanBeEnumerable.Global
         IReadOnlyList<INamedQuery> Items { get; }
+
+        /// <summary>
+        ///     公共记账凭证检索式
+        /// </summary>
+        IQueryCompunded<IVoucherQueryAtom> CommonQuery { get; }
+    }
+
+    public class NamedQBase : INamedQ {
+        public string Name { get; set; }
+        public bool InheritQuery { get; set; }
+        public double Coefficient { get; set; }
+        public string Remark { get; set; }
+        public IGroupedQuery GroupingQuery { get; set; }
     }
 }
