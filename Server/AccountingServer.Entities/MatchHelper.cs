@@ -108,6 +108,11 @@ namespace AccountingServer.Entities
                        : voucher.Details.Any(d => d.IsMatch(query.DetailFilter));
         }
 
+        public static bool IsMatch(this Voucher voucher, IQueryCompunded<IVoucherQueryAtom> query)
+        {
+            return IsMatch(query, q => IsMatch(voucher, q));
+        }
+
         /// <summary>
         ///     判断一般检索式是否成立
         /// </summary>
@@ -117,6 +122,8 @@ namespace AccountingServer.Entities
         public static bool IsMatch<TAtom>(IQueryCompunded<TAtom> query, Func<TAtom, bool> atomPredictor)
             where TAtom : class
         {
+            if (query == null)
+                return true;
             if (query is TAtom)
                 return atomPredictor(query as TAtom);
             if (query is IQueryAry<TAtom>)
