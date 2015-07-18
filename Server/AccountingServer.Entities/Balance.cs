@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace AccountingServer.Entities
 {
@@ -51,6 +52,40 @@ namespace AccountingServer.Entities
             Content = orig.Content;
             Remark = orig.Remark;
             Fund = orig.Fund;
+        }
+    }
+
+    public class BalanceComparer:IEqualityComparer<Balance>
+    {
+        public bool Equals(Balance x, Balance y)
+        {
+            if (x.Date != y.Date)
+                return false;
+            if (x.Title != y.Title)
+                return false;
+            if (x.SubTitle != y.SubTitle)
+                return false;
+            if (x.Content != y.Content)
+                return false;
+            if (x.Remark != y.Remark)
+                return false;
+            if (Math.Abs(x.Fund - y.Fund) > 1E-8)
+                return false;
+            return true;
+        }
+
+        public int GetHashCode(Balance obj)
+        {
+            var aggr = 0;
+            if (obj.Title.HasValue)
+                aggr += obj.Title.Value * 100;
+            if (obj.SubTitle.HasValue)
+                aggr += obj.SubTitle.Value;
+            if (obj.Content != null)
+                aggr ^= obj.Content.GetHashCode();
+            if (obj.Remark != null)
+                aggr ^= obj.Remark.GetHashCode() << 1;
+            return aggr;
         }
     }
 }
