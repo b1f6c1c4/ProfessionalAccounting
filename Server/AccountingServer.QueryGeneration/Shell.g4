@@ -47,19 +47,19 @@ report
 namedQuery
 	:	namedQueries
 	|	namedQ
-	|	namedQueryReference
+	|	namedQueryTemplateR
 	;
 
 namedQueries
-	:	name coef? DoubleQuotedString? '::' namedQuery ('|' namedQuery)* ';'
+	:	name coef? DoubleQuotedString? ((Inh='/' | Inh='//') vouchers | Inh='//')? '::' namedQuery ('|' namedQuery)* ';'
 	;
 
 namedQ
-	:	name coef? DoubleQuotedString? ':' groupedQuery
+	:	name coef? DoubleQuotedString? (Inh='//')? ':' groupedQuery
 	;
 
-namedQueryReference
-	:	name ';'
+namedQueryTemplateR
+	:	name (Inh='//')? ';'
 	;
 
 name

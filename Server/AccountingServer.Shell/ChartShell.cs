@@ -32,6 +32,11 @@ namespace AccountingServer.Shell
             var helper =
                 new NamedQueryTraver<object, object>(m_Accountant, rng)
                     {
+                        Pre =
+                            (preVouchers, query) =>
+                            preVouchers == null
+                                ? m_Accountant.SelectVouchers(query).ToList()
+                                : preVouchers.Where(v => v.IsMatch(query)).ToList(),
                         Leaf = PresentChart,
                         Map = (path, query, coefficient) =>
                               Fork(ShellParser.From(query.Remark).chartLevel(), path, query.Name),
@@ -48,8 +53,9 @@ namespace AccountingServer.Shell
         /// <param name="path0">路径</param>
         /// <param name="query">分类汇总检索式</param>
         /// <param name="coefficient">路径上累计的系数</param>
+        /// <param name="preVouchers">公共记账凭证</param>
         /// <returns></returns>
-        private object PresentChart(object path0, INamedQ query, double coefficient)
+        private object PresentChart(object path0, INamedQ query, double coefficient, IReadOnlyList<Voucher> preVouchers)
         {
             var lvs = (String.IsNullOrWhiteSpace(query.Remark))
                           ? null
@@ -122,7 +128,11 @@ namespace AccountingServer.Shell
                                   }
                     };
 
-            return helper.Traversal(path0, m_Accountant.SelectVoucherDetailsGrouped(query.GroupingQuery));
+            return helper.Traversal(
+                                    path0,
+                                    preVouchers == null
+                                        ? m_Accountant.SelectVoucherDetailsGrouped(query.GroupingQuery)
+                                        : preVouchers.SelectVoucherDetailsGrouped(query.GroupingQuery));
         }
 
         /// <summary>

@@ -18,26 +18,40 @@ namespace AccountingServer.Shell.Parsing
                         return namedQ();
                     if (namedQueries() != null)
                         return namedQueries();
-                    if (namedQueryReference() != null)
-                        return namedQueryReference();
+                    if (namedQueryTemplateR() != null)
+                        return namedQueryTemplateR();
                     throw new MemberAccessException("表达式错误");
                 }
             }
 
             /// <inheritdoc />
             public string Name { get { return InnerQuery.Name; } }
+
+            public bool InheritQuery { get { return InnerQuery.InheritQuery; } }
         }
 
-        public partial class NamedQueryReferenceContext : INamedQueryReference
+        public partial class NamedQueryTemplateRContext : INamedQueryTemplateR
         {
             /// <inheritdoc />
             public string Name { get { return name().DollarQuotedString().Dequotation(); } }
+
+            public bool InheritQuery { get { return Inh == null; } }
         }
 
         public partial class NamedQueriesContext : INamedQueries
         {
             /// <inheritdoc />
             public string Name { get { return name().DollarQuotedString().Dequotation(); } }
+
+            public bool InheritQuery
+            {
+                get
+                {
+                    if (Inh == null)
+                        return true;
+                    return Inh.Text == "/";
+                }
+            }
 
             /// <inheritdoc />
             public double Coefficient
@@ -65,12 +79,16 @@ namespace AccountingServer.Shell.Parsing
 
             /// <inheritdoc />
             public IReadOnlyList<INamedQuery> Items { get { return namedQuery(); } }
+
+            public IQueryCompunded<IVoucherQueryAtom> CommonQuery { get { return vouchers(); } }
         }
 
         public partial class NamedQContext : INamedQ
         {
             /// <inheritdoc />
             public string Name { get { return name().DollarQuotedString().Dequotation(); } }
+
+            public bool InheritQuery { get { return Inh == null; } }
 
             /// <inheritdoc />
             public double Coefficient
