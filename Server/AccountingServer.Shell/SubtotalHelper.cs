@@ -59,11 +59,7 @@ namespace AccountingServer.Shell
                             (path, cat, depth, bal) =>
                             new Tuple<double, string>(
                                 bal.Fund,
-                                String.Format(
-                                              "{0}{1}{2}",
-                                              new String(' ', depth * ident),
-                                              bal.Date.AsDate().CPadRight(38),
-                                              ts(bal.Fund).CPadLeft(12 + 2 * depth))),
+                                $"{new string(' ', depth * ident)}{bal.Date.AsDate().CPadRight(38)}{ts(bal.Fund).CPadLeft(12 + 2 * depth)}"),
                         Map = (path, cat, depth, level) => null,
                         MapA = (path, cat, depth, type) => null,
                         MediumLevel =
@@ -73,45 +69,30 @@ namespace AccountingServer.Shell
                                 switch (level)
                                 {
                                     case SubtotalLevel.Title:
-                                        str = String.Format(
-                                                            "{0} {1}:",
-                                                            cat.Title.AsTitle(),
-                                                            TitleManager.GetTitleName(cat.Title));
+                                        str = $"{cat.Title.AsTitle()} {TitleManager.GetTitleName(cat.Title)}:";
                                         break;
                                     case SubtotalLevel.SubTitle:
-                                        str = String.Format(
-                                                            "{0} {1}:",
-                                                            cat.SubTitle.AsSubTitle(),
-                                                            TitleManager.GetTitleName(cat.Title, cat.SubTitle));
+                                        str =
+                                            $"{cat.SubTitle.AsSubTitle()} {TitleManager.GetTitleName(cat.Title, cat.SubTitle)}:";
                                         break;
                                     case SubtotalLevel.Content:
-                                        str = String.Format("{0}:", cat.Content);
+                                        str = $"{cat.Content}:";
                                         break;
                                     case SubtotalLevel.Remark:
-                                        str = String.Format("{0}:", cat.Remark);
+                                        str = $"{cat.Remark}:";
                                         break;
                                     default:
-                                        str = String.Format("{0}:", cat.Date.AsDate(level));
+                                        str = $"{cat.Date.AsDate(level)}:";
                                         break;
                                 }
                                 if (depth == args.Levels.Count - 1 &&
                                     args.AggrType == AggregationType.None)
                                     return new Tuple<double, string>(
                                         r.Item1,
-                                        String.Format(
-                                                      "{0}{1}{2}",
-                                                      new String(' ', depth * ident),
-                                                      str.CPadRight(38),
-                                                      r.Item2.CPadLeft(12 + 2 * depth)));
+                                        $"{new string(' ', depth * ident)}{str.CPadRight(38)}{r.Item2.CPadLeft(12 + 2 * depth)}");
                                 return new Tuple<double, string>(
                                     r.Item1,
-                                    String.Format(
-                                                  "{0}{1}{2}{3}{4}",
-                                                  new String(' ', depth * ident),
-                                                  str.CPadRight(38),
-                                                  ts(r.Item1).CPadLeft(12 + 2 * depth),
-                                                  Environment.NewLine,
-                                                  r.Item2));
+                                    $"{new string(' ', depth * ident)}{str.CPadRight(38)}{ts(r.Item1).CPadLeft(12 + 2 * depth)}{Environment.NewLine}{r.Item2}");
                             },
                         Reduce =
                             (path, cat, depth, level, results) =>
@@ -127,7 +108,7 @@ namespace AccountingServer.Shell
                                 var r = results.ToList();
                                 var last = r.LastOrDefault();
                                 return new Tuple<double, string>(
-                                    last == null ? 0 : last.Item1,
+                                    last?.Item1 ?? 0,
                                     NotNullJoin(r.Select(t => t.Item2)));
                             }
                     };

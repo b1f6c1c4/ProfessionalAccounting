@@ -40,7 +40,7 @@ namespace AccountingServer.BLL
                 case AmortizeInterval.LastDayOfYear:
                     return new DateTime(the.Year + 1, 1, 1).AddDays(-1);
                 default:
-                    throw new ArgumentException("间隔类型未知", "interval");
+                    throw new ArgumentException("间隔类型未知", nameof(interval));
             }
         }
 
@@ -69,7 +69,7 @@ namespace AccountingServer.BLL
                 case AmortizeInterval.LastDayOfYear:
                     return new DateTime(last.Year + 2, 1, 1).AddDays(-1);
                 default:
-                    throw new ArgumentException("间隔类型未知", "interval");
+                    throw new ArgumentException("间隔类型未知", nameof(interval));
             }
         }
 

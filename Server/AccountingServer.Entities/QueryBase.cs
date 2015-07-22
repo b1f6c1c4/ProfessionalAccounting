@@ -22,7 +22,7 @@ namespace AccountingServer.Entities
         {
             Operator = op;
             if (queries.Count == 0)
-                throw new ArgumentException("参与运算的检索式个数过少", "queries");
+                throw new ArgumentException("参与运算的检索式个数过少", nameof(queries));
             Filter1 = queries[0];
             switch (op)
             {
@@ -42,13 +42,13 @@ namespace AccountingServer.Entities
                         Filter2 = new QueryAryBase<TAtom>(op, queries.Skip(1).ToList());
                     break;
                 default:
-                    throw new ArgumentException("运算类型未知", "op");
+                    throw new ArgumentException("运算类型未知", nameof(op));
             }
         }
 
-        public OperatorType Operator { get; private set; }
-        public IQueryCompunded<TAtom> Filter1 { get; private set; }
-        public IQueryCompunded<TAtom> Filter2 { get; private set; }
+        public OperatorType Operator { get; }
+        public IQueryCompunded<TAtom> Filter1 { get; }
+        public IQueryCompunded<TAtom> Filter2 { get; }
     }
 
     public class DetailQueryAryBase : QueryAryBase<IDetailQueryAtom>

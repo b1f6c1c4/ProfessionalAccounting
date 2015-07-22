@@ -12,10 +12,7 @@ namespace AccountingServer.DAL
     internal class VoucherDetailSerializer : BsonBaseSerializer
     {
         public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
-                                           IBsonSerializationOptions options)
-        {
-            return Deserialize(bsonReader);
-        }
+                                           IBsonSerializationOptions options) => Deserialize(bsonReader);
 
         public static VoucherDetail Deserialize(BsonReader bsonReader)
         {
@@ -36,10 +33,7 @@ namespace AccountingServer.DAL
         }
 
         public override void Serialize(BsonWriter bsonWriter, Type nominalType, object value,
-                                       IBsonSerializationOptions options)
-        {
-            Serialize(bsonWriter, (VoucherDetail)value);
-        }
+                                       IBsonSerializationOptions options) => Serialize(bsonWriter, (VoucherDetail)value);
 
         internal static void Serialize(BsonWriter bsonWriter, VoucherDetail detail)
         {

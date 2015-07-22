@@ -145,9 +145,7 @@ namespace AccountingServer.BLL
         /// <param name="res">分类汇总结果</param>
         /// <returns>输出</returns>
         public TResult Traversal(TMedium initialPath, IEnumerable<Balance> res)
-        {
-            return TraversalSubtotal(initialPath, res, new Balance(), 0);
-        }
+            => TraversalSubtotal(initialPath, res, new Balance(), 0);
 
         /// <summary>
         ///     遍历某层分类汇总结果

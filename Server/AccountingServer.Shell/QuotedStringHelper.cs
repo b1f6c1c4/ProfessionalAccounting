@@ -13,10 +13,7 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="quoted">标识符</param>
         /// <returns>原字符串</returns>
-        public static string Dequotation(this ITerminalNode quoted)
-        {
-            return quoted == null ? null : quoted.GetText().Dequotation();
-        }
+        public static string Dequotation(this ITerminalNode quoted) => quoted?.GetText().Dequotation();
 
         /// <summary>
         ///     给字符串解除引号
@@ -30,14 +27,14 @@ namespace AccountingServer.Shell
             if (quoted.Length == 0)
                 return quoted;
             if (quoted.Length == 1)
-                throw new ArgumentException("格式错误", "quoted");
+                throw new ArgumentException("格式错误", nameof(quoted));
 
             var chr = quoted[0];
             if (quoted[quoted.Length - 1] != chr)
-                throw new ArgumentException("格式错误", "quoted");
+                throw new ArgumentException("格式错误", nameof(quoted));
 
             var s = quoted.Substring(1, quoted.Length - 2);
-            return s.Replace(String.Format("{0}{0}", chr), String.Format("{0}", chr));
+            return s.Replace($"{chr}{chr}", $"{chr}");
         }
     }
 }

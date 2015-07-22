@@ -87,7 +87,7 @@ namespace AccountingServer.Shell.Parsing
             }
 
             /// <inheritdoc />
-            public IQueryCompunded<IDetailQueryAtom> Filter2 { get { return details(1); } }
+            public IQueryCompunded<IDetailQueryAtom> Filter2 => details(1);
         }
     }
 }

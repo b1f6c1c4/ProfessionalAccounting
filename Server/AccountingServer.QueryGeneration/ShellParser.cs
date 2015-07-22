@@ -1,4 +1,4 @@
 ﻿namespace AccountingServer.Entities.Query
 {
-    public partial class ShellParser { }
+    public class ShellParser { }
 }

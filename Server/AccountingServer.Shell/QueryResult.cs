@@ -21,10 +21,10 @@ namespace AccountingServer.Shell
     /// </summary>
     public class Suceed : IQueryResult
     {
-        public override string ToString() { return "OK"; }
+        public override string ToString() => "OK";
 
         /// <inheritdoc />
-        public bool AutoReturn { get { return true; } }
+        public bool AutoReturn => true;
     }
 
     /// <summary>
@@ -39,10 +39,10 @@ namespace AccountingServer.Shell
 
         public Failed(Exception exception) { m_Exception = exception; }
 
-        public override string ToString() { return m_Exception.ToString(); }
+        public override string ToString() => m_Exception.ToString();
 
         /// <inheritdoc />
-        public bool AutoReturn { get { return true; } }
+        public bool AutoReturn => true;
     }
 
     public class NumberAffected : IQueryResult
@@ -58,10 +58,10 @@ namespace AccountingServer.Shell
         /// <param name="n"></param>
         public NumberAffected(long n) { m_N = n; }
 
-        public override string ToString() { return m_N.ToString(CultureInfo.InvariantCulture); }
+        public override string ToString() => m_N.ToString(CultureInfo.InvariantCulture);
 
         /// <inheritdoc />
-        public bool AutoReturn { get { return true; } }
+        public bool AutoReturn => true;
     }
 
     /// <summary>
@@ -79,7 +79,7 @@ namespace AccountingServer.Shell
         /// </summary>
         protected Text(string text) { m_Text = text; }
 
-        public override string ToString() { return m_Text; }
+        public override string ToString() => m_Text;
 
         /// <inheritdoc />
         public abstract bool AutoReturn { get; }
@@ -93,7 +93,7 @@ namespace AccountingServer.Shell
         public EditableText(string text) : base(text) { }
 
         /// <inheritdoc />
-        public override bool AutoReturn { get { return false; } }
+        public override bool AutoReturn => false;
     }
 
     /// <summary>
@@ -104,7 +104,7 @@ namespace AccountingServer.Shell
         public UnEditableText(string text) : base(text) { }
 
         /// <inheritdoc />
-        public override bool AutoReturn { get { return true; } }
+        public override bool AutoReturn => true;
     }
 
     /// <summary>
@@ -123,6 +123,6 @@ namespace AccountingServer.Shell
         public IList<ChartArea> ChartAreas { get; set; }
 
         /// <inheritdoc />
-        public bool AutoReturn { get { return true; } }
+        public bool AutoReturn => true;
     }
 }

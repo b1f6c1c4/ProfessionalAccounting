@@ -59,7 +59,7 @@ namespace AccountingServer.Entities
         }
 
         /// <inheritdoc />
-        public DateFilter Range { get { return this; } }
+        public DateFilter Range => this;
     }
 
     /// <summary>
@@ -67,7 +67,7 @@ namespace AccountingServer.Entities
     /// </summary>
     public class DateComparer : IComparer<DateTime?>
     {
-        public int Compare(DateTime? x, DateTime? y) { return DateHelper.CompareDate(x, y); }
+        public int Compare(DateTime? x, DateTime? y) => DateHelper.CompareDate(x, y);
     }
 
     /// <summary>

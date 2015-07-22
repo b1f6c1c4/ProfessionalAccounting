@@ -45,8 +45,8 @@ namespace AccountingServer.Plugins.YieldRate
                                          new[]
                                              {
                                                  new VoucherDetail { Title = 1101 },
-                                                 new VoucherDetail { Title = 6101, SubTitle = 01},
-                                                 new VoucherDetail { Title = 6111, SubTitle = 02}
+                                                 new VoucherDetail { Title = 6101, SubTitle = 01 },
+                                                 new VoucherDetail { Title = 6111, SubTitle = 02 }
                                              },
                                          false)
                                  };

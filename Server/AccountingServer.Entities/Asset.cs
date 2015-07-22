@@ -187,7 +187,7 @@ namespace AccountingServer.Entities
         /// <inheritdoc />
         public string Remark { get; set; }
 
-        public IEnumerable<IDistributedItem> TheSchedule { get { return Schedule; } }
+        public IEnumerable<IDistributedItem> TheSchedule => Schedule;
     }
 
     /// <summary>

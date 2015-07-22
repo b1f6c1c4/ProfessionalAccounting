@@ -13,7 +13,7 @@ namespace AccountingServer.DAL
     internal class AssetSerializer : BsonBaseSerializer, IBsonIdProvider
     {
         public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
-                                           IBsonSerializationOptions options) { return Deserialize(bsonReader); }
+                                           IBsonSerializationOptions options) => Deserialize(bsonReader);
 
         // ReSharper disable once MemberCanBePrivate.Global
         public static object Deserialize(BsonReader bsonReader)
@@ -34,7 +34,7 @@ namespace AccountingServer.DAL
                                 DepreciationTitle = bsonReader.ReadInt32("deptitle", ref read),
                                 DevaluationTitle = bsonReader.ReadInt32("devtitle", ref read),
                                 DepreciationExpenseTitle = bsonReader.ReadInt32("exptitle", ref read),
-                                DevaluationExpenseTitle = bsonReader.ReadInt32("exvtitle", ref read),
+                                DevaluationExpenseTitle = bsonReader.ReadInt32("exvtitle", ref read)
                             };
             switch (bsonReader.ReadString("method", ref read))
             {
@@ -68,7 +68,7 @@ namespace AccountingServer.DAL
         }
 
         public override void Serialize(BsonWriter bsonWriter, Type nominalType, object value,
-                                       IBsonSerializationOptions options) { Serialize(bsonWriter, (Asset)value); }
+                                       IBsonSerializationOptions options) => Serialize(bsonWriter, (Asset)value);
 
         // ReSharper disable once MemberCanBePrivate.Global
         public static void Serialize(BsonWriter bsonWriter, Asset asset)

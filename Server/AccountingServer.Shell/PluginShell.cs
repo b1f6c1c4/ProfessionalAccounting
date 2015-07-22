@@ -18,7 +18,7 @@ namespace AccountingServer.Shell
         ///     添加插件
         /// </summary>
         /// <param name="plugin">插件</param>
-        public void Add(PluginBase plugin) { m_Plugins.Add(plugin); }
+        public void Add(PluginBase plugin) => m_Plugins.Add(plugin);
 
         /// <summary>
         ///     根据名称检索插件
@@ -33,7 +33,7 @@ namespace AccountingServer.Shell
                                 where attr.Alias.Equals(name, StringComparison.InvariantCultureIgnoreCase)
                                 select plg)
                 return plg;
-            throw new ArgumentException("没有找到与之对应的插件", "name");
+            throw new ArgumentException("没有找到与之对应的插件", nameof(name));
         }
 
         /// <summary>
@@ -53,9 +53,9 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="name">名称</param>
         /// <returns>帮助内容</returns>
-        public string GetHelp(string name) { return GetPlugin(name).ListHelp(); }
+        public string GetHelp(string name) => GetPlugin(name).ListHelp();
 
         /// <inheritdoc />
-        public IEnumerator GetEnumerator() { return m_Plugins.GetEnumerator(); }
+        public IEnumerator GetEnumerator() => m_Plugins.GetEnumerator();
     }
 }

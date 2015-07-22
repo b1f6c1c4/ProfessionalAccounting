@@ -37,7 +37,7 @@ namespace AccountingServer.Plugins.THUInfo
         /// <summary>
         ///     交易日期
         /// </summary>
-        public DateTime Date { get { return Time.Date; } }
+        public DateTime Date => Time.Date;
 
         /// <summary>
         ///     交易金额
@@ -45,16 +45,13 @@ namespace AccountingServer.Plugins.THUInfo
         public double Fund { get; set; }
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return String.Format(
-                                 "@ {4:s}: #{0}{1}{2}{3} {5}",
-                                 Index.ToString(CultureInfo.InvariantCulture).CPadRight(4),
-                                 Location.CPadRight(17),
-                                 Type.CPadRight(23),
-                                 Endpoint.CPadLeft(9),
-                                 Time,
-                                 Fund.AsCurrency().CPadLeft(11));
-        }
+        public override string ToString() => string.Format(
+                                                           "@ {4:s}: #{0}{1}{2}{3} {5}",
+                                                           Index.ToString(CultureInfo.InvariantCulture).CPadRight(4),
+                                                           Location.CPadRight(17),
+                                                           Type.CPadRight(23),
+                                                           Endpoint.CPadLeft(9),
+                                                           Time,
+                                                           Fund.AsCurrency().CPadLeft(11));
     }
 }

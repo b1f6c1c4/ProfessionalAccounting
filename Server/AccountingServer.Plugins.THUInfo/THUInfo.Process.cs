@@ -26,7 +26,7 @@ namespace AccountingServer.Plugins.THUInfo
         public override IQueryResult Execute(params string[] pars)
         {
             if (pars.Length >= 3)
-                if (String.IsNullOrEmpty(pars[0]))
+                if (string.IsNullOrEmpty(pars[0]))
                     FetchData(pars[1], pars[2]);
             lock (m_Lock)
             {
@@ -36,7 +36,7 @@ namespace AccountingServer.Plugins.THUInfo
                 List<VDetail> noRecord;
                 Compare(out noRemark, out tooMuch, out tooFew, out noRecord);
                 if (pars.Length == 0 ||
-                    String.IsNullOrEmpty(pars[0]) ||
+                    string.IsNullOrEmpty(pars[0]) ||
                     noRemark.Any() ||
                     tooMuch.Any() ||
                     tooFew.Any(p => p.Details.Any()) ||
@@ -252,7 +252,7 @@ namespace AccountingServer.Plugins.THUInfo
             foreach (var inst in par)
             {
                 if (id == records.Count)
-                    throw new ArgumentException("生成记账所需参数不足", "par");
+                    throw new ArgumentException("生成记账所需参数不足", nameof(par));
                 Func<TransactionRecord, int, VoucherDetail> newDetail =
                     (tr, dir) => new VoucherDetail
                                      {
@@ -329,9 +329,9 @@ namespace AccountingServer.Plugins.THUInfo
                         {
                             result.Add(
                                        new Voucher
-                                       {
-                                           Date = date,
-                                           Details = new List<VoucherDetail>
+                                           {
+                                               Date = date,
+                                               Details = new List<VoucherDetail>
                                                              {
                                                                  newDetail(records[id], -1),
                                                                  new VoucherDetail
@@ -341,7 +341,7 @@ namespace AccountingServer.Plugins.THUInfo
                                                                          Fund = records[id].Fund
                                                                      }
                                                              }
-                                       });
+                                           });
                             id++;
                         }
                         break;
@@ -411,7 +411,7 @@ namespace AccountingServer.Plugins.THUInfo
                                 lst.Add(new Tuple<RegularType, string>(RegularType.Charging, "洗衣"));
                                 break;
                             default:
-                                throw new ArgumentException("未知参数", "pars");
+                                throw new ArgumentException("未知参数", nameof(pars));
                         }
                 }
                 dic.Add(dt, lst);
@@ -443,12 +443,12 @@ namespace AccountingServer.Plugins.THUInfo
             /// <summary>
             ///     消费记录组
             /// </summary>
-            public List<TransactionRecord> Records { get; private set; }
+            public List<TransactionRecord> Records { get; }
 
             /// <summary>
             ///     记账凭证组
             /// </summary>
-            public List<VDetail> Details { get; private set; }
+            public List<VDetail> Details { get; }
 
             public Problem(List<TransactionRecord> records, List<VDetail> details)
             {

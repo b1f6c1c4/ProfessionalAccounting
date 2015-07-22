@@ -14,21 +14,21 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="value">值</param>
         /// <returns>是否为零</returns>
-        public static bool IsZero(this double value) { return Math.Abs(value) < Tolerance; }
+        public static bool IsZero(this double value) => Math.Abs(value) < Tolerance;
 
         /// <summary>
         ///     判断是否为非负
         /// </summary>
         /// <param name="value">值</param>
         /// <returns>是否非负</returns>
-        public static bool IsNonNegative(this double value) { return value > -Tolerance; }
+        public static bool IsNonNegative(this double value) => value > -Tolerance;
 
         /// <summary>
         ///     判断是否为非正
         /// </summary>
         /// <param name="value">值</param>
         /// <returns>是否非正</returns>
-        public static bool IsNonPositive(this double value) { return value < Tolerance; }
+        public static bool IsNonPositive(this double value) => value < Tolerance;
 
         /// <summary>
         ///     获取指定月的最后一天

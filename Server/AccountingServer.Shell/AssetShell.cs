@@ -322,28 +322,28 @@ namespace AccountingServer.Shell
         private static string ListAssetItem(AssetItem assetItem)
         {
             if (assetItem is AcquisationItem)
-                return String.Format(
+                return string.Format(
                                      "   {0:yyyMMdd} ACQ:{1} ={3} ({2})",
                                      assetItem.Date,
                                      (assetItem as AcquisationItem).OrigValue.AsCurrency().CPadLeft(13),
                                      assetItem.VoucherID,
                                      assetItem.Value.AsCurrency().CPadLeft(13));
             if (assetItem is DepreciateItem)
-                return String.Format(
+                return string.Format(
                                      "   {0:yyyMMdd} DEP:{1} ={3} ({2})",
                                      assetItem.Date,
                                      (assetItem as DepreciateItem).Amount.AsCurrency().CPadLeft(13),
                                      assetItem.VoucherID,
                                      assetItem.Value.AsCurrency().CPadLeft(13));
             if (assetItem is DevalueItem)
-                return String.Format(
+                return string.Format(
                                      "   {0:yyyMMdd} DEV:{1} ={3} ({2})",
                                      assetItem.Date,
                                      (assetItem as DevalueItem).Amount.AsCurrency().CPadLeft(13),
                                      assetItem.VoucherID,
                                      assetItem.Value.AsCurrency().CPadLeft(13));
             if (assetItem is DispositionItem)
-                return String.Format(
+                return string.Format(
                                      "   {0:yyyMMdd} DSP:{1} ={3} ({2})",
                                      assetItem.Date,
                                      "ALL".CPadLeft(13),

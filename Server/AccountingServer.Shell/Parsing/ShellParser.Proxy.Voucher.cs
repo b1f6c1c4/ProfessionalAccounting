@@ -10,7 +10,7 @@ namespace AccountingServer.Shell.Parsing
         public partial class VoucherQueryContext : IVoucherQueryAtom
         {
             /// <inheritdoc />
-            public bool ForAll { get { return Op != null && Op.Text == "A"; } }
+            public bool ForAll => Op != null && Op.Text == "A";
 
             /// <inheritdoc />
             public Voucher VoucherFilter
@@ -38,16 +38,16 @@ namespace AccountingServer.Shell.Parsing
             }
 
             /// <inheritdoc />
-            public DateFilter Range { get { return range().TheRange(); } }
+            public DateFilter Range => range().TheRange();
 
             /// <inheritdoc />
-            public IQueryCompunded<IDetailQueryAtom> DetailFilter { get { return details(); } }
+            public IQueryCompunded<IDetailQueryAtom> DetailFilter => details();
         }
 
         public partial class VouchersContext : IQueryAry<IVoucherQueryAtom>
         {
             /// <inheritdoc />
-            public OperatorType Operator { get { return OperatorType.None; } }
+            public OperatorType Operator => OperatorType.None;
 
             /// <inheritdoc />
             public IQueryCompunded<IVoucherQueryAtom> Filter1
@@ -103,7 +103,7 @@ namespace AccountingServer.Shell.Parsing
             }
 
             /// <inheritdoc />
-            public IQueryCompunded<IVoucherQueryAtom> Filter2 { get { return vouchersB(1); } }
+            public IQueryCompunded<IVoucherQueryAtom> Filter2 => vouchersB(1);
         }
 
         public partial class SubtotalContext : ISubtotal
@@ -199,7 +199,7 @@ namespace AccountingServer.Shell.Parsing
         public partial class EmitContext : IEmit
         {
             /// <inheritdoc />
-            public IQueryCompunded<IDetailQueryAtom> DetailFilter { get { return details(); } }
+            public IQueryCompunded<IDetailQueryAtom> DetailFilter => details();
         }
 
         public partial class VoucherDetailQueryContext : IVoucherDetailQuery
@@ -216,17 +216,17 @@ namespace AccountingServer.Shell.Parsing
             }
 
             /// <inheritdoc />
-            public IEmit DetailEmitFilter { get { return emit(); } }
+            public IEmit DetailEmitFilter => emit();
         }
 
 
         public partial class GroupedQueryContext : IGroupedQuery
         {
             /// <inheritdoc />
-            public IVoucherDetailQuery VoucherEmitQuery { get { return voucherDetailQuery(); } }
+            public IVoucherDetailQuery VoucherEmitQuery => voucherDetailQuery();
 
             /// <inheritdoc />
-            public ISubtotal Subtotal { get { return subtotal(); } }
+            public ISubtotal Subtotal => subtotal();
         }
     }
 }

@@ -34,9 +34,8 @@ namespace AccountingServer.Shell
                     {
                         Pre =
                             (preVouchers, query) =>
-                            preVouchers == null
-                                ? m_Accountant.SelectVouchers(query).ToList()
-                                : preVouchers.Where(v => v.IsMatch(query)).ToList(),
+                            preVouchers?.Where(v => v.IsMatch(query)).ToList() ??
+                            m_Accountant.SelectVouchers(query).ToList(),
                         Leaf =
                             (path, query, coefficient, preVouchers) =>
                             {
@@ -51,24 +50,24 @@ namespace AccountingServer.Shell
                                                      withSubtotal);
                             },
                         Map = (path, query, coefficient) => path.Length == 0 ? query.Name : path + "/" + query.Name,
-                        Reduce = (path, newPath, query, coefficient, results) => Gather(path, results, withSubtotal),
+                        Reduce = (path, newPath, query, coefficient, results) => Gather(path, results, withSubtotal)
                     };
 
             Tuple<double, string> result;
             if (expr.namedQuery() != null)
-                result = helper.Traversal(String.Empty, expr.namedQuery());
+                result = helper.Traversal(string.Empty, expr.namedQuery());
             else if (expr.groupedQuery() != null)
             {
                 IGroupedQuery query = expr.groupedQuery();
                 result = PresentReport(
-                                       String.Empty,
+                                       string.Empty,
                                        1,
                                        query.Subtotal,
                                        m_Accountant.SelectVoucherDetailsGrouped(query),
                                        withSubtotal);
             }
             else
-                throw new ArgumentException("表达式类型未知", "expr");
+                throw new ArgumentException("表达式类型未知", nameof(expr));
             return new UnEditableText(result.Item2);
         }
 
@@ -92,16 +91,11 @@ namespace AccountingServer.Shell
                             (path, cat, depth, val) =>
                             new Tuple<double, string>(
                                 val * coefficient,
-                                String.Format("{0}\t{1:R}\t{2:R}\t{3:R}", path, val, coefficient, val * coefficient)),
+                                $"{path}\t{val:R}\t{coefficient:R}\t{val * coefficient:R}"),
                         LeafAggregated = (path, cat, depth, bal) =>
                                          new Tuple<double, string>(
                                              bal.Fund * coefficient,
-                                             String.Format(
-                                                           "{0}\t{1:R}\t{2:R}\t{3:R}",
-                                                           path.Merge(bal.Date.AsDate()),
-                                                           bal.Fund,
-                                                           coefficient,
-                                                           bal.Fund * coefficient)),
+                                             $"{path.Merge(bal.Date.AsDate())}\t{bal.Fund:R}\t{coefficient:R}\t{bal.Fund * coefficient:R}"),
                         Map = (path, cat, depth, level) =>
                               {
                                   switch (level)
@@ -146,7 +140,7 @@ namespace AccountingServer.Shell
                 return new Tuple<double, string>(val, report);
             return new Tuple<double, string>(
                 val,
-                String.Format("{0}\t\t\t{1:R}{2}{3}", path, val, Environment.NewLine, report));
+                $"{path}\t\t\t{val:R}{Environment.NewLine}{report}");
         }
     }
 }

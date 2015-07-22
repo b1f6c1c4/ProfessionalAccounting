@@ -55,7 +55,7 @@ namespace AccountingServer.Entities
         }
     }
 
-    public class BalanceComparer:IEqualityComparer<Balance>
+    public class BalanceComparer : IEqualityComparer<Balance>
     {
         public bool Equals(Balance x, Balance y)
         {

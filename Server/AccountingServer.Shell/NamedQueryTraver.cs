@@ -133,10 +133,7 @@ namespace AccountingServer.Shell
         /// <param name="initialPath">初始路径</param>
         /// <param name="query">命名查询模板</param>
         /// <returns>输出</returns>
-        public TResult Traversal(TMedium initialPath, INamedQuery query)
-        {
-            return Traversal(initialPath, query, 1, null);
-        }
+        public TResult Traversal(TMedium initialPath, INamedQuery query) => Traversal(initialPath, query, 1, null);
 
         /// <summary>
         ///     遍历命名查询
@@ -170,7 +167,7 @@ namespace AccountingServer.Shell
                               qs.Items.Select(nq => Traversal(newPath, nq, coefficient * qs.Coefficient, preVouchers)));
             }
 
-            throw new ArgumentException("命名查询类型未知", "query");
+            throw new ArgumentException("命名查询类型未知", nameof(query));
         }
 
         /// <summary>
@@ -187,17 +184,13 @@ namespace AccountingServer.Shell
             {
                 if (Range.StartDate.HasValue)
                     range = Range.EndDate.HasValue
-                                ? String.Format(
-                                                "[{0:yyyyMMdd}{2}{1:yyyyMMdd}]",
-                                                Range.StartDate,
-                                                Range.EndDate,
-                                                Range.Nullable ? "=" : "~")
-                                : String.Format("[{0:yyyyMMdd}{1}]", Range.StartDate, Range.Nullable ? "=" : "~");
+                                ? $"[{Range.StartDate:yyyyMMdd}{(Range.Nullable ? "=" : "~")}{Range.EndDate:yyyyMMdd}]"
+                                : $"[{Range.StartDate:yyyyMMdd}{(Range.Nullable ? "=" : "~")}]";
                 else if (Range.Nullable)
-                    range = Range.EndDate.HasValue ? String.Format("[~{0:yyyyMMdd}]", Range.EndDate) : "[]";
+                    range = Range.EndDate.HasValue ? $"[~{Range.EndDate:yyyyMMdd}]" : "[]";
                 else
-                    range = Range.EndDate.HasValue ? String.Format("[={0:yyyyMMdd}]", Range.EndDate) : "[~null]";
-                leftExtendedRange = !Range.EndDate.HasValue ? "[]" : String.Format("[~{0:yyyyMMdd}]", Range.EndDate);
+                    range = Range.EndDate.HasValue ? $"[={Range.EndDate:yyyyMMdd}]" : "[~null]";
+                leftExtendedRange = !Range.EndDate.HasValue ? "[]" : $"[~{Range.EndDate:yyyyMMdd}]";
             }
 
             var templateStr = m_Accountant.SelectNamedQueryTemplate(reference)
@@ -213,9 +206,6 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="reference">命名查询模板引用</param>
         /// <returns>命名查询</returns>
-        private INamedQuery Dereference(INamedQueryTemplateR reference)
-        {
-            return Dereference(reference.Name);
-        }
+        private INamedQuery Dereference(INamedQueryTemplateR reference) => Dereference(reference.Name);
     }
 }

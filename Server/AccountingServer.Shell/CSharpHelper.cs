@@ -140,10 +140,7 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="str">C#表达式</param>
         /// <returns>记账凭证</returns>
-        public static Voucher ParseVoucher(string str)
-        {
-            return (Voucher)ParseCSharp(str, typeof(Voucher));
-        }
+        public static Voucher ParseVoucher(string str) => (Voucher)ParseCSharp(str, typeof(Voucher));
 
         #endregion
 
@@ -223,11 +220,11 @@ namespace AccountingServer.Shell
 
                 foreach (var item in asset.Schedule)
                     if (item is AcquisationItem)
-                        present(item, String.Format("OrigValue = {0},", (item as AcquisationItem).OrigValue));
+                        present(item, $"OrigValue = {(item as AcquisationItem).OrigValue},");
                     else if (item is DepreciateItem)
-                        present(item, String.Format("Amount    = {0},", (item as DepreciateItem).Amount));
+                        present(item, $"Amount    = {(item as DepreciateItem).Amount},");
                     else if (item is DevalueItem)
-                        present(item, String.Format("FairValue = {0},", (item as DevalueItem).FairValue));
+                        present(item, $"FairValue = {(item as DevalueItem).FairValue},");
                     else if (item is DispositionItem)
                         present(item, "");
                 sb.AppendLine("} }@");
@@ -242,10 +239,7 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="str">C#表达式</param>
         /// <returns>资产</returns>
-        public static Asset ParseAsset(string str)
-        {
-            return (Asset)ParseCSharp(str, typeof(Asset));
-        }
+        public static Asset ParseAsset(string str) => (Asset)ParseCSharp(str, typeof(Asset));
 
         #endregion
 
@@ -327,10 +321,7 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="str">C#表达式</param>
         /// <returns>摊销</returns>
-        public static Amortization ParseAmort(string str)
-        {
-            return (Amortization)ParseCSharp(str, typeof(Amortization));
-        }
+        public static Amortization ParseAmort(string str) => (Amortization)ParseCSharp(str, typeof(Amortization));
 
         #endregion
     }
