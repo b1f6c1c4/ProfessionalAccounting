@@ -367,7 +367,7 @@ namespace AccountingServer.Plugins.THUInfo
                 foreach (var s in sp)
                 {
                     var ss = s.Trim().ToLowerInvariant();
-                    if (ss.StartsWith("."))
+                    if (ss.StartsWith(".", StringComparison.Ordinal))
                     {
                         dt = DateTime.Now.Date.AddDays(1 - sp[0].Trim().Length);
                         continue;

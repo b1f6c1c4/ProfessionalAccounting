@@ -63,12 +63,12 @@ namespace AccountingServer.Shell.Parsing
                     if (coef().Percent() != null)
                     {
                         var s = coef().Percent().GetText();
-                        return Double.Parse(s.Substring(1, s.Length - 2)) / 100D;
+                        return double.Parse(s.Substring(1, s.Length - 2)) / 100D;
                     }
                     if (coef().Float() != null)
                     {
                         var s = coef().Float().GetText();
-                        return Double.Parse(s.Substring(1, s.Length - 1));
+                        return double.Parse(s.Substring(1, s.Length - 1));
                     }
                     throw new MemberAccessException("表达式错误");
                 }
@@ -100,12 +100,12 @@ namespace AccountingServer.Shell.Parsing
                     if (coef().Percent() != null)
                     {
                         var s = coef().Percent().GetText();
-                        return Double.Parse(s.Substring(1, s.Length - 2)) / 100D;
+                        return double.Parse(s.Substring(1, s.Length - 2)) / 100D;
                     }
                     if (coef().Float() != null)
                     {
                         var s = coef().Float().GetText();
-                        return Double.Parse(s.Substring(1, s.Length - 1));
+                        return double.Parse(s.Substring(1, s.Length - 1));
                     }
                     throw new MemberAccessException("表达式错误");
                 }

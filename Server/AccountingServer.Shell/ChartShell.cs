@@ -32,10 +32,9 @@ namespace AccountingServer.Shell
             var helper =
                 new NamedQueryTraver<object, object>(m_Accountant, rng)
                     {
-                        Pre =
-                            (preVouchers, query) =>
-                            preVouchers?.Where(v => v.IsMatch(query)).ToList() ??
-                            m_Accountant.SelectVouchers(query).ToList(),
+                        Pre = (preVouchers, query) =>
+                              preVouchers?.Where(v => v.IsMatch(query)).ToList() ??
+                              m_Accountant.SelectVouchers(query).ToList(),
                         Leaf = PresentChart,
                         Map = (path, query, coefficient) =>
                               Fork(ShellParser.From(query.Remark).chartLevel(), path, query.Name),

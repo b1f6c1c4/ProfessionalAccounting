@@ -25,7 +25,7 @@ namespace AccountingServer.Plugins.THUInfo
         /// <summary>
         ///     锁对象
         /// </summary>
-        private readonly Object m_Lock = new Object();
+        private readonly object m_Lock = new object();
 
         /// <summary>
         ///     临时文件文件名

@@ -38,10 +38,10 @@ namespace AccountingServer.Plugins.Utilities
             var date = GetDate(ref par);
             par = par.TrimStart();
 
-            if (par.StartsWith("w"))
+            if (par.StartsWith("w", StringComparison.Ordinal))
             {
                 double fund;
-                if (!Double.TryParse(par.Substring(1), out fund))
+                if (!double.TryParse(par.Substring(1), out fund))
                     fund = 0.42;
                 return new Voucher
                            {
@@ -64,7 +64,7 @@ namespace AccountingServer.Plugins.Utilities
                                              }
                            };
             }
-            if (par.StartsWith("xy"))
+            if (par.StartsWith("xy", StringComparison.Ordinal))
                 return new Voucher
                            {
                                Date = date,
@@ -85,10 +85,10 @@ namespace AccountingServer.Plugins.Utilities
                                                      }
                                              }
                            };
-            if (par.StartsWith("z"))
+            if (par.StartsWith("z", StringComparison.Ordinal))
             {
                 double bal2;
-                if (!Double.TryParse(par.Substring(1).TrimStart(' ', '='), out bal2))
+                if (!double.TryParse(par.Substring(1).TrimStart(' ', '='), out bal2))
                     return null;
                 var bal1 =
                     Accountant.SelectVoucherDetailsGrouped(
@@ -128,10 +128,10 @@ namespace AccountingServer.Plugins.Utilities
                                              }
                            };
             }
-            if (par.StartsWith("p"))
+            if (par.StartsWith("p", StringComparison.Ordinal))
             {
                 double fund;
-                if (!Double.TryParse(par.Substring(1), out fund))
+                if (!double.TryParse(par.Substring(1), out fund))
                     return null;
                 return new Voucher
                            {

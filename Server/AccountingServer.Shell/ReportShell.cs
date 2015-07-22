@@ -38,17 +38,14 @@ namespace AccountingServer.Shell
                             m_Accountant.SelectVouchers(query).ToList(),
                         Leaf =
                             (path, query, coefficient, preVouchers) =>
-                            {
-                                var res = preVouchers == null
+                            PresentReport(
+                                          path.Length == 0 ? query.Name : path + "/" + query.Name,
+                                          coefficient * query.Coefficient,
+                                          query.GroupingQuery.Subtotal,
+                                          preVouchers == null
                                               ? m_Accountant.SelectVoucherDetailsGrouped(query.GroupingQuery)
-                                              : preVouchers.SelectVoucherDetailsGrouped(query.GroupingQuery);
-                                return PresentReport(
-                                                     path.Length == 0 ? query.Name : path + "/" + query.Name,
-                                                     coefficient * query.Coefficient,
-                                                     query.GroupingQuery.Subtotal,
-                                                     res,
-                                                     withSubtotal);
-                            },
+                                              : preVouchers.SelectVoucherDetailsGrouped(query.GroupingQuery),
+                                          withSubtotal),
                         Map = (path, query, coefficient) => path.Length == 0 ? query.Name : path + "/" + query.Name,
                         Reduce = (path, newPath, query, coefficient, results) => Gather(path, results, withSubtotal)
                     };
@@ -92,10 +89,11 @@ namespace AccountingServer.Shell
                             new Tuple<double, string>(
                                 val * coefficient,
                                 $"{path}\t{val:R}\t{coefficient:R}\t{val * coefficient:R}"),
-                        LeafAggregated = (path, cat, depth, bal) =>
-                                         new Tuple<double, string>(
-                                             bal.Fund * coefficient,
-                                             $"{path.Merge(bal.Date.AsDate())}\t{bal.Fund:R}\t{coefficient:R}\t{bal.Fund * coefficient:R}"),
+                        LeafAggregated =
+                            (path, cat, depth, bal) =>
+                            new Tuple<double, string>(
+                                bal.Fund * coefficient,
+                                $"{path.Merge(bal.Date.AsDate())}\t{bal.Fund:R}\t{coefficient:R}\t{bal.Fund * coefficient:R}"),
                         Map = (path, cat, depth, level) =>
                               {
                                   switch (level)
