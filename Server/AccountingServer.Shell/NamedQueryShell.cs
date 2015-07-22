@@ -30,7 +30,7 @@ namespace AccountingServer.Shell
                     @"^new\s+NamedQueryTemplate\s*\{(?<all>(?<name>\$(?:[^\$]|\$\$)*\$)(?:\*F[+-]?\d*.?\d*(?:[Ee][+-]?\d+)?|\*P[+-]?\d*.?\d*)?(?:""(?:[^""]|"""")*"")?::?[\s\S]*)\}$");
             var m = regex.Match(code);
             if (m.Length == 0)
-                throw new ArgumentException("语法错误", "code");
+                throw new ArgumentException("语法错误", nameof(code));
             name = m.Groups["name"].Value.Dequotation();
             return m.Groups["all"].Value;
         }

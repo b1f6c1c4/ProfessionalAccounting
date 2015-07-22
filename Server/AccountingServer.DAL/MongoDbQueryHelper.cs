@@ -17,10 +17,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="id">编号</param>
         /// <returns>Bson查询</returns>
-        public static IMongoQuery GetQuery(string id)
-        {
-            return Query.EQ("_id", ObjectId.Parse(id));
-        }
+        public static IMongoQuery GetQuery(string id) => Query.EQ("_id", ObjectId.Parse(id));
 
         /// <summary>
         ///     按编号查询<c>Guid</c>
@@ -28,9 +25,7 @@ namespace AccountingServer.DAL
         /// <param name="id">编号</param>
         /// <returns>Bson查询</returns>
         public static IMongoQuery GetQuery(Guid? id)
-        {
-            return Query.EQ("_id", id.HasValue ? id.Value.ToBsonValue() as BsonValue : BsonNull.Value);
-        }
+            => Query.EQ("_id", id.HasValue ? id.Value.ToBsonValue() as BsonValue : BsonNull.Value);
 
         /// <summary>
         ///     记账凭证过滤器的Javascript表示
@@ -88,7 +83,7 @@ namespace AccountingServer.DAL
                             break;
                     }
                 if (vfilter.Remark != null)
-                    if (vfilter.Remark == String.Empty)
+                    if (vfilter.Remark == string.Empty)
                         sb.AppendLine("    if (v.remark != null) return false;");
                     else
                         sb.AppendFormat(
@@ -139,9 +134,7 @@ namespace AccountingServer.DAL
         /// <param name="query">细目检索式</param>
         /// <returns>Javascript表示</returns>
         public static string GetJavascriptFilter(this IQueryCompunded<IDetailQueryAtom> query)
-        {
-            return GetJavascriptFilter(query, GetJavascriptFilter);
-        }
+            => GetJavascriptFilter(query, GetJavascriptFilter);
 
         /// <summary>
         ///     原子细目检索式的Javascript表示
@@ -175,14 +168,14 @@ namespace AccountingServer.DAL
                             sb.AppendFormat("    if (d.subtitle != {0}) return false;", f.Filter.SubTitle);
                         }
                     if (f.Filter.Content != null)
-                        if (f.Filter.Content == String.Empty)
+                        if (f.Filter.Content == string.Empty)
                             sb.AppendLine("    if (d.content != null) return false;");
                         else
                             sb.AppendFormat(
                                             "    if (d.content != '{0}') return false;",
                                             f.Filter.Content.Replace("\'", "\\\'"));
                     if (f.Filter.Remark != null)
-                        if (f.Filter.Remark == String.Empty)
+                        if (f.Filter.Remark == string.Empty)
                             sb.AppendLine("    if (d.remark != null) return false;");
                         else
                             sb.AppendFormat(
@@ -206,9 +199,7 @@ namespace AccountingServer.DAL
         /// <param name="query">记账凭证检索式</param>
         /// <returns>Javascript表示</returns>
         public static string GetJavascriptFilter(this IQueryCompunded<IVoucherQueryAtom> query)
-        {
-            return GetJavascriptFilter(query, GetJavascriptFilter);
-        }
+            => GetJavascriptFilter(query, GetJavascriptFilter);
 
         /// <summary>
         ///     记账凭证检索式的查询
@@ -216,9 +207,7 @@ namespace AccountingServer.DAL
         /// <param name="query">记账凭证检索式</param>
         /// <returns>查询</returns>
         public static IMongoQuery GetQuery(this IQueryCompunded<IVoucherQueryAtom> query)
-        {
-            return ToWhere(GetJavascriptFilter(query));
-        }
+            => ToWhere(GetJavascriptFilter(query));
 
         /// <summary>
         ///     原子记账凭证检索式的Javascript表示
@@ -276,9 +265,7 @@ namespace AccountingServer.DAL
         /// <returns>Javascript表示</returns>
         // ReSharper disable once MemberCanBePrivate.Global
         public static string GetJavascriptFilter(this IQueryCompunded<IDistributedQueryAtom> query)
-        {
-            return GetJavascriptFilter(query, GetJavascriptFilter);
-        }
+            => GetJavascriptFilter(query, GetJavascriptFilter);
 
         /// <summary>
         ///     分期检索式的查询
@@ -286,9 +273,7 @@ namespace AccountingServer.DAL
         /// <param name="query">分期检索式</param>
         /// <returns>查询</returns>
         public static IMongoQuery GetQuery(this IQueryCompunded<IDistributedQueryAtom> query)
-        {
-            return ToWhere(GetJavascriptFilter(query));
-        }
+            => ToWhere(GetJavascriptFilter(query));
 
         /// <summary>
         ///     原子分期检索式的Javascript表示
@@ -299,8 +284,7 @@ namespace AccountingServer.DAL
         {
             var sb = new StringBuilder();
             sb.AppendLine("function(a) {");
-            if (f == null ||
-                f.Filter == null)
+            if (f?.Filter == null)
                 sb.AppendLine("    return true;");
             else
             {
@@ -312,14 +296,14 @@ namespace AccountingServer.DAL
                     sb.AppendLine();
                 }
                 if (f.Filter.Name != null)
-                    if (f.Filter.Name == String.Empty)
+                    if (f.Filter.Name == string.Empty)
                         sb.AppendLine("    if (a.name != null) return false;");
                     else
                         sb.AppendFormat(
                                         "    if (a.name != '{0}') return false;",
                                         f.Filter.Name.Replace("\'", "\\\'"));
                 if (f.Filter.Remark != null)
-                    if (f.Filter.Remark == String.Empty)
+                    if (f.Filter.Remark == string.Empty)
                         sb.AppendLine("    if (a.remark != null) return false;");
                     else
                         sb.AppendFormat(
@@ -391,13 +375,13 @@ namespace AccountingServer.DAL
                         sb.AppendLine(")(entity)");
                         break;
                     default:
-                        throw new ArgumentException("运算类型未知", "query");
+                        throw new ArgumentException("运算类型未知", nameof(query));
                 }
                 sb.AppendLine(";");
                 sb.AppendLine("}");
                 return sb.ToString();
             }
-            throw new ArgumentException("检索式类型未知", "query");
+            throw new ArgumentException("检索式类型未知", nameof(query));
         }
 
         /// <summary>
@@ -407,8 +391,8 @@ namespace AccountingServer.DAL
         /// <returns>查询</returns>
         private static IMongoQuery ToWhere(string js)
         {
-            var code = String.Format("function() {{ return ({0})(this); }}", js);
-            return new QueryDocument("$where", code.Replace(Environment.NewLine, String.Empty));
+            var code = $"function() {{ return ({js})(this); }}";
+            return new QueryDocument("$where", code.Replace(Environment.NewLine, string.Empty));
         }
     }
 }

@@ -47,12 +47,12 @@ namespace AccountingServer.Shell
         /// <returns>执行结果</returns>
         public IQueryResult Execute(string s)
         {
-            if (String.IsNullOrWhiteSpace(s))
-                throw new ArgumentNullException("s");
+            if (string.IsNullOrWhiteSpace(s))
+                throw new ArgumentNullException(nameof(s));
 
             var res = ShellParser.From(s + Environment.NewLine).commandEOF();
             if (res.exception != null)
-                throw new ArgumentException(res.exception.ToString(), "s");
+                throw new ArgumentException(res.exception.ToString(), nameof(s));
             var result = res.command();
             var text = result.GetText();
             var j = 0;
@@ -62,14 +62,14 @@ namespace AccountingServer.Shell
                     continue;
                 if (s[j] != ' ' ||
                     j == s.Length - 1)
-                    throw new ArgumentException("语法错误", "s");
+                    throw new ArgumentException("语法错误", nameof(s));
                 i--;
             }
             while (j != s.Length &&
                    s[j] == ' ')
                 j++;
             if (j != s.Length)
-                throw new ArgumentException("语法错误", "s");
+                throw new ArgumentException("语法错误", nameof(s));
 
 
             if (result.autoCommand() != null)
@@ -114,15 +114,15 @@ namespace AccountingServer.Shell
                         case "chk2":
                             return m_CheckShell.AdvancedCheck();
                     }
-                    throw new ArgumentException("表达式类型未知", "s");
+                    throw new ArgumentException("表达式类型未知", nameof(s));
                 }
                 if (result.otherCommand().EditNamedQueries() != null)
                     return m_NamedQueryShell.ListNamedQueryTemplates();
                 if (result.otherCommand().Exit() != null)
                     Environment.Exit(0);
-                throw new ArgumentException("表达式类型未知", "s");
+                throw new ArgumentException("表达式类型未知", nameof(s));
             }
-            throw new ArgumentException("表达式类型未知", "s");
+            throw new ArgumentException("表达式类型未知", nameof(s));
         }
 
         /// <summary>
@@ -292,7 +292,7 @@ namespace AccountingServer.Shell
             if (!m_Accountant.Upsert(name, all))
                 throw new ApplicationException("更新或添加失败");
 
-            return String.Format("@new NamedQueryTemplate {{{0}}}@", all);
+            return $"@new NamedQueryTemplate {{{all}}}@";
         }
 
         #endregion

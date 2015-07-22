@@ -12,7 +12,7 @@ namespace AccountingServer.DAL
     internal class AssetItemSerializer : BsonBaseSerializer
     {
         public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
-                                           IBsonSerializationOptions options) { return Deserialize(bsonReader); }
+                                           IBsonSerializationOptions options) => Deserialize(bsonReader);
 
         public static AssetItem Deserialize(BsonReader bsonReader)
         {
@@ -40,7 +40,7 @@ namespace AccountingServer.DAL
         }
 
         public override void Serialize(BsonWriter bsonWriter, Type nominalType, object value,
-                                       IBsonSerializationOptions options) { Serialize(bsonWriter, (AssetItem)value); }
+                                       IBsonSerializationOptions options) => Serialize(bsonWriter, (AssetItem)value);
 
         public static void Serialize(BsonWriter bsonWriter, AssetItem item)
         {

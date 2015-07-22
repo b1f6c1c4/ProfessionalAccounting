@@ -19,7 +19,7 @@ namespace AccountingServer.Plugins.Interest
         {
             if (pars.Length > 4 ||
                 pars.Length < 3)
-                throw new ArgumentException("参数个数不正确", "pars");
+                throw new ArgumentException("参数个数不正确", nameof(pars));
 
             var loans =
                 Accountant.SelectVoucherDetailsGrouped(
@@ -173,9 +173,9 @@ namespace AccountingServer.Plugins.Interest
                 {
                     // ReSharper disable once PossibleInvalidOperationException
                     var value =
-                        - voucher.Details.Where(d => d.IsMatch(capitalPattern, -1) || d.IsMatch(interestPattern, -1))
-                                 .Select(d => d.Fund.Value)
-                                 .Sum();
+                        -voucher.Details.Where(d => d.IsMatch(capitalPattern, -1) || d.IsMatch(interestPattern, -1))
+                                .Select(d => d.Fund.Value)
+                                .Sum();
                     if ((-value + interestIntegral).IsNonNegative())
                     {
                         RegularizeVoucherDetail(content, rmk, voucher, 0, interestIntegral);
@@ -225,7 +225,7 @@ namespace AccountingServer.Plugins.Interest
                                      {
                                          Title = 6603,
                                          SubTitle = 02,
-                                         Content = "贷款利息",
+                                         Content = "贷款利息"
                                      };
             var interest = delta * rate * capitalIntegral;
             var create = new[]
@@ -253,11 +253,11 @@ namespace AccountingServer.Plugins.Interest
                 voucher.Details = create;
                 Accountant.Upsert(voucher);
             }
-                // ReSharper disable once PossibleInvalidOperationException
+            // ReSharper disable once PossibleInvalidOperationException
             else if (!(detail.Fund.Value - interest).IsZero())
             {
                 if (!voucher.Details.All(d => d.IsMatch(interestPattern) || d.IsMatch(revenuePattern)))
-                    throw new ArgumentException("该记账凭证包含计息以外的细目", "voucher");
+                    throw new ArgumentException("该记账凭证包含计息以外的细目", nameof(voucher));
                 voucher.Details = create;
                 Accountant.Upsert(voucher);
             }

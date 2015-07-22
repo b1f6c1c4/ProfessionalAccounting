@@ -90,9 +90,7 @@ namespace AccountingServer.DAL
         /// <returns>读取结果</returns>
         private static T ReadClass<T>(this BsonReader bsonReader, string expected, ref string read,
                                       Func<T> readFunc) where T : class
-        {
-            return ReadPrep(bsonReader, expected, ref read) ? readFunc() : null;
-        }
+            => ReadPrep(bsonReader, expected, ref read) ? readFunc() : null;
 
         /// <summary>
         ///     安全地读入指定值类型的字段
@@ -104,9 +102,7 @@ namespace AccountingServer.DAL
         /// <returns>读取结果</returns>
         private static T? ReadStruct<T>(this BsonReader bsonReader, string expected, ref string read,
                                         Func<T> readFunc) where T : struct
-        {
-            return ReadPrep(bsonReader, expected, ref read) ? readFunc() : (T?)null;
-        }
+            => ReadPrep(bsonReader, expected, ref read) ? readFunc() : (T?)null;
 
         /// <summary>
         ///     安全地读入<c>ObjectId</c>类型的字段
@@ -128,9 +124,7 @@ namespace AccountingServer.DAL
         /// <param name="read">字段名缓存</param>
         /// <returns>读取结果</returns>
         public static int? ReadInt32(this BsonReader bsonReader, string expected, ref string read)
-        {
-            return ReadStruct(bsonReader, expected, ref read, bsonReader.ReadInt32);
-        }
+            => ReadStruct(bsonReader, expected, ref read, bsonReader.ReadInt32);
 
         /// <summary>
         ///     安全地读入<c>Double</c>类型的字段
@@ -140,9 +134,7 @@ namespace AccountingServer.DAL
         /// <param name="read">字段名缓存</param>
         /// <returns>读取结果</returns>
         public static double? ReadDouble(this BsonReader bsonReader, string expected, ref string read)
-        {
-            return ReadStruct(bsonReader, expected, ref read, bsonReader.ReadDouble);
-        }
+            => ReadStruct(bsonReader, expected, ref read, bsonReader.ReadDouble);
 
         /// <summary>
         ///     安全地读入<c>string</c>类型的字段
@@ -152,9 +144,7 @@ namespace AccountingServer.DAL
         /// <param name="read">字段名缓存</param>
         /// <returns>读取结果</returns>
         public static string ReadString(this BsonReader bsonReader, string expected, ref string read)
-        {
-            return ReadClass(bsonReader, expected, ref read, bsonReader.ReadString);
-        }
+            => ReadClass(bsonReader, expected, ref read, bsonReader.ReadString);
 
         /// <summary>
         ///     安全地读入<c>Guid</c>类型的字段
@@ -211,9 +201,7 @@ namespace AccountingServer.DAL
         /// <returns>读取结果</returns>
         public static T ReadDocument<T>(this BsonReader bsonReader, string expected, ref string read,
                                         Func<BsonReader, T> parser) where T : class
-        {
-            return ReadPrep(bsonReader, expected, ref read) ? parser(bsonReader) : null;
-        }
+            => ReadPrep(bsonReader, expected, ref read) ? parser(bsonReader) : null;
 
         /// <summary>
         ///     安全地读入数组字段
@@ -334,9 +322,6 @@ namespace AccountingServer.DAL
         ///     <c>Guid</c>
         /// </param>
         /// <returns>Bson对象</returns>
-        public static BsonBinaryData ToBsonValue(this Guid id)
-        {
-            return new BsonBinaryData(id);
-        }
+        public static BsonBinaryData ToBsonValue(this Guid id) => new BsonBinaryData(id);
     }
 }

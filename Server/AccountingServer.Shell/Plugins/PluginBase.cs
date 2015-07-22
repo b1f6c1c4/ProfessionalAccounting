@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Resources;
 using AccountingServer.BLL;
 using AccountingServer.Shell;
@@ -34,7 +33,7 @@ namespace AccountingServer.Plugins
         public string ListHelp()
         {
             var type = GetType();
-            var resName = String.Format("{0}.Resources.Document.txt", type.Namespace);
+            var resName = $"{type.Namespace}.Resources.Document.txt";
             using (var stream = type.Assembly.GetManifestResourceStream(resName))
             {
                 if (stream == null)

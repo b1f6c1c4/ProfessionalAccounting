@@ -34,9 +34,8 @@ namespace AccountingServer.Shell
                     {
                         Pre =
                             (preVouchers, query) =>
-                            preVouchers == null
-                                ? m_Accountant.SelectVouchers(query).ToList()
-                                : preVouchers.Where(v => v.IsMatch(query)).ToList(),
+                            preVouchers?.Where(v => v.IsMatch(query)).ToList() ??
+                            m_Accountant.SelectVouchers(query).ToList(),
                         Leaf = PresentChart,
                         Map = (path, query, coefficient) =>
                               Fork(ShellParser.From(query.Remark).chartLevel(), path, query.Name),
@@ -57,7 +56,7 @@ namespace AccountingServer.Shell
         /// <returns></returns>
         private object PresentChart(object path0, INamedQ query, double coefficient, IReadOnlyList<Voucher> preVouchers)
         {
-            var lvs = (String.IsNullOrWhiteSpace(query.Remark))
+            var lvs = (string.IsNullOrWhiteSpace(query.Remark))
                           ? null
                           : ShellParser.From(query.Remark).chartLevels().chartLevel();
 
@@ -79,14 +78,14 @@ namespace AccountingServer.Shell
                                     var series = (Series)newPath;
                                     var val = (double)r;
                                     series.Points.AddXY(GetXValue(level, cat), val);
-                                    return String.Empty;
+                                    return string.Empty;
                                 }
                                 if (path is ChartArea &&
                                     newPath is Series)
                                 {
                                     var lst = new List<Series>();
                                     if (!Reduce(r, lst))
-                                        throw new ArgumentException("同一层级的路径之间不符", "query");
+                                        throw new ArgumentException("同一层级的路径之间不符", nameof(query));
                                     return new ChartData { ChartAreas = new List<ChartArea>(), Series = lst };
                                 }
                                 return r;
@@ -115,7 +114,7 @@ namespace AccountingServer.Shell
                                   {
                                       var series = path as Series;
                                       if (series == null)
-                                          throw new ArgumentException("底层路径不正确", "query");
+                                          throw new ArgumentException("底层路径不正确", nameof(query));
 
                                       series.ChartType = SeriesChartType.StackedArea;
                                       foreach (var o in results)
@@ -150,9 +149,9 @@ namespace AccountingServer.Shell
                 case SubtotalLevel.SubTitle:
                     return cat.SubTitle.AsSubTitle();
                 case SubtotalLevel.Content:
-                    return cat.Content ?? String.Empty;
+                    return cat.Content ?? string.Empty;
                 case SubtotalLevel.Remark:
-                    return cat.Remark ?? String.Empty;
+                    return cat.Remark ?? string.Empty;
                 case SubtotalLevel.Day:
                 case SubtotalLevel.Week:
                 case SubtotalLevel.Month:
@@ -161,7 +160,7 @@ namespace AccountingServer.Shell
                 case SubtotalLevel.Year:
                     return cat.Date;
                 default:
-                    throw new ArgumentException("分类汇总层次未知", "cat");
+                    throw new ArgumentException("分类汇总层次未知", nameof(cat));
             }
         }
 
@@ -180,9 +179,9 @@ namespace AccountingServer.Shell
                 case SubtotalLevel.SubTitle:
                     return cat.SubTitle.AsSubTitle() + TitleManager.GetTitleName(cat.Title, cat.SubTitle);
                 case SubtotalLevel.Content:
-                    return cat.Content ?? String.Empty;
+                    return cat.Content ?? string.Empty;
                 case SubtotalLevel.Remark:
-                    return cat.Remark ?? String.Empty;
+                    return cat.Remark ?? string.Empty;
                 default:
                     return cat.Date.AsDate(level);
             }
@@ -207,7 +206,7 @@ namespace AccountingServer.Shell
 
                 var area = path as ChartArea;
                 if (area == null)
-                    throw new ArgumentException("制图层次与路径不符", "path");
+                    throw new ArgumentException("制图层次与路径不符", nameof(path));
 
                 return new ChartArea(area.Name.Merge(name));
             }
@@ -215,7 +214,7 @@ namespace AccountingServer.Shell
             if (lv.Series() != null)
             {
                 if (path == null)
-                    throw new ArgumentException("制图层次与路径不符", "path");
+                    throw new ArgumentException("制图层次与路径不符", nameof(path));
 
                 var area = path as ChartArea;
                 if (area != null)
@@ -225,9 +224,9 @@ namespace AccountingServer.Shell
                 if (series != null)
                     return new Series(series.Name.Merge(name)) { ChartArea = series.ChartArea };
 
-                throw new ArgumentException("制图层次与路径不符", "path");
+                throw new ArgumentException("制图层次与路径不符", nameof(path));
             }
-            throw new ArgumentException("制图层次未知", "lv");
+            throw new ArgumentException("制图层次未知", nameof(lv));
         }
 
         /// <summary>
@@ -268,13 +267,13 @@ namespace AccountingServer.Shell
             {
                 foreach (var o in lst)
                     if (!Reduce(o, lout))
-                        throw new ArgumentException("同一层级的路径之间不符", "lst");
+                        throw new ArgumentException("同一层级的路径之间不符", nameof(lst));
                 return lout;
             }
 
             if (path != null &&
                 !(path is ChartArea))
-                throw new ArgumentException("路径与上一层级的路径不符", "path");
+                throw new ArgumentException("路径与上一层级的路径不符", nameof(path));
 
             var aout = new List<ChartArea>();
             foreach (var o in lst)
@@ -284,7 +283,7 @@ namespace AccountingServer.Shell
 
                 var d = o as ChartData;
                 if (d == null)
-                    throw new ArgumentException("同一层级的路径之间不符", "lst");
+                    throw new ArgumentException("同一层级的路径之间不符", nameof(lst));
 
                 aout.AddRange(d.ChartAreas);
                 lout.AddRange(d.Series);
@@ -293,7 +292,7 @@ namespace AccountingServer.Shell
             {
                 var area = path as ChartArea;
                 if (area == null)
-                    throw new ArgumentException("制图层次与路径不符", "path");
+                    throw new ArgumentException("制图层次与路径不符", nameof(path));
 
                 if (lout.Any(s => s.ChartType == SeriesChartType.StackedColumn))
                 {

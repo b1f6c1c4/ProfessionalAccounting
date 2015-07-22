@@ -170,7 +170,7 @@ namespace AccountingServer.Plugins.THUInfo
         {
             var buf =
                 Encoding.GetEncoding("GBK")
-                        .GetBytes(String.Format("userName={0}&password={1}&redirect=NO", username, password));
+                        .GetBytes($"userName={username}&password={password}&redirect=NO");
             var req = WebRequest.Create(@"http://info.tsinghua.edu.cn/Login") as HttpWebRequest;
 
             if (req == null)

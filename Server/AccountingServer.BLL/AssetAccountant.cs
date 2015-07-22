@@ -515,32 +515,32 @@ namespace AccountingServer.BLL
                             dt = AccountantHelper.LastDayOfMonth(dt.Year, dt.Month + 1);
                         }
                     }
-                    //if (mo < 12)
-                    //    for (var mon = mo + 1; mon <= 12; mon++)
-                    //        items.Add(
-                    //                  new DepreciateItem
-                    //                      {
-                    //                          Date = LastDayOfMonth(yr, mon),
-                    //                          Amount = amount / n / 12
-                    //                      });
-                    //for (var year = 1; year < n; year++)
-                    //    for (var mon = 1; mon <= 12; mon++)
-                    //        items.Add(
-                    //                  new DepreciateItem
-                    //                      {
-                    //                          Date = LastDayOfMonth(yr + year, mon),
-                    //                          Amount = amount / n / 12
-                    //                      });
-                    //// if (mo > 0)
-                    //{
-                    //    for (var mon = 1; mon <= mo; mon++)
-                    //        items.Add(
-                    //                  new DepreciateItem
-                    //                      {
-                    //                          Date = LastDayOfMonth(yr + n, mon),
-                    //                          Amount = amount / n / 12
-                    //                      });
-                    //}
+                //if (mo < 12)
+                //    for (var mon = mo + 1; mon <= 12; mon++)
+                //        items.Add(
+                //                  new DepreciateItem
+                //                      {
+                //                          Date = LastDayOfMonth(yr, mon),
+                //                          Amount = amount / n / 12
+                //                      });
+                //for (var year = 1; year < n; year++)
+                //    for (var mon = 1; mon <= 12; mon++)
+                //        items.Add(
+                //                  new DepreciateItem
+                //                      {
+                //                          Date = LastDayOfMonth(yr + year, mon),
+                //                          Amount = amount / n / 12
+                //                      });
+                //// if (mo > 0)
+                //{
+                //    for (var mon = 1; mon <= mo; mon++)
+                //        items.Add(
+                //                  new DepreciateItem
+                //                      {
+                //                          Date = LastDayOfMonth(yr + n, mon),
+                //                          Amount = amount / n / 12
+                //                      });
+                //}
                     break;
                 case DepreciationMethod.SumOfTheYear:
                     if (items.Any(a => a is DevalueItem || a.Remark == AssetItem.IgnoranceMark) ||

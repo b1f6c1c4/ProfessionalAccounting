@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace AccountingServer.BLL
 {
@@ -20,12 +19,12 @@ namespace AccountingServer.BLL
         public static string CPadRight(this string s, int length, char chr = ' ')
         {
             if (s == null)
-                s = String.Empty;
+                s = string.Empty;
 
             if (length - s.Length - Reg.Matches(s).Count < 0)
                 length = s.Length + Reg.Matches(s).Count;
 
-            return s + new String(chr, length - s.Length - Reg.Matches(s).Count);
+            return s + new string(chr, length - s.Length - Reg.Matches(s).Count);
         }
 
 
@@ -39,12 +38,12 @@ namespace AccountingServer.BLL
         public static string CPadLeft(this string s, int length, char chr = ' ')
         {
             if (s == null)
-                s = String.Empty;
+                s = string.Empty;
 
             if (length - s.Length - Reg.Matches(s).Count < 0)
                 length = s.Length + Reg.Matches(s).Count;
 
-            return new String(chr, length - s.Length - Reg.Matches(s).Count) + s;
+            return new string(chr, length - s.Length - Reg.Matches(s).Count) + s;
         }
 
         /// <summary>

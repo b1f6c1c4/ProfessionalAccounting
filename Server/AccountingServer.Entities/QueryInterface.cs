@@ -35,7 +35,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     为两者交集
         /// </summary>
-        Intersect,
+        Intersect
     }
 
     /// <summary>
@@ -165,7 +165,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     计数
         /// </summary>
-        Count,
+        Count
     }
 
     /// <summary>
@@ -186,7 +186,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     每日累加
         /// </summary>
-        EveryDay,
+        EveryDay
     }
 
     /// <summary>

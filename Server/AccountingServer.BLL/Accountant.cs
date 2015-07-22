@@ -27,7 +27,7 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     获取是否已经连接到数据库
         /// </summary>
-        public bool Connected { get { return m_Db.Connected; } }
+        public bool Connected => m_Db.Connected;
 
         public Accountant()
         {
@@ -43,24 +43,22 @@ namespace AccountingServer.BLL
 
         #region Server
 
-        public void Launch() { m_DbServer.Launch(); }
+        public void Launch() => m_DbServer.Launch();
 
-        public void Connect() { m_Db.Connect(); }
+        public void Connect() => m_Db.Connect();
 
-        public void Disconnect() { m_Db.Disconnect(); }
+        public void Disconnect() => m_Db.Disconnect();
 
-        public void Backup() { m_DbServer.Backup(); }
+        public void Backup() => m_DbServer.Backup();
 
         #endregion
 
         #region Voucher
 
-        public Voucher SelectVoucher(string id) { return m_Db.SelectVoucher(id); }
+        public Voucher SelectVoucher(string id) => m_Db.SelectVoucher(id);
 
         public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query)
-        {
-            return m_Db.SelectVouchers(query);
-        }
+            => m_Db.SelectVouchers(query);
 
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
@@ -71,11 +69,11 @@ namespace AccountingServer.BLL
             return res;
         }
 
-        public bool DeleteVoucher(string id) { return m_Db.DeleteVoucher(id); }
+        public bool DeleteVoucher(string id) => m_Db.DeleteVoucher(id);
 
-        public long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query) { return m_Db.DeleteVouchers(query); }
+        public long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query) => m_Db.DeleteVouchers(query);
 
-        public bool Upsert(Voucher entity) { return m_Db.Upsert(entity); }
+        public bool Upsert(Voucher entity) => m_Db.Upsert(entity);
 
         #endregion
 
@@ -97,25 +95,21 @@ namespace AccountingServer.BLL
             }
         }
 
-        public bool DeleteAsset(Guid id) { return m_Db.DeleteAsset(id); }
+        public bool DeleteAsset(Guid id) => m_Db.DeleteAsset(id);
 
-        public long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter) { return m_Db.DeleteAssets(filter); }
+        public long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter) => m_Db.DeleteAssets(filter);
 
-        public bool Upsert(Asset entity) { return m_Db.Upsert(entity); }
+        public bool Upsert(Asset entity) => m_Db.Upsert(entity);
 
         public IEnumerable<Voucher> RegisterVouchers(Asset asset, DateFilter rng,
                                                      IQueryCompunded<IVoucherQueryAtom> query)
-        {
-            return m_AssetAccountant.RegisterVouchers(asset, rng, query);
-        }
+            => m_AssetAccountant.RegisterVouchers(asset, rng, query);
 
-        public static void Depreciate(Asset asset) { AssetAccountant.Depreciate(asset); }
+        public static void Depreciate(Asset asset) => AssetAccountant.Depreciate(asset);
 
         public IEnumerable<AssetItem> Update(Asset asset, DateFilter rng,
                                              bool isCollapsed = false, bool editOnly = false)
-        {
-            return m_AssetAccountant.Update(asset, rng, isCollapsed, editOnly);
-        }
+            => m_AssetAccountant.Update(asset, rng, isCollapsed, editOnly);
 
         #endregion
 
@@ -137,56 +131,45 @@ namespace AccountingServer.BLL
             }
         }
 
-        public bool DeleteAmortization(Guid id) { return m_Db.DeleteAmortization(id); }
+        public bool DeleteAmortization(Guid id) => m_Db.DeleteAmortization(id);
 
         public long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
-        {
-            return m_Db.DeleteAmortizations(filter);
-        }
+            => m_Db.DeleteAmortizations(filter);
 
-        public bool Upsert(Amortization entity) { return m_Db.Upsert(entity); }
+        public bool Upsert(Amortization entity) => m_Db.Upsert(entity);
 
         public IEnumerable<Voucher> RegisterVouchers(Amortization amort, DateFilter rng,
                                                      IQueryCompunded<IVoucherQueryAtom> query)
-        {
-            return m_AmortAccountant.RegisterVouchers(amort, rng, query);
-        }
+            => m_AmortAccountant.RegisterVouchers(amort, rng, query);
 
-        public static void Amortize(Amortization amort) { AmortAccountant.Amortize(amort); }
+        public static void Amortize(Amortization amort) => AmortAccountant.Amortize(amort);
 
         public IEnumerable<AmortItem> Update(Amortization amort, DateFilter rng,
                                              bool isCollapsed = false, bool editOnly = false)
-        {
-            return m_AmortAccountant.Update(amort, rng, isCollapsed, editOnly);
-        }
+            => m_AmortAccountant.Update(amort, rng, isCollapsed, editOnly);
 
         public static double? GetBookValueOn(IDistributed dist, DateTime? dt)
-        {
-            return DistributedAccountant.GetBookValueOn(dist, dt);
-        }
+            => DistributedAccountant.GetBookValueOn(dist, dt);
 
         #endregion
 
         #region NamedQueryTemplate
 
-        public string SelectNamedQueryTemplate(string name) { return m_Db.SelectNamedQueryTemplate(name); }
+        public string SelectNamedQueryTemplate(string name) => m_Db.SelectNamedQueryTemplate(name);
 
-        public IEnumerable<KeyValuePair<string, string>> SelectNamedQueryTemplates()
-        {
-            return m_Db.SelectNamedQueryTemplates();
-        }
+        public IEnumerable<KeyValuePair<string, string>> SelectNamedQueryTemplates() => m_Db.SelectNamedQueryTemplates();
 
-        public bool DeleteNamedQueryTemplate(string name) { return m_Db.DeleteNamedQueryTemplate(name); }
+        public bool DeleteNamedQueryTemplate(string name) => m_Db.DeleteNamedQueryTemplate(name);
 
-        public bool Upsert(string name, string value) { return m_Db.Upsert(name, value); }
+        public bool Upsert(string name, string value) => m_Db.Upsert(name, value);
 
         #endregion
 
         #region Carry
 
-        public void Carry(DateTime? dt) { m_CarryAccountant.Carry(dt); }
+        public void Carry(DateTime? dt) => m_CarryAccountant.Carry(dt);
 
-        public void CarryYear(DateTime? dt, bool includeNull = false) { m_CarryAccountant.CarryYear(dt, includeNull); }
+        public void CarryYear(DateTime? dt, bool includeNull = false) => m_CarryAccountant.CarryYear(dt, includeNull);
 
         #endregion
     }

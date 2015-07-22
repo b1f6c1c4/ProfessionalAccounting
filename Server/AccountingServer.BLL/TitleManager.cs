@@ -86,11 +86,7 @@ namespace AccountingServer.BLL
 
             if (subtitle.HasValue)
             {
-                var res = nav.Select(
-                                     String.Format(
-                                                   "/Titles/title[@id={0}]/subTitle[@id={1}]/@name",
-                                                   title,
-                                                   subtitle));
+                var res = nav.Select($"/Titles/title[@id={title}]/subTitle[@id={subtitle}]/@name");
                 if (res.Count == 0)
                     return null;
                 res.MoveNext();
@@ -98,10 +94,7 @@ namespace AccountingServer.BLL
             }
             else
             {
-                var res = nav.Select(
-                                     String.Format(
-                                                   "/Titles/title[@id={0}]/@name",
-                                                   title));
+                var res = nav.Select($"/Titles/title[@id={title}]/@name");
                 if (res.Count == 0)
                     return null;
                 res.MoveNext();

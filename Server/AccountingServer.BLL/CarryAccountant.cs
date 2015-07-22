@@ -98,7 +98,7 @@ namespace AccountingServer.BLL
                                                           Title = 6301,
                                                           SubTitle = 03,
                                                           Content = balance.Content,
-                                                          Fund = -balance.Fund,
+                                                          Fund = -balance.Fund
                                                       });
                             break;
                         default:
@@ -108,7 +108,7 @@ namespace AccountingServer.BLL
                                                           Title = 6301,
                                                           SubTitle = 03,
                                                           Content = balance.Content,
-                                                          Fund = -balance.Fund,
+                                                          Fund = -balance.Fund
                                                       });
                             break;
                     }
@@ -136,7 +136,7 @@ namespace AccountingServer.BLL
                                                           Title = 6301,
                                                           SubTitle = 04,
                                                           Content = balance.Content,
-                                                          Fund = -balance.Fund,
+                                                          Fund = -balance.Fund
                                                       });
                             break;
                         default:
@@ -146,7 +146,7 @@ namespace AccountingServer.BLL
                                                           Title = 6301,
                                                           SubTitle = 04,
                                                           Content = balance.Content,
-                                                          Fund = -balance.Fund,
+                                                          Fund = -balance.Fund
                                                       });
                             break;
                     }
@@ -190,7 +190,7 @@ namespace AccountingServer.BLL
                                                   Title = balance.Title,
                                                   SubTitle = balance.SubTitle,
                                                   Content = balance.Content,
-                                                  Fund = -balance.Fund,
+                                                  Fund = -balance.Fund
                                               });
             }
 
@@ -227,7 +227,7 @@ namespace AccountingServer.BLL
                                                   Title = balance.Title,
                                                   SubTitle = balance.SubTitle,
                                                   Content = balance.Content,
-                                                  Fund = -balance.Fund,
+                                                  Fund = -balance.Fund
                                               });
             }
 

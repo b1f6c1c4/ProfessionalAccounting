@@ -160,12 +160,12 @@ namespace AccountingServer.BLL
             Func<Balance, Balance> keySelector =
                 b =>
                 new Balance
-                {
-                    Date = level.HasFlag(SubtotalLevel.Day) ? b.Date : null,
-                    Title = level.HasFlag(SubtotalLevel.Title) ? b.Title : null,
-                    SubTitle = level.HasFlag(SubtotalLevel.SubTitle) ? b.SubTitle : null,
-                    Content = level.HasFlag(SubtotalLevel.Content) ? b.Content : null,
-                    Remark = level.HasFlag(SubtotalLevel.Remark) ? b.Remark : null,
+                    {
+                        Date = level.HasFlag(SubtotalLevel.Day) ? b.Date : null,
+                        Title = level.HasFlag(SubtotalLevel.Title) ? b.Title : null,
+                        SubTitle = level.HasFlag(SubtotalLevel.SubTitle) ? b.SubTitle : null,
+                        Content = level.HasFlag(SubtotalLevel.Content) ? b.Content : null,
+                        Remark = level.HasFlag(SubtotalLevel.Remark) ? b.Remark : null
                     };
             Func<Balance, IEnumerable<double>, Balance> reducer =
                 (b, bs) =>
@@ -182,7 +182,7 @@ namespace AccountingServer.BLL
             {
                 var ff = query.VoucherEmitQuery.VoucherQuery as IVoucherQueryAtom;
                 if (ff == null)
-                    throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", "query");
+                    throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query));
                 return
                     vouchers.Where(v => v.IsMatch(ff))
                             .SelectMany(

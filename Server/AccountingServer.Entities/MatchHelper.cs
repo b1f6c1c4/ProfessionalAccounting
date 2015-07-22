@@ -28,9 +28,9 @@ namespace AccountingServer.Entities
                 if (filter.Type != voucher.Type)
                     return false;
             if (filter.Remark != null)
-                if (filter.Remark == String.Empty)
+                if (filter.Remark == string.Empty)
                 {
-                    if (!String.IsNullOrEmpty(voucher.Remark))
+                    if (!string.IsNullOrEmpty(voucher.Remark))
                         return false;
                 }
                 else if (filter.Remark != voucher.Remark)
@@ -61,9 +61,9 @@ namespace AccountingServer.Entities
                 else if (filter.SubTitle != voucherDetail.SubTitle)
                     return false;
             if (filter.Content != null)
-                if (filter.Content == String.Empty)
+                if (filter.Content == string.Empty)
                 {
-                    if (!String.IsNullOrEmpty(voucherDetail.Content))
+                    if (!string.IsNullOrEmpty(voucherDetail.Content))
                         return false;
                 }
                 else if (filter.Content != voucherDetail.Content)
@@ -76,9 +76,9 @@ namespace AccountingServer.Entities
                     dir < 0 && voucherDetail.Fund > 0)
                     return false;
             if (filter.Remark != null)
-                if (filter.Remark == String.Empty)
+                if (filter.Remark == string.Empty)
                 {
-                    if (!String.IsNullOrEmpty(voucherDetail.Remark))
+                    if (!string.IsNullOrEmpty(voucherDetail.Remark))
                         return false;
                 }
                 else if (filter.Remark != voucherDetail.Remark)
@@ -142,12 +142,12 @@ namespace AccountingServer.Entities
                     case OperatorType.Intersect:
                         return IsMatch(f.Filter1, atomPredictor) && IsMatch(f.Filter2, atomPredictor);
                     case OperatorType.Substract:
-                        return IsMatch(f.Filter1, atomPredictor) && ! IsMatch(f.Filter2, atomPredictor);
+                        return IsMatch(f.Filter1, atomPredictor) && !IsMatch(f.Filter2, atomPredictor);
                     default:
-                        throw new ArgumentException("运算类型未知", "query");
+                        throw new ArgumentException("运算类型未知", nameof(query));
                 }
             }
-            throw new ArgumentException("检索式类型未知", "query");
+            throw new ArgumentException("检索式类型未知", nameof(query));
         }
     }
 }

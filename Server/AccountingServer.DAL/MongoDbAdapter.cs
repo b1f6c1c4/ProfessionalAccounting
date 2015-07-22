@@ -158,16 +158,11 @@ namespace AccountingServer.DAL
         #region Voucher
 
         /// <inheritdoc />
-        public Voucher SelectVoucher(string id)
-        {
-            return m_Vouchers.FindOneById(ObjectId.Parse(id));
-        }
+        public Voucher SelectVoucher(string id) => m_Vouchers.FindOneById(ObjectId.Parse(id));
 
         /// <inheritdoc />
         public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query)
-        {
-            return m_Vouchers.Find(query.GetQuery());
-        }
+            => m_Vouchers.Find(query.GetQuery());
 
         /// <inheritdoc />
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
@@ -210,16 +205,11 @@ namespace AccountingServer.DAL
         #region Asset
 
         /// <inheritdoc />
-        public Asset SelectAsset(Guid id)
-        {
-            return m_Assets.FindOne(MongoDbQueryHelper.GetQuery(id));
-        }
+        public Asset SelectAsset(Guid id) => m_Assets.FindOne(MongoDbQueryHelper.GetQuery(id));
 
         /// <inheritdoc />
         public IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter)
-        {
-            return m_Assets.Find(filter.GetQuery());
-        }
+            => m_Assets.Find(filter.GetQuery());
 
         /// <inheritdoc />
         public bool DeleteAsset(Guid id)
@@ -247,16 +237,11 @@ namespace AccountingServer.DAL
         #region Amortization
 
         /// <inheritdoc />
-        public Amortization SelectAmortization(Guid id)
-        {
-            return m_Amortizations.FindOne(MongoDbQueryHelper.GetQuery(id));
-        }
+        public Amortization SelectAmortization(Guid id) => m_Amortizations.FindOne(MongoDbQueryHelper.GetQuery(id));
 
         /// <inheritdoc />
         public IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
-        {
-            return m_Amortizations.Find(filter.GetQuery());
-        }
+            => m_Amortizations.Find(filter.GetQuery());
 
         /// <inheritdoc />
         public bool DeleteAmortization(Guid id)
@@ -285,9 +270,7 @@ namespace AccountingServer.DAL
 
         /// <inheritdoc />
         public string SelectNamedQueryTemplate(string name)
-        {
-            return m_NamedQueryTemplates.FindOneById(new BsonString(name))["value"].AsString;
-        }
+            => m_NamedQueryTemplates.FindOneById(new BsonString(name))["value"].AsString;
 
         /// <inheritdoc />
         public IEnumerable<KeyValuePair<string, string>> SelectNamedQueryTemplates()
@@ -419,7 +402,7 @@ namespace AccountingServer.DAL
             {
                 var dQuery = query.VoucherQuery as IVoucherQueryAtom;
                 if (dQuery == null)
-                    throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", "query");
+                    throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query));
                 sb.Append(dQuery.DetailFilter.GetJavascriptFilter());
             }
             sb.AppendLine(";");
@@ -455,7 +438,7 @@ namespace AccountingServer.DAL
             sb.AppendLine("    }");
             sb.AppendLine("}");
 
-            return sb.Replace(Environment.NewLine, String.Empty).ToString();
+            return sb.Replace(Environment.NewLine, string.Empty).ToString();
         }
 
         #endregion

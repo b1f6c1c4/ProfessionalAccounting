@@ -25,23 +25,23 @@ namespace AccountingServer.Shell.Parsing
             }
 
             /// <inheritdoc />
-            public string Name { get { return InnerQuery.Name; } }
+            public string Name => InnerQuery.Name;
 
-            public bool InheritQuery { get { return InnerQuery.InheritQuery; } }
+            public bool InheritQuery => InnerQuery.InheritQuery;
         }
 
         public partial class NamedQueryTemplateRContext : INamedQueryTemplateR
         {
             /// <inheritdoc />
-            public string Name { get { return name().DollarQuotedString().Dequotation(); } }
+            public string Name => name().DollarQuotedString().Dequotation();
 
-            public bool InheritQuery { get { return Inh == null; } }
+            public bool InheritQuery => Inh == null;
         }
 
         public partial class NamedQueriesContext : INamedQueries
         {
             /// <inheritdoc />
-            public string Name { get { return name().DollarQuotedString().Dequotation(); } }
+            public string Name => name().DollarQuotedString().Dequotation();
 
             public bool InheritQuery
             {
@@ -75,20 +75,20 @@ namespace AccountingServer.Shell.Parsing
             }
 
             /// <inheritdoc />
-            public string Remark { get { return DoubleQuotedString().Dequotation(); } }
+            public string Remark => DoubleQuotedString().Dequotation();
 
             /// <inheritdoc />
-            public IReadOnlyList<INamedQuery> Items { get { return namedQuery(); } }
+            public IReadOnlyList<INamedQuery> Items => namedQuery();
 
-            public IQueryCompunded<IVoucherQueryAtom> CommonQuery { get { return vouchers(); } }
+            public IQueryCompunded<IVoucherQueryAtom> CommonQuery => vouchers();
         }
 
         public partial class NamedQContext : INamedQ
         {
             /// <inheritdoc />
-            public string Name { get { return name().DollarQuotedString().Dequotation(); } }
+            public string Name => name().DollarQuotedString().Dequotation();
 
-            public bool InheritQuery { get { return Inh == null; } }
+            public bool InheritQuery => Inh == null;
 
             /// <inheritdoc />
             public double Coefficient
@@ -112,10 +112,10 @@ namespace AccountingServer.Shell.Parsing
             }
 
             /// <inheritdoc />
-            public string Remark { get { return DoubleQuotedString().Dequotation(); } }
+            public string Remark => DoubleQuotedString().Dequotation();
 
             /// <inheritdoc />
-            public IGroupedQuery GroupingQuery { get { return groupedQuery(); } }
+            public IGroupedQuery GroupingQuery => groupedQuery();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using AccountingServer.Shell.Parsing;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 
@@ -13,9 +14,9 @@ namespace AccountingServer.QueryGeneration
             while (true)
             {
                 var input = new AntlrInputStream(inputStream.ReadLine());
-                var lexer = new AccountingServer.Shell.Parsing.ShellLexer(input);
+                var lexer = new ShellLexer(input);
                 var tokens = new CommonTokenStream(lexer);
-                var parser = new AccountingServer.Shell.Parsing.ShellParser(tokens);
+                var parser = new ShellParser(tokens);
                 IParseTree tree = parser.command();
                 Console.WriteLine(tree.ToStringTree(parser));
             }

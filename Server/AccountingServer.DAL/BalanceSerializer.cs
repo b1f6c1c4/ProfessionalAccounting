@@ -12,7 +12,7 @@ namespace AccountingServer.DAL
     internal class BalanceSerializer : BsonBaseSerializer
     {
         public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
-                                           IBsonSerializationOptions options) { return Deserialize(bsonReader); }
+                                           IBsonSerializationOptions options) => Deserialize(bsonReader);
 
         public static Balance Deserialize(BsonReader bsonReader)
         {

@@ -182,7 +182,7 @@ namespace AccountingServer.Shell.Parsing
         public partial class RangeContext : IDateRange
         {
             /// <inheritdoc />
-            public DateFilter Range { get { return rangeCore().TheRange(); } }
+            public DateFilter Range => rangeCore().TheRange();
         }
     }
 }

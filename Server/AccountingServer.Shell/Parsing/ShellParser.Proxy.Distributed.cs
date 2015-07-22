@@ -89,7 +89,7 @@ namespace AccountingServer.Shell.Parsing
             }
 
             /// <inheritdoc />
-            public IQueryCompunded<IDistributedQueryAtom> Filter2 { get { return distributedQ(1); } }
+            public IQueryCompunded<IDistributedQueryAtom> Filter2 => distributedQ(1);
         }
     }
 }

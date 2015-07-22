@@ -67,12 +67,4 @@ namespace AccountingServer.BLL
         /// </summary>
         IQueryCompunded<IVoucherQueryAtom> CommonQuery { get; }
     }
-
-    public class NamedQBase : INamedQ {
-        public string Name { get; set; }
-        public bool InheritQuery { get; set; }
-        public double Coefficient { get; set; }
-        public string Remark { get; set; }
-        public IGroupedQuery GroupingQuery { get; set; }
-    }
 }

@@ -13,10 +13,7 @@ namespace AccountingServer.DAL
     internal class AmortizationSerializer : BsonBaseSerializer, IBsonIdProvider
     {
         public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
-                                           IBsonSerializationOptions options)
-        {
-            return Deserialize(bsonReader);
-        }
+                                           IBsonSerializationOptions options) => Deserialize(bsonReader);
 
         // ReSharper disable once MemberCanBePrivate.Global
         public static object Deserialize(BsonReader bsonReader)
@@ -31,7 +28,7 @@ namespace AccountingServer.DAL
                                 Name = bsonReader.ReadString("name", ref read),
                                 Value = bsonReader.ReadDouble("value", ref read),
                                 Date = bsonReader.ReadDateTime("date", ref read),
-                                TotalDays = bsonReader.ReadInt32("tday", ref read),
+                                TotalDays = bsonReader.ReadInt32("tday", ref read)
                             };
             switch (bsonReader.ReadString("interval", ref read))
             {
@@ -65,10 +62,7 @@ namespace AccountingServer.DAL
         }
 
         public override void Serialize(BsonWriter bsonWriter, Type nominalType, object value,
-                                       IBsonSerializationOptions options)
-        {
-            Serialize(bsonWriter, (Amortization)value);
-        }
+                                       IBsonSerializationOptions options) => Serialize(bsonWriter, (Amortization)value);
 
         // ReSharper disable once MemberCanBePrivate.Global
         public static void Serialize(BsonWriter bsonWriter, Amortization amort)
