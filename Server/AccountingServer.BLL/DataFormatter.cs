@@ -133,7 +133,7 @@ namespace AccountingServer.BLL
         public static int? AsTitleOrSubTitle(this string value)
         {
             int val;
-            if (Int32.TryParse(value, out val))
+            if (int.TryParse(value, out val))
                 return val;
             return null;
         }

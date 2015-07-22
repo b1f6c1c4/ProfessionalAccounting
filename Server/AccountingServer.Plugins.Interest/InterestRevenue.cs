@@ -34,7 +34,7 @@ namespace AccountingServer.Plugins.Interest
                 loans.Single(
                              b => b.Remark != null &&
                                   b.Remark.StartsWith(pars[1], StringComparison.InvariantCultureIgnoreCase) &&
-                                  !b.Remark.EndsWith("-利息"))
+                                  !b.Remark.EndsWith("-利息", StringComparison.Ordinal))
                      .Remark;
 
             var endDate = pars.Length == 4 ? pars[3].AsDate() : null;

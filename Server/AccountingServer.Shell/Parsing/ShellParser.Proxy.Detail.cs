@@ -19,12 +19,12 @@ namespace AccountingServer.Shell.Parsing
                                      };
                     if (DetailTitle() != null)
                     {
-                        var t = Int32.Parse(DetailTitle().GetText().TrimStart('T'));
+                        var t = int.Parse(DetailTitle().GetText().TrimStart('T'));
                         filter.Title = t;
                     }
                     else if (DetailTitleSubTitle() != null)
                     {
-                        var t = Int32.Parse(DetailTitleSubTitle().GetText().TrimStart('T'));
+                        var t = int.Parse(DetailTitleSubTitle().GetText().TrimStart('T'));
                         filter.Title = t / 100;
                         filter.SubTitle = t % 100;
                     }

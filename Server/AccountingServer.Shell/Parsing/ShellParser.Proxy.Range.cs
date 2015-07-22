@@ -58,7 +58,7 @@ namespace AccountingServer.Shell.Parsing
                         DateTime dt;
                         if (RangeDeltaMonth() != null)
                         {
-                            var delta = Int32.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
+                            var delta = int.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
                             dt = new DateTime(
                                 DateTime.Now.Year,
                                 DateTime.Now.Day >= 20 ? DateTime.Now.Month + 1 : DateTime.Now.Month,
@@ -74,7 +74,7 @@ namespace AccountingServer.Shell.Parsing
                         DateTime dt;
                         if (RangeDeltaMonth() != null)
                         {
-                            var delta = Int32.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
+                            var delta = int.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
                             dt = new DateTime(DateTime.Now.Date.Year, DateTime.Now.Month, 1);
                             dt = dt.AddMonths(-delta);
                         }
@@ -87,7 +87,7 @@ namespace AccountingServer.Shell.Parsing
                         DateTime dt;
                         if (RangeDeltaMonth() != null)
                         {
-                            var delta = Int32.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
+                            var delta = int.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
                             dt = new DateTime(
                                 DateTime.Now.Year,
                                 DateTime.Now.Day >= 9 ? DateTime.Now.Month + 1 : DateTime.Now.Month,
@@ -110,7 +110,7 @@ namespace AccountingServer.Shell.Parsing
             {
                 get
                 {
-                    var year = Int32.Parse(RangeAYear().GetText());
+                    var year = int.Parse(RangeAYear().GetText());
                     return new DateFilter(new DateTime(year, 1, 1), new DateTime(year, 12, 31));
                 }
             }
