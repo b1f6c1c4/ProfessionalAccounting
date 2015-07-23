@@ -13,9 +13,7 @@ namespace AccountingServer.BLL
         /// <param name="source">待分类的余额表条目</param>
         /// <returns>类</returns>
         public static IEnumerable<IGrouping<int?, Balance>> GroupByTitle(this IEnumerable<Balance> source)
-        {
-            return source.GroupBy(b => b.Title);
-        }
+            => source.GroupBy(b => b.Title);
 
         /// <summary>
         ///     按二级科目分类
@@ -23,9 +21,7 @@ namespace AccountingServer.BLL
         /// <param name="source">待分类的余额表条目</param>
         /// <returns>类</returns>
         public static IEnumerable<IGrouping<int?, Balance>> GroupBySubTitle(this IEnumerable<Balance> source)
-        {
-            return source.GroupBy(b => b.SubTitle);
-        }
+            => source.GroupBy(b => b.SubTitle);
 
         /// <summary>
         ///     按内容分类
@@ -33,9 +29,7 @@ namespace AccountingServer.BLL
         /// <param name="source">待分类的余额表条目</param>
         /// <returns>类</returns>
         public static IEnumerable<IGrouping<string, Balance>> GroupByContent(this IEnumerable<Balance> source)
-        {
-            return source.GroupBy(b => b.Content);
-        }
+            => source.GroupBy(b => b.Content);
 
         /// <summary>
         ///     按备注分类
@@ -43,9 +37,7 @@ namespace AccountingServer.BLL
         /// <param name="source">待分类的余额表条目</param>
         /// <returns>类</returns>
         public static IEnumerable<IGrouping<string, Balance>> GroupByRemark(this IEnumerable<Balance> source)
-        {
-            return source.GroupBy(b => b.Remark);
-        }
+            => source.GroupBy(b => b.Remark);
 
         /// <summary>
         ///     按日期分类
@@ -53,9 +45,7 @@ namespace AccountingServer.BLL
         /// <param name="source">待分类的余额表条目</param>
         /// <returns>类</returns>
         public static IEnumerable<IGrouping<DateTime?, Balance>> GroupByDate(this IEnumerable<Balance> source)
-        {
-            return source.GroupBy(b => b.Date);
-        }
+            => source.GroupBy(b => b.Date);
 
 
         /// <summary>

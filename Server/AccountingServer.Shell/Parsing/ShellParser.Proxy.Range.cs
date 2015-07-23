@@ -5,12 +5,7 @@ namespace AccountingServer.Shell.Parsing
 {
     internal static class NullDateRangeHelper
     {
-        public static DateFilter TheRange(this IDateRange range)
-        {
-            if (range == null)
-                return DateFilter.Unconstrained;
-            return range.Range;
-        }
+        public static DateFilter TheRange(this IDateRange range) => range?.Range ?? DateFilter.Unconstrained;
     }
 
     public partial class ShellParser

@@ -87,9 +87,7 @@ namespace AccountingServer.Entities
         }
 
         public static bool IsMatch(this VoucherDetail voucherDetail, IQueryCompunded<IDetailQueryAtom> query)
-        {
-            return IsMatch(query, q => IsMatch(voucherDetail, q.Filter, q.Dir));
-        }
+            => IsMatch(query, q => IsMatch(voucherDetail, q.Filter, q.Dir));
 
         /// <summary>
         ///     判断记账凭证是否符合记账凭证检索式
@@ -109,9 +107,7 @@ namespace AccountingServer.Entities
         }
 
         public static bool IsMatch(this Voucher voucher, IQueryCompunded<IVoucherQueryAtom> query)
-        {
-            return IsMatch(query, q => IsMatch(voucher, q));
-        }
+            => IsMatch(query, q => IsMatch(voucher, q));
 
         /// <summary>
         ///     判断一般检索式是否成立

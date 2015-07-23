@@ -133,7 +133,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">细目检索式</param>
         /// <returns>Javascript表示</returns>
-        public static string GetJavascriptFilter(this IQueryCompunded<IDetailQueryAtom> query)
+        public static string GetJavascriptFilter(IQueryCompunded<IDetailQueryAtom> query)
             => GetJavascriptFilter(query, GetJavascriptFilter);
 
         /// <summary>
@@ -198,7 +198,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">记账凭证检索式</param>
         /// <returns>Javascript表示</returns>
-        public static string GetJavascriptFilter(this IQueryCompunded<IVoucherQueryAtom> query)
+        public static string GetJavascriptFilter(IQueryCompunded<IVoucherQueryAtom> query)
             => GetJavascriptFilter(query, GetJavascriptFilter);
 
         /// <summary>
@@ -206,7 +206,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">记账凭证检索式</param>
         /// <returns>查询</returns>
-        public static IMongoQuery GetQuery(this IQueryCompunded<IVoucherQueryAtom> query)
+        public static IMongoQuery GetQuery(IQueryCompunded<IVoucherQueryAtom> query)
             => ToWhere(GetJavascriptFilter(query));
 
         /// <summary>
@@ -264,7 +264,7 @@ namespace AccountingServer.DAL
         /// <param name="query">分期检索式</param>
         /// <returns>Javascript表示</returns>
         // ReSharper disable once MemberCanBePrivate.Global
-        public static string GetJavascriptFilter(this IQueryCompunded<IDistributedQueryAtom> query)
+        public static string GetJavascriptFilter(IQueryCompunded<IDistributedQueryAtom> query)
             => GetJavascriptFilter(query, GetJavascriptFilter);
 
         /// <summary>
@@ -272,7 +272,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">分期检索式</param>
         /// <returns>查询</returns>
-        public static IMongoQuery GetQuery(this IQueryCompunded<IDistributedQueryAtom> query)
+        public static IMongoQuery GetQuery(IQueryCompunded<IDistributedQueryAtom> query)
             => ToWhere(GetJavascriptFilter(query));
 
         /// <summary>

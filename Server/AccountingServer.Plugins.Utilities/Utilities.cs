@@ -135,23 +135,23 @@ namespace AccountingServer.Plugins.Utilities
                     Accountant.SelectVoucherDetailsGrouped(
                                                            new GroupedQueryBase(
                                                                filter: new VoucherDetail
-                                                               {
-                                                                   Title = 1101,
-                                                                   Content = "余额宝"
-                                                               },
+                                                                           {
+                                                                               Title = 1101,
+                                                                               Content = "余额宝"
+                                                                           },
                                                                subtotal:
                                                                    new SubtotalBase
-                                                                   {
-                                                                       GatherType = GatheringType.Zero,
-                                                                       Levels = new SubtotalLevel[] { }
-                                                                   }))
+                                                                       {
+                                                                           GatherType = GatheringType.Zero,
+                                                                           Levels = new SubtotalLevel[] { }
+                                                                       }))
                               .Single()
                               .Fund;
                 var fund = Math.Round(bal2 - bal1, 8);
                 return new Voucher
-                {
-                    Date = date,
-                    Details = new[]
+                           {
+                               Date = date,
+                               Details = new[]
                                              {
                                                  new VoucherDetail
                                                      {
@@ -168,7 +168,7 @@ namespace AccountingServer.Plugins.Utilities
                                                          Fund = -fund
                                                      }
                                              }
-                };
+                           };
             }
             if (par.StartsWith("wy", StringComparison.Ordinal))
             {
@@ -179,23 +179,23 @@ namespace AccountingServer.Plugins.Utilities
                     Accountant.SelectVoucherDetailsGrouped(
                                                            new GroupedQueryBase(
                                                                filter: new VoucherDetail
-                                                               {
-                                                                   Title = 1101,
-                                                                   Content = "无忧宝"
-                                                               },
+                                                                           {
+                                                                               Title = 1101,
+                                                                               Content = "无忧宝"
+                                                                           },
                                                                subtotal:
                                                                    new SubtotalBase
-                                                                   {
-                                                                       GatherType = GatheringType.Zero,
-                                                                       Levels = new SubtotalLevel[] { }
-                                                                   }))
+                                                                       {
+                                                                           GatherType = GatheringType.Zero,
+                                                                           Levels = new SubtotalLevel[] { }
+                                                                       }))
                               .Single()
                               .Fund;
                 var fund = Math.Round(bal2 - bal1, 8);
                 return new Voucher
-                {
-                    Date = date,
-                    Details = new[]
+                           {
+                               Date = date,
+                               Details = new[]
                                              {
                                                  new VoucherDetail
                                                      {
@@ -212,7 +212,7 @@ namespace AccountingServer.Plugins.Utilities
                                                          Fund = -fund
                                                      }
                                              }
-                };
+                           };
             }
             if (par.StartsWith("w", StringComparison.Ordinal))
             {
