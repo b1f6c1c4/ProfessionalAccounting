@@ -112,9 +112,7 @@ namespace AccountingServer.DAL
         /// <param name="read">字段名缓存</param>
         /// <returns>读取结果</returns>
         public static string ReadObjectId(this BsonReader bsonReader, string expected, ref string read)
-        {
-            return ReadClass(bsonReader, expected, ref read, () => bsonReader.ReadObjectId().ToString());
-        }
+            => ReadClass(bsonReader, expected, ref read, () => bsonReader.ReadObjectId().ToString());
 
         /// <summary>
         ///     安全地读入<c>Int32</c>类型的字段
@@ -154,9 +152,7 @@ namespace AccountingServer.DAL
         /// <param name="read">字段名缓存</param>
         /// <returns>读取结果</returns>
         public static Guid? ReadGuid(this BsonReader bsonReader, string expected, ref string read)
-        {
-            return ReadStruct(bsonReader, expected, ref read, () => bsonReader.ReadBinaryData().AsGuid);
-        }
+            => ReadStruct(bsonReader, expected, ref read, () => bsonReader.ReadBinaryData().AsGuid);
 
         /// <summary>
         ///     安全地读入<c>DateTime</c>类型的字段
@@ -166,14 +162,12 @@ namespace AccountingServer.DAL
         /// <param name="read">字段名缓存</param>
         /// <returns>读取结果</returns>
         public static DateTime? ReadDateTime(this BsonReader bsonReader, string expected, ref string read)
-        {
-            return ReadStruct(
-                              bsonReader,
-                              expected,
-                              ref read,
-                              () =>
-                              BsonUtils.ToDateTimeFromMillisecondsSinceEpoch(bsonReader.ReadDateTime()).ToLocalTime());
-        }
+            => ReadStruct(
+                          bsonReader,
+                          expected,
+                          ref read,
+                          () =>
+                          BsonUtils.ToDateTimeFromMillisecondsSinceEpoch(bsonReader.ReadDateTime()).ToLocalTime());
 
         /// <summary>
         ///     安全地读入<c>null</c>类型的字段

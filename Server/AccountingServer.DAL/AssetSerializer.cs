@@ -128,6 +128,6 @@ namespace AccountingServer.DAL
             return true;
         }
 
-        public void SetDocumentId(object document, object id) { ((Asset)document).ID = (Guid)id; }
+        public void SetDocumentId(object document, object id) => ((Asset)document).ID = (Guid)id;
     }
 }

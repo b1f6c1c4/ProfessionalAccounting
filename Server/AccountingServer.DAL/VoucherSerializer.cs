@@ -111,6 +111,6 @@ namespace AccountingServer.DAL
             return true;
         }
 
-        public void SetDocumentId(object document, object id) { ((Voucher)document).ID = (string)id; }
+        public void SetDocumentId(object document, object id) => ((Voucher)document).ID = (string)id;
     }
 }

@@ -8,6 +8,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
+using static AccountingServer.DAL.MongoDbQueryHelper;
 
 namespace AccountingServer.DAL
 {
@@ -56,8 +57,6 @@ namespace AccountingServer.DAL
         private MongoCollection<BsonDocument> m_NamedQueryTemplates;
 
         #endregion
-
-        public MongoDbAdapter() { Connected = false; }
 
         /// <summary>
         ///     注册Bson序列化器
@@ -162,7 +161,7 @@ namespace AccountingServer.DAL
 
         /// <inheritdoc />
         public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query)
-            => m_Vouchers.Find(query.GetQuery());
+            => m_Vouchers.Find(GetQuery(query));
 
         /// <inheritdoc />
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
@@ -182,14 +181,14 @@ namespace AccountingServer.DAL
         /// <inheritdoc />
         public bool DeleteVoucher(string id)
         {
-            var res = m_Vouchers.Remove(MongoDbQueryHelper.GetQuery(id));
+            var res = m_Vouchers.Remove(GetQuery(id));
             return res.DocumentsAffected == 1;
         }
 
         /// <inheritdoc />
         public long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query)
         {
-            var res = m_Vouchers.Remove(query.GetQuery());
+            var res = m_Vouchers.Remove(GetQuery(query));
             return res.DocumentsAffected;
         }
 
@@ -205,16 +204,16 @@ namespace AccountingServer.DAL
         #region Asset
 
         /// <inheritdoc />
-        public Asset SelectAsset(Guid id) => m_Assets.FindOne(MongoDbQueryHelper.GetQuery(id));
+        public Asset SelectAsset(Guid id) => m_Assets.FindOne(GetQuery(id));
 
         /// <inheritdoc />
         public IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter)
-            => m_Assets.Find(filter.GetQuery());
+            => m_Assets.Find(GetQuery(filter));
 
         /// <inheritdoc />
         public bool DeleteAsset(Guid id)
         {
-            var res = m_Assets.Remove(MongoDbQueryHelper.GetQuery(id));
+            var res = m_Assets.Remove(GetQuery(id));
             return res.DocumentsAffected == 1;
         }
 
@@ -228,7 +227,7 @@ namespace AccountingServer.DAL
         /// <inheritdoc />
         public long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            var res = m_Assets.Remove(filter.GetQuery());
+            var res = m_Assets.Remove(GetQuery(filter));
             return res.DocumentsAffected;
         }
 
@@ -237,16 +236,16 @@ namespace AccountingServer.DAL
         #region Amortization
 
         /// <inheritdoc />
-        public Amortization SelectAmortization(Guid id) => m_Amortizations.FindOne(MongoDbQueryHelper.GetQuery(id));
+        public Amortization SelectAmortization(Guid id) => m_Amortizations.FindOne(GetQuery(id));
 
         /// <inheritdoc />
         public IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
-            => m_Amortizations.Find(filter.GetQuery());
+            => m_Amortizations.Find(GetQuery(filter));
 
         /// <inheritdoc />
         public bool DeleteAmortization(Guid id)
         {
-            var res = m_Amortizations.Remove(MongoDbQueryHelper.GetQuery(id));
+            var res = m_Amortizations.Remove(GetQuery(id));
             return res.DocumentsAffected == 1;
         }
 
@@ -260,7 +259,7 @@ namespace AccountingServer.DAL
         /// <inheritdoc />
         public long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            var res = m_Amortizations.Remove(filter.GetQuery());
+            var res = m_Amortizations.Remove(GetQuery(filter));
             return res.DocumentsAffected;
         }
 
@@ -273,14 +272,26 @@ namespace AccountingServer.DAL
             => m_NamedQueryTemplates.FindOneById(new BsonString(name))["value"].AsString;
 
         /// <inheritdoc />
-        public IEnumerable<KeyValuePair<string, string>> SelectNamedQueryTemplates()
-        {
-            return
-                m_NamedQueryTemplates.FindAll()
-                                     .Select(
-                                             d =>
-                                             new KeyValuePair<string, string>(d["_id"].AsString, d["value"].AsString));
-        }
+        public IEnumerable<KeyValuePair<string, string>> SelectNamedQueryTemplates() => m_NamedQueryTemplates.FindAll()
+                                                                                                             .Select(
+                                                                                                                     d
+                                                                                                                     =>
+                                                                                                                     new KeyValuePair
+                                                                                                                         <
+                                                                                                                         string,
+                                                                                                                         string
+                                                                                                                         >
+                                                                                                                         (
+                                                                                                                         d
+                                                                                                                             [
+                                                                                                                              "_id"
+                                                                                                                             ]
+                                                                                                                             .AsString,
+                                                                                                                         d
+                                                                                                                             [
+                                                                                                                              "value"
+                                                                                                                             ]
+                                                                                                                             .AsString));
 
         /// <inheritdoc />
         public bool DeleteNamedQueryTemplate(string name)
@@ -374,7 +385,7 @@ namespace AccountingServer.DAL
         {
             if (emitQuery.DetailFilter == null)
                 return "function(d) { return true; }";
-            return emitQuery.DetailFilter.GetJavascriptFilter();
+            return GetJavascriptFilter(emitQuery.DetailFilter);
         }
 
         /// <summary>
@@ -403,11 +414,11 @@ namespace AccountingServer.DAL
                 var dQuery = query.VoucherQuery as IVoucherQueryAtom;
                 if (dQuery == null)
                     throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query));
-                sb.Append(dQuery.DetailFilter.GetJavascriptFilter());
+                sb.Append(GetJavascriptFilter(dQuery.DetailFilter));
             }
             sb.AppendLine(";");
             sb.AppendLine("    if ((");
-            sb.Append(query.VoucherQuery.GetJavascriptFilter());
+            sb.Append(GetJavascriptFilter(query.VoucherQuery));
             sb.AppendLine(")(this)) {");
             sb.AppendLine(GetTheDateJavascript(level));
             sb.AppendLine("        this.detail.forEach(function(d) {");
@@ -428,10 +439,7 @@ namespace AccountingServer.DAL
                         sb.Append("content: d.content,");
                     if (level.HasFlag(SubtotalLevel.Remark))
                         sb.Append("remark: d.remark,");
-                    if (args.GatherType == GatheringType.Count)
-                        sb.Append("}, 1);");
-                    else
-                        sb.Append("}, d.fund);");
+                    sb.Append(args.GatherType == GatheringType.Count ? "}, 1);" : "}, d.fund);");
                 }
             }
             sb.AppendLine("        });");

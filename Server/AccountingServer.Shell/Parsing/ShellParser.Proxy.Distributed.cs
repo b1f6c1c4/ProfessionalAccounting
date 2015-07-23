@@ -11,7 +11,7 @@ namespace AccountingServer.Shell.Parsing
             /// <summary>
             ///     分期过滤器
             /// </summary>
-            private class MyDistributedFilter : IDistributed
+            private sealed class MyDistributedFilter : IDistributed
             {
                 /// <inheritdoc />
                 public Guid? ID { get; set; }
