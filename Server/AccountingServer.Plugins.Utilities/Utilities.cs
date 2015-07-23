@@ -38,32 +38,6 @@ namespace AccountingServer.Plugins.Utilities
             var date = GetDate(ref par);
             par = par.TrimStart();
 
-            if (par.StartsWith("w", StringComparison.Ordinal))
-            {
-                double fund;
-                if (!double.TryParse(par.Substring(1), out fund))
-                    fund = 0.42;
-                return new Voucher
-                           {
-                               Date = date,
-                               Details = new[]
-                                             {
-                                                 new VoucherDetail
-                                                     {
-                                                         Title = 1123,
-                                                         Content = "学生卡小钱包",
-                                                         Fund = -fund
-                                                     },
-                                                 new VoucherDetail
-                                                     {
-                                                         Title = 6602,
-                                                         SubTitle = 01,
-                                                         Content = "水费",
-                                                         Fund = fund
-                                                     }
-                                             }
-                           };
-            }
             if (par.StartsWith("xy", StringComparison.Ordinal))
                 return new Voucher
                            {
@@ -239,6 +213,32 @@ namespace AccountingServer.Plugins.Utilities
                                                      }
                                              }
                 };
+            }
+            if (par.StartsWith("w", StringComparison.Ordinal))
+            {
+                double fund;
+                if (!double.TryParse(par.Substring(1), out fund))
+                    fund = 0.42;
+                return new Voucher
+                           {
+                               Date = date,
+                               Details = new[]
+                                             {
+                                                 new VoucherDetail
+                                                     {
+                                                         Title = 1123,
+                                                         Content = "学生卡小钱包",
+                                                         Fund = -fund
+                                                     },
+                                                 new VoucherDetail
+                                                     {
+                                                         Title = 6602,
+                                                         SubTitle = 01,
+                                                         Content = "水费",
+                                                         Fund = fund
+                                                     }
+                                             }
+                           };
             }
             return null;
         }
