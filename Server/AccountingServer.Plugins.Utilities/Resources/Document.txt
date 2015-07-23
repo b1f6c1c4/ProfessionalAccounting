@@ -8,3 +8,5 @@
 'xy'			洗衣
 'z' '=' Float	洗澡至
 'p' Float		打印费
+'ye' '=' Float	余额宝至
+'wy' '=' Float	无忧宝至

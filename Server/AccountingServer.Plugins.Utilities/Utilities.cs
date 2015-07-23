@@ -152,6 +152,94 @@ namespace AccountingServer.Plugins.Utilities
                                              }
                            };
             }
+            if (par.StartsWith("ye", StringComparison.Ordinal))
+            {
+                double bal2;
+                if (!double.TryParse(par.Substring(2).TrimStart(' ', '='), out bal2))
+                    return null;
+                var bal1 =
+                    Accountant.SelectVoucherDetailsGrouped(
+                                                           new GroupedQueryBase(
+                                                               filter: new VoucherDetail
+                                                               {
+                                                                   Title = 1101,
+                                                                   Content = "余额宝"
+                                                               },
+                                                               subtotal:
+                                                                   new SubtotalBase
+                                                                   {
+                                                                       GatherType = GatheringType.Zero,
+                                                                       Levels = new SubtotalLevel[] { }
+                                                                   }))
+                              .Single()
+                              .Fund;
+                var fund = Math.Round(bal2 - bal1, 8);
+                return new Voucher
+                {
+                    Date = date,
+                    Details = new[]
+                                             {
+                                                 new VoucherDetail
+                                                     {
+                                                         Title = 1101,
+                                                         SubTitle = 02,
+                                                         Content = "余额宝",
+                                                         Fund = fund
+                                                     },
+                                                 new VoucherDetail
+                                                     {
+                                                         Title = 6111,
+                                                         SubTitle = 02,
+                                                         Content = "余额宝",
+                                                         Fund = -fund
+                                                     }
+                                             }
+                };
+            }
+            if (par.StartsWith("wy", StringComparison.Ordinal))
+            {
+                double bal2;
+                if (!double.TryParse(par.Substring(2).TrimStart(' ', '='), out bal2))
+                    return null;
+                var bal1 =
+                    Accountant.SelectVoucherDetailsGrouped(
+                                                           new GroupedQueryBase(
+                                                               filter: new VoucherDetail
+                                                               {
+                                                                   Title = 1101,
+                                                                   Content = "无忧宝"
+                                                               },
+                                                               subtotal:
+                                                                   new SubtotalBase
+                                                                   {
+                                                                       GatherType = GatheringType.Zero,
+                                                                       Levels = new SubtotalLevel[] { }
+                                                                   }))
+                              .Single()
+                              .Fund;
+                var fund = Math.Round(bal2 - bal1, 8);
+                return new Voucher
+                {
+                    Date = date,
+                    Details = new[]
+                                             {
+                                                 new VoucherDetail
+                                                     {
+                                                         Title = 1101,
+                                                         SubTitle = 02,
+                                                         Content = "无忧宝",
+                                                         Fund = fund
+                                                     },
+                                                 new VoucherDetail
+                                                     {
+                                                         Title = 6111,
+                                                         SubTitle = 02,
+                                                         Content = "无忧宝",
+                                                         Fund = -fund
+                                                     }
+                                             }
+                };
+            }
             return null;
         }
 
