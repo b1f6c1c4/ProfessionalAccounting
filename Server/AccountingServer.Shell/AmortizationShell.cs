@@ -31,200 +31,275 @@ namespace AccountingServer.Shell
             var amortListContext = expr.amortList();
             if (amortListContext != null)
             {
-                var dt = amortListContext.AOAll() != null
-                             ? null
-                             : amortListContext.rangePoint() != null
-                                   ? amortListContext.rangePoint().Range.EndDate
-                                   : DateTime.Now.Date;
+                var showSchedule = amortListContext.AOList() != null;
+                var dt = !showSchedule
+                             ? amortListContext.rangePoint()?.Range.EndDate ?? DateTime.Now.Date
+                             : (DateTime?)null;
 
-                var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAmortizations(amortListContext.distributedQ())))
-                    sb.Append(ListAmort(a, dt, amortListContext.AOList() != null));
-
-                if (amortListContext.AOList() != null)
-                    return new EditableText(sb.ToString());
-                return new UnEditableText(sb.ToString());
+                return ExecuteList(amortListContext.distributedQ(), dt, showSchedule);
             }
             var amortQueryContext = expr.amortQuery();
             if (amortQueryContext != null)
-            {
-                var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAmortizations(amortQueryContext.distributedQ())))
-                    sb.Append(CSharpHelper.PresentAmort(a));
-
-                return new EditableText(sb.ToString());
-            }
+                return ExecuteQuery(amortQueryContext.distributedQ());
             var amortRegisterContext = expr.amortRegister();
             if (amortRegisterContext != null)
-            {
-                var rng = amortRegisterContext.range() != null
-                              ? amortRegisterContext.range().Range
-                              : DateFilter.Unconstrained;
-                var query = amortRegisterContext.vouchers();
-
-                var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAmortizations(amortRegisterContext.distributedQ())))
-                {
-                    foreach (var voucher in m_Accountant.RegisterVouchers(a, rng, query))
-                        sb.Append(CSharpHelper.PresentVoucher(voucher));
-
-                    m_Accountant.Upsert(a);
-                }
-                if (sb.Length > 0)
-                    return new EditableText(sb.ToString());
-                return new Suceed();
-            }
+                return ExecuteRegister(
+                                       amortRegisterContext.distributedQ(),
+                                       amortRegisterContext.range().TheRange(),
+                                       amortRegisterContext.vouchers());
             var amortUnregisterContext = expr.amortUnregister();
             if (amortUnregisterContext != null)
-            {
-                var rng = amortUnregisterContext.range() != null
-                              ? amortUnregisterContext.range().Range
-                              : DateFilter.Unconstrained;
-                var query = amortRegisterContext.vouchers();
-
-                var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAmortizations(amortUnregisterContext.distributedQ())))
-                {
-                    foreach (var item in a.Schedule.Where(item => item.Date.Within(rng)))
-                    {
-                        if (query != null)
-                        {
-                            if (item.VoucherID == null)
-                                continue;
-
-                            var voucher = m_Accountant.SelectVoucher(item.VoucherID);
-                            if (voucher != null)
-                                if (!MatchHelper.IsMatch(query, voucher.IsMatch))
-                                    continue;
-                        }
-                        item.VoucherID = null;
-                    }
-
-                    sb.Append(ListAmort(a));
-                    m_Accountant.Upsert(a);
-                }
-                return new EditableText(sb.ToString());
-            }
+                return ExecuteUnregister(
+                                         amortUnregisterContext.distributedQ(),
+                                         amortUnregisterContext.range().TheRange(),
+                                         amortUnregisterContext.vouchers());
             var amortReamoContext = expr.amortReamo();
             if (amortReamoContext != null)
-            {
-                var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAmortizations(amortReamoContext.distributedQ())))
-                {
-                    Accountant.Amortize(a);
-                    sb.Append(CSharpHelper.PresentAmort(a));
-                    m_Accountant.Upsert(a);
-                }
-                return new EditableText(sb.ToString());
-            }
+                return ExecuteReamo(amortReamoContext.distributedQ());
             var amortResetSoftContext = expr.amortResetSoft();
             if (amortResetSoftContext != null)
-            {
-                var rng = amortResetSoftContext.range() != null
-                              ? amortResetSoftContext.range().Range
-                              : DateFilter.Unconstrained;
+                return ExecuteResetSoft(
+                                        amortResetSoftContext.distributedQ(),
+                                        amortResetSoftContext.range().TheRange());
+            var amortResetMixedContext = expr.amortResetMixed();
+            if (amortResetMixedContext != null)
+                return ExcuteResetMixed(
+                                        amortResetMixedContext.distributedQ(),
+                                        amortResetMixedContext.range().TheRange());
+            var amortApplyContext = expr.amortApply();
+            if (amortApplyContext != null)
+                return ExecuteApply(
+                                    amortApplyContext.distributedQ(),
+                                    amortApplyContext.range().TheRange(),
+                                    amortApplyContext.AOCollapse() != null);
+            var amortCheckContext = expr.amortCheck();
+            if (amortCheckContext != null)
+                return ExecuteCheck(amortCheckContext.distributedQ(), new DateFilter(null, DateTime.Now.Date));
 
-                var cnt = 0L;
-                foreach (var a in m_Accountant.SelectAmortizations(amortResetSoftContext.distributedQ()))
+            throw new InvalidOperationException("摊销表达式无效");
+        }
+
+        /// <summary>
+        ///     执行列表表达式
+        /// </summary>
+        /// <param name="distQuery">分期检索式</param>
+        /// <param name="dt">计算账面价值的时间</param>
+        /// <param name="showSchedule">是否显示折旧计算表</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult ExecuteList(IQueryCompunded<IDistributedQueryAtom> distQuery, DateTime? dt,
+                                         bool showSchedule)
+        {
+            var sb = new StringBuilder();
+            foreach (var a in Sort(m_Accountant.SelectAmortizations(distQuery)))
+                sb.Append(ListAmort(a, dt, showSchedule));
+
+            if (showSchedule)
+                return new EditableText(sb.ToString());
+            return new UnEditableText(sb.ToString());
+        }
+
+        /// <summary>
+        ///     执行查询表达式
+        /// </summary>
+        /// <param name="distQuery">分期检索式</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult ExecuteQuery(IQueryCompunded<IDistributedQueryAtom> distQuery)
+        {
+            var sb = new StringBuilder();
+            foreach (var a in Sort(m_Accountant.SelectAmortizations(distQuery)))
+                sb.Append(CSharpHelper.PresentAmort(a));
+
+            return new EditableText(sb.ToString());
+        }
+
+        /// <summary>
+        ///     执行注册表达式
+        /// </summary>
+        /// <param name="distQuery">分期检索式</param>
+        /// <param name="rng">日期过滤器</param>
+        /// <param name="query">记账凭证检索式</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult ExecuteRegister(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
+                                             IQueryCompunded<IVoucherQueryAtom> query)
+        {
+            var sb = new StringBuilder();
+            foreach (var a in Sort(m_Accountant.SelectAmortizations(distQuery)))
+            {
+                foreach (var voucher in m_Accountant.RegisterVouchers(a, rng, query))
+                    sb.Append(CSharpHelper.PresentVoucher(voucher));
+
+                m_Accountant.Upsert(a);
+            }
+            if (sb.Length > 0)
+                return new EditableText(sb.ToString());
+            return new Suceed();
+        }
+
+        /// <summary>
+        ///     执行解除注册表达式
+        /// </summary>
+        /// <param name="distQuery">分期检索式</param>
+        /// <param name="rng">日期过滤器</param>
+        /// <param name="query">记账凭证检索式</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult ExecuteUnregister(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
+                                               IQueryCompunded<IVoucherQueryAtom> query)
+        {
+            var sb = new StringBuilder();
+            foreach (var a in Sort(m_Accountant.SelectAmortizations(distQuery)))
+            {
+                foreach (var item in a.Schedule.Where(item => item.Date.Within(rng)))
                 {
-                    if (a.Schedule == null)
-                        continue;
-                    var flag = false;
-                    foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
-                                          .Where(item => item.VoucherID != null)
-                                          .Where(item => m_Accountant.SelectVoucher(item.VoucherID) == null))
+                    if (query != null)
+                    {
+                        if (item.VoucherID == null)
+                            continue;
+
+                        var voucher = m_Accountant.SelectVoucher(item.VoucherID);
+                        if (voucher != null)
+                            if (!MatchHelper.IsMatch(query, voucher.IsMatch))
+                                continue;
+                    }
+                    item.VoucherID = null;
+                }
+
+                sb.Append(ListAmort(a));
+                m_Accountant.Upsert(a);
+            }
+            return new EditableText(sb.ToString());
+        }
+
+        /// <summary>
+        ///     执行重新计算表达式
+        /// </summary>
+        /// <param name="distQuery">分期检索式</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult ExecuteReamo(IQueryCompunded<IDistributedQueryAtom> distQuery)
+        {
+            var sb = new StringBuilder();
+            foreach (var a in Sort(m_Accountant.SelectAmortizations(distQuery)))
+            {
+                Accountant.Amortize(a);
+                sb.Append(CSharpHelper.PresentAmort(a));
+                m_Accountant.Upsert(a);
+            }
+            return new EditableText(sb.ToString());
+        }
+
+        /// <summary>
+        ///     执行软重置表达式
+        /// </summary>
+        /// <param name="distQuery">分期检索式</param>
+        /// <param name="rng">日期过滤器</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult ExecuteResetSoft(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng)
+        {
+            var cnt = 0L;
+            foreach (var a in m_Accountant.SelectAmortizations(distQuery))
+            {
+                if (a.Schedule == null)
+                    continue;
+                var flag = false;
+                foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
+                                      .Where(item => item.VoucherID != null)
+                                      .Where(item => m_Accountant.SelectVoucher(item.VoucherID) == null))
+                {
+                    item.VoucherID = null;
+                    cnt++;
+                    flag = true;
+                }
+                if (flag)
+                    m_Accountant.Upsert(a);
+            }
+            return new NumberAffected(cnt);
+        }
+
+        /// <summary>
+        ///     执行混合重置表达式
+        /// </summary>
+        /// <param name="distQuery">分期检索式</param>
+        /// <param name="rng">日期过滤器</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult ExcuteResetMixed(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng)
+        {
+            var cnt = 0L;
+            foreach (var a in m_Accountant.SelectAmortizations(distQuery))
+            {
+                if (a.Schedule == null)
+                    continue;
+                var flag = false;
+                foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
+                                      .Where(item => item.VoucherID != null))
+                {
+                    var voucher = m_Accountant.SelectVoucher(item.VoucherID);
+                    if (voucher == null)
                     {
                         item.VoucherID = null;
                         cnt++;
                         flag = true;
                     }
-                    if (flag)
-                        m_Accountant.Upsert(a);
-                }
-                return new NumberAffected(cnt);
-            }
-            var amortResetMixedContext = expr.amortResetMixed();
-            if (amortResetMixedContext != null)
-            {
-                var rng = amortResetMixedContext.range() != null
-                              ? amortResetMixedContext.range().Range
-                              : DateFilter.Unconstrained;
-
-                var cnt = 0L;
-                foreach (var a in m_Accountant.SelectAmortizations(amortResetMixedContext.distributedQ()))
-                {
-                    if (a.Schedule == null)
-                        continue;
-                    var flag = false;
-                    foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
-                                          .Where(item => item.VoucherID != null))
+                    else if (m_Accountant.DeleteVoucher(voucher.ID))
                     {
-                        var voucher = m_Accountant.SelectVoucher(item.VoucherID);
-                        if (voucher == null)
-                        {
-                            item.VoucherID = null;
-                            cnt++;
-                            flag = true;
-                        }
-                        else if (m_Accountant.DeleteVoucher(voucher.ID))
-                        {
-                            item.VoucherID = null;
-                            cnt++;
-                            flag = true;
-                        }
+                        item.VoucherID = null;
+                        cnt++;
+                        flag = true;
                     }
-                    if (flag)
-                        m_Accountant.Upsert(a);
                 }
-                return new NumberAffected(cnt);
-            }
-            var amortApplyContext = expr.amortApply();
-            if (amortApplyContext != null)
-            {
-                var isCollapsed = amortApplyContext.AOCollapse() != null;
-
-                var rng = amortApplyContext.range() != null
-                              ? amortApplyContext.range().Range
-                              : DateFilter.Unconstrained;
-
-                var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAmortizations(amortApplyContext.distributedQ())))
-                {
-                    foreach (var item in m_Accountant.Update(a, rng, isCollapsed))
-                        sb.AppendLine(ListAmortItem(item));
-
+                if (flag)
                     m_Accountant.Upsert(a);
-                }
-                if (sb.Length > 0)
-                    return new EditableText(sb.ToString());
-                return new Suceed();
             }
-            var amortCheckContext = expr.amortCheck();
-            if (amortCheckContext != null)
+            return new NumberAffected(cnt);
+        }
+
+        /// <summary>
+        ///     执行应用表达式
+        /// </summary>
+        /// <param name="distQuery">分期检索式</param>
+        /// <param name="rng">日期过滤器</param>
+        /// <param name="isCollapsed">是否压缩</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult ExecuteApply(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
+                                          bool isCollapsed)
+        {
+            var sb = new StringBuilder();
+            foreach (var a in Sort(m_Accountant.SelectAmortizations(distQuery)))
             {
-                var rng = new DateFilter(null, DateTime.Now.Date);
+                foreach (var item in m_Accountant.Update(a, rng, isCollapsed))
+                    sb.AppendLine(ListAmortItem(item));
 
-                var sb = new StringBuilder();
-                foreach (var a in Sort(m_Accountant.SelectAmortizations(amortCheckContext.distributedQ())))
-                {
-                    var sbi = new StringBuilder();
-                    foreach (var item in m_Accountant.Update(a, rng, false, true))
-                        sbi.AppendLine(ListAmortItem(item));
-
-                    if (sbi.Length != 0)
-                    {
-                        sb.AppendLine(ListAmort(a, null, false));
-                        sb.AppendLine(sbi.ToString());
-                    }
-
-                    m_Accountant.Upsert(a);
-                }
-                if (sb.Length > 0)
-                    return new EditableText(sb.ToString());
-                return new Suceed();
+                m_Accountant.Upsert(a);
             }
+            if (sb.Length > 0)
+                return new EditableText(sb.ToString());
+            return new Suceed();
+        }
 
-            throw new InvalidOperationException("摊销表达式无效");
+        /// <summary>
+        ///     执行检查表达式
+        /// </summary>
+        /// <param name="distQuery">分期检索式</param>
+        /// <param name="rng">日期过滤器</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult ExecuteCheck(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng)
+        {
+            var sb = new StringBuilder();
+            foreach (var a in Sort(m_Accountant.SelectAmortizations(distQuery)))
+            {
+                var sbi = new StringBuilder();
+                foreach (var item in m_Accountant.Update(a, rng, false, true))
+                    sbi.AppendLine(ListAmortItem(item));
+
+                if (sbi.Length != 0)
+                {
+                    sb.AppendLine(ListAmort(a, null, false));
+                    sb.AppendLine(sbi.ToString());
+                }
+
+                m_Accountant.Upsert(a);
+            }
+            if (sb.Length > 0)
+                return new EditableText(sb.ToString());
+            return new Suceed();
         }
 
         /// <summary>
@@ -267,14 +342,15 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="amortItem">摊销计算表条目</param>
         /// <returns>格式化的信息</returns>
-        private static string ListAmortItem(AmortItem amortItem) => string.Format(
-                                                                                  "   {0:yyyMMdd} AMO:{1} ={3} ({2})",
-                                                                                  amortItem.Date,
-                                                                                  amortItem.Amount.AsCurrency()
-                                                                                           .CPadLeft(13),
-                                                                                  amortItem.VoucherID,
-                                                                                  amortItem.Value.AsCurrency()
-                                                                                           .CPadLeft(13));
+        private static string ListAmortItem(AmortItem amortItem)
+            => string.Format(
+                             "   {0:yyyMMdd} AMO:{1} ={3} ({2})",
+                             amortItem.Date,
+                             amortItem.Amount.AsCurrency()
+                                      .CPadLeft(13),
+                             amortItem.VoucherID,
+                             amortItem.Value.AsCurrency()
+                                      .CPadLeft(13));
 
         /// <summary>
         ///     对摊销进行排序
@@ -282,8 +358,6 @@ namespace AccountingServer.Shell
         /// <param name="enumerable">摊销</param>
         /// <returns>排序后的摊销</returns>
         private static IEnumerable<Amortization> Sort(IEnumerable<Amortization> enumerable)
-        {
-            return enumerable.OrderBy(o => o.Date, new DateComparer()).ThenBy(o => o.Name).ThenBy(o => o.ID);
-        }
+            => enumerable.OrderBy(o => o.Date, new DateComparer()).ThenBy(o => o.Name).ThenBy(o => o.ID);
     }
 }
