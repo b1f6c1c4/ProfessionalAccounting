@@ -178,7 +178,7 @@ namespace AccountingServer.Plugins.Interest
                                 .Sum();
                     if ((-value + interestIntegral).IsNonNegative())
                     {
-                        RegularizeVoucherDetail(content, rmk, voucher, 0, interestIntegral);
+                        RegularizeVoucherDetail(content, rmk, voucher, 0, value);
                         interestIntegral -= value;
                     }
                     else
