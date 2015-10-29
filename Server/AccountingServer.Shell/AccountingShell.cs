@@ -197,7 +197,7 @@ namespace AccountingServer.Shell
                 m_Accountant.Launch();
                 m_Accountant.Connect();
             }
-            return new Suceed();
+            return new Succeed();
         }
 
         /// <summary>
@@ -207,7 +207,7 @@ namespace AccountingServer.Shell
         private IQueryResult ConnectServer()
         {
             m_Accountant.Connect();
-            return new Suceed();
+            return new Succeed();
         }
 
         /// <summary>
@@ -217,7 +217,7 @@ namespace AccountingServer.Shell
         private IQueryResult LaunchServer()
         {
             m_Accountant.Launch();
-            return new Suceed();
+            return new Succeed();
         }
 
         /// <summary>
@@ -227,7 +227,7 @@ namespace AccountingServer.Shell
         private IQueryResult Backup()
         {
             m_Accountant.Backup();
-            return new Suceed();
+            return new Succeed();
         }
 
         #endregion

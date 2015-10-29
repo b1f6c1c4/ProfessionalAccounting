@@ -132,7 +132,7 @@ namespace AccountingServer.Shell
             }
             if (sb.Length > 0)
                 return new EditableText(sb.ToString());
-            return new Suceed();
+            return new Succeed();
         }
 
         /// <summary>
@@ -271,7 +271,7 @@ namespace AccountingServer.Shell
             }
             if (sb.Length > 0)
                 return new EditableText(sb.ToString());
-            return new Suceed();
+            return new Succeed();
         }
 
         /// <summary>
@@ -299,7 +299,7 @@ namespace AccountingServer.Shell
             }
             if (sb.Length > 0)
                 return new EditableText(sb.ToString());
-            return new Suceed();
+            return new Succeed();
         }
 
         /// <summary>
