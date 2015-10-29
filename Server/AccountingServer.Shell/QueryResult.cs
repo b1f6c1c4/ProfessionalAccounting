@@ -19,7 +19,7 @@ namespace AccountingServer.Shell
     /// <summary>
     ///     成功
     /// </summary>
-    public class Suceed : IQueryResult
+    public class Succeed : IQueryResult
     {
         public override string ToString() => "OK";
 

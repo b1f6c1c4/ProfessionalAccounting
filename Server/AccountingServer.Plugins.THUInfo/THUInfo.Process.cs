@@ -77,11 +77,11 @@ namespace AccountingServer.Plugins.THUInfo
                             sb.AppendLine(CSharpHelper.PresentVoucher(v));
                     }
                     if (sb.Length == 0)
-                        return new Suceed();
+                        return new Succeed();
                     return new EditableText(sb.ToString());
                 }
                 if (!tooFew.Any())
-                    return new Suceed();
+                    return new Succeed();
 
                 List<TransactionRecord> fail;
                 foreach (var voucher in AutoGenerate(tooFew.SelectMany(p => p.Records), pars, out fail))
@@ -95,7 +95,7 @@ namespace AccountingServer.Plugins.THUInfo
                         sb.AppendLine(r.ToString());
                     return new EditableText(sb.ToString());
                 }
-                return new Suceed();
+                return new Succeed();
             }
         }
 

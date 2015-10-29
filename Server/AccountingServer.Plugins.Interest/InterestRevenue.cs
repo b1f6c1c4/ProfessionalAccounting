@@ -97,7 +97,7 @@ namespace AccountingServer.Plugins.Interest
                            null,
                            DateTime.Now.Date);
             }
-            return new Suceed();
+            return new Succeed();
         }
 
         /// <summary>

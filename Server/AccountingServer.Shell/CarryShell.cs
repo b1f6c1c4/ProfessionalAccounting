@@ -33,7 +33,7 @@ namespace AccountingServer.Shell
                 if (rng.NullOnly)
                 {
                     m_Accountant.Carry(null);
-                    return new Suceed();
+                    return new Succeed();
                 }
 
                 if (!rng.StartDate.HasValue ||
@@ -51,7 +51,7 @@ namespace AccountingServer.Shell
                 if (rng.Nullable)
                     m_Accountant.Carry(null);
 
-                return new Suceed();
+                return new Succeed();
             }
             if (expr.carryMonthResetHard() != null)
             {
@@ -108,7 +108,7 @@ namespace AccountingServer.Shell
                 if (rng.NullOnly)
                 {
                     m_Accountant.CarryYear(null);
-                    return new Suceed();
+                    return new Succeed();
                 }
 
                 if (!rng.EndDate.HasValue)
@@ -122,7 +122,7 @@ namespace AccountingServer.Shell
                     dt = dt.AddYears(1);
                 }
 
-                return new Suceed();
+                return new Succeed();
             }
             if (expr.carryYearResetHard() != null)
             {
