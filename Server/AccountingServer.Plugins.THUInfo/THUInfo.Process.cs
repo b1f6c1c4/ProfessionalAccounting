@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using System.Xml;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
@@ -20,14 +22,102 @@ namespace AccountingServer.Plugins.THUInfo
         /// </summary>
         private const string IgnoranceMark = "reconciliation";
 
+        private static readonly IQueryCompunded<IDetailQueryAtom> DetailQuery =
+            new DetailQueryAryBase(
+                OperatorType.Substract,
+                new IQueryCompunded<IDetailQueryAtom>[]
+                    {
+                        new DetailQueryAtomBase(new VoucherDetail { Title = 1012, SubTitle = 05 }),
+                        new DetailQueryAryBase(
+                            OperatorType.Union,
+                            new IQueryCompunded<IDetailQueryAtom>[]
+                                {
+                                    new DetailQueryAtomBase(new VoucherDetail { Remark = "" }),
+                                    new DetailQueryAtomBase(new VoucherDetail { Remark = IgnoranceMark })
+                                }
+                            )
+                    });
+
+        private static readonly List<Tuple<string, List<Tuple<int, int>>>> EndPointTemplates;
+
+        static THUInfo()
+        {
+            try
+            {
+                XmlDocument doc;
+                using (
+                    var stream = Assembly.GetExecutingAssembly()
+                                         .GetManifestResourceStream(
+                                                                    "AccountingServer.Plugins.THUInfo.Resources.EndPoint.xml")
+                    )
+                {
+                    if (stream == null)
+                        throw new Exception();
+                    doc = new XmlDocument();
+                    doc.Load(stream);
+                }
+                EndPointTemplates = new List<Tuple<string, List<Tuple<int, int>>>>();
+                // ReSharper disable once PossibleNullReferenceException
+                foreach (XmlElement element in doc.DocumentElement.ChildNodes)
+                    EndPointTemplates.Add(
+                                          new Tuple<string, List<Tuple<int, int>>>(
+                                              element.GetElementsByTagName("Name")[0].InnerText,
+                                              element.GetElementsByTagName("Range")
+                                                     .OfType<XmlElement>()
+                                                     .Select(
+                                                             r =>
+                                                             new Tuple<int, int>(
+                                                                 Convert.ToInt32(
+                                                                                 r.GetElementsByTagName("Start")[0]
+                                                                                     .InnerText),
+                                                                 Convert.ToInt32(
+                                                                                 r.GetElementsByTagName("End")[0]
+                                                                                     .InnerText)))
+                                                     .ToList()));
+            }
+            catch (Exception)
+            {
+                EndPointTemplates = null;
+            }
+        }
+
         public THUInfo(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
         public override IQueryResult Execute(params string[] pars)
         {
+            if (pars.Length == 1 &&
+                pars[0] == "ep")
+            {
+                var sb = new StringBuilder();
+                var voucherQuery = new VoucherQueryAtomBase { DetailFilter = DetailQuery };
+                var bin = new HashSet<int>();
+                foreach (var d in Accountant.SelectVouchers(voucherQuery)
+                                            .SelectMany(
+                                                        v => v.Details.Where(d => d.IsMatch(DetailQuery))
+                                                              .Select(d => new VDetail { Detail = d, Voucher = v })))
+                {
+                    var id = Convert.ToInt32(d.Detail.Remark);
+                    if (!bin.Add(id))
+                        continue;
+                    var record = m_Data.SingleOrDefault(r => r.Index == id);
+                    if (record == null)
+                        continue;
+                    // ReSharper disable once PossibleInvalidOperationException
+                    if (!(Math.Abs(d.Detail.Fund.Value) - record.Fund).IsZero())
+                        continue;
+                    var tmp = d.Voucher.Details.Where(dd => dd.Title == 6602).ToArray();
+                    var content = tmp.Length == 1 ? tmp.First().Content : string.Empty;
+                    sb.AppendLine($"{d.Voucher.ID}\t{d.Detail.Remark}\t{content}\t{record.Endpoint}");
+                }
+
+                return new UnEditableText(sb.ToString());
+            }
+
             if (pars.Length >= 3)
                 if (string.IsNullOrEmpty(pars[0]))
                     FetchData(pars[1], pars[2]);
+
             lock (m_Lock)
             {
                 if (m_Data == null)
@@ -228,6 +318,38 @@ namespace AccountingServer.Plugins.THUInfo
                                                                  }
                                                          }
                                        });
+                        break;
+                    case "消费":
+                        try
+                        {
+                            var ep = Convert.ToInt32(record.Endpoint);
+                            var res =
+                                EndPointTemplates.SingleOrDefault(
+                                                                  t =>
+                                                                  t.Item2.Any(iv => iv.Item1 <= ep && iv.Item2 >= ep));
+                            if (res != null)
+                                result.Add(
+                                           new Voucher
+                                               {
+                                                   Date = recordsGroup.Key.Date,
+                                                   Details = new List<VoucherDetail>
+                                                                 {
+                                                                     item(-1),
+                                                                     new VoucherDetail
+                                                                         {
+                                                                             Title = 6602,
+                                                                             SubTitle = 03,
+                                                                             Content = res.Item1,
+                                                                             Fund = record.Fund
+                                                                         }
+                                                                 }
+                                               });
+                        }
+                        catch (Exception)
+                        {
+                            // ignored
+                        }
+                        specialRecords.Add(record);
                         break;
                     default:
                         specialRecords.Add(record);
@@ -438,7 +560,7 @@ namespace AccountingServer.Plugins.THUInfo
         /// <summary>
         ///     对账问题
         /// </summary>
-        private class Problem
+        private sealed class Problem
         {
             /// <summary>
             ///     消费记录组
@@ -469,27 +591,12 @@ namespace AccountingServer.Plugins.THUInfo
         {
             var data = new List<TransactionRecord>(m_Data);
 
-            var detailQuery =
-                new DetailQueryAryBase(
-                    OperatorType.Substract,
-                    new IQueryCompunded<IDetailQueryAtom>[]
-                        {
-                            new DetailQueryAtomBase(new VoucherDetail { Title = 1012, SubTitle = 05 }),
-                            new DetailQueryAryBase(
-                                OperatorType.Union,
-                                new IQueryCompunded<IDetailQueryAtom>[]
-                                    {
-                                        new DetailQueryAtomBase(new VoucherDetail { Remark = "" }),
-                                        new DetailQueryAtomBase(new VoucherDetail { Remark = IgnoranceMark })
-                                    }
-                                )
-                        });
-            var voucherQuery = new VoucherQueryAtomBase { DetailFilter = detailQuery };
+            var voucherQuery = new VoucherQueryAtomBase { DetailFilter = DetailQuery };
             var bin = new HashSet<int>();
             var binConflict = new HashSet<int>();
             foreach (var d in Accountant.SelectVouchers(voucherQuery)
                                         .SelectMany(
-                                                    v => v.Details.Where(d => d.IsMatch(detailQuery))
+                                                    v => v.Details.Where(d => d.IsMatch(DetailQuery))
                                                           .Select(d => new VDetail { Detail = d, Voucher = v })))
             {
                 var id = Convert.ToInt32(d.Detail.Remark);
