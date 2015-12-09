@@ -46,9 +46,9 @@ namespace AccountingServer.Plugins.THUInfo
             {
                 XmlDocument doc;
                 using (
-                    var stream = Assembly.GetExecutingAssembly()
-                                         .GetManifestResourceStream(
-                                                                    "AccountingServer.Plugins.THUInfo.Resources.EndPoint.xml")
+                    var stream =
+                        Assembly.GetExecutingAssembly()
+                                .GetManifestResourceStream("AccountingServer.Plugins.THUInfo.Resources.EndPoint.xml")
                     )
                 {
                     if (stream == null)
