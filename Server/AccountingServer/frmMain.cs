@@ -106,13 +106,13 @@ namespace AccountingServer
                                     break;
                             }
                         m_Abbrs.Add(
-                                        new Tuple<string, bool, VoucherDetail>(
-                                            str,
-                                            edit,
-                                            vd));
+                                    new Tuple<string, bool, VoucherDetail>(
+                                        str,
+                                        edit,
+                                        vd));
                     }
-                    var col=new AutoCompleteStringCollection();
-                    col.AddRange(m_Abbrs.Select(tpl=>tpl.Item1).ToArray());
+                    var col = new AutoCompleteStringCollection();
+                    col.AddRange(m_Abbrs.Select(tpl => tpl.Item1).ToArray());
                     textBoxCommand.AutoCompleteSource = AutoCompleteSource.CustomSource;
                     textBoxCommand.AutoCompleteCustomSource = col;
                 }
@@ -448,7 +448,8 @@ namespace AccountingServer
                     textBoxResult.SelectionStart = textBoxResult.TextLength;
                     textBoxResult.ScrollToCaret();
                 }
-                if (keyData == Keys.Enter && !m_FastEditing)
+                if (keyData == Keys.Enter &&
+                    !m_FastEditing)
                 {
                     if (textBoxCommand.Text.Length == 0)
                     {
@@ -473,30 +474,29 @@ namespace AccountingServer
                     if (ExecuteCommand(false))
                         return true;
                 }
-                if (keyData == (Keys.Enter | Keys.Shift) && !m_FastEditing)
+                if (keyData == (Keys.Enter | Keys.Shift) &&
+                    !m_FastEditing)
                     if (ExecuteCommand(true))
                         return true;
                 if (keyData == Keys.Enter && m_FastEditing)
                 {
                     if (textBoxCommand.Text.Length == 0)
-                    {
                         if (PerformUpsert())
                         {
                             ExitFastEditing();
                             return true;
                         }
-                    }
 
                     var sc =
                         m_Abbrs.SingleOrDefault(
-                                                    tpl =>
-                                                    tpl.Item1.Equals(
-                                                                     textBoxCommand.Text,
-                                                                     StringComparison.InvariantCultureIgnoreCase));
+                                                tpl =>
+                                                tpl.Item1.Equals(
+                                                                 textBoxCommand.Text,
+                                                                 StringComparison.InvariantCultureIgnoreCase));
                     if (sc == null)
                         return false;
                     var s = CSharpHelper.PresentVoucherDetail(sc.Item3);
-                    var idC = sc.Item2 ? s.IndexOf("Content = \"\"", StringComparison.InvariantCulture) +11: -1;
+                    var idC = sc.Item2 ? s.IndexOf("Content = \"\"", StringComparison.InvariantCulture) + 11 : -1;
                     var idF = s.IndexOf("Fund = null", StringComparison.InvariantCulture) + 7;
                     textBoxResult.Focus();
                     textBoxResult.SelectedText = s;
