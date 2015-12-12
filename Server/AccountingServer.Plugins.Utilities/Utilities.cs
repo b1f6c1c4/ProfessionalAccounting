@@ -102,7 +102,7 @@ namespace AccountingServer.Plugins.Utilities
                                              }
                            };
             }
-            if (par.StartsWith("p", StringComparison.Ordinal))
+            if (par.StartsWith("sm", StringComparison.Ordinal))
             {
                 double fund;
                 if (!double.TryParse(par.Substring(1), out fund))
@@ -114,12 +114,14 @@ namespace AccountingServer.Plugins.Utilities
                                              {
                                                  new VoucherDetail
                                                      {
-                                                         Title = 1001,
+                                                         Title = 1123,
+                                                         Content = "审美",
                                                          Fund = -fund
                                                      },
                                                  new VoucherDetail
                                                      {
-                                                         Title = 6401,
+                                                         Title = 6602,
+                                                         SubTitle = 06,
                                                          Content = "打印费",
                                                          Fund = fund
                                                      }
@@ -148,27 +150,29 @@ namespace AccountingServer.Plugins.Utilities
                               .Single()
                               .Fund;
                 var fund = Math.Round(bal2 - bal1, 8);
-                return new Voucher
-                           {
-                               Date = date,
-                               Details = new[]
-                                             {
-                                                 new VoucherDetail
-                                                     {
-                                                         Title = 1101,
-                                                         SubTitle = 02,
-                                                         Content = "余额宝",
-                                                         Fund = fund
-                                                     },
-                                                 new VoucherDetail
-                                                     {
-                                                         Title = 6111,
-                                                         SubTitle = 02,
-                                                         Content = "余额宝",
-                                                         Fund = -fund
-                                                     }
-                                             }
-                           };
+                return fund.IsZero()
+                           ? null
+                           : new Voucher
+                                 {
+                                     Date = date,
+                                     Details = new[]
+                                                   {
+                                                       new VoucherDetail
+                                                           {
+                                                               Title = 1101,
+                                                               SubTitle = 02,
+                                                               Content = "余额宝",
+                                                               Fund = fund
+                                                           },
+                                                       new VoucherDetail
+                                                           {
+                                                               Title = 6111,
+                                                               SubTitle = 02,
+                                                               Content = "余额宝",
+                                                               Fund = -fund
+                                                           }
+                                                   }
+                                 };
             }
             if (par.StartsWith("wy", StringComparison.Ordinal))
             {
@@ -179,9 +183,54 @@ namespace AccountingServer.Plugins.Utilities
                     Accountant.SelectVoucherDetailsGrouped(
                                                            new GroupedQueryBase(
                                                                filter: new VoucherDetail
+                                                               {
+                                                                   Title = 1101,
+                                                                   Content = "无忧宝"
+                                                               },
+                                                               subtotal:
+                                                                   new SubtotalBase
+                                                                   {
+                                                                       GatherType = GatheringType.Zero,
+                                                                       Levels = new SubtotalLevel[] { }
+                                                                   }))
+                              .Single()
+                              .Fund;
+                var fund = Math.Round(bal2 - bal1, 8);
+                return fund.IsZero()
+                           ? null
+                           : new Voucher
+                           {
+                               Date = date,
+                               Details = new[]
+                                                   {
+                                                       new VoucherDetail
+                                                           {
+                                                               Title = 1101,
+                                                               SubTitle = 02,
+                                                               Content = "无忧宝",
+                                                               Fund = fund
+                                                           },
+                                                       new VoucherDetail
+                                                           {
+                                                               Title = 6111,
+                                                               SubTitle = 02,
+                                                               Content = "无忧宝",
+                                                               Fund = -fund
+                                                           }
+                                                   }
+                           };
+            }
+            if (par.StartsWith("iv", StringComparison.Ordinal))
+            {
+                double bal2;
+                if (!double.TryParse(par.Substring(2).TrimStart(' ', '='), out bal2))
+                    return null;
+                var bal1 =
+                    Accountant.SelectVoucherDetailsGrouped(
+                                                           new GroupedQueryBase(
+                                                               filter: new VoucherDetail
                                                                            {
-                                                                               Title = 1101,
-                                                                               Content = "无忧宝"
+                                                                               Title = 1001
                                                                            },
                                                                subtotal:
                                                                    new SubtotalBase
@@ -192,27 +241,27 @@ namespace AccountingServer.Plugins.Utilities
                               .Single()
                               .Fund;
                 var fund = Math.Round(bal2 - bal1, 8);
-                return new Voucher
-                           {
-                               Date = date,
-                               Details = new[]
-                                             {
-                                                 new VoucherDetail
-                                                     {
-                                                         Title = 1101,
-                                                         SubTitle = 02,
-                                                         Content = "无忧宝",
-                                                         Fund = fund
-                                                     },
-                                                 new VoucherDetail
-                                                     {
-                                                         Title = 6111,
-                                                         SubTitle = 02,
-                                                         Content = "无忧宝",
-                                                         Fund = -fund
-                                                     }
-                                             }
-                           };
+                return fund.IsZero()
+                           ? null
+                           : new Voucher
+                                 {
+                                     Date = date,
+                                     Details = new[]
+                                                   {
+                                                       new VoucherDetail
+                                                           {
+                                                               Title = 1001,
+                                                               Fund = fund
+                                                           },
+                                                       new VoucherDetail
+                                                           {
+                                                               Title = 6711,
+                                                               SubTitle = 10,
+                                                               Content = fund < 0 ? "盘亏" : "盘盈",
+                                                               Fund = -fund
+                                                           }
+                                                   }
+                                 };
             }
             if (par.StartsWith("w", StringComparison.Ordinal))
             {
