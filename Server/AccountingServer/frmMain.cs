@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 using AccountingServer.BLL;
+using AccountingServer.Entities;
 using AccountingServer.Plugins.Interest;
 using AccountingServer.Plugins.THUInfo;
 using AccountingServer.Plugins.Utilities;
@@ -27,9 +32,24 @@ namespace AccountingServer
         private readonly AccountingShell m_Shell;
 
         /// <summary>
-        ///     当前文本是否可编辑
+        ///     快捷编辑缩写
         /// </summary>
-        private bool m_Editable;
+        private readonly List<Tuple<string, bool, VoucherDetail>> m_Abbrs;
+
+        /// <summary>
+        ///     快捷编辑是否启用
+        /// </summary>
+        private bool m_FastEditing;
+
+        /// <summary>
+        ///     快捷编辑下一个细目偏移
+        /// </summary>
+        private int m_FastInsertLocationDelta;
+
+        /// <summary>
+        ///     快捷编辑下一个字段偏移
+        /// </summary>
+        private int m_FastNextLocationDelta;
 
         [DllImport("user32.dll")]
         private static extern bool SetProcessDPIAware();
@@ -48,6 +68,60 @@ namespace AccountingServer
 
             var thu = new THUInfo(m_Accountant);
             Task.Run(() => thu.FetchData(@"2014010914", @""));
+
+            try
+            {
+                using (
+                    var stream = Assembly.GetExecutingAssembly()
+                                         .GetManifestResourceStream("AccountingServer.Resources.Abbr.xml"))
+                {
+                    if (stream == null)
+                        throw new Exception();
+                    var xmlDoc = new XmlDocument();
+                    xmlDoc.Load(stream);
+
+                    m_Abbrs = new List<Tuple<string, bool, VoucherDetail>>();
+                    // ReSharper disable once PossibleNullReferenceException
+                    foreach (XmlElement sc in xmlDoc.DocumentElement.ChildNodes)
+                    {
+                        var str = sc.Attributes["string"].Value;
+                        var edit = sc.HasAttribute("edit");
+                        var vd = new VoucherDetail();
+                        if (edit)
+                            vd.Content = string.Empty;
+                        foreach (XmlElement ele in sc.ChildNodes)
+                            switch (ele.LocalName)
+                            {
+                                case "Title":
+                                    vd.Title = Convert.ToInt32(ele.InnerText);
+                                    break;
+                                case "SubTitle":
+                                    vd.SubTitle = Convert.ToInt32(ele.InnerText);
+                                    break;
+                                case "Content":
+                                    vd.Content = ele.InnerText;
+                                    break;
+                                case "Remark":
+                                    vd.Remark = ele.InnerText;
+                                    break;
+                            }
+                        m_Abbrs.Add(
+                                        new Tuple<string, bool, VoucherDetail>(
+                                            str,
+                                            edit,
+                                            vd));
+                    }
+                    var col=new AutoCompleteStringCollection();
+                    col.AddRange(m_Abbrs.Select(tpl=>tpl.Item1).ToArray());
+                    textBoxCommand.AutoCompleteSource = AutoCompleteSource.CustomSource;
+                    textBoxCommand.AutoCompleteCustomSource = col;
+                }
+            }
+            catch (Exception)
+            {
+                m_Abbrs = null;
+            }
+            m_FastEditing = false;
 
             m_Shell = new AccountingShell(m_Accountant)
                           {
@@ -103,12 +177,6 @@ namespace AccountingServer
                     "Microsoft YaHei Mono",
                     textBoxResult.Font.Size +
                     e.Delta / 18F);
-        }
-
-        private void textBoxCommand_TextChanged(object sender, EventArgs e)
-        {
-            textBoxCommand.BackColor = textBoxCommand.Text.StartsWith("+") ? Color.Black : Color.White;
-            textBoxCommand.ForeColor = textBoxCommand.Text.StartsWith("+") ? Color.White : Color.Black;
         }
 
         /// <summary>
@@ -238,8 +306,6 @@ namespace AccountingServer
                     return true;
                 }
 
-                m_Editable |= res is EditableText;
-
                 var result = res.ToString();
 
                 SwitchToText();
@@ -252,17 +318,13 @@ namespace AccountingServer
                     var lng = textBoxResult.Text.Length;
                     textBoxResult.SelectionStart = lng;
                     textBoxResult.SelectionLength = 0;
-                    textBoxCommand.BackColor = m_Editable
-                                                   ? Color.FromArgb(0, 200, 0)
-                                                   : Color.FromArgb(200, 220, 0);
+                    textBoxCommand.BackColor = Color.FromArgb(0, 200, 0);
                 }
                 else
                 {
                     textBoxResult.Text = result;
                     textBoxResult.SelectionLength = 0;
-                    textBoxCommand.BackColor = m_Editable
-                                                   ? Color.FromArgb(75, 255, 75)
-                                                   : Color.FromArgb(250, 250, 0);
+                    textBoxCommand.BackColor = Color.FromArgb(75, 255, 75);
                 }
 
                 if (res.AutoReturn)
@@ -336,36 +398,158 @@ namespace AccountingServer
         {
             textBoxCommand.Focus();
             textBoxCommand.SelectionStart = 0;
-            textBoxCommand.SelectionLength = textBoxCommand.Text.Length;
+            textBoxCommand.SelectionLength = textBoxCommand.TextLength;
+        }
+
+        /// <summary>
+        ///     进入快捷编辑模式
+        /// </summary>
+        private void EnterFastEditing()
+        {
+            m_FastEditing = true;
+            textBoxCommand.ForeColor = Color.White;
+            textBoxCommand.BackColor = Color.Black;
+            textBoxResult.ForeColor = Color.White;
+            textBoxResult.BackColor = Color.Black;
+            textBoxCommand.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+        }
+
+        /// <summary>
+        ///     退出快捷编辑模式
+        /// </summary>
+        private void ExitFastEditing()
+        {
+            m_FastEditing = false;
+            textBoxCommand.ForeColor = Color.Black;
+            textBoxCommand.BackColor = Color.White;
+            textBoxResult.ForeColor = Color.Black;
+            textBoxResult.BackColor = Color.White;
+            textBoxCommand.AutoCompleteMode = AutoCompleteMode.None;
         }
 
         /// <inheritdoc />
         protected override bool ProcessDialogKey(Keys keyData)
         {
-            if (keyData == Keys.Escape)
-            {
-                FocusTextBoxCommand();
-                return true;
-            }
             if (textBoxCommand.Focused)
             {
-                if (keyData == Keys.Enter)
+                if (keyData == Keys.Escape)
+                {
+                    FocusTextBoxCommand();
+                    if (m_FastEditing)
+                    {
+                        ExitFastEditing();
+                        textBoxResult.Focus();
+                    }
+                    return true;
+                }
+                if (keyData == Keys.Tab)
+                {
+                    textBoxResult.Focus();
+                    textBoxResult.SelectionStart = textBoxResult.TextLength;
+                    textBoxResult.ScrollToCaret();
+                }
+                if (keyData == Keys.Enter && !m_FastEditing)
+                {
+                    if (textBoxCommand.Text.Length == 0)
+                    {
+                        var tmp = textBoxResult.SelectionStart = textBoxResult.TextLength;
+                        var txtPre = "@new Voucher {" + Environment.NewLine +
+                                     $"    Date = D(\"{DateTime.Now:yyy-MM-dd}\")," + Environment.NewLine +
+                                     "    Details = new List<VoucherDetail> {" + Environment.NewLine;
+                        var txtApp = Environment.NewLine +
+                                     "    } }@" + Environment.NewLine +
+                                     ";" + Environment.NewLine;
+                        textBoxResult.SelectedText = txtPre + txtApp;
+                        textBoxResult.SelectionLength = 0;
+                        textBoxResult.SelectionStart = tmp + txtPre.Length;
+                        m_FastInsertLocationDelta = 0;
+                        textBoxResult.ScrollToCaret();
+
+                        FocusTextBoxCommand();
+                        EnterFastEditing();
+                        textBoxResult.ScrollToCaret();
+                        return true;
+                    }
                     if (ExecuteCommand(false))
                         return true;
-                if (keyData == (Keys.Enter | Keys.Shift))
+                }
+                if (keyData == (Keys.Enter | Keys.Shift) && !m_FastEditing)
                     if (ExecuteCommand(true))
                         return true;
+                if (keyData == Keys.Enter && m_FastEditing)
+                {
+                    if (textBoxCommand.Text.Length == 0)
+                    {
+                        if (PerformUpsert())
+                        {
+                            ExitFastEditing();
+                            return true;
+                        }
+                    }
+
+                    var sc =
+                        m_Abbrs.SingleOrDefault(
+                                                    tpl =>
+                                                    tpl.Item1.Equals(
+                                                                     textBoxCommand.Text,
+                                                                     StringComparison.InvariantCultureIgnoreCase));
+                    if (sc == null)
+                        return false;
+                    var s = CSharpHelper.PresentVoucherDetail(sc.Item3);
+                    var idC = sc.Item2 ? s.IndexOf("Content = \"\"", StringComparison.InvariantCulture) +11: -1;
+                    var idF = s.IndexOf("Fund = null", StringComparison.InvariantCulture) + 7;
+                    textBoxResult.Focus();
+                    textBoxResult.SelectedText = s;
+                    textBoxResult.SelectionLength = 0;
+                    if (sc.Item2)
+                    {
+                        textBoxResult.SelectionStart += idC - s.Length;
+                        textBoxResult.SelectionLength = 0;
+                        m_FastNextLocationDelta = idF - idC;
+                        m_FastInsertLocationDelta = s.Length - idC;
+                    }
+                    else
+                    {
+                        textBoxResult.SelectionStart += idF - s.Length;
+                        textBoxResult.SelectionLength = 4;
+                        m_FastNextLocationDelta = s.Length - idF;
+                        m_FastInsertLocationDelta = s.Length - idF;
+                    }
+                    textBoxResult.ScrollToCaret();
+                    textBoxCommand.Text = string.Empty;
+                    return true;
+                }
             }
-            else if (textBoxResult.Focused && m_Editable)
+            else if (textBoxResult.Focused)
             {
+                if (keyData == Keys.Escape)
+                {
+                    FocusTextBoxCommand();
+                    return true;
+                }
                 if (keyData == (Keys.Enter | Keys.Alt))
                     if (PerformUpsert())
                         return true;
                 if (keyData == (Keys.Delete | Keys.Alt))
                     if (PerformRemoval())
                         return true;
+                if ((keyData == Keys.Tab || keyData == Keys.Enter) &&
+                    m_FastEditing)
+                {
+                    textBoxResult.SelectionStart += m_FastNextLocationDelta;
+                    if (m_FastNextLocationDelta == m_FastInsertLocationDelta)
+                        FocusTextBoxCommand();
+                    else
+                    {
+                        textBoxResult.SelectionLength = 4;
+                        m_FastNextLocationDelta = m_FastInsertLocationDelta -= m_FastNextLocationDelta;
+                    }
+                    return true;
+                }
             }
             return base.ProcessDialogKey(keyData);
         }
+
+        private void frmMain_Activated(object sender, EventArgs e) => FocusTextBoxCommand();
     }
 }

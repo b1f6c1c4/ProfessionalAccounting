@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Resources;
 using System.Text;
 using AccountingServer.BLL;
@@ -242,6 +243,11 @@ namespace AccountingServer.Shell
         public string ExecuteVoucherUpsert(string code)
         {
             var voucher = CSharpHelper.ParseVoucher(code);
+            // ReSharper disable once PossibleInvalidOperationException
+            var unc = voucher.Details.SingleOrDefault(d => !d.Fund.HasValue);
+            if (unc != null)
+                // ReSharper disable once PossibleInvalidOperationException
+                unc.Fund = -voucher.Details.Sum(d => d.Fund ?? 0D);
 
             if (!m_Accountant.Upsert(voucher))
                 throw new ApplicationException("更新或添加失败");
