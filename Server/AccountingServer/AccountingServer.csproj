@@ -38,6 +38,7 @@
     <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="frmMain.cs">
@@ -104,6 +105,9 @@
       <Project>{0ddc759f-23de-4443-a97c-4edc1c40690c}</Project>
       <Name>AccountingServer.Shell</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Abbr.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -56,11 +56,9 @@ namespace AccountingServer.Shell
             sb.AppendLine("        {");
             sb.AppendLine("            return Guid.NewGuid().ToString().ToUpper();");
             sb.AppendLine("        }");
-            sb.AppendFormat("        public static {0} GetObject()", type.FullName);
-            sb.AppendLine();
+            sb.AppendLine($"        public static {type.FullName} GetObject()");
             sb.AppendLine("        {");
-            sb.AppendFormat("            return {0};", str);
-            sb.AppendLine();
+            sb.AppendLine($"            return {str};");
             sb.AppendLine("        }");
             sb.AppendLine("    }");
             sb.AppendLine("}");
@@ -78,6 +76,35 @@ namespace AccountingServer.Shell
         #region Voucher
 
         /// <summary>
+        ///     将细目用C#表示
+        /// </summary>
+        /// <param name="detail">细目</param>
+        /// <returns>C#表达式</returns>
+        public static string PresentVoucherDetail(VoucherDetail detail)
+        {
+            if (detail == null)
+                return string.Empty;
+
+            var sb = new StringBuilder();
+            sb.Append("        new VoucherDetail { ");
+            sb.Append($"Title = {detail.Title:0}, ");
+            sb.Append(
+                      detail.SubTitle.HasValue
+                          ? $"SubTitle = {detail.SubTitle:00},    // {TitleManager.GetTitleName(detail)}"
+                          : $"                  // {TitleManager.GetTitleName(detail)}");
+            sb.AppendLine();
+            sb.Append("                            ");
+            if (detail.Content != null)
+                sb.Append($"Content = {ProcessString(detail.Content)}, ");
+            sb.Append(detail.Fund.HasValue ? $"Fund = {detail.Fund}" : "Fund = null");
+            if (detail.Remark != null)
+                sb.Append($", Remark = {ProcessString(detail.Remark)}");
+            sb.AppendLine(" },");
+            sb.AppendLine();
+            return sb.ToString();
+        }
+
+        /// <summary>
         ///     将记账凭证用C#表示
         /// </summary>
         /// <param name="voucher">记账凭证</param>
@@ -89,48 +116,16 @@ namespace AccountingServer.Shell
 
             var sb = new StringBuilder();
             sb.Append("@new Voucher {");
-            sb.AppendFormat("  ID = {0},", ProcessString(voucher.ID));
+            sb.Append($"  ID = {ProcessString(voucher.ID)},");
             sb.AppendLine();
-            if (voucher.Date.HasValue)
-            {
-                sb.AppendFormat("    Date = D(\"{0:yyyy-MM-dd}\"),", voucher.Date);
-                sb.AppendLine();
-            }
-            else
-                sb.AppendLine("    Date = null,");
+            sb.AppendLine(voucher.Date.HasValue ? $"    Date = D(\"{voucher.Date:yyyy-MM-dd}\")," : "    Date = null,");
             if ((voucher.Type ?? VoucherType.Ordinary) != VoucherType.Ordinary)
-            {
-                sb.AppendFormat("    Type = VoucherType.{0},", voucher.Type);
-                sb.AppendLine();
-            }
+                sb.AppendLine($"    Type = VoucherType.{voucher.Type},");
             if (voucher.Remark != null)
-            {
-                sb.AppendFormat("    Remark = {0},", ProcessString(voucher.Remark));
-                sb.AppendLine();
-            }
+                sb.AppendLine($"    Remark = {ProcessString(voucher.Remark)},");
             sb.AppendLine("    Details = new List<VoucherDetail> {");
             foreach (var detail in voucher.Details)
-            {
-                sb.Append("        new VoucherDetail { ");
-                sb.AppendFormat("Title = {0:0}, ", detail.Title);
-                if (detail.SubTitle.HasValue)
-                    sb.AppendFormat(
-                                    "SubTitle = {0:00},    // {1}",
-                                    detail.SubTitle,
-                                    TitleManager.GetTitleName(detail));
-                else
-                    sb.AppendFormat("                  // {0}", TitleManager.GetTitleName(detail));
-                sb.AppendLine();
-                sb.Append("                            ");
-                if (detail.Content != null)
-                    sb.AppendFormat("Content = {0}, ", ProcessString(detail.Content));
-                if (detail.Fund.HasValue)
-                    sb.AppendFormat("Fund = {0}", detail.Fund);
-                if (detail.Remark != null)
-                    sb.AppendFormat(", Remark = {0}", ProcessString(detail.Remark));
-                sb.AppendLine(" },");
-                sb.AppendLine();
-            }
+                sb.Append(PresentVoucherDetail(detail));
             sb.AppendLine("} }@");
             return sb.ToString();
         }
@@ -158,62 +153,32 @@ namespace AccountingServer.Shell
 
             var sb = new StringBuilder();
             sb.Append("@new Asset {");
-            sb.AppendFormat("  StringID = {0},", ProcessString(asset.StringID));
-            sb.AppendLine();
-            sb.AppendFormat("    Name = {0},", ProcessString(asset.Name));
-            sb.AppendLine();
-            if (asset.Date.HasValue)
-            {
-                sb.AppendFormat("    Date = D(\"{0:yyyy-MM-dd}\"),", asset.Date);
-                sb.AppendLine();
-            }
-            else
-                sb.AppendLine("    Date = null,");
-            sb.AppendFormat("    Value = {0}, Salvge = {1}, Life = {2},", asset.Value, asset.Salvge, asset.Life);
-            sb.AppendLine();
-            sb.AppendFormat("    Title = {0}, Method = DepreciationMethod.{1},", asset.Title, asset.Method);
-            sb.AppendLine();
-            sb.AppendFormat(
-                            "    DepreciationTitle = {0}, DepreciationExpenseTitle = {1}, DepreciationExpenseSubTitle = {2},",
-                            asset.DepreciationTitle,
-                            asset.DepreciationExpenseTitle,
-                            asset.DepreciationExpenseSubTitle);
-            sb.AppendLine();
-            sb.AppendFormat(
-                            "    DevaluationTitle = {0}, DevaluationExpenseTitle = {1}, DevaluationExpenseSubTitle = {2},",
-                            asset.DevaluationTitle,
-                            asset.DevaluationExpenseTitle,
-                            asset.DevaluationExpenseSubTitle);
-            sb.AppendLine();
+            sb.AppendLine($"  StringID = {ProcessString(asset.StringID)},");
+            sb.AppendLine($"    Name = {ProcessString(asset.Name)},");
+            sb.AppendLine(asset.Date.HasValue ? $"    Date = D(\"{asset.Date:yyyy-MM-dd}\")," : "    Date = null,");
+            sb.AppendLine($"    Value = {asset.Value}, Salvge = {asset.Salvge}, Life = {asset.Life},");
+            sb.AppendLine($"    Title = {asset.Title}, Method = DepreciationMethod.{asset.Method},");
+            sb.AppendLine(
+                          $"    DepreciationTitle = {asset.DepreciationTitle}, DepreciationExpenseTitle = {asset.DepreciationExpenseTitle}, DepreciationExpenseSubTitle = {asset.DepreciationExpenseSubTitle},");
+            sb.AppendLine(
+                          $"    DevaluationTitle = {asset.DevaluationTitle}, DevaluationExpenseTitle = {asset.DevaluationExpenseTitle}, DevaluationExpenseSubTitle = {asset.DevaluationExpenseSubTitle},");
             if (asset.Remark != null)
-            {
-                sb.AppendFormat("    Remark = {0},", ProcessString(asset.Remark));
-                sb.AppendLine();
-            }
+                sb.AppendLine($"    Remark = {ProcessString(asset.Remark)},");
             sb.AppendLine("    Schedule = new List<AssetItem> {");
             if (asset.Schedule != null)
             {
                 Action<AssetItem, string> present =
                     (item, str) =>
                     {
-                        sb.Append("        new ");
-                        sb.Append(item.GetType().Name.CPadRight(16));
-                        sb.Append("{ ");
-                        if (item.Date.HasValue)
-                            sb.AppendFormat(
-                                            "Date = D(\"{0:yyyy-MM-dd}\"), ",
-                                            item.Date);
-                        else
-                            sb.Append("Date = null, ");
-                        sb.AppendFormat("VoucherID = {0}", (ProcessString(item.VoucherID) + ",").CPadRight(27));
+                        sb.Append($"        new {item.GetType().Name.CPadRight(16)} {{ ");
+                        sb.Append(item.Date.HasValue ? $"Date = D(\"{item.Date:yyyy-MM-dd}\"), " : "Date = null, ");
+                        sb.Append($"VoucherID = {(ProcessString(item.VoucherID) + ",").CPadRight(27)}");
                         sb.Append(str.CPadRight(30));
-                        sb.AppendFormat(
-                                        "Value = {0} ",
-                                        item.Value.ToString(CultureInfo.InvariantCulture).CPadRight(16));
+                        sb.Append($"Value = {item.Value.ToString(CultureInfo.InvariantCulture).CPadRight(16)} ");
                         if (item.Remark != null)
                         {
                             sb.Append("".CPadLeft(30));
-                            sb.AppendFormat(", Remark = {0} ", ProcessString(item.Remark));
+                            sb.Append($", Remark = {ProcessString(item.Remark)} ");
                         }
                         sb.AppendLine("},");
                     };
@@ -257,27 +222,27 @@ namespace AccountingServer.Shell
 
             var sb = new StringBuilder();
             sb.Append("@new Amortization {");
-            sb.AppendFormat("  StringID = {0},", ProcessString(amort.StringID));
+            sb.Append($"  StringID = {ProcessString(amort.StringID)},");
             sb.AppendLine();
-            sb.AppendFormat("    Name = {0},", ProcessString(amort.Name));
+            sb.Append($"    Name = {ProcessString(amort.Name)},");
             sb.AppendLine();
             if (amort.Date.HasValue)
             {
-                sb.AppendFormat("    Date = D(\"{0:yyyy-MM-dd}\"),", amort.Date);
+                sb.Append($"    Date = D(\"{amort.Date:yyyy-MM-dd}\"),");
                 sb.AppendLine();
             }
             else
                 sb.AppendLine("    Date = null,");
-            sb.AppendFormat("    Value = {0}, ", amort.Value);
+            sb.Append($"    Value = {amort.Value}, ");
             sb.AppendLine();
-            sb.AppendFormat("    TotalDays = {0}, Interval = AmortizeInterval.{1},", amort.TotalDays, amort.Interval);
+            sb.Append($"    TotalDays = {amort.TotalDays}, Interval = AmortizeInterval.{amort.Interval},");
             sb.AppendLine();
             sb.Append("Template = ");
             sb.Append(PresentVoucher(amort.Template).Trim().Trim('@'));
             sb.AppendLine(",");
             if (amort.Remark != null)
             {
-                sb.AppendFormat("    Remark = {0},", ProcessString(amort.Remark));
+                sb.Append($"    Remark = {ProcessString(amort.Remark)},");
                 sb.AppendLine();
             }
             if (amort.Schedule != null)
@@ -286,23 +251,14 @@ namespace AccountingServer.Shell
                 foreach (var item in amort.Schedule)
                 {
                     sb.Append("        new AmortItem { ");
-                    if (item.Date.HasValue)
-                        sb.AppendFormat(
-                                        "Date = D(\"{0:yyyy-MM-dd}\"), ",
-                                        item.Date);
-                    else
-                        sb.Append("Date = null, ");
-                    sb.AppendFormat("VoucherID = {0}", (ProcessString(item.VoucherID) + ",").CPadRight(27));
-                    sb.AppendFormat(
-                                    "Amount = {0}",
-                                    (item.Amount.ToString(CultureInfo.InvariantCulture) + ",").CPadRight(19));
-                    sb.AppendFormat(
-                                    "Value = {0} ",
-                                    item.Value.ToString(CultureInfo.InvariantCulture).CPadRight(16));
+                    sb.Append(item.Date.HasValue ? $"Date = D(\"{item.Date:yyyy-MM-dd}\"), " : "Date = null, ");
+                    sb.Append($"VoucherID = {(ProcessString(item.VoucherID) + ",").CPadRight(27)}");
+                    sb.Append($"Amount = {(item.Amount.ToString(CultureInfo.InvariantCulture) + ",").CPadRight(19)}");
+                    sb.Append($"Value = {item.Value.ToString(CultureInfo.InvariantCulture).CPadRight(16)} ");
                     if (item.Remark != null)
                     {
                         sb.Append("".CPadLeft(30));
-                        sb.AppendFormat(", Remark = {0} ", ProcessString(item.Remark));
+                        sb.Append($", Remark = {ProcessString(item.Remark)} ");
                     }
                     sb.AppendLine("},");
                 }
