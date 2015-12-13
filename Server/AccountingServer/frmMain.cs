@@ -536,11 +536,14 @@ namespace AccountingServer
                 if ((keyData == Keys.Tab || keyData == Keys.Enter) &&
                     m_FastEditing)
                 {
-                    textBoxResult.SelectionStart += m_FastNextLocationDelta + textBoxResult.SelectionLength - 4;
                     if (m_FastNextLocationDelta == m_FastInsertLocationDelta)
+                    {
+                        textBoxResult.SelectionStart += m_FastNextLocationDelta + textBoxResult.SelectionLength - 4;
                         FocusTextBoxCommand();
+                    }
                     else
                     {
+                        textBoxResult.SelectionStart += m_FastNextLocationDelta;
                         textBoxResult.SelectionLength = 4;
                         m_FastNextLocationDelta = m_FastInsertLocationDelta -= m_FastNextLocationDelta;
                     }
