@@ -149,7 +149,7 @@ rangeYear
 	;
 	
 rangeMonth
-	:	Modifier=('@'|'#')? (RangeAMonth | RangeDeltaMonth)
+	:	Modifier='@'? (RangeAMonth | RangeDeltaMonth)
 	;
 
 rangeWeek

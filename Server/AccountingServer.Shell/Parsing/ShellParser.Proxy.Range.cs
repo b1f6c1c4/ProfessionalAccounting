@@ -54,11 +54,8 @@ namespace AccountingServer.Shell.Parsing
                         if (RangeDeltaMonth() != null)
                         {
                             var delta = int.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
-                            dt = new DateTime(
-                                DateTime.Now.Year,
-                                DateTime.Now.Day >= 20 ? DateTime.Now.Month + 1 : DateTime.Now.Month,
-                                19);
-                            dt = dt.AddMonths(-delta);
+                            dt = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 19);
+                            dt = dt.AddMonths(DateTime.Now.Day >= 20 ? 1 - delta : -delta);
                         }
                         else
                             dt = DateTime.ParseExact(RangeAMonth().GetText() + "19", "yyyyMMdd", null);
@@ -76,22 +73,6 @@ namespace AccountingServer.Shell.Parsing
                         else
                             dt = DateTime.ParseExact(RangeAMonth().GetText() + "01", "yyyyMMdd", null);
                         return new DateFilter(dt, dt.AddMonths(1).AddDays(-1));
-                    }
-                    if (Modifier.Text == "#")
-                    {
-                        DateTime dt;
-                        if (RangeDeltaMonth() != null)
-                        {
-                            var delta = int.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
-                            dt = new DateTime(
-                                DateTime.Now.Year,
-                                DateTime.Now.Day >= 9 ? DateTime.Now.Month + 1 : DateTime.Now.Month,
-                                8);
-                            dt = dt.AddMonths(-delta);
-                        }
-                        else
-                            dt = DateTime.ParseExact(RangeAMonth().GetText() + "08", "yyyyMMdd", null);
-                        return new DateFilter(dt.AddMonths(-1).AddDays(1), dt);
                     }
                     throw new MemberAccessException("表达式错误");
                 }
