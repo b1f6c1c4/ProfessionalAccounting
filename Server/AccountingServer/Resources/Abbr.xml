@@ -91,6 +91,15 @@
     <Title>6301</Title>
     <SubTitle>03</SubTitle>
   </Abbr>
+  <Abbr string="sjbr">
+    <Title>6301</Title>
+    <SubTitle>04</SubTitle>
+  </Abbr>
+  <Abbr string="qhdx">
+    <Title>6301</Title>
+    <SubTitle>04</SubTitle>
+    <Content>清华大学</Content>
+  </Abbr>
   <Abbr string="print">
     <Title>6401</Title>
     <Content>打印费</Content>
