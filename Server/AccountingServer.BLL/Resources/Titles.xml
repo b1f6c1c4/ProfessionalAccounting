@@ -113,6 +113,8 @@
         <subTitle name="其他费用" id="99"/>
     </title>
     <title name="资产减值损失" id="6701" virtual="true">
+        <subTitle name="坏账损失" id="1"/>
+        <subTitle name="存货跌价损失" id="2"/>
         <subTitle name="长期投资减值损失" id="4"/>
         <subTitle name="固定资产减值损失" id="5"/>
         <subTitle name="无形资产减值损失" id="6"/>
