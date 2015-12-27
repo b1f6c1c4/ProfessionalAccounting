@@ -58,6 +58,10 @@
   <Abbr string="2s" edit="true">
     <Title>1221</Title>
   </Abbr>
+  <Abbr string="xskdl">
+    <Title>1221</Title>
+    <Content>学生卡待领</Content>
+  </Abbr>
   <Abbr string="xbx">
     <Title>1221</Title>
     <Content>徐步轩</Content>
