@@ -55,6 +55,9 @@
     <SubTitle>01</SubTitle>
     <Content>无忧宝</Content>
   </Abbr>
+  <Abbr string="pref" edit="true">
+    <Title>1123</Title>
+  </Abbr>
   <Abbr string="5729yf">
     <Title>1123</Title>
     <Content>5729</Content>
@@ -210,6 +213,10 @@
   </Abbr>
   <Abbr string="6603">
     <Title>6603</Title>
+  </Abbr>
+  <Abbr string="sxf">
+    <Title>6603</Title>
+    <SubTitle>04</SubTitle>
   </Abbr>
   <Abbr string="jzzc" edit="true">
     <Title>6711</Title>
