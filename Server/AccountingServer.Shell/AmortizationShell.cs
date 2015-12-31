@@ -31,8 +31,9 @@ namespace AccountingServer.Shell
             var amortListContext = expr.amortList();
             if (amortListContext != null)
             {
+                var showAll = amortListContext.AOAll() != null;
                 var showSchedule = amortListContext.AOList() != null;
-                var dt = !showSchedule
+                var dt = !showAll
                              ? amortListContext.rangePoint()?.Range.EndDate ?? DateTime.Now.Date
                              : (DateTime?)null;
 
