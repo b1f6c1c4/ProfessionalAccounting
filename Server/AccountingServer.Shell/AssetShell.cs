@@ -30,8 +30,9 @@ namespace AccountingServer.Shell
             var assetListContext = expr.assetList();
             if (assetListContext != null)
             {
+                var showAll = assetListContext.AOAll() != null;
                 var showSchedule = assetListContext.AOList() != null;
-                var dt = showSchedule
+                var dt = showAll
                              ? null
                              : assetListContext.rangePoint() != null
                                    ? assetListContext.rangePoint().Range.EndDate
