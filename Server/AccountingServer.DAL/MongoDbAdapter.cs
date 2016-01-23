@@ -85,7 +85,7 @@ namespace AccountingServer.DAL
                                     FileName = "cmd.exe",
                                     Arguments =
                                         "/c " +
-                                        "mongod --config \"C:\\Users\\b1f6c1c4\\Documents\\tjzh\\Account\\mongod.conf\"",
+                                        "mongod --config \"C:\\Users\\b1f6c1c4\\Documents\\Mongo\\mongod.conf\"",
                                     UseShellExecute = false,
                                     RedirectStandardInput = false,
                                     RedirectStandardOutput = true,
@@ -93,7 +93,7 @@ namespace AccountingServer.DAL
                                 };
 
             var process = Process.Start(startinfo);
-            if (process == null)
+            if (process == null || process.HasExited)
                 throw new ApplicationException("无法启动数据库");
         }
 
