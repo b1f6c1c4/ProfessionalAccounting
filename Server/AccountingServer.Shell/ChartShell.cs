@@ -154,8 +154,6 @@ namespace AccountingServer.Shell
                 case SubtotalLevel.Day:
                 case SubtotalLevel.Week:
                 case SubtotalLevel.Month:
-                case SubtotalLevel.FinancialMonth:
-                case SubtotalLevel.BillingMonth:
                 case SubtotalLevel.Year:
                     return cat.Date;
                 default:

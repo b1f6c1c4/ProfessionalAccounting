@@ -336,34 +336,6 @@ namespace AccountingServer.DAL
                 sb.AppendLine("    theDate.setMonth(0, 1);");
             else if (subtotalLevel.HasFlag(SubtotalLevel.Month))
                 sb.AppendLine("    theDate.setDate(1);");
-            else if (subtotalLevel.HasFlag(SubtotalLevel.BillingMonth))
-            {
-                sb.AppendLine("    if (theDate.getDate() >= 9) {");
-                sb.AppendLine("        theDate.setDate(9);");
-                sb.AppendLine("        if (theDate.getMonth() == 11) {");
-                sb.AppendLine("            theDate.setMonth(0);");
-                sb.AppendLine("            theDate.setFullYear(theDate.getFullYear() + 1);");
-                sb.AppendLine("        } else {");
-                sb.AppendLine("            theDate.setMonth(theDate.getMonth() + 1);");
-                sb.AppendLine("        }");
-                sb.AppendLine("    } else {");
-                sb.AppendLine("        theDate.setDate(9);");
-                sb.AppendLine("    }");
-            }
-            else if (subtotalLevel.HasFlag(SubtotalLevel.FinancialMonth))
-            {
-                sb.AppendLine("    if (theDate.getDate() >= 20) {");
-                sb.AppendLine("        theDate.setDate(19);");
-                sb.AppendLine("        if (theDate.getMonth() == 11) {");
-                sb.AppendLine("            theDate.setMonth(0);");
-                sb.AppendLine("            theDate.setFullYear(theDate.getFullYear() + 1);");
-                sb.AppendLine("        } else {");
-                sb.AppendLine("            theDate.setMonth(theDate.getMonth() + 1);");
-                sb.AppendLine("        }");
-                sb.AppendLine("    } else {");
-                sb.AppendLine("        theDate.setDate(19);");
-                sb.AppendLine("    }");
-            }
             else // if (subtotalLevel.HasFlag(SubtotalLevel.Week))
             {
                 sb.AppendLine("    if (theDate.getDay() == 0)");
