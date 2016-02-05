@@ -72,7 +72,7 @@
   </Target>
   <Import Project="..\packages\Antlr4.4.4.1-alpha001\build\Antlr4.targets" Condition="Exists('..\packages\Antlr4.4.4.1-alpha001\build\Antlr4.targets')" />
   <PropertyGroup>
-    <PostBuildEvent>copy $(ProjectDir)\obj\Debug\Shell* $(SolutionDir)\AccountingServer.Shell\Parsing
+    <PostBuildEvent>copy $(ProjectDir)\obj\$(ConfigurationName)\Shell* $(SolutionDir)\AccountingServer.Shell\Parsing
 </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

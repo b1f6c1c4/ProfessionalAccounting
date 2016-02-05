@@ -87,11 +87,7 @@ namespace AccountingServer.BLL
                 case SubtotalLevel.Week:
                     return value.AsDate();
                 case SubtotalLevel.Month:
-                    return $"@{value.Value.Year:D4}{value.Value.Month:D2}";
-                case SubtotalLevel.FinancialMonth:
                     return $"{value.Value.Year:D4}{value.Value.Month:D2}";
-                case SubtotalLevel.BillingMonth:
-                    return $"#{value.Value.Year:D4}{value.Value.Month:D2}";
                 case SubtotalLevel.Year:
                     return $"{value.Value.Year:D4}";
                 default:

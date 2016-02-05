@@ -49,16 +49,6 @@ namespace AccountingServer.Entities
         Month = 0x70,
 
         /// <summary>
-        ///     按财月分类
-        /// </summary>
-        FinancialMonth = 0xB0,
-
-        /// <summary>
-        ///     按账单月分类
-        /// </summary>
-        BillingMonth = 0xF0,
-
-        /// <summary>
         ///     按年分类
         /// </summary>
         Year = 0x130

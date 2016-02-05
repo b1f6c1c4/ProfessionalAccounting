@@ -265,9 +265,7 @@ namespace AccountingServer.BLL
                         break;
                     case SubtotalLevel.Day:
                     case SubtotalLevel.Week:
-                    case SubtotalLevel.FinancialMonth:
                     case SubtotalLevel.Month:
-                    case SubtotalLevel.BillingMonth:
                     case SubtotalLevel.Year:
                         resx = res
                             .GroupByDate()

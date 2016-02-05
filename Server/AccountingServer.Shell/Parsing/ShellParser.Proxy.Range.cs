@@ -48,33 +48,16 @@ namespace AccountingServer.Shell.Parsing
             {
                 get
                 {
-                    if (Modifier == null)
+                    DateTime dt;
+                    if (RangeDeltaMonth() != null)
                     {
-                        DateTime dt;
-                        if (RangeDeltaMonth() != null)
-                        {
-                            var delta = int.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
-                            dt = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 19);
-                            dt = dt.AddMonths(DateTime.Now.Day >= 20 ? 1 - delta : -delta);
-                        }
-                        else
-                            dt = DateTime.ParseExact(RangeAMonth().GetText() + "19", "yyyyMMdd", null);
-                        return new DateFilter(dt.AddMonths(-1).AddDays(1), dt);
+                        var delta = int.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
+                        dt = new DateTime(DateTime.Now.Date.Year, DateTime.Now.Month, 1);
+                        dt = dt.AddMonths(-delta);
                     }
-                    if (Modifier.Text == "@")
-                    {
-                        DateTime dt;
-                        if (RangeDeltaMonth() != null)
-                        {
-                            var delta = int.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
-                            dt = new DateTime(DateTime.Now.Date.Year, DateTime.Now.Month, 1);
-                            dt = dt.AddMonths(-delta);
-                        }
-                        else
-                            dt = DateTime.ParseExact(RangeAMonth().GetText() + "01", "yyyyMMdd", null);
-                        return new DateFilter(dt, dt.AddMonths(1).AddDays(-1));
-                    }
-                    throw new MemberAccessException("表达式错误");
+                    else
+                        dt = DateTime.ParseExact(RangeAMonth().GetText() + "01", "yyyyMMdd", null);
+                    return new DateFilter(dt, dt.AddMonths(1).AddDays(-1));
                 }
             }
         }

@@ -158,10 +158,6 @@ namespace AccountingServer.Shell.Parsing
                                                                return SubtotalLevel.Week;
                                                            case 'm':
                                                                return SubtotalLevel.Month;
-                                                           case 'f':
-                                                               return SubtotalLevel.FinancialMonth;
-                                                           case 'b':
-                                                               return SubtotalLevel.BillingMonth;
                                                            case 'y':
                                                                return SubtotalLevel.Year;
                                                        }

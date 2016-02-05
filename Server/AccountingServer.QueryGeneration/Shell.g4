@@ -149,7 +149,7 @@ rangeYear
 	;
 	
 rangeMonth
-	:	Modifier='@'? (RangeAMonth | RangeDeltaMonth)
+	:	(RangeAMonth | RangeDeltaMonth)
 	;
 
 rangeWeek
@@ -349,7 +349,7 @@ AOCheck
 	;
 
 SubtotalFields
-	:	('t' | 's' | 'c' | 'r' | 'd' | 'w' | 'm' | 'f' | 'b' | 'y')+
+	:	('t' | 's' | 'c' | 'r' | 'd' | 'w' | 'm' | 'y')+
 	|	'v'
 	;
 
