@@ -78,6 +78,7 @@ namespace AccountingServer.BLL
                         case "包殿文":
                         case "包美玲":
                         case "华北电力大学同学":
+                        case "吴迪":
                         case "张国平":
                         case "文勇":
                         case "文瑞韬":
