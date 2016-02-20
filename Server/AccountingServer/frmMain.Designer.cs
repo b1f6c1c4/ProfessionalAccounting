@@ -90,7 +90,7 @@ namespace AccountingServer
             this.Controls.Add(this.textBoxCommand);
             this.Name = "frmMain";
             this.Text = "Accounting Server";
-            this.Activated += new System.EventHandler(this.frmMain_Activated);
+            this.Shown += new System.EventHandler(this.frmMain_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
