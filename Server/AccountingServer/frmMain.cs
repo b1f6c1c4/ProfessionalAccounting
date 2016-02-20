@@ -553,6 +553,6 @@ namespace AccountingServer
             return base.ProcessDialogKey(keyData);
         }
 
-        private void frmMain_Activated(object sender, EventArgs e) => FocusTextBoxCommand();
+        private void frmMain_Shown(object sender, EventArgs e) => FocusTextBoxCommand();
     }
 }
