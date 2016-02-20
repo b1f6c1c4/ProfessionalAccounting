@@ -74,6 +74,18 @@
     <Content>徐步轩</Content>
     <Remark>FDC2D5E9-B539-4849-8959-B5721CD5E20F</Remark>
   </Abbr>
+  <Abbr string="1601" edit="true">
+    <Title>1601</Title>
+  </Abbr>
+  <Abbr string="1602" edit="true">
+    <Title>1602</Title>
+  </Abbr>
+  <Abbr string="1701" edit="true">
+    <Title>1701</Title>
+  </Abbr>
+  <Abbr string="1702" edit="true">
+    <Title>1702</Title>
+  </Abbr>
   <Abbr string="hb">
     <Title>2001</Title>
     <Content>花呗</Content>
@@ -110,6 +122,9 @@
     <Title>6301</Title>
     <SubTitle>04</SubTitle>
     <Content>清华大学</Content>
+  </Abbr>
+  <Abbr string="zyywcb" edit="true">
+    <Title>6401</Title>
   </Abbr>
   <Abbr string="print">
     <Title>6401</Title>
