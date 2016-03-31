@@ -129,4 +129,13 @@
       </Range>
     </Ranges>
   </Template>
+  <Template>
+    <Name>芝兰园</Name>
+    <Ranges>
+      <Range>
+        <Start>20002301</Start>
+        <End>20002301</End>
+      </Range>
+    </Ranges>
+  </Template>
 </EndPointTemplates>
