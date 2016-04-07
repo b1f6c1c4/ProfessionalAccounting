@@ -85,6 +85,10 @@
       <Project>{7246deb7-bda2-49d8-9490-3ed074219106}</Project>
       <Name>AccountingServer.Entities</Name>
     </ProjectReference>
+    <ProjectReference Include="..\AccountingServer.Plugins.BankBalance\AccountingServer.Plugins.BankBalance.csproj">
+      <Project>{b953c8cb-8283-4bde-80cc-96561b2551dd}</Project>
+      <Name>AccountingServer.Plugins.BankBalance</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AccountingServer.Plugins.Interest\AccountingServer.Plugins.Interest.csproj">
       <Project>{2A6865A5-D37E-406A-A51C-3EF4E8A5C9F4}</Project>
       <Name>AccountingServer.Plugins.Interest</Name>

@@ -11,6 +11,8 @@ Server/AccountingServer/bin/
 Server/AccountingServer/obj/
 Server/AccountingServer.Shell/bin/
 Server/AccountingServer.Shell/obj/
+Server/AccountingServer.Plugins.BankBalance/bin/
+Server/AccountingServer.Plugins.BankBalance/obj/
 Server/AccountingServer.Plugins.Interest/bin/
 Server/AccountingServer.Plugins.Interest/obj/
 Server/AccountingServer.Plugins.THUInfo/bin/
