@@ -1,0 +1,7 @@
+﻿BankBalance帮助文档
+
+日均余额插件AverageDailyBalance
+别名：adb
+总共2个参数，
+第一个参数为银行卡尾号；
+第二个参数为要求的日均余额。

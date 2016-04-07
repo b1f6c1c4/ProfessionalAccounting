@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.Xml;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
+using AccountingServer.Plugins.BankBalance;
 using AccountingServer.Plugins.Interest;
 using AccountingServer.Plugins.THUInfo;
 using AccountingServer.Plugins.Utilities;
@@ -131,7 +132,8 @@ namespace AccountingServer
                                           thu,
                                           new InterestRevenue(m_Accountant),
                                           new Utilities(m_Accountant),
-                                          new YieldRate(m_Accountant)
+                                          new YieldRate(m_Accountant),
+                                          new AverageDailyBalance(m_Accountant)
                                       }
                           };
             m_Shell.AutoConnect();
