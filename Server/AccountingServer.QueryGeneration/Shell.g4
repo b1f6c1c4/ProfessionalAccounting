@@ -41,7 +41,7 @@ chartLevel
 	;
 
 report
-	:	Op=('rp' | 'Rp') (namedQuery range? | groupedQuery)
+	:	Op=('rp' | 'Rp') (Sheer='s')? (namedQuery range? | groupedQuery)
 	;
 
 namedQuery
