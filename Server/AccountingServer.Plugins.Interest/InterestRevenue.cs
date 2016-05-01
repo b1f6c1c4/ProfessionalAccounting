@@ -46,7 +46,10 @@ namespace AccountingServer.Plugins.Interest
                 // ReSharper disable once PossibleInvalidOperationException
                 var lastD = Accountant.SelectVouchers(new VoucherQueryAtomBase(filter: filter0, dir: 1))
                                       .OrderByDescending(v => v.Date, new DateComparer())
-                                      .First().Date.Value.AddDays(-1);
+                                      .FirstOrDefault()?.Date ??
+                            Accountant.SelectVouchers(new VoucherQueryAtomBase(filter: filter, dir: 1))
+                                      .OrderBy(v => v.Date, new DateComparer())
+                                      .First().Date.Value;
                 var rng = new DateFilter(null, lastD);
                 var capQuery = new VoucherDetailQueryBase
                                    {
@@ -67,14 +70,14 @@ namespace AccountingServer.Plugins.Interest
                                                                {
                                                                    VoucherEmitQuery = capQuery,
                                                                    Subtotal = subtotal
-                                                               }).Single().Fund;
+                                                               }).SingleOrDefault()?.Fund ?? 0;
                 var interestIntegral =
                     Accountant.SelectVoucherDetailsGrouped(
                                                            new GroupedQueryBase
                                                                {
                                                                    VoucherEmitQuery = intQuery,
                                                                    Subtotal = subtotal
-                                                               }).Single().Fund;
+                                                           }).SingleOrDefault()?.Fund ?? 0;
                 Regularize(
                            pars[0],
                            rmk,
