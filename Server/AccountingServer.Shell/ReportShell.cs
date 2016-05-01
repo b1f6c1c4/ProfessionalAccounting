@@ -23,9 +23,11 @@ namespace AccountingServer.Shell
         ///     执行报告表达式
         /// </summary>
         /// <param name="expr">表达式</param>
+        /// <param name="sheer">是否仅显示总额</param>
         /// <param name="withSubtotal">是否包含分类汇总</param>
         /// <returns>执行结果</returns>
-        public IQueryResult ExecuteReportQuery(ShellParser.ReportContext expr, bool withSubtotal = true)
+        public IQueryResult ExecuteReportQuery(ShellParser.ReportContext expr, bool sheer = false,
+                                               bool withSubtotal = true)
         {
             var rng = expr.range() != null ? expr.range().Range : ShellParser.From("[0]").range().Range;
 
@@ -45,9 +47,10 @@ namespace AccountingServer.Shell
                                           preVouchers == null
                                               ? m_Accountant.SelectVoucherDetailsGrouped(query.GroupingQuery)
                                               : preVouchers.SelectVoucherDetailsGrouped(query.GroupingQuery),
+                                          sheer,
                                           withSubtotal),
                         Map = (path, query, coefficient) => path.Length == 0 ? query.Name : path + "/" + query.Name,
-                        Reduce = (path, newPath, query, coefficient, results) => Gather(path, results, withSubtotal)
+                        Reduce = (path, newPath, query, coefficient, results) => Gather(path, results, sheer, withSubtotal)
                     };
 
             Tuple<double, string> result;
@@ -61,6 +64,7 @@ namespace AccountingServer.Shell
                                        1,
                                        query.Subtotal,
                                        m_Accountant.SelectVoucherDetailsGrouped(query),
+                                       sheer,
                                        withSubtotal);
             }
             else
@@ -75,11 +79,13 @@ namespace AccountingServer.Shell
         /// <param name="coefficient">路径上累计的系数</param>
         /// <param name="args"></param>
         /// <param name="res"></param>
+        /// <param name="sheer">是否仅显示余额</param>
         /// <param name="withSubtotal">是否包含分类汇总</param>
         /// <returns>累计值和报告部分</returns>
-        private Tuple<double, string> PresentReport(string path0, double coefficient, ISubtotal args,
-                                                    IEnumerable<Balance> res,
-                                                    bool withSubtotal = true)
+        private static Tuple<double, string> PresentReport(string path0, double coefficient, ISubtotal args,
+                                                           IEnumerable<Balance> res,
+                                                           bool sheer = false,
+                                                           bool withSubtotal = true)
         {
             var helper =
                 new SubtotalTraver<string, Tuple<double, string>>(args)
@@ -88,12 +94,16 @@ namespace AccountingServer.Shell
                             (path, cat, depth, val) =>
                             new Tuple<double, string>(
                                 val * coefficient,
-                                $"{path}\t{val:R}\t{coefficient:R}\t{val * coefficient:R}"),
+                                !sheer
+                                    ? $"{path}\t{val:R}\t{coefficient:R}\t{val * coefficient:R}"
+                                    : $"{path}\t{val * coefficient:R}"),
                         LeafAggregated =
                             (path, cat, depth, bal) =>
                             new Tuple<double, string>(
                                 bal.Fund * coefficient,
-                                $"{path.Merge(bal.Date.AsDate())}\t{bal.Fund:R}\t{coefficient:R}\t{bal.Fund * coefficient:R}"),
+                                !sheer
+                                    ? $"{path.Merge(bal.Date.AsDate())}\t{bal.Fund:R}\t{coefficient:R}\t{bal.Fund * coefficient:R}"
+                                    : $"{path.Merge(bal.Date.AsDate())}\t{bal.Fund * coefficient:R}"),
                         Map = (path, cat, depth, level) =>
                               {
                                   switch (level)
@@ -112,8 +122,8 @@ namespace AccountingServer.Shell
                               },
                         MapA = (path, cat, depth, type) => path,
                         MediumLevel = (path, newPath, cat, depth, level, r) => r,
-                        Reduce = (path, cat, depth, level, results) => Gather(path, results, withSubtotal),
-                        ReduceA = (path, newPath, cat, depth, type, results) => Gather(path, results, withSubtotal)
+                        Reduce = (path, cat, depth, level, results) => Gather(path, results, sheer, withSubtotal),
+                        ReduceA = (path, newPath, cat, depth, type, results) => Gather(path, results, sheer, withSubtotal)
                     };
 
             var traversal = helper.Traversal(path0, res);
@@ -126,9 +136,11 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="path">当前路径</param>
         /// <param name="results">次级查询输出</param>
+        /// <param name="sheer">是否仅显示余额</param>
         /// <param name="withSubtotal">是否包含分类汇总</param>
         /// <returns>报告</returns>
         private static Tuple<double, string> Gather(string path, IEnumerable<Tuple<double, string>> results,
+                                                    bool sheer = false,
                                                     bool withSubtotal = true)
         {
             var r = results.ToList();
@@ -138,7 +150,9 @@ namespace AccountingServer.Shell
                 return new Tuple<double, string>(val, report);
             return new Tuple<double, string>(
                 val,
-                $"{path}\t\t\t{val:R}{Environment.NewLine}{report}");
+                !sheer
+                    ? $"{path}\t\t\t{val:R}{Environment.NewLine}{report}"
+                    : $"{path}\t{val:R}{Environment.NewLine}{report}");
         }
     }
 }

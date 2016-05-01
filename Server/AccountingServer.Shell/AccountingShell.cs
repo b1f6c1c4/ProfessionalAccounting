@@ -82,7 +82,7 @@ namespace AccountingServer.Shell
             if (result.chart() != null)
                 return m_ChartShell.ExecuteChartQuery(result.chart());
             if (result.report() != null)
-                return m_ReportShell.ExecuteReportQuery(result.report(), result.report().Op.Text == "Rp");
+                return m_ReportShell.ExecuteReportQuery(result.report(), result.report().Sheer != null, result.report().Op.Text == "Rp");
             if (result.asset() != null)
                 return m_AssetShell.ExecuteAsset(result.asset());
             if (result.amort() != null)
