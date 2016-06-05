@@ -140,7 +140,7 @@ namespace AccountingServer.DAL
                                     FileName = "cmd.exe",
                                     Arguments =
                                         "/c " +
-                                        "mongodump -h 127.0.0.1 -d accounting -o \"C:\\Users\\b1f6c1c4\\OneDrive\\Backup\"",
+                                        "mongodump -h localhost -d accounting -o \"D:\\Backup\\OneDrive\\Backup\"",
                                     UseShellExecute = false,
                                     RedirectStandardInput = false,
                                     RedirectStandardOutput = true,
