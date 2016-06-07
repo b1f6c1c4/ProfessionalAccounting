@@ -136,6 +136,10 @@
         <Start>20002301</Start>
         <End>20002304</End>
       </Range>
+      <Range>
+        <Start>20002334</Start>
+        <End>20002334</End>
+      </Range>
     </Ranges>
   </Template>
 </EndPointTemplates>
