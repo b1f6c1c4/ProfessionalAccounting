@@ -125,8 +125,7 @@ namespace AccountingServer.Plugins.THUInfo
                 List<Problem> noRemark, tooMuch, tooFew;
                 List<VDetail> noRecord;
                 Compare(out noRemark, out tooMuch, out tooFew, out noRecord);
-                if (pars.Length == 0 ||
-                    string.IsNullOrEmpty(pars[0]) ||
+                if ((pars.Length == 1 && pars[0] == "whatif") ||
                     noRemark.Any() ||
                     tooMuch.Any() ||
                     tooFew.Any(p => p.Details.Any()) ||
@@ -217,10 +216,10 @@ namespace AccountingServer.Plugins.THUInfo
         /// <param name="pars">生成记账所需参数</param>
         /// <param name="failed">无法生产记账凭证的交易记录</param>
         private static IEnumerable<Voucher> AutoGenerate(IEnumerable<TransactionRecord> records,
-                                                         IEnumerable<string> pars,
+                                                         IList<string> pars,
                                                          out List<TransactionRecord> failed)
         {
-            var dic = GetDic(pars);
+            var dic = pars.Count > 0 ? GetDic(pars) : null;
             var res = Enumerable.Empty<Voucher>();
             failed = new List<TransactionRecord>();
             foreach (var grp in records.GroupBy(r => r.Date))
@@ -232,13 +231,21 @@ namespace AccountingServer.Plugins.THUInfo
                 if (!lst.Any())
                     continue;
 
-                if (!dic.ContainsKey(grp.Key.Date))
+                if (dic != null)
                 {
-                    failed.AddRange(grp);
-                    continue;
+                    if (!dic.ContainsKey(grp.Key.Date))
+                    {
+                        failed.AddRange(grp);
+                        continue;
+                    }
+
+                    GenerateSpecial(dic[grp.Key.Date], lst, grp.Key.Date, out res1);
+                }
+                else
+                {
+                    GenerateSpecial(Enumerable.Empty<Tuple<RegularType, string>>(), lst, grp.Key.Date, out res1);
                 }
 
-                GenerateSpecial(dic[grp.Key.Date], lst, grp.Key.Date, out res1);
                 res = res.Concat(res1);
             }
             return res;
@@ -476,7 +483,7 @@ namespace AccountingServer.Plugins.THUInfo
         /// </summary>
         /// <param name="pars">自动补全指令</param>
         /// <returns>解析结果</returns>
-        private static Dictionary<DateTime, List<Tuple<RegularType, string>>> GetDic(IEnumerable<string> pars)
+        private static Dictionary<DateTime, List<Tuple<RegularType, string>>> GetDic(IList<string> pars)
         {
             var dic = new Dictionary<DateTime, List<Tuple<RegularType, string>>>();
             foreach (var par in pars)
