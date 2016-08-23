@@ -1,4 +1,0 @@
-D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.DAL\bin\iPhone\Release\ProfessionalAccounting.DAL.dll
-D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.DAL\bin\iPhone\Release\ProfessionalAccounting.Entities.dll
-D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.DAL\obj\Release\ProfessionalAccounting.DAL.csprojResolveAssemblyReference.cache
-D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.DAL\obj\Release\ProfessionalAccounting.DAL.dll

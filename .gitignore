@@ -1,12 +1,24 @@
 Thumbs.db
-ehthumbs.db
 
 Desktop.ini
 
 $RECYCLE.BIN/
 
+*.log
 *.suo
 *.cache
+*.sdf
+*.opensdf
+*.user
+*.opendb
+*.bak
+bin
+obj
+Release
+Debug
+x64
+.vs
+ipch
 *~
-**/bin
-**/obj
+
+/packages/

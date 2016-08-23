@@ -1,2 +1,0 @@
-D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.Entities\bin\iPhone\Release\ProfessionalAccounting.Entities.dll
-D:\tjzh\Programs\ProfessionalAccounting\ProfessionalAccounting.Entities\obj\Release\ProfessionalAccounting.Entities.dll
