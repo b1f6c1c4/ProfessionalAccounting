@@ -3,19 +3,29 @@ using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.IdGenerators;
-using MongoDB.Bson.Serialization.Serializers;
 
 namespace AccountingServer.DAL
 {
     /// <summary>
     ///     记账凭证序列化器
     /// </summary>
-    internal class VoucherSerializer : BsonBaseSerializer, IBsonIdProvider
+    internal class VoucherSerializer : IBsonSerializer<Voucher>, IBsonIdProvider
     {
-        public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
-                                           IBsonSerializationOptions options) => Deserialize(bsonReader);
+        object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)=>
+            Deserialize(context, args);
 
-        public static Voucher Deserialize(BsonReader bsonReader)
+        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, object value) =>
+            Serialize(context, args, (Voucher)value);
+
+        public Type ValueType => typeof(Voucher);
+
+        public Voucher Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
+            Deserialize(context.Reader);
+
+        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, Voucher value) =>
+            Serialize(context.Writer, value);
+
+        public static Voucher Deserialize(IBsonReader bsonReader)
         {
             string read = null;
             bsonReader.ReadStartDocument();
@@ -57,10 +67,7 @@ namespace AccountingServer.DAL
             return voucher;
         }
 
-        public override void Serialize(BsonWriter bsonWriter, Type nominalType, object value,
-                                       IBsonSerializationOptions options) => Serialize(bsonWriter, (Voucher)value);
-
-        public static void Serialize(BsonWriter bsonWriter, Voucher voucher)
+        public static void Serialize(IBsonWriter bsonWriter, Voucher voucher)
         {
             bsonWriter.WriteStartDocument();
             bsonWriter.WriteObjectId("_id", voucher.ID);

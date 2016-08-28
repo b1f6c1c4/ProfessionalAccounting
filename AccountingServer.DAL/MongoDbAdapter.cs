@@ -7,7 +7,6 @@ using AccountingServer.Entities;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
 using static AccountingServer.DAL.MongoDbQueryHelper;
 
 namespace AccountingServer.DAL
@@ -63,13 +62,13 @@ namespace AccountingServer.DAL
         /// </summary>
         static MongoDbAdapter()
         {
-            BsonSerializer.RegisterSerializer(typeof(Voucher), new VoucherSerializer());
-            BsonSerializer.RegisterSerializer(typeof(VoucherDetail), new VoucherDetailSerializer());
-            BsonSerializer.RegisterSerializer(typeof(Asset), new AssetSerializer());
-            BsonSerializer.RegisterSerializer(typeof(AssetItem), new AssetItemSerializer());
-            BsonSerializer.RegisterSerializer(typeof(Amortization), new AmortizationSerializer());
-            BsonSerializer.RegisterSerializer(typeof(AmortItem), new AmortItemSerializer());
-            BsonSerializer.RegisterSerializer(typeof(Balance), new BalanceSerializer());
+            BsonSerializer.RegisterSerializer(new VoucherSerializer());
+            BsonSerializer.RegisterSerializer(new VoucherDetailSerializer());
+            BsonSerializer.RegisterSerializer(new AssetSerializer());
+            BsonSerializer.RegisterSerializer(new AssetItemSerializer());
+            BsonSerializer.RegisterSerializer(new AmortizationSerializer());
+            BsonSerializer.RegisterSerializer(new AmortItemSerializer());
+            BsonSerializer.RegisterSerializer(new BalanceSerializer());
         }
 
         #region Server

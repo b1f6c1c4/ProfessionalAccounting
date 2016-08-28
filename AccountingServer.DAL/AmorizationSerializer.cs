@@ -3,20 +3,30 @@ using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.IdGenerators;
-using MongoDB.Bson.Serialization.Serializers;
 
 namespace AccountingServer.DAL
 {
     /// <summary>
     ///     Ì¯ÏúÐòÁÐ»¯Æ÷
     /// </summary>
-    internal class AmortizationSerializer : BsonBaseSerializer, IBsonIdProvider
+    internal class AmortizationSerializer : IBsonSerializer<Amortization>, IBsonIdProvider
     {
-        public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
-                                           IBsonSerializationOptions options) => Deserialize(bsonReader);
+        object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
+            Deserialize(context, args);
+
+        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, object value) =>
+            Serialize(context, args, (Amortization)value);
+
+        public Type ValueType => typeof(Amortization);
+
+        public Amortization Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
+            Deserialize(context.Reader);
+
+        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, Amortization value) =>
+            Serialize(context.Writer, value);
 
         // ReSharper disable once MemberCanBePrivate.Global
-        public static object Deserialize(BsonReader bsonReader)
+        public static Amortization Deserialize(IBsonReader bsonReader)
         {
             string read = null;
 
@@ -61,11 +71,8 @@ namespace AccountingServer.DAL
             return amort;
         }
 
-        public override void Serialize(BsonWriter bsonWriter, Type nominalType, object value,
-                                       IBsonSerializationOptions options) => Serialize(bsonWriter, (Amortization)value);
-
         // ReSharper disable once MemberCanBePrivate.Global
-        public static void Serialize(BsonWriter bsonWriter, Amortization amort)
+        public static void Serialize(IBsonWriter bsonWriter, Amortization amort)
         {
             bsonWriter.WriteStartDocument();
             bsonWriter.Write("_id", amort.ID);

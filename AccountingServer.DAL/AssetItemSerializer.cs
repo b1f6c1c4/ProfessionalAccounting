@@ -2,19 +2,29 @@ using System;
 using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
 
 namespace AccountingServer.DAL
 {
     /// <summary>
     ///     折旧计算表条目序列化器
     /// </summary>
-    internal class AssetItemSerializer : BsonBaseSerializer
+    internal class AssetItemSerializer : IBsonSerializer<AssetItem>
     {
-        public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
-                                           IBsonSerializationOptions options) => Deserialize(bsonReader);
+        object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
+            Deserialize(context, args);
 
-        public static AssetItem Deserialize(BsonReader bsonReader)
+        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, object value) =>
+            Serialize(context, args, (AssetItem)value);
+
+        public Type ValueType => typeof(AssetItem);
+
+        public AssetItem Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
+            Deserialize(context.Reader);
+
+        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, AssetItem value) =>
+            Serialize(context.Writer, value);
+
+        public static AssetItem Deserialize(IBsonReader bsonReader)
         {
             string read = null;
 
@@ -39,10 +49,7 @@ namespace AccountingServer.DAL
             return item;
         }
 
-        public override void Serialize(BsonWriter bsonWriter, Type nominalType, object value,
-                                       IBsonSerializationOptions options) => Serialize(bsonWriter, (AssetItem)value);
-
-        public static void Serialize(BsonWriter bsonWriter, AssetItem item)
+        public static void Serialize(IBsonWriter bsonWriter, AssetItem item)
         {
             bsonWriter.WriteStartDocument();
             bsonWriter.WriteObjectId("voucher", item.VoucherID);
