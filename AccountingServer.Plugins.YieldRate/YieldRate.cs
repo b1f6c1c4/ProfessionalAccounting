@@ -75,8 +75,7 @@ namespace AccountingServer.Plugins.YieldRate
             foreach (var grp in result.GroupByContent())
             {
                 var rate = GetRate(grp.ToList(), grp.Key, endDate);
-                sb.AppendFormat("{0}\t{1:P2}", grp.Key, rate * 360);
-                sb.AppendLine();
+                sb.AppendLine($"{grp.Key}\t{rate * 360:P2}");
             }
             return new UnEditableText(sb.ToString());
         }

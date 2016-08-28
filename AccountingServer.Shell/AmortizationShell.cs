@@ -318,16 +318,10 @@ namespace AccountingServer.Shell
             if (dt.HasValue &&
                 (!bookValue.HasValue || bookValue.Value.IsZero()))
                 return null;
-            sb.AppendFormat(
-                            "{0} {1}{2:yyyyMMdd}{3}{4}{5}{6}",
-                            amort.StringID,
-                            amort.Name.CPadRight(35),
-                            amort.Date,
-                            amort.Value.AsCurrency().CPadLeft(13),
-                            dt.HasValue ? bookValue.AsCurrency().CPadLeft(13) : "-".CPadLeft(13),
-                            (amort.TotalDays?.ToString(CultureInfo.InvariantCulture) ?? "-").CPadLeft(4),
-                            amort.Interval.ToString().CPadLeft(20));
-            sb.AppendLine();
+            sb.AppendLine(
+                          $"{amort.StringID} {amort.Name.CPadRight(35)}{amort.Date:yyyyMMdd}" +
+                          $"{amort.Value.AsCurrency().CPadLeft(13)}{(dt.HasValue ? bookValue.AsCurrency().CPadLeft(13) : "-".CPadLeft(13))}" +
+                          $"{((amort.TotalDays?.ToString(CultureInfo.InvariantCulture) ?? "-").CPadLeft(4))}{amort.Interval.ToString().CPadLeft(20)}");
             if (showSchedule && amort.Schedule != null)
                 foreach (var amortItem in amort.Schedule)
                 {
