@@ -31,11 +31,7 @@ namespace AccountingServer.Shell
                 if (val.IsZero())
                     continue;
 
-                if (val > 0)
-                    sb.AppendFormat("/* Debit - Credit = {0:R} */", val);
-                else
-                    sb.AppendFormat("/* Credit - Debit = {0:R} */", -val);
-                sb.AppendLine();
+                sb.AppendLine(val > 0 ? $"/* Debit - Credit = {val:R} */" : $"/* Credit - Debit = {-val:R} */");
                 sb.Append(CSharpHelper.PresentVoucher(voucher));
             }
             if (sb.Length > 0)
@@ -132,13 +128,10 @@ namespace AccountingServer.Shell
                                 balance.Fund.IsNonPositive())
                                 continue;
 
-                            sb.AppendFormat(
-                                            "{0:yyyyMMdd} {1}{2} {3}:{4:R}",
-                                            balance.Date,
-                                            grpTitle.Key.AsTitle(),
-                                            grpSubTitle.Key.AsSubTitle(),
-                                            grpContent.Key,
-                                            balance.Fund);
+                            sb.AppendLine(
+                                          $"{balance.Date:yyyyMMdd} " +
+                                          $"{grpTitle.Key.AsTitle()}{grpSubTitle.Key.AsSubTitle()} " +
+                                          $"{grpContent.Key}:{balance.Fund:R}");
                             sb.AppendLine();
                             break;
                         }

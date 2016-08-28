@@ -38,17 +38,10 @@ namespace AccountingServer.DAL
             if (vfilter != null)
             {
                 if (vfilter.ID != null)
-                {
-                    sb.AppendFormat("    if (v._id != '{0}') return false;", vfilter.ID);
-                    sb.AppendLine();
-                }
+                    sb.AppendLine($"    if (v._id != '{vfilter.ID}') return false;");
                 if (vfilter.Date != null)
-                {
-                    sb.AppendFormat(
-                                    "    if (v.date != new ISODate('{0:yyyy-MM-ddTHH:mm:sszzz}')) return false;",
-                                    vfilter.Date);
-                    sb.AppendLine();
-                }
+                    sb.AppendLine(
+                                  $"    if (v.date != new ISODate('{vfilter.Date:yyyy-MM-ddTHH:mm:sszzz}')) return false;");
                 if (vfilter.Type != null)
                     switch (vfilter.Type)
                     {
@@ -82,12 +75,10 @@ namespace AccountingServer.DAL
                             break;
                     }
                 if (vfilter.Remark != null)
-                    if (vfilter.Remark == string.Empty)
-                        sb.AppendLine("    if (v.remark != null) return false;");
-                    else
-                        sb.AppendFormat(
-                                        "    if (v.remark != '{0}') return false;",
-                                        vfilter.Remark.Replace("\'", "\\\'"));
+                    sb.AppendLine(
+                                  vfilter.Remark == string.Empty
+                                      ? "    if (v.remark != null) return false;"
+                                      : $"    if (v.remark != '{(vfilter.Remark.Replace("\'", "\\\'"))}') return false;");
             }
             sb.AppendLine("    return true;");
             sb.AppendLine("}");
@@ -113,13 +104,11 @@ namespace AccountingServer.DAL
                 sb.AppendLine(rng.Value.Nullable ? "true;" : "false;");
 
                 if (rng.Value.StartDate.HasValue)
-                    sb.AppendFormat(
-                                    "    if (v.date < new ISODate('{0:yyyy-MM-ddTHH:mm:sszzz}')) return false;",
-                                    rng.Value.StartDate);
+                    sb.Append(
+                              $"    if (v.date < new ISODate('{rng.Value.StartDate:yyyy-MM-ddTHH:mm:sszzz}')) return false;");
                 if (rng.Value.EndDate.HasValue)
-                    sb.AppendFormat(
-                                    "    if (v.date > new ISODate('{0:yyyy-MM-ddTHH:mm:sszzz}')) return false;",
-                                    rng.Value.EndDate);
+                    sb.Append(
+                              $"    if (v.date > new ISODate('{rng.Value.EndDate:yyyy-MM-ddTHH:mm:sszzz}')) return false;");
 
                 sb.AppendLine("    return true;");
             }
@@ -154,37 +143,24 @@ namespace AccountingServer.DAL
                 if (f.Filter != null)
                 {
                     if (f.Filter.Title != null)
-                    {
-                        sb.AppendFormat("    if (d.title != {0}) return false;", f.Filter.Title);
-                        sb.AppendLine();
-                    }
+                        sb.AppendLine($"    if (d.title != {f.Filter.Title}) return false;");
                     if (f.Filter.SubTitle != null)
-                        if (f.Filter.SubTitle == 00)
-                            sb.AppendLine("    if (d.subtitle != null) return false;");
-                        else
-                        {
-                            sb.AppendLine();
-                            sb.AppendFormat("    if (d.subtitle != {0}) return false;", f.Filter.SubTitle);
-                        }
+                        sb.AppendLine(
+                                      f.Filter.SubTitle == 00
+                                          ? "    if (d.subtitle != null) return false;"
+                                          : $"    if (d.subtitle != {f.Filter.SubTitle}) return false;");
                     if (f.Filter.Content != null)
-                        if (f.Filter.Content == string.Empty)
-                            sb.AppendLine("    if (d.content != null) return false;");
-                        else
-                            sb.AppendFormat(
-                                            "    if (d.content != '{0}') return false;",
-                                            f.Filter.Content.Replace("\'", "\\\'"));
+                        sb.AppendLine(
+                                      f.Filter.Content == string.Empty
+                                          ? "    if (d.content != null) return false;"
+                                          : $"    if (d.content != '{(f.Filter.Content.Replace("\'", "\\\'"))}') return false;");
                     if (f.Filter.Remark != null)
-                        if (f.Filter.Remark == string.Empty)
-                            sb.AppendLine("    if (d.remark != null) return false;");
-                        else
-                            sb.AppendFormat(
-                                            "    if (d.remark != '{0}') return false;",
-                                            f.Filter.Remark.Replace("\'", "\\\'"));
+                        sb.AppendLine(
+                                      f.Filter.Remark == string.Empty
+                                          ? "    if (d.remark != null) return false;"
+                                          : $"    if (d.remark != '{(f.Filter.Remark.Replace("\'", "\\\'"))}') return false;");
                     if (f.Filter.Fund != null)
-                    {
-                        sb.AppendFormat("    if (Math.abs(d.fund - {0:r}) > 1e-8)) return false;", f.Filter.Fund);
-                        sb.AppendLine();
-                    }
+                        sb.AppendLine($"    if (Math.abs(d.fund - {f.Filter.Fund:r}) > 1e-8)) return false;");
                 }
             }
             sb.AppendLine("    return true;");
@@ -219,23 +195,18 @@ namespace AccountingServer.DAL
             sb.AppendLine("function(v) {");
             if (f != null)
             {
-                sb.Append("    var vfilter = ");
-                sb.Append(GetJavascriptFilter(f.VoucherFilter));
-                sb.AppendLine(";");
+                sb.AppendLine($"    var vfilter = {GetJavascriptFilter(f.VoucherFilter)};");
                 sb.AppendLine("    if (!vfilter(v)) return false;");
 
-                sb.Append("    var rng = ");
-                sb.Append(GetJavascriptFilter(f.Range));
-                sb.AppendLine(";");
+                sb.AppendLine($"    var rng = {GetJavascriptFilter(f.Range)};");
                 sb.AppendLine("    if (!rng(v)) return false;");
 
                 if (f.ForAll)
                 {
                     sb.AppendLine("    var i = 0;");
                     sb.AppendLine("    for (i = 0;i < v.detail.length;i++)");
-                    sb.AppendLine("        if (!(");
-                    sb.Append(GetJavascriptFilter(f.DetailFilter, GetJavascriptFilter));
-                    sb.AppendLine(")(v.detail[i]))");
+                    sb.AppendLine(
+                                  $"        if (!({GetJavascriptFilter(f.DetailFilter, GetJavascriptFilter)})(v.detail[i]))");
                     sb.AppendLine("            break;");
                     sb.AppendLine("    if (i < v.detail.length)");
                     sb.AppendLine("        return false;");
@@ -244,9 +215,8 @@ namespace AccountingServer.DAL
                 {
                     sb.AppendLine("    var i = 0;");
                     sb.AppendLine("    for (i = 0;i < v.detail.length;i++)");
-                    sb.AppendLine("        if ((");
-                    sb.Append(GetJavascriptFilter(f.DetailFilter, GetJavascriptFilter));
-                    sb.AppendLine(")(v.detail[i]))");
+                    sb.AppendLine(
+                                  $"        if (({GetJavascriptFilter(f.DetailFilter, GetJavascriptFilter)})(v.detail[i]))");
                     sb.AppendLine("            break;");
                     sb.AppendLine("    if (i >= v.detail.length)");
                     sb.AppendLine("        return false;");
@@ -289,26 +259,18 @@ namespace AccountingServer.DAL
             else
             {
                 if (f.Filter.ID.HasValue)
-                {
-                    sb.AppendFormat(
-                                    "    if (a._id.toString() != BinData(3,'{0}')) return false;",
-                                    Convert.ToBase64String(f.Filter.ID.Value.ToByteArray()));
-                    sb.AppendLine();
-                }
+                    sb.AppendLine(
+                                  $"    if (a._id.toString() != BinData(3,'{Convert.ToBase64String(f.Filter.ID.Value.ToByteArray())}')) return false;");
                 if (f.Filter.Name != null)
-                    if (f.Filter.Name == string.Empty)
-                        sb.AppendLine("    if (a.name != null) return false;");
-                    else
-                        sb.AppendFormat(
-                                        "    if (a.name != '{0}') return false;",
-                                        f.Filter.Name.Replace("\'", "\\\'"));
+                    sb.AppendLine(
+                                  f.Filter.Name == string.Empty
+                                      ? "    if (a.name != null) return false;"
+                                      : $"    if (a.name != '{(f.Filter.Name.Replace("\'", "\\\'"))}') return false;");
                 if (f.Filter.Remark != null)
-                    if (f.Filter.Remark == string.Empty)
-                        sb.AppendLine("    if (a.remark != null) return false;");
-                    else
-                        sb.AppendFormat(
-                                        "    if (a.remark != '{0}') return false;",
-                                        f.Filter.Remark.Replace("\'", "\\\'"));
+                    sb.AppendLine(
+                                  f.Filter.Remark == string.Empty
+                                      ? "    if (a.remark != null) return false;"
+                                      : $"    if (a.remark != '{(f.Filter.Remark.Replace("\'", "\\\'"))}') return false;");
                 sb.AppendLine("    return true;");
             }
             sb.AppendLine("}");
@@ -338,41 +300,25 @@ namespace AccountingServer.DAL
                 {
                     case OperatorType.None:
                     case OperatorType.Identity:
-                        sb.AppendLine("(");
-                        sb.Append(GetJavascriptFilter(f.Filter1, atomFilter));
-                        sb.AppendLine(")(entity)");
+                        sb.AppendLine($"({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
                         break;
                     case OperatorType.Complement:
-                        sb.AppendLine("!(");
-                        sb.Append(GetJavascriptFilter(f.Filter1, atomFilter));
-                        sb.AppendLine(")(entity)");
+                        sb.AppendLine($"!({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
                         break;
                     case OperatorType.Union:
-                        sb.AppendLine("(");
-                        sb.Append(GetJavascriptFilter(f.Filter1, atomFilter));
-                        sb.AppendLine(")(entity) ");
+                        sb.AppendLine($"({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
                         sb.AppendLine("||");
-                        sb.AppendLine(" (");
-                        sb.Append(GetJavascriptFilter(f.Filter2, atomFilter));
-                        sb.AppendLine(")(entity)");
+                        sb.AppendLine($"({GetJavascriptFilter(f.Filter2, atomFilter)})(entity)");
                         break;
                     case OperatorType.Intersect:
-                        sb.AppendLine("(");
-                        sb.Append(GetJavascriptFilter(f.Filter1, atomFilter));
-                        sb.AppendLine(")(entity) ");
+                        sb.AppendLine($"({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
                         sb.AppendLine("&&");
-                        sb.AppendLine(" (");
-                        sb.Append(GetJavascriptFilter(f.Filter2, atomFilter));
-                        sb.AppendLine(")(entity)");
+                        sb.AppendLine($"({GetJavascriptFilter(f.Filter2, atomFilter)})(entity)");
                         break;
                     case OperatorType.Substract:
-                        sb.AppendLine("(");
-                        sb.Append(GetJavascriptFilter(f.Filter1, atomFilter));
-                        sb.AppendLine(")(entity) ");
+                        sb.AppendLine($"({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
                         sb.AppendLine("&& !");
-                        sb.AppendLine(" (");
-                        sb.Append(GetJavascriptFilter(f.Filter2, atomFilter));
-                        sb.AppendLine(")(entity)");
+                        sb.AppendLine($"({GetJavascriptFilter(f.Filter2, atomFilter)})(entity)");
                         break;
                     default:
                         throw new ArgumentException("运算类型未知", nameof(query));

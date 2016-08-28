@@ -82,7 +82,10 @@ namespace AccountingServer.Shell
             if (result.chart() != null)
                 return m_ChartShell.ExecuteChartQuery(result.chart());
             if (result.report() != null)
-                return m_ReportShell.ExecuteReportQuery(result.report(), result.report().Sheer != null, result.report().Op.Text == "Rp");
+                return m_ReportShell.ExecuteReportQuery(
+                                                        result.report(),
+                                                        result.report().Sheer != null,
+                                                        result.report().Op.Text == "Rp");
             if (result.asset() != null)
                 return m_AssetShell.ExecuteAsset(result.asset());
             if (result.amort() != null)
@@ -175,14 +178,7 @@ namespace AccountingServer.Shell
         {
             var sb = new StringBuilder();
             foreach (var title in TitleManager.GetTitles())
-            {
-                sb.AppendFormat(
-                                "{0}{1}\t\t{2}",
-                                title.Item1.AsTitle(),
-                                title.Item2.AsSubTitle(),
-                                title.Item3);
-                sb.AppendLine();
-            }
+                sb.AppendLine($"{title.Item1.AsTitle()}{title.Item2.AsSubTitle()}\t\t{title.Item3}");
             return new UnEditableText(sb.ToString());
         }
 
