@@ -3,7 +3,6 @@ using System.Text;
 using AccountingServer.Entities;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
 
 namespace AccountingServer.DAL
 {
@@ -17,15 +16,15 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="id">编号</param>
         /// <returns>Bson查询</returns>
-        public static IMongoQuery GetQuery(string id) => Query.EQ("_id", ObjectId.Parse(id));
+        public static FilterDefinition<T> GetQuery<T>(string id) => Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
 
         /// <summary>
         ///     按编号查询<c>Guid</c>
         /// </summary>
         /// <param name="id">编号</param>
         /// <returns>Bson查询</returns>
-        public static IMongoQuery GetQuery(Guid? id)
-            => Query.EQ("_id", id.HasValue ? id.Value.ToBsonValue() as BsonValue : BsonNull.Value);
+        public static FilterDefinition<T> GetQuery<T>(Guid? id) =>
+            Builders<T>.Filter.Eq("_id", id.HasValue ? id.Value.ToBsonValue() as BsonValue : BsonNull.Value);
 
         /// <summary>
         ///     记账凭证过滤器的Javascript表示
@@ -133,8 +132,8 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">细目检索式</param>
         /// <returns>Javascript表示</returns>
-        public static string GetJavascriptFilter(IQueryCompunded<IDetailQueryAtom> query)
-            => GetJavascriptFilter(query, GetJavascriptFilter);
+        public static string GetJavascriptFilter(IQueryCompunded<IDetailQueryAtom> query) =>
+            GetJavascriptFilter(query, GetJavascriptFilter);
 
         /// <summary>
         ///     原子细目检索式的Javascript表示
@@ -198,16 +197,16 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">记账凭证检索式</param>
         /// <returns>Javascript表示</returns>
-        public static string GetJavascriptFilter(IQueryCompunded<IVoucherQueryAtom> query)
-            => GetJavascriptFilter(query, GetJavascriptFilter);
+        public static string GetJavascriptFilter(IQueryCompunded<IVoucherQueryAtom> query) =>
+            GetJavascriptFilter(query, GetJavascriptFilter);
 
         /// <summary>
         ///     记账凭证检索式的查询
         /// </summary>
         /// <param name="query">记账凭证检索式</param>
         /// <returns>查询</returns>
-        public static IMongoQuery GetQuery(IQueryCompunded<IVoucherQueryAtom> query)
-            => ToWhere(GetJavascriptFilter(query));
+        public static FilterDefinition<Voucher> GetQuery(IQueryCompunded<IVoucherQueryAtom> query) =>
+            ToWhere<Voucher>(GetJavascriptFilter(query));
 
         /// <summary>
         ///     原子记账凭证检索式的Javascript表示
@@ -264,16 +263,17 @@ namespace AccountingServer.DAL
         /// <param name="query">分期检索式</param>
         /// <returns>Javascript表示</returns>
         // ReSharper disable once MemberCanBePrivate.Global
-        public static string GetJavascriptFilter(IQueryCompunded<IDistributedQueryAtom> query)
-            => GetJavascriptFilter(query, GetJavascriptFilter);
+        public static string GetJavascriptFilter(IQueryCompunded<IDistributedQueryAtom> query) =>
+            GetJavascriptFilter(query, GetJavascriptFilter);
 
         /// <summary>
         ///     分期检索式的查询
         /// </summary>
         /// <param name="query">分期检索式</param>
         /// <returns>查询</returns>
-        public static IMongoQuery GetQuery(IQueryCompunded<IDistributedQueryAtom> query)
-            => ToWhere(GetJavascriptFilter(query));
+        public static FilterDefinition<T> GetQuery<T>(IQueryCompunded<IDistributedQueryAtom> query)
+            where T : IDistributed =>
+                ToWhere<T>(GetJavascriptFilter(query));
 
         /// <summary>
         ///     原子分期检索式的Javascript表示
@@ -389,10 +389,10 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="js">Javascript表示</param>
         /// <returns>查询</returns>
-        private static IMongoQuery ToWhere(string js)
+        private static FilterDefinition<T> ToWhere<T>(string js)
         {
             var code = $"function() {{ return ({js})(this); }}";
-            return new QueryDocument("$where", code.Replace(Environment.NewLine, string.Empty));
+            return new BsonDocument { { "$where", code.Replace(Environment.NewLine, string.Empty) } };
         }
     }
 }

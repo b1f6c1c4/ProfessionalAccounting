@@ -25,35 +25,30 @@ namespace AccountingServer.DAL
         private MongoClient m_Client;
 
         /// <summary>
-        ///     MongoDb服务器
-        /// </summary>
-        private MongoServer m_Server;
-
-        /// <summary>
         ///     MongoDb数据库
         /// </summary>
         // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
-        private MongoDatabase m_Db;
+        private IMongoDatabase m_Db;
 
         /// <summary>
         ///     记账凭证集合
         /// </summary>
-        private MongoCollection<Voucher> m_Vouchers;
+        private IMongoCollection<Voucher> m_Vouchers;
 
         /// <summary>
         ///     资产集合
         /// </summary>
-        private MongoCollection<Asset> m_Assets;
+        private IMongoCollection<Asset> m_Assets;
 
         /// <summary>
         ///     摊销集合
         /// </summary>
-        private MongoCollection<Amortization> m_Amortizations;
+        private IMongoCollection<Amortization> m_Amortizations;
 
         /// <summary>
         ///     命名查询模板集合
         /// </summary>
-        private MongoCollection<BsonDocument> m_NamedQueryTemplates;
+        private IMongoCollection<BsonDocument> m_NamedQueryTemplates;
 
         #endregion
 
@@ -92,7 +87,8 @@ namespace AccountingServer.DAL
                                 };
 
             var process = Process.Start(startinfo);
-            if (process == null || process.HasExited)
+            if (process == null ||
+                process.HasExited)
                 throw new ApplicationException("无法启动数据库");
         }
 
@@ -100,9 +96,8 @@ namespace AccountingServer.DAL
         public void Connect()
         {
             m_Client = new MongoClient("mongodb://localhost");
-            m_Server = m_Client.GetServer();
 
-            m_Db = m_Server.GetDatabase("accounting");
+            m_Db = m_Client.GetDatabase("accounting");
 
             m_Vouchers = m_Db.GetCollection<Voucher>("voucher");
             m_Assets = m_Db.GetCollection<Asset>("asset");
@@ -124,8 +119,6 @@ namespace AccountingServer.DAL
             m_Amortizations = null;
             m_NamedQueryTemplates = null;
 
-            m_Server.Disconnect();
-            m_Server = null;
             m_Client = null;
 
             Connected = false;
@@ -156,46 +149,45 @@ namespace AccountingServer.DAL
         #region Voucher
 
         /// <inheritdoc />
-        public Voucher SelectVoucher(string id) => m_Vouchers.FindOneById(ObjectId.Parse(id));
+        public Voucher SelectVoucher(string id) =>
+            m_Vouchers.FindSync(GetQuery<Voucher>(id)).FirstOrDefault();
 
         /// <inheritdoc />
-        public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query)
-            => m_Vouchers.Find(GetQuery(query));
+        public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query) =>
+            m_Vouchers.Find(GetQuery(query)).ToEnumerable();
 
         /// <inheritdoc />
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
             const string reduce =
                 "function(key, values) { var total = 0; for (var i = 0; i < values.length; i++) total += values[i]; return total; }";
-            var args = new MapReduceArgs
-                           {
-                               MapFunction =
-                                   new BsonJavaScript(GetMapJavascript(query.VoucherEmitQuery, query.Subtotal)),
-                               ReduceFunction = new BsonJavaScript(reduce)
-                           };
-            var res = m_Vouchers.MapReduce(args);
-            return res.GetResultsAs<Balance>();
+            return
+                m_Vouchers.MapReduce<Balance>(GetMapJavascript(query.VoucherEmitQuery, query.Subtotal), reduce)
+                          .ToEnumerable();
         }
 
         /// <inheritdoc />
         public bool DeleteVoucher(string id)
         {
-            var res = m_Vouchers.Remove(GetQuery(id));
-            return res.DocumentsAffected == 1;
+            var res = m_Vouchers.DeleteOne(GetQuery<Voucher>(id));
+            return res.DeletedCount == 1;
         }
 
         /// <inheritdoc />
         public long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query)
         {
-            var res = m_Vouchers.Remove(GetQuery(query));
-            return res.DocumentsAffected;
+            var res = m_Vouchers.DeleteMany(GetQuery(query));
+            return res.DeletedCount;
         }
 
         /// <inheritdoc />
         public bool Upsert(Voucher entity)
         {
-            var res = m_Vouchers.Save(entity);
-            return res.DocumentsAffected <= 1;
+            var res = m_Vouchers.ReplaceOne(
+                                            Builders<Voucher>.Filter.Eq("_id", entity.ID),
+                                            entity,
+                                            new UpdateOptions { IsUpsert = true });
+            return res.ModifiedCount <= 1;
         }
 
         #endregion
@@ -203,31 +195,34 @@ namespace AccountingServer.DAL
         #region Asset
 
         /// <inheritdoc />
-        public Asset SelectAsset(Guid id) => m_Assets.FindOne(GetQuery(id));
+        public Asset SelectAsset(Guid id) => m_Assets.FindSync(GetQuery<Asset>(id)).FirstOrDefault();
 
         /// <inheritdoc />
-        public IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter)
-            => m_Assets.Find(GetQuery(filter));
+        public IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter) =>
+            m_Assets.FindSync(GetQuery<Asset>(filter)).ToEnumerable();
 
         /// <inheritdoc />
         public bool DeleteAsset(Guid id)
         {
-            var res = m_Assets.Remove(GetQuery(id));
-            return res.DocumentsAffected == 1;
+            var res = m_Assets.DeleteOne(GetQuery<Asset>(id));
+            return res.DeletedCount == 1;
         }
 
         /// <inheritdoc />
         public bool Upsert(Asset entity)
         {
-            var res = m_Assets.Save(entity);
-            return res.DocumentsAffected == 1;
+            var res = m_Assets.ReplaceOne(
+                                          Builders<Asset>.Filter.Eq("_id", entity.ID),
+                                          entity,
+                                          new UpdateOptions { IsUpsert = true });
+            return res.ModifiedCount <= 1;
         }
 
         /// <inheritdoc />
         public long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            var res = m_Assets.Remove(GetQuery(filter));
-            return res.DocumentsAffected;
+            var res = m_Assets.DeleteMany(GetQuery<Asset>(filter));
+            return res.DeletedCount;
         }
 
         #endregion
@@ -235,31 +230,35 @@ namespace AccountingServer.DAL
         #region Amortization
 
         /// <inheritdoc />
-        public Amortization SelectAmortization(Guid id) => m_Amortizations.FindOne(GetQuery(id));
+        public Amortization SelectAmortization(Guid id) =>
+            m_Amortizations.FindSync(GetQuery<Amortization>(id)).FirstOrDefault();
 
         /// <inheritdoc />
-        public IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
-            => m_Amortizations.Find(GetQuery(filter));
+        public IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter) =>
+            m_Amortizations.FindSync(GetQuery<Amortization>(filter)).ToEnumerable();
 
         /// <inheritdoc />
         public bool DeleteAmortization(Guid id)
         {
-            var res = m_Amortizations.Remove(GetQuery(id));
-            return res.DocumentsAffected == 1;
+            var res = m_Amortizations.DeleteOne(GetQuery<Amortization>(id));
+            return res.DeletedCount == 1;
         }
 
         /// <inheritdoc />
         public bool Upsert(Amortization entity)
         {
-            var res = m_Amortizations.Save(entity);
-            return res.DocumentsAffected == 1;
+            var res = m_Amortizations.ReplaceOne(
+                                                 Builders<Amortization>.Filter.Eq("_id", entity.ID),
+                                                 entity,
+                                                 new UpdateOptions { IsUpsert = true });
+            return res.ModifiedCount <= 1;
         }
 
         /// <inheritdoc />
         public long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            var res = m_Amortizations.Remove(GetQuery(filter));
-            return res.DocumentsAffected;
+            var res = m_Amortizations.DeleteMany(GetQuery<Amortization>(filter));
+            return res.DeletedCount;
         }
 
         #endregion
@@ -268,47 +267,39 @@ namespace AccountingServer.DAL
 
         /// <inheritdoc />
         public string SelectNamedQueryTemplate(string name)
-            => m_NamedQueryTemplates.FindOneById(new BsonString(name))["value"].AsString;
+        {
+            var filter = Builders<BsonDocument>.Filter.Eq("_id", new BsonString(name));
+            var doc = m_NamedQueryTemplates.FindSync(filter).FirstOrDefault();
+            return doc?["value"].AsString;
+        }
 
         /// <inheritdoc />
-        public IEnumerable<KeyValuePair<string, string>> SelectNamedQueryTemplates() => m_NamedQueryTemplates.FindAll()
-                                                                                                             .Select(
-                                                                                                                     d
-                                                                                                                     =>
-                                                                                                                     new KeyValuePair
-                                                                                                                         <
-                                                                                                                         string,
-                                                                                                                         string
-                                                                                                                         >
-                                                                                                                         (
-                                                                                                                         d
-                                                                                                                             [
-                                                                                                                              "_id"
-                                                                                                                             ]
-                                                                                                                             .AsString,
-                                                                                                                         d
-                                                                                                                             [
-                                                                                                                              "value"
-                                                                                                                             ]
-                                                                                                                             .AsString));
+        public IEnumerable<KeyValuePair<string, string>> SelectNamedQueryTemplates() =>
+            m_NamedQueryTemplates
+                .FindSync(FilterDefinition<BsonDocument>.Empty)
+                .ToEnumerable()
+                .Select(d => new KeyValuePair<string, string>(d["_id"].AsString, d["value"].AsString));
 
         /// <inheritdoc />
         public bool DeleteNamedQueryTemplate(string name)
         {
-            var res = m_NamedQueryTemplates.Remove(Query.EQ("_id", new BsonString(name)));
-            return res.DocumentsAffected == 1;
+            var filter = Builders<BsonDocument>.Filter.Eq("_id", new BsonString(name));
+            var res = m_NamedQueryTemplates.DeleteOne(filter);
+            return res.DeletedCount == 1;
         }
 
         /// <inheritdoc />
         public bool Upsert(string name, string value)
         {
-            var res = m_NamedQueryTemplates.Save(
-                                                 new BsonDocument
-                                                     {
-                                                         { "_id", name },
-                                                         { "value", value }
-                                                     });
-            return res.DocumentsAffected == 1;
+            var res = m_NamedQueryTemplates.ReplaceOne(
+                                                       Builders<BsonDocument>.Filter.Eq("_id", name),
+                                                       new BsonDocument
+                                                           {
+                                                               { "_id", name },
+                                                               { "value", value }
+                                                           },
+                                                       new UpdateOptions { IsUpsert = true });
+            return res.ModifiedCount == 1;
         }
 
         #endregion
