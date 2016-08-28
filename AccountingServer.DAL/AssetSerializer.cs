@@ -3,20 +3,30 @@ using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.IdGenerators;
-using MongoDB.Bson.Serialization.Serializers;
 
 namespace AccountingServer.DAL
 {
     /// <summary>
     ///     资产序列化器
     /// </summary>
-    internal class AssetSerializer : BsonBaseSerializer, IBsonIdProvider
+    internal class AssetSerializer : IBsonSerializer<Asset>, IBsonIdProvider
     {
-        public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
-                                           IBsonSerializationOptions options) => Deserialize(bsonReader);
+        object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
+            Deserialize(context, args);
+
+        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, object value) =>
+            Serialize(context, args, (Asset)value);
+
+        public Type ValueType => typeof(Asset);
+
+        public Asset Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
+            Deserialize(context.Reader);
+
+        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, Asset value) =>
+            Serialize(context.Writer, value);
 
         // ReSharper disable once MemberCanBePrivate.Global
-        public static object Deserialize(BsonReader bsonReader)
+        public static Asset Deserialize(IBsonReader bsonReader)
         {
             string read = null;
 
@@ -67,11 +77,8 @@ namespace AccountingServer.DAL
             return asset;
         }
 
-        public override void Serialize(BsonWriter bsonWriter, Type nominalType, object value,
-                                       IBsonSerializationOptions options) => Serialize(bsonWriter, (Asset)value);
-
         // ReSharper disable once MemberCanBePrivate.Global
-        public static void Serialize(BsonWriter bsonWriter, Asset asset)
+        public static void Serialize(IBsonWriter bsonWriter, Asset asset)
         {
             bsonWriter.WriteStartDocument();
             bsonWriter.Write("_id", asset.ID);

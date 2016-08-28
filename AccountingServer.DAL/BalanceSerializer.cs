@@ -2,19 +2,33 @@ using System;
 using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
 
 namespace AccountingServer.DAL
 {
     /// <summary>
     ///     余额表条目反序列化器（从MapReduce的结果中反序列化）
     /// </summary>
-    internal class BalanceSerializer : BsonBaseSerializer
+    internal class BalanceSerializer : IBsonSerializer<Balance>
     {
-        public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
-                                           IBsonSerializationOptions options) => Deserialize(bsonReader);
+        object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
+            Deserialize(context, args);
 
-        public static Balance Deserialize(BsonReader bsonReader)
+        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, object value)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public Type ValueType => typeof(Balance);
+
+        public Balance Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
+            Deserialize(context.Reader);
+
+        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, Balance value)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public static Balance Deserialize(IBsonReader bsonReader)
         {
             string read = null;
 

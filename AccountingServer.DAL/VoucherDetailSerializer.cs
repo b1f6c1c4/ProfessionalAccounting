@@ -2,19 +2,29 @@ using System;
 using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
 
 namespace AccountingServer.DAL
 {
     /// <summary>
     ///     Ï¸Ä¿ÐòÁÐ»¯Æ÷
     /// </summary>
-    internal class VoucherDetailSerializer : BsonBaseSerializer
+    internal class VoucherDetailSerializer : IBsonSerializer<VoucherDetail>
     {
-        public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
-                                           IBsonSerializationOptions options) => Deserialize(bsonReader);
+        object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
+            Deserialize(context, args);
 
-        public static VoucherDetail Deserialize(BsonReader bsonReader)
+        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, object value) =>
+            Serialize(context, args, (VoucherDetail)value);
+
+        public Type ValueType => typeof(VoucherDetail);
+
+        public VoucherDetail Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
+            Deserialize(context.Reader);
+
+        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, VoucherDetail value) =>
+            Serialize(context.Writer, value);
+
+        public static VoucherDetail Deserialize(IBsonReader bsonReader)
         {
             string read = null;
 
@@ -32,10 +42,7 @@ namespace AccountingServer.DAL
             return detail;
         }
 
-        public override void Serialize(BsonWriter bsonWriter, Type nominalType, object value,
-                                       IBsonSerializationOptions options) => Serialize(bsonWriter, (VoucherDetail)value);
-
-        internal static void Serialize(BsonWriter bsonWriter, VoucherDetail detail)
+        internal static void Serialize(IBsonWriter bsonWriter, VoucherDetail detail)
         {
             bsonWriter.WriteStartDocument();
             bsonWriter.Write("title", detail.Title);

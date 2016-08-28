@@ -2,19 +2,29 @@
 using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
 
 namespace AccountingServer.DAL
 {
     /// <summary>
     ///     摊销计算表条目序列化器
     /// </summary>
-    internal class AmortItemSerializer : BsonBaseSerializer
+    internal class AmortItemSerializer : IBsonSerializer<AmortItem>
     {
-        public override object Deserialize(BsonReader bsonReader, Type nominalType, Type actualType,
-                                           IBsonSerializationOptions options) => Deserialize(bsonReader);
+        object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
+            Deserialize(context, args);
 
-        public static AmortItem Deserialize(BsonReader bsonReader)
+        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, object value) =>
+            Serialize(context, args, (AmortItem)value);
+
+        public Type ValueType => typeof(AmortItem);
+
+        public AmortItem Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
+            Deserialize(context.Reader);
+
+        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, AmortItem value) =>
+            Serialize(context.Writer, value);
+
+        public static AmortItem Deserialize(IBsonReader bsonReader)
         {
             string read = null;
 
@@ -30,10 +40,7 @@ namespace AccountingServer.DAL
             return item;
         }
 
-        public override void Serialize(BsonWriter bsonWriter, Type nominalType, object value,
-                                       IBsonSerializationOptions options) => Serialize(bsonWriter, (AmortItem)value);
-
-        public static void Serialize(BsonWriter bsonWriter, AmortItem item)
+        public static void Serialize(IBsonWriter bsonWriter, AmortItem item)
         {
             bsonWriter.WriteStartDocument();
             bsonWriter.WriteObjectId("voucher", item.VoucherID);

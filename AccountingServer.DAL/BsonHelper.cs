@@ -15,7 +15,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="bsonReader">Bson读取器</param>
         /// <returns>是否读到文档结尾</returns>
-        private static bool IsEndOfDocument(this BsonReader bsonReader)
+        private static bool IsEndOfDocument(this IBsonReader bsonReader)
         {
             if (bsonReader.State == BsonReaderState.Type)
                 bsonReader.ReadBsonType();
@@ -27,7 +27,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="bsonReader">Bson读取器</param>
         /// <returns>是否读到数组结尾</returns>
-        private static bool IsEndOfArray(this BsonReader bsonReader)
+        private static bool IsEndOfArray(this IBsonReader bsonReader)
         {
             if (bsonReader.State == BsonReaderState.Type)
                 bsonReader.ReadBsonType();
@@ -41,7 +41,7 @@ namespace AccountingServer.DAL
         /// <param name="expected">字段名</param>
         /// <param name="read">字段名缓存</param>
         /// <returns>是否可以继续读入</returns>
-        private static bool ReadName(this BsonReader bsonReader, string expected, ref string read)
+        private static bool ReadName(this IBsonReader bsonReader, string expected, ref string read)
         {
             if (bsonReader.IsEndOfDocument())
                 return false;
@@ -61,7 +61,7 @@ namespace AccountingServer.DAL
         /// <param name="expected">字段名</param>
         /// <param name="read">字段名缓存</param>
         /// <returns>是否可以继续读入</returns>
-        private static bool ReadPrep(this BsonReader bsonReader, string expected, ref string read)
+        private static bool ReadPrep(this IBsonReader bsonReader, string expected, ref string read)
         {
             if (!bsonReader.ReadName(expected, ref read))
                 return false;
@@ -88,7 +88,7 @@ namespace AccountingServer.DAL
         /// <param name="read">字段名缓存</param>
         /// <param name="readFunc">类型读取器</param>
         /// <returns>读取结果</returns>
-        private static T ReadClass<T>(this BsonReader bsonReader, string expected, ref string read,
+        private static T ReadClass<T>(this IBsonReader bsonReader, string expected, ref string read,
                                       Func<T> readFunc) where T : class
             => ReadPrep(bsonReader, expected, ref read) ? readFunc() : null;
 
@@ -100,7 +100,7 @@ namespace AccountingServer.DAL
         /// <param name="read">字段名缓存</param>
         /// <param name="readFunc">类型读取器</param>
         /// <returns>读取结果</returns>
-        private static T? ReadStruct<T>(this BsonReader bsonReader, string expected, ref string read,
+        private static T? ReadStruct<T>(this IBsonReader bsonReader, string expected, ref string read,
                                         Func<T> readFunc) where T : struct
             => ReadPrep(bsonReader, expected, ref read) ? readFunc() : (T?)null;
 
@@ -111,7 +111,7 @@ namespace AccountingServer.DAL
         /// <param name="expected">字段名</param>
         /// <param name="read">字段名缓存</param>
         /// <returns>读取结果</returns>
-        public static string ReadObjectId(this BsonReader bsonReader, string expected, ref string read)
+        public static string ReadObjectId(this IBsonReader bsonReader, string expected, ref string read)
             => ReadClass(bsonReader, expected, ref read, () => bsonReader.ReadObjectId().ToString());
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace AccountingServer.DAL
         /// <param name="expected">字段名</param>
         /// <param name="read">字段名缓存</param>
         /// <returns>读取结果</returns>
-        public static int? ReadInt32(this BsonReader bsonReader, string expected, ref string read)
+        public static int? ReadInt32(this IBsonReader bsonReader, string expected, ref string read)
             => ReadStruct(bsonReader, expected, ref read, bsonReader.ReadInt32);
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace AccountingServer.DAL
         /// <param name="expected">字段名</param>
         /// <param name="read">字段名缓存</param>
         /// <returns>读取结果</returns>
-        public static double? ReadDouble(this BsonReader bsonReader, string expected, ref string read)
+        public static double? ReadDouble(this IBsonReader bsonReader, string expected, ref string read)
             => ReadStruct(bsonReader, expected, ref read, bsonReader.ReadDouble);
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace AccountingServer.DAL
         /// <param name="expected">字段名</param>
         /// <param name="read">字段名缓存</param>
         /// <returns>读取结果</returns>
-        public static string ReadString(this BsonReader bsonReader, string expected, ref string read)
+        public static string ReadString(this IBsonReader bsonReader, string expected, ref string read)
             => ReadClass(bsonReader, expected, ref read, bsonReader.ReadString);
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace AccountingServer.DAL
         /// <param name="expected">字段名</param>
         /// <param name="read">字段名缓存</param>
         /// <returns>读取结果</returns>
-        public static Guid? ReadGuid(this BsonReader bsonReader, string expected, ref string read)
+        public static Guid? ReadGuid(this IBsonReader bsonReader, string expected, ref string read)
             => ReadStruct(bsonReader, expected, ref read, () => bsonReader.ReadBinaryData().AsGuid);
 
         /// <summary>
@@ -161,7 +161,7 @@ namespace AccountingServer.DAL
         /// <param name="expected">字段名</param>
         /// <param name="read">字段名缓存</param>
         /// <returns>读取结果</returns>
-        public static DateTime? ReadDateTime(this BsonReader bsonReader, string expected, ref string read)
+        public static DateTime? ReadDateTime(this IBsonReader bsonReader, string expected, ref string read)
             => ReadStruct(
                           bsonReader,
                           expected,
@@ -176,7 +176,7 @@ namespace AccountingServer.DAL
         /// <param name="expected">字段名</param>
         /// <param name="read">字段名缓存</param>
         /// <returns>是否成功</returns>
-        public static bool ReadNull(this BsonReader bsonReader, string expected, ref string read)
+        public static bool ReadNull(this IBsonReader bsonReader, string expected, ref string read)
         {
             if (!bsonReader.ReadName(expected, ref read))
                 return false;
@@ -193,8 +193,8 @@ namespace AccountingServer.DAL
         /// <param name="read">字段名缓存</param>
         /// <param name="parser">文档读取器</param>
         /// <returns>读取结果</returns>
-        public static T ReadDocument<T>(this BsonReader bsonReader, string expected, ref string read,
-                                        Func<BsonReader, T> parser) where T : class
+        public static T ReadDocument<T>(this IBsonReader bsonReader, string expected, ref string read,
+                                        Func<IBsonReader, T> parser) where T : class
             => ReadPrep(bsonReader, expected, ref read) ? parser(bsonReader) : null;
 
         /// <summary>
@@ -205,8 +205,8 @@ namespace AccountingServer.DAL
         /// <param name="read">字段名缓存</param>
         /// <param name="parser">数组元素读取器</param>
         /// <returns>读取结果</returns>
-        public static List<T> ReadArray<T>(this BsonReader bsonReader, string expected, ref string read,
-                                           Func<BsonReader, T> parser)
+        public static List<T> ReadArray<T>(this IBsonReader bsonReader, string expected, ref string read,
+                                           Func<IBsonReader, T> parser)
         {
             if (!ReadPrep(bsonReader, expected, ref read))
                 return null;
@@ -226,7 +226,7 @@ namespace AccountingServer.DAL
         /// <param name="name">字段名</param>
         /// <param name="value">字段值</param>
         /// <param name="force">是否强制写入<c>null</c>值</param>
-        public static void WriteObjectId(this BsonWriter bsonWriter, string name, string value, bool force = false)
+        public static void WriteObjectId(this IBsonWriter bsonWriter, string name, string value, bool force = false)
         {
             if (value != null)
                 bsonWriter.WriteObjectId(name, ObjectId.Parse(value));
@@ -241,7 +241,7 @@ namespace AccountingServer.DAL
         /// <param name="name">字段名</param>
         /// <param name="value">字段值</param>
         /// <param name="force">是否强制写入<c>null</c>值</param>
-        public static void Write(this BsonWriter bsonWriter, string name, Guid? value, bool force = false)
+        public static void Write(this IBsonWriter bsonWriter, string name, Guid? value, bool force = false)
         {
             if (value.HasValue)
                 bsonWriter.WriteBinaryData(name, value.Value.ToBsonValue());
@@ -256,7 +256,7 @@ namespace AccountingServer.DAL
         /// <param name="name">字段名</param>
         /// <param name="value">字段值</param>
         /// <param name="force">是否强制写入<c>null</c>值</param>
-        public static void Write(this BsonWriter bsonWriter, string name, int? value, bool force = false)
+        public static void Write(this IBsonWriter bsonWriter, string name, int? value, bool force = false)
         {
             if (value.HasValue)
                 bsonWriter.WriteInt32(name, value.Value);
@@ -271,7 +271,7 @@ namespace AccountingServer.DAL
         /// <param name="name">字段名</param>
         /// <param name="value">字段值</param>
         /// <param name="force">是否强制写入<c>null</c>值</param>
-        public static void Write(this BsonWriter bsonWriter, string name, double? value, bool force = false)
+        public static void Write(this IBsonWriter bsonWriter, string name, double? value, bool force = false)
         {
             if (value.HasValue)
                 bsonWriter.WriteDouble(name, value.Value);
@@ -286,7 +286,7 @@ namespace AccountingServer.DAL
         /// <param name="name">字段名</param>
         /// <param name="value">字段值</param>
         /// <param name="force">是否强制写入<c>null</c>值</param>
-        public static void Write(this BsonWriter bsonWriter, string name, DateTime? value, bool force = false)
+        public static void Write(this IBsonWriter bsonWriter, string name, DateTime? value, bool force = false)
         {
             if (value.HasValue)
                 bsonWriter.WriteDateTime(name, BsonUtils.ToMillisecondsSinceEpoch(value.Value));
@@ -301,7 +301,7 @@ namespace AccountingServer.DAL
         /// <param name="name">字段名</param>
         /// <param name="value">字段值</param>
         /// <param name="force">是否强制写入<c>null</c>值</param>
-        public static void Write(this BsonWriter bsonWriter, string name, string value, bool force = false)
+        public static void Write(this IBsonWriter bsonWriter, string name, string value, bool force = false)
         {
             if (value != null)
                 bsonWriter.WriteString(name, value);
