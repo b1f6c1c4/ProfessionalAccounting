@@ -14,7 +14,6 @@ namespace AccountingServer.Plugins.THUInfo
     /// <summary>
     ///     从info.tsinghua.edu.cn更新账户
     /// </summary>
-    [Plugin(Alias = "f")]
     public class THUInfo : PluginBase
     {
         /// <summary>

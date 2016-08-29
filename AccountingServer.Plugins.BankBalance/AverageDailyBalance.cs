@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
@@ -10,7 +9,6 @@ namespace AccountingServer.Plugins.BankBalance
     /// <summary>
     ///     计算日均余额
     /// </summary>
-    [Plugin(Alias = "adb")]
     public class AverageDailyBalance : PluginBase
     {
         public AverageDailyBalance(Accountant accountant) : base(accountant) { }
@@ -51,7 +49,7 @@ namespace AccountingServer.Plugins.BankBalance
 
             var avg = double.Parse(pars[1]);
             var targ = ldom.Day * avg;
-            
+
             var sb = new StringBuilder();
             sb.AppendLine($"Target: {targ.AsCurrency()}");
             sb.AppendLine($"Balance until yesterday: {bal.AsCurrency()}");
