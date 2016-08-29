@@ -10,22 +10,12 @@ using System.Text.RegularExpressions;
 
 namespace AccountingServer.Plugins.THUInfo
 {
-    public partial class THUInfo
+    internal class Crawler
     {
         /// <summary>
         ///     Cookies容器
         /// </summary>
         private readonly CookieContainer m_CookieContainer = new CookieContainer();
-
-        /// <summary>
-        ///     数据
-        /// </summary>
-        private List<TransactionRecord> m_Data;
-
-        /// <summary>
-        ///     锁对象
-        /// </summary>
-        private readonly object m_Lock = new object();
 
         /// <summary>
         ///     临时文件文件名
@@ -37,27 +27,25 @@ namespace AccountingServer.Plugins.THUInfo
         /// </summary>
         /// <param name="username">用户名</param>
         /// <param name="password">密码</param>
-        private void FetchData(string username, string password)
+        /// <returns>数据</returns>
+        public List<TransactionRecord> FetchData(string username, string password)
         {
-            lock (m_Lock)
-            {
-                m_Data = null;
+            ServicePointManager.DefaultConnectionLimit = 20;
 
-                ServicePointManager.DefaultConnectionLimit = 20;
+            LoginInfo(username, password);
 
-                LoginInfo(username, password);
+            var url = GetUrl();
 
-                var url = GetUrl();
+            LoginECard(url);
 
-                LoginECard(url);
+            using (var stream = DownloadXls())
+                m_FileName = SaveTempFile(stream);
 
-                using (var stream = DownloadXls())
-                    m_FileName = SaveTempFile(stream);
+            var data = GetData().ToList();
 
-                m_Data = GetData().ToList();
+            File.Delete(m_FileName);
 
-                File.Delete(m_FileName);
-            }
+            return data;
         }
 
         /// <summary>
