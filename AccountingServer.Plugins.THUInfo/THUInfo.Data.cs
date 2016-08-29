@@ -37,7 +37,7 @@ namespace AccountingServer.Plugins.THUInfo
         /// </summary>
         /// <param name="username">ÓÃ»§Ãû</param>
         /// <param name="password">ÃÜÂë</param>
-        public void FetchData(string username, string password)
+        private void FetchData(string username, string password)
         {
             lock (m_Lock)
             {
