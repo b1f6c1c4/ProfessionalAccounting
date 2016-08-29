@@ -1,32 +1,16 @@
 using System;
 using AccountingServer.Entities;
 using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.IdGenerators;
+using MongoDB.Driver;
 
 namespace AccountingServer.DAL
 {
     /// <summary>
     ///     Ì¯ÏúÐòÁÐ»¯Æ÷
     /// </summary>
-    internal class AmortizationSerializer : IBsonSerializer<Amortization>, IBsonIdProvider
+    internal class AmortizationSerializer : BaseSerializer<Amortization, Guid?>
     {
-        object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
-            Deserialize(context, args);
-
-        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, object value) =>
-            Serialize(context, args, (Amortization)value);
-
-        public Type ValueType => typeof(Amortization);
-
-        public Amortization Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
-            Deserialize(context.Reader);
-
-        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, Amortization value) =>
-            Serialize(context.Writer, value);
-
-        // ReSharper disable once MemberCanBePrivate.Global
-        public static Amortization Deserialize(IBsonReader bsonReader)
+        public override Amortization Deserialize(IBsonReader bsonReader)
         {
             string read = null;
 
@@ -64,15 +48,14 @@ namespace AccountingServer.DAL
                     amort.Interval = AmortizeInterval.LastDayOfYear;
                     break;
             }
-            amort.Template = bsonReader.ReadDocument("template", ref read, VoucherSerializer.Deserialize);
-            amort.Schedule = bsonReader.ReadArray("schedule", ref read, AmortItemSerializer.Deserialize);
+            amort.Template = bsonReader.ReadDocument("template", ref read, new VoucherSerializer().Deserialize);
+            amort.Schedule = bsonReader.ReadArray("schedule", ref read, new AmortItemSerializer().Deserialize);
             amort.Remark = bsonReader.ReadString("remark", ref read);
             bsonReader.ReadEndDocument();
             return amort;
         }
 
-        // ReSharper disable once MemberCanBePrivate.Global
-        public static void Serialize(IBsonWriter bsonWriter, Amortization amort)
+        public override void Serialize(IBsonWriter bsonWriter, Amortization amort)
         {
             bsonWriter.WriteStartDocument();
             bsonWriter.Write("_id", amort.ID);
@@ -107,31 +90,25 @@ namespace AccountingServer.DAL
             if (amort.Template != null)
             {
                 bsonWriter.WriteName("template");
-                VoucherSerializer.Serialize(bsonWriter, amort.Template);
+                new VoucherSerializer().Serialize(bsonWriter, amort.Template);
             }
             if (amort.Schedule != null)
             {
                 bsonWriter.WriteStartArray("schedule");
+                var serializer = new AmortItemSerializer();
                 foreach (var item in amort.Schedule)
-                    AmortItemSerializer.Serialize(bsonWriter, item);
+                    serializer.Serialize(bsonWriter, item);
                 bsonWriter.WriteEndArray();
             }
             bsonWriter.Write("remark", amort.Remark);
             bsonWriter.WriteEndDocument();
         }
 
-        public bool GetDocumentId(object document, out object id, out Type idNominalType, out IIdGenerator idGenerator)
-        {
-            id = null;
-            idNominalType = typeof(Amortization);
-            idGenerator = new GuidGenerator();
-            if (((Amortization)document).ID == null)
-                return false;
+        public override Guid? GetId(Amortization entity) => entity.ID;
+        public override void SetId(Amortization entity, Guid? id) => entity.ID = id;
+        public override bool IsNull(Guid? id) => !id.HasValue;
 
-            id = ((Amortization)document).ID;
-            return true;
-        }
-
-        public void SetDocumentId(object document, object id) => ((Amortization)document).ID = (Guid)id;
+        public override Guid? MakeId(IMongoCollection<Amortization> container, Amortization entity) =>
+            Guid.NewGuid();
     }
 }

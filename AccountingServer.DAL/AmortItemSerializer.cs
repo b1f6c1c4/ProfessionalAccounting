@@ -1,30 +1,14 @@
-﻿using System;
-using AccountingServer.Entities;
+﻿using AccountingServer.Entities;
 using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization;
 
 namespace AccountingServer.DAL
 {
     /// <summary>
     ///     摊销计算表条目序列化器
     /// </summary>
-    internal class AmortItemSerializer : IBsonSerializer<AmortItem>
+    internal class AmortItemSerializer : BaseSerializer<AmortItem>
     {
-        object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
-            Deserialize(context, args);
-
-        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, object value) =>
-            Serialize(context, args, (AmortItem)value);
-
-        public Type ValueType => typeof(AmortItem);
-
-        public AmortItem Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
-            Deserialize(context.Reader);
-
-        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, AmortItem value) =>
-            Serialize(context.Writer, value);
-
-        public static AmortItem Deserialize(IBsonReader bsonReader)
+        public override AmortItem Deserialize(IBsonReader bsonReader)
         {
             string read = null;
 
@@ -40,7 +24,7 @@ namespace AccountingServer.DAL
             return item;
         }
 
-        public static void Serialize(IBsonWriter bsonWriter, AmortItem item)
+        public override void Serialize(IBsonWriter bsonWriter, AmortItem item)
         {
             bsonWriter.WriteStartDocument();
             bsonWriter.WriteObjectId("voucher", item.VoucherID);

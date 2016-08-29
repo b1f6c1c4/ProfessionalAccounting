@@ -1,30 +1,14 @@
-using System;
 using AccountingServer.Entities;
 using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization;
 
 namespace AccountingServer.DAL
 {
     /// <summary>
     ///     Ï¸Ä¿ÐòÁÐ»¯Æ÷
     /// </summary>
-    internal class VoucherDetailSerializer : IBsonSerializer<VoucherDetail>
+    internal class VoucherDetailSerializer : BaseSerializer<VoucherDetail>
     {
-        object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
-            Deserialize(context, args);
-
-        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, object value) =>
-            Serialize(context, args, (VoucherDetail)value);
-
-        public Type ValueType => typeof(VoucherDetail);
-
-        public VoucherDetail Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
-            Deserialize(context.Reader);
-
-        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, VoucherDetail value) =>
-            Serialize(context.Writer, value);
-
-        public static VoucherDetail Deserialize(IBsonReader bsonReader)
+        public override VoucherDetail Deserialize(IBsonReader bsonReader)
         {
             string read = null;
 
@@ -42,7 +26,7 @@ namespace AccountingServer.DAL
             return detail;
         }
 
-        internal static void Serialize(IBsonWriter bsonWriter, VoucherDetail detail)
+        public override void Serialize(IBsonWriter bsonWriter, VoucherDetail detail)
         {
             bsonWriter.WriteStartDocument();
             bsonWriter.Write("title", detail.Title);

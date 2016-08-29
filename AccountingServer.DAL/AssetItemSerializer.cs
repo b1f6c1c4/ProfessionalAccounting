@@ -1,30 +1,14 @@
-using System;
 using AccountingServer.Entities;
 using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization;
 
 namespace AccountingServer.DAL
 {
     /// <summary>
     ///     折旧计算表条目序列化器
     /// </summary>
-    internal class AssetItemSerializer : IBsonSerializer<AssetItem>
+    internal class AssetItemSerializer : BaseSerializer<AssetItem>
     {
-        object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
-            Deserialize(context, args);
-
-        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, object value) =>
-            Serialize(context, args, (AssetItem)value);
-
-        public Type ValueType => typeof(AssetItem);
-
-        public AssetItem Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
-            Deserialize(context.Reader);
-
-        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, AssetItem value) =>
-            Serialize(context.Writer, value);
-
-        public static AssetItem Deserialize(IBsonReader bsonReader)
+        public override AssetItem Deserialize(IBsonReader bsonReader)
         {
             string read = null;
 
@@ -49,7 +33,7 @@ namespace AccountingServer.DAL
             return item;
         }
 
-        public static void Serialize(IBsonWriter bsonWriter, AssetItem item)
+        public override void Serialize(IBsonWriter bsonWriter, AssetItem item)
         {
             bsonWriter.WriteStartDocument();
             bsonWriter.WriteObjectId("voucher", item.VoucherID);
