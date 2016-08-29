@@ -25,8 +25,24 @@ namespace AccountingServer.Entities
                 if (filter.Date != voucher.Date)
                     return false;
             if (filter.Type != null)
-                if (filter.Type != voucher.Type)
-                    return false;
+                switch (filter.Type)
+                {
+                    case VoucherType.Ordinary:
+                    case VoucherType.Amortization:
+                    case VoucherType.AnnualCarry:
+                    case VoucherType.Carry:
+                    case VoucherType.Depreciation:
+                    case VoucherType.Devalue:
+                    case VoucherType.Uncertain:
+                        if (filter.Type != voucher.Type)
+                            return false;
+                        break;
+                    case VoucherType.General:
+                        if (filter.Type != VoucherType.Carry &&
+                            filter.Type != VoucherType.AnnualCarry)
+                            return false;
+                        break;
+                }
             if (filter.Remark != null)
                 if (filter.Remark == string.Empty)
                 {
