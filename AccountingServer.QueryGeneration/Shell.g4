@@ -25,7 +25,7 @@ autoCommand
 	;
 
 otherCommand
-	:	EditNamedQueries | Check | Titles | Launch | Connect | Shutdown | Backup | Help DollarQuotedString? | Exit
+	:	EditNamedQueries | Check | Titles | Connect | Help DollarQuotedString? | Exit
 	;
 	
 chart
@@ -270,21 +270,10 @@ Series
 Ignore
 	:	'ignore'
 	;
- 
-Launch
-	:	'lan'
-	|	'launch'
-	;
+
 Connect
 	:	'con'
 	|	'connect'
-	;
-Shutdown
-	:	'shu'
-	|	'shutdown'
-	;
-Backup
-	:	'backup'
 	;
 Help
 	:	'help'
