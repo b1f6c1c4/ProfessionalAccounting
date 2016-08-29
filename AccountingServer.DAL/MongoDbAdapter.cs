@@ -181,14 +181,7 @@ namespace AccountingServer.DAL
         }
 
         /// <inheritdoc />
-        public bool Upsert(Voucher entity)
-        {
-            var res = m_Vouchers.ReplaceOne(
-                                            Builders<Voucher>.Filter.Eq("_id", entity.ID),
-                                            entity,
-                                            new UpdateOptions { IsUpsert = true });
-            return res.ModifiedCount <= 1;
-        }
+        public bool Upsert(Voucher entity) => Upsert(m_Vouchers, entity, new VoucherSerializer());
 
         #endregion
 
@@ -412,5 +405,20 @@ namespace AccountingServer.DAL
         }
 
         #endregion
+
+        private static bool Upsert<T, TId>(IMongoCollection<T> collection, T entity, BaseSerializer<T, TId> idProvider)
+        {
+            if (idProvider.FillId(collection, entity))
+            {
+                collection.InsertOne(entity);
+                return true;
+            }
+
+            var res = collection.ReplaceOne(
+                                            Builders<T>.Filter.Eq("_id", idProvider.GetId(entity)),
+                                            entity,
+                                            new UpdateOptions { IsUpsert = true });
+            return res.ModifiedCount <= 1;
+        }
     }
 }

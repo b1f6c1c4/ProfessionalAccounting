@@ -55,7 +55,8 @@
     <Compile Include="AssetItemSerializer.cs" />
     <Compile Include="AmorizationSerializer.cs" />
     <Compile Include="AssetSerializer.cs" />
-    <Compile Include="BsonHelper.cs" />
+    <Compile Include="BaseSerializer.cs" />
+    <Compile Include="SerializationHelper.cs" />
     <Compile Include="AmortItemSerializer.cs" />
     <Compile Include="IDbAdapter.cs" />
     <Compile Include="IDbServer.cs" />

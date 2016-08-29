@@ -1,32 +1,16 @@
 using System;
 using AccountingServer.Entities;
 using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.IdGenerators;
+using MongoDB.Driver;
 
 namespace AccountingServer.DAL
 {
     /// <summary>
     ///     资产序列化器
     /// </summary>
-    internal class AssetSerializer : IBsonSerializer<Asset>, IBsonIdProvider
+    internal class AssetSerializer : BaseSerializer<Asset, Guid?>
     {
-        object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
-            Deserialize(context, args);
-
-        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, object value) =>
-            Serialize(context, args, (Asset)value);
-
-        public Type ValueType => typeof(Asset);
-
-        public Asset Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
-            Deserialize(context.Reader);
-
-        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, Asset value) =>
-            Serialize(context.Writer, value);
-
-        // ReSharper disable once MemberCanBePrivate.Global
-        public static Asset Deserialize(IBsonReader bsonReader)
+        public override Asset Deserialize(IBsonReader bsonReader)
         {
             string read = null;
 
@@ -71,14 +55,13 @@ namespace AccountingServer.DAL
                 asset.DevaluationExpenseSubTitle = asset.DevaluationExpenseTitle % 100;
                 asset.DevaluationExpenseTitle /= 100;
             }
-            asset.Schedule = bsonReader.ReadArray("schedule", ref read, AssetItemSerializer.Deserialize);
+            asset.Schedule = bsonReader.ReadArray("schedule", ref read, new AssetItemSerializer().Deserialize);
             asset.Remark = bsonReader.ReadString("remark", ref read);
             bsonReader.ReadEndDocument();
             return asset;
         }
 
-        // ReSharper disable once MemberCanBePrivate.Global
-        public static void Serialize(IBsonWriter bsonWriter, Asset asset)
+        public override void Serialize(IBsonWriter bsonWriter, Asset asset)
         {
             bsonWriter.WriteStartDocument();
             bsonWriter.Write("_id", asset.ID);
@@ -115,26 +98,20 @@ namespace AccountingServer.DAL
             if (asset.Schedule != null)
             {
                 bsonWriter.WriteStartArray("schedule");
+                var serializer = new AssetItemSerializer();
                 foreach (var item in asset.Schedule)
-                    AssetItemSerializer.Serialize(bsonWriter, item);
+                    serializer.Serialize(bsonWriter, item);
                 bsonWriter.WriteEndArray();
             }
             bsonWriter.Write("remark", asset.Remark);
             bsonWriter.WriteEndDocument();
         }
 
-        public bool GetDocumentId(object document, out object id, out Type idNominalType, out IIdGenerator idGenerator)
-        {
-            id = null;
-            idNominalType = typeof(Asset);
-            idGenerator = new GuidGenerator();
-            if (((Asset)document).ID == null)
-                return false;
+        public override Guid? GetId(Asset entity) => entity.ID;
+        public override void SetId(Asset entity, Guid? id) => entity.ID = id;
+        public override bool IsNull(Guid? id) => !id.HasValue;
 
-            id = ((Asset)document).ID;
-            return true;
-        }
-
-        public void SetDocumentId(object document, object id) => ((Asset)document).ID = (Guid)id;
+        public override Guid? MakeId(IMongoCollection<Asset> container, Asset entity) =>
+            Guid.NewGuid();
     }
 }

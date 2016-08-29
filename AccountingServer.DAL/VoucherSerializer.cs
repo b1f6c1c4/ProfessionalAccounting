@@ -1,31 +1,17 @@
-using System;
 using AccountingServer.Entities;
+using MongoDB.Bson;
 using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.IdGenerators;
+using MongoDB.Driver;
 
 namespace AccountingServer.DAL
 {
     /// <summary>
     ///     记账凭证序列化器
     /// </summary>
-    internal class VoucherSerializer : IBsonSerializer<Voucher>, IBsonIdProvider
+    internal class VoucherSerializer : BaseSerializer<Voucher, ObjectId>
     {
-        object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)=>
-            Deserialize(context, args);
-
-        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, object value) =>
-            Serialize(context, args, (Voucher)value);
-
-        public Type ValueType => typeof(Voucher);
-
-        public Voucher Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args) =>
-            Deserialize(context.Reader);
-
-        public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, Voucher value) =>
-            Serialize(context.Writer, value);
-
-        public static Voucher Deserialize(IBsonReader bsonReader)
+        public override Voucher Deserialize(IBsonReader bsonReader)
         {
             string read = null;
             bsonReader.ReadStartDocument();
@@ -60,14 +46,14 @@ namespace AccountingServer.DAL
                     voucher.Type = VoucherType.Ordinary;
                     break;
             }
-            voucher.Details = bsonReader.ReadArray("detail", ref read, VoucherDetailSerializer.Deserialize);
+            voucher.Details = bsonReader.ReadArray("detail", ref read, new VoucherDetailSerializer().Deserialize);
             voucher.Remark = bsonReader.ReadString("remark", ref read);
             bsonReader.ReadEndDocument();
 
             return voucher;
         }
 
-        public static void Serialize(IBsonWriter bsonWriter, Voucher voucher)
+        public override void Serialize(IBsonWriter bsonWriter, Voucher voucher)
         {
             bsonWriter.WriteStartDocument();
             bsonWriter.WriteObjectId("_id", voucher.ID);
@@ -97,8 +83,9 @@ namespace AccountingServer.DAL
             if (voucher.Details != null)
             {
                 bsonWriter.WriteStartArray("detail");
+                var serializer = new VoucherDetailSerializer();
                 foreach (var detail in voucher.Details)
-                    VoucherDetailSerializer.Serialize(bsonWriter, detail);
+                    serializer.Serialize(bsonWriter, detail);
                 bsonWriter.WriteEndArray();
             }
             if (voucher.Remark != null)
@@ -106,18 +93,11 @@ namespace AccountingServer.DAL
             bsonWriter.WriteEndDocument();
         }
 
-        public bool GetDocumentId(object document, out object id, out Type idNominalType, out IIdGenerator idGenerator)
-        {
-            id = null;
-            idNominalType = typeof(Voucher);
-            idGenerator = new StringObjectIdGenerator();
-            if (((Voucher)document).ID == null)
-                return false;
+        public override ObjectId GetId(Voucher entity) => entity.ID != null ? new ObjectId(entity.ID) : ObjectId.Empty;
+        public override void SetId(Voucher entity, ObjectId id) => entity.ID = id.ToString();
+        public override bool IsNull(ObjectId id) => id == ObjectId.Empty;
 
-            id = ((Voucher)document).ID;
-            return true;
-        }
-
-        public void SetDocumentId(object document, object id) => ((Voucher)document).ID = (string)id;
+        public override ObjectId MakeId(IMongoCollection<Voucher> container, Voucher entity) =>
+            (ObjectId)new ObjectIdGenerator().GenerateId(container, entity);
     }
 }
