@@ -50,6 +50,7 @@
     </Compile>
     <Compile Include="Accountant.cs" />
     <Compile Include="AssetAccountant.cs" />
+    <Compile Include="CustomManager.cs" />
     <Compile Include="DataFormatter.cs" />
     <Compile Include="DistributedAccountant.cs" />
     <Compile Include="GroupingHelper.cs" />
@@ -91,11 +92,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Titles.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Titles.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

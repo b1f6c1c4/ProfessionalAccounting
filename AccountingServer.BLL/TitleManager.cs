@@ -1,11 +1,44 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Xml;
+using System.ComponentModel;
+using System.Linq;
+using System.Xml.Serialization;
 using AccountingServer.Entities;
 
 namespace AccountingServer.BLL
 {
+    [Serializable]
+    [XmlRoot("Titles")]
+    public class TitleInfos
+    {
+        [XmlElement("title")] public List<TitleInfo> Titles;
+    }
+
+    [Serializable]
+    public class TitleInfo
+    {
+        [XmlAttribute("name")]
+        public string Name { get; set; }
+
+        [XmlAttribute("id")]
+        public int Id { get; set; }
+
+        [XmlAttribute("virtual")]
+        [DefaultValue(false)]
+        public bool IsVirtual { get; set; }
+
+        [XmlElement("subTitle")] public List<SubTitleInfo> SubTitles;
+    }
+
+    public class SubTitleInfo
+    {
+        [XmlAttribute("name")]
+        public string Name { get; set; }
+
+        [XmlAttribute("id")]
+        public int Id { get; set; }
+    }
+
     /// <summary>
     ///     会计科目管理
     /// </summary>
@@ -14,61 +47,18 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     会计科目信息文档
         /// </summary>
-        private static readonly XmlDocument XmlDoc;
+        private static readonly CustomManager<TitleInfos> TitleInfos;
 
         /// <summary>
         ///     读取会计科目信息
         /// </summary>
-        static TitleManager()
-        {
-            try
-            {
-                using (
-                    var stream = Assembly.GetExecutingAssembly()
-                                         .GetManifestResourceStream("AccountingServer.BLL.Resources.Titles.xml"))
-                {
-                    if (stream == null)
-                        return;
-                    XmlDoc = new XmlDocument();
-                    XmlDoc.Load(stream);
-                }
-            }
-            catch (Exception)
-            {
-                XmlDoc = null;
-            }
-        }
+        static TitleManager() { TitleInfos = new CustomManager<TitleInfos>("Titles.xml"); }
 
         /// <summary>
         ///     返回所有会计科目编号和名称
         /// </summary>
         /// <returns>编号和科目名称</returns>
-        public static IEnumerable<Tuple<int, int?, string>> GetTitles()
-        {
-            CheckXml();
-            // ReSharper disable once PossibleNullReferenceException
-            foreach (XmlElement title in XmlDoc.DocumentElement.ChildNodes)
-            {
-                yield return new Tuple<int, int?, string>(
-                    Convert.ToInt32(title.Attributes["id"].Value),
-                    null,
-                    title.Attributes["name"].Value);
-                foreach (XmlElement subTitle in title.ChildNodes)
-                    yield return new Tuple<int, int?, string>(
-                        Convert.ToInt32(title.Attributes["id"].Value),
-                        Convert.ToInt32(subTitle.Attributes["id"].Value),
-                        title.Attributes["name"].Value + "-" + subTitle.Attributes["name"].Value);
-            }
-        }
-
-        /// <summary>
-        ///     检查会计科目信息是否已加载
-        /// </summary>
-        private static void CheckXml()
-        {
-            if (XmlDoc == null)
-                throw new MethodAccessException("在加载AccountingServer.BLL.Resources.Titles.xml时失败，无法访问会计科目信息");
-        }
+        public static IReadOnlyList<TitleInfo> Titles => TitleInfos.Config.Titles.AsReadOnly();
 
         /// <summary>
         ///     返回编号对应的会计科目名称
@@ -78,28 +68,11 @@ namespace AccountingServer.BLL
         /// <returns>名称</returns>
         public static string GetTitleName(int? title, int? subtitle = null)
         {
-            CheckXml();
             if (!title.HasValue)
                 return null;
 
-            var nav = XmlDoc.CreateNavigator();
-
-            if (subtitle.HasValue)
-            {
-                var res = nav.Select($"/Titles/title[@id={title}]/subTitle[@id={subtitle}]/@name");
-                if (res.Count == 0)
-                    return null;
-                res.MoveNext();
-                return res.Current.Value;
-            }
-            else
-            {
-                var res = nav.Select($"/Titles/title[@id={title}]/@name");
-                if (res.Count == 0)
-                    return null;
-                res.MoveNext();
-                return res.Current.Value;
-            }
+            var t0 = Titles.FirstOrDefault(t => t.Id == title.Value);
+            return !subtitle.HasValue ? t0?.Name : t0?.SubTitles?.FirstOrDefault(t => t.Id == subtitle.Value)?.Name;
         }
 
         /// <summary>
@@ -107,12 +80,9 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="detail">细目</param>
         /// <returns>名称</returns>
-        public static string GetTitleName(VoucherDetail detail)
-        {
-            CheckXml();
-            return detail.SubTitle.HasValue
-                       ? GetTitleName(detail.Title) + "-" + GetTitleName(detail.Title, detail.SubTitle)
-                       : GetTitleName(detail.Title);
-        }
+        public static string GetTitleName(VoucherDetail detail) =>
+            detail.SubTitle.HasValue
+                ? GetTitleName(detail.Title) + "-" + GetTitleName(detail.Title, detail.SubTitle)
+                : GetTitleName(detail.Title);
     }
 }

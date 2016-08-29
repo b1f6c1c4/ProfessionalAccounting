@@ -177,8 +177,12 @@ namespace AccountingServer.Shell
         private static IQueryResult ListTitles()
         {
             var sb = new StringBuilder();
-            foreach (var title in TitleManager.GetTitles())
-                sb.AppendLine($"{title.Item1.AsTitle()}{title.Item2.AsSubTitle()}\t\t{title.Item3}");
+            foreach (var title in TitleManager.Titles)
+            {
+                sb.AppendLine($"{title.Id.AsTitle()}\t\t{title.Name}");
+                foreach (var subTitle in title.SubTitles)
+                    sb.AppendLine($"{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}\t\t{subTitle.Name}");
+            }
             return new UnEditableText(sb.ToString());
         }
 
