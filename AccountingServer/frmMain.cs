@@ -68,7 +68,6 @@ public partial class frmMain : Form
             m_Accountant = new Accountant();
 
             var thu = new THUInfo(m_Accountant);
-            Task.Run(() => thu.FetchData());
 
             try
             {

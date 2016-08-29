@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace AccountingServer.Plugins.THUInfo
 {
     [Serializable]
-    internal class EndPointTemplates
+    public class EndPointTemplates
     {
         [XmlElement("Template")] public List<EndPointTemplate> Templates;
     }
 
     [Serializable]
-    internal class EndPointTemplate
+    public class EndPointTemplate
     {
         public string Name { get; set; }
 
@@ -19,7 +20,7 @@ namespace AccountingServer.Plugins.THUInfo
     }
 
     [Serializable]
-    internal class EndPointRange
+    public class EndPointRange
     {
         public int Start { get; set; }
 
