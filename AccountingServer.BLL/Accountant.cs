@@ -16,8 +16,6 @@ namespace AccountingServer.BLL
         /// </summary>
         private readonly IDbAdapter m_Db;
 
-        private readonly IDbServer m_DbServer;
-
         private readonly CarryAccountant m_CarryAccountant;
 
         private readonly AssetAccountant m_AssetAccountant;
@@ -34,7 +32,6 @@ namespace AccountingServer.BLL
             var adapter = new MongoDbAdapter();
 
             m_Db = adapter;
-            m_DbServer = adapter;
 
             m_CarryAccountant = new CarryAccountant(m_Db);
             m_AssetAccountant = new AssetAccountant(m_Db);
@@ -43,13 +40,9 @@ namespace AccountingServer.BLL
 
         #region Server
 
-        public void Launch() => m_DbServer.Launch();
-
         public void Connect() => m_Db.Connect();
 
         public void Disconnect() => m_Db.Disconnect();
-
-        public void Backup() => m_DbServer.Backup();
 
         #endregion
 

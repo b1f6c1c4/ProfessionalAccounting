@@ -59,7 +59,6 @@
     <Compile Include="SerializationHelper.cs" />
     <Compile Include="AmortItemSerializer.cs" />
     <Compile Include="IDbAdapter.cs" />
-    <Compile Include="IDbServer.cs" />
     <Compile Include="MongoDbAdapter.cs" />
     <Compile Include="MongoDbQueryHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

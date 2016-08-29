@@ -14,7 +14,7 @@ namespace AccountingServer.DAL
     /// <summary>
     ///     MongoDb数据访问类
     /// </summary>
-    public class MongoDbAdapter : IDbAdapter, IDbServer
+    public class MongoDbAdapter : IDbAdapter
     {
         #region Member
 
@@ -72,27 +72,6 @@ namespace AccountingServer.DAL
         public bool Connected { get; private set; }
 
         /// <inheritdoc />
-        public void Launch()
-        {
-            var startinfo = new ProcessStartInfo
-                                {
-                                    FileName = "cmd.exe",
-                                    Arguments =
-                                        "/c " +
-                                        "mongod --config \"C:\\Users\\b1f6c1c4\\Documents\\Mongo\\mongod.conf\"",
-                                    UseShellExecute = false,
-                                    RedirectStandardInput = false,
-                                    RedirectStandardOutput = true,
-                                    CreateNoWindow = true
-                                };
-
-            var process = Process.Start(startinfo);
-            if (process == null ||
-                process.HasExited)
-                throw new ApplicationException("无法启动数据库");
-        }
-
-        /// <inheritdoc />
         public void Connect()
         {
             m_Client = new MongoClient("mongodb://localhost");
@@ -122,26 +101,6 @@ namespace AccountingServer.DAL
             m_Client = null;
 
             Connected = false;
-        }
-
-        /// <inheritdoc />
-        public void Backup()
-        {
-            var startinfo = new ProcessStartInfo
-                                {
-                                    FileName = "cmd.exe",
-                                    Arguments =
-                                        "/c " +
-                                        "mongodump -h localhost -d accounting -o \"D:\\Backup\\OneDrive\\Backup\"",
-                                    UseShellExecute = false,
-                                    RedirectStandardInput = false,
-                                    RedirectStandardOutput = true,
-                                    CreateNoWindow = true
-                                };
-
-            var process = Process.Start(startinfo);
-            if (process == null)
-                throw new ApplicationException("无法备份数据库");
         }
 
         #endregion

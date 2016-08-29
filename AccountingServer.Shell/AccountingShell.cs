@@ -94,12 +94,8 @@ namespace AccountingServer.Shell
                 return m_CarryShell.ExecuteCarry(result.carry());
             if (result.otherCommand() != null)
             {
-                if (result.otherCommand().Launch() != null)
-                    return LaunchServer();
                 if (result.otherCommand().Connect() != null)
                     return ConnectServer();
-                if (result.otherCommand().Backup() != null)
-                    return Backup();
                 if (result.otherCommand().Titles() != null)
                     return ListTitles();
                 if (result.otherCommand().Help() != null)
@@ -194,10 +190,7 @@ namespace AccountingServer.Shell
         public IQueryResult AutoConnect()
         {
             if (!m_Accountant.Connected)
-            {
-                m_Accountant.Launch();
                 m_Accountant.Connect();
-            }
             return new Succeed();
         }
 
@@ -208,26 +201,6 @@ namespace AccountingServer.Shell
         private IQueryResult ConnectServer()
         {
             m_Accountant.Connect();
-            return new Succeed();
-        }
-
-        /// <summary>
-        ///     启动数据库服务器
-        /// </summary>
-        /// <returns>启动情况</returns>
-        private IQueryResult LaunchServer()
-        {
-            m_Accountant.Launch();
-            return new Succeed();
-        }
-
-        /// <summary>
-        ///     备份数据库
-        /// </summary>
-        /// <returns>备份情况</returns>
-        private IQueryResult Backup()
-        {
-            m_Accountant.Backup();
             return new Succeed();
         }
 

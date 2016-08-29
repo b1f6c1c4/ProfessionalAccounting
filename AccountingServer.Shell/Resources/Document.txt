@@ -212,10 +212,7 @@ nq							检索所有命名查询模板
 chk1						检查基本正确性（每一Voucher借贷方相等）
 chk2						检查复杂正确性（每日每科目每内容，资产无贷方余额，负债无借方余额）
 T	Titles					检索所有科目编号及其名称
-lan	launch					启动
 con	connect					连接
-shu	shutdown				关闭
-backup						备份
 fetch						从ecard.tsinghua.edu.cn上获取学生卡交易记录，与现有账单自动对账，显示差异
 ?	help					帮助
 exit						退出
