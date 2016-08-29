@@ -8,6 +8,7 @@ using System.Xml;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
+using CredentialManagement;
 
 namespace AccountingServer.Plugins.THUInfo
 {
@@ -83,6 +84,65 @@ namespace AccountingServer.Plugins.THUInfo
 
         public THUInfo(Accountant accountant) : base(accountant) { }
 
+        /// <summary>
+        ///     读取凭证并获取数据
+        /// </summary>
+        public void FetchData()
+        {
+            var cred = CredentialTemplate();
+            if (cred.Exists())
+            {
+                cred.Load();
+                FetchData(cred.Username, cred.Password);
+                return;
+            }
+
+            var credential = PromptForCredential();
+            if (credential == null)
+                return;
+
+            FetchData(credential.Username, credential.Password);
+        }
+
+        private static Credential CredentialTemplate() =>
+            new Credential
+                {
+                    Target = "THUInfo",
+                    PersistanceType = PersistanceType.Enterprise,
+                    Type = CredentialType.DomainVisiblePassword
+                };
+
+        /// <summary>
+        ///     删除保存的凭证
+        /// </summary>
+        private static void DropCredential()
+        {
+            var cred = CredentialTemplate();
+            cred.Delete();
+        }
+
+        /// <summary>
+        ///     提示输入凭证
+        /// </summary>
+        /// <returns>凭证</returns>
+        private static Credential PromptForCredential()
+        {
+            var prompt = new XPPrompt
+                             {
+                                 Target = "THUInfo",
+                                 Persist = true
+                             };
+            if (prompt.ShowDialog() != DialogResult.OK)
+                return null;
+
+            var cred = CredentialTemplate();
+            cred.Username = prompt.Username;
+            cred.Password = prompt.Password;
+
+            cred.Save();
+            return cred;
+        }
+
         /// <inheritdoc />
         public override IQueryResult Execute(params string[] pars)
         {
@@ -114,9 +174,12 @@ namespace AccountingServer.Plugins.THUInfo
                 return new UnEditableText(sb.ToString());
             }
 
-            if (pars.Length >= 3)
-                if (string.IsNullOrEmpty(pars[0]))
-                    FetchData(pars[1], pars[2]);
+            if (pars.Length == 1 &&
+                pars[0] == "cred")
+            {
+                DropCredential();
+                FetchData();
+            }
 
             lock (m_Lock)
             {

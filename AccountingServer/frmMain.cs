@@ -18,57 +18,57 @@ using AccountingServer.Shell;
 
 namespace AccountingServer
 {
-    // ReSharper disable once InconsistentNaming
-    public partial class frmMain : Form
+// ReSharper disable once InconsistentNaming
+public partial class frmMain : Form
+{
+    /// <summary>
+    ///     基本会计业务处理类
+    /// </summary>
+    // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
+    private readonly Accountant m_Accountant;
+
+    /// <summary>
+    ///     控制台
+    /// </summary>
+    private readonly AccountingShell m_Shell;
+
+    /// <summary>
+    ///     快捷编辑缩写
+    /// </summary>
+    private readonly List<Tuple<string, bool, VoucherDetail>> m_Abbrs;
+
+    /// <summary>
+    ///     快捷编辑是否启用
+    /// </summary>
+    private bool m_FastEditing;
+
+    /// <summary>
+    ///     快捷编辑下一个细目偏移
+    /// </summary>
+    private int m_FastInsertLocationDelta;
+
+    /// <summary>
+    ///     快捷编辑下一个字段偏移
+    /// </summary>
+    private int m_FastNextLocationDelta;
+
+    [DllImport("user32.dll")]
+    private static extern bool SetProcessDPIAware();
+
+    public frmMain()
     {
-        /// <summary>
-        ///     基本会计业务处理类
-        /// </summary>
-        // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
-        private readonly Accountant m_Accountant;
+        InitializeComponent();
+        chart1.Dock = DockStyle.Fill;
+        textBoxResult.Dock = DockStyle.Fill;
 
-        /// <summary>
-        ///     控制台
-        /// </summary>
-        private readonly AccountingShell m_Shell;
-
-        /// <summary>
-        ///     快捷编辑缩写
-        /// </summary>
-        private readonly List<Tuple<string, bool, VoucherDetail>> m_Abbrs;
-
-        /// <summary>
-        ///     快捷编辑是否启用
-        /// </summary>
-        private bool m_FastEditing;
-
-        /// <summary>
-        ///     快捷编辑下一个细目偏移
-        /// </summary>
-        private int m_FastInsertLocationDelta;
-
-        /// <summary>
-        ///     快捷编辑下一个字段偏移
-        /// </summary>
-        private int m_FastNextLocationDelta;
-
-        [DllImport("user32.dll")]
-        private static extern bool SetProcessDPIAware();
-
-        public frmMain()
-        {
-            InitializeComponent();
-            chart1.Dock = DockStyle.Fill;
-            textBoxResult.Dock = DockStyle.Fill;
-
-            SetProcessDPIAware();
+        SetProcessDPIAware();
             Width = 1280;
             Height = 860;
 
             m_Accountant = new Accountant();
 
             var thu = new THUInfo(m_Accountant);
-            Task.Run(() => thu.FetchData(@"2014010914", @""));
+            Task.Run(() => thu.FetchData());
 
             try
             {
