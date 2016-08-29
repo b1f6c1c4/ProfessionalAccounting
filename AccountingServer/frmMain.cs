@@ -68,7 +68,6 @@ namespace AccountingServer
             m_Accountant = new Accountant();
 
             var thu = new THUInfo(m_Accountant);
-            Task.Run(() => thu.FetchData());
 
             try
             {

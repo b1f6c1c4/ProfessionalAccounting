@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
@@ -41,30 +42,35 @@ namespace AccountingServer.Plugins.THUInfo
 
         private static IReadOnlyList<EndPointTemplate> Templates => EndPointTemplates.Config.Templates.AsReadOnly();
 
-        private List<TransactionRecord> m_Data;
+        private readonly Crawler m_Crawler;
+
+        private readonly object m_Lock = new object();
 
         static THUInfo() { EndPointTemplates = new CustomManager<EndPointTemplates>("EndPoint.xml"); }
 
-        public THUInfo(Accountant accountant) : base(accountant) { }
+        public THUInfo(Accountant accountant) : base(accountant)
+        {
+            m_Crawler = new Crawler();
+            Task.Run(() => FetchData());
+        }
 
         /// <summary>
         ///     读取凭证并获取数据
         /// </summary>
-        public void FetchData()
+        private void FetchData()
         {
             var cred = CredentialTemplate();
             if (cred.Exists())
-            {
                 cred.Load();
-                m_Data = new Crawler().FetchData(cred.Username, cred.Password);
-                return;
+            else
+            {
+                cred = PromptForCredential();
+                if (cred == null)
+                    return;
             }
 
-            var credential = PromptForCredential();
-            if (credential == null)
-                return;
-
-            m_Data = new Crawler().FetchData(credential.Username, credential.Password);
+            lock (m_Lock)
+                m_Crawler.FetchData(cred.Username, cred.Password);
         }
 
         private static Credential CredentialTemplate() =>
@@ -99,7 +105,7 @@ namespace AccountingServer.Plugins.THUInfo
                 return null;
 
             var cred = CredentialTemplate();
-            cred.Username = prompt.Username;
+            cred.Username = prompt.Username.Split(new[] { '\\' }, 2)[1];
             cred.Password = prompt.Password;
 
             cred.Save();
@@ -123,7 +129,7 @@ namespace AccountingServer.Plugins.THUInfo
                     var id = Convert.ToInt32(d.Detail.Remark);
                     if (!bin.Add(id))
                         continue;
-                    var record = m_Data.SingleOrDefault(r => r.Index == id);
+                    var record = m_Crawler.Result.SingleOrDefault(r => r.Index == id);
                     if (record == null)
                         continue;
                     // ReSharper disable once PossibleInvalidOperationException
@@ -144,11 +150,11 @@ namespace AccountingServer.Plugins.THUInfo
                 FetchData();
             }
 
-            if (m_Data == null)
-                throw new InvalidOperationException("没有消费记录");
+
             List<Problem> noRemark, tooMuch, tooFew;
             List<VDetail> noRecord;
-            Compare(out noRemark, out tooMuch, out tooFew, out noRecord);
+            lock (m_Lock)
+                Compare(out noRemark, out tooMuch, out tooFew, out noRecord);
             if ((pars.Length == 1 && pars[0] == "whatif") ||
                 noRemark.Any() ||
                 tooMuch.Any() ||
@@ -369,6 +375,10 @@ namespace AccountingServer.Plugins.THUInfo
                                                                          }
                                                                  }
                                                });
+                        }
+                        catch (MemberAccessException)
+                        {
+                            throw;
                         }
                         catch (Exception)
                         {
@@ -614,7 +624,7 @@ namespace AccountingServer.Plugins.THUInfo
         private void Compare(out List<Problem> noRemark, out List<Problem> tooMuch, out List<Problem> tooFew,
                              out List<VDetail> noRecord)
         {
-            var data = new List<TransactionRecord>(m_Data);
+            var data = new List<TransactionRecord>(m_Crawler.Result);
 
             var voucherQuery = new VoucherQueryAtomBase { DetailFilter = DetailQuery };
             var bin = new HashSet<int>();
@@ -648,7 +658,7 @@ namespace AccountingServer.Plugins.THUInfo
             }
             foreach (var id in binConflict)
             {
-                var record = m_Data.SingleOrDefault(r => r.Index == id);
+                var record = m_Crawler.Result.SingleOrDefault(r => r.Index == id);
                 if (record != null)
                     data.Add(record);
 

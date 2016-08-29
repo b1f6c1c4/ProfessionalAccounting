@@ -23,29 +23,55 @@ namespace AccountingServer.Plugins.THUInfo
         private string m_FileName;
 
         /// <summary>
+        ///     数据
+        /// </summary>
+        private List<TransactionRecord> m_Data;
+
+        /// <summary>
+        ///     异常
+        /// </summary>
+        private Exception m_Exception;
+
+        public List<TransactionRecord> Result
+        {
+            get
+            {
+                if (m_Exception != null)
+                    throw new MemberAccessException("获取数据时发生错误", m_Exception);
+
+                return m_Data;
+            }
+        }
+
+        /// <summary>
         ///     获取数据
         /// </summary>
         /// <param name="username">用户名</param>
         /// <param name="password">密码</param>
-        /// <returns>数据</returns>
-        public List<TransactionRecord> FetchData(string username, string password)
+        public void FetchData(string username, string password)
         {
-            ServicePointManager.DefaultConnectionLimit = 20;
+            m_Exception = null;
+            try
+            {
+                ServicePointManager.DefaultConnectionLimit = 20;
 
-            LoginInfo(username, password);
+                LoginInfo(username, password);
 
-            var url = GetUrl();
+                var url = GetUrl();
 
-            LoginECard(url);
+                LoginECard(url);
 
-            using (var stream = DownloadXls())
-                m_FileName = SaveTempFile(stream);
+                using (var stream = DownloadXls())
+                    m_FileName = SaveTempFile(stream);
 
-            var data = GetData().ToList();
+                m_Data = GetData().ToList();
 
-            File.Delete(m_FileName);
-
-            return data;
+                File.Delete(m_FileName);
+            }
+            catch (Exception e)
+            {
+                m_Exception = e;
+            }
         }
 
         /// <summary>
@@ -63,7 +89,6 @@ namespace AccountingServer.Plugins.THUInfo
                 throw new WebException("下载xls文档时出现错误");
 
             req.Host = @"ecard.tsinghua.edu.cn";
-            req.KeepAlive = false;
             req.Method = "POST";
             req.ContentType = "application/x-www-form-urlencoded";
             req.ContentLength = buf.Length;
@@ -94,7 +119,6 @@ namespace AccountingServer.Plugins.THUInfo
                 throw new WebException("登录学生卡管理系统时出现错误");
 
             req.Host = @"ecard.tsinghua.edu.cn";
-            req.KeepAlive = false;
             req.Method = "GET";
             req.ContentType = "application/x-www-form-urlencoded";
             req.CookieContainer = m_CookieContainer;
@@ -120,7 +144,6 @@ namespace AccountingServer.Plugins.THUInfo
                 throw new WebException("获取令牌时出现错误");
 
             req.Host = @"info.tsinghua.edu.cn";
-            req.KeepAlive = false;
             req.Method = "GET";
             req.ContentType = "application/x-www-form-urlencoded";
             req.CookieContainer = m_CookieContainer;
@@ -158,14 +181,13 @@ namespace AccountingServer.Plugins.THUInfo
         {
             var buf =
                 Encoding.GetEncoding("GBK")
-                        .GetBytes($"userName={username}&password={password}&redirect=NO");
+                        .GetBytes($"redirect=NO&userName={username}&password={password}");
             var req = WebRequest.Create(@"http://info.tsinghua.edu.cn/Login") as HttpWebRequest;
 
             if (req == null)
                 throw new WebException("登录信息门户时出现错误");
 
             req.Host = @"info.tsinghua.edu.cn";
-            req.KeepAlive = false;
             req.Method = "POST";
             req.ContentType = "application/x-www-form-urlencoded";
             req.ContentLength = buf.Length;

@@ -33,7 +33,7 @@ namespace AccountingServer.BLL
             get
             {
                 if (m_Exception != null)
-                    throw new MethodAccessException($"加载配置文件{m_FileName}时发生错误", m_Exception);
+                    throw new MemberAccessException($"加载配置文件{m_FileName}时发生错误", m_Exception);
 
                 return m_Config;
             }
