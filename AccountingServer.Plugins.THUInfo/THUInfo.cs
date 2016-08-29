@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Text;
-using System.Xml;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
@@ -39,50 +37,13 @@ namespace AccountingServer.Plugins.THUInfo
                             )
                     });
 
-        private static readonly List<Tuple<string, List<Tuple<int, int>>>> EndPointTemplates;
+        private static readonly CustomManager<EndPointTemplates> EndPointTemplates;
+
+        private static IReadOnlyList<EndPointTemplate> Templates => EndPointTemplates.Config.Templates.AsReadOnly();
 
         private List<TransactionRecord> m_Data;
 
-        static THUInfo()
-        {
-            try
-            {
-                XmlDocument doc;
-                using (
-                    var stream =
-                        Assembly.GetExecutingAssembly()
-                                .GetManifestResourceStream("AccountingServer.Plugins.THUInfo.Resources.EndPoint.xml")
-                    )
-                {
-                    if (stream == null)
-                        throw new Exception();
-                    doc = new XmlDocument();
-                    doc.Load(stream);
-                }
-                EndPointTemplates = new List<Tuple<string, List<Tuple<int, int>>>>();
-                // ReSharper disable once PossibleNullReferenceException
-                foreach (XmlElement element in doc.DocumentElement.ChildNodes)
-                    EndPointTemplates.Add(
-                                          new Tuple<string, List<Tuple<int, int>>>(
-                                              element.GetElementsByTagName("Name")[0].InnerText,
-                                              element.GetElementsByTagName("Range")
-                                                     .OfType<XmlElement>()
-                                                     .Select(
-                                                             r =>
-                                                             new Tuple<int, int>(
-                                                                 Convert.ToInt32(
-                                                                                 r.GetElementsByTagName("Start")[0]
-                                                                                     .InnerText),
-                                                                 Convert.ToInt32(
-                                                                                 r.GetElementsByTagName("End")[0]
-                                                                                     .InnerText)))
-                                                     .ToList()));
-            }
-            catch (Exception)
-            {
-                EndPointTemplates = null;
-            }
-        }
+        static THUInfo() { EndPointTemplates = new CustomManager<EndPointTemplates>("EndPoint.xml"); }
 
         public THUInfo(Accountant accountant) : base(accountant) { }
 
@@ -390,10 +351,7 @@ namespace AccountingServer.Plugins.THUInfo
                         try
                         {
                             var ep = Convert.ToInt32(record.Endpoint);
-                            var res =
-                                EndPointTemplates.SingleOrDefault(
-                                                                  t =>
-                                                                  t.Item2.Any(iv => iv.Item1 <= ep && iv.Item2 >= ep));
+                            var res = Templates.SingleOrDefault(t => t.Ranges.Any(iv => iv.Start <= ep && iv.End >= ep));
                             if (res != null)
                                 result.Add(
                                            new Voucher
@@ -406,7 +364,7 @@ namespace AccountingServer.Plugins.THUInfo
                                                                          {
                                                                              Title = 6602,
                                                                              SubTitle = 03,
-                                                                             Content = res.Item1,
+                                                                             Content = res.Name,
                                                                              Fund = record.Fund
                                                                          }
                                                                  }
