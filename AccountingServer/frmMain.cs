@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Plugins.BankBalance;
@@ -35,7 +31,7 @@ namespace AccountingServer
         /// <summary>
         ///     快捷编辑缩写
         /// </summary>
-        private readonly List<Tuple<string, bool, VoucherDetail>> m_Abbrs;
+        private readonly CustomManager<Abbreviations> m_Abbrs;
 
         /// <summary>
         ///     快捷编辑是否启用
@@ -69,58 +65,11 @@ namespace AccountingServer
 
             var thu = new THUInfo(m_Accountant);
 
-            try
-            {
-                using (
-                    var stream = Assembly.GetExecutingAssembly()
-                                         .GetManifestResourceStream("AccountingServer.Resources.Abbr.xml"))
-                {
-                    if (stream == null)
-                        throw new Exception();
-                    var xmlDoc = new XmlDocument();
-                    xmlDoc.Load(stream);
-
-                    m_Abbrs = new List<Tuple<string, bool, VoucherDetail>>();
-                    // ReSharper disable once PossibleNullReferenceException
-                    foreach (XmlElement sc in xmlDoc.DocumentElement.ChildNodes)
-                    {
-                        var str = sc.Attributes["string"].Value;
-                        var edit = sc.HasAttribute("edit");
-                        var vd = new VoucherDetail();
-                        if (edit)
-                            vd.Content = string.Empty;
-                        foreach (XmlElement ele in sc.ChildNodes)
-                            switch (ele.LocalName)
-                            {
-                                case "Title":
-                                    vd.Title = Convert.ToInt32(ele.InnerText);
-                                    break;
-                                case "SubTitle":
-                                    vd.SubTitle = Convert.ToInt32(ele.InnerText);
-                                    break;
-                                case "Content":
-                                    vd.Content = ele.InnerText;
-                                    break;
-                                case "Remark":
-                                    vd.Remark = ele.InnerText;
-                                    break;
-                            }
-                        m_Abbrs.Add(
-                                    new Tuple<string, bool, VoucherDetail>(
-                                        str,
-                                        edit,
-                                        vd));
-                    }
-                    var col = new AutoCompleteStringCollection();
-                    col.AddRange(m_Abbrs.Select(tpl => tpl.Item1).ToArray());
-                    textBoxCommand.AutoCompleteSource = AutoCompleteSource.CustomSource;
-                    textBoxCommand.AutoCompleteCustomSource = col;
-                }
-            }
-            catch (Exception)
-            {
-                m_Abbrs = null;
-            }
+            m_Abbrs = new CustomManager<Abbreviations>("Abbr.xml");
+            var col = new AutoCompleteStringCollection();
+            col.AddRange(m_Abbrs.Config.Abbrs.Select(tpl => tpl.Abbr).ToArray());
+            textBoxCommand.AutoCompleteSource = AutoCompleteSource.CustomSource;
+            textBoxCommand.AutoCompleteCustomSource = col;
             m_FastEditing = false;
 
             m_Shell = new AccountingShell(m_Accountant)
@@ -489,20 +438,28 @@ namespace AccountingServer
                         }
 
                     var sc =
-                        m_Abbrs.SingleOrDefault(
+                        m_Abbrs.Config.Abbrs
+                               .SingleOrDefault(
                                                 tpl =>
-                                                tpl.Item1.Equals(
-                                                                 textBoxCommand.Text,
-                                                                 StringComparison.InvariantCultureIgnoreCase));
+                                                tpl.Abbr.Equals(
+                                                                textBoxCommand.Text,
+                                                                StringComparison.InvariantCultureIgnoreCase));
                     if (sc == null)
                         return false;
-                    var s = CSharpHelper.PresentVoucherDetail(sc.Item3);
-                    var idC = sc.Item2 ? s.IndexOf("Content = \"\"", StringComparison.InvariantCulture) + 11 : -1;
+                    var s = CSharpHelper.PresentVoucherDetail(
+                                                              new VoucherDetail
+                                                                  {
+                                                                      Title = sc.Title,
+                                                                      SubTitle = sc.SubTitle,
+                                                                      Content = sc.Content,
+                                                                      Remark = sc.Remark
+                                                                  });
+                    var idC = sc.Editable ? s.IndexOf("Content = \"\"", StringComparison.InvariantCulture) + 11 : -1;
                     var idF = s.IndexOf("Fund = null", StringComparison.InvariantCulture) + 7;
                     textBoxResult.Focus();
                     textBoxResult.SelectedText = s;
                     textBoxResult.SelectionLength = 0;
-                    if (sc.Item2)
+                    if (sc.Editable)
                     {
                         textBoxResult.SelectionStart += idC - s.Length;
                         textBoxResult.SelectionLength = 0;
