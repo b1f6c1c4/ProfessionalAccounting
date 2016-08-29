@@ -26,8 +26,7 @@ namespace AccountingServer.Shell
         private readonly NamedQueryShell m_NamedQueryShell;
         private readonly ReportShell m_ReportShell;
         private readonly ChartShell m_ChartShell;
-
-        public PluginShell PluginManager { get; set; }
+        private readonly PluginShell m_PluginManager;
 
         public AccountingShell(Accountant helper)
         {
@@ -39,6 +38,7 @@ namespace AccountingServer.Shell
             m_NamedQueryShell = new NamedQueryShell(helper);
             m_ReportShell = new ReportShell(helper);
             m_ChartShell = new ChartShell(helper);
+            m_PluginManager = new PluginShell(helper);
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace AccountingServer.Shell
 
 
             if (result.autoCommand() != null)
-                return PluginManager.ExecuteAuto(result.autoCommand());
+                return m_PluginManager.ExecuteAuto(result.autoCommand());
             if (result.vouchers() != null)
                 return PresentVoucherQuery(result.vouchers());
             if (result.groupedQuery() != null)
@@ -102,7 +102,12 @@ namespace AccountingServer.Shell
                 {
                     var plgName = result.otherCommand().DollarQuotedString();
                     if (plgName != null)
-                        return new UnEditableText(PluginManager.GetHelp(plgName.Dequotation()));
+                    {
+                        var name = plgName.Dequotation();
+                        if (name != "")
+                            return new UnEditableText(m_PluginManager.GetHelp(name));
+                        return new UnEditableText(m_PluginManager.ListPlugins());
+                    }
                     return ListHelp();
                 }
                 if (result.otherCommand().Check() != null)

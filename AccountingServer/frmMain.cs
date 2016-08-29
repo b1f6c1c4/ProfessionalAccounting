@@ -5,11 +5,6 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
-using AccountingServer.Plugins.BankBalance;
-using AccountingServer.Plugins.Interest;
-using AccountingServer.Plugins.THUInfo;
-using AccountingServer.Plugins.Utilities;
-using AccountingServer.Plugins.YieldRate;
 using AccountingServer.Shell;
 
 namespace AccountingServer
@@ -63,8 +58,6 @@ namespace AccountingServer
 
             m_Accountant = new Accountant();
 
-            var thu = new THUInfo(m_Accountant);
-
             m_Abbrs = new CustomManager<Abbreviations>("Abbr.xml");
             var col = new AutoCompleteStringCollection();
             col.AddRange(m_Abbrs.Config.Abbrs.Select(tpl => tpl.Abbr).ToArray());
@@ -72,18 +65,7 @@ namespace AccountingServer
             textBoxCommand.AutoCompleteCustomSource = col;
             m_FastEditing = false;
 
-            m_Shell = new AccountingShell(m_Accountant)
-                          {
-                              PluginManager =
-                                  new PluginShell
-                                      {
-                                          thu,
-                                          new InterestRevenue(m_Accountant),
-                                          new Utilities(m_Accountant),
-                                          new YieldRate(m_Accountant),
-                                          new AverageDailyBalance(m_Accountant)
-                                      }
-                          };
+            m_Shell = new AccountingShell(m_Accountant);
             m_Shell.AutoConnect();
         }
 

@@ -1,7 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text;
+using AccountingServer.BLL;
 using AccountingServer.Plugins;
 using AccountingServer.Shell.Parsing;
 
@@ -10,31 +13,34 @@ namespace AccountingServer.Shell
     /// <summary>
     ///     插件表达式解释器
     /// </summary>
-    public class PluginShell : IEnumerable
+    public class PluginShell
     {
-        private readonly ICollection<PluginBase> m_Plugins = new List<PluginBase>();
+        private readonly Dictionary<string, PluginBase> m_Plugins;
 
-        /// <summary>
-        ///     添加插件
-        /// </summary>
-        /// <param name="plugin">插件</param>
-        public void Add(PluginBase plugin) => m_Plugins.Add(plugin);
+        private readonly CustomManager<PluginInfos> m_Infos;
+
+        public PluginShell(Accountant helper)
+        {
+            m_Infos = new CustomManager<PluginInfos>("Plugins.xml");
+            m_Plugins = new Dictionary<string, PluginBase>();
+            foreach (var info in m_Infos.Config.Infos)
+            {
+                var asm = AppDomain.CurrentDomain.Load(info.AssemblyName);
+                var type = asm.GetType(info.ClassName);
+                if (type == null)
+                    throw new ApplicationException($"无法从{info.AssemblyName}中加载{info.ClassName}");
+                m_Plugins.Add(
+                              info.Alias,
+                              (PluginBase)Activator.CreateInstance(type, helper));
+            }
+        }
 
         /// <summary>
         ///     根据名称检索插件
         /// </summary>
         /// <param name="name">名称</param>
         /// <returns>插件</returns>
-        private PluginBase GetPlugin(string name)
-        {
-            foreach (var plg in from plg in m_Plugins
-                                from attribute in Attribute.GetCustomAttributes(plg.GetType(), typeof(PluginAttribute))
-                                let attr = (PluginAttribute)attribute
-                                where attr.Alias.Equals(name, StringComparison.InvariantCultureIgnoreCase)
-                                select plg)
-                return plg;
-            throw new ArgumentException("没有找到与之对应的插件", nameof(name));
-        }
+        private PluginBase GetPlugin(string name) => m_Plugins[name];
 
         /// <summary>
         ///     调用插件
@@ -55,7 +61,16 @@ namespace AccountingServer.Shell
         /// <returns>帮助内容</returns>
         public string GetHelp(string name) => GetPlugin(name).ListHelp();
 
-        /// <inheritdoc />
-        public IEnumerator GetEnumerator() => m_Plugins.GetEnumerator();
+        /// <summary>
+        ///     列出所有插件
+        /// </summary>
+        /// <returns></returns>
+        public string ListPlugins()
+        {
+            var sb = new StringBuilder();
+            foreach (var info in m_Infos.Config.Infos)
+                sb.AppendLine($"{info.Alias}\t{info.ClassName}\t{info.AssemblyName}");
+            return sb.ToString();
+        }
     }
 }

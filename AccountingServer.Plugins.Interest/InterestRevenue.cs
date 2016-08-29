@@ -9,7 +9,6 @@ namespace AccountingServer.Plugins.Interest
     /// <summary>
     ///     自动计算利息收入和还款
     /// </summary>
-    [Plugin(Alias = "ir")]
     public class InterestRevenue : PluginBase
     {
         public InterestRevenue(Accountant accountant) : base(accountant) { }

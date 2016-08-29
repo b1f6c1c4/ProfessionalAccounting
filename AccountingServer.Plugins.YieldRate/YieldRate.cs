@@ -11,7 +11,6 @@ namespace AccountingServer.Plugins.YieldRate
     /// <summary>
     ///     实际收益率计算
     /// </summary>
-    [Plugin(Alias = "yr")]
     public class YieldRate : PluginBase
     {
         public YieldRate(Accountant accountant) : base(accountant) { }

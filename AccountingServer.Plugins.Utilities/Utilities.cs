@@ -9,7 +9,6 @@ namespace AccountingServer.Plugins.Utilities
     /// <summary>
     ///     常见记账凭证自动填写
     /// </summary>
-    [Plugin(Alias = "u")]
     public class Utilities : PluginBase
     {
         public Utilities(Accountant accountant) : base(accountant) { }

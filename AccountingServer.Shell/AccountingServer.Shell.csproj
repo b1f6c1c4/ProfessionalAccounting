@@ -57,7 +57,7 @@
     <Compile Include="SubtotalHelper.cs" />
     <Compile Include="NamedQueryTraver.cs" />
     <Compile Include="Parsing\ShellParser.Creator.cs" />
-    <Compile Include="Plugins\Attribute.cs" />
+    <Compile Include="Plugins\Info.cs" />
     <Compile Include="Plugins\PluginBase.cs" />
     <Compile Include="QuotedStringHelper.cs" />
     <Compile Include="CSharpHelper.cs" />
