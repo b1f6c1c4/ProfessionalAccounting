@@ -45,8 +45,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="THUInfo.Process.cs" />
-    <Compile Include="THUInfo.Data.cs" />
+    <Compile Include="THUInfo.cs" />
+    <Compile Include="Crawler.cs" />
     <Compile Include="TransactionRecord.cs" />
   </ItemGroup>
   <ItemGroup>

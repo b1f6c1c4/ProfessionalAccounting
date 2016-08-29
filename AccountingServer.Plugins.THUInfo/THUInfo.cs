@@ -16,7 +16,7 @@ namespace AccountingServer.Plugins.THUInfo
     ///     从info.tsinghua.edu.cn更新账户
     /// </summary>
     [Plugin(Alias = "f")]
-    public partial class THUInfo : PluginBase
+    public class THUInfo : PluginBase
     {
         /// <summary>
         ///     对账忽略标志
@@ -40,6 +40,8 @@ namespace AccountingServer.Plugins.THUInfo
                     });
 
         private static readonly List<Tuple<string, List<Tuple<int, int>>>> EndPointTemplates;
+
+        private List<TransactionRecord> m_Data;
 
         static THUInfo()
         {
@@ -93,7 +95,7 @@ namespace AccountingServer.Plugins.THUInfo
             if (cred.Exists())
             {
                 cred.Load();
-                FetchData(cred.Username, cred.Password);
+                m_Data = new Crawler().FetchData(cred.Username, cred.Password);
                 return;
             }
 
@@ -101,7 +103,7 @@ namespace AccountingServer.Plugins.THUInfo
             if (credential == null)
                 return;
 
-            FetchData(credential.Username, credential.Password);
+            m_Data = new Crawler().FetchData(credential.Username, credential.Password);
         }
 
         private static Credential CredentialTemplate() =>
@@ -181,74 +183,71 @@ namespace AccountingServer.Plugins.THUInfo
                 FetchData();
             }
 
-            lock (m_Lock)
+            if (m_Data == null)
+                throw new InvalidOperationException("没有消费记录");
+            List<Problem> noRemark, tooMuch, tooFew;
+            List<VDetail> noRecord;
+            Compare(out noRemark, out tooMuch, out tooFew, out noRecord);
+            if ((pars.Length == 1 && pars[0] == "whatif") ||
+                noRemark.Any() ||
+                tooMuch.Any() ||
+                tooFew.Any(p => p.Details.Any()) ||
+                noRecord.Any())
             {
-                if (m_Data == null)
-                    throw new InvalidOperationException("没有消费记录");
-                List<Problem> noRemark, tooMuch, tooFew;
-                List<VDetail> noRecord;
-                Compare(out noRemark, out tooMuch, out tooFew, out noRecord);
-                if ((pars.Length == 1 && pars[0] == "whatif") ||
-                    noRemark.Any() ||
-                    tooMuch.Any() ||
-                    tooFew.Any(p => p.Details.Any()) ||
-                    noRecord.Any())
+                var sb = new StringBuilder();
+                foreach (var problem in noRemark)
                 {
-                    var sb = new StringBuilder();
-                    foreach (var problem in noRemark)
-                    {
-                        sb.AppendLine("---No Remark");
-                        foreach (var r in problem.Records)
-                            sb.AppendLine(r.ToString());
-                        foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
-                            sb.AppendLine(CSharpHelper.PresentVoucher(v));
-                        sb.AppendLine();
-                    }
-                    foreach (var problem in tooMuch)
-                    {
-                        sb.AppendLine("---Too Much Voucher");
-                        foreach (var r in problem.Records)
-                            sb.AppendLine(r.ToString());
-                        foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
-                            sb.AppendLine(CSharpHelper.PresentVoucher(v));
-                        sb.AppendLine();
-                    }
-                    foreach (var problem in tooFew)
-                    {
-                        sb.AppendLine("---Too Few Voucher");
-                        foreach (var r in problem.Records)
-                            sb.AppendLine(r.ToString());
-                        foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
-                            sb.AppendLine(CSharpHelper.PresentVoucher(v));
-                        sb.AppendLine();
-                    }
-                    if (noRecord.Any())
-                    {
-                        sb.AppendLine("---No Record");
-                        foreach (var v in noRecord.Select(d => d.Voucher).Distinct())
-                            sb.AppendLine(CSharpHelper.PresentVoucher(v));
-                    }
-                    if (sb.Length == 0)
-                        return new Succeed();
-                    return new EditableText(sb.ToString());
-                }
-                if (!tooFew.Any())
-                    return new Succeed();
-
-                List<TransactionRecord> fail;
-                foreach (var voucher in AutoGenerate(tooFew.SelectMany(p => p.Records), pars, out fail))
-                    Accountant.Upsert(voucher);
-
-                if (fail.Any())
-                {
-                    var sb = new StringBuilder();
-                    sb.AppendLine("---Can not generate");
-                    foreach (var r in fail)
+                    sb.AppendLine("---No Remark");
+                    foreach (var r in problem.Records)
                         sb.AppendLine(r.ToString());
-                    return new EditableText(sb.ToString());
+                    foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
+                        sb.AppendLine(CSharpHelper.PresentVoucher(v));
+                    sb.AppendLine();
                 }
-                return new Succeed();
+                foreach (var problem in tooMuch)
+                {
+                    sb.AppendLine("---Too Much Voucher");
+                    foreach (var r in problem.Records)
+                        sb.AppendLine(r.ToString());
+                    foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
+                        sb.AppendLine(CSharpHelper.PresentVoucher(v));
+                    sb.AppendLine();
+                }
+                foreach (var problem in tooFew)
+                {
+                    sb.AppendLine("---Too Few Voucher");
+                    foreach (var r in problem.Records)
+                        sb.AppendLine(r.ToString());
+                    foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
+                        sb.AppendLine(CSharpHelper.PresentVoucher(v));
+                    sb.AppendLine();
+                }
+                if (noRecord.Any())
+                {
+                    sb.AppendLine("---No Record");
+                    foreach (var v in noRecord.Select(d => d.Voucher).Distinct())
+                        sb.AppendLine(CSharpHelper.PresentVoucher(v));
+                }
+                if (sb.Length == 0)
+                    return new Succeed();
+                return new EditableText(sb.ToString());
             }
+            if (!tooFew.Any())
+                return new Succeed();
+
+            List<TransactionRecord> fail;
+            foreach (var voucher in AutoGenerate(tooFew.SelectMany(p => p.Records), pars, out fail))
+                Accountant.Upsert(voucher);
+
+            if (fail.Any())
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine("---Can not generate");
+                foreach (var r in fail)
+                    sb.AppendLine(r.ToString());
+                return new EditableText(sb.ToString());
+            }
+            return new Succeed();
         }
 
         /// <summary>
@@ -305,9 +304,7 @@ namespace AccountingServer.Plugins.THUInfo
                     GenerateSpecial(dic[grp.Key.Date], lst, grp.Key.Date, out res1);
                 }
                 else
-                {
                     GenerateSpecial(Enumerable.Empty<Tuple<RegularType, string>>(), lst, grp.Key.Date, out res1);
-                }
 
                 res = res.Concat(res1);
             }
