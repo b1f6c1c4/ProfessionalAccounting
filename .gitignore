@@ -25,5 +25,4 @@ ipch
 /AccountingServer.Shell/Parsing/Shell.tokens
 /AccountingServer.Shell/Parsing/ShellLexer.cs
 /AccountingServer.Shell/Parsing/ShellLexer.tokens
-/AccountingServer.Shell/Parsing/ShellParser.Creator.cs
 /AccountingServer.Shell/Parsing/ShellParser.cs
