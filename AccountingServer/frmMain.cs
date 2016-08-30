@@ -6,6 +6,8 @@ using System.Windows.Forms;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
+using AutocompleteMenuNS;
+using ScintillaNET;
 
 namespace AccountingServer
 {
@@ -48,13 +50,15 @@ namespace AccountingServer
 
         public frmMain()
         {
+            SetProcessDPIAware();
             InitializeComponent();
             chart1.Dock = DockStyle.Fill;
-            textBoxResult.Dock = DockStyle.Fill;
+            scintilla.Dock = DockStyle.Fill;
 
-            SetProcessDPIAware();
             Width = 1280;
             Height = 860;
+
+            SetupScintilla();
 
             m_Accountant = new Accountant();
 
@@ -69,6 +73,43 @@ namespace AccountingServer
             m_Shell.AutoConnect();
         }
 
+        private void SetupScintilla()
+        {
+            scintilla.StyleResetDefault();
+            scintilla.Styles[Style.Default].Font = "Microsoft YaHei Mono";
+            scintilla.Styles[Style.Default].SizeF = textBoxCommand.Font.Size;
+            scintilla.StyleClearAll();
+
+            scintilla.Styles[Style.Cpp.Default].ForeColor = Color.Silver;
+            scintilla.Styles[Style.Cpp.Comment].ForeColor = Color.Green;
+            scintilla.Styles[Style.Cpp.CommentLine].ForeColor = Color.Green;
+            scintilla.Styles[Style.Cpp.CommentLineDoc].ForeColor = Color.FromArgb(128, 128, 128);
+            scintilla.Styles[Style.Cpp.Number].ForeColor = Color.Black;
+            scintilla.Styles[Style.Cpp.Word].ForeColor = Color.Blue;
+            scintilla.Styles[Style.Cpp.Identifier].ForeColor = Color.FromArgb(128, 0, 128);
+            scintilla.Styles[Style.Cpp.Word2].ForeColor = Color.FromArgb(0, 139, 139);
+            scintilla.Styles[Style.Cpp.GlobalClass].ForeColor = Color.FromArgb(0, 0, 139);
+            scintilla.Styles[Style.Cpp.String].ForeColor = Color.FromArgb(163, 21, 21);
+            scintilla.Styles[Style.Cpp.Character].ForeColor = Color.FromArgb(163, 21, 21);
+            scintilla.Styles[Style.Cpp.Verbatim].ForeColor = Color.FromArgb(163, 21, 21);
+            scintilla.Styles[Style.Cpp.StringEol].BackColor = Color.Pink;
+            scintilla.Styles[Style.Cpp.Operator].ForeColor = Color.Black;
+            scintilla.Styles[Style.Cpp.Preprocessor].ForeColor = Color.Silver;
+
+            scintilla.SetKeywords(0, "@ @new new null");
+            scintilla.SetKeywords(1, "D G");
+            scintilla.SetKeywords(
+                                  3,
+                                  "List Voucher VoucherDetail Asset AssetItem AcquisationItem DepreciationMethod DepreciateItem DevalueItem DispositionItem AmortizeInterval AmortItem Amortization");
+
+            acMenu.TargetControlWrapper = new ScintillaWrapper(scintilla);
+            //var listView = ((AutocompleteListView)acMenu.ListView);
+            //listView.ItemHeight = (int)(listView.ItemHeight);
+            acMenu.SetAutocompleteItems(
+                                        "List Voucher VoucherDetail Asset AssetItem AcquisationItem DepreciationMethod DepreciateItem DevalueItem DispositionItem AmortizeInterval AmortItem Amortization"
+                                            .Split(' '));
+        }
+
         /// <summary>
         ///     获取当前正在编辑的文本
         /// </summary>
@@ -78,37 +119,27 @@ namespace AccountingServer
         /// <returns></returns>
         private bool GetEditableText(out int begin, out int end, out string typeName)
         {
-            begin = textBoxResult.Text.LastIndexOf(
-                                                   "@new",
-                                                   textBoxResult.SelectionStart + textBoxResult.SelectionLength,
-                                                   StringComparison.Ordinal);
+            begin = scintilla.Text.LastIndexOf(
+                                               "@new",
+                                               scintilla.SelectionEnd,
+                                               StringComparison.Ordinal);
 
             typeName = null;
 
-            end = textBoxResult.Text.IndexOf("}@", begin, StringComparison.Ordinal);
+            end = scintilla.Text.IndexOf("}@", begin, StringComparison.Ordinal);
             if (end < 0)
                 return false;
 
             end += 1;
-            if (end + 2 < textBoxResult.Text.Length &&
-                textBoxResult.Text[end + 1] == '\r')
+            if (end + 2 < scintilla.Text.Length &&
+                scintilla.Text[end + 1] == '\r')
                 end += 2;
 
-            typeName = textBoxResult.Text.Substring(
-                                                    begin + 5,
-                                                    textBoxResult.Text.IndexOfAny(new[] { ' ', '{' }, begin + 5)
-                                                    - begin - 5);
+            typeName = scintilla.Text.Substring(
+                                                begin + 5,
+                                                scintilla.Text.IndexOfAny(new[] { ' ', '{' }, begin + 5)
+                                                - begin - 5);
             return true;
-        }
-
-        private void textBoxResult_MouseWheel(object sender, MouseEventArgs e)
-        {
-            if (ModifierKeys.HasFlag(Keys.Control) &&
-                e.Delta != 0)
-                textBoxResult.Font = new Font(
-                    "Microsoft YaHei Mono",
-                    textBoxResult.Font.Size +
-                    e.Delta / 18F);
         }
 
         /// <summary>
@@ -125,7 +156,7 @@ namespace AccountingServer
 
             try
             {
-                var s = textBoxResult.Text.Substring(begin, end - begin + 1).Trim().Trim('@');
+                var s = scintilla.Text.Substring(begin, end - begin + 1).Trim().Trim('@');
                 string result;
                 switch (typeName)
                 {
@@ -144,24 +175,24 @@ namespace AccountingServer
                     default:
                         return false;
                 }
-                if (textBoxResult.Text[end] == '\n' &&
+                if (scintilla.Text[end] == '\n' &&
                     result[result.Length - 1] != '\n')
-                    textBoxResult.Text = textBoxResult.Text.Remove(begin, end - begin - 1)
-                                                      .Insert(begin, result);
+                    scintilla.Text = scintilla.Text.Remove(begin, end - begin - 1)
+                                              .Insert(begin, result);
                 else
-                    textBoxResult.Text = textBoxResult.Text.Remove(begin, end - begin + 1)
-                                                      .Insert(begin, result);
-                textBoxResult.SelectionStart = begin;
-                textBoxResult.SelectionLength = result.Length;
+                    scintilla.Text = scintilla.Text.Remove(begin, end - begin + 1)
+                                              .Insert(begin, result);
+                scintilla.SelectionStart = begin;
+                scintilla.SelectionEnd = result.Length - begin;
             }
             catch (Exception exception)
             {
-                textBoxResult.Text = textBoxResult.Text.Insert(end + 1, exception.ToString());
-                textBoxResult.SelectionStart = begin;
-                textBoxResult.SelectionLength = end - begin + 1;
+                scintilla.Text = scintilla.Text.Insert(end + 1, exception.ToString());
+                scintilla.SelectionStart = begin;
+                scintilla.SelectionEnd = end;
             }
 
-            textBoxResult.ScrollToCaret();
+            scintilla.ScrollCaret();
             return true;
         }
 
@@ -179,7 +210,7 @@ namespace AccountingServer
 
             try
             {
-                var s = textBoxResult.Text.Substring(begin, end - begin + 1).Trim().Trim('@');
+                var s = scintilla.Text.Substring(begin, end - begin + 1).Trim().Trim('@');
                 bool result;
                 switch (typeName)
                 {
@@ -201,21 +232,21 @@ namespace AccountingServer
                 if (!result)
                     throw new ApplicationException("提交的内容类型未知");
                 // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
-                if (textBoxResult.Text[end] == '}')
-                    textBoxResult.Text = textBoxResult.Text.Insert(end + 1, "*/").Insert(begin, "/*");
-                else //if (textBoxResult.Text[end] == '\n')
-                    textBoxResult.Text = textBoxResult.Text.Insert(end - 1, "*/").Insert(begin, "/*");
-                textBoxResult.SelectionStart = begin;
-                textBoxResult.SelectionLength = end - begin + 5;
+                if (scintilla.Text[end] == '}')
+                    scintilla.Text = scintilla.Text.Insert(end + 1, "*/").Insert(begin, "/*");
+                else //if (scintilla.Text[end] == '\n')
+                    scintilla.Text = scintilla.Text.Insert(end - 1, "*/").Insert(begin, "/*");
+                scintilla.SelectionStart = begin;
+                scintilla.SelectionEnd = end + 4;
             }
             catch (Exception exception)
             {
-                textBoxResult.Text = textBoxResult.Text.Insert(end, exception.ToString());
-                textBoxResult.SelectionStart = begin;
-                textBoxResult.SelectionLength = end - begin + 1;
+                scintilla.Text = scintilla.Text.Insert(end, exception.ToString());
+                scintilla.SelectionStart = begin;
+                scintilla.SelectionEnd = end - begin;
             }
 
-            textBoxResult.ScrollToCaret();
+            scintilla.ScrollCaret();
             return true;
         }
 
@@ -242,20 +273,20 @@ namespace AccountingServer
 
                 SwitchToText();
 
-                textBoxResult.Focus();
+                scintilla.Focus();
 
                 if (append)
                 {
-                    textBoxResult.AppendText(result);
-                    var lng = textBoxResult.Text.Length;
-                    textBoxResult.SelectionStart = lng;
-                    textBoxResult.SelectionLength = 0;
+                    scintilla.AppendText(result);
+                    var lng = scintilla.Text.Length;
+                    scintilla.SelectionStart = lng;
+                    scintilla.SelectionEnd = lng;
                     textBoxCommand.BackColor = Color.FromArgb(0, 200, 0);
                 }
                 else
                 {
-                    textBoxResult.Text = result;
-                    textBoxResult.SelectionLength = 0;
+                    scintilla.Text = result;
+                    scintilla.SelectionEnd = scintilla.SelectionStart;
                     textBoxCommand.BackColor = Color.FromArgb(75, 255, 75);
                 }
 
@@ -267,13 +298,13 @@ namespace AccountingServer
             {
                 if (append)
                 {
-                    textBoxResult.AppendText(exception.ToString());
-                    var lng = textBoxResult.Text.Length;
-                    textBoxResult.SelectionStart = lng;
-                    textBoxResult.SelectionLength = 0;
+                    scintilla.AppendText(exception.ToString());
+                    var lng = scintilla.Text.Length;
+                    scintilla.SelectionStart = lng;
+                    scintilla.SelectionEnd = lng;
                 }
                 else
-                    textBoxResult.Text = exception.ToString();
+                    scintilla.Text = exception.ToString();
                 textBoxCommand.BackColor = Color.FromArgb(255, 70, 70);
                 SwitchToText();
                 return false;
@@ -311,7 +342,7 @@ namespace AccountingServer
         private void SwitchToText()
         {
             chart1.Visible = false;
-            textBoxResult.Visible = true;
+            scintilla.Visible = true;
         }
 
         /// <summary>
@@ -320,7 +351,7 @@ namespace AccountingServer
         private void SwitchToChart()
         {
             chart1.Visible = true;
-            textBoxResult.Visible = false;
+            scintilla.Visible = false;
         }
 
         /// <summary>
@@ -341,8 +372,8 @@ namespace AccountingServer
             m_FastEditing = true;
             textBoxCommand.ForeColor = Color.White;
             textBoxCommand.BackColor = Color.Black;
-            textBoxResult.ForeColor = Color.White;
-            textBoxResult.BackColor = Color.Black;
+            scintilla.ForeColor = Color.White;
+            scintilla.BackColor = Color.Black;
             textBoxCommand.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
         }
 
@@ -354,141 +385,137 @@ namespace AccountingServer
             m_FastEditing = false;
             textBoxCommand.ForeColor = Color.Black;
             textBoxCommand.BackColor = Color.White;
-            textBoxResult.ForeColor = Color.Black;
-            textBoxResult.BackColor = Color.White;
+            scintilla.ForeColor = Color.Black;
+            scintilla.BackColor = Color.White;
             textBoxCommand.AutoCompleteMode = AutoCompleteMode.None;
+        }
+
+        private void scintilla_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.Escape)
+                FocusTextBoxCommand();
+            else if (e.KeyData == (Keys.Enter | Keys.Alt))
+                PerformUpsert();
+            else if (e.KeyData == (Keys.Delete | Keys.Alt))
+                PerformRemoval();
+            else if ((e.KeyData == Keys.Tab || e.KeyData == Keys.Enter) &&
+                     m_FastEditing)
+                if (m_FastNextLocationDelta == m_FastInsertLocationDelta)
+                {
+                    scintilla.SelectionStart += m_FastNextLocationDelta + scintilla.SelectionEnd -
+                                                scintilla.SelectionStart - 4;
+                    FocusTextBoxCommand();
+                }
+                else
+                {
+                    scintilla.SelectionStart += m_FastNextLocationDelta;
+                    scintilla.SelectionEnd = scintilla.SelectionStart + 4;
+                    m_FastNextLocationDelta = m_FastInsertLocationDelta -= m_FastNextLocationDelta;
+                }
         }
 
         /// <inheritdoc />
         protected override bool ProcessDialogKey(Keys keyData)
         {
-            if (textBoxCommand.Focused)
+            if (!textBoxCommand.Focused)
+                return base.ProcessDialogKey(keyData);
+
+            if (keyData == Keys.Escape)
             {
-                if (keyData == Keys.Escape)
+                FocusTextBoxCommand();
+                if (m_FastEditing)
                 {
+                    ExitFastEditing();
+                    scintilla.Focus();
+                }
+                return true;
+            }
+            if (keyData == Keys.Tab)
+            {
+                scintilla.Focus();
+                scintilla.SelectionStart = scintilla.TextLength;
+                scintilla.ScrollCaret();
+            }
+            if (keyData == Keys.Enter &&
+                !m_FastEditing)
+            {
+                if (textBoxCommand.Text.Length == 0)
+                {
+                    var tmp = scintilla.SelectionStart = scintilla.TextLength;
+                    var txtPre = "@new Voucher {" + Environment.NewLine +
+                                 $"    Date = D(\"{DateTime.Now:yyy-MM-dd}\")," + Environment.NewLine +
+                                 "    Details = new List<VoucherDetail> {" + Environment.NewLine;
+                    var txtApp = Environment.NewLine +
+                                 "    } }@" + Environment.NewLine +
+                                 ";" + Environment.NewLine;
+                    scintilla.DeleteRange(
+                                          scintilla.SelectionStart,
+                                          scintilla.SelectionEnd - scintilla.SelectionStart);
+                    scintilla.InsertText(scintilla.SelectionStart, txtPre + txtApp);
+                    scintilla.SelectionStart = tmp + txtPre.Length;
+                    m_FastInsertLocationDelta = 0;
+                    scintilla.ScrollCaret();
+
                     FocusTextBoxCommand();
-                    if (m_FastEditing)
+                    EnterFastEditing();
+                    scintilla.ScrollCaret();
+                    return true;
+                }
+                if (ExecuteCommand(false))
+                    return true;
+            }
+            if (keyData == (Keys.Enter | Keys.Shift) &&
+                !m_FastEditing)
+                if (ExecuteCommand(true))
+                    return true;
+            if (keyData == Keys.Enter && m_FastEditing)
+            {
+                if (textBoxCommand.Text.Length == 0)
+                    if (PerformUpsert())
                     {
                         ExitFastEditing();
-                        textBoxResult.Focus();
+                        return true;
                     }
-                    return true;
-                }
-                if (keyData == Keys.Tab)
-                {
-                    textBoxResult.Focus();
-                    textBoxResult.SelectionStart = textBoxResult.TextLength;
-                    textBoxResult.ScrollToCaret();
-                }
-                if (keyData == Keys.Enter &&
-                    !m_FastEditing)
-                {
-                    if (textBoxCommand.Text.Length == 0)
-                    {
-                        var tmp = textBoxResult.SelectionStart = textBoxResult.TextLength;
-                        var txtPre = "@new Voucher {" + Environment.NewLine +
-                                     $"    Date = D(\"{DateTime.Now:yyy-MM-dd}\")," + Environment.NewLine +
-                                     "    Details = new List<VoucherDetail> {" + Environment.NewLine;
-                        var txtApp = Environment.NewLine +
-                                     "    } }@" + Environment.NewLine +
-                                     ";" + Environment.NewLine;
-                        textBoxResult.SelectedText = txtPre + txtApp;
-                        textBoxResult.SelectionLength = 0;
-                        textBoxResult.SelectionStart = tmp + txtPre.Length;
-                        m_FastInsertLocationDelta = 0;
-                        textBoxResult.ScrollToCaret();
 
-                        FocusTextBoxCommand();
-                        EnterFastEditing();
-                        textBoxResult.ScrollToCaret();
-                        return true;
-                    }
-                    if (ExecuteCommand(false))
-                        return true;
-                }
-                if (keyData == (Keys.Enter | Keys.Shift) &&
-                    !m_FastEditing)
-                    if (ExecuteCommand(true))
-                        return true;
-                if (keyData == Keys.Enter && m_FastEditing)
+                var sc =
+                    m_Abbrs.Config.Abbrs
+                           .SingleOrDefault(
+                                            tpl =>
+                                            tpl.Abbr.Equals(
+                                                            textBoxCommand.Text,
+                                                            StringComparison.InvariantCultureIgnoreCase));
+                if (sc == null)
+                    return false;
+                var s = CSharpHelper.PresentVoucherDetail(
+                                                          new VoucherDetail
+                                                              {
+                                                                  Title = sc.Title,
+                                                                  SubTitle = sc.SubTitle,
+                                                                  Content = sc.Content,
+                                                                  Remark = sc.Remark
+                                                              });
+                var idC = sc.Editable ? s.IndexOf("Content = \"\"", StringComparison.InvariantCulture) + 11 : -1;
+                var idF = s.IndexOf("Fund = null", StringComparison.InvariantCulture) + 7;
+                scintilla.Focus();
+                scintilla.DeleteRange(scintilla.SelectionStart, scintilla.SelectionStart - scintilla.SelectionEnd);
+                scintilla.InsertText(scintilla.SelectionStart, s);
+                if (sc.Editable)
                 {
-                    if (textBoxCommand.Text.Length == 0)
-                        if (PerformUpsert())
-                        {
-                            ExitFastEditing();
-                            return true;
-                        }
-
-                    var sc =
-                        m_Abbrs.Config.Abbrs
-                               .SingleOrDefault(
-                                                tpl =>
-                                                tpl.Abbr.Equals(
-                                                                textBoxCommand.Text,
-                                                                StringComparison.InvariantCultureIgnoreCase));
-                    if (sc == null)
-                        return false;
-                    var s = CSharpHelper.PresentVoucherDetail(
-                                                              new VoucherDetail
-                                                                  {
-                                                                      Title = sc.Title,
-                                                                      SubTitle = sc.SubTitle,
-                                                                      Content = sc.Content,
-                                                                      Remark = sc.Remark
-                                                                  });
-                    var idC = sc.Editable ? s.IndexOf("Content = \"\"", StringComparison.InvariantCulture) + 11 : -1;
-                    var idF = s.IndexOf("Fund = null", StringComparison.InvariantCulture) + 7;
-                    textBoxResult.Focus();
-                    textBoxResult.SelectedText = s;
-                    textBoxResult.SelectionLength = 0;
-                    if (sc.Editable)
-                    {
-                        textBoxResult.SelectionStart += idC - s.Length;
-                        textBoxResult.SelectionLength = 0;
-                        m_FastNextLocationDelta = idF - idC;
-                        m_FastInsertLocationDelta = s.Length - idC;
-                    }
-                    else
-                    {
-                        textBoxResult.SelectionStart += idF - s.Length;
-                        textBoxResult.SelectionLength = 4;
-                        m_FastNextLocationDelta = s.Length - idF;
-                        m_FastInsertLocationDelta = s.Length - idF;
-                    }
-                    textBoxResult.ScrollToCaret();
-                    textBoxCommand.Text = string.Empty;
-                    return true;
+                    scintilla.SelectionStart += idC - s.Length;
+                    scintilla.SelectionStart = scintilla.SelectionStart;
+                    m_FastNextLocationDelta = idF - idC;
+                    m_FastInsertLocationDelta = s.Length - idC;
                 }
-            }
-            else if (textBoxResult.Focused)
-            {
-                if (keyData == Keys.Escape)
+                else
                 {
-                    FocusTextBoxCommand();
-                    return true;
+                    scintilla.SelectionStart += idF - s.Length;
+                    scintilla.SelectionEnd = scintilla.SelectionStart + 4;
+                    m_FastNextLocationDelta = s.Length - idF;
+                    m_FastInsertLocationDelta = s.Length - idF;
                 }
-                if (keyData == (Keys.Enter | Keys.Alt))
-                    if (PerformUpsert())
-                        return true;
-                if (keyData == (Keys.Delete | Keys.Alt))
-                    if (PerformRemoval())
-                        return true;
-                if ((keyData == Keys.Tab || keyData == Keys.Enter) &&
-                    m_FastEditing)
-                {
-                    if (m_FastNextLocationDelta == m_FastInsertLocationDelta)
-                    {
-                        textBoxResult.SelectionStart += m_FastNextLocationDelta + textBoxResult.SelectionLength - 4;
-                        FocusTextBoxCommand();
-                    }
-                    else
-                    {
-                        textBoxResult.SelectionStart += m_FastNextLocationDelta;
-                        textBoxResult.SelectionLength = 4;
-                        m_FastNextLocationDelta = m_FastInsertLocationDelta -= m_FastNextLocationDelta;
-                    }
-                    return true;
-                }
+                scintilla.ScrollCaret();
+                textBoxCommand.Text = string.Empty;
+                return true;
             }
             return base.ProcessDialogKey(keyData);
         }
