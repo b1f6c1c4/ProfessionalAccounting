@@ -30,38 +30,52 @@ namespace AccountingServer
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.textBoxCommand = new System.Windows.Forms.TextBox();
-            this.textBoxResult = new System.Windows.Forms.TextBox();
+            this.scintilla = new ScintillaNET.Scintilla();
+            this.acMenu = new AutocompleteMenuNS.AutocompleteMenu();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.SuspendLayout();
             // 
             // textBoxCommand
             // 
+            this.acMenu.SetAutocompleteMenu(this.textBoxCommand, null);
             this.textBoxCommand.Dock = System.Windows.Forms.DockStyle.Top;
-            this.textBoxCommand.Font = new System.Drawing.Font("Microsoft YaHei Mono", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.textBoxCommand.Font = new System.Drawing.Font("Microsoft YaHei Mono", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBoxCommand.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBoxCommand.Location = new System.Drawing.Point(0, 0);
             this.textBoxCommand.Name = "textBoxCommand";
-            this.textBoxCommand.Size = new System.Drawing.Size(1455, 43);
+            this.textBoxCommand.Size = new System.Drawing.Size(1455, 31);
             this.textBoxCommand.TabIndex = 4;
             this.textBoxCommand.TabStop = false;
             // 
-            // textBoxResult
+            // scintilla
             // 
-            this.textBoxResult.Font = new System.Drawing.Font("Microsoft YaHei Mono", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.textBoxResult.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBoxResult.Location = new System.Drawing.Point(280, 354);
-            this.textBoxResult.Multiline = true;
-            this.textBoxResult.Name = "textBoxResult";
-            this.textBoxResult.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBoxResult.Size = new System.Drawing.Size(665, 354);
-            this.textBoxResult.TabIndex = 5;
-            this.textBoxResult.TabStop = false;
-            this.textBoxResult.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.textBoxResult_MouseWheel);
+            this.scintilla.CaretPeriod = 200;
+            this.scintilla.EndAtLastLine = false;
+            this.scintilla.Lexer = ScintillaNET.Lexer.Cpp;
+            this.scintilla.Location = new System.Drawing.Point(83, 238);
+            this.scintilla.Name = "scintilla";
+            this.scintilla.Size = new System.Drawing.Size(883, 509);
+            this.scintilla.TabIndex = 0;
+            this.scintilla.TabStop = false;
+            this.scintilla.WrapMode = ScintillaNET.WrapMode.Char;
+            this.scintilla.KeyUp += new System.Windows.Forms.KeyEventHandler(this.scintilla_KeyUp);
+            // 
+            // acMenu
+            // 
+            this.acMenu.AllowsTabKey = true;
+            this.acMenu.AppearInterval = 50;
+            this.acMenu.Colors = ((AutocompleteMenuNS.Colors)(resources.GetObject("acMenu.Colors")));
+            this.acMenu.Font = new System.Drawing.Font("Microsoft YaHei Mono", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.acMenu.ImageList = null;
+            this.acMenu.Items = new string[0];
+            this.acMenu.LeftPadding = 36;
+            this.acMenu.TargetControlWrapper = null;
             // 
             // chart1
             // 
@@ -87,8 +101,8 @@ namespace AccountingServer
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1455, 861);
+            this.Controls.Add(this.scintilla);
             this.Controls.Add(this.chart1);
-            this.Controls.Add(this.textBoxResult);
             this.Controls.Add(this.textBoxCommand);
             this.Name = "frmMain";
             this.Text = "Accounting Server";
@@ -102,11 +116,9 @@ namespace AccountingServer
         #endregion
 
         private System.Windows.Forms.TextBox textBoxCommand;
-        private System.Windows.Forms.TextBox textBoxResult;
+        private ScintillaNET.Scintilla scintilla;
+        private AutocompleteMenuNS.AutocompleteMenu acMenu;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
-
-
-
     }
 }
 
