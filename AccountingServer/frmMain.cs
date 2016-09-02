@@ -6,7 +6,6 @@ using System.Windows.Forms;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
-using AutocompleteMenuNS;
 using ScintillaNET;
 
 namespace AccountingServer
@@ -369,12 +368,31 @@ namespace AccountingServer
         /// </summary>
         private void EnterFastEditing()
         {
+            var tmp = scintilla.SelectionStart = scintilla.TextLength;
+            var txtPre = "@new Voucher {" + Environment.NewLine +
+                         $"    Date = D(\"{DateTime.Now:yyy-MM-dd}\")," + Environment.NewLine +
+                         "    Details = new List<VoucherDetail> {" + Environment.NewLine;
+            var txtApp = Environment.NewLine +
+                         "    } }@" + Environment.NewLine +
+                         ";" + Environment.NewLine;
+            scintilla.DeleteRange(
+                                  scintilla.SelectionStart,
+                                  scintilla.SelectionEnd - scintilla.SelectionStart);
+            scintilla.InsertText(scintilla.SelectionStart, txtPre + txtApp);
+            scintilla.SelectionStart = tmp + txtPre.Length;
+            m_FastInsertLocationDelta = 0;
+            scintilla.ScrollCaret();
+
+            FocusTextBoxCommand();
+
             m_FastEditing = true;
             textBoxCommand.ForeColor = Color.White;
             textBoxCommand.BackColor = Color.Black;
             scintilla.ForeColor = Color.White;
             scintilla.BackColor = Color.Black;
             textBoxCommand.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+
+            scintilla.ScrollCaret();
         }
 
         /// <summary>
@@ -388,18 +406,99 @@ namespace AccountingServer
             scintilla.ForeColor = Color.Black;
             scintilla.BackColor = Color.White;
             textBoxCommand.AutoCompleteMode = AutoCompleteMode.None;
+
+            scintilla.Focus();
         }
 
-        private void scintilla_KeyUp(object sender, KeyEventArgs e)
+        /// <inheritdoc />
+        protected override bool ProcessDialogKey(Keys keyData)
         {
-            if (e.KeyData == Keys.Escape)
+            switch (keyData)
+            {
+                case Keys.Escape:
+                    return true;
+                case Keys.Return:
+                    return true;
+                case Keys.Enter | Keys.Shift:
+                    return true;
+                case Keys.Enter | Keys.Alt:
+                    return true;
+                case Keys.Delete | Keys.Alt:
+                    return true;
+                default:
+                    return base.ProcessDialogKey(keyData);
+            }
+        }
+
+        private void frmMain_Shown(object sender, EventArgs e) => FocusTextBoxCommand();
+
+        private bool textBoxCommand_Key(Keys keyData)
+        {
+            if (keyData == Keys.Escape)
+            {
                 FocusTextBoxCommand();
-            else if (e.KeyData == (Keys.Enter | Keys.Alt))
-                PerformUpsert();
-            else if (e.KeyData == (Keys.Delete | Keys.Alt))
-                PerformRemoval();
-            else if ((e.KeyData == Keys.Tab || e.KeyData == Keys.Enter) &&
-                     m_FastEditing)
+                if (m_FastEditing)
+                    ExitFastEditing();
+                return true;
+            }
+            if (keyData == Keys.Tab)
+            {
+                scintilla.Focus();
+                scintilla.SelectionStart = scintilla.TextLength;
+                scintilla.ScrollCaret();
+                return true;
+            }
+            if (keyData == Keys.Enter &&
+                !m_FastEditing)
+                if (textBoxCommand.Text.Length == 0)
+                {
+                    EnterFastEditing();
+                    return true;
+                }
+                else
+                    return ExecuteCommand(false);
+            if (keyData == (Keys.Enter | Keys.Shift) &&
+                !m_FastEditing)
+                return ExecuteCommand(true);
+            if (keyData == Keys.Enter && m_FastEditing)
+                if (textBoxCommand.Text.Length == 0)
+                {
+                    if (!PerformUpsert())
+                        return false;
+                    ExitFastEditing();
+                    return true;
+                }
+                else
+                {
+                    FastEdit();
+                    return true;
+                }
+            return false;
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (textBoxCommand.Focused)
+                return textBoxCommand_Key(keyData) || base.ProcessCmdKey(ref msg, keyData);
+            if (scintilla.Focused)
+                return scintilla_Key(keyData) || base.ProcessCmdKey(ref msg, keyData);
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private bool scintilla_Key(Keys keyData)
+        {
+            if (keyData == Keys.Escape)
+            {
+                FocusTextBoxCommand();
+                return true;
+            }
+            if (keyData == (Keys.Enter | Keys.Alt))
+                return PerformUpsert();
+            if (keyData == (Keys.Delete | Keys.Alt))
+                return PerformRemoval();
+            if ((keyData == Keys.Tab || keyData == Keys.Enter) &&
+                m_FastEditing)
+            {
                 if (m_FastNextLocationDelta == m_FastInsertLocationDelta)
                 {
                     scintilla.SelectionStart += m_FastNextLocationDelta + scintilla.SelectionEnd -
@@ -412,114 +511,51 @@ namespace AccountingServer
                     scintilla.SelectionEnd = scintilla.SelectionStart + 4;
                     m_FastNextLocationDelta = m_FastInsertLocationDelta -= m_FastNextLocationDelta;
                 }
+                return true;
+            }
+            return false;
         }
 
-        /// <inheritdoc />
-        protected override bool ProcessDialogKey(Keys keyData)
+        private void FastEdit()
         {
-            if (!textBoxCommand.Focused)
-                return base.ProcessDialogKey(keyData);
-
-            if (keyData == Keys.Escape)
+            var sc =
+                m_Abbrs.Config.Abbrs
+                       .SingleOrDefault(
+                                        tpl =>
+                                        tpl.Abbr.Equals(
+                                                        textBoxCommand.Text,
+                                                        StringComparison.InvariantCultureIgnoreCase));
+            if (sc == null)
+                return;
+            var cnt = sc.Editable ? sc.Content ?? "" : sc.Content;
+            var s = CSharpHelper.PresentVoucherDetail(
+                                                      new VoucherDetail
+                                                          {
+                                                              Title = sc.Title,
+                                                              SubTitle = sc.SubTitle,
+                                                              Content = cnt,
+                                                              Remark = sc.Remark
+                                                          });
+            var idF = s.IndexOf("Fund = null", StringComparison.InvariantCulture) + 7;
+            scintilla.Focus();
+            scintilla.InsertText(scintilla.SelectionStart, s);
+            if (sc.Editable)
             {
-                FocusTextBoxCommand();
-                if (m_FastEditing)
-                {
-                    ExitFastEditing();
-                    scintilla.Focus();
-                }
-                return true;
+                var idC = s.IndexOf("Content = \"\"", StringComparison.InvariantCulture) + 11;
+                scintilla.SelectionStart += idC;
+                scintilla.SelectionStart = scintilla.SelectionStart + cnt.Length;
+                m_FastNextLocationDelta = idF - idC;
+                m_FastInsertLocationDelta = s.Length - idC;
             }
-            if (keyData == Keys.Tab)
+            else
             {
-                scintilla.Focus();
-                scintilla.SelectionStart = scintilla.TextLength;
-                scintilla.ScrollCaret();
+                scintilla.SelectionStart += idF;
+                scintilla.SelectionEnd = scintilla.SelectionStart + 4;
+                m_FastNextLocationDelta = s.Length - idF;
+                m_FastInsertLocationDelta = s.Length - idF;
             }
-            if (keyData == Keys.Enter &&
-                !m_FastEditing)
-            {
-                if (textBoxCommand.Text.Length == 0)
-                {
-                    var tmp = scintilla.SelectionStart = scintilla.TextLength;
-                    var txtPre = "@new Voucher {" + Environment.NewLine +
-                                 $"    Date = D(\"{DateTime.Now:yyy-MM-dd}\")," + Environment.NewLine +
-                                 "    Details = new List<VoucherDetail> {" + Environment.NewLine;
-                    var txtApp = Environment.NewLine +
-                                 "    } }@" + Environment.NewLine +
-                                 ";" + Environment.NewLine;
-                    scintilla.DeleteRange(
-                                          scintilla.SelectionStart,
-                                          scintilla.SelectionEnd - scintilla.SelectionStart);
-                    scintilla.InsertText(scintilla.SelectionStart, txtPre + txtApp);
-                    scintilla.SelectionStart = tmp + txtPre.Length;
-                    m_FastInsertLocationDelta = 0;
-                    scintilla.ScrollCaret();
-
-                    FocusTextBoxCommand();
-                    EnterFastEditing();
-                    scintilla.ScrollCaret();
-                    return true;
-                }
-                if (ExecuteCommand(false))
-                    return true;
-            }
-            if (keyData == (Keys.Enter | Keys.Shift) &&
-                !m_FastEditing)
-                if (ExecuteCommand(true))
-                    return true;
-            if (keyData == Keys.Enter && m_FastEditing)
-            {
-                if (textBoxCommand.Text.Length == 0)
-                    if (PerformUpsert())
-                    {
-                        ExitFastEditing();
-                        return true;
-                    }
-
-                var sc =
-                    m_Abbrs.Config.Abbrs
-                           .SingleOrDefault(
-                                            tpl =>
-                                            tpl.Abbr.Equals(
-                                                            textBoxCommand.Text,
-                                                            StringComparison.InvariantCultureIgnoreCase));
-                if (sc == null)
-                    return false;
-                var s = CSharpHelper.PresentVoucherDetail(
-                                                          new VoucherDetail
-                                                              {
-                                                                  Title = sc.Title,
-                                                                  SubTitle = sc.SubTitle,
-                                                                  Content = sc.Content,
-                                                                  Remark = sc.Remark
-                                                              });
-                var idC = sc.Editable ? s.IndexOf("Content = \"\"", StringComparison.InvariantCulture) + 11 : -1;
-                var idF = s.IndexOf("Fund = null", StringComparison.InvariantCulture) + 7;
-                scintilla.Focus();
-                scintilla.DeleteRange(scintilla.SelectionStart, scintilla.SelectionStart - scintilla.SelectionEnd);
-                scintilla.InsertText(scintilla.SelectionStart, s);
-                if (sc.Editable)
-                {
-                    scintilla.SelectionStart += idC - s.Length;
-                    scintilla.SelectionStart = scintilla.SelectionStart;
-                    m_FastNextLocationDelta = idF - idC;
-                    m_FastInsertLocationDelta = s.Length - idC;
-                }
-                else
-                {
-                    scintilla.SelectionStart += idF - s.Length;
-                    scintilla.SelectionEnd = scintilla.SelectionStart + 4;
-                    m_FastNextLocationDelta = s.Length - idF;
-                    m_FastInsertLocationDelta = s.Length - idF;
-                }
-                scintilla.ScrollCaret();
-                textBoxCommand.Text = string.Empty;
-                return true;
-            }
-            return base.ProcessDialogKey(keyData);
+            scintilla.ScrollCaret();
+            textBoxCommand.Text = string.Empty;
         }
-
-        private void frmMain_Shown(object sender, EventArgs e) => FocusTextBoxCommand();
     }
 }
