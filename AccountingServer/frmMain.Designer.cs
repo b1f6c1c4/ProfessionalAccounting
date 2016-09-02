@@ -64,7 +64,6 @@ namespace AccountingServer
             this.scintilla.TabIndex = 0;
             this.scintilla.TabStop = false;
             this.scintilla.WrapMode = ScintillaNET.WrapMode.Char;
-            this.scintilla.KeyUp += new System.Windows.Forms.KeyEventHandler(this.scintilla_KeyUp);
             // 
             // acMenu
             // 
