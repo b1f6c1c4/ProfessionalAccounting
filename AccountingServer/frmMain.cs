@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using AccountingServer.BLL;
-using AccountingServer.Entities;
 using AccountingServer.Shell;
 using ScintillaNET;
 
@@ -13,37 +10,6 @@ namespace AccountingServer
     // ReSharper disable once InconsistentNaming
     public partial class frmMain : Form
     {
-        /// <summary>
-        ///     基本会计业务处理类
-        /// </summary>
-        // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
-        private readonly Accountant m_Accountant;
-
-        /// <summary>
-        ///     控制台
-        /// </summary>
-        private readonly AccountingShell m_Shell;
-
-        /// <summary>
-        ///     快捷编辑缩写
-        /// </summary>
-        private readonly CustomManager<Abbreviations> m_Abbrs;
-
-        /// <summary>
-        ///     快捷编辑是否启用
-        /// </summary>
-        private bool m_FastEditing;
-
-        /// <summary>
-        ///     快捷编辑下一个细目偏移
-        /// </summary>
-        private int m_FastInsertLocationDelta;
-
-        /// <summary>
-        ///     快捷编辑下一个字段偏移
-        /// </summary>
-        private int m_FastNextLocationDelta;
-
         [DllImport("user32.dll")]
         private static extern bool SetProcessDPIAware();
 
@@ -58,20 +24,13 @@ namespace AccountingServer
             Height = 860;
 
             SetupScintilla();
-
-            m_Accountant = new Accountant();
-
-            m_Abbrs = new CustomManager<Abbreviations>("Abbr.xml");
-            var col = new AutoCompleteStringCollection();
-            col.AddRange(m_Abbrs.Config.Abbrs.Select(tpl => tpl.Abbr).ToArray());
-            textBoxCommand.AutoCompleteSource = AutoCompleteSource.CustomSource;
-            textBoxCommand.AutoCompleteCustomSource = col;
-            m_FastEditing = false;
-
-            m_Shell = new AccountingShell(m_Accountant);
-            m_Shell.AutoConnect();
+            PrepareFastEditing();
+            PrepareAccounting();
         }
 
+        /// <summary>
+        ///     初始化编辑器
+        /// </summary>
         private void SetupScintilla()
         {
             scintilla.StyleResetDefault();
@@ -142,175 +101,6 @@ namespace AccountingServer
         }
 
         /// <summary>
-        ///     更新或添加
-        /// </summary>
-        /// <returns>是否成功</returns>
-        private bool PerformUpsert()
-        {
-            int begin;
-            int end;
-            string typeName;
-            if (!GetEditableText(out begin, out end, out typeName))
-                return false;
-
-            try
-            {
-                var s = scintilla.Text.Substring(begin, end - begin + 1).Trim().Trim('@');
-                string result;
-                switch (typeName)
-                {
-                    case "Voucher":
-                        result = m_Shell.ExecuteVoucherUpsert(s);
-                        break;
-                    case "Asset":
-                        result = m_Shell.ExecuteAssetUpsert(s);
-                        break;
-                    case "Amortization":
-                        result = m_Shell.ExecuteAmortUpsert(s);
-                        break;
-                    case "NamedQueryTemplate":
-                        result = m_Shell.ExecuteNamedQueryTemplateUpsert(s);
-                        break;
-                    default:
-                        return false;
-                }
-                if (scintilla.Text[end] == '\n' &&
-                    result[result.Length - 1] != '\n')
-                    scintilla.Text = scintilla.Text.Remove(begin, end - begin - 1)
-                                              .Insert(begin, result);
-                else
-                    scintilla.Text = scintilla.Text.Remove(begin, end - begin + 1)
-                                              .Insert(begin, result);
-                scintilla.SelectionStart = begin;
-                scintilla.SelectionEnd = result.Length - begin;
-            }
-            catch (Exception exception)
-            {
-                scintilla.Text = scintilla.Text.Insert(end + 1, exception.ToString());
-                scintilla.SelectionStart = begin;
-                scintilla.SelectionEnd = end;
-            }
-
-            scintilla.ScrollCaret();
-            return true;
-        }
-
-        /// <summary>
-        ///     删除
-        /// </summary>
-        /// <returns>是否成功</returns>
-        private bool PerformRemoval()
-        {
-            int begin;
-            int end;
-            string typeName;
-            if (!GetEditableText(out begin, out end, out typeName))
-                return false;
-
-            try
-            {
-                var s = scintilla.Text.Substring(begin, end - begin + 1).Trim().Trim('@');
-                bool result;
-                switch (typeName)
-                {
-                    case "Voucher":
-                        result = m_Shell.ExecuteVoucherRemoval(s);
-                        break;
-                    case "Asset":
-                        result = m_Shell.ExecuteAssetRemoval(s);
-                        break;
-                    case "Amortization":
-                        result = m_Shell.ExecuteAmortRemoval(s);
-                        break;
-                    case "NamedQueryTemplate":
-                        result = m_Shell.ExecuteNamedQueryTemplateRemoval(s);
-                        break;
-                    default:
-                        return false;
-                }
-                if (!result)
-                    throw new ApplicationException("提交的内容类型未知");
-                // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
-                if (scintilla.Text[end] == '}')
-                    scintilla.Text = scintilla.Text.Insert(end + 1, "*/").Insert(begin, "/*");
-                else //if (scintilla.Text[end] == '\n')
-                    scintilla.Text = scintilla.Text.Insert(end - 1, "*/").Insert(begin, "/*");
-                scintilla.SelectionStart = begin;
-                scintilla.SelectionEnd = end + 4;
-            }
-            catch (Exception exception)
-            {
-                scintilla.Text = scintilla.Text.Insert(end, exception.ToString());
-                scintilla.SelectionStart = begin;
-                scintilla.SelectionEnd = end - begin;
-            }
-
-            scintilla.ScrollCaret();
-            return true;
-        }
-
-        /// <summary>
-        ///     执行表达式
-        /// </summary>
-        /// <returns></returns>
-        private bool ExecuteCommand(bool append)
-        {
-            try
-            {
-                var res = m_Shell.Execute(textBoxCommand.Text);
-                if (res == null)
-                    return true;
-
-                if (res is ChartData)
-                {
-                    ProcessChart(res as ChartData);
-                    FocusTextBoxCommand();
-                    return true;
-                }
-
-                var result = res.ToString();
-
-                SwitchToText();
-
-                scintilla.Focus();
-
-                if (append)
-                {
-                    scintilla.AppendText(result);
-                    var lng = scintilla.Text.Length;
-                    scintilla.SelectionStart = lng;
-                    scintilla.SelectionEnd = lng;
-                    textBoxCommand.BackColor = Color.FromArgb(0, 200, 0);
-                }
-                else
-                {
-                    scintilla.Text = result;
-                    scintilla.SelectionEnd = scintilla.SelectionStart;
-                    textBoxCommand.BackColor = Color.FromArgb(75, 255, 75);
-                }
-
-                if (res.AutoReturn)
-                    FocusTextBoxCommand();
-                return true;
-            }
-            catch (Exception exception)
-            {
-                if (append)
-                {
-                    scintilla.AppendText(exception.ToString());
-                    var lng = scintilla.Text.Length;
-                    scintilla.SelectionStart = lng;
-                    scintilla.SelectionEnd = lng;
-                }
-                else
-                    scintilla.Text = exception.ToString();
-                textBoxCommand.BackColor = Color.FromArgb(255, 70, 70);
-                SwitchToText();
-                return false;
-            }
-        }
-
-        /// <summary>
         ///     处理图表
         /// </summary>
         /// <param name="chartArgs">图表数据</param>
@@ -363,53 +153,6 @@ namespace AccountingServer
             textBoxCommand.SelectionLength = textBoxCommand.TextLength;
         }
 
-        /// <summary>
-        ///     进入快捷编辑模式
-        /// </summary>
-        private void EnterFastEditing()
-        {
-            var tmp = scintilla.SelectionStart = scintilla.TextLength;
-            var txtPre = "@new Voucher {" + Environment.NewLine +
-                         $"    Date = D(\"{DateTime.Now:yyy-MM-dd}\")," + Environment.NewLine +
-                         "    Details = new List<VoucherDetail> {" + Environment.NewLine;
-            var txtApp = Environment.NewLine +
-                         "    } }@" + Environment.NewLine +
-                         ";" + Environment.NewLine;
-            scintilla.DeleteRange(
-                                  scintilla.SelectionStart,
-                                  scintilla.SelectionEnd - scintilla.SelectionStart);
-            scintilla.InsertText(scintilla.SelectionStart, txtPre + txtApp);
-            scintilla.SelectionStart = tmp + txtPre.Length;
-            m_FastInsertLocationDelta = 0;
-            scintilla.ScrollCaret();
-
-            FocusTextBoxCommand();
-
-            m_FastEditing = true;
-            textBoxCommand.ForeColor = Color.White;
-            textBoxCommand.BackColor = Color.Black;
-            scintilla.ForeColor = Color.White;
-            scintilla.BackColor = Color.Black;
-            textBoxCommand.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-
-            scintilla.ScrollCaret();
-        }
-
-        /// <summary>
-        ///     退出快捷编辑模式
-        /// </summary>
-        private void ExitFastEditing()
-        {
-            m_FastEditing = false;
-            textBoxCommand.ForeColor = Color.Black;
-            textBoxCommand.BackColor = Color.White;
-            scintilla.ForeColor = Color.Black;
-            scintilla.BackColor = Color.White;
-            textBoxCommand.AutoCompleteMode = AutoCompleteMode.None;
-
-            scintilla.Focus();
-        }
-
         /// <inheritdoc />
         protected override bool ProcessDialogKey(Keys keyData)
         {
@@ -431,6 +174,15 @@ namespace AccountingServer
         }
 
         private void frmMain_Shown(object sender, EventArgs e) => FocusTextBoxCommand();
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (textBoxCommand.Focused)
+                return textBoxCommand_Key(keyData) || base.ProcessCmdKey(ref msg, keyData);
+            if (scintilla.Focused)
+                return scintilla_Key(keyData) || base.ProcessCmdKey(ref msg, keyData);
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
 
         private bool textBoxCommand_Key(Keys keyData)
         {
@@ -476,15 +228,6 @@ namespace AccountingServer
             return false;
         }
 
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-        {
-            if (textBoxCommand.Focused)
-                return textBoxCommand_Key(keyData) || base.ProcessCmdKey(ref msg, keyData);
-            if (scintilla.Focused)
-                return scintilla_Key(keyData) || base.ProcessCmdKey(ref msg, keyData);
-            return base.ProcessCmdKey(ref msg, keyData);
-        }
-
         private bool scintilla_Key(Keys keyData)
         {
             if (keyData == Keys.Escape)
@@ -514,48 +257,6 @@ namespace AccountingServer
                 return true;
             }
             return false;
-        }
-
-        private void FastEdit()
-        {
-            var sc =
-                m_Abbrs.Config.Abbrs
-                       .SingleOrDefault(
-                                        tpl =>
-                                        tpl.Abbr.Equals(
-                                                        textBoxCommand.Text,
-                                                        StringComparison.InvariantCultureIgnoreCase));
-            if (sc == null)
-                return;
-            var cnt = sc.Editable ? sc.Content ?? "" : sc.Content;
-            var s = CSharpHelper.PresentVoucherDetail(
-                                                      new VoucherDetail
-                                                          {
-                                                              Title = sc.Title,
-                                                              SubTitle = sc.SubTitle,
-                                                              Content = cnt,
-                                                              Remark = sc.Remark
-                                                          });
-            var idF = s.IndexOf("Fund = null", StringComparison.InvariantCulture) + 7;
-            scintilla.Focus();
-            scintilla.InsertText(scintilla.SelectionStart, s);
-            if (sc.Editable)
-            {
-                var idC = s.IndexOf("Content = \"\"", StringComparison.InvariantCulture) + 11;
-                scintilla.SelectionStart += idC;
-                scintilla.SelectionStart = scintilla.SelectionStart + cnt.Length;
-                m_FastNextLocationDelta = idF - idC;
-                m_FastInsertLocationDelta = s.Length - idC;
-            }
-            else
-            {
-                scintilla.SelectionStart += idF;
-                scintilla.SelectionEnd = scintilla.SelectionStart + 4;
-                m_FastNextLocationDelta = s.Length - idF;
-                m_FastInsertLocationDelta = s.Length - idF;
-            }
-            scintilla.ScrollCaret();
-            textBoxCommand.Text = string.Empty;
         }
     }
 }

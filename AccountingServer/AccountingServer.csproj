@@ -50,6 +50,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Abbreviation.cs" />
+    <Compile Include="frmMain.Accounting.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmMain.FastEditing.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
     </Compile>
