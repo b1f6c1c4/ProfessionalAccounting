@@ -11,7 +11,7 @@ namespace AccountingServer.Plugins.BankBalance
     /// </summary>
     public class AverageDailyBalance : PluginBase
     {
-        public AverageDailyBalance(Accountant accountant) : base(accountant) { }
+        public AverageDailyBalance(Accountant accountant, AccountingShell shell) : base(accountant, shell) { }
 
         /// <inheritdoc />
         public override IQueryResult Execute(params string[] pars)

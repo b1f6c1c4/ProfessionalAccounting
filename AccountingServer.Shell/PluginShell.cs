@@ -19,7 +19,7 @@ namespace AccountingServer.Shell
 
         private readonly CustomManager<PluginInfos> m_Infos;
 
-        public PluginShell(Accountant helper)
+        public PluginShell(Accountant helper, AccountingShell shell)
         {
             m_Infos = new CustomManager<PluginInfos>("Plugins.xml");
             m_Plugins = new Dictionary<string, PluginBase>();
@@ -31,7 +31,7 @@ namespace AccountingServer.Shell
                     throw new ApplicationException($"无法从{info.AssemblyName}中加载{info.ClassName}");
                 m_Plugins.Add(
                               info.Alias,
-                              (PluginBase)Activator.CreateInstance(type, helper));
+                              (PluginBase)Activator.CreateInstance(type, helper, shell));
             }
         }
 

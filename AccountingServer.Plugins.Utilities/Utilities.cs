@@ -11,7 +11,7 @@ namespace AccountingServer.Plugins.Utilities
     /// </summary>
     public class Utilities : PluginBase
     {
-        public Utilities(Accountant accountant) : base(accountant) { }
+        public Utilities(Accountant accountant, AccountingShell shell) : base(accountant, shell) { }
 
         /// <inheritdoc />
         public override IQueryResult Execute(params string[] pars)
