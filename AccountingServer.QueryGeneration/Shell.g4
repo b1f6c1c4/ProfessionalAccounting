@@ -27,7 +27,7 @@ autoCommand
 otherCommand
 	:	EditNamedQueries | Check | Titles | Connect | Help DollarQuotedString? | Exit
 	;
-	
+
 chart
 	:	'ch' namedQuery range?
 	;
@@ -82,7 +82,7 @@ subtotalAggr
 	:	'D' IsAll='[]'?
 	|	'D' '[' rangeCore ']'
 	;
-	
+
 voucherDetailQuery
 	:	vouchers emit
 	|	voucherQuery
@@ -125,13 +125,22 @@ range
 	:	'[]' | Core=rangeCore | '[' Core=rangeCore ']'
 	;
 
+uniqueTime
+	:	Core=uniqueTimeCore | '[' Core=uniqueTimeCore ']'
+	;
+
 rangeCore
 	:	RangeNull | RangeAllNotNull
 	|	Begin=rangeCertainPoint Op=('~'|'=') End=rangeCertainPoint?
 	|	Op=('~'|'=') End=rangeCertainPoint
 	|	Certain=rangeCertainPoint
 	;
-	
+
+uniqueTimeCore
+	:	RangeNull
+	|	Day=rangeDay
+	;
+
 rangePoint
 	:	RangeNull | All='[]'
 	|	rangeCertainPoint
@@ -147,7 +156,7 @@ rangeCertainPoint
 rangeYear
 	:	RangeAYear
 	;
-	
+
 rangeMonth
 	:	(RangeAMonth | RangeDeltaMonth)
 	;
@@ -159,7 +168,7 @@ rangeWeek
 rangeDay
 	:	RangeADay | RangeDeltaDay
 	;
-	
+
 asset
 	:	assetList | assetQuery | assetRegister | assetUnregister | assetRedep | assetResetSoft | assetResetMixed | assetResetHard | assetApply | assetCheck
 	;
@@ -254,11 +263,11 @@ carryYearResetHard
 carryYear
 	:	'caa' AOApply range?
 	;
-	
+
 /*
  * Lexer Rules
  */
- 
+
 ChartArea
 	:	'chartArea'
 	;
@@ -292,7 +301,7 @@ Check
 EditNamedQueries
 	:	'nq'
 	;
-	
+
 AOAll
 	:	'-all'
 	;
@@ -347,7 +356,7 @@ Guid
 	;
 
 fragment H
-	:	[0-9A-Za-z] 
+	:	[0-9A-Za-z]
 	;
 
 RangeNull
@@ -392,7 +401,7 @@ PercentQuotedString
 DollarQuotedString
 	:	'$' ('$$'|~('$'))* '$'
 	;
-	
+
 DoubleQuotedString
 	:	'"' ('""'|~('"'))* '"'
 	;
@@ -418,7 +427,7 @@ Percent
 	:	'P' ('+' | '-')? [0-9]+ '.'? [0-9]* '%'
 	|	'P' ('+' | '-')? '.' [0-9]+ '%'
 	;
-	
+
 Intersect
 	: '*'
 	;
