@@ -3,11 +3,9 @@
 常见记账凭证自动填写插件Utilities
 每个参数独立作用，格式为：
 '.'* nm
-其中重复的'.'表示日期，nm为：
-'w' Float?		水费，默认0.42元
-'xy'			洗衣
-'z' '=' Float	洗澡至
-'sm' Float		理发
-'ye' '=' Float	余额宝至
-'wy' '=' Float	无忧宝至
-'iv' '=' Float	盘点现金
+其中重复的'.'表示日期，nm由XML指定，其中type意义为：
+fixed			固定
+value			由参数指定
+fill			补全
+若type为value，则可以指定default表示默认值；
+若type为fill，则query应为细目检索式（不包含汇总部分）。

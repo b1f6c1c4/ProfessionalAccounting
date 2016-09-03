@@ -41,6 +41,15 @@ namespace AccountingServer.Shell
             m_PluginManager = new PluginShell(helper, this);
         }
 
+        public DateTime? ParseUniqueTime(ref string s)
+        {
+            var res = ShellParser.From(s).uniqueTime();
+            s = s.Substring(res.GetText().Length);
+            return res;
+        }
+
+        public IGroupedQuery ParseGroupedQuery(string s) => ShellParser.From(s).groupedQuery();
+
         /// <summary>
         ///     执行表达式
         /// </summary>
