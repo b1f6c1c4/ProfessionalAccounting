@@ -17,12 +17,15 @@ namespace AccountingServer.Shell.Parsing
             {
                 get
                 {
-                    var dt = RangeDeltaDay() != null
-                                 ? DateTime.Now.Date.AddDays(1 - RangeDeltaDay().GetText().Length)
-                                 : DateTime.ParseExact(RangeADay().GetText(), "yyyyMMdd", null);
+                    var dt = (DateTime)this;
                     return new DateFilter(dt, dt);
                 }
             }
+
+            public static implicit operator DateTime(RangeDayContext context) =>
+                context.RangeDeltaDay() != null
+                    ? DateTime.Now.Date.AddDays(1 - context.RangeDeltaDay().GetText().Length)
+                    : DateTime.ParseExact(context.RangeADay().GetText(), "yyyyMMdd", null);
         }
 
         public partial class RangeWeekContext : IDateRange
@@ -111,6 +114,16 @@ namespace AccountingServer.Shell.Parsing
             }
         }
 
+        public partial class UniqueTimeCoreContext
+        {
+            public static implicit operator DateTime?(UniqueTimeCoreContext context)
+            {
+                if (context.RangeNull() != null)
+                    return null;
+                return context.Day;
+            }
+        }
+
         public partial class RangeCoreContext : IDateRange
         {
             /// <inheritdoc />
@@ -136,6 +149,11 @@ namespace AccountingServer.Shell.Parsing
                     return f;
                 }
             }
+        }
+
+        public partial class UniqueTimeContext
+        {
+            public static implicit operator DateTime?(UniqueTimeContext context) => context.Core;
         }
 
         public partial class RangeContext : IDateRange
