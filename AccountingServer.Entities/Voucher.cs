@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Xml.Serialization;
 
 namespace AccountingServer.Entities
 {
     /// <summary>
     ///     记账凭证类别
     /// </summary>
+    [Serializable]
     public enum VoucherType
     {
         /// <summary>
@@ -53,11 +56,13 @@ namespace AccountingServer.Entities
     /// <summary>
     ///     记账凭证
     /// </summary>
+    [Serializable]
     public class Voucher
     {
         /// <summary>
         ///     编号
         /// </summary>
+        [XmlAttribute("id")]
         public string ID { get; set; }
 
         /// <summary>
@@ -68,22 +73,26 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     备注
         /// </summary>
+        [XmlAttribute("remark")]
         public string Remark { get; set; }
 
         /// <summary>
         ///     细目
         /// </summary>
-        public IList<VoucherDetail> Details { get; set; }
+        [XmlElement("Detail")]
+        public List<VoucherDetail> Details { get; set; }
 
         /// <summary>
         ///     类别
         /// </summary>
+        [DefaultValue(VoucherType.Ordinary)]
         public VoucherType? Type { get; set; }
     }
 
     /// <summary>
     ///     细目
     /// </summary>
+    [Serializable]
     public class VoucherDetail
     {
         /// <summary>

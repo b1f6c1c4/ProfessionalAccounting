@@ -372,7 +372,7 @@ namespace AccountingServer.BLL
                                   Date = isCollapsed ? null : item.Date,
                                   Type = voucherType,
                                   Remark = "automatically generated",
-                                  Details = details
+                                  Details = details.ToList()
                               };
             var res = Db.Upsert(voucher);
             item.VoucherID = voucher.ID;

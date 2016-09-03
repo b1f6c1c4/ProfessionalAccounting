@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
@@ -155,7 +156,7 @@ namespace AccountingServer.Plugins.Interest
                                                    grp.SingleOrDefault(
                                                                        v =>
                                                                        v.Details.Any(d => d.IsMatch(interestPattern, 1)))
-                                                   ?? new Voucher { Date = grp.Key, Details = new VoucherDetail[0] });
+                                                   ?? new Voucher { Date = grp.Key, Details = new List<VoucherDetail>() });
                 lastSettlement = grp.Key;
 
                 // Settle Loan
@@ -201,7 +202,7 @@ namespace AccountingServer.Plugins.Interest
                                                    rate,
                                                    capitalIntegral,
                                                    finalDay.Subtract(lastSettlement.Value).Days,
-                                                   new Voucher { Date = finalDay, Details = new VoucherDetail[0] });
+                                                   new Voucher { Date = finalDay, Details = new List<VoucherDetail>() });
         }
 
         /// <summary>
@@ -230,7 +231,7 @@ namespace AccountingServer.Plugins.Interest
                                          Content = "贷款利息"
                                      };
             var interest = delta * rate * capitalIntegral;
-            var create = new[]
+            var create = new List<VoucherDetail>
                              {
                                  new VoucherDetail
                                      {
