@@ -11,6 +11,13 @@ namespace AccountingServer.Plugins.Utilities
     /// </summary>
     public class Utilities : PluginBase
     {
+        private static readonly CustomManager<UtilTemplates> Templates;
+
+        static Utilities()
+        {
+            Templates = new CustomManager<UtilTemplates>("Util.xml");
+        }
+
         public Utilities(Accountant accountant, AccountingShell shell) : base(accountant, shell) { }
 
         /// <inheritdoc />
@@ -28,279 +35,90 @@ namespace AccountingServer.Plugins.Utilities
         }
 
         /// <summary>
-        ///     生成记账凭证
+        ///     根据参数生成记账凭证
         /// </summary>
         /// <param name="par">参数</param>
         /// <returns>记账凭证</returns>
         private Voucher GenerateVoucher(string par)
         {
-            var date = GetDate(ref par);
-            par = par.TrimStart();
+            DateTime? time;
+            try
+            {
+                time = Shell.ParseUniqueTime(ref par);
+            }
+            catch (Exception)
+            {
+                time = DateTime.Today;
+            }
+            var sp = par.Trim(' ').Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
+            var template = Templates.Config.Templates.FirstOrDefault(t => t.Name == sp[0]);
+            if (template == null)
+                return null;
+            var num = 1D;
+            if (template.TemplateType == UtilTemplateType.Value ||
+                template.TemplateType == UtilTemplateType.Fill)
+            {
+                double val;
+                if (sp.Length == 2)
+                    val = Convert.ToDouble(sp[1]);
+                else
+                {
+                    if (!template.Default.HasValue)
+                        return null;
+                    val = template.Default.Value;
+                }
 
-            if (par.StartsWith("xy", StringComparison.Ordinal))
-                return new Voucher
-                           {
-                               Date = date,
-                               Details = new[]
-                                             {
-                                                 new VoucherDetail
-                                                     {
-                                                         Title = 1123,
-                                                         Content = "洗衣卡",
-                                                         Fund = -2.5
-                                                     },
-                                                 new VoucherDetail
-                                                     {
-                                                         Title = 6602,
-                                                         SubTitle = 06,
-                                                         Content = "洗衣",
-                                                         Fund = 2.5
-                                                     }
-                                             }
-                           };
-            if (par.StartsWith("z", StringComparison.Ordinal))
-            {
-                double bal2;
-                if (!double.TryParse(par.Substring(1).TrimStart(' ', '='), out bal2))
-                    return null;
-                var bal1 =
-                    Accountant.SelectVoucherDetailsGrouped(
-                                                           new GroupedQueryBase(
-                                                               filter: new VoucherDetail
-                                                                           {
-                                                                               Title = 1123,
-                                                                               Content = "洗澡卡"
-                                                                           },
-                                                               subtotal:
-                                                                   new SubtotalBase
-                                                                       {
-                                                                           GatherType = GatheringType.Zero,
-                                                                           Levels = new SubtotalLevel[] { }
-                                                                       }))
-                              .Single()
-                              .Fund;
-                var fund = Math.Round(bal1 - bal2, 8);
-                return new Voucher
-                           {
-                               Date = date,
-                               Details = new[]
-                                             {
-                                                 new VoucherDetail
-                                                     {
-                                                         Title = 1123,
-                                                         Content = "洗澡卡",
-                                                         Fund = -fund
-                                                     },
-                                                 new VoucherDetail
-                                                     {
-                                                         Title = 6602,
-                                                         SubTitle = 06,
-                                                         Content = "洗澡",
-                                                         Fund = fund
-                                                     }
-                                             }
-                           };
+                if (template.TemplateType == UtilTemplateType.Value)
+                    num = val;
+                else
+                {
+                    var grp =
+                        Shell.ParseGroupedQuery(
+                                                time.HasValue
+                                                    ? $"{template.Query} [~{time:yyyyMMdd}] ``v"
+                                                    : $"{template.Query} [null] ``v");
+                    var arr = Accountant.SelectVoucherDetailsGrouped(grp).ToArray();
+                    if (arr.Length == 0)
+                        num = val;
+                    else
+                        num = arr[0].Fund - val;
+                }
             }
-            if (par.StartsWith("sm", StringComparison.Ordinal))
-            {
-                double fund;
-                if (!double.TryParse(par.Substring(1), out fund))
-                    return null;
-                return new Voucher
-                           {
-                               Date = date,
-                               Details = new[]
-                                             {
-                                                 new VoucherDetail
-                                                     {
-                                                         Title = 1123,
-                                                         Content = "审美",
-                                                         Fund = -fund
-                                                     },
-                                                 new VoucherDetail
-                                                     {
-                                                         Title = 6602,
-                                                         SubTitle = 06,
-                                                         Content = "打印费",
-                                                         Fund = fund
-                                                     }
-                                             }
-                           };
-            }
-            if (par.StartsWith("ye", StringComparison.Ordinal))
-            {
-                double bal2;
-                if (!double.TryParse(par.Substring(2).TrimStart(' ', '='), out bal2))
-                    return null;
-                var bal1 =
-                    Accountant.SelectVoucherDetailsGrouped(
-                                                           new GroupedQueryBase(
-                                                               filter: new VoucherDetail
-                                                                           {
-                                                                               Title = 1101,
-                                                                               Content = "余额宝"
-                                                                           },
-                                                               subtotal:
-                                                                   new SubtotalBase
-                                                                       {
-                                                                           GatherType = GatheringType.Zero,
-                                                                           Levels = new SubtotalLevel[] { }
-                                                                       }))
-                              .Single()
-                              .Fund;
-                var fund = Math.Round(bal2 - bal1, 8);
-                return fund.IsZero()
-                           ? null
-                           : new Voucher
-                                 {
-                                     Date = date,
-                                     Details = new[]
-                                                   {
-                                                       new VoucherDetail
-                                                           {
-                                                               Title = 1101,
-                                                               SubTitle = 02,
-                                                               Content = "余额宝",
-                                                               Fund = fund
-                                                           },
-                                                       new VoucherDetail
-                                                           {
-                                                               Title = 6111,
-                                                               SubTitle = 02,
-                                                               Content = "余额宝",
-                                                               Fund = -fund
-                                                           }
-                                                   }
-                                 };
-            }
-            if (par.StartsWith("wy", StringComparison.Ordinal))
-            {
-                double bal2;
-                if (!double.TryParse(par.Substring(2).TrimStart(' ', '='), out bal2))
-                    return null;
-                var bal1 =
-                    Accountant.SelectVoucherDetailsGrouped(
-                                                           new GroupedQueryBase(
-                                                               filter: new VoucherDetail
-                                                                           {
-                                                                               Title = 1101,
-                                                                               Content = "无忧宝"
-                                                                           },
-                                                               subtotal:
-                                                                   new SubtotalBase
-                                                                       {
-                                                                           GatherType = GatheringType.Zero,
-                                                                           Levels = new SubtotalLevel[] { }
-                                                                       }))
-                              .Single()
-                              .Fund;
-                var fund = Math.Round(bal2 - bal1, 8);
-                return fund.IsZero()
-                           ? null
-                           : new Voucher
-                                 {
-                                     Date = date,
-                                     Details = new[]
-                                                   {
-                                                       new VoucherDetail
-                                                           {
-                                                               Title = 1101,
-                                                               SubTitle = 02,
-                                                               Content = "无忧宝",
-                                                               Fund = fund
-                                                           },
-                                                       new VoucherDetail
-                                                           {
-                                                               Title = 6111,
-                                                               SubTitle = 02,
-                                                               Content = "无忧宝",
-                                                               Fund = -fund
-                                                           }
-                                                   }
-                                 };
-            }
-            if (par.StartsWith("iv", StringComparison.Ordinal))
-            {
-                double bal2;
-                if (!double.TryParse(par.Substring(2).TrimStart(' ', '='), out bal2))
-                    return null;
-                var bal1 =
-                    Accountant.SelectVoucherDetailsGrouped(
-                                                           new GroupedQueryBase(
-                                                               filter: new VoucherDetail
-                                                                           {
-                                                                               Title = 1001
-                                                                           },
-                                                               subtotal:
-                                                                   new SubtotalBase
-                                                                       {
-                                                                           GatherType = GatheringType.Zero,
-                                                                           Levels = new SubtotalLevel[] { }
-                                                                       }))
-                              .Single()
-                              .Fund;
-                var fund = Math.Round(bal2 - bal1, 8);
-                return fund.IsZero()
-                           ? null
-                           : new Voucher
-                                 {
-                                     Date = date,
-                                     Details = new[]
-                                                   {
-                                                       new VoucherDetail
-                                                           {
-                                                               Title = 1001,
-                                                               Fund = fund
-                                                           },
-                                                       new VoucherDetail
-                                                           {
-                                                               Title = 6711,
-                                                               SubTitle = 10,
-                                                               Content = fund < 0 ? "盘亏" : "盘盈",
-                                                               Fund = -fund
-                                                           }
-                                                   }
-                                 };
-            }
-            if (par.StartsWith("w", StringComparison.Ordinal))
-            {
-                double fund;
-                if (!double.TryParse(par.Substring(1), out fund))
-                    fund = 0.42;
-                return new Voucher
-                           {
-                               Date = date,
-                               Details = new[]
-                                             {
-                                                 new VoucherDetail
-                                                     {
-                                                         Title = 1123,
-                                                         Content = "学生卡小钱包",
-                                                         Fund = -fund
-                                                     },
-                                                 new VoucherDetail
-                                                     {
-                                                         Title = 6602,
-                                                         SubTitle = 01,
-                                                         Content = "水费",
-                                                         Fund = fund
-                                                     }
-                                             }
-                           };
-            }
-            return null;
+            if (num.IsZero())
+                return null;
+
+            return MakeVoucher(template, num, time);
         }
 
         /// <summary>
-        ///     获取日期部分
+        ///     从模板生成记账凭证
         /// </summary>
-        /// <param name="par">参数</param>
-        /// <returns>日期</returns>
-        private static DateTime GetDate(ref string par)
+        /// <param name="template">记账凭证模板</param>
+        /// <param name="num">倍乘</param>
+        /// <param name="time">日期</param>
+        /// <returns></returns>
+        private static Voucher MakeVoucher(Voucher template, double num, DateTime? time)
         {
-            var rng = par.TrimStart().TakeWhile(c => c == '.').Count();
-            par = par.Substring(rng);
-            return rng == 0 ? DateTime.Now.Date : DateTime.Now.Date.AddDays(1 - rng);
+            var lst =
+                template.Details
+                        .Select(
+                                d =>
+                                new VoucherDetail
+                                    {
+                                        Title = d.Title,
+                                        SubTitle = d.SubTitle,
+                                        Content = d.Content,
+                                        Fund = num * d.Fund,
+                                        Remark = d.Remark
+                                    }).ToList();
+            var voucher = new Voucher
+                              {
+                                  Date = time,
+                                  Remark = template.Remark,
+                                  Type = template.Type,
+                                  Details = lst
+                              };
+            return voucher;
         }
     }
 }
