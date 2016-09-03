@@ -295,7 +295,7 @@ namespace AccountingServer.BLL
                                     Date = ed,
                                     Type = VoucherType.AnnualCarry,
                                     Details =
-                                        new[]
+                                        new List<VoucherDetail>
                                             {
                                                 new VoucherDetail { Title = 4101, Fund = b00 },
                                                 new VoucherDetail { Title = 4103, Fund = -b00 }
@@ -309,7 +309,7 @@ namespace AccountingServer.BLL
                                     Date = ed,
                                     Type = VoucherType.AnnualCarry,
                                     Details =
-                                        new[]
+                                        new List<VoucherDetail>
                                             {
                                                 new VoucherDetail { Title = 4101, SubTitle = 01, Fund = b01 },
                                                 new VoucherDetail { Title = 4103, SubTitle = 01, Fund = -b01 }
