@@ -38,7 +38,7 @@ namespace AccountingServer.Shell
             m_NamedQueryShell = new NamedQueryShell(helper);
             m_ReportShell = new ReportShell(helper);
             m_ChartShell = new ChartShell(helper);
-            m_PluginManager = new PluginShell(helper);
+            m_PluginManager = new PluginShell(helper, this);
         }
 
         /// <summary>
