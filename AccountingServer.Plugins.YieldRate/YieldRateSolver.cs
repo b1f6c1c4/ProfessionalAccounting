@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using AccountingServer.BLL;
 
 namespace AccountingServer.Plugins.YieldRate
@@ -23,10 +25,10 @@ namespace AccountingServer.Plugins.YieldRate
         /// </summary>
         private readonly double[] m_Fund;
 
-        public YieldRateSolver(double[] delta, double[] fund)
+        public YieldRateSolver(IEnumerable<double> delta, IEnumerable<double> fund)
         {
-            m_Delta = delta;
-            m_Fund = fund;
+            m_Delta = delta.ToArray();
+            m_Fund = fund.ToArray();
             m_N = m_Delta.Length;
             if (m_Fund.Length != m_N)
                 throw new ArgumentException("数组大小不匹配");
