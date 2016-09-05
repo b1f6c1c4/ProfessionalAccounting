@@ -28,6 +28,9 @@ namespace AccountingServer.Plugins
         [XmlAttribute("name")]
         public string Name { get; set; }
 
+        [XmlAttribute("desc")]
+        public string Description { get; set; }
+
         [XmlAttribute("type")]
         public UtilTemplateType TemplateType { get; set; }
 

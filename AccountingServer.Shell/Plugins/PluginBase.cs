@@ -39,7 +39,7 @@ namespace AccountingServer.Plugins
         ///     显示插件帮助
         /// </summary>
         /// <returns>帮助内容</returns>
-        public string ListHelp()
+        public virtual string ListHelp()
         {
             var type = GetType();
             var resName = $"{type.Namespace}.Resources.Document.txt";
