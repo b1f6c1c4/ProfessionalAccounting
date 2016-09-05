@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Xml.Serialization;
 using AccountingServer.Entities;
 
-// ReSharper disable once CheckNamespace
-
-namespace AccountingServer.Plugins
+namespace AccountingServer.Plugins.Utilities
 {
     [Serializable]
     [XmlRoot("Templates")]
