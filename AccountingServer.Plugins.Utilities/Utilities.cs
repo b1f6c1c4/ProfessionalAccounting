@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
@@ -32,6 +33,16 @@ namespace AccountingServer.Plugins.Utilities
                         count++;
             }
             return new NumberAffected(count);
+        }
+
+        /// <inheritdoc />
+        public override string ListHelp()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(base.ListHelp());
+            foreach (var util in Templates.Config.Templates)
+                sb.AppendLine($"{util.Name}\t\t{util.Description}");
+            return sb.ToString();
         }
 
         /// <summary>
