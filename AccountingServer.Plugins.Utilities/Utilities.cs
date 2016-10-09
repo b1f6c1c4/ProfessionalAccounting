@@ -55,7 +55,7 @@ namespace AccountingServer.Plugins.Utilities
             DateTime? time;
             try
             {
-                time = Shell.ParseUniqueTime(ref par);
+                time = AccountingShell.ParseUniqueTime(ref par);
             }
             catch (Exception)
             {
@@ -84,7 +84,7 @@ namespace AccountingServer.Plugins.Utilities
                 else
                 {
                     var grp =
-                        Shell.ParseGroupedQuery(
+                        AccountingShell.ParseGroupedQuery(
                                                 time.HasValue
                                                     ? $"{template.Query} [~{time:yyyyMMdd}] ``v"
                                                     : $"{template.Query} [null] ``v");

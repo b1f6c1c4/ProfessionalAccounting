@@ -20,9 +20,9 @@ namespace AccountingServer.Plugins.YieldRate
         {
             var result =
                 Accountant.SelectVoucherDetailsGrouped(
-                                                       Shell.ParseGroupedQuery(
+                                                       AccountingShell.ParseGroupedQuery(
                                                                                "{T1101}-{T110102+T610101+T611102 A}:T1101``cd"));
-            var resx = Accountant.SelectVoucherDetailsGrouped(Shell.ParseGroupedQuery("T1101``c"));
+            var resx = Accountant.SelectVoucherDetailsGrouped(AccountingShell.ParseGroupedQuery("T1101``c"));
             var sb = new StringBuilder();
             foreach (
                 var tpl in

@@ -6,8 +6,17 @@ namespace AccountingServer.Shell
     /// <summary>
     ///     带引号的字符串辅助类
     /// </summary>
-    internal static class QuotedStringHelper
+    public static class QuotedStringHelper
     {
+        /// <summary>
+        ///     给字符串添加引号
+        /// </summary>
+        /// <param name="unquoted">原字符串</param>
+        /// <param name="chr">引号</param>
+        /// <returns>字符串</returns>
+        public static string Quotation(this string unquoted, char chr) =>
+            $"{chr}{unquoted.Replace(new string(chr, 1), new string(chr, 2))}{chr}";
+
         /// <summary>
         ///     给标识符解除引号
         /// </summary>
