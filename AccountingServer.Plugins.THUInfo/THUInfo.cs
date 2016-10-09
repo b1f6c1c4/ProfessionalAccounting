@@ -243,7 +243,7 @@ namespace AccountingServer.Plugins.THUInfo
         /// <param name="records">交易记录</param>
         /// <param name="pars">生成记账所需参数</param>
         /// <param name="failed">无法生产记账凭证的交易记录</param>
-        private static IEnumerable<Voucher> AutoGenerate(IEnumerable<TransactionRecord> records,
+        private IEnumerable<Voucher> AutoGenerate(IEnumerable<TransactionRecord> records,
                                                          IList<string> pars,
                                                          out List<TransactionRecord> failed)
         {
@@ -510,24 +510,35 @@ namespace AccountingServer.Plugins.THUInfo
         /// </summary>
         /// <param name="pars">自动补全指令</param>
         /// <returns>解析结果</returns>
-        private static Dictionary<DateTime, List<Tuple<RegularType, string>>> GetDic(IList<string> pars)
+        private Dictionary<DateTime, List<Tuple<RegularType, string>>> GetDic(IList<string> pars)
         {
             var dic = new Dictionary<DateTime, List<Tuple<RegularType, string>>>();
             foreach (var par in pars)
             {
-                var sp = par.Split(' ', '/', ',');
+                var xx = par;
+                var dt = DateTime.Now.Date;
+                try
+                {
+                    var dd = AccountingShell.ParseUniqueTime(ref xx);
+                    if (dd == null)
+                        throw new ApplicationException("无法处理无穷长时间以前的自动补全指令");
+                    dt = dd.Value;
+                }
+                catch (ApplicationException)
+                {
+                    throw;
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+                var sp = xx.Split(new[] { ' ', '/', ',' }, StringSplitOptions.RemoveEmptyEntries);
                 if (sp.Length == 0)
                     continue;
-                var dt = DateTime.Now.Date;
                 var lst = new List<Tuple<RegularType, string>>();
                 foreach (var s in sp)
                 {
                     var ss = s.Trim().ToLowerInvariant();
-                    if (ss.StartsWith(".", StringComparison.Ordinal))
-                    {
-                        dt = DateTime.Now.Date.AddDays(1 - sp[0].Trim().Length);
-                        continue;
-                    }
 
                     var canteens = new Dictionary<string, string>
                                        {
