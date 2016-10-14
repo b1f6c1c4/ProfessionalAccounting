@@ -244,8 +244,8 @@ namespace AccountingServer.Plugins.THUInfo
         /// <param name="pars">生成记账所需参数</param>
         /// <param name="failed">无法生产记账凭证的交易记录</param>
         private IEnumerable<Voucher> AutoGenerate(IEnumerable<TransactionRecord> records,
-                                                         IList<string> pars,
-                                                         out List<TransactionRecord> failed)
+                                                  IList<string> pars,
+                                                  out List<TransactionRecord> failed)
         {
             var dic = pars.Count > 0 ? GetDic(pars) : null;
             var res = Enumerable.Empty<Voucher>();
@@ -353,36 +353,27 @@ namespace AccountingServer.Plugins.THUInfo
                                        });
                         break;
                     case "消费":
-                        try
-                        {
-                            var ep = Convert.ToInt32(record.Endpoint);
-                            var res = Templates.SingleOrDefault(t => t.Ranges.Any(iv => iv.Start <= ep && iv.End >= ep));
-                            if (res != null)
-                                result.Add(
-                                           new Voucher
-                                               {
-                                                   Date = recordsGroup.Key.Date,
-                                                   Details = new List<VoucherDetail>
-                                                                 {
-                                                                     item(-1),
-                                                                     new VoucherDetail
-                                                                         {
-                                                                             Title = 6602,
-                                                                             SubTitle = 03,
-                                                                             Content = res.Name,
-                                                                             Fund = record.Fund
-                                                                         }
-                                                                 }
-                                               });
-                        }
-                        catch (MemberAccessException)
-                        {
-                            throw;
-                        }
-                        catch (Exception)
-                        {
-                            // ignored
-                        }
+                        var ep = Convert.ToInt32(record.Endpoint);
+                        var res = Templates.Where(t => t.Ranges.Any(iv => iv.Start <= ep && iv.End >= ep)).ToList();
+                        if (res.Count == 1)
+                            result.Add(
+                                       new Voucher
+                                           {
+                                               Date = recordsGroup.Key.Date,
+                                               Details = new List<VoucherDetail>
+                                                             {
+                                                                 item(-1),
+                                                                 new VoucherDetail
+                                                                     {
+                                                                         Title = 6602,
+                                                                         SubTitle = 03,
+                                                                         Content = res[0].Name,
+                                                                         Fund = record.Fund
+                                                                     }
+                                                             }
+                                           });
+                        else if (res.Count > 1)
+                            throw new ApplicationException($"{ep} 匹配了多个模板：" + string.Join(" ", res.Select(t => t.Name)));
                         specialRecords.Add(record);
                         break;
                     default:
