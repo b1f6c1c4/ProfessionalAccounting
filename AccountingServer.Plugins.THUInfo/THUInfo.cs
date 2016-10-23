@@ -353,9 +353,7 @@ namespace AccountingServer.Plugins.THUInfo
                                        });
                         break;
                     case "消费":
-                        var ep = Convert.ToInt32(record.Endpoint);
-                        var res = Templates.Where(t => t.Ranges.Any(iv => iv.Start <= ep && iv.End >= ep)).ToList();
-                        if (res.Count == 1)
+                        if (record.Location == "游泳馆通道机消费")
                             result.Add(
                                        new Voucher
                                            {
@@ -365,16 +363,38 @@ namespace AccountingServer.Plugins.THUInfo
                                                                  item(-1),
                                                                  new VoucherDetail
                                                                      {
-                                                                         Title = 6602,
-                                                                         SubTitle = 03,
-                                                                         Content = res[0].Name,
+                                                                         Title = 6401,
+                                                                         Content = "训练费",
                                                                          Fund = record.Fund
                                                                      }
                                                              }
                                            });
-                        else if (res.Count > 1)
-                            throw new ApplicationException($"{ep} 匹配了多个模板：" + string.Join(" ", res.Select(t => t.Name)));
-                        specialRecords.Add(record);
+                        else
+                        {
+                            var ep = Convert.ToInt32(record.Endpoint);
+                            var res = Templates.Where(t => t.Ranges.Any(iv => iv.Start <= ep && iv.End >= ep)).ToList();
+                            if (res.Count == 1)
+                                result.Add(
+                                           new Voucher
+                                               {
+                                                   Date = recordsGroup.Key.Date,
+                                                   Details = new List<VoucherDetail>
+                                                                 {
+                                                                     item(-1),
+                                                                     new VoucherDetail
+                                                                         {
+                                                                             Title = 6602,
+                                                                             SubTitle = 03,
+                                                                             Content = res[0].Name,
+                                                                             Fund = record.Fund
+                                                                         }
+                                                                 }
+                                               });
+                            else if (res.Count > 1)
+                                throw new ApplicationException(
+                                    $"{ep} 匹配了多个模板：" + string.Join(" ", res.Select(t => t.Name)));
+                            specialRecords.Add(record);
+                        }
                         break;
                     default:
                         specialRecords.Add(record);
