@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace AccountingServer.Plugins.THUInfo
 {
@@ -56,6 +55,8 @@ namespace AccountingServer.Plugins.THUInfo
                 ServicePointManager.DefaultConnectionLimit = 20;
 
                 LoginInfo(username, password);
+
+                PrepareGetUrl();
 
                 var url = GetUrl();
 
@@ -136,9 +137,32 @@ namespace AccountingServer.Plugins.THUInfo
         /// <returns>令牌</returns>
         private string GetUrl()
         {
-            string url;
+            var req =
+                WebRequest.Create(@"http://info.tsinghua.edu.cn/minichan/roamaction.jsp?id=159") as HttpWebRequest;
 
-            var req = WebRequest.Create(@"http://info.tsinghua.edu.cn/render.userLayoutRootNode.uP") as HttpWebRequest;
+            if (req == null)
+                throw new WebException("获取令牌时出现错误");
+
+            req.Host = @"info.tsinghua.edu.cn";
+            req.Method = "GET";
+            req.ContentType = "application/x-www-form-urlencoded";
+            req.CookieContainer = m_CookieContainer;
+            req.Referer = @"http://info.tsinghua.edu.cn/render.userLayoutRootNode.uP";
+            req.Accept = "text/html, application/xhtml+xml, */*";
+            req.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; Touch; rv:11.0) like Gecko";
+            req.AllowAutoRedirect = false;
+
+            var res = req.GetResponse();
+            return res.Headers["Location"];
+        }
+
+        /// <summary>
+        ///     预获取令牌
+        /// </summary>
+        private void PrepareGetUrl()
+        {
+            var req =
+                WebRequest.Create(@"http://info.tsinghua.edu.cn/render.userLayoutRootNode.uP") as HttpWebRequest;
 
             if (req == null)
                 throw new WebException("获取令牌时出现错误");
@@ -152,24 +176,7 @@ namespace AccountingServer.Plugins.THUInfo
             req.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; Touch; rv:11.0) like Gecko";
             req.AllowAutoRedirect = false;
 
-            var res = req.GetResponse();
-
-            using (var stream = res.GetResponseStream())
-            {
-                if (stream == null)
-                    throw new WebException("获取令牌时出现错误");
-
-                using (var reader = new StreamReader(stream, Encoding.UTF8))
-                {
-                    var s = reader.ReadToEnd();
-                    var regex =
-                        new Regex(
-                            "src=\"(?<url>http://ecard\\.tsinghua\\.edu\\.cn/user/Login\\.do\\?portal=yes&amp;ticket=.*?)\"");
-                    url = regex.Match(s).Groups["url"].Value.Replace("&amp;", "&");
-                }
-            }
-
-            return url;
+            req.GetResponse();
         }
 
         /// <summary>
