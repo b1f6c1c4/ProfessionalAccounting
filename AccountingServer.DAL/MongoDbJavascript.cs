@@ -1,8 +1,6 @@
 using System;
 using System.Text;
 using AccountingServer.Entities;
-using MongoDB.Bson;
-using MongoDB.Driver;
 
 namespace AccountingServer.DAL
 {
@@ -11,96 +9,6 @@ namespace AccountingServer.DAL
     /// </summary>
     internal static class MongoDbJavascript
     {
-        /// <summary>
-        ///     记账凭证过滤器的Javascript表示
-        /// </summary>
-        /// <param name="vfilter">记账凭证过滤器</param>
-        /// <returns>Javascript表示</returns>
-        private static string GetJavascriptFilter(Voucher vfilter)
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine("function(v) {");
-            if (vfilter != null)
-            {
-                if (vfilter.ID != null)
-                    sb.AppendLine($"    if (v._id != '{vfilter.ID}') return false;");
-                if (vfilter.Date != null)
-                    sb.AppendLine(
-                                  $"    if (v.date != new ISODate('{vfilter.Date:yyyy-MM-ddTHH:mm:sszzz}')) return false;");
-                if (vfilter.Type != null)
-                    switch (vfilter.Type)
-                    {
-                        case VoucherType.Ordinary:
-                            sb.AppendLine("    if (v.special != undefined) return false;");
-                            break;
-                        case VoucherType.General:
-                            sb.AppendLine("    if (v.special != undefined)");
-                            sb.AppendLine("    {");
-                            sb.AppendLine("        if (v.special == 'acarry') return false;");
-                            sb.AppendLine("        if (v.special == 'carry') return false;");
-                            sb.AppendLine("    }");
-                            break;
-                        case VoucherType.Amortization:
-                            sb.AppendLine("    if (v.special != 'amorz') return false;");
-                            break;
-                        case VoucherType.AnnualCarry:
-                            sb.AppendLine("    if (v.special != 'acarry') return false;");
-                            break;
-                        case VoucherType.Carry:
-                            sb.AppendLine("    if (v.special != 'carry') return false;");
-                            break;
-                        case VoucherType.Depreciation:
-                            sb.AppendLine("    if (v.special != 'dep') return false;");
-                            break;
-                        case VoucherType.Devalue:
-                            sb.AppendLine("    if (v.special != 'dev') return false;");
-                            break;
-                        case VoucherType.Uncertain:
-                            sb.AppendLine("    if (v.special != 'unc') return false;");
-                            break;
-                    }
-                if (vfilter.Remark != null)
-                    sb.AppendLine(
-                                  vfilter.Remark == string.Empty
-                                      ? "    if (v.remark != null) return false;"
-                                      : $"    if (v.remark != '{(vfilter.Remark.Replace("\'", "\\\'"))}') return false;");
-            }
-            sb.AppendLine("    return true;");
-            sb.AppendLine("}");
-            return sb.ToString();
-        }
-
-        /// <summary>
-        ///     日期过滤器的Javascript表示
-        /// </summary>
-        /// <param name="rng">日期过滤器</param>
-        /// <returns>Javascript表示</returns>
-        private static string GetJavascriptFilter(DateFilter? rng)
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine("function(v) {");
-            if (rng == null)
-                sb.AppendLine("    return true;");
-            else if (rng.Value.NullOnly)
-                sb.AppendLine("    return v.date == null;");
-            else
-            {
-                sb.Append("    if (v.date == null) return ");
-                sb.AppendLine(rng.Value.Nullable ? "true;" : "false;");
-
-                if (rng.Value.StartDate.HasValue)
-                    sb.Append(
-                              $"    if (v.date < new ISODate('{rng.Value.StartDate:yyyy-MM-ddTHH:mm:sszzz}')) return false;");
-                if (rng.Value.EndDate.HasValue)
-                    sb.Append(
-                              $"    if (v.date > new ISODate('{rng.Value.EndDate:yyyy-MM-ddTHH:mm:sszzz}')) return false;");
-
-                sb.AppendLine("    return true;");
-            }
-            sb.AppendLine("}");
-            return sb.ToString();
-        }
-
         /// <summary>
         ///     细目检索式的Javascript表示
         /// </summary>
@@ -146,65 +54,6 @@ namespace AccountingServer.DAL
                                           : $"    if (d.remark != '{(f.Filter.Remark.Replace("\'", "\\\'"))}') return false;");
                     if (f.Filter.Fund != null)
                         sb.AppendLine($"    if (Math.abs(d.fund - {f.Filter.Fund:r}) > 1e-8)) return false;");
-                }
-            }
-            sb.AppendLine("    return true;");
-            sb.AppendLine("}");
-            return sb.ToString();
-        }
-
-        /// <summary>
-        ///     记账凭证检索式的Javascript表示
-        /// </summary>
-        /// <param name="query">记账凭证检索式</param>
-        /// <returns>Javascript表示</returns>
-        public static string GetJavascriptFilter(IQueryCompunded<IVoucherQueryAtom> query) =>
-            GetJavascriptFilter(query, GetJavascriptFilter);
-
-        /// <summary>
-        ///     记账凭证检索式的查询
-        /// </summary>
-        /// <param name="query">记账凭证检索式</param>
-        /// <returns>查询</returns>
-        public static FilterDefinition<Voucher> GetJQuery(IQueryCompunded<IVoucherQueryAtom> query) =>
-            ToWhere<Voucher>(GetJavascriptFilter(query));
-
-        /// <summary>
-        ///     原子记账凭证检索式的Javascript表示
-        /// </summary>
-        /// <param name="f">记账凭证检索式</param>
-        /// <returns>Javascript表示</returns>
-        private static string GetJavascriptFilter(IVoucherQueryAtom f)
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine("function(v) {");
-            if (f != null)
-            {
-                sb.AppendLine($"    var vfilter = {GetJavascriptFilter(f.VoucherFilter)};");
-                sb.AppendLine("    if (!vfilter(v)) return false;");
-
-                sb.AppendLine($"    var rng = {GetJavascriptFilter(f.Range)};");
-                sb.AppendLine("    if (!rng(v)) return false;");
-
-                if (f.ForAll)
-                {
-                    sb.AppendLine("    var i = 0;");
-                    sb.AppendLine("    for (i = 0;i < v.detail.length;i++)");
-                    sb.AppendLine(
-                                  $"        if (!({GetJavascriptFilter(f.DetailFilter, GetJavascriptFilter)})(v.detail[i]))");
-                    sb.AppendLine("            break;");
-                    sb.AppendLine("    if (i < v.detail.length)");
-                    sb.AppendLine("        return false;");
-                }
-                else
-                {
-                    sb.AppendLine("    var i = 0;");
-                    sb.AppendLine("    for (i = 0;i < v.detail.length;i++)");
-                    sb.AppendLine(
-                                  $"        if (({GetJavascriptFilter(f.DetailFilter, GetJavascriptFilter)})(v.detail[i]))");
-                    sb.AppendLine("            break;");
-                    sb.AppendLine("    if (i >= v.detail.length)");
-                    sb.AppendLine("        return false;");
                 }
             }
             sb.AppendLine("    return true;");
@@ -303,17 +152,6 @@ namespace AccountingServer.DAL
             sb.AppendLine(";");
             sb.AppendLine("}");
             return sb.ToString();
-        }
-
-        /// <summary>
-        ///     将检索式的Javascript表示转换为查询
-        /// </summary>
-        /// <param name="js">Javascript表示</param>
-        /// <returns>查询</returns>
-        private static FilterDefinition<T> ToWhere<T>(string js)
-        {
-            var code = $"function() {{ return ({js})(this); }}";
-            return new BsonDocument { { "$where", code.Replace(Environment.NewLine, string.Empty) } };
         }
     }
 }
