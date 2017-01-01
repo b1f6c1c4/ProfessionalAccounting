@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using AccountingServer.Entities;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -107,14 +106,6 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     细目检索式的Native表示
-        /// </summary>
-        /// <param name="query">细目检索式</param>
-        /// <returns>Native表示</returns>
-        public static FilterDefinition<VoucherDetail> GetNativeFilter(IQueryCompunded<IDetailQueryAtom> query) =>
-            GetNativeFilter(query, GetNativeFilter);
-
-        /// <summary>
         ///     原子细目检索式的Native表示
         /// </summary>
         /// <param name="f">细目检索式</param>
@@ -194,16 +185,6 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     分期检索式的Native表示
-        /// </summary>
-        /// <param name="query">分期检索式</param>
-        /// <returns>Native表示</returns>
-        // ReSharper disable once MemberCanBePrivate.Global
-        public static FilterDefinition<T> GetNativeFilter<T>(IQueryCompunded<IDistributedQueryAtom> query)
-            where T : IDistributed =>
-                GetNativeFilter(query, GetNativeFilter<T>);
-
-        /// <summary>
         ///     分期检索式的查询
         /// </summary>
         /// <param name="query">分期检索式</param>
@@ -220,8 +201,24 @@ namespace AccountingServer.DAL
         private static FilterDefinition<T> GetNativeFilter<T>(IDistributedQueryAtom f)
             where T : IDistributed
         {
-            // TODO
-            return MongoDbJavascript.GetJavascriptFilter(f);
+            if (f?.Filter == null)
+                return Builders<T>.Filter.Empty;
+
+            var lst = new List<FilterDefinition<T>>();
+            if (f.Filter.ID.HasValue)
+                lst.Add(Builders<T>.Filter.Eq("_id", f.Filter.ID.Value));
+            if (f.Filter.Name != null)
+                lst.Add(
+                        f.Filter.Name == string.Empty
+                            ? Builders<T>.Filter.Exists("name", false)
+                            : Builders<T>.Filter.Eq("name", f.Filter.Name));
+            if (f.Filter.Remark != null)
+                lst.Add(
+                        f.Filter.Remark == string.Empty
+                            ? Builders<T>.Filter.Exists("remark", false)
+                            : Builders<T>.Filter.Eq("remark", f.Filter.Remark));
+
+            return Builders<T>.Filter.And(lst);
         }
 
         /// <summary>
