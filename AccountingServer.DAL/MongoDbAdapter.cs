@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using AccountingServer.Entities;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
-using static AccountingServer.DAL.MongoDbQueryHelper;
+using static AccountingServer.DAL.MongoDbNative;
+using static AccountingServer.DAL.MongoDbJavascript;
 
 namespace AccountingServer.DAL
 {
@@ -109,33 +109,34 @@ namespace AccountingServer.DAL
 
         /// <inheritdoc />
         public Voucher SelectVoucher(string id) =>
-            m_Vouchers.FindSync(GetQuery<Voucher>(id)).FirstOrDefault();
+            m_Vouchers.FindSync(GetNQuery<Voucher>(id)).FirstOrDefault();
 
         /// <inheritdoc />
         public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query) =>
-            m_Vouchers.Find(GetQuery(query)).ToEnumerable();
+            m_Vouchers.Find(GetNQuery(query)).ToEnumerable();
 
         /// <inheritdoc />
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
             const string reduce =
-                "function(key, values) { var total = 0; for (var i = 0; i < values.length; i++) total += values[i]; return total; }";
-            return
-                m_Vouchers.MapReduce<Balance>(GetMapJavascript(query.VoucherEmitQuery, query.Subtotal), reduce)
-                          .ToEnumerable();
+                "function(key, values) { return Array.sum(values); }";
+            FilterDefinition<Voucher> preFilter;
+            var map = GetMapJavascript(query.VoucherEmitQuery, query.Subtotal, out preFilter);
+            var options = new MapReduceOptions<Voucher, Balance> { Filter = preFilter };
+            return m_Vouchers.MapReduce(map, reduce, options).ToEnumerable();
         }
 
         /// <inheritdoc />
         public bool DeleteVoucher(string id)
         {
-            var res = m_Vouchers.DeleteOne(GetQuery<Voucher>(id));
+            var res = m_Vouchers.DeleteOne(GetNQuery<Voucher>(id));
             return res.DeletedCount == 1;
         }
 
         /// <inheritdoc />
         public long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query)
         {
-            var res = m_Vouchers.DeleteMany(GetQuery(query));
+            var res = m_Vouchers.DeleteMany(GetNQuery(query));
             return res.DeletedCount;
         }
 
@@ -147,16 +148,16 @@ namespace AccountingServer.DAL
         #region Asset
 
         /// <inheritdoc />
-        public Asset SelectAsset(Guid id) => m_Assets.FindSync(GetQuery<Asset>(id)).FirstOrDefault();
+        public Asset SelectAsset(Guid id) => m_Assets.FindSync(GetNQuery<Asset>(id)).FirstOrDefault();
 
         /// <inheritdoc />
         public IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter) =>
-            m_Assets.FindSync(GetQuery<Asset>(filter)).ToEnumerable();
+            m_Assets.FindSync(GetNQuery<Asset>(filter)).ToEnumerable();
 
         /// <inheritdoc />
         public bool DeleteAsset(Guid id)
         {
-            var res = m_Assets.DeleteOne(GetQuery<Asset>(id));
+            var res = m_Assets.DeleteOne(GetNQuery<Asset>(id));
             return res.DeletedCount == 1;
         }
 
@@ -173,7 +174,7 @@ namespace AccountingServer.DAL
         /// <inheritdoc />
         public long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            var res = m_Assets.DeleteMany(GetQuery<Asset>(filter));
+            var res = m_Assets.DeleteMany(GetNQuery<Asset>(filter));
             return res.DeletedCount;
         }
 
@@ -183,16 +184,16 @@ namespace AccountingServer.DAL
 
         /// <inheritdoc />
         public Amortization SelectAmortization(Guid id) =>
-            m_Amortizations.FindSync(GetQuery<Amortization>(id)).FirstOrDefault();
+            m_Amortizations.FindSync(GetNQuery<Amortization>(id)).FirstOrDefault();
 
         /// <inheritdoc />
         public IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter) =>
-            m_Amortizations.FindSync(GetQuery<Amortization>(filter)).ToEnumerable();
+            m_Amortizations.FindSync(GetNQuery<Amortization>(filter)).ToEnumerable();
 
         /// <inheritdoc />
         public bool DeleteAmortization(Guid id)
         {
-            var res = m_Amortizations.DeleteOne(GetQuery<Amortization>(id));
+            var res = m_Amortizations.DeleteOne(GetNQuery<Amortization>(id));
             return res.DeletedCount == 1;
         }
 
@@ -209,7 +210,7 @@ namespace AccountingServer.DAL
         /// <inheritdoc />
         public long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            var res = m_Amortizations.DeleteMany(GetQuery<Amortization>(filter));
+            var res = m_Amortizations.DeleteMany(GetNQuery<Amortization>(filter));
             return res.DeletedCount;
         }
 
@@ -295,20 +296,18 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="emitQuery">细目映射检索式</param>
         /// <returns>Javascript表示</returns>
-        private static string GetEmitFilterJavascript(IEmit emitQuery)
-        {
-            if (emitQuery.DetailFilter == null)
-                return "function(d) { return true; }";
-            return GetJavascriptFilter(emitQuery.DetailFilter);
-        }
+        private static string GetEmitFilterJavascript(IEmit emitQuery) =>
+            GetJavascriptFilter(emitQuery.DetailFilter);
 
         /// <summary>
         ///     映射函数的Javascript表示
         /// </summary>
         /// <param name="query">记账凭证检索式</param>
         /// <param name="args">分类汇总层次，若为<c>null</c>表示不汇总</param>
+        /// <param name="preFilter">前置Native表示</param>
         /// <returns>Javascript表示</returns>
-        private static string GetMapJavascript(IVoucherDetailQuery query, ISubtotal args)
+        private static string GetMapJavascript(IVoucherDetailQuery query, ISubtotal args,
+                                               out FilterDefinition<Voucher> preFilter)
         {
             SubtotalLevel level;
             if (args == null)
@@ -331,12 +330,10 @@ namespace AccountingServer.DAL
                 sb.Append(GetJavascriptFilter(dQuery.DetailFilter));
             }
             sb.AppendLine(";");
-            sb.AppendLine("    if ((");
-            sb.Append(GetJavascriptFilter(query.VoucherQuery));
-            sb.AppendLine(")(this)) {");
+            preFilter = GetNativeFilter(query.VoucherQuery);
             sb.AppendLine(GetTheDateJavascript(level));
-            sb.AppendLine("        this.detail.forEach(function(d) {");
-            sb.AppendLine("            if (chk(d))");
+            sb.AppendLine("    this.detail.forEach(function(d) {");
+            sb.AppendLine("        if (chk(d))");
             {
                 if (args == null)
                     sb.Append("emit(d, 0);");
@@ -356,8 +353,7 @@ namespace AccountingServer.DAL
                     sb.Append(args.GatherType == GatheringType.Count ? "}, 1);" : "}, d.fund);");
                 }
             }
-            sb.AppendLine("        });");
-            sb.AppendLine("    }");
+            sb.AppendLine("    });");
             sb.AppendLine("}");
 
             return sb.Replace(Environment.NewLine, string.Empty).ToString();

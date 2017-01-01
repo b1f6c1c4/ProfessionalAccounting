@@ -9,23 +9,8 @@ namespace AccountingServer.DAL
     /// <summary>
     ///     MongoDb数据库查询
     /// </summary>
-    internal static class MongoDbQueryHelper
+    internal static class MongoDbJavascript
     {
-        /// <summary>
-        ///     按编号查询<c>ObjectId</c>
-        /// </summary>
-        /// <param name="id">编号</param>
-        /// <returns>Bson查询</returns>
-        public static FilterDefinition<T> GetQuery<T>(string id) => Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
-
-        /// <summary>
-        ///     按编号查询<c>Guid</c>
-        /// </summary>
-        /// <param name="id">编号</param>
-        /// <returns>Bson查询</returns>
-        public static FilterDefinition<T> GetQuery<T>(Guid? id) =>
-            Builders<T>.Filter.Eq("_id", id.HasValue ? id.Value.ToBsonValue() as BsonValue : BsonNull.Value);
-
         /// <summary>
         ///     记账凭证过滤器的Javascript表示
         /// </summary>
@@ -181,7 +166,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">记账凭证检索式</param>
         /// <returns>查询</returns>
-        public static FilterDefinition<Voucher> GetQuery(IQueryCompunded<IVoucherQueryAtom> query) =>
+        public static FilterDefinition<Voucher> GetJQuery(IQueryCompunded<IVoucherQueryAtom> query) =>
             ToWhere<Voucher>(GetJavascriptFilter(query));
 
         /// <summary>
@@ -237,15 +222,6 @@ namespace AccountingServer.DAL
             GetJavascriptFilter(query, GetJavascriptFilter);
 
         /// <summary>
-        ///     分期检索式的查询
-        /// </summary>
-        /// <param name="query">分期检索式</param>
-        /// <returns>查询</returns>
-        public static FilterDefinition<T> GetQuery<T>(IQueryCompunded<IDistributedQueryAtom> query)
-            where T : IDistributed =>
-                ToWhere<T>(GetJavascriptFilter(query));
-
-        /// <summary>
         ///     原子分期检索式的Javascript表示
         /// </summary>
         /// <param name="f">分期检索式</param>
@@ -288,46 +264,45 @@ namespace AccountingServer.DAL
         {
             if (query == null ||
                 query is TAtom)
-                return atomFilter(query as TAtom);
-            if (query is IQueryAry<TAtom>)
-            {
-                var f = query as IQueryAry<TAtom>;
+                return atomFilter((TAtom)query);
 
-                var sb = new StringBuilder();
-                sb.AppendLine("function (entity) {");
-                sb.AppendLine("    return ");
-                switch (f.Operator)
-                {
-                    case OperatorType.None:
-                    case OperatorType.Identity:
-                        sb.AppendLine($"({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
-                        break;
-                    case OperatorType.Complement:
-                        sb.AppendLine($"!({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
-                        break;
-                    case OperatorType.Union:
-                        sb.AppendLine($"({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
-                        sb.AppendLine("||");
-                        sb.AppendLine($"({GetJavascriptFilter(f.Filter2, atomFilter)})(entity)");
-                        break;
-                    case OperatorType.Intersect:
-                        sb.AppendLine($"({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
-                        sb.AppendLine("&&");
-                        sb.AppendLine($"({GetJavascriptFilter(f.Filter2, atomFilter)})(entity)");
-                        break;
-                    case OperatorType.Substract:
-                        sb.AppendLine($"({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
-                        sb.AppendLine("&& !");
-                        sb.AppendLine($"({GetJavascriptFilter(f.Filter2, atomFilter)})(entity)");
-                        break;
-                    default:
-                        throw new ArgumentException("运算类型未知", nameof(query));
-                }
-                sb.AppendLine(";");
-                sb.AppendLine("}");
-                return sb.ToString();
+            var f = query as IQueryAry<TAtom>;
+            if (f == null)
+                throw new ArgumentException("检索式类型未知", nameof(query));
+
+            var sb = new StringBuilder();
+            sb.AppendLine("function (entity) {");
+            sb.AppendLine("    return ");
+            switch (f.Operator)
+            {
+                case OperatorType.None:
+                case OperatorType.Identity:
+                    sb.AppendLine($"({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
+                    break;
+                case OperatorType.Complement:
+                    sb.AppendLine($"!({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
+                    break;
+                case OperatorType.Union:
+                    sb.AppendLine($"({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
+                    sb.AppendLine("||");
+                    sb.AppendLine($"({GetJavascriptFilter(f.Filter2, atomFilter)})(entity)");
+                    break;
+                case OperatorType.Intersect:
+                    sb.AppendLine($"({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
+                    sb.AppendLine("&&");
+                    sb.AppendLine($"({GetJavascriptFilter(f.Filter2, atomFilter)})(entity)");
+                    break;
+                case OperatorType.Substract:
+                    sb.AppendLine($"({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
+                    sb.AppendLine("&& !");
+                    sb.AppendLine($"({GetJavascriptFilter(f.Filter2, atomFilter)})(entity)");
+                    break;
+                default:
+                    throw new ArgumentException("运算类型未知", nameof(query));
             }
-            throw new ArgumentException("检索式类型未知", nameof(query));
+            sb.AppendLine(";");
+            sb.AppendLine("}");
+            return sb.ToString();
         }
 
         /// <summary>
