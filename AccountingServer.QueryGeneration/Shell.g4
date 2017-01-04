@@ -106,7 +106,7 @@ vouchersB
 	;
 
 voucherQuery
-	:	details? Op=('A' | 'E')? range? CaretQuotedString? PercentQuotedString? VoucherType?
+	:	details? Op=('A' | 'E')? range? CaretQuotedString? PercentQuotedString? VoucherType? VoucherCurrency?
 	;
 
 details
@@ -347,7 +347,7 @@ AOCheck
 	;
 
 SubtotalFields
-	:	('t' | 's' | 'c' | 'r' | 'd' | 'w' | 'm' | 'y')+
+	:	('t' | 's' | 'c' | 'r' | 'd' | 'w' | 'm' | 'y' | 'C')+
 	|	'v'
 	;
 
@@ -388,6 +388,11 @@ RangeDeltaWeek
 
 VoucherType
 	:	'Ordinary' | 'G' | 'General' | 'Carry' | 'Amortization' | 'Depreciation' | 'Devalue' | 'AnnualCarry' | 'Uncertain'
+	;
+
+VoucherCurrency
+	:	'@' [a-zA-Z]+
+	|	'@@'
 	;
 
 CaretQuotedString

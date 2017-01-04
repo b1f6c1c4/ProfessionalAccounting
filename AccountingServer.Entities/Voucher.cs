@@ -60,6 +60,11 @@ namespace AccountingServer.Entities
     public class Voucher
     {
         /// <summary>
+        ///     记账本位币
+        /// </summary>
+        public const string BaseCurrency = "CNY";
+
+        /// <summary>
         ///     编号
         /// </summary>
         [XmlAttribute("id")]
@@ -87,6 +92,12 @@ namespace AccountingServer.Entities
         /// </summary>
         [DefaultValue(VoucherType.Ordinary)]
         public VoucherType? Type { get; set; }
+
+        /// <summary>
+        ///     币种
+        /// </summary>
+        [XmlAttribute("currency")]
+        public string Currency { get; set; }
     }
 
     /// <summary>

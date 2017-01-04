@@ -123,6 +123,8 @@ namespace AccountingServer.Shell
                 sb.AppendLine($"    Type = VoucherType.{voucher.Type},");
             if (voucher.Remark != null)
                 sb.AppendLine($"    Remark = {ProcessString(voucher.Remark)},");
+            if (voucher.Currency != Voucher.BaseCurrency)
+                sb.AppendLine($"    Currency = {ProcessString(voucher.Currency)},");
             sb.AppendLine("    Details = new List<VoucherDetail> {");
             foreach (var detail in voucher.Details)
                 sb.Append(PresentVoucherDetail(detail));

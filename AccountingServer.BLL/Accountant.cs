@@ -66,7 +66,11 @@ namespace AccountingServer.BLL
 
         public long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query) => m_Db.DeleteVouchers(query);
 
-        public bool Upsert(Voucher entity) => m_Db.Upsert(entity);
+        public bool Upsert(Voucher entity)
+        {
+            entity.Currency = entity.Currency?.ToUpperInvariant() ?? Voucher.BaseCurrency;
+            return m_Db.Upsert(entity);
+        }
 
         #endregion
 
