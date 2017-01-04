@@ -75,6 +75,10 @@ namespace AccountingServer.DAL
                         vfilter.Remark == string.Empty
                             ? Builders<Voucher>.Filter.Exists("remark", false)
                             : Builders<Voucher>.Filter.Eq("remark", vfilter.Remark));
+            if (vfilter.Currency == Voucher.BaseCurrency)
+                lst.Add(Builders<Voucher>.Filter.Exists("currency", false));
+            else if (vfilter.Currency != null)
+                lst.Add(Builders<Voucher>.Filter.Eq("currency", vfilter.Currency));
 
             return Builders<Voucher>.Filter.And(lst);
         }
