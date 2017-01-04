@@ -40,6 +40,14 @@ namespace AccountingServer.BLL
             => source.GroupBy(b => b.Remark);
 
         /// <summary>
+        ///     按币种分类
+        /// </summary>
+        /// <param name="source">待分类的余额表条目</param>
+        /// <returns>类</returns>
+        public static IEnumerable<IGrouping<string, Balance>> GroupByCurrency(this IEnumerable<Balance> source)
+            => source.GroupBy(b => b.Currency);
+
+        /// <summary>
         ///     按日期分类
         /// </summary>
         /// <param name="source">待分类的余额表条目</param>

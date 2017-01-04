@@ -140,36 +140,43 @@ namespace AccountingServer.Shell.Parsing
                 get
                 {
                     if (SubtotalFields() == null)
-                        return new[] { SubtotalLevel.Title, SubtotalLevel.SubTitle, SubtotalLevel.Content };
+                        return new[]
+                                   {
+                                       SubtotalLevel.Currency, SubtotalLevel.Title, SubtotalLevel.SubTitle,
+                                       SubtotalLevel.Content
+                                   };
 
                     if (SubtotalFields().GetText() == "v")
                         return new SubtotalLevel[0];
 
-                    return SubtotalFields().GetText()
-                                           .Select(
-                                                   ch =>
-                                                   {
-                                                       switch (ch)
-                                                       {
-                                                           case 't':
-                                                               return SubtotalLevel.Title;
-                                                           case 's':
-                                                               return SubtotalLevel.SubTitle;
-                                                           case 'c':
-                                                               return SubtotalLevel.Content;
-                                                           case 'r':
-                                                               return SubtotalLevel.Remark;
-                                                           case 'd':
-                                                               return SubtotalLevel.Day;
-                                                           case 'w':
-                                                               return SubtotalLevel.Week;
-                                                           case 'm':
-                                                               return SubtotalLevel.Month;
-                                                           case 'y':
-                                                               return SubtotalLevel.Year;
-                                                       }
-                                                       throw new MemberAccessException("表达式错误");
-                                                   }).ToList();
+                    return SubtotalFields()
+                        .GetText()
+                        .Select(
+                                ch =>
+                                {
+                                    switch (ch)
+                                    {
+                                        case 't':
+                                            return SubtotalLevel.Title;
+                                        case 's':
+                                            return SubtotalLevel.SubTitle;
+                                        case 'c':
+                                            return SubtotalLevel.Content;
+                                        case 'r':
+                                            return SubtotalLevel.Remark;
+                                        case 'C':
+                                            return SubtotalLevel.Currency;
+                                        case 'd':
+                                            return SubtotalLevel.Day;
+                                        case 'w':
+                                            return SubtotalLevel.Week;
+                                        case 'm':
+                                            return SubtotalLevel.Month;
+                                        case 'y':
+                                            return SubtotalLevel.Year;
+                                    }
+                                    throw new MemberAccessException("表达式错误");
+                                }).ToList();
                 }
             }
 

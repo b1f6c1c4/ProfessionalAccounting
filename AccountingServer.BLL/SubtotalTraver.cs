@@ -263,6 +263,23 @@ namespace AccountingServer.BLL
                                                            TraversalSubtotal(newPath, grp, newCat, depth + 1));
                                     });
                         break;
+                    case SubtotalLevel.Currency:
+                        resx = res
+                            .GroupByCurrency()
+                            .Select(
+                                    grp =>
+                                    {
+                                        var newCat = new Balance(cat) { Currency = grp.Key };
+                                        var newPath = Map(path, newCat, depth, SubtotalArgs.Levels[depth]);
+                                        return MediumLevel(
+                                                           path,
+                                                           newPath,
+                                                           newCat,
+                                                           depth,
+                                                           SubtotalArgs.Levels[depth],
+                                                           TraversalSubtotal(newPath, grp, newCat, depth + 1));
+                                    });
+                        break;
                     case SubtotalLevel.Day:
                     case SubtotalLevel.Week:
                     case SubtotalLevel.Month:

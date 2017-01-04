@@ -123,7 +123,16 @@ namespace AccountingServer.DAL
             FilterDefinition<Voucher> preFilter;
             var map = GetMapJavascript(query.VoucherEmitQuery, query.Subtotal, out preFilter);
             var options = new MapReduceOptions<Voucher, Balance> { Filter = preFilter };
-            return m_Vouchers.MapReduce(map, reduce, options).ToEnumerable();
+            var balances = m_Vouchers.MapReduce(map, reduce, options).ToEnumerable();
+            if (query.Subtotal.Levels.Contains(SubtotalLevel.Currency))
+                return balances
+                    .Select(
+                            b =>
+                            {
+                                b.Currency = b.Currency ?? Voucher.BaseCurrency;
+                                return b;
+                            });
+            return balances;
         }
 
         /// <inheritdoc />
@@ -332,6 +341,7 @@ namespace AccountingServer.DAL
             sb.AppendLine(";");
             preFilter = GetNativeFilter(query.VoucherQuery);
             sb.AppendLine(GetTheDateJavascript(level));
+            sb.AppendLine("    var theCurrency = this.currency;");
             sb.AppendLine("    this.detail.forEach(function(d) {");
             sb.AppendLine("        if (chk(d))");
             {
@@ -350,6 +360,8 @@ namespace AccountingServer.DAL
                         sb.Append("content: d.content,");
                     if (level.HasFlag(SubtotalLevel.Remark))
                         sb.Append("remark: d.remark,");
+                    if (level.HasFlag(SubtotalLevel.Currency))
+                        sb.Append("currency: theCurrency,");
                     sb.Append(args.GatherType == GatheringType.Count ? "}, 1);" : "}, d.fund);");
                 }
             }

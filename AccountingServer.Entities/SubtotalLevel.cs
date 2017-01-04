@@ -34,23 +34,28 @@ namespace AccountingServer.Entities
         Remark = 0x8,
 
         /// <summary>
+        ///     按币种分类
+        /// </summary>
+        Currency = 0x10,
+
+        /// <summary>
         ///     按日期分类
         /// </summary>
-        Day = 0x10,
+        Day = 0x20,
 
         /// <summary>
         ///     按周分类
         /// </summary>
-        Week = 0x30,
+        Week = 0x60,
 
         /// <summary>
         ///     按月分类
         /// </summary>
-        Month = 0x70,
+        Month = 0xe0,
 
         /// <summary>
         ///     按年分类
         /// </summary>
-        Year = 0x130
+        Year = 0x260
     }
 }

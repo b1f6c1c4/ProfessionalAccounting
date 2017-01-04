@@ -34,7 +34,8 @@ namespace AccountingServer.DAL
                                                   Title = (int?)bR.ReadDouble("title", ref read),
                                                   SubTitle = (int?)bR.ReadDouble("subtitle", ref read),
                                                   Content = bR.ReadString("content", ref read),
-                                                  Remark = bR.ReadString("remark", ref read)
+                                                  Remark = bR.ReadString("remark", ref read),
+                                                  Currency = bR.ReadString("currency", ref read)
                                               };
                                       bR.ReadEndDocument();
                                       return bal;

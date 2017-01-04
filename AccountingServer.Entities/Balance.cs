@@ -34,6 +34,11 @@ namespace AccountingServer.Entities
         public string Remark { get; set; }
 
         /// <summary>
+        ///     币种
+        /// </summary>
+        public string Currency { get; set; }
+
+        /// <summary>
         ///     余额
         /// </summary>
         public double Fund { get; set; }
@@ -51,6 +56,7 @@ namespace AccountingServer.Entities
             SubTitle = orig.SubTitle;
             Content = orig.Content;
             Remark = orig.Remark;
+            Currency = orig.Currency;
             Fund = orig.Fund;
         }
     }
@@ -69,6 +75,8 @@ namespace AccountingServer.Entities
                 return false;
             if (x.Remark != y.Remark)
                 return false;
+            if (x.Currency != y.Currency)
+                return false;
             if (Math.Abs(x.Fund - y.Fund) > 1E-8)
                 return false;
             return true;
@@ -85,6 +93,8 @@ namespace AccountingServer.Entities
                 aggr ^= obj.Content.GetHashCode();
             if (obj.Remark != null)
                 aggr ^= obj.Remark.GetHashCode() << 1;
+            if (obj.Currency != null)
+                aggr ^= obj.Currency.GetHashCode() << 2;
             return aggr;
         }
     }
