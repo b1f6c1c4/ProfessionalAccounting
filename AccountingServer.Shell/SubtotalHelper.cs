@@ -81,6 +81,9 @@ namespace AccountingServer.Shell
                                     case SubtotalLevel.Remark:
                                         str = $"{cat.Remark}:";
                                         break;
+                                    case SubtotalLevel.Currency:
+                                        str = $"@{cat.Currency}:";
+                                        break;
                                     default:
                                         str = $"{cat.Date.AsDate(level)}:";
                                         break;
