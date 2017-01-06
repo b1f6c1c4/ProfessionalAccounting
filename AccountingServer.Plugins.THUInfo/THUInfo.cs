@@ -306,6 +306,7 @@ namespace AccountingServer.Plugins.THUInfo
                                    new Voucher
                                        {
                                            Date = recordsGroup.Key.Date,
+                                           Currency = Voucher.BaseCurrency,
                                            Details = new List<VoucherDetail>
                                                          {
                                                              item(1),
@@ -323,6 +324,7 @@ namespace AccountingServer.Plugins.THUInfo
                                    new Voucher
                                        {
                                            Date = recordsGroup.Key.Date,
+                                           Currency = Voucher.BaseCurrency,
                                            Details = new List<VoucherDetail>
                                                          {
                                                              item(1),
@@ -340,6 +342,7 @@ namespace AccountingServer.Plugins.THUInfo
                                    new Voucher
                                        {
                                            Date = recordsGroup.Key.Date,
+                                           Currency = Voucher.BaseCurrency,
                                            Details = new List<VoucherDetail>
                                                          {
                                                              item(-1),
@@ -358,6 +361,7 @@ namespace AccountingServer.Plugins.THUInfo
                                        new Voucher
                                            {
                                                Date = recordsGroup.Key.Date,
+                                               Currency = Voucher.BaseCurrency,
                                                Details = new List<VoucherDetail>
                                                              {
                                                                  item(-1),
@@ -378,6 +382,7 @@ namespace AccountingServer.Plugins.THUInfo
                                            new Voucher
                                                {
                                                    Date = recordsGroup.Key.Date,
+                                                   Currency = Voucher.BaseCurrency,
                                                    Details = new List<VoucherDetail>
                                                                  {
                                                                      item(-1),
@@ -447,6 +452,7 @@ namespace AccountingServer.Plugins.THUInfo
                                            new Voucher
                                                {
                                                    Date = date,
+                                                   Currency = Voucher.BaseCurrency,
                                                    Details = new List<VoucherDetail>
                                                                  {
                                                                      newDetail(records[id], -1),
@@ -475,6 +481,7 @@ namespace AccountingServer.Plugins.THUInfo
                                        new Voucher
                                            {
                                                Date = date,
+                                               Currency = Voucher.BaseCurrency,
                                                Details = new List<VoucherDetail>
                                                              {
                                                                  newDetail(records[id], -1),
@@ -498,6 +505,7 @@ namespace AccountingServer.Plugins.THUInfo
                                        new Voucher
                                            {
                                                Date = date,
+                                               Currency = Voucher.BaseCurrency,
                                                Details = new List<VoucherDetail>
                                                              {
                                                                  newDetail(records[id], -1),
