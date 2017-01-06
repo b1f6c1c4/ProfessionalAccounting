@@ -10,6 +10,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.BLL", "AccountingServer.BLL\AccountingServer.BLL.csproj", "{4F938D5A-6B22-4150-A74C-8203FDF1D215}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer", "AccountingServer\AccountingServer.csproj", "{28C2EDB0-CE1E-473E-9CA6-70E29A1408A4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0DDC759F-23DE-4443-A97C-4EDC1C40690C} = {0DDC759F-23DE-4443-A97C-4EDC1C40690C}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.Shell", "AccountingServer.Shell\AccountingServer.Shell.csproj", "{0DDC759F-23DE-4443-A97C-4EDC1C40690C}"
 EndProject
