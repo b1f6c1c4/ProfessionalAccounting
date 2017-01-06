@@ -1,10 +1,9 @@
 ﻿using System;
-using AccountingServer.BLL;
 using AccountingServer.Entities;
 
-namespace AccountingServer.Shell.Parsing
+namespace AccountingServer.BLL.Parsing
 {
-    public partial class ShellParser
+    public partial class QueryParser
     {
         public partial class DetailQueryContext : IDetailQueryAtom
         {
