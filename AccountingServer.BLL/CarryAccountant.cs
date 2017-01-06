@@ -42,18 +42,21 @@ namespace AccountingServer.BLL
                                 {
                                     Date = ed,
                                     Type = VoucherType.Carry,
+                                    Currency = Voucher.BaseCurrency,
                                     Details = new List<VoucherDetail>()
                                 };
             var voucher01 = new Voucher
                                 {
                                     Date = ed,
                                     Type = VoucherType.Carry,
+                                    Currency = Voucher.BaseCurrency,
                                     Details = new List<VoucherDetail>()
                                 };
             var voucher02 = new Voucher
                                 {
                                     Date = ed,
                                     Type = VoucherType.Carry,
+                                    Currency = Voucher.BaseCurrency,
                                     Details = new List<VoucherDetail>()
                                 };
 
@@ -294,6 +297,7 @@ namespace AccountingServer.BLL
                                 {
                                     Date = ed,
                                     Type = VoucherType.AnnualCarry,
+                                    Currency = Voucher.BaseCurrency,
                                     Details =
                                         new List<VoucherDetail>
                                             {
@@ -308,6 +312,7 @@ namespace AccountingServer.BLL
                                 {
                                     Date = ed,
                                     Type = VoucherType.AnnualCarry,
+                                    Currency = Voucher.BaseCurrency,
                                     Details =
                                         new List<VoucherDetail>
                                             {

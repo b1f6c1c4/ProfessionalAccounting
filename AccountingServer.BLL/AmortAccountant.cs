@@ -250,8 +250,9 @@ namespace AccountingServer.BLL
             var voucher = new Voucher
                               {
                                   Date = isCollapsed ? null : item.Date,
-                                  Remark = template.Remark ?? "automatically generated",
                                   Type = template.Type,
+                                  Remark = template.Remark ?? "automatically generated",
+                                  Currency = Voucher.BaseCurrency,
                                   Details = lst
                               };
             var res = Db.Upsert(voucher);

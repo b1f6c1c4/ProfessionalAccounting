@@ -156,7 +156,12 @@ namespace AccountingServer.Plugins.Interest
                                                    grp.SingleOrDefault(
                                                                        v =>
                                                                        v.Details.Any(d => d.IsMatch(interestPattern, 1)))
-                                                   ?? new Voucher { Date = grp.Key, Details = new List<VoucherDetail>() });
+                                                   ?? new Voucher
+                                                          {
+                                                              Date = grp.Key,
+                                                              Currency = Voucher.BaseCurrency,
+                                                              Details = new List<VoucherDetail>()
+                                                          });
                 lastSettlement = grp.Key;
 
                 // Settle Loan
@@ -202,7 +207,12 @@ namespace AccountingServer.Plugins.Interest
                                                    rate,
                                                    capitalIntegral,
                                                    finalDay.Subtract(lastSettlement.Value).Days,
-                                                   new Voucher { Date = finalDay, Details = new List<VoucherDetail>() });
+                                                   new Voucher
+                                                       {
+                                                           Date = finalDay,
+                                                           Currency = Voucher.BaseCurrency,
+                                                           Details = new List<VoucherDetail>()
+                                                       });
         }
 
         /// <summary>

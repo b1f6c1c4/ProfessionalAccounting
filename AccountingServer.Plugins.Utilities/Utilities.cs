@@ -127,6 +127,7 @@ namespace AccountingServer.Plugins.Utilities
                                   Date = time,
                                   Remark = template.Remark,
                                   Type = template.Type,
+                                  Currency = template.Currency,
                                   Details = lst
                               };
             return voucher;
