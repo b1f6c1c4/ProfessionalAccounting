@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AccountingServer.Entities;
-using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using static AccountingServer.DAL.MongoDbNative;
@@ -44,12 +43,6 @@ namespace AccountingServer.DAL
         ///     摊销集合
         /// </summary>
         private IMongoCollection<Amortization> m_Amortizations;
-
-        /// <summary>
-        ///     命名查询模板集合
-        /// </summary>
-        private IMongoCollection<BsonDocument> m_NamedQueryTemplates;
-
         #endregion
 
         /// <summary>
@@ -81,7 +74,6 @@ namespace AccountingServer.DAL
             m_Vouchers = m_Db.GetCollection<Voucher>("voucher");
             m_Assets = m_Db.GetCollection<Asset>("asset");
             m_Amortizations = m_Db.GetCollection<Amortization>("amortization");
-            m_NamedQueryTemplates = m_Db.GetCollection<BsonDocument>("namedQuery");
 
             Connected = true;
         }
@@ -96,7 +88,6 @@ namespace AccountingServer.DAL
             m_Vouchers = null;
             m_Assets = null;
             m_Amortizations = null;
-            m_NamedQueryTemplates = null;
 
             m_Client = null;
 
@@ -221,47 +212,6 @@ namespace AccountingServer.DAL
         {
             var res = m_Amortizations.DeleteMany(GetNQuery<Amortization>(filter));
             return res.DeletedCount;
-        }
-
-        #endregion
-
-        #region NamedQurey
-
-        /// <inheritdoc />
-        public string SelectNamedQueryTemplate(string name)
-        {
-            var filter = Builders<BsonDocument>.Filter.Eq("_id", new BsonString(name));
-            var doc = m_NamedQueryTemplates.FindSync(filter).FirstOrDefault();
-            return doc?["value"].AsString;
-        }
-
-        /// <inheritdoc />
-        public IEnumerable<KeyValuePair<string, string>> SelectNamedQueryTemplates() =>
-            m_NamedQueryTemplates
-                .FindSync(FilterDefinition<BsonDocument>.Empty)
-                .ToEnumerable()
-                .Select(d => new KeyValuePair<string, string>(d["_id"].AsString, d["value"].AsString));
-
-        /// <inheritdoc />
-        public bool DeleteNamedQueryTemplate(string name)
-        {
-            var filter = Builders<BsonDocument>.Filter.Eq("_id", new BsonString(name));
-            var res = m_NamedQueryTemplates.DeleteOne(filter);
-            return res.DeletedCount == 1;
-        }
-
-        /// <inheritdoc />
-        public bool Upsert(string name, string value)
-        {
-            var res = m_NamedQueryTemplates.ReplaceOne(
-                                                       Builders<BsonDocument>.Filter.Eq("_id", name),
-                                                       new BsonDocument
-                                                           {
-                                                               { "_id", name },
-                                                               { "value", value }
-                                                           },
-                                                       new UpdateOptions { IsUpsert = true });
-            return res.ModifiedCount == 1;
         }
 
         #endregion

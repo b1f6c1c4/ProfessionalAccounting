@@ -150,18 +150,6 @@ namespace AccountingServer.BLL
 
         #endregion
 
-        #region NamedQueryTemplate
-
-        public string SelectNamedQueryTemplate(string name) => m_Db.SelectNamedQueryTemplate(name);
-
-        public IEnumerable<KeyValuePair<string, string>> SelectNamedQueryTemplates() => m_Db.SelectNamedQueryTemplates();
-
-        public bool DeleteNamedQueryTemplate(string name) => m_Db.DeleteNamedQueryTemplate(name);
-
-        public bool Upsert(string name, string value) => m_Db.Upsert(name, value);
-
-        #endregion
-
         #region Carry
 
         public void Carry(DateTime? dt) => m_CarryAccountant.Carry(dt);
