@@ -22,23 +22,18 @@ namespace AccountingServer.Shell
         public AccountingShell(Accountant helper) { m_Accountant = helper; }
 
         /// <inheritdoc />
-        public IQueryResult Execute(string s)
+        public IQueryResult Execute(string expr)
         {
-            if (s == "?")
-                return ListHelp();
-            if (s == "T")
-                return ListTitles();
-
             {
-                var res = Parsing.GroupedQuery(s);
+                var res = Parsing.GroupedQuery(expr);
                 if (res != null)
                     return PresentSubtotal(res);
             }
 
             {
-                var l = s.Length;
-                var res = Parsing.VoucherQuery(ref s);
-                if (l != s.Length)
+                var l = expr.Length;
+                var res = Parsing.VoucherQuery(ref expr);
+                if (l != expr.Length)
                     if (res != null)
                         return PresentVoucherQuery(res);
             }
@@ -72,38 +67,6 @@ namespace AccountingServer.Shell
             var result = m_Accountant.SelectVoucherDetailsGrouped(query);
 
             return new UnEditableText(SubtotalHelper.PresentSubtotal(result, query.Subtotal));
-        }
-
-        /// <summary>
-        ///     显示控制台帮助
-        /// </summary>
-        /// <returns>帮助内容</returns>
-        private static IQueryResult ListHelp()
-        {
-            const string resName = "AccountingServer.Shell.Resources.Document.txt";
-            using (var stream = typeof(AccountingShell).Assembly.GetManifestResourceStream(resName))
-            {
-                if (stream == null)
-                    throw new MissingManifestResourceException();
-                using (var reader = new StreamReader(stream))
-                    return new UnEditableText(reader.ReadToEnd());
-            }
-        }
-
-        /// <summary>
-        ///     显示所有会计科目及其编号
-        /// </summary>
-        /// <returns>会计科目及其编号</returns>
-        private static IQueryResult ListTitles()
-        {
-            var sb = new StringBuilder();
-            foreach (var title in TitleManager.Titles)
-            {
-                sb.AppendLine($"{title.Id.AsTitle()}\t\t{title.Name}");
-                foreach (var subTitle in title.SubTitles)
-                    sb.AppendLine($"{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}\t\t{subTitle.Name}");
-            }
-            return new UnEditableText(sb.ToString());
         }
     }
 }

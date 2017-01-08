@@ -49,4 +49,18 @@ namespace AccountingServer.Shell
 
         public IEnumerator GetEnumerator() => m_Components.GetEnumerator();
     }
+
+    internal static class ExprHelper
+    {
+        /// <summary>
+        ///     首段字符串
+        /// </summary>
+        /// <param name="str">原字符串</param>
+        /// <returns>首段</returns>
+        public static string Initital(this string str)
+        {
+            var id = str.IndexOfAny(new[] { ' ', '-' });
+            return id < 0 ? str : str.Substring(0, id);
+        }
+    }
 }

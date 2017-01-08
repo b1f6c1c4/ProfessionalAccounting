@@ -28,7 +28,7 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        public bool IsExecutable(string expr) => expr.StartsWith("a", StringComparison.Ordinal);
+        public bool IsExecutable(string expr) => expr.Initital() == "a";
 
         /// <summary>
         ///     执行列表表达式

@@ -1,5 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
+using System.Resources;
+using System.Text;
 using AccountingServer.BLL;
 
 namespace AccountingServer.Shell
@@ -9,8 +12,14 @@ namespace AccountingServer.Shell
     /// </summary>
     public class Facade : IShellComponent
     {
+        /// <summary>
+        ///     基本会计业务处理类
+        /// </summary>
         private readonly Accountant m_Accountant;
 
+        /// <summary>
+        ///     复合表达式解释器
+        /// </summary>
         private readonly ShellComposer m_Composer;
 
         public Facade(Accountant helper)
@@ -22,6 +31,7 @@ namespace AccountingServer.Shell
                     {
                         new CheckShell(helper),
                         new CarryShell(helper),
+                        new CarryYearShell(helper),
                         new AssetShell(helper),
                         new AmortizationShell(helper),
                         new PluginShell(helper),
@@ -30,12 +40,54 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        public IQueryResult Execute(string expr) => m_Composer.Execute(expr);
+        public IQueryResult Execute(string expr)
+        {
+            if (expr == "con")
+                return ConnectServer();
+            if (expr == "T")
+                return ListTitles();
+            if (expr == "?")
+                return ListHelp();
+
+            return m_Composer.Execute(expr);
+        }
 
         /// <inheritdoc />
-        public bool IsExecutable(string expr) => m_Composer.IsExecutable(expr);
+        public bool IsExecutable(string expr) { throw new NotImplementedException(); }
 
         #region Miscellaneous
+
+        /// <summary>
+        ///     显示控制台帮助
+        /// </summary>
+        /// <returns>帮助内容</returns>
+        private static IQueryResult ListHelp()
+        {
+            const string resName = "AccountingServer.Shell.Resources.Document.txt";
+            using (var stream = typeof(AccountingShell).Assembly.GetManifestResourceStream(resName))
+            {
+                if (stream == null)
+                    throw new MissingManifestResourceException();
+                using (var reader = new StreamReader(stream))
+                    return new UnEditableText(reader.ReadToEnd());
+            }
+        }
+
+        /// <summary>
+        ///     显示所有会计科目及其编号
+        /// </summary>
+        /// <returns>会计科目及其编号</returns>
+        private static IQueryResult ListTitles()
+        {
+            var sb = new StringBuilder();
+            foreach (var title in TitleManager.Titles)
+            {
+                sb.AppendLine($"{title.Id.AsTitle()}\t\t{title.Name}");
+                foreach (var subTitle in title.SubTitles)
+                    sb.AppendLine($"{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}\t\t{subTitle.Name}");
+            }
+            return new UnEditableText(sb.ToString());
+        }
 
         /// <summary>
         ///     检查是否已连接；若未连接，尝试连接
