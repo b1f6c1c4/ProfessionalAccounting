@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
+using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Shell
 {
@@ -17,15 +18,132 @@ namespace AccountingServer.Shell
         /// </summary>
         private readonly Accountant m_Accountant;
 
-        public AssetShell(Accountant helper) { m_Accountant = helper; }
+        private readonly IShellComponent m_Composer;
+
+        public AssetShell(Accountant helper)
+        {
+            m_Accountant = helper;
+            var resetComopser =
+                new ShellComposer
+                    {
+                        new ShellComponent(
+                            "soft",
+                            expr =>
+                            {
+                                var dist = Parsing.DistributedQuery(ref expr);
+                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+                                Parsing.Eof(expr);
+                                return ExecuteResetSoft(dist, rng);
+                            }),
+                        new ShellComponent(
+                            "mixed",
+                            expr =>
+                            {
+                                var dist = Parsing.DistributedQuery(ref expr);
+                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+                                Parsing.Eof(expr);
+                                return ExcuteResetMixed(dist, rng);
+                            }),
+                        new ShellComponent(
+                            "hard",
+                            expr =>
+                            {
+                                var dist = Parsing.DistributedQuery(ref expr);
+                                var vouchers = Parsing.OptColVouchers(ref expr);
+                                Parsing.Eof(expr);
+                                return ExecuteResetHard(dist, vouchers);
+                            })
+                    };
+            m_Composer =
+                new ShellComposer
+                    {
+                        new ShellComponent(
+                            "all",
+                            expr =>
+                            {
+                                var dist = Parsing.DistributedQuery(ref expr);
+                                Parsing.Eof(expr);
+                                return ExecuteList(dist, null, false);
+                            }),
+                        new ShellComponent(
+                            "l",
+                            expr =>
+                            {
+                                var dt = Parsing.UniqueTime(ref expr) ?? DateTime.Today;
+                                var dist = Parsing.DistributedQuery(ref expr);
+                                Parsing.Eof(expr);
+                                return ExecuteList(dist, dt, true);
+                            }),
+                        new ShellComponent(
+                            "q",
+                            expr =>
+                            {
+                                var dist = Parsing.DistributedQuery(ref expr);
+                                Parsing.Eof(expr);
+                                return ExecuteQuery(dist);
+                            }),
+                        new ShellComponent(
+                            "reg",
+                            expr =>
+                            {
+                                var dist = Parsing.DistributedQuery(ref expr);
+                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+                                var vouchers = Parsing.OptColVouchers(ref expr);
+                                Parsing.Eof(expr);
+                                return ExecuteRegister(dist, rng, vouchers);
+                            }),
+                        new ShellComponent(
+                            "unreg",
+                            expr =>
+                            {
+                                var dist = Parsing.DistributedQuery(ref expr);
+                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+                                var vouchers = Parsing.OptColVouchers(ref expr);
+                                Parsing.Eof(expr);
+                                return ExecuteUnregister(dist, rng, vouchers);
+                            }),
+                        new ShellComponent(
+                            "recal",
+                            expr =>
+                            {
+                                var dist = Parsing.DistributedQuery(ref expr);
+                                Parsing.Eof(expr);
+                                return ExecuteRedep(dist);
+                            }),
+                        new ShellComponent("reset", resetComopser.Execute),
+                        new ShellComponent(
+                            "ap",
+                            expr =>
+                            {
+                                var collapse = Parsing.Optional(ref expr, "col");
+                                var dist = Parsing.DistributedQuery(ref expr);
+                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+                                Parsing.Eof(expr);
+                                return ExecuteApply(dist, rng, collapse);
+                            }),
+                        new ShellComponent(
+                            "chk",
+                            expr =>
+                            {
+                                var dist = Parsing.DistributedQuery(ref expr);
+                                Parsing.Eof(expr);
+                                return ExecuteCheck(dist, new DateFilter(null, DateTime.Today));
+                            }),
+                        new ShellComponent(
+                            null,
+                            expr =>
+                            {
+                                expr = expr ?? "";
+                                var dt = Parsing.UniqueTime(ref expr) ?? DateTime.Today;
+                                var dist = Parsing.DistributedQuery(ref expr);
+                                Parsing.Eof(expr);
+                                return ExecuteList(dist, dt, false);
+                            })
+                    };
+        }
 
         /// <inheritdoc />
-        public IQueryResult Execute(string expr)
-        {
-            throw new NotImplementedException();
-
-            throw new InvalidOperationException("资产表达式无效");
-        }
+        public IQueryResult Execute(string expr) => m_Composer.Execute(expr.Rest());
 
         /// <inheritdoc />
         public bool IsExecutable(string expr) => expr.Initital() == "a";

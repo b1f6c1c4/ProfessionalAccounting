@@ -37,8 +37,7 @@ namespace AccountingServer.Shell
         private IQueryResult DoCarry(string expr)
         {
             var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-            if (!string.IsNullOrWhiteSpace(expr))
-                throw new ArgumentException("语法错误", nameof(expr));
+            Parsing.Eof(expr);
 
             if (rng.NullOnly)
             {
@@ -72,8 +71,7 @@ namespace AccountingServer.Shell
         private IQueryResult ResetCarry(string expr)
         {
             var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-            if (!string.IsNullOrWhiteSpace(expr))
-                throw new ArgumentException("语法错误", nameof(expr));
+            Parsing.Eof(expr);
 
             if (rng.NullOnly)
             {
@@ -152,8 +150,7 @@ namespace AccountingServer.Shell
         private IQueryResult DoCarry(string expr)
         {
             var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-            if (!string.IsNullOrWhiteSpace(expr))
-                throw new ArgumentException("语法错误", nameof(expr));
+            Parsing.Eof(expr);
 
             if (rng.NullOnly)
             {
@@ -183,8 +180,7 @@ namespace AccountingServer.Shell
         private IQueryResult ResetCarry(string expr)
         {
             var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-            if (!string.IsNullOrWhiteSpace(expr))
-                throw new ArgumentException("语法错误", nameof(expr));
+            Parsing.Eof(expr);
 
             if (rng.NullOnly)
             {

@@ -6,7 +6,7 @@ using System.Linq;
 namespace AccountingServer.Shell
 {
     /// <summary>
-    ///     表达式解释器
+    ///     表达式解释组件
     /// </summary>
     internal interface IShellComponent
     {
@@ -26,28 +26,72 @@ namespace AccountingServer.Shell
     }
 
     /// <summary>
-    ///     复合表达式解释器
+    ///     从委托创建表达式解释组件
     /// </summary>
-    internal sealed class ShellComposer : IShellComponent, IEnumerable
+    internal class ShellComponent : IShellComponent
+    {
+        /// <summary>
+        ///     首段字符串
+        /// </summary>
+        private readonly string m_Initial;
+
+        /// <summary>
+        ///     操作
+        /// </summary>
+        private readonly Func<string, IQueryResult> m_Action;
+
+        public ShellComponent(string initial, Func<string, IQueryResult> action)
+        {
+            m_Initial = initial;
+            m_Action = action;
+        }
+
+        /// <inheritdoc />
+        public IQueryResult Execute(string expr) => m_Action(m_Initial == null ? expr : expr.Rest());
+
+        /// <inheritdoc />
+        public bool IsExecutable(string expr) => m_Initial == null || expr.Initital() == m_Initial;
+    }
+
+    /// <summary>
+    ///     复合表达式解释组件
+    /// </summary>
+    internal class ShellComposer : IShellComponent, IEnumerable
     {
         private readonly List<IShellComponent> m_Components = new List<IShellComponent>();
 
         public void Add(IShellComponent shell) => m_Components.Add(shell);
 
-        /// <inheritdoc />
-        public IQueryResult Execute(string expr)
+        /// <summary>
+        ///     第一个可以执行的组件
+        /// </summary>
+        /// <param name="expr">表达式</param>
+        /// <returns>组件</returns>
+        protected IShellComponent FirstExecutable(string expr)
         {
             var comp = m_Components.FirstOrDefault(s => s.IsExecutable(expr));
             if (comp == null)
                 throw new InvalidOperationException("表达式无效");
-
-            return comp.Execute(expr);
+            return comp;
         }
+
+        /// <inheritdoc />
+        public virtual IQueryResult Execute(string expr) => FirstExecutable(expr).Execute(expr);
 
         /// <inheritdoc />
         public bool IsExecutable(string expr) => m_Components.Any(s => s.IsExecutable(expr));
 
+        /// <inheritdoc />
         public IEnumerator GetEnumerator() => m_Components.GetEnumerator();
+    }
+
+    /// <summary>
+    ///     复合表达式解释器
+    /// </summary>
+    internal sealed class ShellRestComposer : ShellComposer
+    {
+        /// <inheritdoc />
+        public override IQueryResult Execute(string expr) => FirstExecutable(expr).Execute(expr.Rest());
     }
 
     internal static class ExprHelper
@@ -59,6 +103,9 @@ namespace AccountingServer.Shell
         /// <returns>首段</returns>
         public static string Initital(this string str)
         {
+            if (str == null)
+                return null;
+
             var id = str.IndexOfAny(new[] { ' ', '-' });
             return id < 0 ? str : str.Substring(0, id);
         }
