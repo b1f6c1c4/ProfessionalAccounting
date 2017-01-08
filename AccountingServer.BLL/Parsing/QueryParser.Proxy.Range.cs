@@ -8,7 +8,7 @@ namespace AccountingServer.BLL.Parsing
         public static DateFilter TheRange(this IDateRange range) => range?.Range ?? DateFilter.Unconstrained;
     }
 
-    public partial class QueryParser
+    internal partial class QueryParser
     {
         public partial class RangeDayContext : IDateRange
         {

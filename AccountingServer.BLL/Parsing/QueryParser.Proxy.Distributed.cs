@@ -4,7 +4,7 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.BLL.Parsing
 {
-    public partial class QueryParser
+    internal partial class QueryParser
     {
         public partial class DistributedQAtomContext : IDistributedQueryAtom
         {

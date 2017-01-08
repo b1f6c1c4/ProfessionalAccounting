@@ -58,7 +58,7 @@
     <Compile Include="DataFormatter.cs" />
     <Compile Include="DistributedAccountant.cs" />
     <Compile Include="GroupingHelper.cs" />
-    <Compile Include="Parsing\ParsingHelper.cs" />
+    <Compile Include="Parsing\Facade.cs" />
     <Compile Include="Parsing\QueryLexer.cs" />
     <Compile Include="Parsing\QueryParser.cs" />
     <Compile Include="Parsing\QueryParser.Proxy.Detail.cs" />
