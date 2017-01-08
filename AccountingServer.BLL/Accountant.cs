@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AccountingServer.BLL.Parsing;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
 
@@ -50,8 +51,14 @@ namespace AccountingServer.BLL
 
         public Voucher SelectVoucher(string id) => m_Db.SelectVoucher(id);
 
+        public IEnumerable<Voucher> SelectVouchers(string query)
+            => SelectVouchers(QueryParser.From(query).vouchers());
+
         public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query)
             => m_Db.SelectVouchers(query);
+
+        public IEnumerable<Balance> SelectVoucherDetailsGrouped(string query)
+            => SelectVoucherDetailsGrouped(QueryParser.From(query).groupedQuery());
 
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
@@ -63,6 +70,9 @@ namespace AccountingServer.BLL
         }
 
         public bool DeleteVoucher(string id) => m_Db.DeleteVoucher(id);
+
+        public long DeleteVouchers(string query)
+            => DeleteVouchers(QueryParser.From(query).vouchers());
 
         public long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query) => m_Db.DeleteVouchers(query);
 
@@ -83,6 +93,9 @@ namespace AccountingServer.BLL
             return result;
         }
 
+        public IEnumerable<Asset> SelectAssets(string query)
+            => SelectAssets(QueryParser.From(query).distributedQ());
+
         public IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter)
         {
             foreach (var asset in m_Db.SelectAssets(filter))
@@ -94,9 +107,16 @@ namespace AccountingServer.BLL
 
         public bool DeleteAsset(Guid id) => m_Db.DeleteAsset(id);
 
+        public long DeleteAssets(string query)
+            => DeleteAssets(QueryParser.From(query).distributedQ());
+
         public long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter) => m_Db.DeleteAssets(filter);
 
         public bool Upsert(Asset entity) => m_Db.Upsert(entity);
+
+        public IEnumerable<Voucher> RegisterVouchers(Asset asset, DateFilter rng,
+                                                     string query)
+            => RegisterVouchers(asset, rng, QueryParser.From(query).vouchers());
 
         public IEnumerable<Voucher> RegisterVouchers(Asset asset, DateFilter rng,
                                                      IQueryCompunded<IVoucherQueryAtom> query)
@@ -119,6 +139,9 @@ namespace AccountingServer.BLL
             return result;
         }
 
+        public IEnumerable<Amortization> SelectAmortizations(string query)
+            => SelectAmortizations(QueryParser.From(query).distributedQ());
+
         public IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
         {
             foreach (var amort in m_Db.SelectAmortizations(filter))
@@ -130,10 +153,17 @@ namespace AccountingServer.BLL
 
         public bool DeleteAmortization(Guid id) => m_Db.DeleteAmortization(id);
 
+        public long DeleteAmortizations(string query)
+            => DeleteAmortizations(QueryParser.From(query).distributedQ());
+
         public long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
             => m_Db.DeleteAmortizations(filter);
 
         public bool Upsert(Amortization entity) => m_Db.Upsert(entity);
+
+        public IEnumerable<Voucher> RegisterVouchers(Amortization amort, DateFilter rng,
+                                                     string query)
+            => RegisterVouchers(amort, rng, QueryParser.From(query).vouchers());
 
         public IEnumerable<Voucher> RegisterVouchers(Amortization amort, DateFilter rng,
                                                      IQueryCompunded<IVoucherQueryAtom> query)
