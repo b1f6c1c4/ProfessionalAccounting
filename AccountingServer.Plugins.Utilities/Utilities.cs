@@ -4,6 +4,7 @@ using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
+using static AccountingServer.BLL.Parsing.ParsingHelperF;
 
 namespace AccountingServer.Plugins.Utilities
 {
@@ -55,7 +56,7 @@ namespace AccountingServer.Plugins.Utilities
             DateTime? time;
             try
             {
-                time = AccountingShell.ParseUniqueTime(ref par);
+                time = ParsingF.UniqueTime(ref par);
             }
             catch (Exception)
             {
@@ -84,10 +85,10 @@ namespace AccountingServer.Plugins.Utilities
                 else
                 {
                     var grp =
-                        AccountingShell.ParseGroupedQuery(
-                                                time.HasValue
-                                                    ? $"{template.Query} [~{time:yyyyMMdd}] ``v"
-                                                    : $"{template.Query} [null] ``v");
+                        ParsingF.GroupedQuery(
+                                              time.HasValue
+                                                  ? $"{template.Query} [~{time:yyyyMMdd}] ``v"
+                                                  : $"{template.Query} [null] ``v");
                     var arr = Accountant.SelectVoucherDetailsGrouped(grp).ToArray();
                     if (arr.Length == 0)
                         num = val;

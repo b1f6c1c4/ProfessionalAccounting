@@ -5,6 +5,7 @@ using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
+using static AccountingServer.BLL.Parsing.ParsingHelperF;
 
 namespace AccountingServer.Plugins.YieldRate
 {
@@ -20,9 +21,9 @@ namespace AccountingServer.Plugins.YieldRate
         {
             var result =
                 Accountant.SelectVoucherDetailsGrouped(
-                                                       AccountingShell.ParseGroupedQuery(
-                                                                               "{T1101}-{T110102+T610101+T611102 A}:T1101``cd"));
-            var resx = Accountant.SelectVoucherDetailsGrouped(AccountingShell.ParseGroupedQuery("T1101``c"));
+                                                       ParsingF.GroupedQuery(
+                                                                             "{T1101}-{T110102+T610101+T611102 A}:T1101``cd"));
+            var resx = Accountant.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery("T1101``c"));
             var sb = new StringBuilder();
             foreach (
                 var tpl in

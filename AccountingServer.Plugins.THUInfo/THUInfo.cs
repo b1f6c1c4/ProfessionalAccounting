@@ -8,6 +8,7 @@ using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
 using CredentialManagement;
+using static AccountingServer.BLL.Parsing.ParsingHelperF;
 
 namespace AccountingServer.Plugins.THUInfo
 {
@@ -538,7 +539,7 @@ namespace AccountingServer.Plugins.THUInfo
                 var dt = DateTime.Now.Date;
                 try
                 {
-                    var dd = AccountingShell.ParseUniqueTime(ref xx);
+                    var dd = ParsingF.UniqueTime(ref xx);
                     if (dd == null)
                         throw new ApplicationException("无法处理无穷长时间以前的自动补全指令");
                     dt = dd.Value;
