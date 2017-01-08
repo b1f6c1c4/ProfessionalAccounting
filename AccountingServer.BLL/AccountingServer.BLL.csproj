@@ -58,7 +58,6 @@
     <Compile Include="DataFormatter.cs" />
     <Compile Include="DistributedAccountant.cs" />
     <Compile Include="GroupingHelper.cs" />
-    <Compile Include="NamedQuery.cs" />
     <Compile Include="Parsing\ParsingHelper.cs" />
     <Compile Include="Parsing\QueryLexer.cs" />
     <Compile Include="Parsing\QueryParser.cs" />
