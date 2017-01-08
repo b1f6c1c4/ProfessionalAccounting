@@ -5,6 +5,7 @@ using System.Resources;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
+using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Shell
 {
@@ -21,7 +22,29 @@ namespace AccountingServer.Shell
         public AccountingShell(Accountant helper) { m_Accountant = helper; }
 
         /// <inheritdoc />
-        public IQueryResult Execute(string s) { throw new NotImplementedException(); }
+        public IQueryResult Execute(string s)
+        {
+            if (s == "?")
+                return ListHelp();
+            if (s == "T")
+                return ListTitles();
+
+            {
+                var res = Parsing.GroupedQuery(s);
+                if (res != null)
+                    return PresentSubtotal(res);
+            }
+
+            {
+                var l = s.Length;
+                var res = Parsing.VoucherQuery(ref s);
+                if (l != s.Length)
+                    if (res != null)
+                        return PresentVoucherQuery(res);
+            }
+
+            throw new InvalidOperationException("表达式无效");
+        }
 
         /// <inheritdoc />
         public bool IsExecutable(string expr) => true;
