@@ -24,7 +24,7 @@ namespace AccountingServer.Shell
         public IQueryResult BasicCheck()
         {
             var sb = new StringBuilder();
-            foreach (var voucher in m_Accountant.SelectVouchers(null))
+            foreach (var voucher in m_Accountant.SelectVouchers((IQueryCompunded<IVoucherQueryAtom>)null))
             {
                 // ReSharper disable once PossibleInvalidOperationException
                 var val = voucher.Details.Sum(d => d.Fund.Value);

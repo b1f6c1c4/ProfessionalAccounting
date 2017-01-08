@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
-using AccountingServer.Shell.Parsing;
 
 namespace AccountingServer.Shell
 {
@@ -25,61 +24,9 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>执行结果</returns>
-        public IQueryResult ExecuteAsset(ShellParser.AssetContext expr)
+        public IQueryResult ExecuteAsset(string expr)
         {
-            var assetListContext = expr.assetList();
-            if (assetListContext != null)
-            {
-                var showAll = assetListContext.AOAll() != null;
-                var showSchedule = assetListContext.AOList() != null;
-                var dt = showAll
-                             ? null
-                             : assetListContext.rangePoint() != null
-                                   ? assetListContext.rangePoint().Range.EndDate
-                                   : DateTime.Now.Date;
-
-                return ExecuteList(assetListContext.distributedQ(), dt, showSchedule);
-            }
-            var assetQueryContext = expr.assetQuery();
-            if (assetQueryContext != null)
-                return ExecuteQuery(assetQueryContext.distributedQ());
-            var assetRegisterContext = expr.assetRegister();
-            if (assetRegisterContext != null)
-                return ExecuteRegister(
-                                       assetRegisterContext.distributedQ(),
-                                       assetRegisterContext.range().TheRange(),
-                                       assetRegisterContext.vouchers());
-            var assetUnregisterContext = expr.assetUnregister();
-            if (assetUnregisterContext != null)
-                return ExecuteUnregister(
-                                         assetUnregisterContext.distributedQ(),
-                                         assetUnregisterContext.range().TheRange(),
-                                         assetUnregisterContext.vouchers());
-            var assetRedepContext = expr.assetRedep();
-            if (assetRedepContext != null)
-                return ExecuteRedep(assetRedepContext.distributedQ());
-            var assetResetSoftContext = expr.assetResetSoft();
-            if (assetResetSoftContext != null)
-                return ExecuteResetSoft(
-                                        assetResetSoftContext.distributedQ(),
-                                        assetResetSoftContext.range().TheRange());
-            var assetResetMixedContext = expr.assetResetMixed();
-            if (assetResetMixedContext != null)
-                return ExcuteResetMixed(
-                                        assetResetMixedContext.distributedQ(),
-                                        assetResetMixedContext.range().TheRange());
-            var assetResetHardContext = expr.assetResetHard();
-            if (assetResetHardContext != null)
-                return ExecuteResetHard(assetResetHardContext.distributedQ(), assetResetHardContext.vouchers());
-            var assetApplyContext = expr.assetApply();
-            if (assetApplyContext != null)
-                return ExecuteApply(
-                                    assetApplyContext.distributedQ(),
-                                    assetApplyContext.range().TheRange(),
-                                    assetApplyContext.AOCollapse() != null);
-            var assetCheckContext = expr.assetCheck();
-            if (assetCheckContext != null)
-                return ExecuteCheck(assetCheckContext.distributedQ(), new DateFilter(null, DateTime.Now.Date));
+            throw new NotImplementedException();
 
             throw new InvalidOperationException("资产表达式无效");
         }
