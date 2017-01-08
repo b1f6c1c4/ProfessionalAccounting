@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
-using AccountingServer.Shell.Parsing;
 
 namespace AccountingServer.Shell
 {
@@ -26,56 +25,9 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>执行结果</returns>
-        public IQueryResult ExecuteAmort(ShellParser.AmortContext expr)
+        public IQueryResult ExecuteAmort(string expr)
         {
-            var amortListContext = expr.amortList();
-            if (amortListContext != null)
-            {
-                var showAll = amortListContext.AOAll() != null;
-                var showSchedule = amortListContext.AOList() != null;
-                var dt = !showAll
-                             ? amortListContext.rangePoint()?.Range.EndDate ?? DateTime.Now.Date
-                             : (DateTime?)null;
-
-                return ExecuteList(amortListContext.distributedQ(), dt, showSchedule);
-            }
-            var amortQueryContext = expr.amortQuery();
-            if (amortQueryContext != null)
-                return ExecuteQuery(amortQueryContext.distributedQ());
-            var amortRegisterContext = expr.amortRegister();
-            if (amortRegisterContext != null)
-                return ExecuteRegister(
-                                       amortRegisterContext.distributedQ(),
-                                       amortRegisterContext.range().TheRange(),
-                                       amortRegisterContext.vouchers());
-            var amortUnregisterContext = expr.amortUnregister();
-            if (amortUnregisterContext != null)
-                return ExecuteUnregister(
-                                         amortUnregisterContext.distributedQ(),
-                                         amortUnregisterContext.range().TheRange(),
-                                         amortUnregisterContext.vouchers());
-            var amortReamoContext = expr.amortReamo();
-            if (amortReamoContext != null)
-                return ExecuteReamo(amortReamoContext.distributedQ());
-            var amortResetSoftContext = expr.amortResetSoft();
-            if (amortResetSoftContext != null)
-                return ExecuteResetSoft(
-                                        amortResetSoftContext.distributedQ(),
-                                        amortResetSoftContext.range().TheRange());
-            var amortResetMixedContext = expr.amortResetMixed();
-            if (amortResetMixedContext != null)
-                return ExcuteResetMixed(
-                                        amortResetMixedContext.distributedQ(),
-                                        amortResetMixedContext.range().TheRange());
-            var amortApplyContext = expr.amortApply();
-            if (amortApplyContext != null)
-                return ExecuteApply(
-                                    amortApplyContext.distributedQ(),
-                                    amortApplyContext.range().TheRange(),
-                                    amortApplyContext.AOCollapse() != null);
-            var amortCheckContext = expr.amortCheck();
-            if (amortCheckContext != null)
-                return ExecuteCheck(amortCheckContext.distributedQ(), new DateFilter(null, DateTime.Now.Date));
+            throw new NotImplementedException();
 
             throw new InvalidOperationException("摊销表达式无效");
         }

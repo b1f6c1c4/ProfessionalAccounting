@@ -2,7 +2,6 @@
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using AccountingServer.Shell;
 using ScintillaNET;
 
 namespace AccountingServer
@@ -17,7 +16,6 @@ namespace AccountingServer
         {
             SetProcessDPIAware();
             InitializeComponent();
-            chart1.Dock = DockStyle.Fill;
             scintilla.Dock = DockStyle.Fill;
 
             Width = 1280;
@@ -98,49 +96,6 @@ namespace AccountingServer
                                                 scintilla.Text.IndexOfAny(new[] { ' ', '{' }, begin + 5)
                                                 - begin - 5);
             return true;
-        }
-
-        /// <summary>
-        ///     处理图表
-        /// </summary>
-        /// <param name="chartArgs">图表数据</param>
-        private void ProcessChart(ChartData chartArgs)
-        {
-            chart1.ChartAreas.SuspendUpdates();
-
-            chart1.ChartAreas.Clear();
-
-            foreach (var chartArea in chartArgs.ChartAreas)
-                chart1.ChartAreas.Add(chartArea);
-
-            chart1.Legends[0].Font = new Font("Microsoft YaHei Mono", 12, GraphicsUnit.Pixel);
-
-            chart1.Series.Clear();
-
-            foreach (var series in chartArgs.Series)
-                chart1.Series.Add(series);
-
-            chart1.ChartAreas.ResumeUpdates();
-
-            SwitchToChart();
-        }
-
-        /// <summary>
-        ///     显示文本
-        /// </summary>
-        private void SwitchToText()
-        {
-            chart1.Visible = false;
-            scintilla.Visible = true;
-        }
-
-        /// <summary>
-        ///     显示图表
-        /// </summary>
-        private void SwitchToChart()
-        {
-            chart1.Visible = true;
-            scintilla.Visible = false;
         }
 
         /// <summary>

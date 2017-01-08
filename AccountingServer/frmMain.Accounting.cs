@@ -57,9 +57,6 @@ namespace AccountingServer
                     case "Amortization":
                         result = m_Shell.ExecuteAmortUpsert(s);
                         break;
-                    case "NamedQueryTemplate":
-                        result = m_Shell.ExecuteNamedQueryTemplateUpsert(s);
-                        break;
                     default:
                         return false;
                 }
@@ -111,9 +108,6 @@ namespace AccountingServer
                     case "Amortization":
                         result = m_Shell.ExecuteAmortRemoval(s);
                         break;
-                    case "NamedQueryTemplate":
-                        result = m_Shell.ExecuteNamedQueryTemplateRemoval(s);
-                        break;
                     default:
                         return false;
                 }
@@ -152,14 +146,11 @@ namespace AccountingServer
 
                 if (res is ChartData)
                 {
-                    ProcessChart(res as ChartData);
                     FocusTextBoxCommand();
                     return true;
                 }
 
                 var result = res.ToString();
-
-                SwitchToText();
 
                 scintilla.Focus();
 
@@ -194,7 +185,6 @@ namespace AccountingServer
                 else
                     scintilla.Text = exception.ToString();
                 textBoxCommand.BackColor = Color.FromArgb(255, 70, 70);
-                SwitchToText();
                 return false;
             }
         }

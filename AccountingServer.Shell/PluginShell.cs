@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Plugins;
-using AccountingServer.Shell.Parsing;
 
 namespace AccountingServer.Shell
 {
@@ -47,11 +43,9 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>执行结果</returns>
-        public IQueryResult ExecuteAuto(ShellParser.AutoCommandContext expr)
+        public IQueryResult ExecuteAuto(string expr)
         {
-            var name = expr.DollarQuotedString().Dequotation();
-            var plugin = GetPlugin(name);
-            return plugin.Execute(expr.SingleQuotedString().Select(n => n.Dequotation()).ToArray());
+            throw new NotImplementedException();
         }
 
         /// <summary>

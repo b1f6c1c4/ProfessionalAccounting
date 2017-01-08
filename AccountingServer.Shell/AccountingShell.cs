@@ -4,8 +4,8 @@ using System.Linq;
 using System.Resources;
 using System.Text;
 using AccountingServer.BLL;
+using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
-using AccountingServer.Shell.Parsing;
 
 namespace AccountingServer.Shell
 {
@@ -23,9 +23,6 @@ namespace AccountingServer.Shell
         private readonly AssetShell m_AssetShell;
         private readonly CarryShell m_CarryShell;
         private readonly CheckShell m_CheckShell;
-        private readonly NamedQueryShell m_NamedQueryShell;
-        private readonly ReportShell m_ReportShell;
-        private readonly ChartShell m_ChartShell;
         private readonly PluginShell m_PluginManager;
 
         public AccountingShell(Accountant helper)
@@ -35,22 +32,19 @@ namespace AccountingServer.Shell
             m_AssetShell = new AssetShell(helper);
             m_CarryShell = new CarryShell(helper);
             m_CheckShell = new CheckShell(helper);
-            m_NamedQueryShell = new NamedQueryShell(helper);
-            m_ReportShell = new ReportShell(helper);
-            m_ChartShell = new ChartShell(helper);
             m_PluginManager = new PluginShell(helper, this);
         }
 
         public static DateTime? ParseUniqueTime(ref string s)
         {
-            var res = ShellParser.From(s).uniqueTime();
+            var res = QueryParser.From(s).uniqueTime();
             s = s.Substring(res.GetText().Length);
             return res;
         }
 
-        public static IQueryCompunded<IVoucherQueryAtom> ParseVoucherQuery(string s) => ShellParser.From(s).voucherQuery();
+        public static IQueryCompunded<IVoucherQueryAtom> ParseVoucherQuery(string s) => QueryParser.From(s).voucherQuery();
 
-        public static IGroupedQuery ParseGroupedQuery(string s) => ShellParser.From(s).groupedQuery();
+        public static IGroupedQuery ParseGroupedQuery(string s) => QueryParser.From(s).groupedQuery();
 
         /// <summary>
         ///     执行表达式
@@ -62,83 +56,7 @@ namespace AccountingServer.Shell
             if (string.IsNullOrWhiteSpace(s))
                 throw new ArgumentNullException(nameof(s));
 
-            var res = ShellParser.From(s + Environment.NewLine).commandEOF();
-            if (res.exception != null)
-                throw new ArgumentException(res.exception.ToString(), nameof(s));
-            var result = res.command();
-            var text = result.GetText();
-            var j = 0;
-            for (var i = 0; i < text.Length; i++,j++)
-            {
-                if (text[i] == s[j])
-                    continue;
-                if (s[j] != ' ' ||
-                    j == s.Length - 1)
-                    throw new ArgumentException("语法错误", nameof(s));
-                i--;
-            }
-            while (j != s.Length &&
-                   s[j] == ' ')
-                j++;
-            if (j != s.Length)
-                throw new ArgumentException("语法错误", nameof(s));
-
-
-            if (result.autoCommand() != null)
-                return m_PluginManager.ExecuteAuto(result.autoCommand());
-            if (result.vouchers() != null)
-                return PresentVoucherQuery(result.vouchers());
-            if (result.groupedQuery() != null)
-                return PresentSubtotal(result.groupedQuery());
-            if (result.chart() != null)
-                return m_ChartShell.ExecuteChartQuery(result.chart());
-            if (result.report() != null)
-                return m_ReportShell.ExecuteReportQuery(
-                                                        result.report(),
-                                                        result.report().Sheer != null,
-                                                        result.report().Op.Text == "Rp");
-            if (result.asset() != null)
-                return m_AssetShell.ExecuteAsset(result.asset());
-            if (result.amort() != null)
-                return m_AmortizationShell.ExecuteAmort(result.amort());
-            if (result.carry() != null)
-                return m_CarryShell.ExecuteCarry(result.carry());
-            if (result.otherCommand() != null)
-            {
-                if (result.otherCommand().Connect() != null)
-                    return ConnectServer();
-                if (result.otherCommand().Titles() != null)
-                    return ListTitles();
-                if (result.otherCommand().Help() != null)
-                {
-                    var plgName = result.otherCommand().DollarQuotedString();
-                    if (plgName != null)
-                    {
-                        var name = plgName.Dequotation();
-                        if (name != "")
-                            return new UnEditableText(m_PluginManager.GetHelp(name));
-                        return new UnEditableText(m_PluginManager.ListPlugins());
-                    }
-                    return ListHelp();
-                }
-                if (result.otherCommand().Check() != null)
-                {
-                    switch (result.otherCommand().Check().GetText())
-                    {
-                        case "chk1":
-                            return m_CheckShell.BasicCheck();
-                        case "chk2":
-                            return m_CheckShell.AdvancedCheck();
-                    }
-                    throw new ArgumentException("表达式类型未知", nameof(s));
-                }
-                if (result.otherCommand().EditNamedQueries() != null)
-                    return m_NamedQueryShell.ListNamedQueryTemplates();
-                if (result.otherCommand().Exit() != null)
-                    Environment.Exit(0);
-                throw new ArgumentException("表达式类型未知", nameof(s));
-            }
-            throw new ArgumentException("表达式类型未知", nameof(s));
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -274,22 +192,6 @@ namespace AccountingServer.Shell
             return CSharpHelper.PresentAmort(amort);
         }
 
-        /// <summary>
-        ///     更新或添加命名查询模板
-        /// </summary>
-        /// <param name="code">命名查询模板表达式</param>
-        /// <returns>命名查询模板表达式</returns>
-        public string ExecuteNamedQueryTemplateUpsert(string code)
-        {
-            string name;
-            var all = m_NamedQueryShell.ParseNamedQueryTemplate(code, out name);
-
-            if (!m_Accountant.Upsert(name, all))
-                throw new ApplicationException("更新或添加失败");
-
-            return $"@new NamedQueryTemplate {{{all}}}@";
-        }
-
         #endregion
 
         #region Removal
@@ -337,19 +239,6 @@ namespace AccountingServer.Shell
                 throw new ApplicationException("编号未知");
 
             return m_Accountant.DeleteAmortization(amort.ID.Value);
-        }
-
-        /// <summary>
-        ///     删除命名查询模板
-        /// </summary>
-        /// <param name="code">命名查询模板表达式</param>
-        /// <returns>是否成功</returns>
-        public bool ExecuteNamedQueryTemplateRemoval(string code)
-        {
-            string name;
-            m_NamedQueryShell.ParseNamedQueryTemplate(code, out name);
-
-            return m_Accountant.DeleteNamedQueryTemplate(name);
         }
 
         #endregion

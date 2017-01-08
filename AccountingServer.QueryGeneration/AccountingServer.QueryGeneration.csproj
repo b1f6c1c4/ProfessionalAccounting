@@ -50,20 +50,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="QueryLexer.cs" />
-    <Compile Include="ShellLexer.cs" />
     <Compile Include="QueryParser.cs" />
-    <Compile Include="ShellParser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <Antlr4 Include="Shell.g4">
-      <Generator>MSBuild:Compile</Generator>
-      <CustomToolNamespace>AccountingServer.Shell.Parsing</CustomToolNamespace>
-      <Listener>False</Listener>
-      <Visitor>False</Visitor>
-    </Antlr4>
     <None Include="packages.config" />
     <Antlr4 Include="Query.g4">
       <Generator>MSBuild:Compile</Generator>
@@ -74,7 +66,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy $(ProjectDir)\obj\$(ConfigurationName)\Shell* $(SolutionDir)\AccountingServer.Shell\Parsing &amp;&amp; copy $(ProjectDir)\obj\$(ConfigurationName)\Query* $(SolutionDir)\AccountingServer.BLL\Parsing
+    <PostBuildEvent>copy $(ProjectDir)\obj\$(ConfigurationName)\Query* $(SolutionDir)\AccountingServer.BLL\Parsing
 </PostBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
