@@ -8,7 +8,7 @@ using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
 using CredentialManagement;
-using static AccountingServer.BLL.Parsing.ParsingHelperF;
+using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.Plugins.THUInfo
 {

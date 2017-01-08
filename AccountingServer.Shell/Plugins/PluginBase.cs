@@ -5,7 +5,7 @@ using System.Resources;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
-using static AccountingServer.BLL.Parsing.ParsingHelperF;
+using static AccountingServer.BLL.Parsing.FacadeF;
 
 // ReSharper disable once CheckNamespace
 

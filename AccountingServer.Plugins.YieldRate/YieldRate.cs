@@ -5,7 +5,7 @@ using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
-using static AccountingServer.BLL.Parsing.ParsingHelperF;
+using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.Plugins.YieldRate
 {

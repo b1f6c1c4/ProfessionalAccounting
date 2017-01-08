@@ -4,9 +4,9 @@ using Antlr4.Runtime;
 
 namespace AccountingServer.BLL.Parsing
 {
-    public abstract class ParsingHelperBase
+    public abstract class FacadeBase
     {
-        protected virtual T Parse<T>(ref string s, Func<QueryParser, T> func)
+        internal virtual T Parse<T>(ref string s, Func<QueryParser, T> func)
             where T : RuleContext
         {
             var res = func(QueryParser.From(s));
@@ -45,24 +45,24 @@ namespace AccountingServer.BLL.Parsing
             => Parse(ref s, p => p.distributedQ());
     }
 
-    public sealed class ParsingHelperF : ParsingHelperBase
+    public sealed class FacadeF : FacadeBase
     {
-        private static readonly ParsingHelperF Instance = new ParsingHelperF();
+        private static readonly FacadeF Instance = new FacadeF();
 
-        private ParsingHelperF() { }
+        private FacadeF() { }
 
-        public static ParsingHelperBase ParsingF => Instance;
+        public static FacadeBase ParsingF => Instance;
     }
 
-    public sealed class ParsingHelper : ParsingHelperBase
+    public sealed class Facade : FacadeBase
     {
-        private static readonly ParsingHelper Instance = new ParsingHelper();
+        private static readonly Facade Instance = new Facade();
 
-        private ParsingHelper() { }
+        private Facade() { }
 
-        public static ParsingHelperBase Parsing => Instance;
+        public static FacadeBase Parsing => Instance;
 
-        protected override T Parse<T>(ref string s, Func<QueryParser, T> func)
+        internal override T Parse<T>(ref string s, Func<QueryParser, T> func)
         {
             try
             {
