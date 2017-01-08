@@ -20,7 +20,7 @@ namespace AccountingServer.Plugins.Utilities
             Templates = new CustomManager<UtilTemplates>("Util.xml");
         }
 
-        public Utilities(Accountant accountant, AccountingShell shell) : base(accountant, shell) { }
+        public Utilities(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
         public override IQueryResult Execute(params string[] pars)

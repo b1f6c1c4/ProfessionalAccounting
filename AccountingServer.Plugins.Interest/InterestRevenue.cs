@@ -12,7 +12,7 @@ namespace AccountingServer.Plugins.Interest
     /// </summary>
     public class InterestRevenue : PluginBase
     {
-        public InterestRevenue(Accountant accountant, AccountingShell shell) : base(accountant, shell) { }
+        public InterestRevenue(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
         public override IQueryResult Execute(params string[] pars)

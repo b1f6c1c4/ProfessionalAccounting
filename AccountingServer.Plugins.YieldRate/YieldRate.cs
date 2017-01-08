@@ -14,7 +14,7 @@ namespace AccountingServer.Plugins.YieldRate
     /// </summary>
     public class YieldRate : PluginBase
     {
-        public YieldRate(Accountant accountant, AccountingShell shell) : base(accountant, shell) { }
+        public YieldRate(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
         public override IQueryResult Execute(params string[] pars)

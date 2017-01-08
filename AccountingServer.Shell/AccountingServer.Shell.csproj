@@ -48,6 +48,8 @@
   <ItemGroup>
     <Compile Include="AmortizationShell.cs" />
     <Compile Include="AssetShell.cs" />
+    <Compile Include="Facade.cs" />
+    <Compile Include="IShellComponent.cs" />
     <Compile Include="PluginShell.cs" />
     <Compile Include="CheckShell.cs" />
     <Compile Include="AccountingShell.cs" />
