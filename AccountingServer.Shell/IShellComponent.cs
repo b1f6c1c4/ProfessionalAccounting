@@ -62,5 +62,16 @@ namespace AccountingServer.Shell
             var id = str.IndexOfAny(new[] { ' ', '-' });
             return id < 0 ? str : str.Substring(0, id);
         }
+
+        /// <summary>
+        ///     首段字符串
+        /// </summary>
+        /// <param name="str">原字符串</param>
+        /// <returns>首段</returns>
+        public static string Rest(this string str)
+        {
+            var id = str.IndexOfAny(new[] { ' ', '-' });
+            return id < 0 ? null : str.Substring(id + 1).TrimStart();
+        }
     }
 }
