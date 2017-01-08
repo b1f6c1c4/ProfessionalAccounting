@@ -4,7 +4,6 @@ using System.Linq;
 using System.Resources;
 using System.Text;
 using AccountingServer.BLL;
-using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
 
 namespace AccountingServer.Shell
@@ -34,17 +33,6 @@ namespace AccountingServer.Shell
             m_CheckShell = new CheckShell(helper);
             m_PluginManager = new PluginShell(helper, this);
         }
-
-        public static DateTime? ParseUniqueTime(ref string s)
-        {
-            var res = QueryParser.From(s).uniqueTime();
-            s = s.Substring(res.GetText().Length);
-            return res;
-        }
-
-        public static IQueryCompunded<IVoucherQueryAtom> ParseVoucherQuery(string s) => QueryParser.From(s).voucherQuery();
-
-        public static IGroupedQuery ParseGroupedQuery(string s) => QueryParser.From(s).groupedQuery();
 
         /// <summary>
         ///     执行表达式

@@ -5,6 +5,7 @@ using System.Resources;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
+using static AccountingServer.BLL.Parsing.ParsingHelperF;
 
 // ReSharper disable once CheckNamespace
 
@@ -61,7 +62,7 @@ namespace AccountingServer.Plugins
         /// <param name="query">值分类汇总检索式</param>
         /// <returns>汇总结果</returns>
         protected double GetV(string query) =>
-            Accountant.SelectVoucherDetailsGrouped(AccountingShell.ParseGroupedQuery(query)).SingleOrDefault()?.Fund ?? 0;
+            Accountant.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query)).SingleOrDefault()?.Fund ?? 0;
 
         /// <summary>
         ///     执行记账凭证检索式
@@ -69,6 +70,6 @@ namespace AccountingServer.Plugins
         /// <param name="query">记账凭证检索式</param>
         /// <returns>记账凭证</returns>
         protected IEnumerable<Voucher> Gets(string query) =>
-            Accountant.SelectVouchers(AccountingShell.ParseVoucherQuery(query));
+            Accountant.SelectVouchers(ParsingF.VoucherQuery(query));
     }
 }
