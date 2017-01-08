@@ -21,19 +21,22 @@ namespace AccountingServer.Shell
         /// <inheritdoc />
         public IQueryResult Execute(string expr)
         {
-            throw new NotImplementedException();
+            if (expr == "chk-1")
+                return BasicCheck();
+            if (expr == "chk-2")
+                return AdvancedCheck();
 
             throw new InvalidOperationException("检验表达式无效");
         }
 
         /// <inheritdoc />
-        public bool IsExecutable(string expr) => expr.StartsWith("chk", StringComparison.Ordinal);
+        public bool IsExecutable(string expr) => expr.Initital() == "chk";
 
         /// <summary>
         ///     检查每张会计记账凭证借贷方是否相等
         /// </summary>
         /// <returns>有误的会计记账凭证表达式</returns>
-        public IQueryResult BasicCheck()
+        private IQueryResult BasicCheck()
         {
             var sb = new StringBuilder();
             foreach (var voucher in m_Accountant.SelectVouchers(null))
@@ -55,7 +58,7 @@ namespace AccountingServer.Shell
         ///     检查每科目每内容每日资产无贷方余额，负债无借方余额
         /// </summary>
         /// <returns>发生错误的第一日及其信息</returns>
-        public IQueryResult AdvancedCheck()
+        private IQueryResult AdvancedCheck()
         {
             var res =
                 m_Accountant.SelectVoucherDetailsGrouped(

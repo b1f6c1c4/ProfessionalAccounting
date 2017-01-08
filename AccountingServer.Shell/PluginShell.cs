@@ -41,24 +41,34 @@ namespace AccountingServer.Shell
         /// <inheritdoc />
         public IQueryResult Execute(string expr)
         {
+            if (expr.StartsWith("?", StringComparison.Ordinal))
+            {
+                var plgName = expr.Substring(1).Dequotation();
+                if (plgName == "")
+                    return new UnEditableText(ListPlugins());
+                return new UnEditableText(GetHelp(plgName));
+            }
+
             throw new NotImplementedException();
         }
 
         /// <inheritdoc />
-        public bool IsExecutable(string expr) => expr.StartsWith("$", StringComparison.Ordinal);
+        public bool IsExecutable(string expr)
+            => expr.StartsWith("$", StringComparison.Ordinal)
+               || expr.StartsWith("?$", StringComparison.Ordinal);
 
         /// <summary>
         ///     显示插件帮助
         /// </summary>
         /// <param name="name">名称</param>
         /// <returns>帮助内容</returns>
-        public string GetHelp(string name) => GetPlugin(name).ListHelp();
+        private string GetHelp(string name) => GetPlugin(name).ListHelp();
 
         /// <summary>
         ///     列出所有插件
         /// </summary>
         /// <returns></returns>
-        public string ListPlugins()
+        private string ListPlugins()
         {
             var sb = new StringBuilder();
             foreach (var info in m_Infos.Config.Infos)
