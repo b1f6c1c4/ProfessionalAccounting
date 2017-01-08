@@ -17,7 +17,7 @@ namespace AccountingServer
         /// <summary>
         ///     控制台
         /// </summary>
-        private AccountingShell m_Shell;
+        private Facade m_Shell;
 
         /// <summary>
         ///     初始化
@@ -26,7 +26,7 @@ namespace AccountingServer
         {
             m_Accountant = new Accountant();
 
-            m_Shell = new AccountingShell(m_Accountant);
+            m_Shell = new Facade(m_Accountant);
             m_Shell.AutoConnect();
         }
 

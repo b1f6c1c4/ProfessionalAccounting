@@ -9,43 +9,22 @@ using AccountingServer.Entities;
 namespace AccountingServer.Shell
 {
     /// <summary>
-    ///     表达式解释器
+    ///     基本表达式解释器
     /// </summary>
-    public class AccountingShell
+    internal class AccountingShell : IShellComponent
     {
         /// <summary>
         ///     基本会计业务处理类
         /// </summary>
         private readonly Accountant m_Accountant;
 
-        private readonly AmortizationShell m_AmortizationShell;
-        private readonly AssetShell m_AssetShell;
-        private readonly CarryShell m_CarryShell;
-        private readonly CheckShell m_CheckShell;
-        private readonly PluginShell m_PluginManager;
+        public AccountingShell(Accountant helper) { m_Accountant = helper; }
 
-        public AccountingShell(Accountant helper)
-        {
-            m_Accountant = helper;
-            m_AmortizationShell = new AmortizationShell(helper);
-            m_AssetShell = new AssetShell(helper);
-            m_CarryShell = new CarryShell(helper);
-            m_CheckShell = new CheckShell(helper);
-            m_PluginManager = new PluginShell(helper, this);
-        }
+        /// <inheritdoc />
+        public IQueryResult Execute(string s) { throw new NotImplementedException(); }
 
-        /// <summary>
-        ///     执行表达式
-        /// </summary>
-        /// <param name="s">表达式</param>
-        /// <returns>执行结果</returns>
-        public IQueryResult Execute(string s)
-        {
-            if (string.IsNullOrWhiteSpace(s))
-                throw new ArgumentNullException(nameof(s));
-
-            throw new NotImplementedException();
-        }
+        /// <inheritdoc />
+        public bool IsExecutable(string expr) => true;
 
         /// <summary>
         ///     执行记账凭证检索式并呈现记账凭证
@@ -103,132 +82,5 @@ namespace AccountingServer.Shell
             }
             return new UnEditableText(sb.ToString());
         }
-
-        #region Miscellaneous
-
-        /// <summary>
-        ///     检查是否已连接；若未连接，尝试连接
-        /// </summary>
-        public IQueryResult AutoConnect()
-        {
-            if (!m_Accountant.Connected)
-                m_Accountant.Connect();
-            return new Succeed();
-        }
-
-        /// <summary>
-        ///     连接数据库服务器
-        /// </summary>
-        /// <returns>连接情况</returns>
-        private IQueryResult ConnectServer()
-        {
-            m_Accountant.Connect();
-            return new Succeed();
-        }
-
-        #endregion
-
-        #region Upsert
-
-        /// <summary>
-        ///     更新或添加记账凭证
-        /// </summary>
-        /// <param name="code">记账凭证的C#代码</param>
-        /// <returns>新记账凭证的C#代码</returns>
-        public string ExecuteVoucherUpsert(string code)
-        {
-            var voucher = CSharpHelper.ParseVoucher(code);
-            // ReSharper disable once PossibleInvalidOperationException
-            var unc = voucher.Details.SingleOrDefault(d => !d.Fund.HasValue);
-            if (unc != null)
-                // ReSharper disable once PossibleInvalidOperationException
-                unc.Fund = -voucher.Details.Sum(d => d.Fund ?? 0D);
-
-            if (!m_Accountant.Upsert(voucher))
-                throw new ApplicationException("更新或添加失败");
-
-            return CSharpHelper.PresentVoucher(voucher);
-        }
-
-        /// <summary>
-        ///     更新或添加资产
-        /// </summary>
-        /// <param name="code">资产的C#代码</param>
-        /// <returns>新资产的C#代码</returns>
-        public string ExecuteAssetUpsert(string code)
-        {
-            var asset = CSharpHelper.ParseAsset(code);
-
-            if (!m_Accountant.Upsert(asset))
-                throw new ApplicationException("更新或添加失败");
-
-            return CSharpHelper.PresentAsset(asset);
-        }
-
-        /// <summary>
-        ///     更新或添加摊销
-        /// </summary>
-        /// <param name="code">摊销的C#代码</param>
-        /// <returns>新摊销的C#代码</returns>
-        public string ExecuteAmortUpsert(string code)
-        {
-            var amort = CSharpHelper.ParseAmort(code);
-
-            if (!m_Accountant.Upsert(amort))
-                throw new ApplicationException("更新或添加失败");
-
-            return CSharpHelper.PresentAmort(amort);
-        }
-
-        #endregion
-
-        #region Removal
-
-        /// <summary>
-        ///     删除记账凭证
-        /// </summary>
-        /// <param name="code">记账凭证的C#代码</param>
-        /// <returns>是否成功</returns>
-        public bool ExecuteVoucherRemoval(string code)
-        {
-            var voucher = CSharpHelper.ParseVoucher(code);
-
-            if (voucher.ID == null)
-                throw new ApplicationException("编号未知");
-
-            return m_Accountant.DeleteVoucher(voucher.ID);
-        }
-
-        /// <summary>
-        ///     删除资产
-        /// </summary>
-        /// <param name="code">资产的C#代码</param>
-        /// <returns>是否成功</returns>
-        public bool ExecuteAssetRemoval(string code)
-        {
-            var asset = CSharpHelper.ParseAsset(code);
-
-            if (!asset.ID.HasValue)
-                throw new ApplicationException("编号未知");
-
-            return m_Accountant.DeleteAsset(asset.ID.Value);
-        }
-
-        /// <summary>
-        ///     删除摊销
-        /// </summary>
-        /// <param name="code">摊销的C#代码</param>
-        /// <returns>是否成功</returns>
-        public bool ExecuteAmortRemoval(string code)
-        {
-            var amort = CSharpHelper.ParseAmort(code);
-
-            if (!amort.ID.HasValue)
-                throw new ApplicationException("编号未知");
-
-            return m_Accountant.DeleteAmortization(amort.ID.Value);
-        }
-
-        #endregion
     }
 }

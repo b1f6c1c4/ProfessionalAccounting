@@ -21,16 +21,7 @@ namespace AccountingServer.Plugins
         /// </summary>
         protected readonly Accountant Accountant;
 
-        /// <summary>
-        ///     控制台
-        /// </summary>
-        protected readonly AccountingShell Shell;
-
-        protected PluginBase(Accountant accountant, AccountingShell shell)
-        {
-            Accountant = accountant;
-            Shell = shell;
-        }
+        protected PluginBase(Accountant accountant) { Accountant = accountant; }
 
         /// <summary>
         ///     执行插件表达式

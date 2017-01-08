@@ -11,7 +11,7 @@ namespace AccountingServer.Shell
     /// <summary>
     ///     摊销表达式解释器
     /// </summary>
-    internal class AmortizationShell
+    internal class AmortizationShell : IShellComponent
     {
         /// <summary>
         ///     基本会计业务处理类
@@ -20,17 +20,16 @@ namespace AccountingServer.Shell
 
         public AmortizationShell(Accountant helper) { m_Accountant = helper; }
 
-        /// <summary>
-        ///     执行摊销表达式
-        /// </summary>
-        /// <param name="expr">表达式</param>
-        /// <returns>执行结果</returns>
-        public IQueryResult ExecuteAmort(string expr)
+        /// <inheritdoc />
+        public IQueryResult Execute(string expr)
         {
             throw new NotImplementedException();
 
             throw new InvalidOperationException("摊销表达式无效");
         }
+
+        /// <inheritdoc />
+        public bool IsExecutable(string expr) => expr.StartsWith("o", StringComparison.Ordinal);
 
         /// <summary>
         ///     执行列表表达式

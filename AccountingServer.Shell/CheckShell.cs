@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
@@ -8,7 +9,7 @@ namespace AccountingServer.Shell
     /// <summary>
     ///     检验表达式解释器
     /// </summary>
-    internal class CheckShell
+    internal class CheckShell : IShellComponent
     {
         /// <summary>
         ///     基本会计业务处理类
@@ -16,6 +17,17 @@ namespace AccountingServer.Shell
         private readonly Accountant m_Accountant;
 
         public CheckShell(Accountant helper) { m_Accountant = helper; }
+
+        /// <inheritdoc />
+        public IQueryResult Execute(string expr)
+        {
+            throw new NotImplementedException();
+
+            throw new InvalidOperationException("检验表达式无效");
+        }
+
+        /// <inheritdoc />
+        public bool IsExecutable(string expr) => expr.StartsWith("chk", StringComparison.Ordinal);
 
         /// <summary>
         ///     检查每张会计记账凭证借贷方是否相等

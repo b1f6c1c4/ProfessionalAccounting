@@ -10,7 +10,7 @@ namespace AccountingServer.Shell
     /// <summary>
     ///     资产表达式解释器
     /// </summary>
-    internal class AssetShell
+    internal class AssetShell : IShellComponent
     {
         /// <summary>
         ///     基本会计业务处理类
@@ -19,17 +19,16 @@ namespace AccountingServer.Shell
 
         public AssetShell(Accountant helper) { m_Accountant = helper; }
 
-        /// <summary>
-        ///     执行资产表达式
-        /// </summary>
-        /// <param name="expr">表达式</param>
-        /// <returns>执行结果</returns>
-        public IQueryResult ExecuteAsset(string expr)
+        /// <inheritdoc />
+        public IQueryResult Execute(string expr)
         {
             throw new NotImplementedException();
 
             throw new InvalidOperationException("资产表达式无效");
         }
+
+        /// <inheritdoc />
+        public bool IsExecutable(string expr) => expr.StartsWith("a", StringComparison.Ordinal);
 
         /// <summary>
         ///     执行列表表达式
