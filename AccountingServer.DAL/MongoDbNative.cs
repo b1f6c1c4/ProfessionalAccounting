@@ -39,7 +39,7 @@ namespace AccountingServer.DAL
             var lst = new List<FilterDefinition<Voucher>>();
 
             if (vfilter.ID != null)
-                lst.Add(Builders<Voucher>.Filter.Eq("_id", vfilter.ID));
+                lst.Add(Builders<Voucher>.Filter.Eq("_id", new ObjectId(vfilter.ID)));
             if (vfilter.Date != null)
                 lst.Add(Builders<Voucher>.Filter.Eq("date", vfilter.Date));
             if (vfilter.Type != null)
