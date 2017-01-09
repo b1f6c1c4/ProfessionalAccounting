@@ -44,6 +44,8 @@ namespace AccountingServer.Shell
         {
             if (expr == "con")
                 return ConnectServer();
+            if (expr == "exit")
+                Environment.Exit(0);
             if (expr == "T")
                 return ListTitles();
             if (expr == "?")
