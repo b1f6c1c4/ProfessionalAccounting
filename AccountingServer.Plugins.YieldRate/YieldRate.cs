@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
+using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
 using static AccountingServer.BLL.Parsing.FacadeF;
@@ -19,11 +20,8 @@ namespace AccountingServer.Plugins.YieldRate
         /// <inheritdoc />
         public override IQueryResult Execute(IReadOnlyList<string> pars)
         {
-            var result =
-                Accountant.SelectVoucherDetailsGrouped(
-                                                       ParsingF.GroupedQuery(
-                                                                             "{T1101}-{T110102+T610101+T611102 A}:T1101``cd"));
-            var resx = Accountant.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery("T1101``c"));
+            var result = Accountant.RunGroupedQuery("{T1101}-{T110102+T610101+T611102 A}:T1101``cd");
+            var resx = Accountant.RunGroupedQuery("T1101``c");
             var sb = new StringBuilder();
             foreach (
                 var tpl in

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AccountingServer.Entities;
 using Antlr4.Runtime;
 
@@ -73,5 +74,14 @@ namespace AccountingServer.BLL.Parsing
                 return null;
             }
         }
+    }
+
+    public static class Helper
+    {
+        public static IEnumerable<Voucher> RunVoucherQuery(this Accountant acc, string str)
+            => acc.SelectVouchers(FacadeF.ParsingF.VoucherQuery(str));
+
+        public static IEnumerable<Balance> RunGroupedQuery(this Accountant acc, string str)
+            => acc.SelectVoucherDetailsGrouped(FacadeF.ParsingF.GroupedQuery(str));
     }
 }
