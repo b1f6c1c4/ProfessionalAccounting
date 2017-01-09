@@ -4,173 +4,25 @@ using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
-using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Shell
 {
     /// <summary>
     ///     资产表达式解释器
     /// </summary>
-    internal class AssetShell : IShellComponent
+    internal class AssetShell : DistributedShell
     {
-        /// <summary>
-        ///     基本会计业务处理类
-        /// </summary>
-        private readonly Accountant m_Accountant;
-
-        /// <summary>
-        ///     复合表达式解释器
-        /// </summary>
-        private readonly IShellComponent m_Composer;
-
-        public AssetShell(Accountant helper)
-        {
-            m_Accountant = helper;
-            var resetComopser =
-                new ShellComposer
-                    {
-                        new ShellComponent(
-                            "soft",
-                            expr =>
-                            {
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-                                Parsing.Eof(expr);
-                                return ExecuteResetSoft(dist, rng);
-                            }),
-                        new ShellComponent(
-                            "mixed",
-                            expr =>
-                            {
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-                                Parsing.Eof(expr);
-                                return ExcuteResetMixed(dist, rng);
-                            }),
-                        new ShellComponent(
-                            "hard",
-                            expr =>
-                            {
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var vouchers = Parsing.OptColVouchers(ref expr);
-                                Parsing.Eof(expr);
-                                return ExecuteResetHard(dist, vouchers);
-                            })
-                    };
-            m_Composer =
-                new ShellComposer
-                    {
-                        new ShellComponent(
-                            "all",
-                            expr =>
-                            {
-                                expr = expr ?? "";
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                Parsing.Eof(expr);
-                                return ExecuteList(dist, null, false);
-                            }),
-                        new ShellComponent(
-                            "li",
-                            expr =>
-                            {
-                                expr = expr ?? "";
-                                var dt = Parsing.UniqueTime(ref expr) ?? DateTime.Today;
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                Parsing.Eof(expr);
-                                return ExecuteList(dist, dt, true);
-                            }),
-                        new ShellComponent(
-                            "q",
-                            expr =>
-                            {
-                                expr = expr ?? "";
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                Parsing.Eof(expr);
-                                return ExecuteQuery(dist);
-                            }),
-                        new ShellComponent(
-                            "reg",
-                            expr =>
-                            {
-                                expr = expr ?? "";
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-                                var vouchers = Parsing.OptColVouchers(ref expr);
-                                Parsing.Eof(expr);
-                                return ExecuteRegister(dist, rng, vouchers);
-                            }),
-                        new ShellComponent(
-                            "unreg",
-                            expr =>
-                            {
-                                expr = expr ?? "";
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-                                var vouchers = Parsing.OptColVouchers(ref expr);
-                                Parsing.Eof(expr);
-                                return ExecuteUnregister(dist, rng, vouchers);
-                            }),
-                        new ShellComponent(
-                            "recal",
-                            expr =>
-                            {
-                                expr = expr ?? "";
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                Parsing.Eof(expr);
-                                return ExecuteRedep(dist);
-                            }),
-                        new ShellComponent("reset", resetComopser.Execute),
-                        new ShellComponent(
-                            "ap",
-                            expr =>
-                            {
-                                expr = expr ?? "";
-                                var collapse = Parsing.Optional(ref expr, "col");
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-                                Parsing.Eof(expr);
-                                return ExecuteApply(dist, rng, collapse);
-                            }),
-                        new ShellComponent(
-                            "chk",
-                            expr =>
-                            {
-                                expr = expr ?? "";
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                Parsing.Eof(expr);
-                                return ExecuteCheck(dist, new DateFilter(null, DateTime.Today));
-                            }),
-                        new ShellComponent(
-                            null,
-                            expr =>
-                            {
-                                expr = expr ?? "";
-                                var dt = Parsing.UniqueTime(ref expr) ?? DateTime.Today;
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                Parsing.Eof(expr);
-                                return ExecuteList(dist, dt, false);
-                            })
-                    };
-        }
+        public AssetShell(Accountant helper) : base(helper) { }
 
         /// <inheritdoc />
-        public IQueryResult Execute(string expr) => m_Composer.Execute(expr.Rest());
+        protected override string Initial => "a";
 
         /// <inheritdoc />
-        public bool IsExecutable(string expr) => expr.Initital() == "a";
-
-        /// <summary>
-        ///     执行列表表达式
-        /// </summary>
-        /// <param name="distQuery">分期检索式</param>
-        /// <param name="dt">计算账面价值的时间</param>
-        /// <param name="showSchedule">是否显示折旧计算表</param>
-        /// <returns>执行结果</returns>
-        private IQueryResult ExecuteList(IQueryCompunded<IDistributedQueryAtom> distQuery, DateTime? dt,
-                                         bool showSchedule)
+        protected override IQueryResult ExecuteList(IQueryCompunded<IDistributedQueryAtom> distQuery, DateTime? dt,
+                                                    bool showSchedule)
         {
             var sb = new StringBuilder();
-            foreach (var a in Sort(m_Accountant.SelectAssets(distQuery)))
+            foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
                 sb.Append(ListAsset(a, dt, showSchedule));
 
             if (showSchedule)
@@ -178,55 +30,40 @@ namespace AccountingServer.Shell
             return new UnEditableText(sb.ToString());
         }
 
-        /// <summary>
-        ///     执行查询表达式
-        /// </summary>
-        /// <param name="distQuery">分期检索式</param>
-        /// <returns>执行结果</returns>
-        private IQueryResult ExecuteQuery(IQueryCompunded<IDistributedQueryAtom> distQuery)
+        /// <inheritdoc />
+        protected override IQueryResult ExecuteQuery(IQueryCompunded<IDistributedQueryAtom> distQuery)
         {
             var sb = new StringBuilder();
-            foreach (var a in Sort(m_Accountant.SelectAssets(distQuery)))
+            foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
                 sb.Append(CSharpHelper.PresentAsset(a));
 
             return new EditableText(sb.ToString());
         }
 
-        /// <summary>
-        ///     执行注册表达式
-        /// </summary>
-        /// <param name="distQuery">分期检索式</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="query">记账凭证检索式</param>
-        /// <returns>执行结果</returns>
-        private IQueryResult ExecuteRegister(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
-                                             IQueryCompunded<IVoucherQueryAtom> query)
+        /// <inheritdoc />
+        protected override IQueryResult ExecuteRegister(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
+                                                        IQueryCompunded<IVoucherQueryAtom> query)
         {
             var sb = new StringBuilder();
-            foreach (var a in Sort(m_Accountant.SelectAssets(distQuery)))
+            foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
             {
-                foreach (var voucher in m_Accountant.RegisterVouchers(a, rng, query))
+                foreach (var voucher in Accountant.RegisterVouchers(a, rng, query))
                     sb.Append(CSharpHelper.PresentVoucher(voucher));
 
-                m_Accountant.Upsert(a);
+                Accountant.Upsert(a);
             }
             if (sb.Length > 0)
                 return new EditableText(sb.ToString());
             return new Succeed();
         }
 
-        /// <summary>
-        ///     执行解除注册表达式
-        /// </summary>
-        /// <param name="distQuery">分期检索式</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="query">记账凭证检索式</param>
-        /// <returns>执行结果</returns>
-        private IQueryResult ExecuteUnregister(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
-                                               IQueryCompunded<IVoucherQueryAtom> query)
+        /// <inheritdoc />
+        protected override IQueryResult ExecuteUnregister(IQueryCompunded<IDistributedQueryAtom> distQuery,
+                                                          DateFilter rng,
+                                                          IQueryCompunded<IVoucherQueryAtom> query)
         {
             var sb = new StringBuilder();
-            foreach (var a in Sort(m_Accountant.SelectAssets(distQuery)))
+            foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
             {
                 foreach (var item in a.Schedule.Where(item => item.Date.Within(rng)))
                 {
@@ -235,7 +72,7 @@ namespace AccountingServer.Shell
                         if (item.VoucherID == null)
                             continue;
 
-                        var voucher = m_Accountant.SelectVoucher(item.VoucherID);
+                        var voucher = Accountant.SelectVoucher(item.VoucherID);
                         if (voucher != null)
                             if (!MatchHelper.IsMatch(query, voucher.IsMatch))
                                 continue;
@@ -244,66 +81,54 @@ namespace AccountingServer.Shell
                 }
 
                 sb.Append(ListAsset(a));
-                m_Accountant.Upsert(a);
+                Accountant.Upsert(a);
             }
             return new EditableText(sb.ToString());
         }
 
-        /// <summary>
-        ///     执行重新计算表达式
-        /// </summary>
-        /// <param name="distQuery">分期检索式</param>
-        /// <returns>执行结果</returns>
-        private IQueryResult ExecuteRedep(IQueryCompunded<IDistributedQueryAtom> distQuery)
+        /// <inheritdoc />
+        protected override IQueryResult ExecuteRecal(IQueryCompunded<IDistributedQueryAtom> distQuery)
         {
             var sb = new StringBuilder();
-            foreach (var a in Sort(m_Accountant.SelectAssets(distQuery)))
+            foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
             {
                 Accountant.Depreciate(a);
                 sb.Append(CSharpHelper.PresentAsset(a));
-                m_Accountant.Upsert(a);
+                Accountant.Upsert(a);
             }
             return new EditableText(sb.ToString());
         }
 
-        /// <summary>
-        ///     执行软重置表达式
-        /// </summary>
-        /// <param name="distQuery">分期检索式</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <returns>执行结果</returns>
-        private IQueryResult ExecuteResetSoft(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng)
+        /// <inheritdoc />
+        protected override IQueryResult ExecuteResetSoft(IQueryCompunded<IDistributedQueryAtom> distQuery,
+                                                         DateFilter rng)
         {
             var cnt = 0L;
-            foreach (var a in m_Accountant.SelectAssets(distQuery))
+            foreach (var a in Accountant.SelectAssets(distQuery))
             {
                 if (a.Schedule == null)
                     continue;
                 var flag = false;
                 foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
                                       .Where(item => item.VoucherID != null)
-                                      .Where(item => m_Accountant.SelectVoucher(item.VoucherID) == null))
+                                      .Where(item => Accountant.SelectVoucher(item.VoucherID) == null))
                 {
                     item.VoucherID = null;
                     cnt++;
                     flag = true;
                 }
                 if (flag)
-                    m_Accountant.Upsert(a);
+                    Accountant.Upsert(a);
             }
             return new NumberAffected(cnt);
         }
 
-        /// <summary>
-        ///     执行混合重置表达式
-        /// </summary>
-        /// <param name="distQuery">分期检索式</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <returns>执行结果</returns>
-        private IQueryResult ExcuteResetMixed(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng)
+        /// <inheritdoc />
+        protected override IQueryResult ExcuteResetMixed(IQueryCompunded<IDistributedQueryAtom> distQuery,
+                                                         DateFilter rng)
         {
             var cnt = 0L;
-            foreach (var a in m_Accountant.SelectAssets(distQuery))
+            foreach (var a in Accountant.SelectAssets(distQuery))
             {
                 if (a.Schedule == null)
                     continue;
@@ -311,14 +136,14 @@ namespace AccountingServer.Shell
                 foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
                                       .Where(item => item.VoucherID != null))
                 {
-                    var voucher = m_Accountant.SelectVoucher(item.VoucherID);
+                    var voucher = Accountant.SelectVoucher(item.VoucherID);
                     if (voucher == null)
                     {
                         item.VoucherID = null;
                         cnt++;
                         flag = true;
                     }
-                    else if (m_Accountant.DeleteVoucher(voucher.ID))
+                    else if (Accountant.DeleteVoucher(voucher.ID))
                     {
                         item.VoucherID = null;
                         cnt++;
@@ -326,19 +151,13 @@ namespace AccountingServer.Shell
                     }
                 }
                 if (flag)
-                    m_Accountant.Upsert(a);
+                    Accountant.Upsert(a);
             }
             return new NumberAffected(cnt);
         }
 
-        /// <summary>
-        ///     执行硬重置表达式
-        /// </summary>
-        /// <param name="distQuery">分期检索式</param>
-        /// <param name="query">记账凭证检索式</param>
-        /// <returns>执行结果</returns>
-        private IQueryResult ExecuteResetHard(IQueryCompunded<IDistributedQueryAtom> distQuery,
-                                              IQueryCompunded<IVoucherQueryAtom> query)
+        protected override IQueryResult ExecuteResetHard(IQueryCompunded<IDistributedQueryAtom> distQuery,
+                                                         IQueryCompunded<IVoucherQueryAtom> query)
         {
             Func<Asset, IQueryCompunded<IVoucherQueryAtom>> getMainQ =
                 a => new VoucherQueryAryBase(
@@ -353,32 +172,26 @@ namespace AccountingServer.Shell
                                      new VoucherDetail { Title = a.DevaluationTitle, Content = a.StringID })
                              });
             return new NumberAffected(
-                m_Accountant.SelectAssets(distQuery)
-                            .Sum(
-                                 a => m_Accountant.DeleteVouchers(
-                                                                  new VoucherQueryAryBase
-                                                                      (
-                                                                      OperatorType.Intersect,
-                                                                      new[] { query, getMainQ(a) }))));
+                Accountant.SelectAssets(distQuery)
+                          .Sum(
+                               a => Accountant.DeleteVouchers(
+                                                              new VoucherQueryAryBase
+                                                                  (
+                                                                  OperatorType.Intersect,
+                                                                  new[] { query, getMainQ(a) }))));
         }
 
-        /// <summary>
-        ///     执行应用表达式
-        /// </summary>
-        /// <param name="distQuery">分期检索式</param>
-        /// <param name="rng">日期过滤器</param>
-        /// <param name="isCollapsed">是否压缩</param>
-        /// <returns>执行结果</returns>
-        private IQueryResult ExecuteApply(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
-                                          bool isCollapsed)
+        /// <inheritdoc />
+        protected override IQueryResult ExecuteApply(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
+                                                     bool isCollapsed)
         {
             var sb = new StringBuilder();
-            foreach (var a in Sort(m_Accountant.SelectAssets(distQuery)))
+            foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
             {
-                foreach (var item in m_Accountant.Update(a, rng, isCollapsed))
+                foreach (var item in Accountant.Update(a, rng, isCollapsed))
                     sb.AppendLine(ListAssetItem(item));
 
-                m_Accountant.Upsert(a);
+                Accountant.Upsert(a);
             }
             if (sb.Length > 0)
                 return new EditableText(sb.ToString());
@@ -391,13 +204,13 @@ namespace AccountingServer.Shell
         /// <param name="distQuery">分期检索式</param>
         /// <param name="rng">日期过滤器</param>
         /// <returns>执行结果</returns>
-        private IQueryResult ExecuteCheck(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng)
+        protected override IQueryResult ExecuteCheck(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng)
         {
             var sb = new StringBuilder();
-            foreach (var a in Sort(m_Accountant.SelectAssets(distQuery)))
+            foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
             {
                 var sbi = new StringBuilder();
-                foreach (var item in m_Accountant.Update(a, rng, false, true))
+                foreach (var item in Accountant.Update(a, rng, false, true))
                     sbi.AppendLine(ListAssetItem(item));
 
                 if (sbi.Length != 0)
@@ -406,7 +219,7 @@ namespace AccountingServer.Shell
                     sb.AppendLine(sbi.ToString());
                 }
 
-                m_Accountant.Upsert(a);
+                Accountant.Upsert(a);
             }
             if (sb.Length > 0)
                 return new EditableText(sb.ToString());
@@ -441,7 +254,7 @@ namespace AccountingServer.Shell
                 {
                     sb.AppendLine(ListAssetItem(assetItem));
                     if (assetItem.VoucherID != null)
-                        sb.AppendLine(CSharpHelper.PresentVoucher(m_Accountant.SelectVoucher(assetItem.VoucherID)));
+                        sb.AppendLine(CSharpHelper.PresentVoucher(Accountant.SelectVoucher(assetItem.VoucherID)));
                 }
             return sb.ToString();
         }
