@@ -121,7 +121,7 @@ namespace AccountingServer.Shell
                                 Parsing.Eof(expr);
                                 return ExecuteRecal(dist);
                             }),
-                        new ShellComponent("reset", resetComopser.Execute),
+                        new ShellComponent("rst", resetComopser.Execute),
                         new ShellComponent(
                             "ap",
                             expr =>

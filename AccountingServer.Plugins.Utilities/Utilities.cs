@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
+using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
 using static AccountingServer.BLL.Parsing.FacadeF;
@@ -85,12 +86,11 @@ namespace AccountingServer.Plugins.Utilities
                     num = val;
                 else
                 {
-                    var grp =
-                        ParsingF.GroupedQuery(
-                                              time.HasValue
-                                                  ? $"{template.Query} [~{time:yyyyMMdd}] ``v"
-                                                  : $"{template.Query} [null] ``v");
-                    var arr = Accountant.SelectVoucherDetailsGrouped(grp).ToArray();
+                    var arr = Accountant
+                        .RunGroupedQuery(
+                                         time.HasValue
+                                             ? $"{template.Query} [~{time:yyyyMMdd}] ``v"
+                                             : $"{template.Query} [null] ``v").ToArray();
                     if (arr.Length == 0)
                         num = val;
                     else

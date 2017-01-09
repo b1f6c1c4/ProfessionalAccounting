@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
-using AccountingServer.Entities;
+using AccountingServer.BLL.Parsing;
 
 namespace AccountingServer.Shell
 {
@@ -27,7 +27,7 @@ namespace AccountingServer.Shell
             if (expr == "2")
                 return AdvancedCheck();
 
-            throw new InvalidOperationException("检验表达式无效");
+            throw new InvalidOperationException("表达式无效");
         }
 
         /// <inheritdoc />
@@ -61,60 +61,31 @@ namespace AccountingServer.Shell
         /// <returns>发生错误的第一日及其信息</returns>
         private IQueryResult AdvancedCheck()
         {
-            var res =
-                m_Accountant.SelectVoucherDetailsGrouped(
-                                                         new GroupedQueryBase(
-                                                             filter: null,
-                                                             subtotal: new SubtotalBase
-                                                                           {
-                                                                               AggrType = AggregationType.ChangedDay,
-                                                                               Levels = new[]
-                                                                                            {
-                                                                                                SubtotalLevel.Title,
-                                                                                                SubtotalLevel.SubTitle,
-                                                                                                SubtotalLevel.Content,
-                                                                                                SubtotalLevel.Day
-                                                                                            }
-                                                                           }));
+            var res = m_Accountant.RunGroupedQuery("`tscD");
 
             var sb = new StringBuilder();
             foreach (var grpTitle in res.GroupByTitle())
             {
-                if (grpTitle.Key >= 4000 &&
+                if (grpTitle.Key >= 3000 &&
                     grpTitle.Key < 5000)
                     continue;
 
-                if (grpTitle.Key == 1901)
+                if (grpTitle.Key == 1901 ||
+                    grpTitle.Key == 6101 ||
+                    grpTitle.Key == 6111)
                     continue;
 
                 foreach (var grpSubTitle in grpTitle.GroupBySubTitle())
                 {
-                    if (grpTitle.Key == 1101 &&
-                        grpSubTitle.Key == 02)
-                        continue;
-                    if (grpTitle.Key == 1501 &&
-                        grpSubTitle.Key == 02)
-                        continue;
-                    if (grpTitle.Key == 1503 &&
-                        grpSubTitle.Key == 02)
-                        continue;
-                    if (grpTitle.Key == 1511 &&
-                        grpSubTitle.Key == 02)
-                        continue;
-                    if (grpTitle.Key == 1511 &&
-                        grpSubTitle.Key == 03)
-                        continue;
-                    if (grpTitle.Key == 6603 &&
-                        grpSubTitle.Key == null)
-                        continue;
-                    if (grpTitle.Key == 6603 &&
-                        grpSubTitle.Key == 03)
-                        continue;
-                    if (grpTitle.Key == 6603 &&
-                        grpSubTitle.Key == 99)
-                        continue;
-                    if (grpTitle.Key == 6711 &&
-                        grpSubTitle.Key == 10)
+                    if (grpTitle.Key == 1101 && grpSubTitle.Key == 02 ||
+                        grpTitle.Key == 1501 && grpSubTitle.Key == 02 ||
+                        grpTitle.Key == 1503 && grpSubTitle.Key == 02 ||
+                        grpTitle.Key == 1511 && grpSubTitle.Key == 02 ||
+                        grpTitle.Key == 1511 && grpSubTitle.Key == 03 ||
+                        grpTitle.Key == 6603 && grpSubTitle.Key == null ||
+                        grpTitle.Key == 6603 && grpSubTitle.Key == 03 ||
+                        grpTitle.Key == 6603 && grpSubTitle.Key == 99 ||
+                        grpTitle.Key == 6711 && grpSubTitle.Key == 10)
                         continue;
 
                     var isPositive = grpTitle.Key < 2000 || grpTitle.Key >= 6400;
@@ -129,11 +100,9 @@ namespace AccountingServer.Shell
                         grpTitle.Key == 1702 ||
                         grpTitle.Key == 1703 ||
                         grpTitle.Key == 1602 ||
-                        grpTitle.Key == 1602)
+                        grpTitle.Key == 1602 ||
+                        grpTitle.Key == 6603 && grpSubTitle.Key == 02)
                         isPositive = false;
-                    else if (grpTitle.Key == 6603 &&
-                             grpSubTitle.Key == 02)
-                        isPositive = true;
 
                     foreach (var grpContent in grpSubTitle.GroupByContent())
                         foreach (var balance in grpContent.AggregateChangedDay())
