@@ -14,11 +14,11 @@ namespace AccountingServer.Shell
     {
         private readonly Dictionary<string, PluginBase> m_Plugins;
 
-        private readonly CustomManager<PluginInfos> m_Infos;
+        private readonly ConfigManager<PluginInfos> m_Infos;
 
         public PluginShell(Accountant helper)
         {
-            m_Infos = new CustomManager<PluginInfos>("Plugins.xml");
+            m_Infos = new ConfigManager<PluginInfos>("Plugins.xml");
             m_Plugins = new Dictionary<string, PluginBase>();
             foreach (var info in m_Infos.Config.Infos)
             {
