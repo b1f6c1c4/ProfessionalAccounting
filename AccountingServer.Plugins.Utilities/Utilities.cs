@@ -14,11 +14,11 @@ namespace AccountingServer.Plugins.Utilities
     /// </summary>
     public class Utilities : PluginBase
     {
-        private static readonly CustomManager<UtilTemplates> Templates;
+        private static readonly ConfigManager<UtilTemplates> Templates;
 
         static Utilities()
         {
-            Templates = new CustomManager<UtilTemplates>("Util.xml");
+            Templates = new ConfigManager<UtilTemplates>("Util.xml");
         }
 
         public Utilities(Accountant accountant) : base(accountant) { }

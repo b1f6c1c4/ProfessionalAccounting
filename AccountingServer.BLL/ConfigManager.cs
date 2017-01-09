@@ -8,7 +8,7 @@ namespace AccountingServer.BLL
     ///     配置文件管理器
     /// </summary>
     /// <typeparam name="T">配置文件类型</typeparam>
-    public class CustomManager<T>
+    public class ConfigManager<T>
     {
         /// <summary>
         ///     文件名
@@ -29,7 +29,7 @@ namespace AccountingServer.BLL
         ///     读取配置文件；若发生错误，保存在<c>m_Exception</c>中
         /// </summary>
         /// <param name="filename">文件名</param>
-        public CustomManager(string filename)
+        public ConfigManager(string filename)
         {
             m_FileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filename);
 

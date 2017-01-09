@@ -38,7 +38,7 @@ namespace AccountingServer.Plugins.THUInfo
                             )
                     });
 
-        private static readonly CustomManager<EndPointTemplates> EndPointTemplates;
+        private static readonly ConfigManager<EndPointTemplates> EndPointTemplates;
 
         private static IReadOnlyList<EndPointTemplate> Templates => EndPointTemplates.Config.Templates.AsReadOnly();
 
@@ -46,7 +46,7 @@ namespace AccountingServer.Plugins.THUInfo
 
         private readonly object m_Lock = new object();
 
-        static THUInfo() { EndPointTemplates = new CustomManager<EndPointTemplates>("EndPoint.xml"); }
+        static THUInfo() { EndPointTemplates = new ConfigManager<EndPointTemplates>("EndPoint.xml"); }
 
         public THUInfo(Accountant accountant) : base(accountant)
         {

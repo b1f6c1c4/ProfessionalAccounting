@@ -27,7 +27,6 @@ namespace AccountingServer
             m_Accountant = new Accountant();
 
             m_Shell = new Facade(m_Accountant);
-            m_Shell.AutoConnect();
         }
 
         /// <summary>

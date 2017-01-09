@@ -19,7 +19,7 @@ namespace AccountingServer
         /// <summary>
         ///     快捷编辑缩写
         /// </summary>
-        private CustomManager<Abbreviations> m_Abbrs;
+        private ConfigManager<Abbreviations> m_Abbrs;
 
         /// <summary>
         ///     快捷编辑下一个细目偏移
@@ -36,7 +36,7 @@ namespace AccountingServer
         /// </summary>
         private void PrepareFastEditing()
         {
-            m_Abbrs = new CustomManager<Abbreviations>("Abbr.xml");
+            m_Abbrs = new ConfigManager<Abbreviations>("Abbr.xml");
             var col = new AutoCompleteStringCollection();
             col.AddRange(m_Abbrs.Config.Abbrs.Select(tpl => tpl.Abbr).ToArray());
             textBoxCommand.AutoCompleteSource = AutoCompleteSource.CustomSource;

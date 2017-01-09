@@ -37,6 +37,8 @@ namespace AccountingServer.Shell
                         new PluginShell(helper),
                         new AccountingShell(helper)
                     };
+
+            ConnectServer();
         }
 
         /// <inheritdoc />
@@ -55,7 +57,7 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        public bool IsExecutable(string expr) { throw new NotImplementedException(); }
+        public bool IsExecutable(string expr) { throw new InvalidOperationException(); }
 
         #region Miscellaneous
 
@@ -92,22 +94,13 @@ namespace AccountingServer.Shell
         }
 
         /// <summary>
-        ///     检查是否已连接；若未连接，尝试连接
-        /// </summary>
-        public IQueryResult AutoConnect()
-        {
-            if (!m_Accountant.Connected)
-                m_Accountant.Connect();
-            return new Succeed();
-        }
-
-        /// <summary>
         ///     连接数据库服务器
         /// </summary>
         /// <returns>连接情况</returns>
         private IQueryResult ConnectServer()
         {
-            m_Accountant.Connect();
+            if (!m_Accountant.Connected)
+                m_Accountant.Connect();
             return new Succeed();
         }
 
