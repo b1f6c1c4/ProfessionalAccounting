@@ -18,6 +18,9 @@ namespace AccountingServer.Shell
         /// </summary>
         private readonly Accountant m_Accountant;
 
+        /// <summary>
+        ///     复合表达式解释器
+        /// </summary>
         private readonly IShellComponent m_Composer;
 
         public AssetShell(Accountant helper)
@@ -61,14 +64,16 @@ namespace AccountingServer.Shell
                             "all",
                             expr =>
                             {
+                                expr = expr ?? "";
                                 var dist = Parsing.DistributedQuery(ref expr);
                                 Parsing.Eof(expr);
                                 return ExecuteList(dist, null, false);
                             }),
                         new ShellComponent(
-                            "l",
+                            "li",
                             expr =>
                             {
+                                expr = expr ?? "";
                                 var dt = Parsing.UniqueTime(ref expr) ?? DateTime.Today;
                                 var dist = Parsing.DistributedQuery(ref expr);
                                 Parsing.Eof(expr);
@@ -78,6 +83,7 @@ namespace AccountingServer.Shell
                             "q",
                             expr =>
                             {
+                                expr = expr ?? "";
                                 var dist = Parsing.DistributedQuery(ref expr);
                                 Parsing.Eof(expr);
                                 return ExecuteQuery(dist);
@@ -86,6 +92,7 @@ namespace AccountingServer.Shell
                             "reg",
                             expr =>
                             {
+                                expr = expr ?? "";
                                 var dist = Parsing.DistributedQuery(ref expr);
                                 var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
                                 var vouchers = Parsing.OptColVouchers(ref expr);
@@ -96,6 +103,7 @@ namespace AccountingServer.Shell
                             "unreg",
                             expr =>
                             {
+                                expr = expr ?? "";
                                 var dist = Parsing.DistributedQuery(ref expr);
                                 var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
                                 var vouchers = Parsing.OptColVouchers(ref expr);
@@ -106,6 +114,7 @@ namespace AccountingServer.Shell
                             "recal",
                             expr =>
                             {
+                                expr = expr ?? "";
                                 var dist = Parsing.DistributedQuery(ref expr);
                                 Parsing.Eof(expr);
                                 return ExecuteRedep(dist);
@@ -115,6 +124,7 @@ namespace AccountingServer.Shell
                             "ap",
                             expr =>
                             {
+                                expr = expr ?? "";
                                 var collapse = Parsing.Optional(ref expr, "col");
                                 var dist = Parsing.DistributedQuery(ref expr);
                                 var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
@@ -125,6 +135,7 @@ namespace AccountingServer.Shell
                             "chk",
                             expr =>
                             {
+                                expr = expr ?? "";
                                 var dist = Parsing.DistributedQuery(ref expr);
                                 Parsing.Eof(expr);
                                 return ExecuteCheck(dist, new DateFilter(null, DateTime.Today));
