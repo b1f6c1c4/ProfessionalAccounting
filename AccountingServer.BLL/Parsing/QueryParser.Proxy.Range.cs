@@ -118,6 +118,8 @@ namespace AccountingServer.BLL.Parsing
         {
             public static implicit operator DateTime?(UniqueTimeCoreContext context)
             {
+                if (context == null)
+                    return null;
                 if (context.RangeNull() != null)
                     return null;
                 return context.Day;
@@ -153,7 +155,7 @@ namespace AccountingServer.BLL.Parsing
 
         public partial class UniqueTimeContext
         {
-            public static implicit operator DateTime?(UniqueTimeContext context) => context.Core;
+            public static implicit operator DateTime?(UniqueTimeContext context) => context?.Core;
         }
 
         public partial class RangeContext : IDateRange
