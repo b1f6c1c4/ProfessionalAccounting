@@ -15,10 +15,10 @@ namespace AccountingServer.Plugins.Interest
         public InterestRevenue(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
-        public override IQueryResult Execute(params string[] pars)
+        public override IQueryResult Execute(IReadOnlyList<string> pars)
         {
-            if (pars.Length > 4 ||
-                pars.Length < 3)
+            if (pars.Count > 4 ||
+                pars.Count < 3)
                 throw new ArgumentException("参数个数不正确", nameof(pars));
 
             var loans =
@@ -37,8 +37,8 @@ namespace AccountingServer.Plugins.Interest
                                   !b.Remark.EndsWith("-利息", StringComparison.Ordinal))
                      .Remark;
 
-            var endDate = pars.Length == 4 ? pars[3].AsDate() : null;
-            if (pars.Length == 3 ||
+            var endDate = pars.Count == 4 ? pars[3].AsDate() : null;
+            if (pars.Count == 3 ||
                 endDate.HasValue)
             {
                 var filter = new VoucherDetail { Title = 1221, Content = pars[0], Remark = rmk };

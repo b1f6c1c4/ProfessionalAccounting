@@ -113,9 +113,9 @@ namespace AccountingServer.Plugins.THUInfo
         }
 
         /// <inheritdoc />
-        public override IQueryResult Execute(params string[] pars)
+        public override IQueryResult Execute(IReadOnlyList<string> pars)
         {
-            if (pars.Length == 1 &&
+            if (pars.Count == 1 &&
                 pars[0] == "ep")
             {
                 var sb = new StringBuilder();
@@ -143,7 +143,7 @@ namespace AccountingServer.Plugins.THUInfo
                 return new UnEditableText(sb.ToString());
             }
 
-            if (pars.Length == 1 &&
+            if (pars.Count == 1 &&
                 pars[0] == "cred")
             {
                 DropCredential();
@@ -155,7 +155,7 @@ namespace AccountingServer.Plugins.THUInfo
             List<VDetail> noRecord;
             lock (m_Lock)
                 Compare(out noRemark, out tooMuch, out tooFew, out noRecord);
-            if ((pars.Length == 1 && pars[0] == "whatif") ||
+            if ((pars.Count == 1 && pars[0] == "whatif") ||
                 noRemark.Any() ||
                 tooMuch.Any() ||
                 tooFew.Any(p => p.Details.Any()) ||
@@ -245,7 +245,7 @@ namespace AccountingServer.Plugins.THUInfo
         /// <param name="pars">生成记账所需参数</param>
         /// <param name="failed">无法生产记账凭证的交易记录</param>
         private IEnumerable<Voucher> AutoGenerate(IEnumerable<TransactionRecord> records,
-                                                  IList<string> pars,
+                                                  IReadOnlyList<string> pars,
                                                   out List<TransactionRecord> failed)
         {
             var dic = pars.Count > 0 ? GetDic(pars) : null;
@@ -530,7 +530,7 @@ namespace AccountingServer.Plugins.THUInfo
         /// </summary>
         /// <param name="pars">自动补全指令</param>
         /// <returns>解析结果</returns>
-        private Dictionary<DateTime, List<Tuple<RegularType, string>>> GetDic(IList<string> pars)
+        private Dictionary<DateTime, List<Tuple<RegularType, string>>> GetDic(IReadOnlyList<string> pars)
         {
             var dic = new Dictionary<DateTime, List<Tuple<RegularType, string>>>();
             foreach (var par in pars)

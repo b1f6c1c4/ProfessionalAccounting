@@ -21,9 +21,10 @@ namespace AccountingServer.Shell
         /// <inheritdoc />
         public IQueryResult Execute(string expr)
         {
-            if (expr == "chk-1")
+            expr = expr.Rest();
+            if (expr == "1")
                 return BasicCheck();
-            if (expr == "chk-2")
+            if (expr == "2")
                 return AdvancedCheck();
 
             throw new InvalidOperationException("检验表达式无效");

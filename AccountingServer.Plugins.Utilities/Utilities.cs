@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
@@ -23,7 +24,7 @@ namespace AccountingServer.Plugins.Utilities
         public Utilities(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
-        public override IQueryResult Execute(params string[] pars)
+        public override IQueryResult Execute(IReadOnlyList<string> pars)
         {
             var count = 0;
             foreach (var par in pars)

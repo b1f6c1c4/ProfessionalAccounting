@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Plugins;
+using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Shell
 {
@@ -41,15 +42,33 @@ namespace AccountingServer.Shell
         /// <inheritdoc />
         public IQueryResult Execute(string expr)
         {
+            var help = false;
             if (expr.StartsWith("?", StringComparison.Ordinal))
             {
-                var plgName = expr.Substring(1).Dequotation();
+                expr = expr.Substring(1);
+                help = true;
+            }
+
+            var plgName = Parsing.Quoted(ref expr, '$');
+
+            if (help)
+            {
+                Parsing.Eof(expr);
                 if (plgName == "")
                     return new UnEditableText(ListPlugins());
                 return new UnEditableText(GetHelp(plgName));
             }
 
-            throw new NotImplementedException();
+            var pars = new List<string>();
+            while (true)
+            {
+                var par = Parsing.Quoted(ref expr);
+                if (par == null)
+                    break;
+                pars.Add(par);
+            }
+
+            return GetPlugin(plgName).Execute(pars);
         }
 
         /// <inheritdoc />

@@ -17,7 +17,7 @@ namespace AccountingServer.Plugins.YieldRate
         public YieldRate(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
-        public override IQueryResult Execute(params string[] pars)
+        public override IQueryResult Execute(IReadOnlyList<string> pars)
         {
             var result =
                 Accountant.SelectVoucherDetailsGrouped(

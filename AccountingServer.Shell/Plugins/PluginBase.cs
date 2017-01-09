@@ -28,7 +28,7 @@ namespace AccountingServer.Plugins
         /// </summary>
         /// <param name="pars">参数</param>
         /// <returns>执行结果</returns>
-        public abstract IQueryResult Execute(params string[] pars);
+        public abstract IQueryResult Execute(IReadOnlyList<string> pars);
 
         /// <summary>
         ///     显示插件帮助

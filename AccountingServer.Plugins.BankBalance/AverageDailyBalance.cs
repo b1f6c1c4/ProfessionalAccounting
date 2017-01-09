@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
@@ -14,9 +15,9 @@ namespace AccountingServer.Plugins.BankBalance
         public AverageDailyBalance(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
-        public override IQueryResult Execute(params string[] pars)
+        public override IQueryResult Execute(IReadOnlyList<string> pars)
         {
-            if (pars.Length != 2)
+            if (pars.Count != 2)
                 throw new ArgumentException("参数个数不正确", nameof(pars));
 
             var tdy = DateTime.Now.Date;
