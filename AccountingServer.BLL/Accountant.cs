@@ -16,8 +16,6 @@ namespace AccountingServer.BLL
         /// </summary>
         private readonly IDbAdapter m_Db;
 
-        private readonly CarryAccountant m_CarryAccountant;
-
         private readonly AssetAccountant m_AssetAccountant;
 
         private readonly AmortAccountant m_AmortAccountant;
@@ -33,7 +31,6 @@ namespace AccountingServer.BLL
 
             m_Db = adapter;
 
-            m_CarryAccountant = new CarryAccountant(m_Db);
             m_AssetAccountant = new AssetAccountant(m_Db);
             m_AmortAccountant = new AmortAccountant(m_Db);
         }
@@ -150,12 +147,5 @@ namespace AccountingServer.BLL
 
         #endregion
 
-        #region Carry
-
-        public void Carry(DateTime? dt) => m_CarryAccountant.Carry(dt);
-
-        public void CarryYear(DateTime? dt, bool includeNull = false) => m_CarryAccountant.CarryYear(dt, includeNull);
-
-        #endregion
     }
 }
