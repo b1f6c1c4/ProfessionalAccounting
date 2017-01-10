@@ -1,5 +1,6 @@
 ﻿using System;
 using AccountingServer.BLL;
+using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
 using static AccountingServer.BLL.Parsing.Facade;
 
@@ -73,45 +74,8 @@ namespace AccountingServer.Shell
             var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
             Parsing.Eof(expr);
 
-            if (rng.NullOnly)
-            {
-                var cnt = m_Accountant.DeleteVouchers(
-                                                      new VoucherQueryAtomBase(
-                                                          new Voucher { Type = VoucherType.Carry },
-                                                          filter: null,
-                                                          rng: rng));
-                return new NumberAffected(cnt);
-            }
-
-            if (!rng.StartDate.HasValue ||
-                !rng.EndDate.HasValue)
-                throw new ArgumentException("时间范围无界", nameof(expr));
-
-            var count = 0L;
-            var dt = new DateTime(rng.StartDate.Value.Year, rng.StartDate.Value.Month, 1);
-
-            while (dt <= rng.EndDate.Value)
-            {
-                var cnt = m_Accountant.DeleteVouchers(
-                                                      new VoucherQueryAtomBase(
-                                                          new Voucher { Type = VoucherType.Carry },
-                                                          filter: null,
-                                                          rng: new DateFilter(dt, dt.AddMonths(1).AddDays(-1))));
-                count += cnt;
-                dt = dt.AddMonths(1);
-            }
-
-            if (rng.Nullable)
-            {
-                var cnt = m_Accountant.DeleteVouchers(
-                                                      new VoucherQueryAtomBase(
-                                                          new Voucher { Type = VoucherType.Carry },
-                                                          filter: null,
-                                                          rng: DateFilter.TheNullOnly));
-                count += cnt;
-            }
-
-            return new NumberAffected(count);
+            var cnt = m_Accountant.DeleteVouchers($"{rng.AsDateRange()} Carry");
+            return new NumberAffected(cnt);
         }
 
         /// <inheritdoc />
@@ -135,9 +99,9 @@ namespace AccountingServer.Shell
         {
             expr = expr.Rest();
             if (expr?.Initital() == "ap")
-                return DoCarry(expr);
+                return DoCarry(expr.Rest());
             if (expr?.Initital() == "rst")
-                return ResetCarry(expr);
+                return ResetCarry(expr.Rest());
 
             throw new InvalidOperationException("表达式无效");
         }
@@ -182,44 +146,8 @@ namespace AccountingServer.Shell
             var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
             Parsing.Eof(expr);
 
-            if (rng.NullOnly)
-            {
-                var cnt = m_Accountant.DeleteVouchers(
-                                                      new VoucherQueryAtomBase(
-                                                          new Voucher { Type = VoucherType.AnnualCarry },
-                                                          filter: null,
-                                                          rng: rng));
-                return new NumberAffected(cnt);
-            }
-
-            if (!rng.EndDate.HasValue)
-                throw new ArgumentException("时间范围无后界", nameof(expr));
-
-            var count = 0L;
-            var dt = new DateTime((rng.StartDate ?? rng.EndDate.Value).Year, 1, 1);
-
-            while (dt <= rng.EndDate.Value)
-            {
-                var cnt = m_Accountant.DeleteVouchers(
-                                                      new VoucherQueryAtomBase(
-                                                          new Voucher { Type = VoucherType.AnnualCarry },
-                                                          filter: null,
-                                                          rng: new DateFilter(dt, dt.AddYears(1).AddDays(-1))));
-                count += cnt;
-                dt = dt.AddYears(1);
-            }
-
-            if (rng.Nullable)
-            {
-                var cnt = m_Accountant.DeleteVouchers(
-                                                      new VoucherQueryAtomBase(
-                                                          new Voucher { Type = VoucherType.AnnualCarry },
-                                                          filter: null,
-                                                          rng: DateFilter.TheNullOnly));
-                count += cnt;
-            }
-
-            return new NumberAffected(count);
+            var cnt = m_Accountant.DeleteVouchers($"{rng.AsDateRange()} AnnualCarry");
+            return new NumberAffected(cnt);
         }
 
         /// <inheritdoc />

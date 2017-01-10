@@ -7,16 +7,6 @@ namespace AccountingServer.Shell
 {
     internal static class ParseHelper
     {
-        /// <summary>
-        ///     匹配EOF
-        /// </summary>
-        /// <param name="facade">占位符</param>
-        /// <param name="expr">表达式</param>
-        public static void Eof(this FacadeBase facade, string expr)
-        {
-            if (!string.IsNullOrWhiteSpace(expr))
-                throw new ArgumentException("语法错误", nameof(expr));
-        }
 
         /// <summary>
         ///     匹配可选的非零长度字符串
