@@ -102,9 +102,6 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CarryAccountant.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
     <None Include="Parsing\Query.tokens" />
     <None Include="Parsing\QueryLexer.tokens" />

@@ -35,6 +35,10 @@
       <HintPath>..\packages\Antlr4.Runtime.4.5.3\lib\net45\Antlr4.Runtime.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -48,6 +52,8 @@
   <ItemGroup>
     <Compile Include="AmortizationShell.cs" />
     <Compile Include="AssetShell.cs" />
+    <Compile Include="Carry\CarryYearShell.cs" />
+    <Compile Include="Carry\FixerIoExchange.cs" />
     <Compile Include="DistributedShell.cs" />
     <Compile Include="Facade.cs" />
     <Compile Include="IShellComponent.cs" />
@@ -55,7 +61,7 @@
     <Compile Include="PluginShell.cs" />
     <Compile Include="CheckShell.cs" />
     <Compile Include="AccountingShell.cs" />
-    <Compile Include="CarryShell.cs" />
+    <Compile Include="Carry\CarryShell.cs" />
     <Compile Include="SubtotalHelper.cs" />
     <Compile Include="Plugins\Info.cs" />
     <Compile Include="Plugins\PluginBase.cs" />
