@@ -107,6 +107,11 @@ namespace AccountingServer.Entities
     public class VoucherDetail
     {
         /// <summary>
+        ///     判断金额相等的误差
+        /// </summary>
+        public const double Tolerance = 1e-8;
+
+        /// <summary>
         ///     会计科目一级科目代码
         /// </summary>
         public int? Title { get; set; }

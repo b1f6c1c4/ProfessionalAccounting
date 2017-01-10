@@ -123,8 +123,8 @@ namespace AccountingServer.DAL
             if (f.Dir != 0)
                 lst.Add(
                         f.Dir > 0
-                            ? Builders<VoucherDetail>.Filter.Gt("fund", 0)
-                            : Builders<VoucherDetail>.Filter.Lt("fund", 0));
+                            ? Builders<VoucherDetail>.Filter.Gt("fund", -VoucherDetail.Tolerance)
+                            : Builders<VoucherDetail>.Filter.Lt("fund", +VoucherDetail.Tolerance));
             if (f.Filter != null)
             {
                 if (f.Filter.Title != null)
@@ -146,8 +146,8 @@ namespace AccountingServer.DAL
                                 : Builders<VoucherDetail>.Filter.Eq("remark", f.Filter.Remark));
                 if (f.Filter.Fund != null)
                     lst.Add(
-                            Builders<VoucherDetail>.Filter.Gte("fund", f.Filter.Fund.Value - 1e-8) &
-                            Builders<VoucherDetail>.Filter.Lte("fund", f.Filter.Fund.Value + 1e-8));
+                            Builders<VoucherDetail>.Filter.Gte("fund", f.Filter.Fund.Value - VoucherDetail.Tolerance) &
+                            Builders<VoucherDetail>.Filter.Lte("fund", f.Filter.Fund.Value + VoucherDetail.Tolerance));
             }
             return Builders<VoucherDetail>.Filter.And(lst);
         }

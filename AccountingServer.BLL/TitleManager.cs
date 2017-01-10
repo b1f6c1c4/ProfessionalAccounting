@@ -27,6 +27,18 @@ namespace AccountingServer.BLL
         [DefaultValue(false)]
         public bool IsVirtual { get; set; }
 
+        /// <summary>
+        ///     方向：
+        ///     <c>0</c>表示任意
+        ///     <c>1</c>表示均在借方
+        ///     <c>2</c>表示汇总在借方
+        ///     <c>-1</c>表示均在贷方
+        ///     <c>-2</c>表示汇总在贷方
+        /// </summary>
+        [XmlAttribute("dir")]
+        [DefaultValue(0)]
+        public int Direction { get; set; }
+
         [XmlElement("subTitle")] public List<SubTitleInfo> SubTitles;
     }
 
@@ -37,6 +49,18 @@ namespace AccountingServer.BLL
 
         [XmlAttribute("id")]
         public int Id { get; set; }
+
+        /// <summary>
+        ///     方向：
+        ///     <c>0</c>表示任意
+        ///     <c>1</c>表示均在借方
+        ///     <c>2</c>表示汇总在借方
+        ///     <c>-1</c>表示均在贷方
+        ///     <c>-2</c>表示汇总在贷方
+        /// </summary>
+        [XmlAttribute("dir")]
+        [DefaultValue(0)]
+        public int Direction { get; set; }
     }
 
     /// <summary>
