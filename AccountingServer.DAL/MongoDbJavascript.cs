@@ -53,7 +53,7 @@ namespace AccountingServer.DAL
                                           ? "    if (d.remark != null) return false;"
                                           : $"    if (d.remark != '{(f.Filter.Remark.Replace("\'", "\\\'"))}') return false;");
                     if (f.Filter.Fund != null)
-                        sb.AppendLine($"    if (Math.abs(d.fund - {f.Filter.Fund:r}) > 1e-8)) return false;");
+                        sb.AppendLine($"    if (Math.abs(d.fund - {f.Filter.Fund:r}) > {VoucherDetail.Tolerance:R})) return false;");
                 }
             }
             sb.AppendLine("    return true;");

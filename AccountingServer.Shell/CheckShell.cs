@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Xml.Serialization;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
@@ -36,9 +35,6 @@ namespace AccountingServer.Shell
         /// <inheritdoc />
         public bool IsExecutable(string expr) => expr.Initital() == "chk";
 
-        private static readonly ConfigManager<CheckedTitles> CheckedTitles =
-            new ConfigManager<CheckedTitles>("Chk.xml");
-
         /// <summary>
         ///     检查每张会计记账凭证借贷方是否相等
         /// </summary>
@@ -62,59 +58,81 @@ namespace AccountingServer.Shell
         }
 
         /// <summary>
-        ///     检查每科目每内容每日资产无贷方余额，负债无借方余额
+        ///     检查每科目每内容借贷方向
         /// </summary>
-        /// <returns>发生错误的第一日及其信息</returns>
+        /// <returns>发生错误的信息</returns>
         private IQueryResult AdvancedCheck()
         {
             var sb = new StringBuilder();
-            foreach (var title in CheckedTitles.Config.Titles)
+            foreach (var title in TitleManager.Titles)
             {
-                var res = m_Accountant.RunGroupedQuery($"T{title.Title.AsTitle()}{title.SubTitle.AsSubTitle()}G`cD");
+                if (!title.IsVirtual)
+                    if (Math.Abs(title.Direction) == 1)
+                        DoCheck(m_Accountant.RunVoucherQuery(
+                                                             $"T{title.Id.AsTitle()}00 {(title.Direction < 0 ? ">" : "<")} G")
+                                            .SelectMany(
+                                                        v => v.Details.Where(d => d.Title == title.Id)
+                                                              .Select(d => new Tuple<Voucher, VoucherDetail>(v, d))),
+                                $"T{title.Id.AsTitle()}00",
+                                sb);
+                    else if (Math.Abs(title.Direction) == 2)
+                        DoCheck(
+                                title.Direction,
+                                m_Accountant.RunGroupedQuery($"T{title.Id.AsTitle()}00 G`cD"),
+                                $"T{title.Id.AsTitle()}00",
+                                sb);
 
-                foreach (var grpContent in res.GroupByContent())
-                    foreach (var balance in grpContent.AggregateChangedDay())
-                    {
-                        if (title.Direction &&
-                            balance.Fund.IsNonNegative())
-                            continue;
-                        if (!title.Direction &&
-                            balance.Fund.IsNonPositive())
-                            continue;
-
-                        sb.AppendLine(
-                                      $"{balance.Date:yyyyMMdd} " +
-                                      $"{title.Title.AsTitle()}{title.SubTitle.AsSubTitle()} " +
-                                      $"{grpContent.Key}:{balance.Fund:R}");
-                        sb.AppendLine();
-                        break;
-                    }
+                foreach (var subTitle in title.SubTitles)
+                    if (Math.Abs(subTitle.Direction) == 1)
+                        DoCheck(m_Accountant.RunVoucherQuery(
+                                                             $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} {(subTitle.Direction < 0 ? ">" : "<")} G")
+                                            .SelectMany(
+                                                        v =>
+                                                        v.Details.Where(
+                                                                        d =>
+                                                                        d.Title == title.Id && d.SubTitle == subTitle.Id)
+                                                         .Select(d => new Tuple<Voucher, VoucherDetail>(v, d))),
+                                $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}",
+                                sb);
+                    else if (Math.Abs(subTitle.Direction) == 2)
+                        DoCheck(
+                                subTitle.Direction,
+                                m_Accountant.RunGroupedQuery($"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} G`cD"),
+                                $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}",
+                                sb);
             }
 
             if (sb.Length > 0)
                 return new EditableText(sb.ToString());
             return new Succeed();
         }
-    }
 
-    [Serializable]
-    [XmlRoot("CheckedTitles")]
-    public class CheckedTitles
-    {
-        [XmlElement("Title")] public List<CheckedTitle> Titles;
-    }
+        private static void DoCheck(int dir, IEnumerable<Balance> res, string info, StringBuilder sb)
+        {
+            foreach (var grpContent in res.GroupByContent())
+                foreach (var balance in grpContent.AggregateChangedDay())
+                {
+                    if (dir > 0 &&
+                        balance.Fund.IsNonNegative())
+                        continue;
+                    if (dir < 0 &&
+                        balance.Fund.IsNonPositive())
+                        continue;
 
-    [Serializable]
-    public class CheckedTitle
-    {
-        /// <summary>
-        ///     方向，<c>True</c>表示非负
-        /// </summary>
-        [XmlAttribute("dir")]
-        public bool Direction { get; set; }
+                    sb.AppendLine($"{balance.Date:yyyyMMdd} {info} {grpContent.Key}:{balance.Fund:R}");
+                }
+        }
 
-        public int Title { get; set; }
-
-        public int? SubTitle { get; set; }
+        private static void DoCheck(IEnumerable<Tuple<Voucher, VoucherDetail>> res, string info,
+                                    StringBuilder sb)
+        {
+            foreach (var d in res)
+            {
+                // ReSharper disable PossibleInvalidOperationException
+                sb.AppendLine($"{d.Item1.ID} {d.Item1.Date:yyyyMMdd} {info} {d.Item2.Content}:{d.Item2.Fund.Value:R}");
+                sb.AppendLine();
+                // ReSharper restore PossibleInvalidOperationException
+            }
+        }
     }
 }
