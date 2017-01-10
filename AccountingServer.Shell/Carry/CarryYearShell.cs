@@ -100,19 +100,8 @@ namespace AccountingServer.Shell.Carry
                 rng = DateFilter.TheNullOnly;
             }
 
-            var r00 = m_Accountant.SelectVoucherDetailsGrouped(
-                                                               new GroupedQueryBase(
-                                                                   filter:
-                                                                       new VoucherDetail { Title = 4103, SubTitle = 00 },
-                                                                   rng: rng)).Single();
-            var b00 = r00.Fund;
-
-            var r01 = m_Accountant.SelectVoucherDetailsGrouped(
-                                                               new GroupedQueryBase(
-                                                                   filter:
-                                                                       new VoucherDetail { Title = 4103, SubTitle = 01 },
-                                                                   rng: rng)).Single();
-            var b01 = r01.Fund;
+            var b00 = m_Accountant.RunGroupedQuery($"T410300 {rng.AsDateRange()}").Single().Fund;
+            var b01 = m_Accountant.RunGroupedQuery($"T410301 {rng.AsDateRange()}").Single().Fund;
 
             if (!b00.IsZero())
                 m_Accountant.Upsert(

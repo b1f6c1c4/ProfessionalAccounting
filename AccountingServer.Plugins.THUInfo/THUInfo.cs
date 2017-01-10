@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AccountingServer.BLL;
+using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
 using CredentialManagement;
@@ -692,25 +693,23 @@ namespace AccountingServer.Plugins.THUInfo
                 if (record != null)
                     data.Add(record);
 
-                var fltr = new VoucherDetail
-                               {
-                                   Title = 1012,
-                                   SubTitle = 05,
-                                   Remark = id.ToString(CultureInfo.InvariantCulture)
-                               };
-                foreach (var voucher in Accountant.SelectVouchers(new VoucherQueryAtomBase(filter: fltr)))
+                var idv = id.ToString(CultureInfo.InvariantCulture);
+                foreach (var voucher in Accountant.RunVoucherQuery($"T101205 {idv.Quotation('"')}"))
                 {
-                    foreach (var d in voucher.Details.Where(d => d.IsMatch(fltr)))
+                    foreach (var d in
+                        voucher.Details.Where(d => d.Title == 1012 && d.SubTitle == 05 && d.Remark == idv))
                         d.Remark = null;
                     Accountant.Upsert(voucher);
                 }
             }
 
-            var filter0 = new VoucherDetail { Title = 1012, SubTitle = 05, Remark = "" };
-            var account = Accountant.SelectVouchers(new VoucherQueryAtomBase(filter: filter0))
+            var account = Accountant.RunVoucherQuery("T101205 \"\"")
                                     .SelectMany(
-                                                v => v.Details.Where(d => d.IsMatch(filter0))
-                                                      .Select(d => new VDetail { Detail = d, Voucher = v })).ToList();
+                                                v =>
+                                                v.Details.Where(
+                                                                d =>
+                                                                d.Title == 1012 && d.Title == 05 && d.Remark == null)
+                                                 .Select(d => new VDetail { Detail = d, Voucher = v })).ToList();
 
             noRemark = new List<Problem>();
             tooMuch = new List<Problem>();

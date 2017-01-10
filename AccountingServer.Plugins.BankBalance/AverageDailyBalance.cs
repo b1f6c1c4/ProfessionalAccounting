@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using AccountingServer.BLL;
+using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
 
@@ -22,20 +23,9 @@ namespace AccountingServer.Plugins.BankBalance
 
             var tdy = DateTime.Now.Date;
             var ldom = AccountantHelper.LastDayOfMonth(tdy.Year, tdy.Month);
-            var rng = new DateFilter(null, tdy);
             var srng = new DateFilter(new DateTime(tdy.Year, tdy.Month, 1), tdy);
             var balance =
-                Accountant.SelectVoucherDetailsGrouped(
-                                                       new GroupedQueryBase(
-                                                           filter: new VoucherDetail { Title = 1002, Content = pars[0] },
-                                                           rng: rng,
-                                                           subtotal: new SubtotalBase
-                                                                         {
-                                                                             AggrType = AggregationType.EveryDay,
-                                                                             EveryDayRange = srng,
-                                                                             GatherType = GatheringType.NonZero,
-                                                                             Levels = new SubtotalLevel[] { }
-                                                                         }))
+                Accountant.RunGroupedQuery($"T1002 {pars[0].Quotation('\'')} [~{tdy.AsDate()}]`vD{srng.AsDateRange()}")
                           .AggregateEveryDay(srng);
 
             var bal = 0D;
