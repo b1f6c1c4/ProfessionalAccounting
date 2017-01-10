@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.BLL;
+using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
 
@@ -21,15 +22,7 @@ namespace AccountingServer.Plugins.Interest
                 pars.Count < 3)
                 throw new ArgumentException("参数个数不正确", nameof(pars));
 
-            var loans =
-                Accountant.SelectVoucherDetailsGrouped(
-                                                       new GroupedQueryBase(
-                                                           filter: new VoucherDetail { Title = 1221, Content = pars[0] },
-                                                           subtotal: new SubtotalBase
-                                                                         {
-                                                                             GatherType = GatheringType.Zero,
-                                                                             Levels = new[] { SubtotalLevel.Remark }
-                                                                         })).ToList();
+            var loans = Accountant.RunGroupedQuery($"T1221 {pars[0].Quotation('\'')} ``r").ToList();
             var rmk =
                 loans.Single(
                              b => b.Remark != null &&
@@ -41,43 +34,19 @@ namespace AccountingServer.Plugins.Interest
             if (pars.Count == 3 ||
                 endDate.HasValue)
             {
-                var filter = new VoucherDetail { Title = 1221, Content = pars[0], Remark = rmk };
-                var filter0 = new VoucherDetail { Title = 1221, Content = pars[0], Remark = rmk + "-利息" };
+                var filter = $"T1221 > {pars[0].Quotation('\'')} {rmk.Quotation('"')}";
+                var filter0 = $"T1221 > {pars[0].Quotation('\'')} {(rmk + "-利息").Quotation('"')}";
                 // ReSharper disable once PossibleInvalidOperationException
-                var lastD = Accountant.SelectVouchers(new VoucherQueryAtomBase(filter: filter0, dir: 1))
+                var lastD = Accountant.RunVoucherQuery(filter0)
                                       .OrderByDescending(v => v.Date, new DateComparer())
                                       .FirstOrDefault()?.Date ??
-                            Accountant.SelectVouchers(new VoucherQueryAtomBase(filter: filter, dir: 1))
+                            Accountant.RunVoucherQuery(filter)
                                       .OrderBy(v => v.Date, new DateComparer())
                                       .First().Date.Value;
-                var rng = new DateFilter(null, lastD);
-                var capQuery = new VoucherDetailQueryBase
-                                   {
-                                       VoucherQuery = new VoucherQueryAtomBase(filter: filter, rng: rng)
-                                   };
-                var intQuery = new VoucherDetailQueryBase
-                                   {
-                                       VoucherQuery = new VoucherQueryAtomBase(filter: filter0, rng: rng)
-                                   };
-                var subtotal = new SubtotalBase
-                                   {
-                                       Levels = new SubtotalLevel[] { },
-                                       GatherType = GatheringType.Zero
-                                   };
-                var capitalIntegral =
-                    Accountant.SelectVoucherDetailsGrouped(
-                                                           new GroupedQueryBase
-                                                               {
-                                                                   VoucherEmitQuery = capQuery,
-                                                                   Subtotal = subtotal
-                                                               }).SingleOrDefault()?.Fund ?? 0;
-                var interestIntegral =
-                    Accountant.SelectVoucherDetailsGrouped(
-                                                           new GroupedQueryBase
-                                                               {
-                                                                   VoucherEmitQuery = intQuery,
-                                                                   Subtotal = subtotal
-                                                           }).SingleOrDefault()?.Fund ?? 0;
+                var capQuery = $"{filter} [~{lastD.AsDate()}]``v";
+                var intQuery = $"{filter0} [~{lastD.AsDate()}]``v";
+                var capitalIntegral = Accountant.RunGroupedQuery(capQuery).SingleOrDefault()?.Fund ?? 0;
+                var interestIntegral = Accountant.RunGroupedQuery(intQuery).SingleOrDefault()?.Fund ?? 0;
                 Regularize(
                            pars[0],
                            rmk,
@@ -131,15 +100,11 @@ namespace AccountingServer.Plugins.Interest
             var rng = lastSettlement.HasValue
                           ? new DateFilter(lastSettlement.Value.AddDays(1), finalDay)
                           : new DateFilter(null, finalDay);
-            foreach (var grp in Accountant.SelectVouchers(
-                                                          new VoucherQueryAtomBase(
-                                                              filters: new[]
-                                                                           {
-                                                                               capitalPattern,
-                                                                               interestPattern
-                                                                           },
-                                                              rng: rng))
-                                          .GroupBy(v => v.Date).OrderBy(grp => grp.Key, new DateComparer()))
+            foreach (var grp in
+                Accountant
+                    .RunVoucherQuery(
+                                     $"(T1221 {content.Quotation('\'')})*({rmk.Quotation('"')}+{(rmk + "-利息").Quotation('"')}) {rng.AsDateRange()}")
+                    .GroupBy(v => v.Date).OrderBy(grp => grp.Key, new DateComparer()))
             {
                 if (!grp.Key.HasValue)
                     throw new ApplicationException("无法处理无穷长时间以前的利息收入");

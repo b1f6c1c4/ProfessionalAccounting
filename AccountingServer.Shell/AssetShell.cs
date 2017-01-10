@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
+using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.Shell
 {
@@ -160,17 +161,9 @@ namespace AccountingServer.Shell
                                                          IQueryCompunded<IVoucherQueryAtom> query)
         {
             Func<Asset, IQueryCompunded<IVoucherQueryAtom>> getMainQ =
-                a => new VoucherQueryAryBase(
-                         OperatorType.Union,
-                         new IQueryCompunded<IVoucherQueryAtom>[]
-                             {
-                                 new VoucherQueryAtomBase(
-                                     new Voucher { Type = VoucherType.Depreciation },
-                                     new VoucherDetail { Title = a.DepreciationTitle, Content = a.StringID }),
-                                 new VoucherQueryAtomBase(
-                                     new Voucher { Type = VoucherType.Devalue },
-                                     new VoucherDetail { Title = a.DevaluationTitle, Content = a.StringID })
-                             });
+                a =>
+                ParsingF.VoucherQuery(
+                                      $"{{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} }}*{{ {{ Depreciation }} + {{ Devalue }} }}");
             return new NumberAffected(
                 Accountant.SelectAssets(distQuery)
                           .Sum(

@@ -115,22 +115,10 @@ namespace AccountingServer.BLL
             if (amort.Remark == Amortization.IgnoranceMark)
                 yield break;
 
+            var queryT = new VoucherQueryAtomBase(amort.Template, amort.Template.Details) { ForAll = true };
             foreach (
                 var voucher in
-                    Db.SelectVouchers(
-                                      new VoucherQueryAryBase(
-                                          OperatorType.Intersect,
-                                          new[]
-                                              {
-                                                  query,
-                                                  new VoucherQueryAtomBase(amort.Template, amort.Template.Details)
-                                                      {
-                                                          ForAll
-                                                              =
-                                                              true
-                                                      }
-                                              }))
-                )
+                    Db.SelectVouchers(new VoucherQueryAryBase(OperatorType.Intersect, new[] { query, queryT })))
             {
                 if (voucher.Remark == Amortization.IgnoranceMark)
                     continue;
