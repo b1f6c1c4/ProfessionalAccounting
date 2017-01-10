@@ -10,8 +10,30 @@ namespace AccountingServer.BLL.Parsing
         internal virtual T Parse<T>(ref string s, Func<QueryParser, T> func)
             where T : RuleContext
         {
-            var res = func(QueryParser.From(s));
-            s = s.Substring(res.GetText().Length);
+            var stream = new AntlrInputStream(s);
+            var lexer = new QueryLexer(stream);
+            var tokens = new CommonTokenStream(lexer);
+            var parser = new QueryParser(tokens) { ErrorHandler = new BailErrorStrategy() };
+            var res = func(parser);
+
+            var t = res.GetText();
+            var i = 0;
+            var j = 0;
+            while (j < t.Length)
+            {
+                if (s[i] == t[j])
+                {
+                    i++;
+                    j++;
+                    continue;
+                }
+
+                if (char.IsWhiteSpace(s[i]))
+                    i++;
+                else
+                    throw new ApplicationException("内部错误");
+            }
+            s = s.Substring(i);
             return res;
         }
 
