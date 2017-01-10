@@ -87,6 +87,9 @@ namespace AccountingServer.BLL.Parsing
 
         internal override T Parse<T>(ref string s, Func<QueryParser, T> func)
         {
+            if (s == null)
+                return null;
+
             try
             {
                 return base.Parse(ref s, func);
@@ -100,10 +103,36 @@ namespace AccountingServer.BLL.Parsing
 
     public static class Helper
     {
+        /// <summary>
+        ///     匹配EOF
+        /// </summary>
+        /// <param name="facade">占位符</param>
+        /// <param name="expr">表达式</param>
+        public static void Eof(this FacadeBase facade, string expr)
+        {
+            if (!string.IsNullOrWhiteSpace(expr))
+                throw new ArgumentException("语法错误", nameof(expr));
+        }
+
         public static IEnumerable<Voucher> RunVoucherQuery(this Accountant acc, string str)
-            => acc.SelectVouchers(FacadeF.ParsingF.VoucherQuery(str));
+        {
+            var res = FacadeF.ParsingF.VoucherQuery(ref str);
+            FacadeF.ParsingF.Eof(str);
+            return acc.SelectVouchers(res);
+        }
+
+        public static long DeleteVouchers(this Accountant acc, string str)
+        {
+            var res = FacadeF.ParsingF.VoucherQuery(ref str);
+            FacadeF.ParsingF.Eof(str);
+            return acc.DeleteVouchers(res);
+        }
 
         public static IEnumerable<Balance> RunGroupedQuery(this Accountant acc, string str)
-            => acc.SelectVoucherDetailsGrouped(FacadeF.ParsingF.GroupedQuery(str));
+        {
+            var res = FacadeF.ParsingF.GroupedQuery(ref str);
+            FacadeF.ParsingF.Eof(str);
+            return acc.SelectVoucherDetailsGrouped(res);
+        }
     }
 }

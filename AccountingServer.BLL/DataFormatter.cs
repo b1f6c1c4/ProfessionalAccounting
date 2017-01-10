@@ -96,6 +96,43 @@ namespace AccountingServer.BLL
         }
 
         /// <summary>
+        ///     格式化日期过滤器
+        /// </summary>
+        /// <param name="value">日期过滤器</param>
+        /// <returns>格式化后的日期过滤器</returns>
+        public static string AsDateRange(this DateFilter value)
+        {
+            if (value.NullOnly)
+                return "[null]";
+
+            if (value.EndDate.HasValue)
+            {
+                if (value.StartDate.HasValue)
+                    return value.Nullable
+                               ? $"[{value.StartDate.AsDate()}={value.EndDate.AsDate()}]"
+                               : $"[{value.StartDate.AsDate()}~{value.EndDate.AsDate()}]";
+
+                return value.Nullable
+                           ? $"[~{value.EndDate.AsDate()}]"
+                           : $"[={value.EndDate.AsDate()}]";
+            }
+
+            if (value.StartDate.HasValue)
+                return value.Nullable
+                           ? $"[{value.StartDate.AsDate()}=]"
+                           : $"[{value.StartDate.AsDate()}~]";
+
+            return value.Nullable ? "[]" : "[~null]";
+        }
+
+        /// <summary>
+        ///     格式化日期过滤器
+        /// </summary>
+        /// <param name="value">日期过滤器</param>
+        /// <returns>格式化后的日期过滤器</returns>
+        public static string AsDateRange(this DateFilter? value) => !value.HasValue ? "[]" : value.Value.AsDateRange();
+
+        /// <summary>
         ///     解析日期
         /// </summary>
         /// <param name="value">格式化后的日期</param>
