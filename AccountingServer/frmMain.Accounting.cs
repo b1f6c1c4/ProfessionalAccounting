@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using AccountingServer.BLL;
 using AccountingServer.Shell;
 
 namespace AccountingServer
@@ -9,12 +8,6 @@ namespace AccountingServer
     public partial class frmMain
     {
         /// <summary>
-        ///     基本会计业务处理类
-        /// </summary>
-        // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
-        private Accountant m_Accountant;
-
-        /// <summary>
         ///     控制台
         /// </summary>
         private Facade m_Shell;
@@ -22,12 +15,7 @@ namespace AccountingServer
         /// <summary>
         ///     初始化
         /// </summary>
-        private void PrepareAccounting()
-        {
-            m_Accountant = new Accountant();
-
-            m_Shell = new Facade(m_Accountant);
-        }
+        private void PrepareAccounting() => m_Shell = new Facade();
 
         /// <summary>
         ///     更新或添加

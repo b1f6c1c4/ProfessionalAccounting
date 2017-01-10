@@ -23,20 +23,20 @@ namespace AccountingServer.Shell
         /// </summary>
         private readonly ShellComposer m_Composer;
 
-        public Facade(Accountant helper)
+        public Facade()
         {
-            m_Accountant = helper;
+            m_Accountant = new Accountant();
 
             m_Composer =
                 new ShellComposer
                     {
-                        new CheckShell(helper),
-                        new CarryShell(helper),
-                        new CarryYearShell(helper),
-                        new AssetShell(helper),
-                        new AmortizationShell(helper),
-                        new PluginShell(helper),
-                        new AccountingShell(helper)
+                        new CheckShell(m_Accountant),
+                        new CarryShell(m_Accountant),
+                        new CarryYearShell(m_Accountant),
+                        new AssetShell(m_Accountant),
+                        new AmortizationShell(m_Accountant),
+                        new PluginShell(m_Accountant),
+                        new AccountingShell(m_Accountant)
                     };
 
             ConnectServer();

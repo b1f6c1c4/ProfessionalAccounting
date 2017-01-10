@@ -54,7 +54,6 @@
     </Compile>
     <Compile Include="Accountant.cs" />
     <Compile Include="AssetAccountant.cs" />
-    <Compile Include="ConfigManager.cs" />
     <Compile Include="DataFormatter.cs" />
     <Compile Include="DistributedAccountant.cs" />
     <Compile Include="GroupingHelper.cs" />
