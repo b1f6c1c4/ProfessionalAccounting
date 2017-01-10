@@ -15,12 +15,8 @@ namespace AccountingServer.Plugins.Utilities
     /// </summary>
     public class Utilities : PluginBase
     {
-        private static readonly ConfigManager<UtilTemplates> Templates;
-
-        static Utilities()
-        {
-            Templates = new ConfigManager<UtilTemplates>("Util.xml");
-        }
+        private static readonly ConfigManager<UtilTemplates> Templates =
+            new ConfigManager<UtilTemplates>("Util.xml");
 
         public Utilities(Accountant accountant) : base(accountant) { }
 

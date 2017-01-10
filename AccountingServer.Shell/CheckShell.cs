@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml.Serialization;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 
@@ -33,6 +35,9 @@ namespace AccountingServer.Shell
         /// <inheritdoc />
         public bool IsExecutable(string expr) => expr.Initital() == "chk";
 
+        private static readonly ConfigManager<CheckedTitles> CheckedTitles =
+            new ConfigManager<CheckedTitles>("Chk.xml");
+
         /// <summary>
         ///     检查每张会计记账凭证借贷方是否相等
         /// </summary>
@@ -61,71 +66,54 @@ namespace AccountingServer.Shell
         /// <returns>发生错误的第一日及其信息</returns>
         private IQueryResult AdvancedCheck()
         {
-            var res = m_Accountant.RunGroupedQuery("`tscD");
-
             var sb = new StringBuilder();
-            foreach (var grpTitle in res.GroupByTitle())
+            foreach (var title in CheckedTitles.Config.Titles)
             {
-                if (grpTitle.Key >= 3000 &&
-                    grpTitle.Key < 5000)
-                    continue;
+                var res = m_Accountant.RunGroupedQuery($"T{title.Title.AsTitle()}{title.SubTitle.AsSubTitle()}G`cD");
 
-                if (grpTitle.Key == 1901 ||
-                    grpTitle.Key == 6101 ||
-                    grpTitle.Key == 6111)
-                    continue;
+                foreach (var grpContent in res.GroupByContent())
+                    foreach (var balance in grpContent.AggregateChangedDay())
+                    {
+                        if (title.Direction &&
+                            balance.Fund.IsNonNegative())
+                            continue;
+                        if (!title.Direction &&
+                            balance.Fund.IsNonPositive())
+                            continue;
 
-                foreach (var grpSubTitle in grpTitle.GroupBySubTitle())
-                {
-                    if (grpTitle.Key == 1101 && grpSubTitle.Key == 02 ||
-                        grpTitle.Key == 1501 && grpSubTitle.Key == 02 ||
-                        grpTitle.Key == 1503 && grpSubTitle.Key == 02 ||
-                        grpTitle.Key == 1511 && grpSubTitle.Key == 02 ||
-                        grpTitle.Key == 1511 && grpSubTitle.Key == 03 ||
-                        grpTitle.Key == 6603 && grpSubTitle.Key == null ||
-                        grpTitle.Key == 6603 && grpSubTitle.Key == 03 ||
-                        grpTitle.Key == 6603 && grpSubTitle.Key == 99 ||
-                        grpTitle.Key == 6711 && grpSubTitle.Key == 10)
-                        continue;
-
-                    var isPositive = grpTitle.Key < 2000 || grpTitle.Key >= 6400;
-                    if (grpTitle.Key == 1502 ||
-                        grpTitle.Key == 1504 ||
-                        grpTitle.Key == 1504 ||
-                        grpTitle.Key == 1504 ||
-                        grpTitle.Key == 1504 ||
-                        grpTitle.Key == 1512 ||
-                        grpTitle.Key == 1602 ||
-                        grpTitle.Key == 1603 ||
-                        grpTitle.Key == 1702 ||
-                        grpTitle.Key == 1703 ||
-                        grpTitle.Key == 1602 ||
-                        grpTitle.Key == 1602 ||
-                        grpTitle.Key == 6603 && grpSubTitle.Key == 02)
-                        isPositive = false;
-
-                    foreach (var grpContent in grpSubTitle.GroupByContent())
-                        foreach (var balance in grpContent.AggregateChangedDay())
-                        {
-                            if (isPositive && balance.Fund.IsNonNegative())
-                                continue;
-                            if (!isPositive &&
-                                balance.Fund.IsNonPositive())
-                                continue;
-
-                            sb.AppendLine(
-                                          $"{balance.Date:yyyyMMdd} " +
-                                          $"{grpTitle.Key.AsTitle()}{grpSubTitle.Key.AsSubTitle()} " +
-                                          $"{grpContent.Key}:{balance.Fund:R}");
-                            sb.AppendLine();
-                            break;
-                        }
-                }
+                        sb.AppendLine(
+                                      $"{balance.Date:yyyyMMdd} " +
+                                      $"{title.Title.AsTitle()}{title.SubTitle.AsSubTitle()} " +
+                                      $"{grpContent.Key}:{balance.Fund:R}");
+                        sb.AppendLine();
+                        break;
+                    }
             }
 
             if (sb.Length > 0)
                 return new EditableText(sb.ToString());
             return new Succeed();
         }
+    }
+
+    [Serializable]
+    [XmlRoot("CheckedTitles")]
+    public class CheckedTitles
+    {
+        [XmlElement("Title")] public List<CheckedTitle> Titles;
+    }
+
+    [Serializable]
+    public class CheckedTitle
+    {
+        /// <summary>
+        ///     方向，<c>True</c>表示非负
+        /// </summary>
+        [XmlAttribute("dir")]
+        public bool Direction { get; set; }
+
+        public int Title { get; set; }
+
+        public int? SubTitle { get; set; }
     }
 }
