@@ -2,7 +2,7 @@
 using System.IO;
 using System.Xml.Serialization;
 
-namespace AccountingServer.BLL
+namespace AccountingServer.Entities
 {
     /// <summary>
     ///     配置文件管理器
