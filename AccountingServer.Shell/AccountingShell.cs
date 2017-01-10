@@ -2,7 +2,7 @@
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
-using static AccountingServer.BLL.Parsing.Facade;
+using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.Shell
 {
@@ -21,21 +21,51 @@ namespace AccountingServer.Shell
         /// <inheritdoc />
         public IQueryResult Execute(string expr)
         {
+            try
             {
-                var res = Parsing.GroupedQuery(expr);
-                if (res != null)
-                    return PresentSubtotal(res);
+                return TryGroupedQuery(expr);
+            }
+            catch (Exception)
+            {
+                // ignored
             }
 
+            try
             {
-                var l = expr.Length;
-                var res = Parsing.VoucherQuery(ref expr);
-                if (l != expr.Length)
-                    if (res != null)
-                        return PresentVoucherQuery(res);
+                return TryVoucherQuery(expr);
+            }
+            catch (Exception)
+            {
+                // ignored
             }
 
             throw new InvalidOperationException("表达式无效");
+        }
+
+        /// <summary>
+        ///     按记账凭证检索式解析
+        /// </summary>
+        /// <param name="expr">表达式</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult TryVoucherQuery(string expr)
+        {
+            if (string.IsNullOrWhiteSpace(expr))
+                throw new ApplicationException("不允许执行空白检索式");
+            var res = ParsingF.VoucherQuery(ref expr);
+            ParsingF.Eof(expr);
+            return PresentVoucherQuery(res);
+        }
+
+        /// <summary>
+        ///     按分类汇总检索式解析
+        /// </summary>
+        /// <param name="expr">表达式</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult TryGroupedQuery(string expr)
+        {
+            var res = ParsingF.GroupedQuery(ref expr);
+            ParsingF.Eof(expr);
+            return PresentSubtotal(res);
         }
 
         /// <inheritdoc />
