@@ -18,8 +18,10 @@ namespace AccountingServer.Plugins.YieldRate
         public YieldRate(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
-        public override IQueryResult Execute(IReadOnlyList<string> pars)
+        public override IQueryResult Execute(string expr)
         {
+            ParsingF.Eof(expr);
+
             var result = Accountant.RunGroupedQuery("{T1101}-{T110102+T610101+T611102 A}:T1101``cd");
             var resx = Accountant.RunGroupedQuery("T1101``c");
             var sb = new StringBuilder();

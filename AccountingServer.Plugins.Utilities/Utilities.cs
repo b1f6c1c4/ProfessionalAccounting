@@ -6,7 +6,7 @@ using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
-using static AccountingServer.BLL.Parsing.FacadeF;
+using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Plugins.Utilities
 {
@@ -21,12 +21,12 @@ namespace AccountingServer.Plugins.Utilities
         public Utilities(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
-        public override IQueryResult Execute(IReadOnlyList<string> pars)
+        public override IQueryResult Execute(string expr)
         {
             var count = 0;
-            foreach (var par in pars)
+            while (!string.IsNullOrWhiteSpace(expr))
             {
-                var voucher = GenerateVoucher(par);
+                var voucher = GenerateVoucher(ref expr);
                 if (voucher != null)
                     if (Accountant.Upsert(voucher))
                         count++;
@@ -45,36 +45,31 @@ namespace AccountingServer.Plugins.Utilities
         }
 
         /// <summary>
-        ///     根据参数生成记账凭证
+        ///     根据表达式生成记账凭证
         /// </summary>
-        /// <param name="par">参数</param>
+        /// <param name="expr">表达式</param>
         /// <returns>记账凭证</returns>
-        private Voucher GenerateVoucher(string par)
+        private Voucher GenerateVoucher(ref string expr)
         {
-            DateTime? time;
-            try
-            {
-                time = ParsingF.UniqueTime(ref par);
-            }
-            catch (Exception)
-            {
-                time = DateTime.Today;
-            }
-            var sp = par.Trim(' ').Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
-            var template = Templates.Config.Templates.FirstOrDefault(t => t.Name == sp[0]);
+            var time = Parsing.UniqueTime(ref expr) ?? DateTime.Today;
+            var abbr = Parsing.Token(ref expr);
+
+            var template = Templates.Config.Templates.FirstOrDefault(t => t.Name == abbr);
             if (template == null)
-                return null;
+                throw new KeyNotFoundException($"找不到常见记账凭证{abbr}");
+
             var num = 1D;
             if (template.TemplateType == UtilTemplateType.Value ||
                 template.TemplateType == UtilTemplateType.Fill)
             {
+                var valt = Parsing.Double(ref expr);
                 double val;
-                if (sp.Length == 2)
-                    val = Convert.ToDouble(sp[1]);
+                if (valt.HasValue)
+                    val = valt.Value;
                 else
                 {
                     if (!template.Default.HasValue)
-                        return null;
+                        throw new ApplicationException($"常见记账凭证{template.Name}没有默认值");
                     val = template.Default.Value;
                 }
 
@@ -83,10 +78,7 @@ namespace AccountingServer.Plugins.Utilities
                 else
                 {
                     var arr = Accountant
-                        .RunGroupedQuery(
-                                         time.HasValue
-                                             ? $"{template.Query} [~{time:yyyyMMdd}] ``v"
-                                             : $"{template.Query} [null] ``v").ToArray();
+                        .RunGroupedQuery($"{template.Query} [~{time:yyyyMMdd}] ``v").ToArray();
                     if (arr.Length == 0)
                         num = val;
                     else

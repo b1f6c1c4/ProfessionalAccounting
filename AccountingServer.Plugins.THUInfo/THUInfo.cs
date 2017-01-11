@@ -114,11 +114,11 @@ namespace AccountingServer.Plugins.THUInfo
         }
 
         /// <inheritdoc />
-        public override IQueryResult Execute(IReadOnlyList<string> pars)
+        public override IQueryResult Execute(string expr)
         {
-            if (pars.Count == 1 &&
-                pars[0] == "ep")
+            if (ParsingF.Optional(ref expr, "ep"))
             {
+                ParsingF.Eof(expr);
                 var sb = new StringBuilder();
                 var voucherQuery = new VoucherQueryAtomBase { DetailFilter = DetailQuery };
                 var bin = new HashSet<int>();
@@ -144,9 +144,9 @@ namespace AccountingServer.Plugins.THUInfo
                 return new UnEditableText(sb.ToString());
             }
 
-            if (pars.Count == 1 &&
-                pars[0] == "cred")
+            if (ParsingF.Optional(ref expr, "cred"))
             {
+                ParsingF.Eof(expr);
                 DropCredential();
                 FetchData();
             }
@@ -156,7 +156,10 @@ namespace AccountingServer.Plugins.THUInfo
             List<VDetail> noRecord;
             lock (m_Lock)
                 Compare(out noRemark, out tooMuch, out tooFew, out noRecord);
-            if ((pars.Count == 1 && pars[0] == "whatif") ||
+            var whatif = ParsingF.Optional(ref expr, "whatif");
+            if (whatif)
+                ParsingF.Eof(expr);
+            if (whatif ||
                 noRemark.Any() ||
                 tooMuch.Any() ||
                 tooFew.Any(p => p.Details.Any()) ||
@@ -202,6 +205,10 @@ namespace AccountingServer.Plugins.THUInfo
             }
             if (!tooFew.Any())
                 return new Succeed();
+
+            var pars = new List<string>();
+            while (!string.IsNullOrWhiteSpace(expr))
+                pars.Add(ParsingF.Token(ref expr));
 
             List<TransactionRecord> fail;
             foreach (var voucher in AutoGenerate(tooFew.SelectMany(p => p.Records), pars, out fail))
