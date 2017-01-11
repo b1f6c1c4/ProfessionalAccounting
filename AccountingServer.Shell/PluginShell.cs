@@ -61,16 +61,7 @@ namespace AccountingServer.Shell
                 return new UnEditableText(GetHelp(plgName));
             }
 
-            var pars = new List<string>();
-            while (true)
-            {
-                var par = Parsing.Quoted(ref expr);
-                if (par == null)
-                    break;
-                pars.Add(par);
-            }
-
-            return GetPlugin(plgName).Execute(pars);
+            return GetPlugin(plgName).Execute(expr);
         }
 
         /// <inheritdoc />

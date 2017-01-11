@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
+using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Plugins.BankBalance
 {
@@ -16,16 +16,17 @@ namespace AccountingServer.Plugins.BankBalance
         public AverageDailyBalance(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
-        public override IQueryResult Execute(IReadOnlyList<string> pars)
+        public override IQueryResult Execute(string expr)
         {
-            if (pars.Count != 2)
-                throw new ArgumentException("参数个数不正确", nameof(pars));
+            var content = Parsing.Token(ref expr);
+            var avg = Parsing.DoubleF(ref expr);
+            Parsing.Eof(expr);
 
             var tdy = DateTime.Now.Date;
             var ldom = AccountantHelper.LastDayOfMonth(tdy.Year, tdy.Month);
             var srng = new DateFilter(new DateTime(tdy.Year, tdy.Month, 1), tdy);
             var balance =
-                Accountant.RunGroupedQuery($"T1002 {pars[0].Quotation('\'')} [~{tdy.AsDate()}]`vD{srng.AsDateRange()}")
+                Accountant.RunGroupedQuery($"T1002 {content.Quotation('\'')} [~{tdy.AsDate()}]`vD{srng.AsDateRange()}")
                           .AggregateEveryDay(srng);
 
             var bal = 0D;
@@ -38,7 +39,6 @@ namespace AccountingServer.Plugins.BankBalance
                     bal += b.Fund;
             }
 
-            var avg = double.Parse(pars[1]);
             var targ = ldom.Day * avg;
 
             var sb = new StringBuilder();

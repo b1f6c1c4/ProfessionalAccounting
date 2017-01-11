@@ -5,8 +5,68 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.Shell
 {
-    internal static class ParseHelper
+    /// <summary>
+    ///     扩展的字符串匹配
+    /// </summary>
+    public static class ParseHelper
     {
+        /// <summary>
+        ///     匹配带括号和连续字符串
+        /// </summary>
+        /// <param name="facade">占位符</param>
+        /// <param name="expr">表达式</param>
+        /// <returns>字符串</returns>
+        public static string Token(this FacadeBase facade, ref string expr)
+        {
+            expr = expr.TrimStart();
+            if (expr.Length == 0)
+                return null;
+            if (expr[0] == '\'' ||
+                expr[0] == '"')
+                return facade.Quoted(ref expr);
+
+            var id = 1;
+            while (id < expr.Length)
+            {
+                if (char.IsWhiteSpace(expr[id]))
+                    break;
+                id++;
+            }
+            var t = expr.Substring(0, id);
+            expr = expr.Substring(id);
+            return t;
+        }
+
+        /// <summary>
+        ///     匹配可选的数
+        /// </summary>
+        /// <param name="facade">占位符</param>
+        /// <param name="expr">表达式</param>
+        /// <returns>数</returns>
+        public static double? Double(this FacadeBase facade, ref string expr)
+        {
+            var t = expr;
+            var token = facade.Token(ref expr);
+            double d;
+            if (double.TryParse(token, out d))
+                return d;
+
+            expr = t; // revert
+            return null;
+        }
+
+        /// <summary>
+        ///     匹配数
+        /// </summary>
+        /// <param name="facade">占位符</param>
+        /// <param name="expr">表达式</param>
+        /// <returns>数</returns>
+        public static double DoubleF(this FacadeBase facade, ref string expr)
+        {
+            var t = expr;
+            var token = facade.Token(ref expr);
+            return double.Parse(token);
+        }
 
         /// <summary>
         ///     匹配可选的非零长度字符串

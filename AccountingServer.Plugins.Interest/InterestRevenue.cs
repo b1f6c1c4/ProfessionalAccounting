@@ -5,6 +5,7 @@ using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
+using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Plugins.Interest
 {
@@ -16,26 +17,28 @@ namespace AccountingServer.Plugins.Interest
         public InterestRevenue(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
-        public override IQueryResult Execute(IReadOnlyList<string> pars)
+        public override IQueryResult Execute(string expr)
         {
-            if (pars.Count > 4 ||
-                pars.Count < 3)
-                throw new ArgumentException("参数个数不正确", nameof(pars));
+            var content = Parsing.Token(ref expr);
+            var remark = Parsing.Token(ref expr);
+            var rate = Parsing.DoubleF(ref expr) / 10000D;
+            var all = Parsing.Optional(ref expr, "all");
+            var endDate = !all ? Parsing.UniqueTime(ref expr) : null;
+            Parsing.Eof(expr);
 
-            var loans = Accountant.RunGroupedQuery($"T1221 {pars[0].Quotation('\'')} ``r").ToList();
+            var loans = Accountant.RunGroupedQuery($"T1221 {content.Quotation('\'')} ``r").ToList();
             var rmk =
                 loans.Single(
                              b => b.Remark != null &&
-                                  b.Remark.StartsWith(pars[1], StringComparison.InvariantCultureIgnoreCase) &&
+                                  b.Remark.StartsWith(remark, StringComparison.InvariantCultureIgnoreCase) &&
                                   !b.Remark.EndsWith("-利息", StringComparison.Ordinal))
                      .Remark;
 
-            var endDate = pars.Count == 4 ? pars[3].AsDate() : null;
-            if (pars.Count == 3 ||
+            if (!all && !endDate.HasValue ||
                 endDate.HasValue)
             {
-                var filter = $"T1221 > {pars[0].Quotation('\'')} {rmk.Quotation('"')}";
-                var filter0 = $"T1221 > {pars[0].Quotation('\'')} {(rmk + "-利息").Quotation('"')}";
+                var filter = $"T1221 > {content.Quotation('\'')} {rmk.Quotation('"')}";
+                var filter0 = $"T1221 > {content.Quotation('\'')} {(rmk + "-利息").Quotation('"')}";
                 // ReSharper disable once PossibleInvalidOperationException
                 var lastD = Accountant.RunVoucherQuery(filter0)
                                       .OrderByDescending(v => v.Date, new DateComparer())
@@ -48,9 +51,9 @@ namespace AccountingServer.Plugins.Interest
                 var capitalIntegral = Accountant.RunGroupedQuery(capQuery).SingleOrDefault()?.Fund ?? 0;
                 var interestIntegral = Accountant.RunGroupedQuery(intQuery).SingleOrDefault()?.Fund ?? 0;
                 Regularize(
-                           pars[0],
+                           content,
                            rmk,
-                           Convert.ToDouble(pars[2]) / 10000D,
+                           rate,
                            ref capitalIntegral,
                            ref interestIntegral,
                            lastD,
@@ -61,9 +64,9 @@ namespace AccountingServer.Plugins.Interest
                 var capitalIntegral = 0D;
                 var interestIntegral = 0D;
                 Regularize(
-                           pars[0],
+                           content,
                            rmk,
-                           Convert.ToDouble(pars[2]) / 10000D,
+                           rate,
                            ref capitalIntegral,
                            ref interestIntegral,
                            null,
