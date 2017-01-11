@@ -46,6 +46,8 @@
   <ItemGroup>
     <Compile Include="EndPointTemplate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="THUInfo.Generation.cs" />
+    <Compile Include="THUInfo.Compare.cs" />
     <Compile Include="THUInfo.cs" />
     <Compile Include="Crawler.cs" />
     <Compile Include="TransactionRecord.cs" />
