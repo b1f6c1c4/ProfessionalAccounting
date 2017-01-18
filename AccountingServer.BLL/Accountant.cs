@@ -56,6 +56,7 @@ namespace AccountingServer.BLL
             if (query.Subtotal.AggrType != AggregationType.ChangedDay &&
                 query.Subtotal.GatherType == GatheringType.NonZero)
                 return res.Where(b => !b.Fund.IsZero());
+
             return res;
         }
 
@@ -96,13 +97,13 @@ namespace AccountingServer.BLL
         public bool Upsert(Asset entity) => m_Db.Upsert(entity);
 
         public IEnumerable<Voucher> RegisterVouchers(Asset asset, DateFilter rng,
-                                                     IQueryCompunded<IVoucherQueryAtom> query)
+            IQueryCompunded<IVoucherQueryAtom> query)
             => m_AssetAccountant.RegisterVouchers(asset, rng, query);
 
         public static void Depreciate(Asset asset) => AssetAccountant.Depreciate(asset);
 
         public IEnumerable<AssetItem> Update(Asset asset, DateFilter rng,
-                                             bool isCollapsed = false, bool editOnly = false)
+            bool isCollapsed = false, bool editOnly = false)
             => m_AssetAccountant.Update(asset, rng, isCollapsed, editOnly);
 
         #endregion
@@ -133,19 +134,18 @@ namespace AccountingServer.BLL
         public bool Upsert(Amortization entity) => m_Db.Upsert(entity);
 
         public IEnumerable<Voucher> RegisterVouchers(Amortization amort, DateFilter rng,
-                                                     IQueryCompunded<IVoucherQueryAtom> query)
+            IQueryCompunded<IVoucherQueryAtom> query)
             => m_AmortAccountant.RegisterVouchers(amort, rng, query);
 
         public static void Amortize(Amortization amort) => AmortAccountant.Amortize(amort);
 
         public IEnumerable<AmortItem> Update(Amortization amort, DateFilter rng,
-                                             bool isCollapsed = false, bool editOnly = false)
+            bool isCollapsed = false, bool editOnly = false)
             => m_AmortAccountant.Update(amort, rng, isCollapsed, editOnly);
 
         public static double? GetBookValueOn(IDistributed dist, DateTime? dt)
             => DistributedAccountant.GetBookValueOn(dist, dt);
 
         #endregion
-
     }
 }

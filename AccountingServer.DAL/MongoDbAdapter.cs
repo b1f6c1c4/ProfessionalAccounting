@@ -43,6 +43,7 @@ namespace AccountingServer.DAL
         ///     摊销集合
         /// </summary>
         private IMongoCollection<Amortization> m_Amortizations;
+
         #endregion
 
         /// <summary>
@@ -118,11 +119,12 @@ namespace AccountingServer.DAL
             if (query.Subtotal.Levels.Contains(SubtotalLevel.Currency))
                 return balances
                     .Select(
-                            b =>
-                            {
-                                b.Currency = b.Currency ?? Voucher.BaseCurrency;
-                                return b;
-                            });
+                        b =>
+                        {
+                            b.Currency = b.Currency ?? Voucher.BaseCurrency;
+                            return b;
+                        });
+
             return balances;
         }
 
@@ -165,9 +167,9 @@ namespace AccountingServer.DAL
         public bool Upsert(Asset entity)
         {
             var res = m_Assets.ReplaceOne(
-                                          Builders<Asset>.Filter.Eq("_id", entity.ID),
-                                          entity,
-                                          new UpdateOptions { IsUpsert = true });
+                Builders<Asset>.Filter.Eq("_id", entity.ID),
+                entity,
+                new UpdateOptions { IsUpsert = true });
             return res.ModifiedCount <= 1;
         }
 
@@ -201,9 +203,9 @@ namespace AccountingServer.DAL
         public bool Upsert(Amortization entity)
         {
             var res = m_Amortizations.ReplaceOne(
-                                                 Builders<Amortization>.Filter.Eq("_id", entity.ID),
-                                                 entity,
-                                                 new UpdateOptions { IsUpsert = true });
+                Builders<Amortization>.Filter.Eq("_id", entity.ID),
+                entity,
+                new UpdateOptions { IsUpsert = true });
             return res.ModifiedCount <= 1;
         }
 
@@ -229,6 +231,7 @@ namespace AccountingServer.DAL
             sb.AppendLine("var theDate = this.date;");
             if (!subtotalLevel.HasFlag(SubtotalLevel.Week))
                 return sb.ToString();
+
             sb.AppendLine("if (theDate != null && theDate != undefined) {");
             sb.AppendLine("    theDate.setHours(0);");
             sb.AppendLine("    theDate.setMinutes(0);");
@@ -266,7 +269,7 @@ namespace AccountingServer.DAL
         /// <param name="preFilter">前置Native表示</param>
         /// <returns>Javascript表示</returns>
         private static string GetMapJavascript(IVoucherDetailQuery query, ISubtotal args,
-                                               out FilterDefinition<Voucher> preFilter)
+            out FilterDefinition<Voucher> preFilter)
         {
             SubtotalLevel level;
             if (args == null)
@@ -286,8 +289,10 @@ namespace AccountingServer.DAL
                 var dQuery = query.VoucherQuery as IVoucherQueryAtom;
                 if (dQuery == null)
                     throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query));
+
                 sb.Append(GetJavascriptFilter(dQuery.DetailFilter));
             }
+
             sb.AppendLine(";");
             preFilter = GetNativeFilter(query.VoucherQuery);
             sb.AppendLine(GetTheDateJavascript(level));
@@ -332,9 +337,9 @@ namespace AccountingServer.DAL
             }
 
             var res = collection.ReplaceOne(
-                                            Builders<T>.Filter.Eq("_id", idProvider.GetId(entity)),
-                                            entity,
-                                            new UpdateOptions { IsUpsert = true });
+                Builders<T>.Filter.Eq("_id", idProvider.GetId(entity)),
+                entity,
+                new UpdateOptions { IsUpsert = true });
             return res.ModifiedCount <= 1;
         }
     }

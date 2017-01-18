@@ -2,8 +2,8 @@
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using AccountingServer.Shell;
 using AccountingServer.Entities;
+using AccountingServer.Shell;
 
 namespace AccountingServer
 {
@@ -50,22 +50,23 @@ namespace AccountingServer
         {
             var sc =
                 m_Abbrs.Config.Abbrs
-                       .SingleOrDefault(
-                                        tpl =>
-                                        tpl.Abbr.Equals(
-                                                        textBoxCommand.Text,
-                                                        StringComparison.InvariantCultureIgnoreCase));
+                    .SingleOrDefault(
+                        tpl =>
+                            tpl.Abbr.Equals(
+                                textBoxCommand.Text,
+                                StringComparison.InvariantCultureIgnoreCase));
             if (sc == null)
                 return;
+
             var cnt = sc.Editable ? sc.Content ?? "" : sc.Content;
             var s = CSharpHelper.PresentVoucherDetail(
-                                                      new VoucherDetail
-                                                          {
-                                                              Title = sc.Title,
-                                                              SubTitle = sc.SubTitle,
-                                                              Content = cnt,
-                                                              Remark = sc.Remark
-                                                          });
+                new VoucherDetail
+                    {
+                        Title = sc.Title,
+                        SubTitle = sc.SubTitle,
+                        Content = cnt,
+                        Remark = sc.Remark
+                    });
             var idF = s.IndexOf("Fund = null", StringComparison.InvariantCulture) + 7;
             scintilla.Focus();
             scintilla.InsertText(scintilla.SelectionStart, s);
@@ -110,14 +111,14 @@ namespace AccountingServer
         {
             var tmp = scintilla.SelectionStart = scintilla.TextLength;
             var txtPre = "@new Voucher {" + Environment.NewLine +
-                         $"    Date = D(\"{DateTime.Now:yyy-MM-dd}\")," + Environment.NewLine +
-                         "    Details = new List<VoucherDetail> {" + Environment.NewLine;
+                $"    Date = D(\"{DateTime.Now:yyy-MM-dd}\")," + Environment.NewLine +
+                "    Details = new List<VoucherDetail> {" + Environment.NewLine;
             var txtApp = Environment.NewLine +
-                         "    } }@" + Environment.NewLine +
-                         ";" + Environment.NewLine;
+                "    } }@" + Environment.NewLine +
+                ";" + Environment.NewLine;
             scintilla.DeleteRange(
-                                  scintilla.SelectionStart,
-                                  scintilla.SelectionEnd - scintilla.SelectionStart);
+                scintilla.SelectionStart,
+                scintilla.SelectionEnd - scintilla.SelectionStart);
             scintilla.InsertText(scintilla.SelectionStart, txtPre + txtApp);
             scintilla.SelectionStart = tmp + txtPre.Length;
             m_FastInsertLocationDelta = 0;

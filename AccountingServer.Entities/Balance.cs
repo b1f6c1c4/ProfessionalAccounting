@@ -79,6 +79,7 @@ namespace AccountingServer.Entities
                 return false;
             if (Math.Abs(x.Fund - y.Fund) > 1E-8)
                 return false;
+
             return true;
         }
 

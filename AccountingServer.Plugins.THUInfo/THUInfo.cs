@@ -35,7 +35,7 @@ namespace AccountingServer.Plugins.THUInfo
                                     new DetailQueryAtomBase(new VoucherDetail { Remark = "" }),
                                     new DetailQueryAtomBase(new VoucherDetail { Remark = IgnoranceMark })
                                 }
-                            )
+                        )
                     });
 
         private static readonly ConfigManager<EndPointTemplates> EndPointTemplates;
@@ -97,10 +97,10 @@ namespace AccountingServer.Plugins.THUInfo
         private static Credential PromptForCredential()
         {
             var prompt = new XPPrompt
-                             {
-                                 Target = "THUInfo",
-                                 Persist = true
-                             };
+                {
+                    Target = "THUInfo",
+                    Persist = true
+                };
             if (prompt.ShowDialog() != DialogResult.OK)
                 return null;
 
@@ -158,8 +158,10 @@ namespace AccountingServer.Plugins.THUInfo
                 sb.AppendLine("---Can not generate");
                 foreach (var r in fail)
                     sb.AppendLine(r.ToString());
+
                 return new EditableText(sb.ToString());
             }
+
             return new Succeed();
         }
 
@@ -173,19 +175,21 @@ namespace AccountingServer.Plugins.THUInfo
             var voucherQuery = new VoucherQueryAtomBase { DetailFilter = DetailQuery };
             var bin = new HashSet<int>();
             foreach (var d in Accountant.SelectVouchers(voucherQuery)
-                                        .SelectMany(
-                                                    v => v.Details.Where(d => d.IsMatch(DetailQuery))
-                                                          .Select(d => new VDetail { Detail = d, Voucher = v })))
+                .SelectMany(
+                    v => v.Details.Where(d => d.IsMatch(DetailQuery))
+                        .Select(d => new VDetail { Detail = d, Voucher = v })))
             {
                 var id = Convert.ToInt32(d.Detail.Remark);
                 if (!bin.Add(id))
                     continue;
+
                 var record = m_Crawler.Result.SingleOrDefault(r => r.Index == id);
                 if (record == null)
                     continue;
                 // ReSharper disable once PossibleInvalidOperationException
                 if (!(Math.Abs(d.Detail.Fund.Value) - record.Fund).IsZero())
                     continue;
+
                 var tmp = d.Voucher.Details.Where(dd => dd.Title == 6602).ToArray();
                 var content = tmp.Length == 1 ? tmp.First().Content : string.Empty;
                 sb.AppendLine($"{d.Voucher.ID}\t{d.Detail.Remark}\t{content}\t{record.Endpoint}");
@@ -211,6 +215,7 @@ namespace AccountingServer.Plugins.THUInfo
                     var dd = ParsingF.UniqueTime(ref xx);
                     if (dd == null)
                         throw new ApplicationException("无法处理无穷长时间以前的自动补全指令");
+
                     dt = dd.Value;
                 }
                 catch (ApplicationException)
@@ -221,9 +226,11 @@ namespace AccountingServer.Plugins.THUInfo
                 {
                     // ignored
                 }
+
                 var sp = xx.Split(new[] { ' ', '/', ',' }, StringSplitOptions.RemoveEmptyEntries);
                 if (sp.Length == 0)
                     continue;
+
                 var lst = new List<Tuple<RegularType, string>>();
                 foreach (var s in sp)
                     switch (s.Trim().ToLowerInvariant())
@@ -246,8 +253,10 @@ namespace AccountingServer.Plugins.THUInfo
                         default:
                             throw new ArgumentException("未知参数", nameof(pars));
                     }
+
                 dic.Add(dt, lst);
             }
+
             return dic;
         }
     }

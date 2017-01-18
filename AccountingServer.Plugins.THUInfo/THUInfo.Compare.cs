@@ -79,9 +79,9 @@ namespace AccountingServer.Plugins.THUInfo
             ///     存在问题
             /// </summary>
             public bool Any => NoRemark.Any() ||
-                               TooMuch.Any() ||
-                               TooFew.Any(p => p.Details.Any()) ||
-                               NoRecord.Any();
+                TooMuch.Any() ||
+                TooFew.Any(p => p.Details.Any()) ||
+                NoRecord.Any();
 
             /// <summary>
             ///     待生成条目
@@ -101,9 +101,9 @@ namespace AccountingServer.Plugins.THUInfo
             var bin = new HashSet<int>();
             var binConflict = new HashSet<int>();
             foreach (var d in Accountant.SelectVouchers(voucherQuery)
-                                        .SelectMany(
-                                                    v => v.Details.Where(d => d.IsMatch(DetailQuery))
-                                                          .Select(d => new VDetail { Detail = d, Voucher = v })))
+                .SelectMany(
+                    v => v.Details.Where(d => d.IsMatch(DetailQuery))
+                        .Select(d => new VDetail { Detail = d, Voucher = v })))
             {
                 var id = Convert.ToInt32(d.Detail.Remark);
                 if (!bin.Add(id))
@@ -111,6 +111,7 @@ namespace AccountingServer.Plugins.THUInfo
                     binConflict.Add(id);
                     continue;
                 }
+
                 var record = data.SingleOrDefault(r => r.Index == id);
                 if (record == null)
                 {
@@ -125,6 +126,7 @@ namespace AccountingServer.Plugins.THUInfo
                     Accountant.Upsert(d.Voucher);
                     continue;
                 }
+
                 data.Remove(record);
             }
             foreach (var id in binConflict)
@@ -139,17 +141,18 @@ namespace AccountingServer.Plugins.THUInfo
                     foreach (var d in
                         voucher.Details.Where(d => d.Title == 1012 && d.SubTitle == 05 && d.Remark == idv))
                         d.Remark = null;
+
                     Accountant.Upsert(voucher);
                 }
             }
 
             var account = Accountant.RunVoucherQuery("T101205 \"\"")
-                                    .SelectMany(
-                                                v =>
-                                                v.Details.Where(
-                                                                d =>
-                                                                d.Title == 1012 && d.Title == 05 && d.Remark == null)
-                                                 .Select(d => new VDetail { Detail = d, Voucher = v })).ToList();
+                .SelectMany(
+                    v =>
+                        v.Details.Where(
+                                d =>
+                                    d.Title == 1012 && d.Title == 05 && d.Remark == null)
+                            .Select(d => new VDetail { Detail = d, Voucher = v })).ToList();
 
             var noRemark = new List<Problem>();
             var tooMuch = new List<Problem>();
@@ -161,10 +164,10 @@ namespace AccountingServer.Plugins.THUInfo
                 var grp = dfgrp;
                 var acc =
                     account.Where(
-                                  d =>
-                                  d.Voucher.Date == grp.Key.Date &&
-                                  // ReSharper disable once PossibleInvalidOperationException
-                                  (Math.Abs(d.Detail.Fund.Value) - grp.Key.Fund).IsZero()).ToList();
+                        d =>
+                            d.Voucher.Date == grp.Key.Date &&
+                            // ReSharper disable once PossibleInvalidOperationException
+                            (Math.Abs(d.Detail.Fund.Value) - grp.Key.Fund).IsZero()).ToList();
                 noRecord.RemoveAll(acc.Contains);
                 switch (acc.Count.CompareTo(grp.Count()))
                 {
@@ -187,12 +190,12 @@ namespace AccountingServer.Plugins.THUInfo
             }
 
             return new Problems
-                       {
-                           NoRecord = noRecord,
-                           NoRemark = noRemark,
-                           TooFew = tooFew,
-                           TooMuch = tooMuch
-                       };
+                {
+                    NoRecord = noRecord,
+                    NoRemark = noRemark,
+                    TooFew = tooFew,
+                    TooMuch = tooMuch
+                };
         }
 
         /// <summary>
@@ -210,6 +213,7 @@ namespace AccountingServer.Plugins.THUInfo
                     sb.AppendLine(r.ToString());
                 foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
                     sb.AppendLine(CSharpHelper.PresentVoucher(v));
+
                 sb.AppendLine();
             }
             foreach (var problem in problems.TooMuch)
@@ -219,6 +223,7 @@ namespace AccountingServer.Plugins.THUInfo
                     sb.AppendLine(r.ToString());
                 foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
                     sb.AppendLine(CSharpHelper.PresentVoucher(v));
+
                 sb.AppendLine();
             }
             foreach (var problem in problems.TooFew)
@@ -228,16 +233,20 @@ namespace AccountingServer.Plugins.THUInfo
                     sb.AppendLine(r.ToString());
                 foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
                     sb.AppendLine(CSharpHelper.PresentVoucher(v));
+
                 sb.AppendLine();
             }
+
             if (problems.NoRecord.Any())
             {
                 sb.AppendLine("---No Record");
                 foreach (var v in problems.NoRecord.Select(d => d.Voucher).Distinct())
                     sb.AppendLine(CSharpHelper.PresentVoucher(v));
             }
+
             if (sb.Length == 0)
                 return new Succeed();
+
             return new EditableText(sb.ToString());
         }
     }

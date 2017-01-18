@@ -43,20 +43,20 @@ namespace AccountingServer.BLL
                     assetItem is DevalueItem)
                     if (assetItem.Date.HasValue)
                         assetItem.Date = AccountantHelper.LastDayOfMonth(
-                                                                         assetItem.Date.Value.Year,
-                                                                         assetItem.Date.Value.Month);
+                            assetItem.Date.Value.Year,
+                            assetItem.Date.Value.Month);
 
             lst.Sort(new AssetItemComparer());
 
             if (lst.Count == 0 ||
                 !(lst[0] is AcquisationItem))
                 lst.Insert(
-                           0,
-                           new AcquisationItem
-                               {
-                                   Date = asset.Date,
-                                   OrigValue = asset.Value.Value
-                               });
+                    0,
+                    new AcquisationItem
+                        {
+                            Date = asset.Date,
+                            OrigValue = asset.Value.Value
+                        });
             else if (lst[0].Remark != AssetItem.IgnoranceMark)
             {
                 (lst[0] as AcquisationItem).Date = asset.Date;
@@ -86,6 +86,7 @@ namespace AccountingServer.BLL
                         lst.RemoveAt(i--);
                         continue;
                     }
+
                     (item as DevalueItem).Amount = bookValue - (item as DevalueItem).FairValue;
                     bookValue = (item as DevalueItem).FairValue;
                     item.Value = (item as DevalueItem).FairValue;
@@ -105,23 +106,23 @@ namespace AccountingServer.BLL
         /// <param name="query">检索式</param>
         /// <returns>未注册的记账凭证</returns>
         public IEnumerable<Voucher> RegisterVouchers(Asset asset, DateFilter rng,
-                                                     IQueryCompunded<IVoucherQueryAtom> query)
+            IQueryCompunded<IVoucherQueryAtom> query)
         {
             if (asset.Remark == Asset.IgnoranceMark)
                 yield break;
 
             {
                 var filter = new VoucherDetail
-                                 {
-                                     Title = asset.Title,
-                                     Content = asset.StringID
-                                 };
+                    {
+                        Title = asset.Title,
+                        Content = asset.StringID
+                    };
                 foreach (
                     var voucher in
-                        Db.SelectVouchers(
-                                          new VoucherQueryAryBase(
-                                              OperatorType.Intersect,
-                                              new[] { query, new VoucherQueryAtomBase(filter: filter) })))
+                    Db.SelectVouchers(
+                        new VoucherQueryAryBase(
+                            OperatorType.Intersect,
+                            new[] { query, new VoucherQueryAtomBase(filter: filter) })))
                 {
                     if (voucher.Remark == Asset.IgnoranceMark)
                         continue;
@@ -135,12 +136,12 @@ namespace AccountingServer.BLL
                     if (value > 0)
                     {
                         var lst = asset.Schedule.Where(item => item.Date.Within(rng))
-                                       .Where(
-                                              item =>
-                                              item is AcquisationItem &&
-                                              (!voucher.Date.HasValue || item.Date == voucher.Date) &&
-                                              ((item as AcquisationItem).OrigValue - value).IsZero())
-                                       .ToList();
+                            .Where(
+                                item =>
+                                    item is AcquisationItem &&
+                                    (!voucher.Date.HasValue || item.Date == voucher.Date) &&
+                                    ((item as AcquisationItem).OrigValue - value).IsZero())
+                            .ToList();
 
                         if (lst.Count == 1)
                             lst[0].VoucherID = voucher.ID;
@@ -150,11 +151,11 @@ namespace AccountingServer.BLL
                     else if (value < 0)
                     {
                         var lst = asset.Schedule.Where(item => item.Date.Within(rng))
-                                       .Where(
-                                              item =>
-                                              item is DispositionItem &&
-                                              (!voucher.Date.HasValue || item.Date == voucher.Date))
-                                       .ToList();
+                            .Where(
+                                item =>
+                                    item is DispositionItem &&
+                                    (!voucher.Date.HasValue || item.Date == voucher.Date))
+                            .ToList();
 
                         if (lst.Count == 1)
                             lst[0].VoucherID = voucher.ID;
@@ -167,10 +168,10 @@ namespace AccountingServer.BLL
             }
             {
                 var filter = new VoucherDetail
-                                 {
-                                     Title = asset.DepreciationTitle,
-                                     Content = asset.StringID
-                                 };
+                    {
+                        Title = asset.DepreciationTitle,
+                        Content = asset.StringID
+                    };
                 foreach (var voucher in Db.SelectVouchers(new VoucherQueryAtomBase(filter: filter)))
                 {
                     if (voucher.Remark == Asset.IgnoranceMark)
@@ -180,10 +181,10 @@ namespace AccountingServer.BLL
                         continue;
 
                     var lst = asset.Schedule.Where(
-                                                   item =>
-                                                   item is DepreciateItem &&
-                                                   (!voucher.Date.HasValue || item.Date == voucher.Date))
-                                   .ToList();
+                            item =>
+                                item is DepreciateItem &&
+                                (!voucher.Date.HasValue || item.Date == voucher.Date))
+                        .ToList();
 
                     if (lst.Count == 1)
                         lst[0].VoucherID = voucher.ID;
@@ -193,10 +194,10 @@ namespace AccountingServer.BLL
             }
             {
                 var filter = new VoucherDetail
-                                 {
-                                     Title = asset.DevaluationTitle,
-                                     Content = asset.StringID
-                                 };
+                    {
+                        Title = asset.DevaluationTitle,
+                        Content = asset.StringID
+                    };
                 foreach (var voucher in Db.SelectVouchers(new VoucherQueryAtomBase(filter: filter)))
                 {
                     if (voucher.Remark == Asset.IgnoranceMark)
@@ -206,10 +207,10 @@ namespace AccountingServer.BLL
                         continue;
 
                     var lst = asset.Schedule.Where(
-                                                   item =>
-                                                   item is DevalueItem &&
-                                                   (!voucher.Date.HasValue || item.Date == voucher.Date))
-                                   .ToList();
+                            item =>
+                                item is DevalueItem &&
+                                (!voucher.Date.HasValue || item.Date == voucher.Date))
+                        .ToList();
 
                     if (lst.Count == 1)
                         lst[0].VoucherID = voucher.ID;
@@ -228,7 +229,7 @@ namespace AccountingServer.BLL
         /// <param name="editOnly">是否只允许更新</param>
         /// <returns>无法更新的条目</returns>
         public IEnumerable<AssetItem> Update(Asset asset, DateFilter rng,
-                                             bool isCollapsed = false, bool editOnly = false)
+            bool isCollapsed = false, bool editOnly = false)
         {
             if (asset.Schedule == null)
                 yield break;
@@ -239,6 +240,7 @@ namespace AccountingServer.BLL
                 if (item.Date.Within(rng))
                     if (!UpdateItem(asset, item, bookValue, isCollapsed, editOnly))
                         yield return item;
+
                 bookValue = item.Value;
             }
         }
@@ -253,104 +255,104 @@ namespace AccountingServer.BLL
         /// <param name="editOnly">是否只允许更新</param>
         /// <returns>是否成功</returns>
         private bool UpdateItem(Asset asset, AssetItem item, double bookValue, bool isCollapsed = false,
-                                bool editOnly = false)
+            bool editOnly = false)
         {
             if (item is AcquisationItem)
                 return UpdateVoucher(
-                                     item,
-                                     isCollapsed,
-                                     editOnly,
-                                     VoucherType.Ordinary,
-                                     new VoucherDetail
-                                         {
-                                             Title = asset.Title,
-                                             Content = asset.StringID,
-                                             Fund = (item as AcquisationItem).OrigValue
-                                         });
+                    item,
+                    isCollapsed,
+                    editOnly,
+                    VoucherType.Ordinary,
+                    new VoucherDetail
+                        {
+                            Title = asset.Title,
+                            Content = asset.StringID,
+                            Fund = (item as AcquisationItem).OrigValue
+                        });
 
             if (item is DepreciateItem)
                 return UpdateVoucher(
-                                     item,
-                                     isCollapsed,
-                                     editOnly,
-                                     VoucherType.Depreciation,
-                                     new VoucherDetail
-                                         {
-                                             Title = asset.DepreciationExpenseTitle,
-                                             SubTitle = asset.DepreciationExpenseSubTitle,
-                                             Content = asset.StringID,
-                                             Fund = (item as DepreciateItem).Amount
-                                         },
-                                     new VoucherDetail
-                                         {
-                                             Title = asset.DepreciationTitle,
-                                             Content = asset.StringID,
-                                             Fund = -(item as DepreciateItem).Amount
-                                         });
+                    item,
+                    isCollapsed,
+                    editOnly,
+                    VoucherType.Depreciation,
+                    new VoucherDetail
+                        {
+                            Title = asset.DepreciationExpenseTitle,
+                            SubTitle = asset.DepreciationExpenseSubTitle,
+                            Content = asset.StringID,
+                            Fund = (item as DepreciateItem).Amount
+                        },
+                    new VoucherDetail
+                        {
+                            Title = asset.DepreciationTitle,
+                            Content = asset.StringID,
+                            Fund = -(item as DepreciateItem).Amount
+                        });
 
             if (item is DevalueItem)
                 return UpdateVoucher(
-                                     item,
-                                     isCollapsed,
-                                     editOnly,
-                                     VoucherType.Devalue,
-                                     new VoucherDetail
-                                         {
-                                             Title = asset.DevaluationExpenseTitle,
-                                             SubTitle = asset.DevaluationExpenseSubTitle,
-                                             Content = asset.StringID,
-                                             Fund = (item as DevalueItem).Amount
-                                         },
-                                     new VoucherDetail
-                                         {
-                                             Title = asset.DevaluationTitle,
-                                             Content = asset.StringID,
-                                             Fund = -(item as DevalueItem).Amount
-                                         });
+                    item,
+                    isCollapsed,
+                    editOnly,
+                    VoucherType.Devalue,
+                    new VoucherDetail
+                        {
+                            Title = asset.DevaluationExpenseTitle,
+                            SubTitle = asset.DevaluationExpenseSubTitle,
+                            Content = asset.StringID,
+                            Fund = (item as DevalueItem).Amount
+                        },
+                    new VoucherDetail
+                        {
+                            Title = asset.DevaluationTitle,
+                            Content = asset.StringID,
+                            Fund = -(item as DevalueItem).Amount
+                        });
 
             if (item is DispositionItem)
             {
                 var totalDep = asset.Schedule.Where(
-                                                    it =>
-                                                    DateHelper.CompareDate(it.Date, item.Date) < 0 &&
-                                                    it is DepreciateItem)
-                                    .Cast<DepreciateItem>().Aggregate(0D, (td, it) => td + it.Amount);
+                        it =>
+                            DateHelper.CompareDate(it.Date, item.Date) < 0 &&
+                            it is DepreciateItem)
+                    .Cast<DepreciateItem>().Aggregate(0D, (td, it) => td + it.Amount);
                 var totalDev = asset.Schedule.Where(
-                                                    it =>
-                                                    DateHelper.CompareDate(it.Date, item.Date) < 0 &&
-                                                    it is DevalueItem)
-                                    .Cast<DevalueItem>().Aggregate(0D, (td, it) => td + it.Amount);
+                        it =>
+                            DateHelper.CompareDate(it.Date, item.Date) < 0 &&
+                            it is DevalueItem)
+                    .Cast<DevalueItem>().Aggregate(0D, (td, it) => td + it.Amount);
                 return UpdateVoucher(
-                                     item,
-                                     isCollapsed,
-                                     editOnly,
-                                     VoucherType.Ordinary,
-                                     new VoucherDetail
-                                         {
-                                             Title = asset.Title,
-                                             Content = asset.StringID,
-                                             Fund = -asset.Value
-                                         },
-                                     new VoucherDetail
-                                         {
-                                             Title = asset.DepreciationTitle,
-                                             Content = asset.StringID,
-                                             Fund = totalDep
-                                         },
-                                     new VoucherDetail
-                                         {
-                                             Title = asset.DevaluationTitle,
-                                             Content = asset.StringID,
-                                             Fund = totalDev
-                                         },
-                                     new VoucherDetail
-                                         {
-                                             Title = DefaultDispositionTitle,
-                                             Content = asset.StringID,
-                                             Fund = bookValue,
-                                             Remark = Asset.IgnoranceMark // 不用于检索，只用于添加
-                                         }
-                    );
+                    item,
+                    isCollapsed,
+                    editOnly,
+                    VoucherType.Ordinary,
+                    new VoucherDetail
+                        {
+                            Title = asset.Title,
+                            Content = asset.StringID,
+                            Fund = -asset.Value
+                        },
+                    new VoucherDetail
+                        {
+                            Title = asset.DepreciationTitle,
+                            Content = asset.StringID,
+                            Fund = totalDep
+                        },
+                    new VoucherDetail
+                        {
+                            Title = asset.DevaluationTitle,
+                            Content = asset.StringID,
+                            Fund = totalDev
+                        },
+                    new VoucherDetail
+                        {
+                            Title = DefaultDispositionTitle,
+                            Content = asset.StringID,
+                            Fund = bookValue,
+                            Remark = Asset.IgnoranceMark // 不用于检索，只用于添加
+                        }
+                );
             }
 
             return false;
@@ -365,16 +367,16 @@ namespace AccountingServer.BLL
         /// <param name="details">细目</param>
         /// <returns>是否成功</returns>
         private bool GenerateVoucher(AssetItem item, bool isCollapsed, VoucherType voucherType,
-                                     params VoucherDetail[] details)
+            params VoucherDetail[] details)
         {
             var voucher = new Voucher
-                              {
-                                  Date = isCollapsed ? null : item.Date,
-                                  Type = voucherType,
-                                  Remark = "automatically generated",
-                                  Currency = Voucher.BaseCurrency,
-                                  Details = details.ToList()
-                              };
+                {
+                    Date = isCollapsed ? null : item.Date,
+                    Type = voucherType,
+                    Remark = "automatically generated",
+                    Currency = Voucher.BaseCurrency,
+                    Details = details.ToList()
+                };
             var res = Db.Upsert(voucher);
             item.VoucherID = voucher.ID;
             return res;
@@ -390,7 +392,7 @@ namespace AccountingServer.BLL
         /// <param name="expectedDetails">应填细目</param>
         /// <returns>是否成功</returns>
         private bool UpdateVoucher(AssetItem item, bool isCollapsed, bool editOnly, VoucherType voucherType,
-                                   params VoucherDetail[] expectedDetails)
+            params VoucherDetail[] expectedDetails)
         {
             if (item.VoucherID == null)
                 return !editOnly && GenerateVoucher(item, isCollapsed, voucherType, expectedDetails);
@@ -422,6 +424,7 @@ namespace AccountingServer.BLL
                 UpdateDetail(d, voucher, out sucess, out mo, editOnly);
                 if (!sucess)
                     return false;
+
                 modified |= mo;
             }
 
@@ -444,9 +447,9 @@ namespace AccountingServer.BLL
 
             var items =
                 asset.Schedule.Where(
-                                     assetItem =>
-                                     !(assetItem is DepreciateItem) || assetItem.Remark == AssetItem.IgnoranceMark)
-                     .ToList();
+                        assetItem =>
+                            !(assetItem is DepreciateItem) || assetItem.Remark == AssetItem.IgnoranceMark)
+                    .ToList();
 
             switch (asset.Method)
             {
@@ -469,11 +472,13 @@ namespace AccountingServer.BLL
                                     flag = false;
                                     continue;
                                 }
+
                                 if (flag)
                                     continue;
                                 if (items[i] is AcquisationItem ||
                                     items[i] is DispositionItem)
                                     continue;
+
                                 if (items[i] is DepreciateItem) // With IgnoranceMark
                                 {
                                     flag = true;
@@ -501,52 +506,54 @@ namespace AccountingServer.BLL
                             {
                                 if (i < items.Count)
                                     continue; // If another AcquisationItem exists
+
                                 break;
                             }
 
                             items.Insert(
-                                         i,
-                                         new DepreciateItem
-                                             {
-                                                 Date = dt,
-                                                 Amount = amount / (monthes + 1),
-                                                 Value = items[i - 1].Value - amount / (monthes + 1)
-                                             });
+                                i,
+                                new DepreciateItem
+                                    {
+                                        Date = dt,
+                                        Amount = amount / (monthes + 1),
+                                        Value = items[i - 1].Value - amount / (monthes + 1)
+                                    });
 
                             dt = AccountantHelper.LastDayOfMonth(dt.Year, dt.Month + 1);
                         }
                     }
-                //if (mo < 12)
-                //    for (var mon = mo + 1; mon <= 12; mon++)
-                //        items.Add(
-                //                  new DepreciateItem
-                //                      {
-                //                          Date = LastDayOfMonth(yr, mon),
-                //                          Amount = amount / n / 12
-                //                      });
-                //for (var year = 1; year < n; year++)
-                //    for (var mon = 1; mon <= 12; mon++)
-                //        items.Add(
-                //                  new DepreciateItem
-                //                      {
-                //                          Date = LastDayOfMonth(yr + year, mon),
-                //                          Amount = amount / n / 12
-                //                      });
-                //// if (mo > 0)
-                //{
-                //    for (var mon = 1; mon <= mo; mon++)
-                //        items.Add(
-                //                  new DepreciateItem
-                //                      {
-                //                          Date = LastDayOfMonth(yr + n, mon),
-                //                          Amount = amount / n / 12
-                //                      });
-                //}
+                    //if (mo < 12)
+                    //    for (var mon = mo + 1; mon <= 12; mon++)
+                    //        items.Add(
+                    //                  new DepreciateItem
+                    //                      {
+                    //                          Date = LastDayOfMonth(yr, mon),
+                    //                          Amount = amount / n / 12
+                    //                      });
+                    //for (var year = 1; year < n; year++)
+                    //    for (var mon = 1; mon <= 12; mon++)
+                    //        items.Add(
+                    //                  new DepreciateItem
+                    //                      {
+                    //                          Date = LastDayOfMonth(yr + year, mon),
+                    //                          Amount = amount / n / 12
+                    //                      });
+                    //// if (mo > 0)
+                    //{
+                    //    for (var mon = 1; mon <= mo; mon++)
+                    //        items.Add(
+                    //                  new DepreciateItem
+                    //                      {
+                    //                          Date = LastDayOfMonth(yr + n, mon),
+                    //                          Amount = amount / n / 12
+                    //                      });
+                    //}
                     break;
                 case DepreciationMethod.SumOfTheYear:
                     if (items.Any(a => a is DevalueItem || a.Remark == AssetItem.IgnoranceMark) ||
                         items.Count(a => a is AcquisationItem) != 1)
                         throw new NotImplementedException();
+
                     {
                         var n = asset.Life.Value;
                         var mo = asset.Date.Value.Month;
@@ -561,31 +568,33 @@ namespace AccountingServer.BLL
                             amount -= a;
                             for (var mon = mo + 1; mon <= 12; mon++)
                                 items.Add(
-                                          new DepreciateItem
-                                              {
-                                                  Date = AccountantHelper.LastDayOfMonth(yr, mon),
-                                                  Amount = a / (12 - mo)
-                                              });
+                                    new DepreciateItem
+                                        {
+                                            Date = AccountantHelper.LastDayOfMonth(yr, mon),
+                                            Amount = a / (12 - mo)
+                                        });
                         }
+
                         for (var year = 1; year < n; year++)
-                            for (var mon = 1; mon <= 12; mon++)
-                                items.Add(
-                                          new DepreciateItem
-                                              {
-                                                  Date = AccountantHelper.LastDayOfMonth(yr + year, mon),
-                                                  Amount = amount * (nstar - year + 1) / zstar / 12
-                                              });
+                        for (var mon = 1; mon <= 12; mon++)
+                            items.Add(
+                                new DepreciateItem
+                                    {
+                                        Date = AccountantHelper.LastDayOfMonth(yr + year, mon),
+                                        Amount = amount * (nstar - year + 1) / zstar / 12
+                                    });
                         // if (mo > 0)
                         {
                             for (var mon = 1; mon <= mo; mon++)
                                 items.Add(
-                                          new DepreciateItem
-                                              {
-                                                  Date = AccountantHelper.LastDayOfMonth(yr + n, mon),
-                                                  Amount = amount * (nstar - (n + 1) + 2) / zstar / 12
-                                              });
+                                    new DepreciateItem
+                                        {
+                                            Date = AccountantHelper.LastDayOfMonth(yr + n, mon),
+                                            Amount = amount * (nstar - (n + 1) + 2) / zstar / 12
+                                        });
                         }
                     }
+
                     break;
                 case DepreciationMethod.DoubleDeclineMethod:
                     throw new NotImplementedException();

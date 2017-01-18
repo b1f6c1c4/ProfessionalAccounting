@@ -30,6 +30,7 @@ namespace AccountingServer.BLL
                     if (the.Month == 2 &&
                         the.Day == 29)
                         return the.AddDays(1);
+
                     return the;
                 case AmortizeInterval.SameDayOfMonth:
                     return the.Day > 28 ? the.AddDays(1 - the.Day).AddMonths(1) : the;
@@ -110,7 +111,7 @@ namespace AccountingServer.BLL
         /// <param name="query">检索式</param>
         /// <returns>未注册的记账凭证</returns>
         public IEnumerable<Voucher> RegisterVouchers(Amortization amort, DateFilter rng,
-                                                     IQueryCompunded<IVoucherQueryAtom> query)
+            IQueryCompunded<IVoucherQueryAtom> query)
         {
             if (amort.Remark == Amortization.IgnoranceMark)
                 yield break;
@@ -118,7 +119,7 @@ namespace AccountingServer.BLL
             var queryT = new VoucherQueryAtomBase(amort.Template, amort.Template.Details) { ForAll = true };
             foreach (
                 var voucher in
-                    Db.SelectVouchers(new VoucherQueryAryBase(OperatorType.Intersect, new[] { query, queryT })))
+                Db.SelectVouchers(new VoucherQueryAryBase(OperatorType.Intersect, new[] { query, queryT })))
             {
                 if (voucher.Remark == Amortization.IgnoranceMark)
                     continue;
@@ -131,8 +132,8 @@ namespace AccountingServer.BLL
                 else
                 {
                     var lst = amort.Schedule
-                                   .Where(item => item.Date.Within(rng))
-                                   .Where(item => item.Date == voucher.Date).ToList();
+                        .Where(item => item.Date.Within(rng))
+                        .Where(item => item.Date == voucher.Date).ToList();
 
                     if (lst.Count == 1)
                         lst[0].VoucherID = voucher.ID;
@@ -151,15 +152,15 @@ namespace AccountingServer.BLL
         /// <param name="editOnly">是否只允许更新</param>
         /// <returns>无法更新的条目</returns>
         public IEnumerable<AmortItem> Update(Amortization amort, DateFilter rng,
-                                             bool isCollapsed = false, bool editOnly = false)
+            bool isCollapsed = false, bool editOnly = false)
         {
             if (amort.Schedule == null)
                 yield break;
 
             foreach (
                 var item in
-                    amort.Schedule.Where(item => item.Date.Within(rng))
-                         .Where(item => !UpdateVoucher(item, isCollapsed, editOnly, amort.Template)))
+                amort.Schedule.Where(item => item.Date.Within(rng))
+                    .Where(item => !UpdateVoucher(item, isCollapsed, editOnly, amort.Template)))
                 yield return item;
         }
 
@@ -205,6 +206,7 @@ namespace AccountingServer.BLL
                 UpdateDetail(d, voucher, out sucess, out mo, editOnly);
                 if (!sucess)
                     return false;
+
                 modified |= mo;
             }
 
@@ -224,25 +226,25 @@ namespace AccountingServer.BLL
         private bool GenerateVoucher(AmortItem item, bool isCollapsed, Voucher template)
         {
             var lst = template.Details.Select(
-                                              detail => new VoucherDetail
-                                                            {
-                                                                Title = detail.Title,
-                                                                SubTitle = detail.SubTitle,
-                                                                Content = detail.Content,
-                                                                Fund =
-                                                                    detail.Remark == AmortItem.IgnoranceMark
-                                                                        ? detail.Fund
-                                                                        : item.Amount * detail.Fund,
-                                                                Remark = item.Remark
-                                                            }).ToList();
+                detail => new VoucherDetail
+                    {
+                        Title = detail.Title,
+                        SubTitle = detail.SubTitle,
+                        Content = detail.Content,
+                        Fund =
+                            detail.Remark == AmortItem.IgnoranceMark
+                                ? detail.Fund
+                                : item.Amount * detail.Fund,
+                        Remark = item.Remark
+                    }).ToList();
             var voucher = new Voucher
-                              {
-                                  Date = isCollapsed ? null : item.Date,
-                                  Type = template.Type,
-                                  Remark = template.Remark ?? "automatically generated",
-                                  Currency = Voucher.BaseCurrency,
-                                  Details = lst
-                              };
+                {
+                    Date = isCollapsed ? null : item.Date,
+                    Type = template.Type,
+                    Remark = template.Remark ?? "automatically generated",
+                    Currency = Voucher.BaseCurrency,
+                    Details = lst
+                };
             var res = Db.Upsert(voucher);
             item.VoucherID = voucher.ID;
             return res;
@@ -270,14 +272,15 @@ namespace AccountingServer.BLL
             while (true)
             {
                 var dtNxt = flag
-                                ? ThisAmortizationDate(amort.Interval.Value, amort.Date.Value)
-                                : NextAmortizationDate(amort.Interval.Value, dtCur);
+                    ? ThisAmortizationDate(amort.Interval.Value, amort.Date.Value)
+                    : NextAmortizationDate(amort.Interval.Value, dtCur);
 
                 if (dtNxt >= dtEnd)
                 {
                     lst.Add(new AmortItem { Date = dtNxt, Amount = residue });
                     break;
                 }
+
                 var n = dtNxt.Subtract(dtCur).TotalDays + (flag ? 1 : 0);
 
                 flag = false;

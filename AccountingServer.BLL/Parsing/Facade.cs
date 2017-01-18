@@ -33,6 +33,7 @@ namespace AccountingServer.BLL.Parsing
                 else
                     throw new ApplicationException("内部错误");
             }
+
             s = s.Substring(i);
             return res;
         }

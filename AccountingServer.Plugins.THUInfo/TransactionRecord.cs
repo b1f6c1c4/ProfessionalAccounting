@@ -46,12 +46,12 @@ namespace AccountingServer.Plugins.THUInfo
 
         /// <inheritdoc />
         public override string ToString() => string.Format(
-                                                           "@ {4:s}: #{0}{1}{2}{3} {5}",
-                                                           Index.ToString(CultureInfo.InvariantCulture).CPadRight(4),
-                                                           Location.CPadRight(17),
-                                                           Type.CPadRight(23),
-                                                           Endpoint.CPadLeft(9),
-                                                           Time,
-                                                           Fund.AsCurrency().CPadLeft(11));
+            "@ {4:s}: #{0}{1}{2}{3} {5}",
+            Index.ToString(CultureInfo.InvariantCulture).CPadRight(4),
+            Location.CPadRight(17),
+            Type.CPadRight(23),
+            Endpoint.CPadLeft(9),
+            Time,
+            Fund.AsCurrency().CPadLeft(11));
     }
 }

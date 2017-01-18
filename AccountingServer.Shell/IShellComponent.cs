@@ -72,6 +72,7 @@ namespace AccountingServer.Shell
             var comp = m_Components.FirstOrDefault(s => s.IsExecutable(expr));
             if (comp == null)
                 throw new InvalidOperationException("表达式无效");
+
             return comp;
         }
 

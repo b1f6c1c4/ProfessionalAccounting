@@ -26,6 +26,7 @@ namespace AccountingServer.Shell
             {
                 if (s == null)
                     continue;
+
                 if (sb.Length > 0)
                     sb.AppendLine();
                 sb.Append(s);
@@ -46,20 +47,20 @@ namespace AccountingServer.Shell
             const int ident = 4;
 
             Func<double, string> ts = f => (args.GatherType == GatheringType.Count
-                                                ? f.ToString("N0")
-                                                : f.AsCurrency());
+                ? f.ToString("N0")
+                : f.AsCurrency());
 
             var helper =
                 new SubtotalTraver<object, Tuple<double, string>>(args)
                     {
                         LeafNoneAggr =
                             (path, cat, depth, val) =>
-                            new Tuple<double, string>(val, ts(val)),
+                                new Tuple<double, string>(val, ts(val)),
                         LeafAggregated =
                             (path, cat, depth, bal) =>
-                            new Tuple<double, string>(
-                                bal.Fund,
-                                $"{new string(' ', depth * ident)}{bal.Date.AsDate().CPadRight(38)}{ts(bal.Fund).CPadLeft(12 + 2 * depth)}"),
+                                new Tuple<double, string>(
+                                    bal.Fund,
+                                    $"{new string(' ', depth * ident)}{bal.Date.AsDate().CPadRight(38)}{ts(bal.Fund).CPadLeft(12 + 2 * depth)}"),
                         Map = (path, cat, depth, level) => null,
                         MapA = (path, cat, depth, type) => null,
                         MediumLevel =
@@ -88,11 +89,13 @@ namespace AccountingServer.Shell
                                         str = $"{cat.Date.AsDate(level)}:";
                                         break;
                                 }
+
                                 if (depth == args.Levels.Count - 1 &&
                                     args.AggrType == AggregationType.None)
                                     return new Tuple<double, string>(
                                         r.Item1,
                                         $"{new string(' ', depth * ident)}{str.CPadRight(38)}{r.Item2.CPadLeft(12 + 2 * depth)}");
+
                                 return new Tuple<double, string>(
                                     r.Item1,
                                     $"{new string(' ', depth * ident)}{str.CPadRight(38)}{ts(r.Item1).CPadLeft(12 + 2 * depth)}{Environment.NewLine}{r.Item2}");
@@ -121,6 +124,7 @@ namespace AccountingServer.Shell
             if (args.Levels.Count == 0 &&
                 args.AggrType == AggregationType.None)
                 return traversal.Item2;
+
             return ts(traversal.Item1) + ":" + Environment.NewLine + traversal.Item2;
         }
     }

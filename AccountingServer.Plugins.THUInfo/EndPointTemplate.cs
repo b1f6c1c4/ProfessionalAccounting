@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace AccountingServer.Plugins.THUInfo

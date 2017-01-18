@@ -29,10 +29,10 @@ namespace AccountingServer.Plugins.Interest
             var loans = Accountant.RunGroupedQuery($"T1221 {content.Quotation('\'')} ``r").ToList();
             var rmk =
                 loans.Single(
-                             b => b.Remark != null &&
-                                  b.Remark.StartsWith(remark, StringComparison.InvariantCultureIgnoreCase) &&
-                                  !b.Remark.EndsWith("-利息", StringComparison.Ordinal))
-                     .Remark;
+                        b => b.Remark != null &&
+                            b.Remark.StartsWith(remark, StringComparison.InvariantCultureIgnoreCase) &&
+                            !b.Remark.EndsWith("-利息", StringComparison.Ordinal))
+                    .Remark;
 
             if (!all && !endDate.HasValue ||
                 endDate.HasValue)
@@ -41,36 +41,36 @@ namespace AccountingServer.Plugins.Interest
                 var filter0 = $"T1221 > {content.Quotation('\'')} {(rmk + "-利息").Quotation('"')}";
                 // ReSharper disable once PossibleInvalidOperationException
                 var lastD = Accountant.RunVoucherQuery(filter0)
-                                      .OrderByDescending(v => v.Date, new DateComparer())
-                                      .FirstOrDefault()?.Date ??
-                            Accountant.RunVoucherQuery(filter)
-                                      .OrderBy(v => v.Date, new DateComparer())
-                                      .First().Date.Value;
+                        .OrderByDescending(v => v.Date, new DateComparer())
+                        .FirstOrDefault()?.Date ??
+                    Accountant.RunVoucherQuery(filter)
+                        .OrderBy(v => v.Date, new DateComparer())
+                        .First().Date.Value;
                 var capQuery = $"{filter} [~{lastD.AsDate()}]``v";
                 var intQuery = $"{filter0} [~{lastD.AsDate()}]``v";
                 var capitalIntegral = Accountant.RunGroupedQuery(capQuery).SingleOrDefault()?.Fund ?? 0;
                 var interestIntegral = Accountant.RunGroupedQuery(intQuery).SingleOrDefault()?.Fund ?? 0;
                 Regularize(
-                           content,
-                           rmk,
-                           rate,
-                           ref capitalIntegral,
-                           ref interestIntegral,
-                           lastD,
-                           endDate ?? DateTime.Now.Date);
+                    content,
+                    rmk,
+                    rate,
+                    ref capitalIntegral,
+                    ref interestIntegral,
+                    lastD,
+                    endDate ?? DateTime.Now.Date);
             }
             else
             {
                 var capitalIntegral = 0D;
                 var interestIntegral = 0D;
                 Regularize(
-                           content,
-                           rmk,
-                           rate,
-                           ref capitalIntegral,
-                           ref interestIntegral,
-                           null,
-                           DateTime.Now.Date);
+                    content,
+                    rmk,
+                    rate,
+                    ref capitalIntegral,
+                    ref interestIntegral,
+                    null,
+                    DateTime.Now.Date);
             }
             return new Succeed();
         }
@@ -86,72 +86,73 @@ namespace AccountingServer.Plugins.Interest
         /// <param name="lastSettlement">上次计息日</param>
         /// <param name="finalDay">截止日期</param>
         private void Regularize(string content, string rmk, double rate, ref double capitalIntegral,
-                                ref double interestIntegral, DateTime? lastSettlement, DateTime finalDay)
+            ref double interestIntegral, DateTime? lastSettlement, DateTime finalDay)
         {
             var capitalPattern = new VoucherDetail
-                                     {
-                                         Title = 1221,
-                                         Content = content,
-                                         Remark = rmk
-                                     };
+                {
+                    Title = 1221,
+                    Content = content,
+                    Remark = rmk
+                };
             var interestPattern = new VoucherDetail
-                                      {
-                                          Title = 1221,
-                                          Content = content,
-                                          Remark = rmk + "-利息"
-                                      };
+                {
+                    Title = 1221,
+                    Content = content,
+                    Remark = rmk + "-利息"
+                };
             var rng = lastSettlement.HasValue
-                          ? new DateFilter(lastSettlement.Value.AddDays(1), finalDay)
-                          : new DateFilter(null, finalDay);
+                ? new DateFilter(lastSettlement.Value.AddDays(1), finalDay)
+                : new DateFilter(null, finalDay);
             foreach (var grp in
                 Accountant
                     .RunVoucherQuery(
-                                     $"(T1221 {content.Quotation('\'')})*({rmk.Quotation('"')}+{(rmk + "-利息").Quotation('"')}) {rng.AsDateRange()}")
+                        $"(T1221 {content.Quotation('\'')})*({rmk.Quotation('"')}+{(rmk + "-利息").Quotation('"')}) {rng.AsDateRange()}")
                     .GroupBy(v => v.Date).OrderBy(grp => grp.Key, new DateComparer()))
             {
                 if (!grp.Key.HasValue)
                     throw new ApplicationException("无法处理无穷长时间以前的利息收入");
+
                 if (!lastSettlement.HasValue)
                     lastSettlement = grp.Key;
 
                 // Settle Interest
                 interestIntegral += SettleInterest(
-                                                   content,
-                                                   rmk,
-                                                   rate,
-                                                   capitalIntegral,
-                                                   grp.Key.Value.Subtract(lastSettlement.Value).Days,
-                                                   grp.SingleOrDefault(
-                                                                       v =>
-                                                                       v.Details.Any(d => d.IsMatch(interestPattern, 1)))
-                                                   ?? new Voucher
-                                                          {
-                                                              Date = grp.Key,
-                                                              Currency = Voucher.BaseCurrency,
-                                                              Details = new List<VoucherDetail>()
-                                                          });
+                    content,
+                    rmk,
+                    rate,
+                    capitalIntegral,
+                    grp.Key.Value.Subtract(lastSettlement.Value).Days,
+                    grp.SingleOrDefault(
+                        v =>
+                            v.Details.Any(d => d.IsMatch(interestPattern, 1)))
+                    ?? new Voucher
+                        {
+                            Date = grp.Key,
+                            Currency = Voucher.BaseCurrency,
+                            Details = new List<VoucherDetail>()
+                        });
                 lastSettlement = grp.Key;
 
                 // Settle Loan
                 // ReSharper disable once PossibleInvalidOperationException
                 capitalIntegral +=
                     grp.SelectMany(v => v.Details.Where(d => d.IsMatch(capitalPattern, 1)))
-                       .Select(d => d.Fund.Value)
-                       .Sum();
+                        .Select(d => d.Fund.Value)
+                        .Sum();
 
                 // Settle Return
                 foreach (
                     var voucher in
-                        grp.Where(
-                                  v =>
-                                  v.Details.Any(d => d.IsMatch(capitalPattern, -1) || d.IsMatch(interestPattern, -1)))
-                           .OrderBy(v => v.ID))
+                    grp.Where(
+                            v =>
+                                v.Details.Any(d => d.IsMatch(capitalPattern, -1) || d.IsMatch(interestPattern, -1)))
+                        .OrderBy(v => v.ID))
                 {
                     // ReSharper disable once PossibleInvalidOperationException
                     var value =
                         -voucher.Details.Where(d => d.IsMatch(capitalPattern, -1) || d.IsMatch(interestPattern, -1))
-                                .Select(d => d.Fund.Value)
-                                .Sum();
+                            .Select(d => d.Fund.Value)
+                            .Sum();
                     if ((-value + interestIntegral).IsNonNegative())
                     {
                         RegularizeVoucherDetail(content, rmk, voucher, 0, value);
@@ -165,22 +166,23 @@ namespace AccountingServer.Plugins.Interest
                     }
                 }
             }
+
             if (lastSettlement == null)
                 throw new ApplicationException("无法处理无穷长时间以前的利息收入");
 
             if (lastSettlement != finalDay)
                 interestIntegral += SettleInterest(
-                                                   content,
-                                                   rmk,
-                                                   rate,
-                                                   capitalIntegral,
-                                                   finalDay.Subtract(lastSettlement.Value).Days,
-                                                   new Voucher
-                                                       {
-                                                           Date = finalDay,
-                                                           Currency = Voucher.BaseCurrency,
-                                                           Details = new List<VoucherDetail>()
-                                                       });
+                    content,
+                    rmk,
+                    rate,
+                    capitalIntegral,
+                    finalDay.Subtract(lastSettlement.Value).Days,
+                    new Voucher
+                        {
+                            Date = finalDay,
+                            Currency = Voucher.BaseCurrency,
+                            Details = new List<VoucherDetail>()
+                        });
         }
 
         /// <summary>
@@ -194,38 +196,38 @@ namespace AccountingServer.Plugins.Interest
         /// <param name="voucher">记账凭证</param>
         /// <returns>利息</returns>
         private double SettleInterest(string content, string rmk, double rate,
-                                      double capitalIntegral, int delta, Voucher voucher)
+            double capitalIntegral, int delta, Voucher voucher)
         {
             var interestPattern = new VoucherDetail
-                                      {
-                                          Title = 1221,
-                                          Content = content,
-                                          Remark = rmk + "-利息"
-                                      };
+                {
+                    Title = 1221,
+                    Content = content,
+                    Remark = rmk + "-利息"
+                };
             var revenuePattern = new VoucherDetail
-                                     {
-                                         Title = 6603,
-                                         SubTitle = 02,
-                                         Content = "贷款利息"
-                                     };
+                {
+                    Title = 6603,
+                    SubTitle = 02,
+                    Content = "贷款利息"
+                };
             var interest = delta * rate * capitalIntegral;
             var create = new List<VoucherDetail>
-                             {
-                                 new VoucherDetail
-                                     {
-                                         Title = 1221,
-                                         Content = content,
-                                         Remark = rmk + "-利息",
-                                         Fund = interest
-                                     },
-                                 new VoucherDetail
-                                     {
-                                         Title = 6603,
-                                         SubTitle = 02,
-                                         Content = "贷款利息",
-                                         Fund = -interest
-                                     }
-                             };
+                {
+                    new VoucherDetail
+                        {
+                            Title = 1221,
+                            Content = content,
+                            Remark = rmk + "-利息",
+                            Fund = interest
+                        },
+                    new VoucherDetail
+                        {
+                            Title = 6603,
+                            SubTitle = 02,
+                            Content = "贷款利息",
+                            Fund = -interest
+                        }
+                };
 
             // ReSharper disable once PossibleInvalidOperationException
             var detail = voucher.Details.SingleOrDefault(d => d.IsMatch(interestPattern));
@@ -239,9 +241,11 @@ namespace AccountingServer.Plugins.Interest
             {
                 if (!voucher.Details.All(d => d.IsMatch(interestPattern) || d.IsMatch(revenuePattern)))
                     throw new ArgumentException("该记账凭证包含计息以外的细目", nameof(voucher));
+
                 voucher.Details = create;
                 Accountant.Upsert(voucher);
             }
+
             return interest;
         }
 
@@ -256,17 +260,17 @@ namespace AccountingServer.Plugins.Interest
         private void RegularizeVoucherDetail(string content, string rmk, Voucher voucher, double capVol, double intVol)
         {
             var capitalPattern = new VoucherDetail
-                                     {
-                                         Title = 1221,
-                                         Content = content,
-                                         Remark = rmk
-                                     };
+                {
+                    Title = 1221,
+                    Content = content,
+                    Remark = rmk
+                };
             var interestPattern = new VoucherDetail
-                                      {
-                                          Title = 1221,
-                                          Content = content,
-                                          Remark = rmk + "-利息"
-                                      };
+                {
+                    Title = 1221,
+                    Content = content,
+                    Remark = rmk + "-利息"
+                };
             var flag = false;
             var capFlag = false;
             var intFlag = false;
@@ -289,6 +293,7 @@ namespace AccountingServer.Plugins.Interest
                     }
                     capFlag = true;
                 }
+
                 if (voucher.Details[i].IsMatch(interestPattern, -1))
                 {
                     if (intFlag || intVol.IsZero())
@@ -307,30 +312,31 @@ namespace AccountingServer.Plugins.Interest
                     intFlag = true;
                 }
             }
+
             if (!capFlag &&
                 !capVol.IsZero())
             {
                 voucher.Details.Add(
-                                    new VoucherDetail
-                                        {
-                                            Title = 1221,
-                                            Content = content,
-                                            Remark = rmk,
-                                            Fund = -capVol
-                                        });
+                    new VoucherDetail
+                        {
+                            Title = 1221,
+                            Content = content,
+                            Remark = rmk,
+                            Fund = -capVol
+                        });
                 flag = true;
             }
             if (!intFlag &&
                 !intVol.IsZero())
             {
                 voucher.Details.Add(
-                                    new VoucherDetail
-                                        {
-                                            Title = 1221,
-                                            Content = content,
-                                            Remark = rmk + "-利息",
-                                            Fund = -intVol
-                                        });
+                    new VoucherDetail
+                        {
+                            Title = 1221,
+                            Content = content,
+                            Remark = rmk + "-利息",
+                            Fund = -intVol
+                        });
                 flag = true;
             }
             if (flag)

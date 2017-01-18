@@ -48,7 +48,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccountantHelper.cs" />
     <Compile Include="AmortAccountant.cs">
       <SubType>Code</SubType>
     </Compile>

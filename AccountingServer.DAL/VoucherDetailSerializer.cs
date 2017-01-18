@@ -14,13 +14,13 @@ namespace AccountingServer.DAL
 
             bsonReader.ReadStartDocument();
             var detail = new VoucherDetail
-                             {
-                                 Title = bsonReader.ReadInt32("title", ref read),
-                                 SubTitle = bsonReader.ReadInt32("subtitle", ref read),
-                                 Content = bsonReader.ReadString("content", ref read),
-                                 Fund = bsonReader.ReadDouble("fund", ref read),
-                                 Remark = bsonReader.ReadString("remark", ref read)
-                             };
+                {
+                    Title = bsonReader.ReadInt32("title", ref read),
+                    SubTitle = bsonReader.ReadInt32("subtitle", ref read),
+                    Content = bsonReader.ReadString("content", ref read),
+                    Fund = bsonReader.ReadDouble("fund", ref read),
+                    Remark = bsonReader.ReadString("remark", ref read)
+                };
             bsonReader.ReadEndDocument();
 
             return detail;

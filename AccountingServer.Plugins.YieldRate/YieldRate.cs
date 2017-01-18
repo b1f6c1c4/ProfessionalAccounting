@@ -27,14 +27,15 @@ namespace AccountingServer.Plugins.YieldRate
             var sb = new StringBuilder();
             foreach (
                 var tpl in
-                    result.GroupByContent()
-                          .Join(
-                                resx,
-                                grp => grp.Key,
-                                rsx => rsx.Content,
-                                (grp, bal) => new Tuple<IGrouping<string, Balance>, double>(grp, bal.Fund)))
+                result.GroupByContent()
+                    .Join(
+                        resx,
+                        grp => grp.Key,
+                        rsx => rsx.Content,
+                        (grp, bal) => new Tuple<IGrouping<string, Balance>, double>(grp, bal.Fund)))
                 sb.AppendLine(
-                              $"{tpl.Item1.Key}\t{GetRate(tpl.Item1.OrderBy(b => b.Date, new DateComparer()).ToList(), tpl.Item2) * 360:P2}");
+                    $"{tpl.Item1.Key}\t{GetRate(tpl.Item1.OrderBy(b => b.Date, new DateComparer()).ToList(), tpl.Item2) * 360:P2}");
+
             return new UnEditableText(sb.ToString());
         }
 
@@ -52,6 +53,7 @@ namespace AccountingServer.Plugins.YieldRate
                     new YieldRateSolver(
                         lst.Select(b => DateTime.Today.Subtract(b.Date.Value).TotalDays).Concat(new[] { 0D }),
                         lst.Select(b => b.Fund).Concat(new[] { -pv })).Solve();
+
             return
                 new YieldRateSolver(
                     lst.Select(b => lst.Last().Date.Value.Subtract(b.Date.Value).TotalDays),

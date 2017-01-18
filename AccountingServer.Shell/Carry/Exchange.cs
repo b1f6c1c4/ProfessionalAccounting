@@ -60,7 +60,7 @@ namespace AccountingServer.Shell.Carry
 
         /// <inheritdoc />
         public double To(DateTime date, string target)
-            => RetriveCache(date, target, m_FromCache, () => m_Exchange.To(date, target));
+            => RetriveCache(date, target, m_ToCache, () => m_Exchange.To(date, target));
 
         /// <summary>
         ///     尝试读取缓存
@@ -71,7 +71,7 @@ namespace AccountingServer.Shell.Carry
         /// <param name="func">缓存失效则调用</param>
         /// <returns>结果</returns>
         private static double RetriveCache(DateTime date, string target,
-                                           IDictionary<string, Dictionary<DateTime, double>> cache, Func<double> func)
+            IDictionary<string, Dictionary<DateTime, double>> cache, Func<double> func)
         {
             double val;
             Dictionary<DateTime, double> dic;
@@ -121,6 +121,7 @@ namespace AccountingServer.Shell.Carry
                     var json = JObject.Parse(reader.ReadToEnd());
                     return json["rates"][to].Value<double>();
                 }
+
                 throw new NetworkInformationException();
             }
         }

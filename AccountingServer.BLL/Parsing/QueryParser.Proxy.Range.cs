@@ -93,6 +93,7 @@ namespace AccountingServer.BLL.Parsing
                         return rangeMonth().Range;
                     if (rangeYear() != null)
                         return rangeYear().Range;
+
                     throw new MemberAccessException("表达式错误");
                 }
             }
@@ -109,6 +110,7 @@ namespace AccountingServer.BLL.Parsing
                         return DateFilter.Unconstrained;
                     if (RangeNull() != null)
                         return DateFilter.TheNullOnly;
+
                     return rangeCertainPoint().Range;
                 }
             }
@@ -122,6 +124,7 @@ namespace AccountingServer.BLL.Parsing
                     return null;
                 if (context.RangeNull() != null)
                     return null;
+
                 return context.Day;
             }
         }

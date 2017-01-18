@@ -70,11 +70,12 @@ namespace AccountingServer.DAL
                         lst.Add(Builders<Voucher>.Filter.Eq("special", "unc"));
                         break;
                 }
+
             if (vfilter.Remark != null)
                 lst.Add(
-                        vfilter.Remark == string.Empty
-                            ? Builders<Voucher>.Filter.Exists("remark", false)
-                            : Builders<Voucher>.Filter.Eq("remark", vfilter.Remark));
+                    vfilter.Remark == string.Empty
+                        ? Builders<Voucher>.Filter.Exists("remark", false)
+                        : Builders<Voucher>.Filter.Eq("remark", vfilter.Remark));
             if (vfilter.Currency == Voucher.BaseCurrency)
                 lst.Add(Builders<Voucher>.Filter.Exists("currency", false));
             else if (vfilter.Currency != null)
@@ -105,8 +106,8 @@ namespace AccountingServer.DAL
 
             var gather = Builders<Voucher>.Filter.And(lst);
             return rng.Value.Nullable
-                       ? Builders<Voucher>.Filter.Eq<DateTime?>("date", null) | gather
-                       : gather;
+                ? Builders<Voucher>.Filter.Eq<DateTime?>("date", null) | gather
+                : gather;
         }
 
         /// <summary>
@@ -122,32 +123,32 @@ namespace AccountingServer.DAL
             var lst = new List<FilterDefinition<VoucherDetail>>();
             if (f.Dir != 0)
                 lst.Add(
-                        f.Dir > 0
-                            ? Builders<VoucherDetail>.Filter.Gt("fund", -VoucherDetail.Tolerance)
-                            : Builders<VoucherDetail>.Filter.Lt("fund", +VoucherDetail.Tolerance));
+                    f.Dir > 0
+                        ? Builders<VoucherDetail>.Filter.Gt("fund", -VoucherDetail.Tolerance)
+                        : Builders<VoucherDetail>.Filter.Lt("fund", +VoucherDetail.Tolerance));
             if (f.Filter != null)
             {
                 if (f.Filter.Title != null)
                     lst.Add(Builders<VoucherDetail>.Filter.Eq("title", f.Filter.Title.Value));
                 if (f.Filter.SubTitle != null)
                     lst.Add(
-                            f.Filter.SubTitle == 00
-                                ? Builders<VoucherDetail>.Filter.Exists("subtitle", false)
-                                : Builders<VoucherDetail>.Filter.Eq("subtitle", f.Filter.SubTitle.Value));
+                        f.Filter.SubTitle == 00
+                            ? Builders<VoucherDetail>.Filter.Exists("subtitle", false)
+                            : Builders<VoucherDetail>.Filter.Eq("subtitle", f.Filter.SubTitle.Value));
                 if (f.Filter.Content != null)
                     lst.Add(
-                            f.Filter.Content == string.Empty
-                                ? Builders<VoucherDetail>.Filter.Exists("content", false)
-                                : Builders<VoucherDetail>.Filter.Eq("content", f.Filter.Content));
+                        f.Filter.Content == string.Empty
+                            ? Builders<VoucherDetail>.Filter.Exists("content", false)
+                            : Builders<VoucherDetail>.Filter.Eq("content", f.Filter.Content));
                 if (f.Filter.Remark != null)
                     lst.Add(
-                            f.Filter.Remark == string.Empty
-                                ? Builders<VoucherDetail>.Filter.Exists("remark", false)
-                                : Builders<VoucherDetail>.Filter.Eq("remark", f.Filter.Remark));
+                        f.Filter.Remark == string.Empty
+                            ? Builders<VoucherDetail>.Filter.Exists("remark", false)
+                            : Builders<VoucherDetail>.Filter.Eq("remark", f.Filter.Remark));
                 if (f.Filter.Fund != null)
                     lst.Add(
-                            Builders<VoucherDetail>.Filter.Gte("fund", f.Filter.Fund.Value - VoucherDetail.Tolerance) &
-                            Builders<VoucherDetail>.Filter.Lte("fund", f.Filter.Fund.Value + VoucherDetail.Tolerance));
+                        Builders<VoucherDetail>.Filter.Gte("fund", f.Filter.Fund.Value - VoucherDetail.Tolerance) &
+                        Builders<VoucherDetail>.Filter.Lte("fund", f.Filter.Fund.Value + VoucherDetail.Tolerance));
             }
             return Builders<VoucherDetail>.Filter.And(lst);
         }
@@ -195,7 +196,7 @@ namespace AccountingServer.DAL
         /// <returns>查询</returns>
         public static FilterDefinition<T> GetNQuery<T>(IQueryCompunded<IDistributedQueryAtom> query)
             where T : IDistributed =>
-                GetNativeFilter(query, GetNativeFilter<T>);
+            GetNativeFilter(query, GetNativeFilter<T>);
 
         /// <summary>
         ///     原子分期检索式的Native表示
@@ -213,14 +214,14 @@ namespace AccountingServer.DAL
                 lst.Add(Builders<T>.Filter.Eq("_id", f.Filter.ID.Value));
             if (f.Filter.Name != null)
                 lst.Add(
-                        f.Filter.Name == string.Empty
-                            ? Builders<T>.Filter.Exists("name", false)
-                            : Builders<T>.Filter.Eq("name", f.Filter.Name));
+                    f.Filter.Name == string.Empty
+                        ? Builders<T>.Filter.Exists("name", false)
+                        : Builders<T>.Filter.Eq("name", f.Filter.Name));
             if (f.Filter.Remark != null)
                 lst.Add(
-                        f.Filter.Remark == string.Empty
-                            ? Builders<T>.Filter.Exists("remark", false)
-                            : Builders<T>.Filter.Eq("remark", f.Filter.Remark));
+                    f.Filter.Remark == string.Empty
+                        ? Builders<T>.Filter.Exists("remark", false)
+                        : Builders<T>.Filter.Eq("remark", f.Filter.Remark));
 
             return Builders<T>.Filter.And(lst);
         }
@@ -232,7 +233,7 @@ namespace AccountingServer.DAL
         /// <param name="atomFilter">原子检索式的Native表示</param>
         /// <returns>Native表示</returns>
         private static FilterDefinition<T> GetNativeFilter<T, TAtom>(IQueryCompunded<TAtom> query,
-                                                                     Func<TAtom, FilterDefinition<T>> atomFilter)
+            Func<TAtom, FilterDefinition<T>> atomFilter)
             where TAtom : class
         {
             if (query == null ||
@@ -242,6 +243,7 @@ namespace AccountingServer.DAL
             var f = query as IQueryAry<TAtom>;
             if (f == null)
                 throw new ArgumentException("检索式类型未知", nameof(query));
+
             switch (f.Operator)
             {
                 case OperatorType.None:

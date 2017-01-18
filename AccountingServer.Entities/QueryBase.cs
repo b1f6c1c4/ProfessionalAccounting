@@ -23,6 +23,7 @@ namespace AccountingServer.Entities
             Operator = op;
             if (queries.Count == 0)
                 throw new ArgumentException("参与运算的检索式个数过少", nameof(queries));
+
             Filter1 = queries[0];
             switch (op)
             {
@@ -59,15 +60,15 @@ namespace AccountingServer.Entities
             : this(
                 useAnd ? OperatorType.Intersect : OperatorType.Union,
                 filters.Select(filter => new DetailQueryAtomBase(filter, dir))
-                       .Cast<IQueryCompunded<IDetailQueryAtom>>()
-                       .ToList()) { }
+                    .Cast<IQueryCompunded<IDetailQueryAtom>>()
+                    .ToList()) { }
     }
 
     public struct VoucherQueryAtomBase : IVoucherQueryAtom
     {
         public VoucherQueryAtomBase(Voucher vfilter = null, VoucherDetail filter = null, DateFilter? rng = null,
-                                    int dir = 0,
-                                    bool forAll = false)
+            int dir = 0,
+            bool forAll = false)
             : this()
         {
             VoucherFilter = vfilter;
@@ -77,8 +78,8 @@ namespace AccountingServer.Entities
         }
 
         public VoucherQueryAtomBase(Voucher vfilter = null, IEnumerable<VoucherDetail> filters = null,
-                                    DateFilter? rng = null, bool useAnd = false, int dir = 0,
-                                    bool forAll = false)
+            DateFilter? rng = null, bool useAnd = false, int dir = 0,
+            bool forAll = false)
             : this()
         {
             VoucherFilter = vfilter;

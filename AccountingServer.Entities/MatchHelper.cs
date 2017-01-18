@@ -18,12 +18,15 @@ namespace AccountingServer.Entities
         {
             if (filter == null)
                 return true;
+
             if (filter.ID != null)
                 if (filter.ID != voucher.ID)
                     return false;
+
             if (filter.Date != null)
                 if (filter.Date != voucher.Date)
                     return false;
+
             if (filter.Type != null)
                 switch (filter.Type)
                 {
@@ -36,13 +39,16 @@ namespace AccountingServer.Entities
                     case VoucherType.Uncertain:
                         if (filter.Type != voucher.Type)
                             return false;
+
                         break;
                     case VoucherType.General:
                         if (filter.Type != VoucherType.Carry &&
                             filter.Type != VoucherType.AnnualCarry)
                             return false;
+
                         break;
                 }
+
             if (filter.Remark != null)
                 if (filter.Remark == string.Empty)
                 {
@@ -51,6 +57,7 @@ namespace AccountingServer.Entities
                 }
                 else if (filter.Remark != voucher.Remark)
                     return false;
+
             return true;
         }
 
@@ -65,9 +72,11 @@ namespace AccountingServer.Entities
         {
             if (filter == null)
                 return true;
+
             if (filter.Title != null)
                 if (filter.Title != voucherDetail.Title)
                     return false;
+
             if (filter.SubTitle != null)
                 if (filter.SubTitle == 00)
                 {
@@ -76,6 +85,7 @@ namespace AccountingServer.Entities
                 }
                 else if (filter.SubTitle != voucherDetail.SubTitle)
                     return false;
+
             if (filter.Content != null)
                 if (filter.Content == string.Empty)
                 {
@@ -84,13 +94,17 @@ namespace AccountingServer.Entities
                 }
                 else if (filter.Content != voucherDetail.Content)
                     return false;
+
             if (filter.Fund != null)
-                if (filter.Fund != voucherDetail.Fund)
+                if (!voucherDetail.Fund.HasValue ||
+                    !(filter.Fund.Value - voucherDetail.Fund.Value).IsZero())
                     return false;
+
             if (dir != 0)
                 if (dir > 0 && voucherDetail.Fund < 0 ||
                     dir < 0 && voucherDetail.Fund > 0)
                     return false;
+
             if (filter.Remark != null)
                 if (filter.Remark == string.Empty)
                 {
@@ -99,6 +113,7 @@ namespace AccountingServer.Entities
                 }
                 else if (filter.Remark != voucherDetail.Remark)
                     return false;
+
             return true;
         }
 
@@ -117,9 +132,10 @@ namespace AccountingServer.Entities
                 return false;
             if (!voucher.Date.Within(query.Range))
                 return false;
+
             return query.ForAll
-                       ? voucher.Details.All(d => d.IsMatch(query.DetailFilter))
-                       : voucher.Details.Any(d => d.IsMatch(query.DetailFilter));
+                ? voucher.Details.All(d => d.IsMatch(query.DetailFilter))
+                : voucher.Details.Any(d => d.IsMatch(query.DetailFilter));
         }
 
         public static bool IsMatch(this Voucher voucher, IQueryCompunded<IVoucherQueryAtom> query)
@@ -138,6 +154,7 @@ namespace AccountingServer.Entities
                 return true;
             if (query is TAtom)
                 return atomPredictor(query as TAtom);
+
             if (query is IQueryAry<TAtom>)
             {
                 var f = query as IQueryAry<TAtom>;
@@ -159,6 +176,7 @@ namespace AccountingServer.Entities
                         throw new ArgumentException("运算类型未知", nameof(query));
                 }
             }
+
             throw new ArgumentException("检索式类型未知", nameof(query));
         }
     }

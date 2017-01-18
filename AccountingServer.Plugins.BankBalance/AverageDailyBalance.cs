@@ -27,17 +27,15 @@ namespace AccountingServer.Plugins.BankBalance
             var srng = new DateFilter(new DateTime(tdy.Year, tdy.Month, 1), tdy);
             var balance =
                 Accountant.RunGroupedQuery($"T1002 {content.Quotation('\'')} [~{tdy.AsDate()}]`vD{srng.AsDateRange()}")
-                          .AggregateEveryDay(srng);
+                    .AggregateEveryDay(srng);
 
             var bal = 0D;
             var btd = 0D;
             foreach (var b in balance)
-            {
                 if (b.Date == tdy)
                     btd += b.Fund;
                 else
                     bal += b.Fund;
-            }
 
             var targ = ldom.Day * avg;
 
@@ -50,9 +48,9 @@ namespace AccountingServer.Plugins.BankBalance
                 sb.AppendLine();
 
                 sb.AppendLine(
-                              (btd - avg).IsNonNegative()
-                                  ? $"Plan A: Credit {(btd - avg).AsCurrency()}, Balance {avg.AsCurrency()}"
-                                  : $"Plan A: Debit {(avg - btd).AsCurrency()}, Balance {avg.AsCurrency()}");
+                    (btd - avg).IsNonNegative()
+                        ? $"Plan A: Credit {(btd - avg).AsCurrency()}, Balance {avg.AsCurrency()}"
+                        : $"Plan A: Debit {(avg - btd).AsCurrency()}, Balance {avg.AsCurrency()}");
                 sb.AppendLine("Plan B: No Action");
             }
             else
@@ -67,13 +65,13 @@ namespace AccountingServer.Plugins.BankBalance
                     sb.AppendLine();
 
                     sb.AppendLine(
-                                  (btd - avx).IsNonNegative()
-                                      ? $"Plan A: Credit {(btd - avx).AsCurrency()}, Balance {avx.AsCurrency()}"
-                                      : $"Plan A: Debit {(avx - btd).AsCurrency()}, Balance {avx.AsCurrency()}");
+                        (btd - avx).IsNonNegative()
+                            ? $"Plan A: Credit {(btd - avx).AsCurrency()}, Balance {avx.AsCurrency()}"
+                            : $"Plan A: Debit {(avx - btd).AsCurrency()}, Balance {avx.AsCurrency()}");
                     sb.AppendLine(
-                                  (btd - avg).IsNonNegative()
-                                      ? $"Plan B: Credit {(btd - avg).AsCurrency()}, Balance {avg.AsCurrency()}"
-                                      : $"Plan B: Debit {(avg - btd).AsCurrency()}, Balance {avg.AsCurrency()}");
+                        (btd - avg).IsNonNegative()
+                            ? $"Plan B: Credit {(btd - avg).AsCurrency()}, Balance {avg.AsCurrency()}"
+                            : $"Plan B: Debit {(avg - btd).AsCurrency()}, Balance {avg.AsCurrency()}");
                 }
                 else
                 {
@@ -81,9 +79,9 @@ namespace AccountingServer.Plugins.BankBalance
                     sb.AppendLine();
 
                     sb.AppendLine(
-                                  (btd - avx).IsNonNegative()
-                                      ? $"Plan: Credit {(btd - avx).AsCurrency()}, Balance {avx.AsCurrency()}"
-                                      : $"Plan: Debit {(avx - btd).AsCurrency()}, Balance {avx.AsCurrency()}");
+                        (btd - avx).IsNonNegative()
+                            ? $"Plan: Credit {(btd - avx).AsCurrency()}, Balance {avx.AsCurrency()}"
+                            : $"Plan: Debit {(avx - btd).AsCurrency()}, Balance {avx.AsCurrency()}");
                 }
             }
             return new UnEditableText(sb.ToString());

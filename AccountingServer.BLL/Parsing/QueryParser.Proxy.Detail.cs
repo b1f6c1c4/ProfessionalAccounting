@@ -13,10 +13,10 @@ namespace AccountingServer.BLL.Parsing
                 get
                 {
                     var filter = new VoucherDetail
-                                     {
-                                         Content = SingleQuotedString().Dequotation(),
-                                         Remark = DoubleQuotedString().Dequotation()
-                                     };
+                        {
+                            Content = SingleQuotedString().Dequotation(),
+                            Remark = DoubleQuotedString().Dequotation()
+                        };
                     if (DetailTitle() != null)
                     {
                         var t = int.Parse(DetailTitle().GetText().TrimStart('T'));
@@ -43,6 +43,7 @@ namespace AccountingServer.BLL.Parsing
                         return 1;
                     if (Direction.Text == "<")
                         return -1;
+
                     throw new MemberAccessException("表达式错误");
                 }
             }
@@ -57,20 +58,24 @@ namespace AccountingServer.BLL.Parsing
                 {
                     if (Op == null)
                         return OperatorType.None;
+
                     if (details().Count == 1)
                     {
                         if (Op.Text == "+")
                             return OperatorType.Identity;
                         if (Op.Text == "-")
                             return OperatorType.Complement;
+
                         throw new MemberAccessException("表达式错误");
                     }
+
                     if (Op.Text == "+")
                         return OperatorType.Union;
                     if (Op.Text == "-")
                         return OperatorType.Substract;
                     if (Op.Text == "*")
                         return OperatorType.Intersect;
+
                     throw new MemberAccessException("表达式错误");
                 }
             }
@@ -82,6 +87,7 @@ namespace AccountingServer.BLL.Parsing
                 {
                     if (detailQuery() != null)
                         return detailQuery();
+
                     return details(0);
                 }
             }

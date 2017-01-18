@@ -36,8 +36,8 @@ namespace AccountingServer.Plugins.THUInfo
         /// <param name="pars">生成记账所需参数</param>
         /// <param name="failed">无法生产记账凭证的交易记录</param>
         private IEnumerable<Voucher> AutoGenerate(IEnumerable<TransactionRecord> records,
-                                                  IReadOnlyList<string> pars,
-                                                  out List<TransactionRecord> failed)
+            IReadOnlyList<string> pars,
+            out List<TransactionRecord> failed)
         {
             var dic = pars.Count > 0 ? GetDic(pars) : null;
             var res = Enumerable.Empty<Voucher>();
@@ -66,6 +66,7 @@ namespace AccountingServer.Plugins.THUInfo
 
                 res = res.Concat(res1);
             }
+
             return res;
         }
 
@@ -76,7 +77,7 @@ namespace AccountingServer.Plugins.THUInfo
         /// <param name="result">生成的记账凭证</param>
         /// <param name="specialRecords">未能处理的交易记录</param>
         private static void GenerateCommon(IGrouping<DateTime, TransactionRecord> recordsGroup, out List<Voucher> result,
-                                           out List<TransactionRecord> specialRecords)
+            out List<TransactionRecord> specialRecords)
         {
             specialRecords = new List<TransactionRecord>();
             result = new List<Voucher>();
@@ -85,113 +86,115 @@ namespace AccountingServer.Plugins.THUInfo
                 var rec = record;
                 Func<int, VoucherDetail> item =
                     dir => new VoucherDetail
-                               {
-                                   Title = 1012,
-                                   SubTitle = 05,
-                                   Fund = dir * rec.Fund,
-                                   Remark = rec.Index.ToString(CultureInfo.InvariantCulture)
-                               };
+                        {
+                            Title = 1012,
+                            SubTitle = 05,
+                            Fund = dir * rec.Fund,
+                            Remark = rec.Index.ToString(CultureInfo.InvariantCulture)
+                        };
                 switch (record.Type)
                 {
                     case "支付宝充值":
                         result.Add(
-                                   new Voucher
-                                       {
-                                           Date = recordsGroup.Key.Date,
-                                           Currency = Voucher.BaseCurrency,
-                                           Details = new List<VoucherDetail>
-                                                         {
-                                                             item(1),
-                                                             new VoucherDetail
-                                                                 {
-                                                                     Title = 1221,
-                                                                     Content = "学生卡待领",
-                                                                     Fund = -record.Fund
-                                                                 }
-                                                         }
-                                       });
+                            new Voucher
+                                {
+                                    Date = recordsGroup.Key.Date,
+                                    Currency = Voucher.BaseCurrency,
+                                    Details = new List<VoucherDetail>
+                                        {
+                                            item(1),
+                                            new VoucherDetail
+                                                {
+                                                    Title = 1221,
+                                                    Content = "学生卡待领",
+                                                    Fund = -record.Fund
+                                                }
+                                        }
+                                });
                         break;
                     case "领取圈存":
                         result.Add(
-                                   new Voucher
-                                       {
-                                           Date = recordsGroup.Key.Date,
-                                           Currency = Voucher.BaseCurrency,
-                                           Details = new List<VoucherDetail>
-                                                         {
-                                                             item(1),
-                                                             new VoucherDetail
-                                                                 {
-                                                                     Title = 1002,
-                                                                     Content = "3593",
-                                                                     Fund = -record.Fund
-                                                                 }
-                                                         }
-                                       });
+                            new Voucher
+                                {
+                                    Date = recordsGroup.Key.Date,
+                                    Currency = Voucher.BaseCurrency,
+                                    Details = new List<VoucherDetail>
+                                        {
+                                            item(1),
+                                            new VoucherDetail
+                                                {
+                                                    Title = 1002,
+                                                    Content = "3593",
+                                                    Fund = -record.Fund
+                                                }
+                                        }
+                                });
                         break;
                     case "自助缴费(学生公寓水费)":
                         result.Add(
-                                   new Voucher
-                                       {
-                                           Date = recordsGroup.Key.Date,
-                                           Currency = Voucher.BaseCurrency,
-                                           Details = new List<VoucherDetail>
-                                                         {
-                                                             item(-1),
-                                                             new VoucherDetail
-                                                                 {
-                                                                     Title = 1123,
-                                                                     Content = "学生卡小钱包",
-                                                                     Fund = record.Fund
-                                                                 }
-                                                         }
-                                       });
+                            new Voucher
+                                {
+                                    Date = recordsGroup.Key.Date,
+                                    Currency = Voucher.BaseCurrency,
+                                    Details = new List<VoucherDetail>
+                                        {
+                                            item(-1),
+                                            new VoucherDetail
+                                                {
+                                                    Title = 1123,
+                                                    Content = "学生卡小钱包",
+                                                    Fund = record.Fund
+                                                }
+                                        }
+                                });
                         break;
                     case "消费":
                         if (record.Location == "游泳馆通道机消费")
                             result.Add(
-                                       new Voucher
-                                           {
-                                               Date = recordsGroup.Key.Date,
-                                               Currency = Voucher.BaseCurrency,
-                                               Details = new List<VoucherDetail>
-                                                             {
-                                                                 item(-1),
-                                                                 new VoucherDetail
-                                                                     {
-                                                                         Title = 6401,
-                                                                         Content = "训练费",
-                                                                         Fund = record.Fund
-                                                                     }
-                                                             }
-                                           });
+                                new Voucher
+                                    {
+                                        Date = recordsGroup.Key.Date,
+                                        Currency = Voucher.BaseCurrency,
+                                        Details = new List<VoucherDetail>
+                                            {
+                                                item(-1),
+                                                new VoucherDetail
+                                                    {
+                                                        Title = 6401,
+                                                        Content = "训练费",
+                                                        Fund = record.Fund
+                                                    }
+                                            }
+                                    });
                         else
                         {
                             var ep = Convert.ToInt32(record.Endpoint);
                             var res = Templates.Where(t => t.Ranges.Any(iv => iv.Start <= ep && iv.End >= ep)).ToList();
                             if (res.Count == 1)
                                 result.Add(
-                                           new Voucher
-                                               {
-                                                   Date = recordsGroup.Key.Date,
-                                                   Currency = Voucher.BaseCurrency,
-                                                   Details = new List<VoucherDetail>
-                                                                 {
-                                                                     item(-1),
-                                                                     new VoucherDetail
-                                                                         {
-                                                                             Title = 6602,
-                                                                             SubTitle = 03,
-                                                                             Content = res[0].Name,
-                                                                             Fund = record.Fund
-                                                                         }
-                                                                 }
-                                               });
+                                    new Voucher
+                                        {
+                                            Date = recordsGroup.Key.Date,
+                                            Currency = Voucher.BaseCurrency,
+                                            Details = new List<VoucherDetail>
+                                                {
+                                                    item(-1),
+                                                    new VoucherDetail
+                                                        {
+                                                            Title = 6602,
+                                                            SubTitle = 03,
+                                                            Content = res[0].Name,
+                                                            Fund = record.Fund
+                                                        }
+                                                }
+                                        });
                             else if (res.Count > 1)
                                 throw new ApplicationException(
                                     $"{ep} 匹配了多个模板：" + string.Join(" ", res.Select(t => t.Name)));
+
                             specialRecords.Add(record);
                         }
+
                         break;
                     default:
                         specialRecords.Add(record);
@@ -208,8 +211,8 @@ namespace AccountingServer.Plugins.THUInfo
         /// <param name="date">日期</param>
         /// <param name="result">生成的记账凭证</param>
         private static void GenerateSpecial(IEnumerable<Tuple<RegularType, string>> par,
-                                            IReadOnlyList<TransactionRecord> records, DateTime date,
-                                            out List<Voucher> result)
+            IReadOnlyList<TransactionRecord> records, DateTime date,
+            out List<Voucher> result)
         {
             result = new List<Voucher>();
             var id = 0;
@@ -217,14 +220,15 @@ namespace AccountingServer.Plugins.THUInfo
             {
                 if (id == records.Count)
                     throw new ArgumentException("生成记账所需参数不足", nameof(par));
+
                 Func<TransactionRecord, int, VoucherDetail> newDetail =
                     (tr, dir) => new VoucherDetail
-                                     {
-                                         Title = 1012,
-                                         SubTitle = 05,
-                                         Fund = dir * tr.Fund,
-                                         Remark = tr.Index.ToString(CultureInfo.InvariantCulture)
-                                     };
+                        {
+                            Title = 1012,
+                            SubTitle = 05,
+                            Fund = dir * tr.Fund,
+                            Remark = tr.Index.ToString(CultureInfo.InvariantCulture)
+                        };
                 switch (inst.Item1)
                 {
                     case RegularType.Meals:
@@ -238,54 +242,57 @@ namespace AccountingServer.Plugins.THUInfo
                             }
                             else
                                 t = records[id].Time;
+
                             if (records[id].Type == "消费" &&
                                 records[id].Location == "饮食中心")
                                 result.Add(
-                                           new Voucher
-                                               {
-                                                   Date = date,
-                                                   Currency = Voucher.BaseCurrency,
-                                                   Details = new List<VoucherDetail>
-                                                                 {
-                                                                     newDetail(records[id], -1),
-                                                                     new VoucherDetail
-                                                                         {
-                                                                             Title = 6602,
-                                                                             SubTitle = 03,
-                                                                             Content = inst.Item2,
-                                                                             Fund = records[id].Fund
-                                                                         }
-                                                                 }
-                                               });
+                                    new Voucher
+                                        {
+                                            Date = date,
+                                            Currency = Voucher.BaseCurrency,
+                                            Details = new List<VoucherDetail>
+                                                {
+                                                    newDetail(records[id], -1),
+                                                    new VoucherDetail
+                                                        {
+                                                            Title = 6602,
+                                                            SubTitle = 03,
+                                                            Content = inst.Item2,
+                                                            Fund = records[id].Fund
+                                                        }
+                                                }
+                                        });
                             else
                                 break;
+
                             id++;
                             if (id == records.Count)
                                 break;
                         }
+
                         break;
                     case RegularType.Shopping:
                         if (records[id].Type == "消费" &&
-                            (records[id].Location == "紫荆服务楼超市" ||
-                             records[id].Location == "饮食广场超市"))
+                        (records[id].Location == "紫荆服务楼超市" ||
+                            records[id].Location == "饮食广场超市"))
                         {
                             result.Add(
-                                       new Voucher
-                                           {
-                                               Date = date,
-                                               Currency = Voucher.BaseCurrency,
-                                               Details = new List<VoucherDetail>
-                                                             {
-                                                                 newDetail(records[id], -1),
-                                                                 new VoucherDetail
-                                                                     {
-                                                                         Title = 6602,
-                                                                         SubTitle = 06,
-                                                                         Content = inst.Item2,
-                                                                         Fund = records[id].Fund
-                                                                     }
-                                                             }
-                                           });
+                                new Voucher
+                                    {
+                                        Date = date,
+                                        Currency = Voucher.BaseCurrency,
+                                        Details = new List<VoucherDetail>
+                                            {
+                                                newDetail(records[id], -1),
+                                                new VoucherDetail
+                                                    {
+                                                        Title = 6602,
+                                                        SubTitle = 06,
+                                                        Content = inst.Item2,
+                                                        Fund = records[id].Fund
+                                                    }
+                                            }
+                                    });
                             id++;
                         }
                         break;
@@ -294,21 +301,21 @@ namespace AccountingServer.Plugins.THUInfo
                             records[id].Location == "")
                         {
                             result.Add(
-                                       new Voucher
-                                           {
-                                               Date = date,
-                                               Currency = Voucher.BaseCurrency,
-                                               Details = new List<VoucherDetail>
-                                                             {
-                                                                 newDetail(records[id], -1),
-                                                                 new VoucherDetail
-                                                                     {
-                                                                         Title = 1123,
-                                                                         Content = inst.Item2,
-                                                                         Fund = records[id].Fund
-                                                                     }
-                                                             }
-                                           });
+                                new Voucher
+                                    {
+                                        Date = date,
+                                        Currency = Voucher.BaseCurrency,
+                                        Details = new List<VoucherDetail>
+                                            {
+                                                newDetail(records[id], -1),
+                                                new VoucherDetail
+                                                    {
+                                                        Title = 1123,
+                                                        Content = inst.Item2,
+                                                        Fund = records[id].Fund
+                                                    }
+                                            }
+                                    });
                             id++;
                         }
                         break;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AccountingServer.BLL;
+using AccountingServer.Entities;
 
 namespace AccountingServer.Plugins.YieldRate
 {
@@ -89,10 +89,13 @@ namespace AccountingServer.Plugins.YieldRate
                     }
                     else
                         dir = del > 0 ? 1 : -1;
+
                     b -= lambda * del;
                 }
+
                 if (flag)
                     return b - 1;
+
                 lambda /= 2;
             }
         }

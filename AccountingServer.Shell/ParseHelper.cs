@@ -30,8 +30,10 @@ namespace AccountingServer.Shell
             {
                 if (char.IsWhiteSpace(expr[id]))
                     break;
+
                 id++;
             }
+
             var t = expr.Substring(0, id);
             expr = expr.Substring(id);
             return t;
@@ -63,7 +65,6 @@ namespace AccountingServer.Shell
         /// <returns>数</returns>
         public static double DoubleF(this FacadeBase facade, ref string expr)
         {
-            var t = expr;
             var token = facade.Token(ref expr);
             return double.Parse(token);
         }
@@ -75,11 +76,13 @@ namespace AccountingServer.Shell
         /// <param name="expr">表达式</param>
         /// <param name="opt">字符串</param>
         /// <returns>是否匹配</returns>
+        // ReSharper disable once UnusedParameter.Global
         public static bool Optional(this FacadeBase facade, ref string expr, string opt)
         {
             expr = expr.TrimStart();
             if (!expr.StartsWith(opt, StringComparison.Ordinal))
                 return false;
+
             expr = expr.Substring(opt.Length);
             return true;
         }
@@ -90,11 +93,13 @@ namespace AccountingServer.Shell
         /// <param name="facade">占位符</param>
         /// <param name="expr">表达式</param>
         /// <param name="c">引号（若为空表示任意）</param>
+        // ReSharper disable once UnusedParameter.Global
         public static string Quoted(this FacadeBase facade, ref string expr, char? c = null)
         {
             expr = expr.TrimStart();
             if (expr.Length < 1)
                 return null;
+
             var ch = expr[0];
             if (c != null &&
                 ch != c)
