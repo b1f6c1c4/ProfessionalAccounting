@@ -52,6 +52,7 @@ namespace AccountingServer.Shell
         {
             if (string.IsNullOrWhiteSpace(expr))
                 throw new ApplicationException("不允许执行空白检索式");
+
             var res = ParsingF.VoucherQuery(ref expr);
             ParsingF.Eof(expr);
             return PresentVoucherQuery(res);
@@ -82,6 +83,7 @@ namespace AccountingServer.Shell
             var sb = new StringBuilder();
             foreach (var voucher in m_Accountant.SelectVouchers(query))
                 sb.Append(CSharpHelper.PresentVoucher(voucher));
+
             return new EditableText(sb.ToString());
         }
 

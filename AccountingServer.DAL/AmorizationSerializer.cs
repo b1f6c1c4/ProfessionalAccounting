@@ -17,13 +17,13 @@ namespace AccountingServer.DAL
             bsonReader.ReadStartDocument();
 
             var amort = new Amortization
-                            {
-                                ID = bsonReader.ReadGuid("_id", ref read),
-                                Name = bsonReader.ReadString("name", ref read),
-                                Value = bsonReader.ReadDouble("value", ref read),
-                                Date = bsonReader.ReadDateTime("date", ref read),
-                                TotalDays = bsonReader.ReadInt32("tday", ref read)
-                            };
+                {
+                    ID = bsonReader.ReadGuid("_id", ref read),
+                    Name = bsonReader.ReadString("name", ref read),
+                    Value = bsonReader.ReadDouble("value", ref read),
+                    Date = bsonReader.ReadDateTime("date", ref read),
+                    TotalDays = bsonReader.ReadInt32("tday", ref read)
+                };
             switch (bsonReader.ReadString("interval", ref read))
             {
                 case "d":
@@ -48,6 +48,7 @@ namespace AccountingServer.DAL
                     amort.Interval = AmortizeInterval.LastDayOfYear;
                     break;
             }
+
             amort.Template = bsonReader.ReadDocument("template", ref read, new VoucherSerializer().Deserialize);
             amort.Schedule = bsonReader.ReadArray("schedule", ref read, new AmortItemSerializer().Deserialize);
             amort.Remark = bsonReader.ReadString("remark", ref read);
@@ -87,6 +88,7 @@ namespace AccountingServer.DAL
                     bsonWriter.Write("interval", "Y");
                     break;
             }
+
             if (amort.Template != null)
             {
                 bsonWriter.WriteName("template");
@@ -98,8 +100,10 @@ namespace AccountingServer.DAL
                 var serializer = new AmortItemSerializer();
                 foreach (var item in amort.Schedule)
                     serializer.Serialize(bsonWriter, item);
+
                 bsonWriter.WriteEndArray();
             }
+
             bsonWriter.Write("remark", amort.Remark);
             bsonWriter.WriteEndDocument();
         }

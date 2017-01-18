@@ -14,12 +14,12 @@ namespace AccountingServer.DAL
 
             bsonReader.ReadStartDocument();
             var item = new AmortItem
-                           {
-                               VoucherID = bsonReader.ReadObjectId("voucher", ref read),
-                               Date = bsonReader.ReadDateTime("date", ref read),
-                               Amount = bsonReader.ReadDouble("amount", ref read) ?? 0D,
-                               Remark = bsonReader.ReadString("remark", ref read)
-                           };
+                {
+                    VoucherID = bsonReader.ReadObjectId("voucher", ref read),
+                    Date = bsonReader.ReadDateTime("date", ref read),
+                    Amount = bsonReader.ReadDouble("amount", ref read) ?? 0D,
+                    Remark = bsonReader.ReadString("remark", ref read)
+                };
             bsonReader.ReadEndDocument();
             return item;
         }

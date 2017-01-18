@@ -113,25 +113,25 @@ namespace AccountingServer.Shell.Carry
             }
 
             PartialCarry(
-                         m_Accountant
-                             .RunGroupedQuery($"{CarrySettings.Config.ExpensesQuery} {rng.AsDateRange()}`Ctsc")
-                             .Where(b => b.Currency != Voucher.BaseCurrency),
-                         ed,
-                         true);
+                m_Accountant
+                    .RunGroupedQuery($"{CarrySettings.Config.ExpensesQuery} {rng.AsDateRange()}`Ctsc")
+                    .Where(b => b.Currency != Voucher.BaseCurrency),
+                ed,
+                true);
 
             PartialCarry(
-                         m_Accountant
-                             .RunGroupedQuery($"{CarrySettings.Config.Revenue1Query} {rng.AsDateRange()}`Ctsc")
-                             .Where(b => b.Currency != Voucher.BaseCurrency),
-                         ed,
-                         false);
+                m_Accountant
+                    .RunGroupedQuery($"{CarrySettings.Config.Revenue1Query} {rng.AsDateRange()}`Ctsc")
+                    .Where(b => b.Currency != Voucher.BaseCurrency),
+                ed,
+                false);
 
             PartialCarry(
-                         m_Accountant
-                             .RunGroupedQuery($"{CarrySettings.Config.Revenue2Query} {rng.AsDateRange()}`Ctsc")
-                             .Where(b => b.Currency != Voucher.BaseCurrency),
-                         ed,
-                         true);
+                m_Accountant
+                    .RunGroupedQuery($"{CarrySettings.Config.Revenue2Query} {rng.AsDateRange()}`Ctsc")
+                    .Where(b => b.Currency != Voucher.BaseCurrency),
+                ed,
+                true);
 
             if (ed.HasValue)
             {
@@ -175,22 +175,22 @@ namespace AccountingServer.Shell.Carry
             }
 
             PartialCarry(
-                         m_Accountant
-                             .RunGroupedQuery($"{CarrySettings.Config.ExpensesQuery} {rng.AsDateRange()} @@`Ctsc"),
-                         ed,
-                         true);
+                m_Accountant
+                    .RunGroupedQuery($"{CarrySettings.Config.ExpensesQuery} {rng.AsDateRange()} @@`Ctsc"),
+                ed,
+                true);
 
             PartialCarry(
-                         m_Accountant
-                             .RunGroupedQuery($"{CarrySettings.Config.Revenue1Query} {rng.AsDateRange()} @@`Ctsc"),
-                         ed,
-                         false);
+                m_Accountant
+                    .RunGroupedQuery($"{CarrySettings.Config.Revenue1Query} {rng.AsDateRange()} @@`Ctsc"),
+                ed,
+                false);
 
             PartialCarry(
-                         m_Accountant
-                             .RunGroupedQuery($"{CarrySettings.Config.Revenue2Query} {rng.AsDateRange()} @@`Ctsc"),
-                         ed,
-                         true);
+                m_Accountant
+                    .RunGroupedQuery($"{CarrySettings.Config.Revenue2Query} {rng.AsDateRange()} @@`Ctsc"),
+                ed,
+                true);
         }
 
         /// <summary>
@@ -216,13 +216,13 @@ namespace AccountingServer.Shell.Carry
                 {
                     b += balance.Fund;
                     voucher.Details.Add(
-                                        new VoucherDetail
-                                            {
-                                                Title = balance.Title,
-                                                SubTitle = balance.SubTitle,
-                                                Content = balance.Content,
-                                                Fund = -balance.Fund
-                                            });
+                        new VoucherDetail
+                            {
+                                Title = balance.Title,
+                                SubTitle = balance.SubTitle,
+                                Content = balance.Content,
+                                Fund = -balance.Fund
+                            });
                 }
 
                 if (b.IsZero())
@@ -231,12 +231,12 @@ namespace AccountingServer.Shell.Carry
                 if (grpCurrency.Key == Voucher.BaseCurrency)
                 {
                     voucher.Details.Add(
-                                        new VoucherDetail
-                                            {
-                                                Title = 4103,
-                                                SubTitle = target ? 01 : (int?)null,
-                                                Fund = b
-                                            });
+                        new VoucherDetail
+                            {
+                                Title = 4103,
+                                SubTitle = target ? 01 : (int?)null,
+                                Fund = b
+                            });
                     m_Accountant.Upsert(voucher);
                     continue;
                 }
@@ -247,13 +247,13 @@ namespace AccountingServer.Shell.Carry
                 var cob = Exchange.From(ed.Value, grpCurrency.Key) * b;
 
                 voucher.Details.Add(
-                                    new VoucherDetail
-                                        {
-                                            Title = 3999,
-                                            SubTitle = 01,
-                                            Content = Voucher.BaseCurrency,
-                                            Fund = b
-                                        });
+                    new VoucherDetail
+                        {
+                            Title = 3999,
+                            SubTitle = 01,
+                            Content = Voucher.BaseCurrency,
+                            Fund = b
+                        });
                 m_Accountant.Upsert(voucher);
 
                 var covoucher =

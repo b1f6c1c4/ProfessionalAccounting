@@ -1,7 +1,6 @@
 ﻿using System;
-using AccountingServer.Entities;
 
-namespace AccountingServer.BLL
+namespace AccountingServer.Entities
 {
     public static class AccountantHelper
     {
@@ -44,6 +43,7 @@ namespace AccountingServer.BLL
                 month += 12;
                 year--;
             }
+
             return new DateTime(year, month, 1).AddMonths(1).AddDays(-1);
         }
     }

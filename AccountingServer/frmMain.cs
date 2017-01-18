@@ -55,15 +55,15 @@ namespace AccountingServer
             scintilla.SetKeywords(0, "@ @new new null");
             scintilla.SetKeywords(1, "D G");
             scintilla.SetKeywords(
-                                  3,
-                                  "List Voucher VoucherDetail Asset AssetItem AcquisationItem DepreciationMethod DepreciateItem DevalueItem DispositionItem AmortizeInterval AmortItem Amortization");
+                3,
+                "List Voucher VoucherDetail Asset AssetItem AcquisationItem DepreciationMethod DepreciateItem DevalueItem DispositionItem AmortizeInterval AmortItem Amortization");
 
             acMenu.TargetControlWrapper = new ScintillaWrapper(scintilla);
             //var listView = ((AutocompleteListView)acMenu.ListView);
             //listView.ItemHeight = (int)(listView.ItemHeight);
             acMenu.SetAutocompleteItems(
-                                        "List Voucher VoucherDetail Asset AssetItem AcquisationItem DepreciationMethod DepreciateItem DevalueItem DispositionItem AmortizeInterval AmortItem Amortization"
-                                            .Split(' '));
+                "List Voucher VoucherDetail Asset AssetItem AcquisationItem DepreciationMethod DepreciateItem DevalueItem DispositionItem AmortizeInterval AmortItem Amortization"
+                    .Split(' '));
         }
 
         /// <summary>
@@ -76,9 +76,9 @@ namespace AccountingServer
         private bool GetEditableText(out int begin, out int end, out string typeName)
         {
             begin = scintilla.Text.LastIndexOf(
-                                               "@new",
-                                               scintilla.SelectionEnd,
-                                               StringComparison.Ordinal);
+                "@new",
+                scintilla.SelectionEnd,
+                StringComparison.Ordinal);
 
             typeName = null;
 
@@ -92,9 +92,9 @@ namespace AccountingServer
                 end += 2;
 
             typeName = scintilla.Text.Substring(
-                                                begin + 5,
-                                                scintilla.Text.IndexOfAny(new[] { ' ', '{' }, begin + 5)
-                                                - begin - 5);
+                begin + 5,
+                scintilla.Text.IndexOfAny(new[] { ' ', '{' }, begin + 5)
+                - begin - 5);
             return true;
         }
 
@@ -136,6 +136,7 @@ namespace AccountingServer
                 return textBoxCommand_Key(keyData) || base.ProcessCmdKey(ref msg, keyData);
             if (scintilla.Focused)
                 return scintilla_Key(keyData) || base.ProcessCmdKey(ref msg, keyData);
+
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
@@ -148,6 +149,7 @@ namespace AccountingServer
                     ExitFastEditing();
                 return true;
             }
+
             if (keyData == Keys.Tab)
             {
                 scintilla.Focus();
@@ -155,6 +157,7 @@ namespace AccountingServer
                 scintilla.ScrollCaret();
                 return true;
             }
+
             if (keyData == Keys.Enter &&
                 !m_FastEditing)
                 if (textBoxCommand.Text.Length == 0)
@@ -164,14 +167,17 @@ namespace AccountingServer
                 }
                 else
                     return ExecuteCommand(false);
+
             if (keyData == (Keys.Enter | Keys.Shift) &&
                 !m_FastEditing)
                 return ExecuteCommand(true);
+
             if (keyData == Keys.Enter && m_FastEditing)
                 if (textBoxCommand.Text.Length == 0)
                 {
                     if (!PerformUpsert())
                         return false;
+
                     ExitFastEditing();
                     return true;
                 }
@@ -180,6 +186,7 @@ namespace AccountingServer
                     FastEdit();
                     return true;
                 }
+
             return false;
         }
 
@@ -190,17 +197,19 @@ namespace AccountingServer
                 FocusTextBoxCommand();
                 return true;
             }
+
             if (keyData == (Keys.Enter | Keys.Alt))
                 return PerformUpsert();
             if (keyData == (Keys.Delete | Keys.Alt))
                 return PerformRemoval();
+
             if ((keyData == Keys.Tab || keyData == Keys.Enter) &&
                 m_FastEditing)
             {
                 if (m_FastNextLocationDelta == m_FastInsertLocationDelta)
                 {
                     scintilla.SelectionStart += m_FastNextLocationDelta + scintilla.SelectionEnd -
-                                                scintilla.SelectionStart - 4;
+                        scintilla.SelectionStart - 4;
                     FocusTextBoxCommand();
                 }
                 else
@@ -211,6 +220,7 @@ namespace AccountingServer
                 }
                 return true;
             }
+
             return false;
         }
     }

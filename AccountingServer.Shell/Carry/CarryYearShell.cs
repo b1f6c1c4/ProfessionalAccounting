@@ -105,33 +105,33 @@ namespace AccountingServer.Shell.Carry
 
             if (!b00.IsZero())
                 m_Accountant.Upsert(
-                                    new Voucher
-                                        {
-                                            Date = ed,
-                                            Type = VoucherType.AnnualCarry,
-                                            Currency = Voucher.BaseCurrency,
-                                            Details =
-                                                new List<VoucherDetail>
-                                                    {
-                                                        new VoucherDetail { Title = 4101, Fund = b00 },
-                                                        new VoucherDetail { Title = 4103, Fund = -b00 }
-                                                    }
-                                        });
+                    new Voucher
+                        {
+                            Date = ed,
+                            Type = VoucherType.AnnualCarry,
+                            Currency = Voucher.BaseCurrency,
+                            Details =
+                                new List<VoucherDetail>
+                                    {
+                                        new VoucherDetail { Title = 4101, Fund = b00 },
+                                        new VoucherDetail { Title = 4103, Fund = -b00 }
+                                    }
+                        });
 
             if (!b01.IsZero())
                 m_Accountant.Upsert(
-                                    new Voucher
-                                        {
-                                            Date = ed,
-                                            Type = VoucherType.AnnualCarry,
-                                            Currency = Voucher.BaseCurrency,
-                                            Details =
-                                                new List<VoucherDetail>
-                                                    {
-                                                        new VoucherDetail { Title = 4101, SubTitle = 01, Fund = b01 },
-                                                        new VoucherDetail { Title = 4103, SubTitle = 01, Fund = -b01 }
-                                                    }
-                                        });
+                    new Voucher
+                        {
+                            Date = ed,
+                            Type = VoucherType.AnnualCarry,
+                            Currency = Voucher.BaseCurrency,
+                            Details =
+                                new List<VoucherDetail>
+                                    {
+                                        new VoucherDetail { Title = 4101, SubTitle = 01, Fund = b01 },
+                                        new VoucherDetail { Title = 4103, SubTitle = 01, Fund = -b01 }
+                                    }
+                        });
         }
     }
 }

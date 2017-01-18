@@ -31,6 +31,7 @@ namespace AccountingServer.Plugins.Utilities
                     if (Accountant.Upsert(voucher))
                         count++;
             }
+
             return new NumberAffected(count);
         }
 
@@ -41,6 +42,7 @@ namespace AccountingServer.Plugins.Utilities
             sb.AppendLine(base.ListHelp());
             foreach (var util in Templates.Config.Templates)
                 sb.AppendLine($"{util.Name}\t\t{util.Description}");
+
             return sb.ToString();
         }
 
@@ -70,6 +72,7 @@ namespace AccountingServer.Plugins.Utilities
                 {
                     if (!template.Default.HasValue)
                         throw new ApplicationException($"常见记账凭证{template.Name}没有默认值");
+
                     val = template.Default.Value;
                 }
 
@@ -85,6 +88,7 @@ namespace AccountingServer.Plugins.Utilities
                         num = arr[0].Fund - val;
                 }
             }
+
             if (num.IsZero())
                 return null;
 
@@ -102,24 +106,24 @@ namespace AccountingServer.Plugins.Utilities
         {
             var lst =
                 template.Details
-                        .Select(
-                                d =>
-                                new VoucherDetail
-                                    {
-                                        Title = d.Title,
-                                        SubTitle = d.SubTitle,
-                                        Content = d.Content,
-                                        Fund = num * d.Fund,
-                                        Remark = d.Remark
-                                    }).ToList();
+                    .Select(
+                        d =>
+                            new VoucherDetail
+                                {
+                                    Title = d.Title,
+                                    SubTitle = d.SubTitle,
+                                    Content = d.Content,
+                                    Fund = num * d.Fund,
+                                    Remark = d.Remark
+                                }).ToList();
             var voucher = new Voucher
-                              {
-                                  Date = time,
-                                  Remark = template.Remark,
-                                  Type = template.Type,
-                                  Currency = template.Currency,
-                                  Details = lst
-                              };
+                {
+                    Date = time,
+                    Remark = template.Remark,
+                    Type = template.Type,
+                    Currency = template.Currency,
+                    Details = lst
+                };
             return voucher;
         }
     }

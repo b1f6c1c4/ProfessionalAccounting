@@ -20,7 +20,7 @@ namespace AccountingServer.Shell
 
         /// <inheritdoc />
         protected override IQueryResult ExecuteList(IQueryCompunded<IDistributedQueryAtom> distQuery, DateTime? dt,
-                                                    bool showSchedule)
+            bool showSchedule)
         {
             var sb = new StringBuilder();
             foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
@@ -28,6 +28,7 @@ namespace AccountingServer.Shell
 
             if (showSchedule)
                 return new EditableText(sb.ToString());
+
             return new UnEditableText(sb.ToString());
         }
 
@@ -43,7 +44,7 @@ namespace AccountingServer.Shell
 
         /// <inheritdoc />
         protected override IQueryResult ExecuteRegister(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
-                                                        IQueryCompunded<IVoucherQueryAtom> query)
+            IQueryCompunded<IVoucherQueryAtom> query)
         {
             var sb = new StringBuilder();
             foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
@@ -53,15 +54,17 @@ namespace AccountingServer.Shell
 
                 Accountant.Upsert(a);
             }
+
             if (sb.Length > 0)
                 return new EditableText(sb.ToString());
+
             return new Succeed();
         }
 
         /// <inheritdoc />
         protected override IQueryResult ExecuteUnregister(IQueryCompunded<IDistributedQueryAtom> distQuery,
-                                                          DateFilter rng,
-                                                          IQueryCompunded<IVoucherQueryAtom> query)
+            DateFilter rng,
+            IQueryCompunded<IVoucherQueryAtom> query)
         {
             var sb = new StringBuilder();
             foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
@@ -78,12 +81,14 @@ namespace AccountingServer.Shell
                             if (!MatchHelper.IsMatch(query, voucher.IsMatch))
                                 continue;
                     }
+
                     item.VoucherID = null;
                 }
 
                 sb.Append(ListAsset(a));
                 Accountant.Upsert(a);
             }
+
             return new EditableText(sb.ToString());
         }
 
@@ -97,45 +102,50 @@ namespace AccountingServer.Shell
                 sb.Append(CSharpHelper.PresentAsset(a));
                 Accountant.Upsert(a);
             }
+
             return new EditableText(sb.ToString());
         }
 
         /// <inheritdoc />
         protected override IQueryResult ExecuteResetSoft(IQueryCompunded<IDistributedQueryAtom> distQuery,
-                                                         DateFilter rng)
+            DateFilter rng)
         {
             var cnt = 0L;
             foreach (var a in Accountant.SelectAssets(distQuery))
             {
                 if (a.Schedule == null)
                     continue;
+
                 var flag = false;
                 foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
-                                      .Where(item => item.VoucherID != null)
-                                      .Where(item => Accountant.SelectVoucher(item.VoucherID) == null))
+                    .Where(item => item.VoucherID != null)
+                    .Where(item => Accountant.SelectVoucher(item.VoucherID) == null))
                 {
                     item.VoucherID = null;
                     cnt++;
                     flag = true;
                 }
+
                 if (flag)
                     Accountant.Upsert(a);
             }
+
             return new NumberAffected(cnt);
         }
 
         /// <inheritdoc />
         protected override IQueryResult ExcuteResetMixed(IQueryCompunded<IDistributedQueryAtom> distQuery,
-                                                         DateFilter rng)
+            DateFilter rng)
         {
             var cnt = 0L;
             foreach (var a in Accountant.SelectAssets(distQuery))
             {
                 if (a.Schedule == null)
                     continue;
+
                 var flag = false;
                 foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
-                                      .Where(item => item.VoucherID != null))
+                    .Where(item => item.VoucherID != null))
                 {
                     var voucher = Accountant.SelectVoucher(item.VoucherID);
                     if (voucher == null)
@@ -151,32 +161,34 @@ namespace AccountingServer.Shell
                         flag = true;
                     }
                 }
+
                 if (flag)
                     Accountant.Upsert(a);
             }
+
             return new NumberAffected(cnt);
         }
 
         protected override IQueryResult ExecuteResetHard(IQueryCompunded<IDistributedQueryAtom> distQuery,
-                                                         IQueryCompunded<IVoucherQueryAtom> query)
+            IQueryCompunded<IVoucherQueryAtom> query)
         {
             Func<Asset, IQueryCompunded<IVoucherQueryAtom>> getMainQ =
                 a =>
-                ParsingF.VoucherQuery(
-                                      $"{{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} }}*{{ {{ Depreciation }} + {{ Devalue }} }}");
+                    ParsingF.VoucherQuery(
+                        $"{{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} }}*{{ {{ Depreciation }} + {{ Devalue }} }}");
             return new NumberAffected(
                 Accountant.SelectAssets(distQuery)
-                          .Sum(
-                               a => Accountant.DeleteVouchers(
-                                                              new VoucherQueryAryBase
-                                                                  (
-                                                                  OperatorType.Intersect,
-                                                                  new[] { query, getMainQ(a) }))));
+                    .Sum(
+                        a => Accountant.DeleteVouchers(
+                            new VoucherQueryAryBase
+                            (
+                                OperatorType.Intersect,
+                                new[] { query, getMainQ(a) }))));
         }
 
         /// <inheritdoc />
         protected override IQueryResult ExecuteApply(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
-                                                     bool isCollapsed)
+            bool isCollapsed)
         {
             var sb = new StringBuilder();
             foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
@@ -186,8 +198,10 @@ namespace AccountingServer.Shell
 
                 Accountant.Upsert(a);
             }
+
             if (sb.Length > 0)
                 return new EditableText(sb.ToString());
+
             return new Succeed();
         }
 
@@ -214,8 +228,10 @@ namespace AccountingServer.Shell
 
                 Accountant.Upsert(a);
             }
+
             if (sb.Length > 0)
                 return new EditableText(sb.ToString());
+
             return new Succeed();
         }
 
@@ -234,14 +250,15 @@ namespace AccountingServer.Shell
             if (dt.HasValue &&
                 (!bookValue.HasValue || bookValue.Value.IsZero()))
                 return null;
+
             sb.AppendLine(
-                          $"{asset.StringID} {asset.Name.CPadRight(35)}{asset.Date:yyyyMMdd}" +
-                          $"{asset.Value.AsCurrency().CPadLeft(13)}{(dt.HasValue ? bookValue.AsCurrency().CPadLeft(13) : "-".CPadLeft(13))}" +
-                          $"{asset.Salvge.AsCurrency().CPadLeft(13)}{asset.Title.AsTitle().CPadLeft(5)}" +
-                          $"{asset.DepreciationTitle.AsTitle().CPadLeft(5)}{asset.DevaluationTitle.AsTitle().CPadLeft(5)}" +
-                          $"{asset.DepreciationExpenseTitle.AsTitle().CPadLeft(5)}{asset.DepreciationExpenseSubTitle.AsSubTitle()}" +
-                          $"{asset.DevaluationExpenseTitle.AsTitle().CPadLeft(5)}{asset.DevaluationExpenseSubTitle.AsSubTitle()}" +
-                          $"{asset.Life.ToString().CPadLeft(4)}{asset.Method.ToString().CPadLeft(20)}");
+                $"{asset.StringID} {asset.Name.CPadRight(35)}{asset.Date:yyyyMMdd}" +
+                $"{asset.Value.AsCurrency().CPadLeft(13)}{(dt.HasValue ? bookValue.AsCurrency().CPadLeft(13) : "-".CPadLeft(13))}" +
+                $"{asset.Salvge.AsCurrency().CPadLeft(13)}{asset.Title.AsTitle().CPadLeft(5)}" +
+                $"{asset.DepreciationTitle.AsTitle().CPadLeft(5)}{asset.DevaluationTitle.AsTitle().CPadLeft(5)}" +
+                $"{asset.DepreciationExpenseTitle.AsTitle().CPadLeft(5)}{asset.DepreciationExpenseSubTitle.AsSubTitle()}" +
+                $"{asset.DevaluationExpenseTitle.AsTitle().CPadLeft(5)}{asset.DevaluationExpenseSubTitle.AsSubTitle()}" +
+                $"{asset.Life.ToString().CPadLeft(4)}{asset.Method.ToString().CPadLeft(20)}");
             if (showSchedule && asset.Schedule != null)
                 foreach (var assetItem in asset.Schedule)
                 {
@@ -249,6 +266,7 @@ namespace AccountingServer.Shell
                     if (assetItem.VoucherID != null)
                         sb.AppendLine(CSharpHelper.PresentVoucher(Accountant.SelectVoucher(assetItem.VoucherID)));
                 }
+
             return sb.ToString();
         }
 
@@ -261,32 +279,33 @@ namespace AccountingServer.Shell
         {
             if (assetItem is AcquisationItem)
                 return string.Format(
-                                     "   {0:yyyMMdd} ACQ:{1} ={3} ({2})",
-                                     assetItem.Date,
-                                     (assetItem as AcquisationItem).OrigValue.AsCurrency().CPadLeft(13),
-                                     assetItem.VoucherID,
-                                     assetItem.Value.AsCurrency().CPadLeft(13));
+                    "   {0:yyyMMdd} ACQ:{1} ={3} ({2})",
+                    assetItem.Date,
+                    (assetItem as AcquisationItem).OrigValue.AsCurrency().CPadLeft(13),
+                    assetItem.VoucherID,
+                    assetItem.Value.AsCurrency().CPadLeft(13));
             if (assetItem is DepreciateItem)
                 return string.Format(
-                                     "   {0:yyyMMdd} DEP:{1} ={3} ({2})",
-                                     assetItem.Date,
-                                     (assetItem as DepreciateItem).Amount.AsCurrency().CPadLeft(13),
-                                     assetItem.VoucherID,
-                                     assetItem.Value.AsCurrency().CPadLeft(13));
+                    "   {0:yyyMMdd} DEP:{1} ={3} ({2})",
+                    assetItem.Date,
+                    (assetItem as DepreciateItem).Amount.AsCurrency().CPadLeft(13),
+                    assetItem.VoucherID,
+                    assetItem.Value.AsCurrency().CPadLeft(13));
             if (assetItem is DevalueItem)
                 return string.Format(
-                                     "   {0:yyyMMdd} DEV:{1} ={3} ({2})",
-                                     assetItem.Date,
-                                     (assetItem as DevalueItem).Amount.AsCurrency().CPadLeft(13),
-                                     assetItem.VoucherID,
-                                     assetItem.Value.AsCurrency().CPadLeft(13));
+                    "   {0:yyyMMdd} DEV:{1} ={3} ({2})",
+                    assetItem.Date,
+                    (assetItem as DevalueItem).Amount.AsCurrency().CPadLeft(13),
+                    assetItem.VoucherID,
+                    assetItem.Value.AsCurrency().CPadLeft(13));
             if (assetItem is DispositionItem)
                 return string.Format(
-                                     "   {0:yyyMMdd} DSP:{1} ={3} ({2})",
-                                     assetItem.Date,
-                                     "ALL".CPadLeft(13),
-                                     assetItem.VoucherID,
-                                     assetItem.Value.AsCurrency().CPadLeft(13));
+                    "   {0:yyyMMdd} DSP:{1} ={3} ({2})",
+                    assetItem.Date,
+                    "ALL".CPadLeft(13),
+                    assetItem.VoucherID,
+                    assetItem.Value.AsCurrency().CPadLeft(13));
+
             return null;
         }
 

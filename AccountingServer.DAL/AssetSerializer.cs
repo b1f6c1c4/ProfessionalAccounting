@@ -17,19 +17,19 @@ namespace AccountingServer.DAL
             bsonReader.ReadStartDocument();
 
             var asset = new Asset
-                            {
-                                ID = bsonReader.ReadGuid("_id", ref read),
-                                Name = bsonReader.ReadString("name", ref read),
-                                Date = bsonReader.ReadDateTime("date", ref read),
-                                Value = bsonReader.ReadDouble("value", ref read),
-                                Salvge = bsonReader.ReadDouble("salvge", ref read),
-                                Life = bsonReader.ReadInt32("life", ref read),
-                                Title = bsonReader.ReadInt32("title", ref read),
-                                DepreciationTitle = bsonReader.ReadInt32("deptitle", ref read),
-                                DevaluationTitle = bsonReader.ReadInt32("devtitle", ref read),
-                                DepreciationExpenseTitle = bsonReader.ReadInt32("exptitle", ref read),
-                                DevaluationExpenseTitle = bsonReader.ReadInt32("exvtitle", ref read)
-                            };
+                {
+                    ID = bsonReader.ReadGuid("_id", ref read),
+                    Name = bsonReader.ReadString("name", ref read),
+                    Date = bsonReader.ReadDateTime("date", ref read),
+                    Value = bsonReader.ReadDouble("value", ref read),
+                    Salvge = bsonReader.ReadDouble("salvge", ref read),
+                    Life = bsonReader.ReadInt32("life", ref read),
+                    Title = bsonReader.ReadInt32("title", ref read),
+                    DepreciationTitle = bsonReader.ReadInt32("deptitle", ref read),
+                    DevaluationTitle = bsonReader.ReadInt32("devtitle", ref read),
+                    DepreciationExpenseTitle = bsonReader.ReadInt32("exptitle", ref read),
+                    DevaluationExpenseTitle = bsonReader.ReadInt32("exvtitle", ref read)
+                };
             switch (bsonReader.ReadString("method", ref read))
             {
                 case "sl":
@@ -45,6 +45,7 @@ namespace AccountingServer.DAL
                     asset.Method = DepreciationMethod.None;
                     break;
             }
+
             if (asset.DepreciationExpenseTitle > 100)
             {
                 asset.DepreciationExpenseSubTitle = asset.DepreciationExpenseTitle % 100;
@@ -74,15 +75,15 @@ namespace AccountingServer.DAL
             bsonWriter.Write("deptitle", asset.DepreciationTitle);
             bsonWriter.Write("devtitle", asset.DevaluationTitle);
             bsonWriter.Write(
-                             "exptitle",
-                             asset.DepreciationExpenseSubTitle.HasValue
-                                 ? asset.DepreciationExpenseTitle * 100 + asset.DepreciationExpenseSubTitle
-                                 : asset.DepreciationExpenseTitle);
+                "exptitle",
+                asset.DepreciationExpenseSubTitle.HasValue
+                    ? asset.DepreciationExpenseTitle * 100 + asset.DepreciationExpenseSubTitle
+                    : asset.DepreciationExpenseTitle);
             bsonWriter.Write(
-                             "exvtitle",
-                             asset.DevaluationExpenseSubTitle.HasValue
-                                 ? asset.DevaluationExpenseTitle * 100 + asset.DevaluationExpenseSubTitle
-                                 : asset.DevaluationExpenseTitle);
+                "exvtitle",
+                asset.DevaluationExpenseSubTitle.HasValue
+                    ? asset.DevaluationExpenseTitle * 100 + asset.DevaluationExpenseSubTitle
+                    : asset.DevaluationExpenseTitle);
             switch (asset.Method)
             {
                 case DepreciationMethod.StraightLine:
@@ -95,14 +96,17 @@ namespace AccountingServer.DAL
                     bsonWriter.Write("method", "dd");
                     break;
             }
+
             if (asset.Schedule != null)
             {
                 bsonWriter.WriteStartArray("schedule");
                 var serializer = new AssetItemSerializer();
                 foreach (var item in asset.Schedule)
                     serializer.Serialize(bsonWriter, item);
+
                 bsonWriter.WriteEndArray();
             }
+
             bsonWriter.Write("remark", asset.Remark);
             bsonWriter.WriteEndDocument();
         }

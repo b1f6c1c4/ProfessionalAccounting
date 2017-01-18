@@ -83,7 +83,7 @@ namespace AccountingServer.Plugins.THUInfo
         {
             var buf =
                 Encoding.UTF8
-                        .GetBytes("begindate=&enddate=&transtype=&dept=");
+                    .GetBytes("begindate=&enddate=&transtype=&dept=");
             var req = WebRequest.Create(@"http://ecard.tsinghua.edu.cn/user/ExDetailsDown.do?") as HttpWebRequest;
 
             if (req == null)
@@ -188,7 +188,7 @@ namespace AccountingServer.Plugins.THUInfo
         {
             var buf =
                 Encoding.GetEncoding("GBK")
-                        .GetBytes($"redirect=NO&userName={username}&password={password}");
+                    .GetBytes($"redirect=NO&userName={username}&password={password}");
             var req = WebRequest.Create(@"http://info.tsinghua.edu.cn/Login") as HttpWebRequest;
 
             if (req == null)
@@ -228,8 +228,10 @@ namespace AccountingServer.Plugins.THUInfo
                     s.Write(buf, 0, length);
                     length = stream.Read(buf, 0, 1024);
                 }
+
                 s.Flush();
             }
+
             return tempFileName;
         }
 
@@ -240,7 +242,7 @@ namespace AccountingServer.Plugins.THUInfo
         private IEnumerable<TransactionRecord> GetData()
         {
             var strCon = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + m_FileName +
-                         ";Extended Properties='Excel 8.0;IMEX=1'";
+                ";Extended Properties='Excel 8.0;IMEX=1'";
             var conn = new OleDbConnection(strCon);
             conn.Open();
 
@@ -254,14 +256,14 @@ namespace AccountingServer.Plugins.THUInfo
             return from DataRow row in ds.Tables[0].Rows
                    where !row.IsNull(4) && !row.IsNull(5)
                    select new TransactionRecord
-                              {
-                                  Index = Convert.ToInt32(row[0]),
-                                  Location = row[1].ToString().Trim(),
-                                  Type = row[2].ToString().Trim(),
-                                  Endpoint = row[3].ToString().Trim(),
-                                  Time = Convert.ToDateTime(row[4]),
-                                  Fund = Convert.ToDouble(row[5])
-                              };
+                       {
+                           Index = Convert.ToInt32(row[0]),
+                           Location = row[1].ToString().Trim(),
+                           Type = row[2].ToString().Trim(),
+                           Endpoint = row[3].ToString().Trim(),
+                           Time = Convert.ToDateTime(row[4]),
+                           Fund = Convert.ToDouble(row[5])
+                       };
         }
     }
 }

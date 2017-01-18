@@ -6,23 +6,23 @@ using AccountingServer.Entities;
 namespace AccountingServer.BLL
 {
     /// <summary>
-    ///     ·ÖÆÚ»á¼ÆÒµÎñ´¦ÀíÀà
+    ///     åˆ†æœŸä¼šè®¡ä¸šåŠ¡å¤„ç†ç±»
     /// </summary>
     internal abstract class DistributedAccountant
     {
         /// <summary>
-        ///     Êı¾İ¿â·ÃÎÊ
+        ///     æ•°æ®åº“è®¿é—®
         /// </summary>
         protected readonly IDbAdapter Db;
 
         protected DistributedAccountant(IDbAdapter db) { Db = db; }
 
         /// <summary>
-        ///     »ñÈ¡·ÖÆÚµÄÊ£Óà
+        ///     è·å–åˆ†æœŸçš„å‰©ä½™
         /// </summary>
-        /// <param name="dist">·ÖÆÚ</param>
-        /// <param name="dt">ÈÕÆÚ£¬ÈôÎª<c>null</c>Ôò·µ»Ø×Ü¶î</param>
-        /// <returns>Ö¸¶¨ÈÕÆÚµÄ×Ü¶î£¬ÈôÔçÓÚÈÕÆÚÔòÎª<c>null</c></returns>
+        /// <param name="dist">åˆ†æœŸ</param>
+        /// <param name="dt">æ—¥æœŸï¼Œè‹¥ä¸º<c>null</c>åˆ™è¿”å›æ€»é¢</param>
+        /// <returns>æŒ‡å®šæ—¥æœŸçš„æ€»é¢ï¼Œè‹¥æ—©äºæ—¥æœŸåˆ™ä¸º<c>null</c></returns>
         public static double? GetBookValueOn(IDistributed dist, DateTime? dt)
         {
             if (!dt.HasValue ||
@@ -34,25 +34,27 @@ namespace AccountingServer.BLL
                 return last.Value;
             if (DateHelper.CompareDate(dist.Date, dt) <= 0)
                 return dist.Value;
+
             return null;
         }
 
         /// <summary>
-        ///     ¸üĞÂ¼ÇÕËÆ¾Ö¤µÄÏ¸Ä¿
+        ///     æ›´æ–°è®°è´¦å‡­è¯çš„ç»†ç›®
         /// </summary>
-        /// <param name="expected">Ó¦ÌîÏ¸Ä¿</param>
-        /// <param name="voucher">¼ÇÕËÆ¾Ö¤</param>
-        /// <param name="sucess">ÊÇ·ñ³É¹¦</param>
-        /// <param name="modified">ÊÇ·ñ¸ü¸ÄÁË¼ÇÕËÆ¾Ö¤</param>
-        /// <param name="editOnly">ÊÇ·ñÖ»ÔÊĞí¸üĞÂ</param>
+        /// <param name="expected">åº”å¡«ç»†ç›®</param>
+        /// <param name="voucher">è®°è´¦å‡­è¯</param>
+        /// <param name="sucess">æ˜¯å¦æˆåŠŸ</param>
+        /// <param name="modified">æ˜¯å¦æ›´æ”¹äº†è®°è´¦å‡­è¯</param>
+        /// <param name="editOnly">æ˜¯å¦åªå…è®¸æ›´æ–°</param>
         protected static void UpdateDetail(VoucherDetail expected, Voucher voucher,
-                                           out bool sucess, out bool modified, bool editOnly = false)
+            out bool sucess, out bool modified, bool editOnly = false)
         {
             sucess = false;
             modified = false;
 
             if (!expected.Fund.HasValue)
-                throw new ArgumentException("Ó¦ÌîÏ¸Ä¿µÄ½ğ¶îÎªnull", nameof(expected));
+                throw new ArgumentException("åº”å¡«ç»†ç›®çš„é‡‘é¢ä¸ºnull", nameof(expected));
+
             var fund = expected.Fund.Value;
             expected.Fund = null;
             var isEliminated = fund.IsZero();
@@ -77,6 +79,7 @@ namespace AccountingServer.BLL
                 modified = true;
                 return;
             }
+
             if (ds.Count > 1)
                 return;
 

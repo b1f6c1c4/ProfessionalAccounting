@@ -38,6 +38,7 @@ namespace AccountingServer.Plugins
             {
                 if (stream == null)
                     throw new MissingManifestResourceException();
+
                 using (var reader = new StreamReader(stream))
                     return reader.ReadToEnd();
             }

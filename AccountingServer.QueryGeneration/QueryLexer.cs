@@ -1,4 +1,4 @@
-﻿namespace AccountingServer.Entities.Query
+﻿namespace AccountingServer.QueryGeneration
 {
     public class QueryLexer { }
 }

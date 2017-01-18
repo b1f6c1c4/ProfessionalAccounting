@@ -45,6 +45,7 @@ namespace AccountingServer.DAL
         {
             if (bsonReader.IsEndOfDocument())
                 return false;
+
             if (read == null)
                 read = bsonReader.ReadName();
             if (read != expected)
@@ -71,6 +72,7 @@ namespace AccountingServer.DAL
                 bsonReader.ReadNull();
                 return false;
             }
+
             if (bsonReader.CurrentBsonType == BsonType.Undefined)
             {
                 bsonReader.ReadUndefined();
@@ -89,7 +91,7 @@ namespace AccountingServer.DAL
         /// <param name="readFunc">类型读取器</param>
         /// <returns>读取结果</returns>
         private static T ReadClass<T>(this IBsonReader bsonReader, string expected, ref string read,
-                                      Func<T> readFunc) where T : class
+            Func<T> readFunc) where T : class
             => ReadPrep(bsonReader, expected, ref read) ? readFunc() : null;
 
         /// <summary>
@@ -101,7 +103,7 @@ namespace AccountingServer.DAL
         /// <param name="readFunc">类型读取器</param>
         /// <returns>读取结果</returns>
         private static T? ReadStruct<T>(this IBsonReader bsonReader, string expected, ref string read,
-                                        Func<T> readFunc) where T : struct
+            Func<T> readFunc) where T : struct
             => ReadPrep(bsonReader, expected, ref read) ? readFunc() : (T?)null;
 
         /// <summary>
@@ -163,11 +165,11 @@ namespace AccountingServer.DAL
         /// <returns>读取结果</returns>
         public static DateTime? ReadDateTime(this IBsonReader bsonReader, string expected, ref string read)
             => ReadStruct(
-                          bsonReader,
-                          expected,
-                          ref read,
-                          () =>
-                          BsonUtils.ToDateTimeFromMillisecondsSinceEpoch(bsonReader.ReadDateTime()).ToLocalTime());
+                bsonReader,
+                expected,
+                ref read,
+                () =>
+                    BsonUtils.ToDateTimeFromMillisecondsSinceEpoch(bsonReader.ReadDateTime()).ToLocalTime());
 
         /// <summary>
         ///     安全地读入<c>null</c>类型的字段
@@ -194,7 +196,7 @@ namespace AccountingServer.DAL
         /// <param name="parser">文档读取器</param>
         /// <returns>读取结果</returns>
         public static T ReadDocument<T>(this IBsonReader bsonReader, string expected, ref string read,
-                                        Func<IBsonReader, T> parser) where T : class
+            Func<IBsonReader, T> parser) where T : class
             => ReadPrep(bsonReader, expected, ref read) ? parser(bsonReader) : null;
 
         /// <summary>
@@ -206,7 +208,7 @@ namespace AccountingServer.DAL
         /// <param name="parser">数组元素读取器</param>
         /// <returns>读取结果</returns>
         public static List<T> ReadArray<T>(this IBsonReader bsonReader, string expected, ref string read,
-                                           Func<IBsonReader, T> parser)
+            Func<IBsonReader, T> parser)
         {
             if (!ReadPrep(bsonReader, expected, ref read))
                 return null;
@@ -215,6 +217,7 @@ namespace AccountingServer.DAL
             bsonReader.ReadStartArray();
             while (!bsonReader.IsEndOfArray())
                 lst.Add(parser(bsonReader));
+
             bsonReader.ReadEndArray();
             return lst;
         }

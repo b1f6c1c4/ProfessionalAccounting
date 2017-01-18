@@ -52,8 +52,10 @@ namespace AccountingServer.Shell
                 sb.AppendLine(val > 0 ? $"/* Debit - Credit = {val:R} */" : $"/* Credit - Debit = {-val:R} */");
                 sb.Append(CSharpHelper.PresentVoucher(voucher));
             }
+
             if (sb.Length > 0)
                 return new EditableText(sb.ToString());
+
             return new Succeed();
         }
 
@@ -68,63 +70,66 @@ namespace AccountingServer.Shell
             {
                 if (!title.IsVirtual)
                     if (Math.Abs(title.Direction) == 1)
-                        DoCheck(m_Accountant.RunVoucherQuery(
-                                                             $"T{title.Id.AsTitle()}00 {(title.Direction < 0 ? ">" : "<")} G")
-                                            .SelectMany(
-                                                        v => v.Details.Where(d => d.Title == title.Id)
-                                                              .Select(d => new Tuple<Voucher, VoucherDetail>(v, d))),
-                                $"T{title.Id.AsTitle()}00",
-                                sb);
+                        DoCheck(
+                            m_Accountant.RunVoucherQuery(
+                                    $"T{title.Id.AsTitle()}00 {(title.Direction < 0 ? ">" : "<")} G")
+                                .SelectMany(
+                                    v => v.Details.Where(d => d.Title == title.Id)
+                                        .Select(d => new Tuple<Voucher, VoucherDetail>(v, d))),
+                            $"T{title.Id.AsTitle()}00",
+                            sb);
                     else if (Math.Abs(title.Direction) == 2)
                         DoCheck(
-                                title.Direction,
-                                m_Accountant.RunGroupedQuery($"T{title.Id.AsTitle()}00 G`cD"),
-                                $"T{title.Id.AsTitle()}00",
-                                sb);
+                            title.Direction,
+                            m_Accountant.RunGroupedQuery($"T{title.Id.AsTitle()}00 G`cD"),
+                            $"T{title.Id.AsTitle()}00",
+                            sb);
 
                 foreach (var subTitle in title.SubTitles)
                     if (Math.Abs(subTitle.Direction) == 1)
-                        DoCheck(m_Accountant.RunVoucherQuery(
-                                                             $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} {(subTitle.Direction < 0 ? ">" : "<")} G")
-                                            .SelectMany(
-                                                        v =>
-                                                        v.Details.Where(
-                                                                        d =>
-                                                                        d.Title == title.Id && d.SubTitle == subTitle.Id)
-                                                         .Select(d => new Tuple<Voucher, VoucherDetail>(v, d))),
-                                $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}",
-                                sb);
+                        DoCheck(
+                            m_Accountant.RunVoucherQuery(
+                                    $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} {(subTitle.Direction < 0 ? ">" : "<")} G")
+                                .SelectMany(
+                                    v =>
+                                        v.Details.Where(
+                                                d =>
+                                                    d.Title == title.Id && d.SubTitle == subTitle.Id)
+                                            .Select(d => new Tuple<Voucher, VoucherDetail>(v, d))),
+                            $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}",
+                            sb);
                     else if (Math.Abs(subTitle.Direction) == 2)
                         DoCheck(
-                                subTitle.Direction,
-                                m_Accountant.RunGroupedQuery($"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} G`cD"),
-                                $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}",
-                                sb);
+                            subTitle.Direction,
+                            m_Accountant.RunGroupedQuery($"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} G`cD"),
+                            $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}",
+                            sb);
             }
 
             if (sb.Length > 0)
                 return new EditableText(sb.ToString());
+
             return new Succeed();
         }
 
         private static void DoCheck(int dir, IEnumerable<Balance> res, string info, StringBuilder sb)
         {
             foreach (var grpContent in res.GroupByContent())
-                foreach (var balance in grpContent.AggregateChangedDay())
-                {
-                    if (dir > 0 &&
-                        balance.Fund.IsNonNegative())
-                        continue;
-                    if (dir < 0 &&
-                        balance.Fund.IsNonPositive())
-                        continue;
+            foreach (var balance in grpContent.AggregateChangedDay())
+            {
+                if (dir > 0 &&
+                    balance.Fund.IsNonNegative())
+                    continue;
+                if (dir < 0 &&
+                    balance.Fund.IsNonPositive())
+                    continue;
 
-                    sb.AppendLine($"{balance.Date:yyyyMMdd} {info} {grpContent.Key}:{balance.Fund:R}");
-                }
+                sb.AppendLine($"{balance.Date:yyyyMMdd} {info} {grpContent.Key}:{balance.Fund:R}");
+            }
         }
 
         private static void DoCheck(IEnumerable<Tuple<Voucher, VoucherDetail>> res, string info,
-                                    StringBuilder sb)
+            StringBuilder sb)
         {
             foreach (var d in res)
             {

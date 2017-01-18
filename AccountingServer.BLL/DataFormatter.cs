@@ -109,18 +109,18 @@ namespace AccountingServer.BLL
             {
                 if (value.StartDate.HasValue)
                     return value.Nullable
-                               ? $"[{value.StartDate.AsDate()}={value.EndDate.AsDate()}]"
-                               : $"[{value.StartDate.AsDate()}~{value.EndDate.AsDate()}]";
+                        ? $"[{value.StartDate.AsDate()}={value.EndDate.AsDate()}]"
+                        : $"[{value.StartDate.AsDate()}~{value.EndDate.AsDate()}]";
 
                 return value.Nullable
-                           ? $"[~{value.EndDate.AsDate()}]"
-                           : $"[={value.EndDate.AsDate()}]";
+                    ? $"[~{value.EndDate.AsDate()}]"
+                    : $"[={value.EndDate.AsDate()}]";
             }
 
             if (value.StartDate.HasValue)
                 return value.Nullable
-                           ? $"[{value.StartDate.AsDate()}=]"
-                           : $"[{value.StartDate.AsDate()}~]";
+                    ? $"[{value.StartDate.AsDate()}=]"
+                    : $"[{value.StartDate.AsDate()}~]";
 
             return value.Nullable ? "[]" : "[~null]";
         }
@@ -142,6 +142,7 @@ namespace AccountingServer.BLL
             DateTime val;
             if (DateTime.TryParseExact(value, "yyyyMMdd", null, DateTimeStyles.AllowWhiteSpaces, out val))
                 return val;
+
             return null;
         }
 
@@ -155,6 +156,7 @@ namespace AccountingServer.BLL
             double val;
             if (double.TryParse(value, out val))
                 return val;
+
             return null;
         }
 
@@ -168,6 +170,7 @@ namespace AccountingServer.BLL
             int val;
             if (int.TryParse(value, out val))
                 return val;
+
             return null;
         }
     }

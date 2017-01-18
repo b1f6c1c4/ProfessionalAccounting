@@ -161,33 +161,35 @@ namespace AccountingServer.BLL
             {
                 if (SubtotalArgs.AggrType == AggregationType.None)
                     return LeafNoneAggr(path, cat, depth, res.Sum(b => b.Fund));
+
                 var newPath = MapA(path, cat, depth, SubtotalArgs.AggrType);
                 if (SubtotalArgs.AggrType == AggregationType.ChangedDay)
                     return ReduceA(
-                                   path,
-                                   newPath,
-                                   cat,
-                                   depth + 1,
-                                   SubtotalArgs.AggrType,
-                                   res.AggregateChangedDay()
-                                      .Where(
-                                             b =>
-                                             SubtotalArgs.GatherType != GatheringType.NonZero ||
-                                             !b.Fund.IsZero())
-                                      .Select(b => LeafAggregated(newPath, cat, depth, b)));
+                        path,
+                        newPath,
+                        cat,
+                        depth + 1,
+                        SubtotalArgs.AggrType,
+                        res.AggregateChangedDay()
+                            .Where(
+                                b =>
+                                    SubtotalArgs.GatherType != GatheringType.NonZero ||
+                                    !b.Fund.IsZero())
+                            .Select(b => LeafAggregated(newPath, cat, depth, b)));
                 if (SubtotalArgs.AggrType == AggregationType.EveryDay)
                     return ReduceA(
-                                   path,
-                                   newPath,
-                                   cat,
-                                   depth + 1,
-                                   SubtotalArgs.AggrType,
-                                   res.AggregateEveryDay(SubtotalArgs.EveryDayRange.Range)
-                                      .Where(
-                                             b =>
-                                             SubtotalArgs.GatherType != GatheringType.NonZero ||
-                                             !b.Fund.IsZero())
-                                      .Select(b => LeafAggregated(newPath, cat, depth, b)));
+                        path,
+                        newPath,
+                        cat,
+                        depth + 1,
+                        SubtotalArgs.AggrType,
+                        res.AggregateEveryDay(SubtotalArgs.EveryDayRange.Range)
+                            .Where(
+                                b =>
+                                    SubtotalArgs.GatherType != GatheringType.NonZero ||
+                                    !b.Fund.IsZero())
+                            .Select(b => LeafAggregated(newPath, cat, depth, b)));
+
                 throw new ArgumentException("日期累加类型未知");
             }
             // else
@@ -199,86 +201,86 @@ namespace AccountingServer.BLL
                         resx = res
                             .GroupByTitle()
                             .Select(
-                                    grp =>
-                                    {
-                                        var newCat = new Balance(cat) { Title = grp.Key };
-                                        var newPath = Map(path, newCat, depth, SubtotalArgs.Levels[depth]);
-                                        return MediumLevel(
-                                                           path,
-                                                           newPath,
-                                                           newCat,
-                                                           depth,
-                                                           SubtotalArgs.Levels[depth],
-                                                           TraversalSubtotal(newPath, grp, newCat, depth + 1));
-                                    });
+                                grp =>
+                                {
+                                    var newCat = new Balance(cat) { Title = grp.Key };
+                                    var newPath = Map(path, newCat, depth, SubtotalArgs.Levels[depth]);
+                                    return MediumLevel(
+                                        path,
+                                        newPath,
+                                        newCat,
+                                        depth,
+                                        SubtotalArgs.Levels[depth],
+                                        TraversalSubtotal(newPath, grp, newCat, depth + 1));
+                                });
                         break;
                     case SubtotalLevel.SubTitle:
                         resx = res
                             .GroupBySubTitle()
                             .Select(
-                                    grp =>
-                                    {
-                                        var newCat = new Balance(cat) { SubTitle = grp.Key };
-                                        var newPath = Map(path, newCat, depth, SubtotalArgs.Levels[depth]);
-                                        return MediumLevel(
-                                                           path,
-                                                           newPath,
-                                                           newCat,
-                                                           depth,
-                                                           SubtotalArgs.Levels[depth],
-                                                           TraversalSubtotal(newPath, grp, newCat, depth + 1));
-                                    });
+                                grp =>
+                                {
+                                    var newCat = new Balance(cat) { SubTitle = grp.Key };
+                                    var newPath = Map(path, newCat, depth, SubtotalArgs.Levels[depth]);
+                                    return MediumLevel(
+                                        path,
+                                        newPath,
+                                        newCat,
+                                        depth,
+                                        SubtotalArgs.Levels[depth],
+                                        TraversalSubtotal(newPath, grp, newCat, depth + 1));
+                                });
                         break;
                     case SubtotalLevel.Content:
                         resx = res
                             .GroupByContent()
                             .Select(
-                                    grp =>
-                                    {
-                                        var newCat = new Balance(cat) { Content = grp.Key };
-                                        var newPath = Map(path, newCat, depth, SubtotalArgs.Levels[depth]);
-                                        return MediumLevel(
-                                                           path,
-                                                           newPath,
-                                                           newCat,
-                                                           depth,
-                                                           SubtotalArgs.Levels[depth],
-                                                           TraversalSubtotal(newPath, grp, newCat, depth + 1));
-                                    });
+                                grp =>
+                                {
+                                    var newCat = new Balance(cat) { Content = grp.Key };
+                                    var newPath = Map(path, newCat, depth, SubtotalArgs.Levels[depth]);
+                                    return MediumLevel(
+                                        path,
+                                        newPath,
+                                        newCat,
+                                        depth,
+                                        SubtotalArgs.Levels[depth],
+                                        TraversalSubtotal(newPath, grp, newCat, depth + 1));
+                                });
                         break;
                     case SubtotalLevel.Remark:
                         resx = res
                             .GroupByRemark()
                             .Select(
-                                    grp =>
-                                    {
-                                        var newCat = new Balance(cat) { Remark = grp.Key };
-                                        var newPath = Map(path, newCat, depth, SubtotalArgs.Levels[depth]);
-                                        return MediumLevel(
-                                                           path,
-                                                           newPath,
-                                                           newCat,
-                                                           depth,
-                                                           SubtotalArgs.Levels[depth],
-                                                           TraversalSubtotal(newPath, grp, newCat, depth + 1));
-                                    });
+                                grp =>
+                                {
+                                    var newCat = new Balance(cat) { Remark = grp.Key };
+                                    var newPath = Map(path, newCat, depth, SubtotalArgs.Levels[depth]);
+                                    return MediumLevel(
+                                        path,
+                                        newPath,
+                                        newCat,
+                                        depth,
+                                        SubtotalArgs.Levels[depth],
+                                        TraversalSubtotal(newPath, grp, newCat, depth + 1));
+                                });
                         break;
                     case SubtotalLevel.Currency:
                         resx = res
                             .GroupByCurrency()
                             .Select(
-                                    grp =>
-                                    {
-                                        var newCat = new Balance(cat) { Currency = grp.Key };
-                                        var newPath = Map(path, newCat, depth, SubtotalArgs.Levels[depth]);
-                                        return MediumLevel(
-                                                           path,
-                                                           newPath,
-                                                           newCat,
-                                                           depth,
-                                                           SubtotalArgs.Levels[depth],
-                                                           TraversalSubtotal(newPath, grp, newCat, depth + 1));
-                                    });
+                                grp =>
+                                {
+                                    var newCat = new Balance(cat) { Currency = grp.Key };
+                                    var newPath = Map(path, newCat, depth, SubtotalArgs.Levels[depth]);
+                                    return MediumLevel(
+                                        path,
+                                        newPath,
+                                        newCat,
+                                        depth,
+                                        SubtotalArgs.Levels[depth],
+                                        TraversalSubtotal(newPath, grp, newCat, depth + 1));
+                                });
                         break;
                     case SubtotalLevel.Day:
                     case SubtotalLevel.Week:
@@ -287,22 +289,23 @@ namespace AccountingServer.BLL
                         resx = res
                             .GroupByDate()
                             .Select(
-                                    grp =>
-                                    {
-                                        var newCat = new Balance(cat) { Date = grp.Key };
-                                        var newPath = Map(path, newCat, depth, SubtotalArgs.Levels[depth]);
-                                        return MediumLevel(
-                                                           path,
-                                                           newPath,
-                                                           newCat,
-                                                           depth,
-                                                           SubtotalArgs.Levels[depth],
-                                                           TraversalSubtotal(newPath, grp, newCat, depth + 1));
-                                    });
+                                grp =>
+                                {
+                                    var newCat = new Balance(cat) { Date = grp.Key };
+                                    var newPath = Map(path, newCat, depth, SubtotalArgs.Levels[depth]);
+                                    return MediumLevel(
+                                        path,
+                                        newPath,
+                                        newCat,
+                                        depth,
+                                        SubtotalArgs.Levels[depth],
+                                        TraversalSubtotal(newPath, grp, newCat, depth + 1));
+                                });
                         break;
                     default:
                         throw new ArgumentException("分类层次类型未知");
                 }
+
                 return Reduce(path, cat, depth, SubtotalArgs.Levels[depth], resx);
             }
         }

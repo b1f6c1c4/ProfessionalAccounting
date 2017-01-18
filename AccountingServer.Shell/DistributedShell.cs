@@ -163,7 +163,7 @@ namespace AccountingServer.Shell
         /// <param name="showSchedule">是否显示折旧计算表</param>
         /// <returns>执行结果</returns>
         protected abstract IQueryResult ExecuteList(IQueryCompunded<IDistributedQueryAtom> distQuery, DateTime? dt,
-                                                    bool showSchedule);
+            bool showSchedule);
 
         /// <summary>
         ///     执行查询表达式
@@ -180,7 +180,7 @@ namespace AccountingServer.Shell
         /// <param name="query">记账凭证检索式</param>
         /// <returns>执行结果</returns>
         protected abstract IQueryResult ExecuteRegister(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
-                                                        IQueryCompunded<IVoucherQueryAtom> query);
+            IQueryCompunded<IVoucherQueryAtom> query);
 
         /// <summary>
         ///     执行解除注册表达式
@@ -190,7 +190,7 @@ namespace AccountingServer.Shell
         /// <param name="query">记账凭证检索式</param>
         /// <returns>执行结果</returns>
         protected abstract IQueryResult ExecuteUnregister(IQueryCompunded<IDistributedQueryAtom> distQuery,
-                                                          DateFilter rng, IQueryCompunded<IVoucherQueryAtom> query);
+            DateFilter rng, IQueryCompunded<IVoucherQueryAtom> query);
 
         /// <summary>
         ///     执行重新计算表达式
@@ -206,7 +206,7 @@ namespace AccountingServer.Shell
         /// <param name="rng">日期过滤器</param>
         /// <returns>执行结果</returns>
         protected abstract IQueryResult ExecuteResetSoft(IQueryCompunded<IDistributedQueryAtom> distQuery,
-                                                         DateFilter rng);
+            DateFilter rng);
 
         /// <summary>
         ///     执行混合重置表达式
@@ -215,7 +215,7 @@ namespace AccountingServer.Shell
         /// <param name="rng">日期过滤器</param>
         /// <returns>执行结果</returns>
         protected abstract IQueryResult ExcuteResetMixed(IQueryCompunded<IDistributedQueryAtom> distQuery,
-                                                         DateFilter rng);
+            DateFilter rng);
 
         /// <summary>
         ///     执行硬重置表达式
@@ -224,7 +224,7 @@ namespace AccountingServer.Shell
         /// <param name="query">记账凭证检索式</param>
         /// <returns>执行结果</returns>
         protected abstract IQueryResult ExecuteResetHard(IQueryCompunded<IDistributedQueryAtom> distQuery,
-                                                         IQueryCompunded<IVoucherQueryAtom> query);
+            IQueryCompunded<IVoucherQueryAtom> query);
 
         /// <summary>
         ///     执行应用表达式
@@ -234,7 +234,7 @@ namespace AccountingServer.Shell
         /// <param name="isCollapsed">是否压缩</param>
         /// <returns>执行结果</returns>
         protected abstract IQueryResult ExecuteApply(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
-                                                     bool isCollapsed);
+            bool isCollapsed);
 
         /// <summary>
         ///     执行检查表达式

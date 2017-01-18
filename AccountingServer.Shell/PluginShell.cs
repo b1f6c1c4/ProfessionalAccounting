@@ -28,9 +28,10 @@ namespace AccountingServer.Shell
                 var type = asm.GetType(info.ClassName);
                 if (type == null)
                     throw new ApplicationException($"无法从{info.AssemblyName}中加载{info.ClassName}");
+
                 m_Plugins.Add(
-                              info.Alias,
-                              (PluginBase)Activator.CreateInstance(type, helper));
+                    info.Alias,
+                    (PluginBase)Activator.CreateInstance(type, helper));
             }
         }
 
@@ -58,6 +59,7 @@ namespace AccountingServer.Shell
                 Parsing.Eof(expr);
                 if (plgName == "")
                     return new UnEditableText(ListPlugins());
+
                 return new UnEditableText(GetHelp(plgName));
             }
 
@@ -67,7 +69,7 @@ namespace AccountingServer.Shell
         /// <inheritdoc />
         public bool IsExecutable(string expr)
             => expr.StartsWith("$", StringComparison.Ordinal)
-               || expr.StartsWith("?$", StringComparison.Ordinal);
+                || expr.StartsWith("?$", StringComparison.Ordinal);
 
         /// <summary>
         ///     显示插件帮助
@@ -85,6 +87,7 @@ namespace AccountingServer.Shell
             var sb = new StringBuilder();
             foreach (var info in m_Infos.Config.Infos)
                 sb.AppendLine($"{info.Alias}\t{info.ClassName}\t{info.AssemblyName}");
+
             return sb.ToString();
         }
     }

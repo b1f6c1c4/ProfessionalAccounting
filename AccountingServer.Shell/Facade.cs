@@ -47,6 +47,7 @@ namespace AccountingServer.Shell
         {
             if (expr == "con")
                 return ConnectServer();
+
             if (expr == "exit")
                 Environment.Exit(0);
             if (expr == "T")
@@ -73,6 +74,7 @@ namespace AccountingServer.Shell
             {
                 if (stream == null)
                     throw new MissingManifestResourceException();
+
                 using (var reader = new StreamReader(stream))
                     return new UnEditableText(reader.ReadToEnd());
             }
@@ -91,6 +93,7 @@ namespace AccountingServer.Shell
                 foreach (var subTitle in title.SubTitles)
                     sb.AppendLine($"{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}\t\t{subTitle.Name}");
             }
+
             return new UnEditableText(sb.ToString());
         }
 

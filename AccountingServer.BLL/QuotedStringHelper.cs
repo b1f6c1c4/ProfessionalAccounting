@@ -35,6 +35,7 @@ namespace AccountingServer.BLL
                 return null;
             if (quoted.Length == 0)
                 return quoted;
+
             if (quoted.Length == 1)
                 throw new ArgumentException("格式错误", nameof(quoted));
 

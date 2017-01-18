@@ -35,11 +35,11 @@ namespace AccountingServer.Shell
         {
             var provider = new CSharpCodeProvider();
             var paras = new CompilerParameters
-                            {
-                                GenerateExecutable = false,
-                                GenerateInMemory = true,
-                                ReferencedAssemblies = { "AccountingServer.Entities.dll" }
-                            };
+                {
+                    GenerateExecutable = false,
+                    GenerateInMemory = true,
+                    ReferencedAssemblies = { "AccountingServer.Entities.dll" }
+                };
             var sb = new StringBuilder();
             sb.AppendLine("using System;");
             sb.AppendLine("using System.Collections.Generic;");
@@ -69,8 +69,8 @@ namespace AccountingServer.Shell
             var resultAssembly = result.CompiledAssembly;
             return
                 resultAssembly.GetType("AccountingServer.Shell.Dynamic.ObjectCreator")
-                              .GetMethod("GetObject")
-                              .Invoke(null, null);
+                    .GetMethod("GetObject")
+                    .Invoke(null, null);
         }
 
         #region Voucher
@@ -89,9 +89,9 @@ namespace AccountingServer.Shell
             sb.Append("        new VoucherDetail { ");
             sb.Append($"Title = {detail.Title:0}, ");
             sb.Append(
-                      detail.SubTitle.HasValue
-                          ? $"SubTitle = {detail.SubTitle:00},    // {TitleManager.GetTitleName(detail)}"
-                          : $"                  // {TitleManager.GetTitleName(detail)}");
+                detail.SubTitle.HasValue
+                    ? $"SubTitle = {detail.SubTitle:00},    // {TitleManager.GetTitleName(detail)}"
+                    : $"                  // {TitleManager.GetTitleName(detail)}");
             sb.AppendLine();
             sb.Append("                            ");
             if (detail.Content != null)
@@ -128,6 +128,7 @@ namespace AccountingServer.Shell
             sb.AppendLine("    Details = new List<VoucherDetail> {");
             foreach (var detail in voucher.Details)
                 sb.Append(PresentVoucherDetail(detail));
+
             sb.AppendLine("} }@");
             return sb.ToString();
         }
@@ -161,9 +162,9 @@ namespace AccountingServer.Shell
             sb.AppendLine($"    Value = {asset.Value}, Salvge = {asset.Salvge}, Life = {asset.Life},");
             sb.AppendLine($"    Title = {asset.Title}, Method = DepreciationMethod.{asset.Method},");
             sb.AppendLine(
-                          $"    DepreciationTitle = {asset.DepreciationTitle}, DepreciationExpenseTitle = {asset.DepreciationExpenseTitle}, DepreciationExpenseSubTitle = {asset.DepreciationExpenseSubTitle},");
+                $"    DepreciationTitle = {asset.DepreciationTitle}, DepreciationExpenseTitle = {asset.DepreciationExpenseTitle}, DepreciationExpenseSubTitle = {asset.DepreciationExpenseSubTitle},");
             sb.AppendLine(
-                          $"    DevaluationTitle = {asset.DevaluationTitle}, DevaluationExpenseTitle = {asset.DevaluationExpenseTitle}, DevaluationExpenseSubTitle = {asset.DevaluationExpenseSubTitle},");
+                $"    DevaluationTitle = {asset.DevaluationTitle}, DevaluationExpenseTitle = {asset.DevaluationExpenseTitle}, DevaluationExpenseSubTitle = {asset.DevaluationExpenseSubTitle},");
             if (asset.Remark != null)
                 sb.AppendLine($"    Remark = {ProcessString(asset.Remark)},");
             sb.AppendLine("    Schedule = new List<AssetItem> {");
@@ -194,10 +195,12 @@ namespace AccountingServer.Shell
                         present(item, $"FairValue = {(item as DevalueItem).FairValue},");
                     else if (item is DispositionItem)
                         present(item, "");
+
                 sb.AppendLine("} }@");
             }
             else
                 sb.AppendLine("}@");
+
             return sb.ToString();
         }
 
@@ -264,6 +267,7 @@ namespace AccountingServer.Shell
                     }
                     sb.AppendLine("},");
                 }
+
                 sb.AppendLine("} }@");
             }
             else
@@ -271,6 +275,7 @@ namespace AccountingServer.Shell
                 sb.AppendLine("    Schedule = null");
                 sb.AppendLine("}@");
             }
+
             return sb.ToString();
         }
 

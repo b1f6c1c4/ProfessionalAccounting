@@ -40,11 +40,11 @@ namespace AccountingServer.BLL.Parsing
                 get
                 {
                     var filter = new MyDistributedFilter
-                                     {
-                                         ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : (Guid?)null,
-                                         Name = DollarQuotedString().Dequotation(),
-                                         Remark = PercentQuotedString().Dequotation()
-                                     };
+                        {
+                            ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : (Guid?)null,
+                            Name = DollarQuotedString().Dequotation(),
+                            Remark = PercentQuotedString().Dequotation()
+                        };
                     return filter;
                 }
             }
@@ -59,20 +59,24 @@ namespace AccountingServer.BLL.Parsing
                 {
                     if (Op == null)
                         return OperatorType.None;
+
                     if (distributedQ().Count == 1)
                     {
                         if (Op.Text == "+")
                             return OperatorType.Identity;
                         if (Op.Text == "-")
                             return OperatorType.Complement;
+
                         throw new MemberAccessException("表达式错误");
                     }
+
                     if (Op.Text == "+")
                         return OperatorType.Union;
                     if (Op.Text == "-")
                         return OperatorType.Substract;
                     if (Op.Text == "*")
                         return OperatorType.Intersect;
+
                     throw new MemberAccessException("表达式错误");
                 }
             }
@@ -84,6 +88,7 @@ namespace AccountingServer.BLL.Parsing
                 {
                     if (distributedQAtom() != null)
                         return distributedQAtom();
+
                     return distributedQ(0);
                 }
             }

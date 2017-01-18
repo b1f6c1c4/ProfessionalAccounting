@@ -47,13 +47,14 @@ namespace AccountingServer
                     default:
                         return false;
                 }
+
                 if (scintilla.Text[end] == '\n' &&
                     result[result.Length - 1] != '\n')
                     scintilla.Text = scintilla.Text.Remove(begin, end - begin - 1)
-                                              .Insert(begin, result);
+                        .Insert(begin, result);
                 else
                     scintilla.Text = scintilla.Text.Remove(begin, end - begin + 1)
-                                              .Insert(begin, result);
+                        .Insert(begin, result);
                 scintilla.SelectionStart = begin;
                 scintilla.SelectionEnd = result.Length - begin;
             }
@@ -98,6 +99,7 @@ namespace AccountingServer
                     default:
                         return false;
                 }
+
                 if (!result)
                     throw new ApplicationException("提交的内容类型未知");
                 // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression

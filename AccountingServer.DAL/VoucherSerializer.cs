@@ -17,11 +17,11 @@ namespace AccountingServer.DAL
             bsonReader.ReadStartDocument();
 
             var voucher = new Voucher
-                              {
-                                  ID = bsonReader.ReadObjectId("_id", ref read),
-                                  Date = bsonReader.ReadDateTime("date", ref read),
-                                  Type = VoucherType.Ordinary
-                              };
+                {
+                    ID = bsonReader.ReadObjectId("_id", ref read),
+                    Date = bsonReader.ReadDateTime("date", ref read),
+                    Type = VoucherType.Ordinary
+                };
             switch (bsonReader.ReadString("special", ref read))
             {
                 case "amorz":
@@ -46,6 +46,7 @@ namespace AccountingServer.DAL
                     voucher.Type = VoucherType.Ordinary;
                     break;
             }
+
             voucher.Details = bsonReader.ReadArray("detail", ref read, new VoucherDetailSerializer().Deserialize);
             voucher.Remark = bsonReader.ReadString("remark", ref read);
             voucher.Currency = bsonReader.ReadString("currency", ref read) ?? Voucher.BaseCurrency;
@@ -81,14 +82,17 @@ namespace AccountingServer.DAL
                         bsonWriter.Write("special", "unc");
                         break;
                 }
+
             if (voucher.Details != null)
             {
                 bsonWriter.WriteStartArray("detail");
                 var serializer = new VoucherDetailSerializer();
                 foreach (var detail in voucher.Details)
                     serializer.Serialize(bsonWriter, detail);
+
                 bsonWriter.WriteEndArray();
             }
+
             if (voucher.Remark != null)
                 bsonWriter.WriteString("remark", voucher.Remark);
             if (voucher.Currency != Voucher.BaseCurrency)

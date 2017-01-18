@@ -32,23 +32,23 @@ namespace AccountingServer.Entities
         ///     任意日期
         /// </summary>
         public static DateFilter Unconstrained = new DateFilter
-                                                     {
-                                                         NullOnly = false,
-                                                         Nullable = true,
-                                                         StartDate = null,
-                                                         EndDate = null
-                                                     };
+            {
+                NullOnly = false,
+                Nullable = true,
+                StartDate = null,
+                EndDate = null
+            };
 
         /// <summary>
         ///     仅限无日期
         /// </summary>
         public static DateFilter TheNullOnly = new DateFilter
-                                                   {
-                                                       NullOnly = true,
-                                                       Nullable = true,
-                                                       StartDate = null,
-                                                       EndDate = null
-                                                   };
+            {
+                NullOnly = true,
+                Nullable = true,
+                StartDate = null,
+                EndDate = null
+            };
 
         public DateFilter(DateTime? startDate, DateTime? endDate)
         {
@@ -90,6 +90,7 @@ namespace AccountingServer.Entities
                 return 1;
             if (b2Date.HasValue)
                 return -1;
+
             return 0;
         }
 

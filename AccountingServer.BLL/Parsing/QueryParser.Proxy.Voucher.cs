@@ -18,10 +18,10 @@ namespace AccountingServer.BLL.Parsing
                 get
                 {
                     var vfilter = new Voucher
-                                      {
-                                          ID = CaretQuotedString().Dequotation(),
-                                          Remark = PercentQuotedString().Dequotation()
-                                      };
+                        {
+                            ID = CaretQuotedString().Dequotation(),
+                            Remark = PercentQuotedString().Dequotation()
+                        };
                     if (VoucherType() != null)
                     {
                         var s = VoucherType().GetText();
@@ -33,13 +33,16 @@ namespace AccountingServer.BLL.Parsing
                         else
                             throw new MemberAccessException("表达式错误");
                     }
+
                     if (VoucherCurrency() != null)
                     {
                         var c = VoucherCurrency().GetText();
                         if (!c.StartsWith("@", StringComparison.Ordinal))
                             throw new MemberAccessException("表达式错误");
+
                         vfilter.Currency = c == "@@" ? Voucher.BaseCurrency : c.Substring(1).ToUpperInvariant();
                     }
+
                     return vfilter;
                 }
             }
@@ -63,6 +66,7 @@ namespace AccountingServer.BLL.Parsing
                 {
                     if (voucherQuery() != null)
                         return voucherQuery();
+
                     return vouchersB();
                 }
             }
@@ -80,20 +84,24 @@ namespace AccountingServer.BLL.Parsing
                 {
                     if (Op == null)
                         return OperatorType.None;
+
                     if (vouchersB().Count == 1)
                     {
                         if (Op.Text == "+")
                             return OperatorType.Identity;
                         if (Op.Text == "-")
                             return OperatorType.Complement;
+
                         throw new MemberAccessException("表达式错误");
                     }
+
                     if (Op.Text == "+")
                         return OperatorType.Union;
                     if (Op.Text == "-")
                         return OperatorType.Substract;
                     if (Op.Text == "*")
                         return OperatorType.Intersect;
+
                     throw new MemberAccessException("表达式错误");
                 }
             }
@@ -105,6 +113,7 @@ namespace AccountingServer.BLL.Parsing
                 {
                     if (voucherQuery() != null)
                         return voucherQuery();
+
                     return vouchersB(0);
                 }
             }
@@ -141,10 +150,10 @@ namespace AccountingServer.BLL.Parsing
                 {
                     if (SubtotalFields() == null)
                         return new[]
-                                   {
-                                       SubtotalLevel.Currency, SubtotalLevel.Title, SubtotalLevel.SubTitle,
-                                       SubtotalLevel.Content
-                                   };
+                            {
+                                SubtotalLevel.Currency, SubtotalLevel.Title, SubtotalLevel.SubTitle,
+                                SubtotalLevel.Content
+                            };
 
                     if (SubtotalFields().GetText() == "v")
                         return new SubtotalLevel[0];
@@ -152,31 +161,32 @@ namespace AccountingServer.BLL.Parsing
                     return SubtotalFields()
                         .GetText()
                         .Select(
-                                ch =>
+                            ch =>
+                            {
+                                switch (ch)
                                 {
-                                    switch (ch)
-                                    {
-                                        case 't':
-                                            return SubtotalLevel.Title;
-                                        case 's':
-                                            return SubtotalLevel.SubTitle;
-                                        case 'c':
-                                            return SubtotalLevel.Content;
-                                        case 'r':
-                                            return SubtotalLevel.Remark;
-                                        case 'C':
-                                            return SubtotalLevel.Currency;
-                                        case 'd':
-                                            return SubtotalLevel.Day;
-                                        case 'w':
-                                            return SubtotalLevel.Week;
-                                        case 'm':
-                                            return SubtotalLevel.Month;
-                                        case 'y':
-                                            return SubtotalLevel.Year;
-                                    }
-                                    throw new MemberAccessException("表达式错误");
-                                }).ToList();
+                                    case 't':
+                                        return SubtotalLevel.Title;
+                                    case 's':
+                                        return SubtotalLevel.SubTitle;
+                                    case 'c':
+                                        return SubtotalLevel.Content;
+                                    case 'r':
+                                        return SubtotalLevel.Remark;
+                                    case 'C':
+                                        return SubtotalLevel.Currency;
+                                    case 'd':
+                                        return SubtotalLevel.Day;
+                                    case 'w':
+                                        return SubtotalLevel.Week;
+                                    case 'm':
+                                        return SubtotalLevel.Month;
+                                    case 'y':
+                                        return SubtotalLevel.Year;
+                                }
+
+                                throw new MemberAccessException("表达式错误");
+                            }).ToList();
                 }
             }
 
@@ -190,6 +200,7 @@ namespace AccountingServer.BLL.Parsing
                     if (subtotalAggr().IsAll == null &&
                         subtotalAggr().rangeCore() == null)
                         return AggregationType.ChangedDay;
+
                     return AggregationType.EveryDay;
                 }
             }
@@ -201,6 +212,7 @@ namespace AccountingServer.BLL.Parsing
                 {
                     if (subtotalAggr().IsAll != null)
                         return DateFilter.Unconstrained;
+
                     return subtotalAggr().rangeCore();
                 }
             }
@@ -221,6 +233,7 @@ namespace AccountingServer.BLL.Parsing
                 {
                     if (voucherQuery() != null)
                         return voucherQuery();
+
                     return vouchers();
                 }
             }
