@@ -51,10 +51,10 @@ namespace AccountingServer.BLL.Parsing
             => Parse(ref s, p => p.range())?.Range;
 
         public IQueryCompunded<IVoucherQueryAtom> VoucherQuery(string s)
-            => Parse(ref s, p => p.voucherQuery());
+            => Parse(ref s, p => p.vouchers());
 
         public IQueryCompunded<IVoucherQueryAtom> VoucherQuery(ref string s)
-            => Parse(ref s, p => p.voucherQuery());
+            => Parse(ref s, p => p.vouchers());
 
         public IGroupedQuery GroupedQuery(string s)
             => Parse(ref s, p => p.groupedQuery());
