@@ -9,6 +9,7 @@ using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell;
+using AccountingServer.Shell.Util;
 
 namespace AccountingServer.Plugins.THUInfo
 {

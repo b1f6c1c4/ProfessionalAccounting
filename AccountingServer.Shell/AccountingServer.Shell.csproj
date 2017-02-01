@@ -58,18 +58,18 @@
     <Compile Include="Serializer\ExprSerializer.cs" />
     <Compile Include="Facade.cs" />
     <Compile Include="Serializer\IEntitySerializer.cs" />
-    <Compile Include="IShellComponent.cs" />
-    <Compile Include="ParseHelper.cs" />
+    <Compile Include="Util\IShellComponent.cs" />
+    <Compile Include="Util\ParseHelper.cs" />
     <Compile Include="PluginShell.cs" />
     <Compile Include="CheckShell.cs" />
     <Compile Include="AccountingShell.cs" />
     <Compile Include="Carry\CarryShell.cs" />
-    <Compile Include="SubtotalHelper.cs" />
+    <Compile Include="Util\SubtotalHelper.cs" />
     <Compile Include="Plugins\Info.cs" />
     <Compile Include="Plugins\PluginBase.cs" />
     <Compile Include="Serializer\CSharpSerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueryResult.cs" />
+    <Compile Include="Util\QueryResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AccountingServer.BLL\AccountingServer.BLL.csproj">
