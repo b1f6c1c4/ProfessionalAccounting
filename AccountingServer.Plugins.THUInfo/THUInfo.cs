@@ -7,7 +7,6 @@ using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
-using AccountingServer.Shell;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using CredentialManagement;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 
 namespace AccountingServer.Plugins.THUInfo
