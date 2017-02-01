@@ -33,29 +33,26 @@ namespace AccountingServer.DAL
                         f.Dir > 0
                             ? "    if (d.fund <= 0) return false;"
                             : "    if (d.fund >= 0) return false;");
-                if (f.Filter != null)
-                {
-                    if (f.Filter.Title != null)
-                        sb.AppendLine($"    if (d.title != {f.Filter.Title}) return false;");
-                    if (f.Filter.SubTitle != null)
-                        sb.AppendLine(
-                            f.Filter.SubTitle == 00
-                                ? "    if (d.subtitle != null) return false;"
-                                : $"    if (d.subtitle != {f.Filter.SubTitle}) return false;");
-                    if (f.Filter.Content != null)
-                        sb.AppendLine(
-                            f.Filter.Content == string.Empty
-                                ? "    if (d.content != null) return false;"
-                                : $"    if (d.content != '{(f.Filter.Content.Replace("\'", "\\\'"))}') return false;");
-                    if (f.Filter.Remark != null)
-                        sb.AppendLine(
-                            f.Filter.Remark == string.Empty
-                                ? "    if (d.remark != null) return false;"
-                                : $"    if (d.remark != '{(f.Filter.Remark.Replace("\'", "\\\'"))}') return false;");
-                    if (f.Filter.Fund != null)
-                        sb.AppendLine(
-                            $"    if (Math.abs(d.fund - {f.Filter.Fund:r}) > {VoucherDetail.Tolerance:R})) return false;");
-                }
+                if (f.Filter?.Title != null)
+                    sb.AppendLine($"    if (d.title != {f.Filter.Title}) return false;");
+                if (f.Filter?.SubTitle != null)
+                    sb.AppendLine(
+                        f.Filter.SubTitle == 00
+                            ? "    if (d.subtitle != null) return false;"
+                            : $"    if (d.subtitle != {f.Filter.SubTitle}) return false;");
+                if (f.Filter?.Content != null)
+                    sb.AppendLine(
+                        f.Filter.Content == string.Empty
+                            ? "    if (d.content != null) return false;"
+                            : $"    if (d.content != '{f.Filter.Content.Replace("\'", "\\\'")}') return false;");
+                if (f.Filter?.Remark != null)
+                    sb.AppendLine(
+                        f.Filter.Remark == string.Empty
+                            ? "    if (d.remark != null) return false;"
+                            : $"    if (d.remark != '{f.Filter.Remark.Replace("\'", "\\\'")}') return false;");
+                if (f.Filter?.Fund != null)
+                    sb.AppendLine(
+                        $"    if (Math.abs(d.fund - {f.Filter.Fund:r}) > {VoucherDetail.Tolerance:R})) return false;");
             }
             sb.AppendLine("    return true;");
             sb.AppendLine("}");
@@ -91,12 +88,12 @@ namespace AccountingServer.DAL
                     sb.AppendLine(
                         f.Filter.Name == string.Empty
                             ? "    if (a.name != null) return false;"
-                            : $"    if (a.name != '{(f.Filter.Name.Replace("\'", "\\\'"))}') return false;");
+                            : $"    if (a.name != '{f.Filter.Name.Replace("\'", "\\\'")}') return false;");
                 if (f.Filter.Remark != null)
                     sb.AppendLine(
                         f.Filter.Remark == string.Empty
                             ? "    if (a.remark != null) return false;"
-                            : $"    if (a.remark != '{(f.Filter.Remark.Replace("\'", "\\\'"))}') return false;");
+                            : $"    if (a.remark != '{f.Filter.Remark.Replace("\'", "\\\'")}') return false;");
                 sb.AppendLine("    return true;");
             }
             sb.AppendLine("}");
