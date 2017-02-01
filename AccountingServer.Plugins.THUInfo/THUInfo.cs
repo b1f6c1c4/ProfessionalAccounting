@@ -7,6 +7,7 @@ using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
+using AccountingServer.Shell.Serializer;
 using CredentialManagement;
 using static AccountingServer.BLL.Parsing.FacadeF;
 

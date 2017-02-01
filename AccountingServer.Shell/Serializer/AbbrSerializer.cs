@@ -7,7 +7,7 @@ using AccountingServer.BLL;
 using AccountingServer.Entities;
 using static AccountingServer.BLL.Parsing.Facade;
 
-namespace AccountingServer.Shell
+namespace AccountingServer.Shell.Serializer
 {
     internal class AbbrSerializer : ExprSerializer
     {

@@ -1,6 +1,6 @@
 ﻿using AccountingServer.Entities;
 
-namespace AccountingServer.Shell
+namespace AccountingServer.Shell.Serializer
 {
     /// <summary>
     ///     表示器

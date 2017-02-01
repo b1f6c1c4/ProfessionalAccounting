@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
+using AccountingServer.Shell.Serializer;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.Shell

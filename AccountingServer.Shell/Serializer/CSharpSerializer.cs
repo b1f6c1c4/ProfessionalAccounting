@@ -6,7 +6,7 @@ using AccountingServer.BLL;
 using AccountingServer.Entities;
 using Microsoft.CSharp;
 
-namespace AccountingServer.Shell
+namespace AccountingServer.Shell.Serializer
 {
     internal class CSharpSerializer : IEntitySerializer
     {
