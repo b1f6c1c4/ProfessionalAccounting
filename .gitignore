@@ -26,7 +26,3 @@ ipch
 /AccountingServer.BLL/Parsing/QueryLexer.cs
 /AccountingServer.BLL/Parsing/QueryLexer.tokens
 /AccountingServer.BLL/Parsing/QueryParser.cs
-/AccountingServer.Shell/Parsing/Shell.tokens
-/AccountingServer.Shell/Parsing/ShellLexer.cs
-/AccountingServer.Shell/Parsing/ShellLexer.tokens
-/AccountingServer.Shell/Parsing/ShellParser.cs
