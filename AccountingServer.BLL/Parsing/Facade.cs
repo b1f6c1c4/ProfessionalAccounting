@@ -39,31 +39,31 @@ namespace AccountingServer.BLL.Parsing
         }
 
         public DateTime? UniqueTime(string s)
-            => Parse(ref s, p => p.uniqueTime());
+            => UniqueTime(ref s);
 
         public DateTime? UniqueTime(ref string s)
             => Parse(ref s, p => p.uniqueTime());
 
         public DateFilter? Range(string s)
-            => Parse(ref s, p => p.range())?.Range;
+            => Range(ref s);
 
         public DateFilter? Range(ref string s)
             => Parse(ref s, p => p.range())?.Range;
 
         public IQueryCompunded<IVoucherQueryAtom> VoucherQuery(string s)
-            => Parse(ref s, p => p.vouchers());
+            => VoucherQuery(ref s);
 
         public IQueryCompunded<IVoucherQueryAtom> VoucherQuery(ref string s)
             => Parse(ref s, p => p.vouchers());
 
         public IGroupedQuery GroupedQuery(string s)
-            => Parse(ref s, p => p.groupedQuery());
+            => GroupedQuery(ref s);
 
         public IGroupedQuery GroupedQuery(ref string s)
             => Parse(ref s, p => p.groupedQuery());
 
         public IQueryCompunded<IDistributedQueryAtom> DistributedQuery(string s)
-            => Parse(ref s, p => p.distributedQ());
+            => DistributedQuery(ref s);
 
         public IQueryCompunded<IDistributedQueryAtom> DistributedQuery(ref string s)
             => Parse(ref s, p => p.distributedQ());
