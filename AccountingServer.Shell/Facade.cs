@@ -4,6 +4,7 @@ using System.Linq;
 using System.Resources;
 using System.Text;
 using AccountingServer.BLL;
+using AccountingServer.Entities;
 using AccountingServer.Shell.Carry;
 
 namespace AccountingServer.Shell
@@ -31,7 +32,7 @@ namespace AccountingServer.Shell
         public Facade()
         {
             m_Accountant = new Accountant();
-            m_Serializer = new ExpressionHelper();
+            m_Serializer = new AlternativeSerializer(new ExpressionHelper(), new CSharpHelper());
             m_Composer =
                 new ShellComposer
                     {
@@ -217,5 +218,43 @@ namespace AccountingServer.Shell
         }
 
         #endregion
+    }
+
+    internal class AlternativeSerializer : IEntitySerializer
+    {
+        /// <summary>
+        ///     主要表示器
+        /// </summary>
+        private readonly IEntitySerializer m_Primary;
+
+        /// <summary>
+        ///     次要表示器
+        /// </summary>
+        private readonly IEntitySerializer m_Secondary;
+
+        public AlternativeSerializer(IEntitySerializer primary, IEntitySerializer secondary)
+        {
+            m_Primary = primary;
+            m_Secondary = secondary;
+        }
+
+        private TOut Run<TOut>(Func<IEntitySerializer, TOut> func)
+        {
+            try
+            {
+                return func(m_Primary);
+            }
+            catch (Exception)
+            {
+                return func(m_Secondary);
+            }
+        }
+
+        public string PresentVoucher(Voucher voucher) => Run(s => s.PresentVoucher(voucher));
+        public Voucher ParseVoucher(string str) => Run(s => s.ParseVoucher(str));
+        public string PresentAsset(Asset asset) => Run(s => s.PresentAsset(asset));
+        public Asset ParseAsset(string str) => Run(s => s.ParseAsset(str));
+        public string PresentAmort(Amortization amort) => Run(s => s.PresentAmort(amort));
+        public Amortization ParseAmort(string str) => Run(s => s.ParseAmort(str));
     }
 }

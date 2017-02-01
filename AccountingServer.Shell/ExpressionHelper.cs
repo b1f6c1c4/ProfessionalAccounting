@@ -42,6 +42,20 @@ namespace AccountingServer.Shell
         /// <inheritdoc />
         public Voucher ParseVoucher(string expr)
         {
+            const string tk = "new Voucher {";
+            if (expr.StartsWith(tk, StringComparison.Ordinal))
+                return GetVoucher(expr.Substring(tk.Length));
+
+            throw new FormatException("格式错误");
+        }
+
+        /// <summary>
+        ///     解析记账凭证表达式
+        /// </summary>
+        /// <param name="expr">表达式</param>
+        /// <returns>记账凭证</returns>
+        private static Voucher GetVoucher(string expr)
+        {
             Parsing.TrimStartComment(ref expr);
             var id = Parsing.Quoted(ref expr, '^');
             Parsing.TrimStartComment(ref expr);
