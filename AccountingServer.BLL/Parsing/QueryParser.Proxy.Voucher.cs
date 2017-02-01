@@ -85,7 +85,7 @@ namespace AccountingServer.BLL.Parsing
                     if (Op == null)
                         return OperatorType.None;
 
-                    if (vouchersB().Count == 1)
+                    if (vouchersB().Length == 1)
                     {
                         if (Op.Text == "+")
                             return OperatorType.Identity;
