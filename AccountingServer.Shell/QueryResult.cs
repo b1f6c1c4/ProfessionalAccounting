@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Windows.Forms.DataVisualization.Charting;
 
 namespace AccountingServer.Shell
 {
@@ -105,24 +103,5 @@ namespace AccountingServer.Shell
 
         /// <inheritdoc />
         public override bool AutoReturn => true;
-    }
-
-    /// <summary>
-    ///     图标数据
-    /// </summary>
-    public class ChartData : IQueryResult
-    {
-        /// <summary>
-        ///     系列
-        /// </summary>
-        public IList<Series> Series { get; set; }
-
-        /// <summary>
-        ///     图表区域
-        /// </summary>
-        public IList<ChartArea> ChartAreas { get; set; }
-
-        /// <inheritdoc />
-        public bool AutoReturn => true;
     }
 }
