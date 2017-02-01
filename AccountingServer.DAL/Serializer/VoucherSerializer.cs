@@ -4,7 +4,7 @@ using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Driver;
 
-namespace AccountingServer.DAL
+namespace AccountingServer.DAL.Serializer
 {
     /// <summary>
     ///     记账凭证序列化器

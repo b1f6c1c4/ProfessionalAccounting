@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AccountingServer.DAL.Serializer;
 using AccountingServer.Entities;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;

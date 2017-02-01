@@ -3,7 +3,7 @@ using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 using MongoDB.Driver;
 
-namespace AccountingServer.DAL
+namespace AccountingServer.DAL.Serializer
 {
     /// <summary>
     ///     Ì¯ÏúÐòÁÐ»¯Æ÷
