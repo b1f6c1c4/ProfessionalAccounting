@@ -6,6 +6,7 @@ using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
 using AccountingServer.Shell;
+using AccountingServer.Shell.Serializer;
 using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Plugins.Utilities

@@ -6,7 +6,7 @@ using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
 using static AccountingServer.BLL.Parsing.Facade;
 
-namespace AccountingServer.Shell
+namespace AccountingServer.Shell.Serializer
 {
     /// <summary>
     ///     实体表达式
