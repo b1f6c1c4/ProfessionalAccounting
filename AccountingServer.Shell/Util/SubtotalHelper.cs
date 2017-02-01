@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 
-namespace AccountingServer.Shell
+namespace AccountingServer.Shell.Util
 {
     /// <summary>
     ///     分类汇总结果处理器

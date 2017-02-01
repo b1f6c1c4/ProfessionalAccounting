@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace AccountingServer.Shell
+namespace AccountingServer.Shell.Util
 {
     /// <summary>
     ///     表达式执行结果
