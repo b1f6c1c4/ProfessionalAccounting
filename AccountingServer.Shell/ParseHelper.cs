@@ -15,16 +15,19 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="facade">占位符</param>
         /// <param name="expr">表达式</param>
+        /// <param name="allow">允许括号</param>
         /// <param name="predicate">是否有效</param>
         /// <returns>字符串</returns>
-        public static string Token(this FacadeBase facade, ref string expr, Func<string, bool> predicate = null)
+        public static string Token(this FacadeBase facade, ref string expr, bool allow = true, Func<string, bool> predicate = null)
         {
             expr = expr.TrimStart();
             if (expr.Length == 0)
                 return null;
-            if (expr[0] == '\'' ||
-                expr[0] == '"')
-                return facade.Quoted(ref expr);
+
+            if (allow)
+                if (expr[0] == '\'' ||
+                    expr[0] == '"')
+                    return facade.Quoted(ref expr);
 
             var id = 1;
             while (id < expr.Length)
@@ -51,13 +54,10 @@ namespace AccountingServer.Shell
         /// <returns>数</returns>
         public static double? Double(this FacadeBase facade, ref string expr)
         {
-            var t = expr;
-            var token = facade.Token(ref expr);
-            double d;
-            if (double.TryParse(token, out d))
+            var d = double.NaN;
+            if (facade.Token(ref expr, false, t => double.TryParse(t, out d)) != null)
                 return d;
 
-            expr = t; // revert
             return null;
         }
 
@@ -68,10 +68,7 @@ namespace AccountingServer.Shell
         /// <param name="expr">表达式</param>
         /// <returns>数</returns>
         public static double DoubleF(this FacadeBase facade, ref string expr)
-        {
-            var token = facade.Token(ref expr);
-            return double.Parse(token);
-        }
+            => double.Parse(facade.Token(ref expr, false));
 
         /// <summary>
         ///     匹配可选的非零长度字符串
