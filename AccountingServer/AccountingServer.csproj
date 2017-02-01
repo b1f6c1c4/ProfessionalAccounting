@@ -49,7 +49,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Abbreviation.cs" />
     <Compile Include="frmMain.Accounting.cs">
       <SubType>Form</SubType>
     </Compile>

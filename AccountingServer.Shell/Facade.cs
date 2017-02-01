@@ -32,7 +32,7 @@ namespace AccountingServer.Shell
         public Facade()
         {
             m_Accountant = new Accountant();
-            m_Serializer = new AlternativeSerializer(new ExpressionHelper(), new CSharpHelper());
+            m_Serializer = new AlternativeSerializer(new AbbrHelper(), new CSharpHelper());
             m_Composer =
                 new ShellComposer
                     {
@@ -244,7 +244,7 @@ namespace AccountingServer.Shell
             {
                 return func(m_Primary);
             }
-            catch (Exception)
+            catch (NotImplementedException)
             {
                 return func(m_Secondary);
             }
