@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
+using AccountingServer.BLL;
 using AccountingServer.Entities;
 using static AccountingServer.BLL.Parsing.Facade;
 
@@ -11,18 +13,54 @@ namespace AccountingServer.Shell
     public static class ExpressionHelper
     {
         /// <summary>
+        ///     将记账凭证用记账凭证表达式表示
+        /// </summary>
+        /// <param name="voucher">记账凭证</param>
+        /// <returns>记账凭证表达式</returns>
+        public static string PresentVoucher(Voucher voucher)
+        {
+            var sb = new StringBuilder();
+            sb.Append("@new Voucher {");
+            sb.AppendLine(voucher.ID?.Quotation('^'));
+            sb.AppendLine(voucher.Date.AsDate());
+            if (voucher.Remark != null)
+                sb.AppendLine(voucher.Remark.Quotation('%'));
+            if (voucher.Type.HasValue && voucher.Type != VoucherType.Ordinary)
+                sb.AppendLine(voucher.Type.ToString());
+            if (voucher.Currency != null &&
+                voucher.Currency != Voucher.BaseCurrency)
+                sb.AppendLine($"@{voucher.Currency}");
+
+            foreach (var d in voucher.Details)
+            {
+                var t = TitleManager.GetTitleName(d.Title);
+                var s = TitleManager.GetTitleName(d.Title);
+                sb.AppendLine($"// {t}-{s}");
+                sb.AppendLine($"T{d.Title.AsTitle()}{d.SubTitle.AsSubTitle()} {d.Content?.Quotation('\'')} {d.Remark?.Quotation('\"')} {d.Fund}");
+            }
+
+            sb.AppendLine("}@");
+            return sb.ToString();
+        }
+
+        /// <summary>
         ///     解析记账凭证表达式
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>记账凭证</returns>
         public static Voucher GetVoucher(ref string expr)
         {
+            Parsing.TrimStartComment(ref expr);
             var id = Parsing.Quoted(ref expr, '^');
-            var date = Parsing.UniqueTime(ref expr) ?? DateTime.Today;
+            Parsing.TrimStartComment(ref expr);
+            var date = Parsing.UniqueTime(ref expr) ?? DateTime.Today; // TODO
+            Parsing.TrimStartComment(ref expr);
             var remark = Parsing.Quoted(ref expr, '%');
-            var typeT = VoucherType.General;
+            Parsing.TrimStartComment(ref expr);
+            var typeT = VoucherType.Ordinary;
             var type = Parsing.Token(ref expr, false, t => Enum.TryParse(t, out typeT)) != null ? (VoucherType?)typeT : null;
-            var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal));
+            Parsing.TrimStartComment(ref expr);
+            var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))?.ToUpperInvariant();
 
             var lst = new List<VoucherDetail>();
             VoucherDetail d;
@@ -45,8 +83,9 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>细目</returns>
-        public static VoucherDetail GetVoucherDetail(ref string expr)
+        private static VoucherDetail GetVoucherDetail(ref string expr)
         {
+            Parsing.TrimStartComment(ref expr);
             var title = Parsing.Title(ref expr);
             if (title == null)
                 return null;
@@ -56,15 +95,18 @@ namespace AccountingServer.Shell
 
             while (true)
             {
+                Parsing.TrimStartComment(ref expr);
                 if ((fund = Parsing.Double(ref expr)) != null)
                     break;
 
+                Parsing.TrimStartComment(ref expr);
                 if (Parsing.Optional(ref expr, "null"))
                     break;
 
                 if (lst.Count > 2)
                     throw new ArgumentException("语法错误", nameof(expr));
 
+                Parsing.TrimStartComment(ref expr);
                 lst.Add(Parsing.Token(ref expr));
             }
 
