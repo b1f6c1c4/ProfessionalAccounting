@@ -3,7 +3,7 @@ using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 
-namespace AccountingServer.DAL
+namespace AccountingServer.DAL.Serializer
 {
     /// <summary>
     ///     序列化封装

@@ -2,7 +2,7 @@ using System;
 using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 
-namespace AccountingServer.DAL
+namespace AccountingServer.DAL.Serializer
 {
     /// <summary>
     ///     余额表条目反序列化器（从MapReduce的结果中反序列化）

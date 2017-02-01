@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AccountingServer.DAL.Serializer;
 using AccountingServer.Entities;
 using MongoDB.Bson;
 using MongoDB.Driver;

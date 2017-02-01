@@ -1,7 +1,7 @@
 using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 
-namespace AccountingServer.DAL
+namespace AccountingServer.DAL.Serializer
 {
     /// <summary>
     ///     Ï¸Ä¿ÐòÁÐ»¯Æ÷

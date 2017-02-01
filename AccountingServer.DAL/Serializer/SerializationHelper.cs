@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
 
-namespace AccountingServer.DAL
+namespace AccountingServer.DAL.Serializer
 {
     /// <summary>
     ///     Bson–Ú¡–ªØ∏®÷˙∂¡–¥
