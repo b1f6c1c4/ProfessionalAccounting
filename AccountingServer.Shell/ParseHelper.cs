@@ -15,8 +15,9 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="facade">占位符</param>
         /// <param name="expr">表达式</param>
+        /// <param name="predicate">是否有效</param>
         /// <returns>字符串</returns>
-        public static string Token(this FacadeBase facade, ref string expr)
+        public static string Token(this FacadeBase facade, ref string expr, Func<string, bool> predicate = null)
         {
             expr = expr.TrimStart();
             if (expr.Length == 0)
@@ -35,6 +36,9 @@ namespace AccountingServer.Shell
             }
 
             var t = expr.Substring(0, id);
+            if (!predicate?.Invoke(t) == true)
+                return null;
+
             expr = expr.Substring(id);
             return t;
         }
