@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 
-namespace AccountingServer.BLL
+namespace AccountingServer.BLL.Util
 {
     [Serializable]
     [XmlRoot("Titles")]

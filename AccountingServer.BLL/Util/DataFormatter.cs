@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using AccountingServer.Entities;
 
-namespace AccountingServer.BLL
+namespace AccountingServer.BLL.Util
 {
     /// <summary>
     ///     格式化数据

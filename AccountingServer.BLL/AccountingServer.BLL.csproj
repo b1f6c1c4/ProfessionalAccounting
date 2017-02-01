@@ -53,9 +53,9 @@
     </Compile>
     <Compile Include="Accountant.cs" />
     <Compile Include="AssetAccountant.cs" />
-    <Compile Include="DataFormatter.cs" />
+    <Compile Include="Util\DataFormatter.cs" />
     <Compile Include="DistributedAccountant.cs" />
-    <Compile Include="GroupingHelper.cs" />
+    <Compile Include="Util\GroupingHelper.cs" />
     <Compile Include="ITitle.cs" />
     <Compile Include="Parsing\Facade.cs" />
     <Compile Include="Parsing\QueryLexer.cs" />
@@ -65,10 +65,10 @@
     <Compile Include="Parsing\QueryParser.Proxy.Range.cs" />
     <Compile Include="Parsing\QueryParser.Proxy.Voucher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QuotedStringHelper.cs" />
-    <Compile Include="StringFormatter.cs" />
-    <Compile Include="SubtotalTraver.cs" />
-    <Compile Include="TitleManager.cs" />
+    <Compile Include="Util\QuotedStringHelper.cs" />
+    <Compile Include="Util\StringFormatter.cs" />
+    <Compile Include="Util\SubtotalTraver.cs" />
+    <Compile Include="Util\TitleManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AccountingServer.DAL\AccountingServer.DAL.csproj">

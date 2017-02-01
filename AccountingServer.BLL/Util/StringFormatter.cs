@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace AccountingServer.BLL
+namespace AccountingServer.BLL.Util
 {
     /// <summary>
     ///     字符串格式化
