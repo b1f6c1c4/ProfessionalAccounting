@@ -133,12 +133,6 @@ namespace AccountingServer
                 if (res == null)
                     return true;
 
-                if (res is ChartData)
-                {
-                    FocusTextBoxCommand();
-                    return true;
-                }
-
                 var result = res.ToString();
 
                 scintilla.Focus();
