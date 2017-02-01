@@ -52,7 +52,11 @@ details
 	;
 
 detailQuery
-	:	(DetailTitle | DetailTitleSubTitle)? SingleQuotedString? DoubleQuotedString? Direction=('>' | '<')?
+	:	title? SingleQuotedString? DoubleQuotedString? Direction=('>' | '<')?
+	;
+
+title
+	:	DetailTitle | DetailTitleSubTitle
 	;
 
 range

@@ -3,8 +3,55 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.BLL.Parsing
 {
+    public interface ITitle
+    {
+        int Title { get; }
+
+        int? SubTitle { get; }
+    }
+
     internal partial class QueryParser
     {
+        public partial class TitleContext : ITitle
+        {
+            public int Title
+            {
+                get
+                {
+                    if (DetailTitle() != null)
+                    {
+                        var tt = int.Parse(DetailTitle().GetText().TrimStart('T'));
+                        return tt;
+                    }
+
+                    if (DetailTitleSubTitle() != null)
+                    {
+                        var tt = int.Parse(DetailTitleSubTitle().GetText().TrimStart('T'));
+                        return tt / 100;
+                    }
+
+                    throw new MemberAccessException("表达式错误");
+                }
+            }
+
+            public int? SubTitle
+            {
+                get
+                {
+                    if (DetailTitle() != null)
+                        return null;
+
+                    if (DetailTitleSubTitle() != null)
+                    {
+                        var tt = int.Parse(DetailTitleSubTitle().GetText().TrimStart('T'));
+                        return tt % 100;
+                    }
+
+                    throw new MemberAccessException("表达式错误");
+                }
+            }
+        }
+
         public partial class DetailQueryContext : IDetailQueryAtom
         {
             /// <inheritdoc />
@@ -12,22 +59,15 @@ namespace AccountingServer.BLL.Parsing
             {
                 get
                 {
+                    var t = title();
                     var filter = new VoucherDetail
                         {
+                            Title = t?.Title,
+                            SubTitle = t?.SubTitle,
                             Content = SingleQuotedString().Dequotation(),
                             Remark = DoubleQuotedString().Dequotation()
                         };
-                    if (DetailTitle() != null)
-                    {
-                        var t = int.Parse(DetailTitle().GetText().TrimStart('T'));
-                        filter.Title = t;
-                    }
-                    else if (DetailTitleSubTitle() != null)
-                    {
-                        var t = int.Parse(DetailTitleSubTitle().GetText().TrimStart('T'));
-                        filter.Title = t / 100;
-                        filter.SubTitle = t % 100;
-                    }
+
                     return filter;
                 }
             }

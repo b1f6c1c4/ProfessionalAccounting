@@ -38,6 +38,12 @@ namespace AccountingServer.BLL.Parsing
             return res;
         }
 
+        public ITitle Title(string s)
+            => Title(ref s);
+
+        public ITitle Title(ref string s)
+            => Parse(ref s, p => p.title());
+
         public DateTime? UniqueTime(string s)
             => UniqueTime(ref s);
 
