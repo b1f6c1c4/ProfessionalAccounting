@@ -57,6 +57,7 @@
     <Compile Include="DistributedShell.cs" />
     <Compile Include="ExpressionHelper.cs" />
     <Compile Include="Facade.cs" />
+    <Compile Include="IEntitySerializer.cs" />
     <Compile Include="IShellComponent.cs" />
     <Compile Include="ParseHelper.cs" />
     <Compile Include="PluginShell.cs" />

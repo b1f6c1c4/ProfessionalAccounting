@@ -17,7 +17,16 @@ namespace AccountingServer.Plugins
         /// </summary>
         protected readonly Accountant Accountant;
 
-        protected PluginBase(Accountant accountant) { Accountant = accountant; }
+        /// <summary>
+        ///     表示器
+        /// </summary>
+        protected readonly IEntitySerializer Serializer;
+
+        protected PluginBase(Accountant accountant, IEntitySerializer serializer)
+        {
+            Accountant = accountant;
+            Serializer = serializer;
+        }
 
         /// <summary>
         ///     执行插件表达式

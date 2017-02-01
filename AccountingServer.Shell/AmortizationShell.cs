@@ -13,7 +13,7 @@ namespace AccountingServer.Shell
     /// </summary>
     internal class AmortizationShell : DistributedShell
     {
-        public AmortizationShell(Accountant helper) : base(helper) { }
+        public AmortizationShell(Accountant helper, IEntitySerializer serializer) : base(helper, serializer) { }
 
         /// <inheritdoc />
         protected override string Initial => "o";
@@ -43,7 +43,7 @@ namespace AccountingServer.Shell
         {
             var sb = new StringBuilder();
             foreach (var a in Sort(Accountant.SelectAmortizations(distQuery)))
-                sb.Append(CSharpHelper.PresentAmort(a));
+                sb.Append(Serializer.PresentAmort(a));
 
             return new EditableText(sb.ToString());
         }
@@ -56,7 +56,7 @@ namespace AccountingServer.Shell
             foreach (var a in Sort(Accountant.SelectAmortizations(distQuery)))
             {
                 foreach (var voucher in Accountant.RegisterVouchers(a, rng, query))
-                    sb.Append(CSharpHelper.PresentVoucher(voucher));
+                    sb.Append(Serializer.PresentVoucher(voucher));
 
                 Accountant.Upsert(a);
             }
@@ -105,7 +105,7 @@ namespace AccountingServer.Shell
             foreach (var a in Sort(Accountant.SelectAmortizations(distQuery)))
             {
                 Accountant.Amortize(a);
-                sb.Append(CSharpHelper.PresentAmort(a));
+                sb.Append(Serializer.PresentAmort(a));
                 Accountant.Upsert(a);
             }
 
@@ -248,7 +248,7 @@ namespace AccountingServer.Shell
                 {
                     sb.AppendLine(ListAmortItem(amortItem));
                     if (amortItem.VoucherID != null)
-                        sb.AppendLine(CSharpHelper.PresentVoucher(Accountant.SelectVoucher(amortItem.VoucherID)));
+                        sb.AppendLine(Serializer.PresentVoucher(Accountant.SelectVoucher(amortItem.VoucherID)));
                 }
 
             return sb.ToString();

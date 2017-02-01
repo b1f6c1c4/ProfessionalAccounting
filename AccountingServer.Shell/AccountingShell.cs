@@ -17,7 +17,16 @@ namespace AccountingServer.Shell
         /// </summary>
         private readonly Accountant m_Accountant;
 
-        public AccountingShell(Accountant helper) { m_Accountant = helper; }
+        /// <summary>
+        ///     表示器
+        /// </summary>
+        private readonly IEntitySerializer m_Serializer;
+
+        public AccountingShell(Accountant helper, IEntitySerializer serializer)
+        {
+            m_Accountant = helper;
+            m_Serializer = serializer;
+        }
 
         /// <inheritdoc />
         public IQueryResult Execute(string expr)
@@ -82,7 +91,7 @@ namespace AccountingServer.Shell
         {
             var sb = new StringBuilder();
             foreach (var voucher in m_Accountant.SelectVouchers(query))
-                sb.Append(CSharpHelper.PresentVoucher(voucher));
+                sb.Append(m_Serializer.PresentVoucher(voucher));
 
             return new EditableText(sb.ToString());
         }

@@ -10,14 +10,10 @@ namespace AccountingServer.Shell
     /// <summary>
     ///     实体表达式
     /// </summary>
-    public static class ExpressionHelper
+    public class ExpressionHelper : IEntitySerializer
     {
-        /// <summary>
-        ///     将记账凭证用记账凭证表达式表示
-        /// </summary>
-        /// <param name="voucher">记账凭证</param>
-        /// <returns>记账凭证表达式</returns>
-        public static string PresentVoucher(Voucher voucher)
+        /// <inheritdoc />
+        public string PresentVoucher(Voucher voucher)
         {
             var sb = new StringBuilder();
             sb.Append("@new Voucher {");
@@ -43,12 +39,8 @@ namespace AccountingServer.Shell
             return sb.ToString();
         }
 
-        /// <summary>
-        ///     解析记账凭证表达式
-        /// </summary>
-        /// <param name="expr">表达式</param>
-        /// <returns>记账凭证</returns>
-        public static Voucher GetVoucher(ref string expr)
+        /// <inheritdoc />
+        public Voucher ParseVoucher(string expr)
         {
             Parsing.TrimStartComment(ref expr);
             var id = Parsing.Quoted(ref expr, '^');
@@ -122,5 +114,10 @@ namespace AccountingServer.Shell
                     Remark = remark
                 };
         }
+
+        public string PresentAsset(Asset asset) { throw new NotImplementedException(); }
+        public Asset ParseAsset(string str) { throw new NotImplementedException(); }
+        public string PresentAmort(Amortization amort) { throw new NotImplementedException(); }
+        public Amortization ParseAmort(string str) { throw new NotImplementedException(); }
     }
 }

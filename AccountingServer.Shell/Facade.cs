@@ -23,20 +23,25 @@ namespace AccountingServer.Shell
         /// </summary>
         private readonly ShellComposer m_Composer;
 
+        /// <summary>
+        ///     表示器
+        /// </summary>
+        private readonly IEntitySerializer m_Serializer;
+
         public Facade()
         {
             m_Accountant = new Accountant();
-
+            m_Serializer = new ExpressionHelper();
             m_Composer =
                 new ShellComposer
                     {
-                        new CheckShell(m_Accountant),
+                        new CheckShell(m_Accountant, m_Serializer),
                         new CarryShell(m_Accountant),
                         new CarryYearShell(m_Accountant),
-                        new AssetShell(m_Accountant),
-                        new AmortizationShell(m_Accountant),
-                        new PluginShell(m_Accountant),
-                        new AccountingShell(m_Accountant)
+                        new AssetShell(m_Accountant, m_Serializer),
+                        new AmortizationShell(m_Accountant, m_Serializer),
+                        new PluginShell(m_Accountant, m_Serializer),
+                        new AccountingShell(m_Accountant, m_Serializer)
                     };
 
             ConnectServer();
@@ -119,7 +124,7 @@ namespace AccountingServer.Shell
         /// <returns>新记账凭证的C#代码</returns>
         public string ExecuteVoucherUpsert(string code)
         {
-            var voucher = CSharpHelper.ParseVoucher(code);
+            var voucher = m_Serializer.ParseVoucher(code);
             // ReSharper disable once PossibleInvalidOperationException
             var unc = voucher.Details.SingleOrDefault(d => !d.Fund.HasValue);
             if (unc != null)
@@ -129,7 +134,7 @@ namespace AccountingServer.Shell
             if (!m_Accountant.Upsert(voucher))
                 throw new ApplicationException("更新或添加失败");
 
-            return CSharpHelper.PresentVoucher(voucher);
+            return m_Serializer.PresentVoucher(voucher);
         }
 
         /// <summary>
@@ -139,12 +144,12 @@ namespace AccountingServer.Shell
         /// <returns>新资产的C#代码</returns>
         public string ExecuteAssetUpsert(string code)
         {
-            var asset = CSharpHelper.ParseAsset(code);
+            var asset = m_Serializer.ParseAsset(code);
 
             if (!m_Accountant.Upsert(asset))
                 throw new ApplicationException("更新或添加失败");
 
-            return CSharpHelper.PresentAsset(asset);
+            return m_Serializer.PresentAsset(asset);
         }
 
         /// <summary>
@@ -154,12 +159,12 @@ namespace AccountingServer.Shell
         /// <returns>新摊销的C#代码</returns>
         public string ExecuteAmortUpsert(string code)
         {
-            var amort = CSharpHelper.ParseAmort(code);
+            var amort = m_Serializer.ParseAmort(code);
 
             if (!m_Accountant.Upsert(amort))
                 throw new ApplicationException("更新或添加失败");
 
-            return CSharpHelper.PresentAmort(amort);
+            return m_Serializer.PresentAmort(amort);
         }
 
         #endregion
@@ -173,7 +178,7 @@ namespace AccountingServer.Shell
         /// <returns>是否成功</returns>
         public bool ExecuteVoucherRemoval(string code)
         {
-            var voucher = CSharpHelper.ParseVoucher(code);
+            var voucher = m_Serializer.ParseVoucher(code);
 
             if (voucher.ID == null)
                 throw new ApplicationException("编号未知");
@@ -188,7 +193,7 @@ namespace AccountingServer.Shell
         /// <returns>是否成功</returns>
         public bool ExecuteAssetRemoval(string code)
         {
-            var asset = CSharpHelper.ParseAsset(code);
+            var asset = m_Serializer.ParseAsset(code);
 
             if (!asset.ID.HasValue)
                 throw new ApplicationException("编号未知");
@@ -203,7 +208,7 @@ namespace AccountingServer.Shell
         /// <returns>是否成功</returns>
         public bool ExecuteAmortRemoval(string code)
         {
-            var amort = CSharpHelper.ParseAmort(code);
+            var amort = m_Serializer.ParseAmort(code);
 
             if (!amort.ID.HasValue)
                 throw new ApplicationException("编号未知");

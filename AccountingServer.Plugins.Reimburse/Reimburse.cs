@@ -17,7 +17,7 @@ namespace AccountingServer.Plugins.Reimburse
         private static readonly ConfigManager<ReimTemplates> Templates =
             new ConfigManager<ReimTemplates>("Reim.xml");
 
-        public Reimburse(Accountant accountant) : base(accountant) { }
+        public Reimburse(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
 
         /// <inheritdoc />
         public override IQueryResult Execute(string expr)

@@ -18,7 +18,7 @@ namespace AccountingServer.Plugins.Utilities
         private static readonly ConfigManager<UtilTemplates> Templates =
             new ConfigManager<UtilTemplates>("Util.xml");
 
-        public Utilities(Accountant accountant) : base(accountant) { }
+        public Utilities(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
 
         /// <inheritdoc />
         public override IQueryResult Execute(string expr)

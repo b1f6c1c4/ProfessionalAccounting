@@ -8,7 +8,7 @@ using Microsoft.CSharp;
 
 namespace AccountingServer.Shell
 {
-    public static class CSharpHelper
+    public class CSharpHelper : IEntitySerializer
     {
         /// <summary>
         ///     转义字符串
@@ -46,17 +46,17 @@ namespace AccountingServer.Shell
             sb.AppendLine("using AccountingServer.Entities;");
             sb.AppendLine("namespace AccountingServer.Shell.Dynamic");
             sb.AppendLine("{");
-            sb.AppendLine("    public static class ObjectCreator");
+            sb.AppendLine("    public class ObjectCreator");
             sb.AppendLine("    {");
-            sb.AppendLine("        private static DateTime D(string s)");
+            sb.AppendLine("        private DateTime D(string s)");
             sb.AppendLine("        {");
             sb.AppendLine("            return DateTime.Parse(s);");
             sb.AppendLine("        }");
-            sb.AppendLine("        private static string G()");
+            sb.AppendLine("        private string G()");
             sb.AppendLine("        {");
             sb.AppendLine("            return Guid.NewGuid().ToString().ToUpper();");
             sb.AppendLine("        }");
-            sb.AppendLine($"        public static {type.FullName} GetObject()");
+            sb.AppendLine($"        public {type.FullName} GetObject()");
             sb.AppendLine("        {");
             sb.AppendLine($"            return {str};");
             sb.AppendLine("        }");
@@ -104,12 +104,8 @@ namespace AccountingServer.Shell
             return sb.ToString();
         }
 
-        /// <summary>
-        ///     将记账凭证用C#表示
-        /// </summary>
-        /// <param name="voucher">记账凭证</param>
-        /// <returns>C#表达式</returns>
-        public static string PresentVoucher(Voucher voucher)
+        /// <inheritdoc />
+        public string PresentVoucher(Voucher voucher)
         {
             if (voucher == null)
                 return "@null@";
@@ -133,23 +129,15 @@ namespace AccountingServer.Shell
             return sb.ToString();
         }
 
-        /// <summary>
-        ///     从C#表达式中取得记账凭证
-        /// </summary>
-        /// <param name="str">C#表达式</param>
-        /// <returns>记账凭证</returns>
-        public static Voucher ParseVoucher(string str) => (Voucher)ParseCSharp(str, typeof(Voucher));
+        /// <inheritdoc />
+        public Voucher ParseVoucher(string str) => (Voucher)ParseCSharp(str, typeof(Voucher));
 
         #endregion
 
         #region Asset
 
-        /// <summary>
-        ///     将资产用C#表示
-        /// </summary>
-        /// <param name="asset">资产</param>
-        /// <returns>C#表达式</returns>
-        public static string PresentAsset(Asset asset)
+        /// <inheritdoc />
+        public string PresentAsset(Asset asset)
         {
             if (asset == null)
                 return "@null@";
@@ -204,23 +192,15 @@ namespace AccountingServer.Shell
             return sb.ToString();
         }
 
-        /// <summary>
-        ///     从C#表达式中取得资产
-        /// </summary>
-        /// <param name="str">C#表达式</param>
-        /// <returns>资产</returns>
-        public static Asset ParseAsset(string str) => (Asset)ParseCSharp(str, typeof(Asset));
+        /// <inheritdoc />
+        public Asset ParseAsset(string str) => (Asset)ParseCSharp(str, typeof(Asset));
 
         #endregion
 
         #region Amort
 
-        /// <summary>
-        ///     将摊销用C#表示
-        /// </summary>
-        /// <param name="amort">摊销</param>
-        /// <returns>C#表达式</returns>
-        public static string PresentAmort(Amortization amort)
+        /// <inheritdoc />
+        public string PresentAmort(Amortization amort)
         {
             if (amort == null)
                 return "@null@";
@@ -279,12 +259,8 @@ namespace AccountingServer.Shell
             return sb.ToString();
         }
 
-        /// <summary>
-        ///     从C#表达式中取得摊销
-        /// </summary>
-        /// <param name="str">C#表达式</param>
-        /// <returns>摊销</returns>
-        public static Amortization ParseAmort(string str) => (Amortization)ParseCSharp(str, typeof(Amortization));
+        /// <inheritdoc />
+        public Amortization ParseAmort(string str) => (Amortization)ParseCSharp(str, typeof(Amortization));
 
         #endregion
     }

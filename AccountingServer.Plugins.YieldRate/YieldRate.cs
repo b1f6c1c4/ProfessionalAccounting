@@ -15,7 +15,7 @@ namespace AccountingServer.Plugins.YieldRate
     /// </summary>
     public class YieldRate : PluginBase
     {
-        public YieldRate(Accountant accountant) : base(accountant) { }
+        public YieldRate(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
 
         /// <inheritdoc />
         public override IQueryResult Execute(string expr)

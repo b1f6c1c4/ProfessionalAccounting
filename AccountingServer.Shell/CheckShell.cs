@@ -18,7 +18,16 @@ namespace AccountingServer.Shell
         /// </summary>
         private readonly Accountant m_Accountant;
 
-        public CheckShell(Accountant helper) { m_Accountant = helper; }
+        /// <summary>
+        ///     表示器
+        /// </summary>
+        private readonly IEntitySerializer m_Serializer;
+
+        public CheckShell(Accountant helper, IEntitySerializer serializer)
+        {
+            m_Accountant = helper;
+            m_Serializer = serializer;
+        }
 
         /// <inheritdoc />
         public IQueryResult Execute(string expr)
@@ -50,7 +59,7 @@ namespace AccountingServer.Shell
                     continue;
 
                 sb.AppendLine(val > 0 ? $"/* Debit - Credit = {val:R} */" : $"/* Credit - Debit = {-val:R} */");
-                sb.Append(CSharpHelper.PresentVoucher(voucher));
+                sb.Append(m_Serializer.PresentVoucher(voucher));
             }
 
             if (sb.Length > 0)

@@ -203,7 +203,7 @@ namespace AccountingServer.Plugins.THUInfo
         /// </summary>
         /// <param name="problems">对账问题</param>
         /// <returns>执行结果</returns>
-        private static IQueryResult ShowComparison(Problems problems)
+        private IQueryResult ShowComparison(Problems problems)
         {
             var sb = new StringBuilder();
             foreach (var problem in problems.NoRemark)
@@ -212,7 +212,7 @@ namespace AccountingServer.Plugins.THUInfo
                 foreach (var r in problem.Records)
                     sb.AppendLine(r.ToString());
                 foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
-                    sb.AppendLine(CSharpHelper.PresentVoucher(v));
+                    sb.AppendLine(Serializer.PresentVoucher(v));
 
                 sb.AppendLine();
             }
@@ -222,7 +222,7 @@ namespace AccountingServer.Plugins.THUInfo
                 foreach (var r in problem.Records)
                     sb.AppendLine(r.ToString());
                 foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
-                    sb.AppendLine(CSharpHelper.PresentVoucher(v));
+                    sb.AppendLine(Serializer.PresentVoucher(v));
 
                 sb.AppendLine();
             }
@@ -232,7 +232,7 @@ namespace AccountingServer.Plugins.THUInfo
                 foreach (var r in problem.Records)
                     sb.AppendLine(r.ToString());
                 foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
-                    sb.AppendLine(CSharpHelper.PresentVoucher(v));
+                    sb.AppendLine(Serializer.PresentVoucher(v));
 
                 sb.AppendLine();
             }
@@ -241,7 +241,7 @@ namespace AccountingServer.Plugins.THUInfo
             {
                 sb.AppendLine("---No Record");
                 foreach (var v in problems.NoRecord.Select(d => d.Voucher).Distinct())
-                    sb.AppendLine(CSharpHelper.PresentVoucher(v));
+                    sb.AppendLine(Serializer.PresentVoucher(v));
             }
 
             if (sb.Length == 0)
