@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
-using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using AccountingServer.Plugins;
 using AccountingServer.Shell.Serializer;
 using static AccountingServer.BLL.Parsing.Facade;

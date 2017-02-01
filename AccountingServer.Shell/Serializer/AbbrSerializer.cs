@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml.Serialization;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Shell.Serializer

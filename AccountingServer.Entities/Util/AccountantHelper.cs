@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AccountingServer.Entities
+namespace AccountingServer.Entities.Util
 {
     public static class AccountantHelper
     {

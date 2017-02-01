@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Xml.Serialization;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 
 namespace AccountingServer.BLL
 {
