@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using AccountingServer.BLL;
+using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
 using static AccountingServer.BLL.Parsing.Facade;
 
@@ -43,10 +44,17 @@ namespace AccountingServer.Shell
         public Voucher ParseVoucher(string expr)
         {
             const string tk = "new Voucher {";
-            if (expr.StartsWith(tk, StringComparison.Ordinal))
-                return GetVoucher(expr.Substring(tk.Length));
+            if (!expr.StartsWith(tk, StringComparison.Ordinal))
+                throw new FormatException("格式错误");
 
-            throw new FormatException("格式错误");
+            expr = expr.Substring(tk.Length);
+            var v = GetVoucher(ref expr);
+            Parsing.TrimStartComment(ref expr);
+            if (Parsing.Token(ref expr, false) != "}")
+                throw new FormatException("格式错误");
+
+            Parsing.Eof(expr);
+            return v;
         }
 
         /// <summary>
@@ -54,7 +62,7 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>记账凭证</returns>
-        private static Voucher GetVoucher(string expr)
+        private Voucher GetVoucher(ref string expr)
         {
             Parsing.TrimStartComment(ref expr);
             var id = Parsing.Quoted(ref expr, '^');
@@ -89,7 +97,7 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>细目</returns>
-        private static VoucherDetail GetVoucherDetail(ref string expr)
+        protected virtual VoucherDetail GetVoucherDetail(ref string expr)
         {
             Parsing.TrimStartComment(ref expr);
             var title = Parsing.Title(ref expr);

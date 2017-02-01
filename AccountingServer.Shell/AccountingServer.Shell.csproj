@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbbrHelper.cs" />
     <Compile Include="AmortizationShell.cs" />
     <Compile Include="AssetShell.cs" />
     <Compile Include="Carry\CarryYearShell.cs" />

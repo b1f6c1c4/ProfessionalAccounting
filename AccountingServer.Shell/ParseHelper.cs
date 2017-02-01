@@ -24,7 +24,7 @@ namespace AccountingServer.Shell
                 return;
 
             var index = expr.IndexOf(Environment.NewLine, 2, StringComparison.Ordinal);
-            expr = expr.Substring(index + 2);
+            expr = expr.Substring(index + Environment.NewLine.Length);
             expr = expr.TrimStart();
         }
 
