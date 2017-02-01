@@ -8,7 +8,7 @@ using Microsoft.CSharp;
 
 namespace AccountingServer.Shell
 {
-    public class CSharpHelper : IEntitySerializer
+    internal class CSharpHelper : IEntitySerializer
     {
         /// <summary>
         ///     转义字符串
@@ -80,7 +80,7 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="detail">细目</param>
         /// <returns>C#表达式</returns>
-        public static string PresentVoucherDetail(VoucherDetail detail)
+        private static string PresentVoucherDetail(VoucherDetail detail)
         {
             if (detail == null)
                 return string.Empty;
