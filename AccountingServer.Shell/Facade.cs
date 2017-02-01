@@ -32,7 +32,7 @@ namespace AccountingServer.Shell
         public Facade()
         {
             m_Accountant = new Accountant();
-            m_Serializer = new AlternativeSerializer(new AbbrHelper(), new CSharpHelper());
+            m_Serializer = new AlternativeSerializer(new AbbrSerializer(), new CSharpSerializer());
             m_Composer =
                 new ShellComposer
                     {

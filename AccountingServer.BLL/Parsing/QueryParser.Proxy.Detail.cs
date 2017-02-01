@@ -3,13 +3,6 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.BLL.Parsing
 {
-    public interface ITitle
-    {
-        int Title { get; }
-
-        int? SubTitle { get; }
-    }
-
     internal partial class QueryParser
     {
         public partial class TitleContext : ITitle

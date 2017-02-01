@@ -11,7 +11,7 @@ namespace AccountingServer.Shell
     /// <summary>
     ///     实体表达式
     /// </summary>
-    internal class ExpressionHelper : IEntitySerializer
+    internal class ExprSerializer : IEntitySerializer
     {
         /// <inheritdoc />
         public string PresentVoucher(Voucher voucher)
