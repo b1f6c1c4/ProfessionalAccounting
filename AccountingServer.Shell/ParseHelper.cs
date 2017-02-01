@@ -11,6 +11,24 @@ namespace AccountingServer.Shell
     public static class ParseHelper
     {
         /// <summary>
+        ///     忽略空白和注释
+        /// </summary>
+        /// <param name="facade">占位符</param>
+        /// <param name="expr">表达式</param>
+        public static void TrimStartComment(this FacadeBase facade, ref string expr)
+        {
+            expr = expr.TrimStart();
+            if (expr.Length <= 2 ||
+                expr[0] != '/' ||
+                expr[1] != '/')
+                return;
+
+            var index = expr.IndexOf(Environment.NewLine, 2, StringComparison.Ordinal);
+            expr = expr.Substring(index + 2);
+            expr = expr.TrimStart();
+        }
+
+        /// <summary>
         ///     匹配带括号和连续字符串
         /// </summary>
         /// <param name="facade">占位符</param>
