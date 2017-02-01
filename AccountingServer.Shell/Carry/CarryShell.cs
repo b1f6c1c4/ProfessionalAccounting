@@ -41,7 +41,7 @@ namespace AccountingServer.Shell.Carry
         /// <summary>
         ///     汇率查询
         /// </summary>
-        private static readonly IExchange Exchange = new ExchangeCache(new FixerIoExchange());
+        private static readonly IExchange Exchange = ExchangeFactory.Create();
 
         /// <summary>
         ///     执行摊销
