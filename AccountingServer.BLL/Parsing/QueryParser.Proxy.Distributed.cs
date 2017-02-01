@@ -60,7 +60,7 @@ namespace AccountingServer.BLL.Parsing
                     if (Op == null)
                         return OperatorType.None;
 
-                    if (distributedQ().Count == 1)
+                    if (distributedQ().Length == 1)
                     {
                         if (Op.Text == "+")
                             return OperatorType.Identity;
