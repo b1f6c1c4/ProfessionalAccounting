@@ -48,7 +48,7 @@ namespace AccountingServer.Plugins.THUInfo
 
         static THUInfo() { EndPointTemplates = new ConfigManager<EndPointTemplates>("EndPoint.xml"); }
 
-        public THUInfo(Accountant accountant) : base(accountant)
+        public THUInfo(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer)
         {
             m_Crawler = new Crawler();
             Task.Run(() => FetchData());

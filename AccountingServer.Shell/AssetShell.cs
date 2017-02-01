@@ -13,7 +13,7 @@ namespace AccountingServer.Shell
     /// </summary>
     internal class AssetShell : DistributedShell
     {
-        public AssetShell(Accountant helper) : base(helper) { }
+        public AssetShell(Accountant helper, IEntitySerializer serializer) : base(helper, serializer) { }
 
         /// <inheritdoc />
         protected override string Initial => "a";
@@ -37,7 +37,7 @@ namespace AccountingServer.Shell
         {
             var sb = new StringBuilder();
             foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
-                sb.Append(CSharpHelper.PresentAsset(a));
+                sb.Append(Serializer.PresentAsset(a));
 
             return new EditableText(sb.ToString());
         }
@@ -50,7 +50,7 @@ namespace AccountingServer.Shell
             foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
             {
                 foreach (var voucher in Accountant.RegisterVouchers(a, rng, query))
-                    sb.Append(CSharpHelper.PresentVoucher(voucher));
+                    sb.Append(Serializer.PresentVoucher(voucher));
 
                 Accountant.Upsert(a);
             }
@@ -99,7 +99,7 @@ namespace AccountingServer.Shell
             foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
             {
                 Accountant.Depreciate(a);
-                sb.Append(CSharpHelper.PresentAsset(a));
+                sb.Append(Serializer.PresentAsset(a));
                 Accountant.Upsert(a);
             }
 
@@ -264,7 +264,7 @@ namespace AccountingServer.Shell
                 {
                     sb.AppendLine(ListAssetItem(assetItem));
                     if (assetItem.VoucherID != null)
-                        sb.AppendLine(CSharpHelper.PresentVoucher(Accountant.SelectVoucher(assetItem.VoucherID)));
+                        sb.AppendLine(Serializer.PresentVoucher(Accountant.SelectVoucher(assetItem.VoucherID)));
                 }
 
             return sb.ToString();

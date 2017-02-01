@@ -18,7 +18,7 @@ namespace AccountingServer.Shell
 
         private readonly ConfigManager<PluginInfos> m_Infos;
 
-        public PluginShell(Accountant helper)
+        public PluginShell(Accountant helper, IEntitySerializer serializer)
         {
             m_Infos = new ConfigManager<PluginInfos>("Plugins.xml");
             m_Plugins = new Dictionary<string, PluginBase>();
@@ -31,7 +31,7 @@ namespace AccountingServer.Shell
 
                 m_Plugins.Add(
                     info.Alias,
-                    (PluginBase)Activator.CreateInstance(type, helper));
+                    (PluginBase)Activator.CreateInstance(type, helper, serializer));
             }
         }
 

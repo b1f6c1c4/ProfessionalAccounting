@@ -14,7 +14,7 @@ namespace AccountingServer.Plugins.Interest
     /// </summary>
     public class InterestRevenue : PluginBase
     {
-        public InterestRevenue(Accountant accountant) : base(accountant) { }
+        public InterestRevenue(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
 
         /// <inheritdoc />
         public override IQueryResult Execute(string expr)

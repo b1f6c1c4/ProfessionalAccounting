@@ -23,9 +23,15 @@ namespace AccountingServer.Shell
         /// </summary>
         private readonly IShellComponent m_Composer;
 
-        protected DistributedShell(Accountant helper)
+        /// <summary>
+        ///     表示器
+        /// </summary>
+        protected readonly IEntitySerializer Serializer;
+
+        protected DistributedShell(Accountant helper, IEntitySerializer serializer)
         {
             Accountant = helper;
+            Serializer = serializer;
             var resetComopser =
                 new ShellComposer
                     {
