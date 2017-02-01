@@ -50,13 +50,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AbbrHelper.cs" />
+    <Compile Include="AbbrSerializer.cs" />
     <Compile Include="AmortizationShell.cs" />
     <Compile Include="AssetShell.cs" />
     <Compile Include="Carry\CarryYearShell.cs" />
     <Compile Include="Carry\Exchange.cs" />
     <Compile Include="DistributedShell.cs" />
-    <Compile Include="ExpressionHelper.cs" />
+    <Compile Include="ExprSerializer.cs" />
     <Compile Include="Facade.cs" />
     <Compile Include="IEntitySerializer.cs" />
     <Compile Include="IShellComponent.cs" />
@@ -68,7 +68,7 @@
     <Compile Include="SubtotalHelper.cs" />
     <Compile Include="Plugins\Info.cs" />
     <Compile Include="Plugins\PluginBase.cs" />
-    <Compile Include="CSharpHelper.cs" />
+    <Compile Include="CSharpSerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryResult.cs" />
   </ItemGroup>

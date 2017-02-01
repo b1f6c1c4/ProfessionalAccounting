@@ -8,7 +8,7 @@ using Microsoft.CSharp;
 
 namespace AccountingServer.Shell
 {
-    internal class CSharpHelper : IEntitySerializer
+    internal class CSharpSerializer : IEntitySerializer
     {
         /// <summary>
         ///     转义字符串

@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Xml.Serialization;
-using AccountingServer.BLL.Parsing;
+using AccountingServer.BLL;
 using AccountingServer.Entities;
 using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Shell
 {
-    internal class AbbrHelper : ExpressionHelper
+    internal class AbbrSerializer : ExprSerializer
     {
         private static readonly ConfigManager<Abbreviations> Abbrs;
 
-        static AbbrHelper() { Abbrs = new ConfigManager<Abbreviations>("Abbr.xml"); }
+        static AbbrSerializer() { Abbrs = new ConfigManager<Abbreviations>("Abbr.xml"); }
 
         protected override VoucherDetail GetVoucherDetail(ref string expr)
         {
