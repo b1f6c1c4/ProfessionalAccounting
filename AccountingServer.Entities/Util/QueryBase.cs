@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AccountingServer.Entities
+namespace AccountingServer.Entities.Util
 {
     public class DetailQueryAtomBase : IDetailQueryAtom
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace AccountingServer.Entities
+namespace AccountingServer.Entities.Util
 {
     /// <summary>
     ///     判断实体是否符合各过滤器

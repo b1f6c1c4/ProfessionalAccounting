@@ -40,17 +40,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccountantHelper.cs" />
+    <Compile Include="Util\AccountantHelper.cs" />
     <Compile Include="Amortization.cs" />
     <Compile Include="Asset.cs" />
     <Compile Include="Balance.cs" />
-    <Compile Include="ConfigManager.cs" />
+    <Compile Include="Util\ConfigManager.cs" />
     <Compile Include="IDistributed.cs" />
-    <Compile Include="QueryBase.cs" />
+    <Compile Include="Util\QueryBase.cs" />
     <Compile Include="QueryInterface.cs" />
     <Compile Include="SubtotalLevel.cs" />
     <Compile Include="Date.cs" />
-    <Compile Include="MatchHelper.cs" />
+    <Compile Include="Util\MatchHelper.cs" />
     <Compile Include="Voucher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

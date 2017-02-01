@@ -4,6 +4,7 @@ using System.Linq;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 
 namespace AccountingServer.Shell.Carry
 {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 
 namespace AccountingServer.BLL
 {
