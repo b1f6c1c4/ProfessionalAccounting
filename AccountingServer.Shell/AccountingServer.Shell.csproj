@@ -55,6 +55,7 @@
     <Compile Include="Carry\CarryYearShell.cs" />
     <Compile Include="Carry\Exchange.cs" />
     <Compile Include="DistributedShell.cs" />
+    <Compile Include="ExpressionHelper.cs" />
     <Compile Include="Facade.cs" />
     <Compile Include="IShellComponent.cs" />
     <Compile Include="ParseHelper.cs" />
