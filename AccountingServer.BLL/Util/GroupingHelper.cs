@@ -4,7 +4,7 @@ using System.Linq;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 
-namespace AccountingServer.BLL
+namespace AccountingServer.BLL.Util
 {
     public static class GroupingHelper
     {

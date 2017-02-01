@@ -1,7 +1,7 @@
 ﻿using System;
 using Antlr4.Runtime.Tree;
 
-namespace AccountingServer.BLL
+namespace AccountingServer.BLL.Util
 {
     /// <summary>
     ///     带引号的字符串辅助类
