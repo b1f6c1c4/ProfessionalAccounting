@@ -22,7 +22,6 @@ namespace AccountingServer
             Height = 860;
 
             SetupScintilla();
-            PrepareFastEditing();
             PrepareAccounting();
         }
 
@@ -145,8 +144,6 @@ namespace AccountingServer
             if (keyData == Keys.Escape)
             {
                 FocusTextBoxCommand();
-                if (m_FastEditing)
-                    ExitFastEditing();
                 return true;
             }
 
@@ -158,34 +155,11 @@ namespace AccountingServer
                 return true;
             }
 
-            if (keyData == Keys.Enter &&
-                !m_FastEditing)
-                if (textBoxCommand.Text.Length == 0)
-                {
-                    EnterFastEditing();
-                    return true;
-                }
-                else
-                    return ExecuteCommand(false);
+            if (keyData == Keys.Enter)
+                return ExecuteCommand(false);
 
-            if (keyData == (Keys.Enter | Keys.Shift) &&
-                !m_FastEditing)
+            if (keyData == (Keys.Enter | Keys.Shift))
                 return ExecuteCommand(true);
-
-            if (keyData == Keys.Enter && m_FastEditing)
-                if (textBoxCommand.Text.Length == 0)
-                {
-                    if (!PerformUpsert())
-                        return false;
-
-                    ExitFastEditing();
-                    return true;
-                }
-                else
-                {
-                    FastEdit();
-                    return true;
-                }
 
             return false;
         }
@@ -202,24 +176,6 @@ namespace AccountingServer
                 return PerformUpsert();
             if (keyData == (Keys.Delete | Keys.Alt))
                 return PerformRemoval();
-
-            if ((keyData == Keys.Tab || keyData == Keys.Enter) &&
-                m_FastEditing)
-            {
-                if (m_FastNextLocationDelta == m_FastInsertLocationDelta)
-                {
-                    scintilla.SelectionStart += m_FastNextLocationDelta + scintilla.SelectionEnd -
-                        scintilla.SelectionStart - 4;
-                    FocusTextBoxCommand();
-                }
-                else
-                {
-                    scintilla.SelectionStart += m_FastNextLocationDelta;
-                    scintilla.SelectionEnd = scintilla.SelectionStart + 4;
-                    m_FastNextLocationDelta = m_FastInsertLocationDelta -= m_FastNextLocationDelta;
-                }
-                return true;
-            }
 
             return false;
         }
