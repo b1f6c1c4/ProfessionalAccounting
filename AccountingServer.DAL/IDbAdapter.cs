@@ -1,71 +1,57 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using AccountingServer.Entities;
 
 namespace AccountingServer.DAL
 {
     /// <summary>
-    ///     Êı¾İ¿â·ÃÎÊ½Ó¿Ú
+    ///     æ•°æ®åº“è®¿é—®æ¥å£
     /// </summary>
     public interface IDbAdapter
     {
-        #region Server
-
-        /// <summary>
-        ///     ÊÇ·ñÒÑ¾­Á¬½Óµ½Êı¾İ¿â
-        /// </summary>
-        bool Connected { get; }
-
-        /// <summary>
-        ///     Á¬½Ó·şÎñÆ÷
-        /// </summary>
-        void Connect();
-
-        #endregion
-
         #region Voucher
 
         /// <summary>
-        ///     °´±àºÅ²éÕÒ¼ÇÕËÆ¾Ö¤
+        ///     æŒ‰ç¼–å·æŸ¥æ‰¾è®°è´¦å‡­è¯
         /// </summary>
-        /// <param name="id">±àºÅ</param>
-        /// <returns>¼ÇÕËÆ¾Ö¤£¬Èç¹ûÃ»ÓĞÔòÎª<c>null</c></returns>
+        /// <param name="id">ç¼–å·</param>
+        /// <returns>è®°è´¦å‡­è¯ï¼Œå¦‚æœæ²¡æœ‰åˆ™ä¸º<c>null</c></returns>
         Voucher SelectVoucher(string id);
 
         /// <summary>
-        ///     °´¼ìË÷Ê½²éÕÒ¼ÇÕËÆ¾Ö¤
+        ///     æŒ‰æ£€ç´¢å¼æŸ¥æ‰¾è®°è´¦å‡­è¯
         /// </summary>
-        /// <param name="query">¼ìË÷Ê½</param>
-        /// <returns>ÈÎÒ»Ï¸Ä¿Æ¥Åä¼ìË÷Ê½µÄ¼ÇÕËÆ¾Ö¤</returns>
+        /// <param name="query">æ£€ç´¢å¼</param>
+        /// <returns>ä»»ä¸€ç»†ç›®åŒ¹é…æ£€ç´¢å¼çš„è®°è´¦å‡­è¯</returns>
         IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query);
 
         /// <summary>
-        ///     °´¼ìË÷Ê½Ö´ĞĞ·ÖÀà»ã×Ü
+        ///     æŒ‰æ£€ç´¢å¼æ‰§è¡Œåˆ†ç±»æ±‡æ€»
         /// </summary>
-        /// <param name="query">¼ìË÷Ê½</param>
-        /// <returns>·ÖÀà»ã×Ü½á¹û</returns>
+        /// <param name="query">æ£€ç´¢å¼</param>
+        /// <returns>åˆ†ç±»æ±‡æ€»ç»“æœ</returns>
         IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query);
 
         /// <summary>
-        ///     °´±àºÅÉ¾³ı¼ÇÕËÆ¾Ö¤
+        ///     æŒ‰ç¼–å·åˆ é™¤è®°è´¦å‡­è¯
         /// </summary>
-        /// <param name="id">±àºÅ</param>
-        /// <returns>ÊÇ·ñ³É¹¦</returns>
+        /// <param name="id">ç¼–å·</param>
+        /// <returns>æ˜¯å¦æˆåŠŸ</returns>
         bool DeleteVoucher(string id);
 
         /// <summary>
-        ///     °´¼ìË÷Ê½É¾³ı¼ÇÕËÆ¾Ö¤
+        ///     æŒ‰æ£€ç´¢å¼åˆ é™¤è®°è´¦å‡­è¯
         /// </summary>
-        /// <param name="query">¼ìË÷Ê½</param>
-        /// <returns>ÒÑÉ¾³ıµÄÏ¸Ä¿×ÜÊı</returns>
+        /// <param name="query">æ£€ç´¢å¼</param>
+        /// <returns>å·²åˆ é™¤çš„ç»†ç›®æ€»æ•°</returns>
         long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query);
 
         /// <summary>
-        ///     Ìí¼Ó»òÌæ»»¼ÇÕËÆ¾Ö¤
-        ///     <para>ÈôÎŞ±àºÅ£¬ÔòÌí¼ÓĞÂ±àºÅ</para>
+        ///     æ·»åŠ æˆ–æ›¿æ¢è®°è´¦å‡­è¯
+        ///     <para>è‹¥æ— ç¼–å·ï¼Œåˆ™æ·»åŠ æ–°ç¼–å·</para>
         /// </summary>
-        /// <param name="entity">ĞÂ¼ÇÕËÆ¾Ö¤</param>
-        /// <returns>ÊÇ·ñ³É¹¦</returns>
+        /// <param name="entity">æ–°è®°è´¦å‡­è¯</param>
+        /// <returns>æ˜¯å¦æˆåŠŸ</returns>
         bool Upsert(Voucher entity);
 
         #endregion
@@ -73,39 +59,39 @@ namespace AccountingServer.DAL
         #region Asset
 
         /// <summary>
-        ///     °´±àºÅ²éÕÒ×Ê²ú
+        ///     æŒ‰ç¼–å·æŸ¥æ‰¾èµ„äº§
         /// </summary>
-        /// <param name="id">±àºÅ</param>
-        /// <returns>×Ê²ú£¬Èç¹ûÃ»ÓĞÔòÎª<c>null</c></returns>
+        /// <param name="id">ç¼–å·</param>
+        /// <returns>èµ„äº§ï¼Œå¦‚æœæ²¡æœ‰åˆ™ä¸º<c>null</c></returns>
         Asset SelectAsset(Guid id);
 
         /// <summary>
-        ///     °´¼ÇÕËÆ¾Ö¤¹ıÂËÆ÷²éÕÒ×Ê²ú
+        ///     æŒ‰è®°è´¦å‡­è¯è¿‡æ»¤å™¨æŸ¥æ‰¾èµ„äº§
         /// </summary>
-        /// <param name="filter">¼ÇÕËÆ¾Ö¤¹ıÂËÆ÷</param>
-        /// <returns>Æ¥Åä¼ÇÕËÆ¾Ö¤¹ıÂËÆ÷µÄ×Ê²ú</returns>
+        /// <param name="filter">è®°è´¦å‡­è¯è¿‡æ»¤å™¨</param>
+        /// <returns>åŒ¹é…è®°è´¦å‡­è¯è¿‡æ»¤å™¨çš„èµ„äº§</returns>
         IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter);
 
         /// <summary>
-        ///     °´±àºÅÉ¾³ı×Ê²ú
+        ///     æŒ‰ç¼–å·åˆ é™¤èµ„äº§
         /// </summary>
-        /// <param name="id">±àºÅ</param>
-        /// <returns>ÊÇ·ñ³É¹¦</returns>
+        /// <param name="id">ç¼–å·</param>
+        /// <returns>æ˜¯å¦æˆåŠŸ</returns>
         bool DeleteAsset(Guid id);
 
         /// <summary>
-        ///     °´¼ÇÕËÆ¾Ö¤¹ıÂËÆ÷É¾³ı×Ê²ú
+        ///     æŒ‰è®°è´¦å‡­è¯è¿‡æ»¤å™¨åˆ é™¤èµ„äº§
         /// </summary>
-        /// <param name="filter">¼ÇÕËÆ¾Ö¤¹ıÂËÆ÷</param>
-        /// <returns>ÒÑÉ¾³ıµÄ×Ê²ú×ÜÊı</returns>
+        /// <param name="filter">è®°è´¦å‡­è¯è¿‡æ»¤å™¨</param>
+        /// <returns>å·²åˆ é™¤çš„èµ„äº§æ€»æ•°</returns>
         long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter);
 
         /// <summary>
-        ///     Ìí¼Ó»òÌæ»»×Ê²ú
-        ///     <para>ÈôÎŞ±àºÅ£¬ÔòÌí¼ÓĞÂ±àºÅ</para>
+        ///     æ·»åŠ æˆ–æ›¿æ¢èµ„äº§
+        ///     <para>è‹¥æ— ç¼–å·ï¼Œåˆ™æ·»åŠ æ–°ç¼–å·</para>
         /// </summary>
-        /// <param name="entity">ĞÂ×Ê²ú</param>
-        /// <returns>ÊÇ·ñ³É¹¦</returns>
+        /// <param name="entity">æ–°èµ„äº§</param>
+        /// <returns>æ˜¯å¦æˆåŠŸ</returns>
         bool Upsert(Asset entity);
 
         #endregion
@@ -113,39 +99,39 @@ namespace AccountingServer.DAL
         #region Amortization
 
         /// <summary>
-        ///     °´±àºÅ²éÕÒÌ¯Ïú
+        ///     æŒ‰ç¼–å·æŸ¥æ‰¾æ‘Šé”€
         /// </summary>
-        /// <param name="id">±àºÅ</param>
-        /// <returns>Ì¯Ïú£¬Èç¹ûÃ»ÓĞÔòÎª<c>null</c></returns>
+        /// <param name="id">ç¼–å·</param>
+        /// <returns>æ‘Šé”€ï¼Œå¦‚æœæ²¡æœ‰åˆ™ä¸º<c>null</c></returns>
         Amortization SelectAmortization(Guid id);
 
         /// <summary>
-        ///     °´¼ÇÕËÆ¾Ö¤¹ıÂËÆ÷²éÕÒÌ¯Ïú
+        ///     æŒ‰è®°è´¦å‡­è¯è¿‡æ»¤å™¨æŸ¥æ‰¾æ‘Šé”€
         /// </summary>
-        /// <param name="filter">¼ÇÕËÆ¾Ö¤¹ıÂËÆ÷</param>
-        /// <returns>Æ¥Åä¼ÇÕËÆ¾Ö¤¹ıÂËÆ÷µÄÌ¯Ïú</returns>
+        /// <param name="filter">è®°è´¦å‡­è¯è¿‡æ»¤å™¨</param>
+        /// <returns>åŒ¹é…è®°è´¦å‡­è¯è¿‡æ»¤å™¨çš„æ‘Šé”€</returns>
         IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter);
 
         /// <summary>
-        ///     °´±àºÅÉ¾³ıÌ¯Ïú
+        ///     æŒ‰ç¼–å·åˆ é™¤æ‘Šé”€
         /// </summary>
-        /// <param name="id">±àºÅ</param>
-        /// <returns>ÊÇ·ñ³É¹¦</returns>
+        /// <param name="id">ç¼–å·</param>
+        /// <returns>æ˜¯å¦æˆåŠŸ</returns>
         bool DeleteAmortization(Guid id);
 
         /// <summary>
-        ///     °´¼ÇÕËÆ¾Ö¤¹ıÂËÆ÷É¾³ıÌ¯Ïú
+        ///     æŒ‰è®°è´¦å‡­è¯è¿‡æ»¤å™¨åˆ é™¤æ‘Šé”€
         /// </summary>
-        /// <param name="filter">¼ÇÕËÆ¾Ö¤¹ıÂËÆ÷</param>
-        /// <returns>ÒÑÉ¾³ıµÄÌ¯Ïú×ÜÊı</returns>
+        /// <param name="filter">è®°è´¦å‡­è¯è¿‡æ»¤å™¨</param>
+        /// <returns>å·²åˆ é™¤çš„æ‘Šé”€æ€»æ•°</returns>
         long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter);
 
         /// <summary>
-        ///     Ìí¼Ó»òÌæ»»Ì¯Ïú
-        ///     <para>ÈôÎŞ±àºÅ£¬ÔòÌí¼ÓĞÂ±àºÅ</para>
+        ///     æ·»åŠ æˆ–æ›¿æ¢æ‘Šé”€
+        ///     <para>è‹¥æ— ç¼–å·ï¼Œåˆ™æ·»åŠ æ–°ç¼–å·</para>
         /// </summary>
-        /// <param name="entity">ĞÂÌ¯Ïú</param>
-        /// <returns>ÊÇ·ñ³É¹¦</returns>
+        /// <param name="entity">æ–°æ‘Šé”€</param>
+        /// <returns>æ˜¯å¦æˆåŠŸ</returns>
         bool Upsert(Amortization entity);
 
         #endregion

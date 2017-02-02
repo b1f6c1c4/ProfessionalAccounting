@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using AccountingServer.DAL.Serializer;
@@ -14,36 +15,35 @@ namespace AccountingServer.DAL
     /// <summary>
     ///     MongoDb数据访问类
     /// </summary>
-    public class MongoDbAdapter : IDbAdapter
+    [SuppressMessage("ReSharper", "PrivateFieldCanBeConvertedToLocalVariable")]
+    internal class MongoDbAdapter : IDbAdapter
     {
         #region Member
 
         /// <summary>
         ///     MongoDb客户端
         /// </summary>
-        // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
-        private MongoClient m_Client;
+        private readonly MongoClient m_Client;
 
         /// <summary>
         ///     MongoDb数据库
         /// </summary>
-        // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
-        private IMongoDatabase m_Db;
+        private readonly IMongoDatabase m_Db;
 
         /// <summary>
         ///     记账凭证集合
         /// </summary>
-        private IMongoCollection<Voucher> m_Vouchers;
+        private readonly IMongoCollection<Voucher> m_Vouchers;
 
         /// <summary>
         ///     资产集合
         /// </summary>
-        private IMongoCollection<Asset> m_Assets;
+        private readonly IMongoCollection<Asset> m_Assets;
 
         /// <summary>
         ///     摊销集合
         /// </summary>
-        private IMongoCollection<Amortization> m_Amortizations;
+        private readonly IMongoCollection<Amortization> m_Amortizations;
 
         #endregion
 
@@ -61,26 +61,16 @@ namespace AccountingServer.DAL
             BsonSerializer.RegisterSerializer(new BalanceSerializer());
         }
 
-        #region Server
-
-        /// <inheritdoc />
-        public bool Connected { get; private set; }
-
-        /// <inheritdoc />
-        public void Connect()
+        public MongoDbAdapter(MongoClientSettings settings)
         {
-            m_Client = new MongoClient("mongodb://localhost");
+            m_Client = new MongoClient(settings);
 
             m_Db = m_Client.GetDatabase("accounting");
 
             m_Vouchers = m_Db.GetCollection<Voucher>("voucher");
             m_Assets = m_Db.GetCollection<Asset>("asset");
             m_Amortizations = m_Db.GetCollection<Amortization>("amortization");
-
-            Connected = true;
         }
-
-        #endregion
 
         #region Voucher
 

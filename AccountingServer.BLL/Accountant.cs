@@ -16,7 +16,7 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     数据库访问
         /// </summary>
-        private readonly IDbAdapter m_Db;
+        private IDbAdapter m_Db;
 
         private readonly AssetAccountant m_AssetAccountant;
 
@@ -25,21 +25,17 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     获取是否已经连接到数据库
         /// </summary>
-        public bool Connected => m_Db.Connected;
+        public bool Connected => m_Db != null;
 
         public Accountant()
         {
-            var adapter = new MongoDbAdapter();
-
-            m_Db = adapter;
-
             m_AssetAccountant = new AssetAccountant(m_Db);
             m_AmortAccountant = new AmortAccountant(m_Db);
         }
 
         #region Server
 
-        public void Connect() => m_Db.Connect();
+        public void Connect(string uri) => m_Db = Facade.Create(uri);
 
         #endregion
 

@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Facade.cs" />
     <Compile Include="Serializer\AssetItemSerializer.cs" />
     <Compile Include="Serializer\AmorizationSerializer.cs" />
     <Compile Include="Serializer\AssetSerializer.cs" />
