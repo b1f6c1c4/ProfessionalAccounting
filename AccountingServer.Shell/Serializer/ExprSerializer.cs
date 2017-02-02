@@ -14,27 +14,39 @@ namespace AccountingServer.Shell.Serializer
     /// </summary>
     internal class ExprSerializer : IEntitySerializer
     {
+        private const string TheToken = "new Voucher {";
+
         /// <inheritdoc />
         public string PresentVoucher(Voucher voucher)
         {
             var sb = new StringBuilder();
-            sb.Append("@new Voucher {");
-            sb.AppendLine(voucher.ID?.Quotation('^'));
-            sb.AppendLine(voucher.Date.AsDate());
-            if (voucher.Remark != null)
-                sb.AppendLine(voucher.Remark.Quotation('%'));
-            if (voucher.Type.HasValue && voucher.Type != VoucherType.Ordinary)
-                sb.AppendLine(voucher.Type.ToString());
-            if (voucher.Currency != null &&
-                voucher.Currency != Voucher.BaseCurrency)
-                sb.AppendLine($"@{voucher.Currency}");
-
-            foreach (var d in voucher.Details)
+            sb.Append($"@{TheToken}");
+            if (voucher == null)
             {
-                var t = TitleManager.GetTitleName(d.Title);
-                var s = TitleManager.GetTitleName(d.Title);
-                sb.AppendLine($"// {t}-{s}");
-                sb.AppendLine($"T{d.Title.AsTitle()}{d.SubTitle.AsSubTitle()} {d.Content?.Quotation('\'')} {d.Remark?.Quotation('\"')} {d.Fund}");
+                sb.AppendLine();
+                sb.AppendLine();
+            }
+            else
+            {
+                sb.AppendLine(voucher.ID?.Quotation('^'));
+                sb.AppendLine(voucher.Date.AsDate());
+                if (voucher.Remark != null)
+                    sb.AppendLine(voucher.Remark.Quotation('%'));
+                if (voucher.Type.HasValue &&
+                    voucher.Type != VoucherType.Ordinary)
+                    sb.AppendLine(voucher.Type.ToString());
+                if (voucher.Currency != null &&
+                    voucher.Currency != Voucher.BaseCurrency)
+                    sb.AppendLine($"@{voucher.Currency}");
+
+                foreach (var d in voucher.Details)
+                {
+                    var t = TitleManager.GetTitleName(d.Title);
+                    var s = TitleManager.GetTitleName(d.Title);
+                    sb.AppendLine($"// {t}-{s}");
+                    sb.AppendLine(
+                        $"T{d.Title.AsTitle()}{d.SubTitle.AsSubTitle()} {d.Content?.Quotation('\'')} {d.Remark?.Quotation('\"')} {d.Fund}");
+                }
             }
 
             sb.AppendLine("}@");
@@ -44,11 +56,10 @@ namespace AccountingServer.Shell.Serializer
         /// <inheritdoc />
         public Voucher ParseVoucher(string expr)
         {
-            const string tk = "new Voucher {";
-            if (!expr.StartsWith(tk, StringComparison.Ordinal))
+            if (!expr.StartsWith(TheToken, StringComparison.Ordinal))
                 throw new FormatException("格式错误");
 
-            expr = expr.Substring(tk.Length);
+            expr = expr.Substring(TheToken.Length);
             var v = GetVoucher(ref expr);
             Parsing.TrimStartComment(ref expr);
             if (Parsing.Token(ref expr, false) != "}")
