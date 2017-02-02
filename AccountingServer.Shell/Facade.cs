@@ -221,6 +221,11 @@ namespace AccountingServer.Shell
         }
 
         #endregion
+
+        /// <summary>
+        ///     空记账凭证的表示
+        /// </summary>
+        public string EmptyVoucher => m_Serializer.PresentVoucher(null);
     }
 
     internal class AlternativeSerializer : IEntitySerializer

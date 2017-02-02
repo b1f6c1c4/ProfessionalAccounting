@@ -156,7 +156,15 @@ namespace AccountingServer
             }
 
             if (keyData == Keys.Enter)
-                return ExecuteCommand(false);
+                if (string.IsNullOrWhiteSpace(textBoxCommand.Text))
+                {
+                    scintilla.InsertText(scintilla.Lines[scintilla.CurrentLine].Position, m_Shell.EmptyVoucher);
+                    scintilla.Focus();
+                    scintilla.SelectionStart = scintilla.Lines[scintilla.CurrentLine + 1].Position;
+                    scintilla.ScrollCaret();
+                }
+                else
+                    return ExecuteCommand(false);
 
             if (keyData == (Keys.Enter | Keys.Shift))
                 return ExecuteCommand(true);
