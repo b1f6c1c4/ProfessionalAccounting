@@ -20,8 +20,8 @@ namespace AccountingServer.BLL.Parsing
                 {
                     var vfilter = new Voucher
                         {
-                            ID = CaretQuotedString().Dequotation(),
-                            Remark = PercentQuotedString().Dequotation()
+                            ID = CaretQuotedString()?.GetText().Dequotation(),
+                            Remark = PercentQuotedString()?.GetText().Dequotation()
                         };
                     if (VoucherType() != null)
                     {

@@ -58,8 +58,8 @@ namespace AccountingServer.BLL.Parsing
                         {
                             Title = t?.Title,
                             SubTitle = t?.SubTitle,
-                            Content = SingleQuotedString().Dequotation(),
-                            Remark = DoubleQuotedString().Dequotation()
+                            Content = SingleQuotedString()?.GetText().Dequotation(),
+                            Remark = DoubleQuotedString()?.GetText().Dequotation()
                         };
 
                     return filter;

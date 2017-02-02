@@ -43,8 +43,8 @@ namespace AccountingServer.BLL.Parsing
                     var filter = new MyDistributedFilter
                         {
                             ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : (Guid?)null,
-                            Name = DollarQuotedString().Dequotation(),
-                            Remark = PercentQuotedString().Dequotation()
+                            Name = DollarQuotedString()?.GetText().Dequotation(),
+                            Remark = PercentQuotedString()?.GetText().Dequotation()
                         };
                     return filter;
                 }
