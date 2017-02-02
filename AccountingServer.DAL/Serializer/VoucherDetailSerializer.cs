@@ -1,10 +1,10 @@
-using AccountingServer.Entities;
+ï»¿using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 
 namespace AccountingServer.DAL.Serializer
 {
     /// <summary>
-    ///     Ï¸Ä¿ĞòÁĞ»¯Æ÷
+    ///     ç»†ç›®åºåˆ—åŒ–å™¨
     /// </summary>
     internal class VoucherDetailSerializer : BaseSerializer<VoucherDetail>
     {

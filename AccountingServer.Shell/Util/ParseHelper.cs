@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Diagnostics.CodeAnalysis;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.BLL.Util;
@@ -7,16 +7,16 @@ using AccountingServer.Entities;
 namespace AccountingServer.Shell.Util
 {
     /// <summary>
-    ///     À©Õ¹µÄ×Ö·û´®Æ¥Åä
+    ///     æ‰©å±•çš„å­—ç¬¦ä¸²åŒ¹é…
     /// </summary>
     [SuppressMessage("ReSharper", "UnusedParameter.Global")]
     public static class ParseHelper
     {
         /// <summary>
-        ///     ºöÂÔ¿Õ°×ºÍ×¢ÊÍ
+        ///     å¿½ç•¥ç©ºç™½å’Œæ³¨é‡Š
         /// </summary>
-        /// <param name="facade">Õ¼Î»·û</param>
-        /// <param name="expr">±í´ïÊ½</param>
+        /// <param name="facade">å ä½ç¬¦</param>
+        /// <param name="expr">è¡¨è¾¾å¼</param>
         public static void TrimStartComment(this FacadeBase facade, ref string expr)
         {
             expr = expr.TrimStart();
@@ -31,13 +31,13 @@ namespace AccountingServer.Shell.Util
         }
 
         /// <summary>
-        ///     Æ¥Åä´øÀ¨ºÅºÍÁ¬Ğø×Ö·û´®
+        ///     åŒ¹é…å¸¦æ‹¬å·å’Œè¿ç»­å­—ç¬¦ä¸²
         /// </summary>
-        /// <param name="facade">Õ¼Î»·û</param>
-        /// <param name="expr">±í´ïÊ½</param>
-        /// <param name="allow">ÔÊĞíÀ¨ºÅ</param>
-        /// <param name="predicate">ÊÇ·ñÓĞĞ§</param>
-        /// <returns>×Ö·û´®</returns>
+        /// <param name="facade">å ä½ç¬¦</param>
+        /// <param name="expr">è¡¨è¾¾å¼</param>
+        /// <param name="allow">å…è®¸æ‹¬å·</param>
+        /// <param name="predicate">æ˜¯å¦æœ‰æ•ˆ</param>
+        /// <returns>å­—ç¬¦ä¸²</returns>
         public static string Token(this FacadeBase facade, ref string expr, bool allow = true, Func<string, bool> predicate = null)
         {
             expr = expr.TrimStart();
@@ -67,11 +67,11 @@ namespace AccountingServer.Shell.Util
         }
 
         /// <summary>
-        ///     Æ¥Åä¿ÉÑ¡µÄÊı
+        ///     åŒ¹é…å¯é€‰çš„æ•°
         /// </summary>
-        /// <param name="facade">Õ¼Î»·û</param>
-        /// <param name="expr">±í´ïÊ½</param>
-        /// <returns>Êı</returns>
+        /// <param name="facade">å ä½ç¬¦</param>
+        /// <param name="expr">è¡¨è¾¾å¼</param>
+        /// <returns>æ•°</returns>
         public static double? Double(this FacadeBase facade, ref string expr)
         {
             var d = double.NaN;
@@ -82,21 +82,21 @@ namespace AccountingServer.Shell.Util
         }
 
         /// <summary>
-        ///     Æ¥ÅäÊı
+        ///     åŒ¹é…æ•°
         /// </summary>
-        /// <param name="facade">Õ¼Î»·û</param>
-        /// <param name="expr">±í´ïÊ½</param>
-        /// <returns>Êı</returns>
+        /// <param name="facade">å ä½ç¬¦</param>
+        /// <param name="expr">è¡¨è¾¾å¼</param>
+        /// <returns>æ•°</returns>
         public static double DoubleF(this FacadeBase facade, ref string expr)
             => double.Parse(facade.Token(ref expr, false));
 
         /// <summary>
-        ///     Æ¥Åä¿ÉÑ¡µÄ·ÇÁã³¤¶È×Ö·û´®
+        ///     åŒ¹é…å¯é€‰çš„éé›¶é•¿åº¦å­—ç¬¦ä¸²
         /// </summary>
-        /// <param name="facade">Õ¼Î»·û</param>
-        /// <param name="expr">±í´ïÊ½</param>
-        /// <param name="opt">×Ö·û´®</param>
-        /// <returns>ÊÇ·ñÆ¥Åä</returns>
+        /// <param name="facade">å ä½ç¬¦</param>
+        /// <param name="expr">è¡¨è¾¾å¼</param>
+        /// <param name="opt">å­—ç¬¦ä¸²</param>
+        /// <returns>æ˜¯å¦åŒ¹é…</returns>
         // ReSharper disable once UnusedParameter.Global
         public static bool Optional(this FacadeBase facade, ref string expr, string opt)
         {
@@ -109,11 +109,11 @@ namespace AccountingServer.Shell.Util
         }
 
         /// <summary>
-        ///     Æ¥Åä´øÒıºÅµÄ×Ö·û´®
+        ///     åŒ¹é…å¸¦å¼•å·çš„å­—ç¬¦ä¸²
         /// </summary>
-        /// <param name="facade">Õ¼Î»·û</param>
-        /// <param name="expr">±í´ïÊ½</param>
-        /// <param name="c">ÒıºÅ£¨ÈôÎª¿Õ±íÊ¾ÈÎÒâ£©</param>
+        /// <param name="facade">å ä½ç¬¦</param>
+        /// <param name="expr">è¡¨è¾¾å¼</param>
+        /// <param name="c">å¼•å·ï¼ˆè‹¥ä¸ºç©ºè¡¨ç¤ºä»»æ„ï¼‰</param>
         // ReSharper disable once UnusedParameter.Global
         public static string Quoted(this FacadeBase facade, ref string expr, char? c = null)
         {
@@ -131,7 +131,7 @@ namespace AccountingServer.Shell.Util
             {
                 id = expr.IndexOf(ch, id + 1);
                 if (id < 0)
-                    throw new ArgumentException("Óï·¨´íÎó", nameof(expr));
+                    throw new ArgumentException("è¯­æ³•é”™è¯¯", nameof(expr));
 
                 if (id == expr.Length - 1)
                     break;
@@ -145,11 +145,11 @@ namespace AccountingServer.Shell.Util
         }
 
         /// <summary>
-        ///     Æ¥Åä¿ÉÑ¡µÄÃ°ºÅ¿ªÊ¼µÄ¼ÇÕËÆ¾Ö¤¼ìË÷Ê½
+        ///     åŒ¹é…å¯é€‰çš„å†’å·å¼€å§‹çš„è®°è´¦å‡­è¯æ£€ç´¢å¼
         /// </summary>
-        /// <param name="facade">Õ¼Î»·û</param>
-        /// <param name="expr">±í´ïÊ½</param>
-        /// <returns>¼ÇÕËÆ¾Ö¤¼ìË÷Ê½</returns>
+        /// <param name="facade">å ä½ç¬¦</param>
+        /// <param name="expr">è¡¨è¾¾å¼</param>
+        /// <returns>è®°è´¦å‡­è¯æ£€ç´¢å¼</returns>
         public static IQueryCompunded<IVoucherQueryAtom> OptColVouchers(this FacadeBase facade, ref string expr)
             => Optional(facade, ref expr, ":") ? facade.VoucherQuery(ref expr) : null;
     }

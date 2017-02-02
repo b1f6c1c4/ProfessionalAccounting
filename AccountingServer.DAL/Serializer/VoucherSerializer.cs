@@ -1,4 +1,4 @@
-using AccountingServer.Entities;
+锘縰sing AccountingServer.Entities;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization.IdGenerators;
@@ -7,7 +7,7 @@ using MongoDB.Driver;
 namespace AccountingServer.DAL.Serializer
 {
     /// <summary>
-    ///     记账凭证序列化器
+    ///     璁拌处鍑瘉搴忓垪鍖栧櫒
     /// </summary>
     internal class VoucherSerializer : BaseSerializer<Voucher, ObjectId>
     {

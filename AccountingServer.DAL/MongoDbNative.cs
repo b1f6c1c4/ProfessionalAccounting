@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using AccountingServer.DAL.Serializer;
 using AccountingServer.Entities;
@@ -8,30 +8,30 @@ using MongoDB.Driver;
 namespace AccountingServer.DAL
 {
     /// <summary>
-    ///     MongoDbÊı¾İ¿â²éÑ¯
+    ///     MongoDbæ•°æ®åº“æŸ¥è¯¢
     /// </summary>
     internal static class MongoDbNative
     {
         /// <summary>
-        ///     °´±àºÅ²éÑ¯<c>ObjectId</c>
+        ///     æŒ‰ç¼–å·æŸ¥è¯¢<c>ObjectId</c>
         /// </summary>
-        /// <param name="id">±àºÅ</param>
-        /// <returns>Bson²éÑ¯</returns>
+        /// <param name="id">ç¼–å·</param>
+        /// <returns>BsonæŸ¥è¯¢</returns>
         public static FilterDefinition<T> GetNQuery<T>(string id) => Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
 
         /// <summary>
-        ///     °´±àºÅ²éÑ¯<c>Guid</c>
+        ///     æŒ‰ç¼–å·æŸ¥è¯¢<c>Guid</c>
         /// </summary>
-        /// <param name="id">±àºÅ</param>
-        /// <returns>Bson²éÑ¯</returns>
+        /// <param name="id">ç¼–å·</param>
+        /// <returns>BsonæŸ¥è¯¢</returns>
         public static FilterDefinition<T> GetNQuery<T>(Guid? id) =>
             Builders<T>.Filter.Eq("_id", id.HasValue ? id.Value.ToBsonValue() as BsonValue : BsonNull.Value);
 
         /// <summary>
-        ///     ¼ÇÕËÆ¾Ö¤¹ıÂËÆ÷µÄNative±íÊ¾
+        ///     è®°è´¦å‡­è¯è¿‡æ»¤å™¨çš„Nativeè¡¨ç¤º
         /// </summary>
-        /// <param name="vfilter">¼ÇÕËÆ¾Ö¤¹ıÂËÆ÷</param>
-        /// <returns>Native±íÊ¾</returns>
+        /// <param name="vfilter">è®°è´¦å‡­è¯è¿‡æ»¤å™¨</param>
+        /// <returns>Nativeè¡¨ç¤º</returns>
         private static FilterDefinition<Voucher> GetNativeFilter(Voucher vfilter)
         {
             if (vfilter == null)
@@ -86,10 +86,10 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     ÈÕÆÚ¹ıÂËÆ÷µÄNative±íÊ¾
+        ///     æ—¥æœŸè¿‡æ»¤å™¨çš„Nativeè¡¨ç¤º
         /// </summary>
-        /// <param name="rng">ÈÕÆÚ¹ıÂËÆ÷</param>
-        /// <returns>Native±íÊ¾</returns>
+        /// <param name="rng">æ—¥æœŸè¿‡æ»¤å™¨</param>
+        /// <returns>Nativeè¡¨ç¤º</returns>
         private static FilterDefinition<Voucher> GetNativeFilter(DateFilter? rng)
         {
             if (rng == null)
@@ -112,10 +112,10 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     Ô­×ÓÏ¸Ä¿¼ìË÷Ê½µÄNative±íÊ¾
+        ///     åŸå­ç»†ç›®æ£€ç´¢å¼çš„Nativeè¡¨ç¤º
         /// </summary>
-        /// <param name="f">Ï¸Ä¿¼ìË÷Ê½</param>
-        /// <returns>Native±íÊ¾</returns>
+        /// <param name="f">ç»†ç›®æ£€ç´¢å¼</param>
+        /// <returns>Nativeè¡¨ç¤º</returns>
         private static FilterDefinition<VoucherDetail> GetNativeFilter(IDetailQueryAtom f)
         {
             if (f == null)
@@ -152,26 +152,26 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     ¼ÇÕËÆ¾Ö¤¼ìË÷Ê½µÄNative±íÊ¾
+        ///     è®°è´¦å‡­è¯æ£€ç´¢å¼çš„Nativeè¡¨ç¤º
         /// </summary>
-        /// <param name="query">¼ÇÕËÆ¾Ö¤¼ìË÷Ê½</param>
-        /// <returns>Native±íÊ¾</returns>
+        /// <param name="query">è®°è´¦å‡­è¯æ£€ç´¢å¼</param>
+        /// <returns>Nativeè¡¨ç¤º</returns>
         public static FilterDefinition<Voucher> GetNativeFilter(IQueryCompunded<IVoucherQueryAtom> query) =>
             GetNativeFilter(query, GetNativeFilter);
 
         /// <summary>
-        ///     ¼ÇÕËÆ¾Ö¤¼ìË÷Ê½µÄ²éÑ¯
+        ///     è®°è´¦å‡­è¯æ£€ç´¢å¼çš„æŸ¥è¯¢
         /// </summary>
-        /// <param name="query">¼ÇÕËÆ¾Ö¤¼ìË÷Ê½</param>
-        /// <returns>²éÑ¯</returns>
+        /// <param name="query">è®°è´¦å‡­è¯æ£€ç´¢å¼</param>
+        /// <returns>æŸ¥è¯¢</returns>
         public static FilterDefinition<Voucher> GetNQuery(IQueryCompunded<IVoucherQueryAtom> query) =>
             GetNativeFilter(query);
 
         /// <summary>
-        ///     Ô­×Ó¼ÇÕËÆ¾Ö¤¼ìË÷Ê½µÄNative±íÊ¾
+        ///     åŸå­è®°è´¦å‡­è¯æ£€ç´¢å¼çš„Nativeè¡¨ç¤º
         /// </summary>
-        /// <param name="f">¼ÇÕËÆ¾Ö¤¼ìË÷Ê½</param>
-        /// <returns>Native±íÊ¾</returns>
+        /// <param name="f">è®°è´¦å‡­è¯æ£€ç´¢å¼</param>
+        /// <returns>Nativeè¡¨ç¤º</returns>
         private static FilterDefinition<Voucher> GetNativeFilter(IVoucherQueryAtom f)
         {
             if (f == null)
@@ -188,19 +188,19 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     ·ÖÆÚ¼ìË÷Ê½µÄ²éÑ¯
+        ///     åˆ†æœŸæ£€ç´¢å¼çš„æŸ¥è¯¢
         /// </summary>
-        /// <param name="query">·ÖÆÚ¼ìË÷Ê½</param>
-        /// <returns>²éÑ¯</returns>
+        /// <param name="query">åˆ†æœŸæ£€ç´¢å¼</param>
+        /// <returns>æŸ¥è¯¢</returns>
         public static FilterDefinition<T> GetNQuery<T>(IQueryCompunded<IDistributedQueryAtom> query)
             where T : IDistributed =>
             GetNativeFilter(query, GetNativeFilter<T>);
 
         /// <summary>
-        ///     Ô­×Ó·ÖÆÚ¼ìË÷Ê½µÄNative±íÊ¾
+        ///     åŸå­åˆ†æœŸæ£€ç´¢å¼çš„Nativeè¡¨ç¤º
         /// </summary>
-        /// <param name="f">·ÖÆÚ¼ìË÷Ê½</param>
-        /// <returns>Native±íÊ¾</returns>
+        /// <param name="f">åˆ†æœŸæ£€ç´¢å¼</param>
+        /// <returns>Nativeè¡¨ç¤º</returns>
         private static FilterDefinition<T> GetNativeFilter<T>(IDistributedQueryAtom f)
             where T : IDistributed
         {
@@ -225,11 +225,11 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     Ò»°ã¼ìË÷Ê½µÄNative±íÊ¾
+        ///     ä¸€èˆ¬æ£€ç´¢å¼çš„Nativeè¡¨ç¤º
         /// </summary>
-        /// <param name="query">¼ìË÷Ê½</param>
-        /// <param name="atomFilter">Ô­×Ó¼ìË÷Ê½µÄNative±íÊ¾</param>
-        /// <returns>Native±íÊ¾</returns>
+        /// <param name="query">æ£€ç´¢å¼</param>
+        /// <param name="atomFilter">åŸå­æ£€ç´¢å¼çš„Nativeè¡¨ç¤º</param>
+        /// <returns>Nativeè¡¨ç¤º</returns>
         private static FilterDefinition<T> GetNativeFilter<T, TAtom>(IQueryCompunded<TAtom> query,
             Func<TAtom, FilterDefinition<T>> atomFilter)
             where TAtom : class
@@ -240,7 +240,7 @@ namespace AccountingServer.DAL
 
             var f = query as IQueryAry<TAtom>;
             if (f == null)
-                throw new ArgumentException("¼ìË÷Ê½ÀàĞÍÎ´Öª", nameof(query));
+                throw new ArgumentException("æ£€ç´¢å¼ç±»å‹æœªçŸ¥", nameof(query));
 
             switch (f.Operator)
             {
@@ -256,7 +256,7 @@ namespace AccountingServer.DAL
                 case OperatorType.Substract:
                     return GetNativeFilter(f.Filter1, atomFilter) & !GetNativeFilter(f.Filter2, atomFilter);
                 default:
-                    throw new ArgumentException("ÔËËãÀàĞÍÎ´Öª", nameof(query));
+                    throw new ArgumentException("è¿ç®—ç±»å‹æœªçŸ¥", nameof(query));
             }
         }
     }

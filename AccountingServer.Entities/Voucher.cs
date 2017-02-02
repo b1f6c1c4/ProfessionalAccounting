@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Xml.Serialization;
@@ -6,133 +6,133 @@ using System.Xml.Serialization;
 namespace AccountingServer.Entities
 {
     /// <summary>
-    ///     ¼ÇÕËÆ¾Ö¤Àà±ğ
+    ///     è®°è´¦å‡­è¯ç±»åˆ«
     /// </summary>
     [Serializable]
     public enum VoucherType
     {
         /// <summary>
-        ///     ÆÕÍ¨¼ÇÕËÆ¾Ö¤
+        ///     æ™®é€šè®°è´¦å‡­è¯
         /// </summary>
         Ordinary,
 
         /// <summary>
-        ///     ·Ç½á×ª¼ÇÕËÆ¾Ö¤
-        ///     <remarks>½ö¼ìË÷Ê±Ê¹ÓÃ</remarks>
+        ///     éç»“è½¬è®°è´¦å‡­è¯
+        ///     <remarks>ä»…æ£€ç´¢æ—¶ä½¿ç”¨</remarks>
         /// </summary>
         General,
 
         /// <summary>
-        ///     ÆÚÄ©½á×ª¼ÇÕËÆ¾Ö¤
+        ///     æœŸæœ«ç»“è½¬è®°è´¦å‡­è¯
         /// </summary>
         Carry,
 
         /// <summary>
-        ///     Ì¯Ïú¼ÇÕËÆ¾Ö¤
+        ///     æ‘Šé”€è®°è´¦å‡­è¯
         /// </summary>
         Amortization,
 
         /// <summary>
-        ///     ÕÛ¾É¼ÇÕËÆ¾Ö¤
+        ///     æŠ˜æ—§è®°è´¦å‡­è¯
         /// </summary>
         Depreciation,
 
         /// <summary>
-        ///     ¼õÖµ¼ÇÕËÆ¾Ö¤
+        ///     å‡å€¼è®°è´¦å‡­è¯
         /// </summary>
         Devalue,
 
         /// <summary>
-        ///     ½á×ª¼ÇÕËÆ¾Ö¤
+        ///     ç»“è½¬è®°è´¦å‡­è¯
         /// </summary>
         AnnualCarry,
 
         /// <summary>
-        ///     ²»×¼È·¼ÇÕËÆ¾Ö¤
+        ///     ä¸å‡†ç¡®è®°è´¦å‡­è¯
         /// </summary>
         Uncertain
     }
 
     /// <summary>
-    ///     ¼ÇÕËÆ¾Ö¤
+    ///     è®°è´¦å‡­è¯
     /// </summary>
     [Serializable]
     public class Voucher
     {
         /// <summary>
-        ///     ¼ÇÕË±¾Î»±Ò
+        ///     è®°è´¦æœ¬ä½å¸
         /// </summary>
         public const string BaseCurrency = "CNY";
 
         /// <summary>
-        ///     ±àºÅ
+        ///     ç¼–å·
         /// </summary>
         [XmlAttribute("id")]
         public string ID { get; set; }
 
         /// <summary>
-        ///     ÈÕÆÚ£¬ÈôÎª<c>null</c>±íÊ¾ÎŞÈÕÆÚ
+        ///     æ—¥æœŸï¼Œè‹¥ä¸º<c>null</c>è¡¨ç¤ºæ— æ—¥æœŸ
         /// </summary>
         public DateTime? Date { get; set; }
 
         /// <summary>
-        ///     ±¸×¢
+        ///     å¤‡æ³¨
         /// </summary>
         [XmlAttribute("remark")]
         public string Remark { get; set; }
 
         /// <summary>
-        ///     Ï¸Ä¿
+        ///     ç»†ç›®
         /// </summary>
         [XmlElement("Detail")]
         public List<VoucherDetail> Details { get; set; }
 
         /// <summary>
-        ///     Àà±ğ
+        ///     ç±»åˆ«
         /// </summary>
         [DefaultValue(VoucherType.Ordinary)]
         public VoucherType? Type { get; set; }
 
         /// <summary>
-        ///     ±ÒÖÖ
+        ///     å¸ç§
         /// </summary>
         [XmlAttribute("currency")]
         public string Currency { get; set; }
     }
 
     /// <summary>
-    ///     Ï¸Ä¿
+    ///     ç»†ç›®
     /// </summary>
     [Serializable]
     public class VoucherDetail
     {
         /// <summary>
-        ///     ÅĞ¶Ï½ğ¶îÏàµÈµÄÎó²î
+        ///     åˆ¤æ–­é‡‘é¢ç›¸ç­‰çš„è¯¯å·®
         /// </summary>
         public const double Tolerance = 1e-8;
 
         /// <summary>
-        ///     »á¼Æ¿ÆÄ¿Ò»¼¶¿ÆÄ¿´úÂë
+        ///     ä¼šè®¡ç§‘ç›®ä¸€çº§ç§‘ç›®ä»£ç 
         /// </summary>
         public int? Title { get; set; }
 
         /// <summary>
-        ///     »á¼Æ¿ÆÄ¿¶ş¼¶¿ÆÄ¿´úÂë£¬ÈôÎª<c>null</c>±íÊ¾ÎŞ¶ş¼¶¿ÆÄ¿
+        ///     ä¼šè®¡ç§‘ç›®äºŒçº§ç§‘ç›®ä»£ç ï¼Œè‹¥ä¸º<c>null</c>è¡¨ç¤ºæ— äºŒçº§ç§‘ç›®
         /// </summary>
         public int? SubTitle { get; set; }
 
         /// <summary>
-        ///     ÄÚÈİ
+        ///     å†…å®¹
         /// </summary>
         public string Content { get; set; }
 
         /// <summary>
-        ///     ½ğ¶î
+        ///     é‡‘é¢
         /// </summary>
         public double? Fund { get; set; }
 
         /// <summary>
-        ///     ±¸×¢
+        ///     å¤‡æ³¨
         /// </summary>
         public string Remark { get; set; }
     }

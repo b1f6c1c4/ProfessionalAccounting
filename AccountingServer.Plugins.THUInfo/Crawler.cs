@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
@@ -12,22 +12,22 @@ namespace AccountingServer.Plugins.THUInfo
     internal class Crawler
     {
         /// <summary>
-        ///     CookiesÈİÆ÷
+        ///     Cookieså®¹å™¨
         /// </summary>
         private readonly CookieContainer m_CookieContainer = new CookieContainer();
 
         /// <summary>
-        ///     ÁÙÊ±ÎÄ¼şÎÄ¼şÃû
+        ///     ä¸´æ—¶æ–‡ä»¶æ–‡ä»¶å
         /// </summary>
         private string m_FileName;
 
         /// <summary>
-        ///     Êı¾İ
+        ///     æ•°æ®
         /// </summary>
         private List<TransactionRecord> m_Data;
 
         /// <summary>
-        ///     Òì³£
+        ///     å¼‚å¸¸
         /// </summary>
         private Exception m_Exception;
 
@@ -36,17 +36,17 @@ namespace AccountingServer.Plugins.THUInfo
             get
             {
                 if (m_Exception != null)
-                    throw new MemberAccessException("»ñÈ¡Êı¾İÊ±·¢Éú´íÎó", m_Exception);
+                    throw new MemberAccessException("è·å–æ•°æ®æ—¶å‘ç”Ÿé”™è¯¯", m_Exception);
 
                 return m_Data;
             }
         }
 
         /// <summary>
-        ///     »ñÈ¡Êı¾İ
+        ///     è·å–æ•°æ®
         /// </summary>
-        /// <param name="username">ÓÃ»§Ãû</param>
-        /// <param name="password">ÃÜÂë</param>
+        /// <param name="username">ç”¨æˆ·å</param>
+        /// <param name="password">å¯†ç </param>
         public void FetchData(string username, string password)
         {
             m_Exception = null;
@@ -76,9 +76,9 @@ namespace AccountingServer.Plugins.THUInfo
         }
 
         /// <summary>
-        ///     ÏÂÔØxlsÎÄµµ
+        ///     ä¸‹è½½xlsæ–‡æ¡£
         /// </summary>
-        /// <returns>Á÷</returns>
+        /// <returns>æµ</returns>
         private Stream DownloadXls()
         {
             var buf =
@@ -87,7 +87,7 @@ namespace AccountingServer.Plugins.THUInfo
             var req = WebRequest.Create(@"http://ecard.tsinghua.edu.cn/user/ExDetailsDown.do?") as HttpWebRequest;
 
             if (req == null)
-                throw new WebException("ÏÂÔØxlsÎÄµµÊ±³öÏÖ´íÎó");
+                throw new WebException("ä¸‹è½½xlsæ–‡æ¡£æ—¶å‡ºç°é”™è¯¯");
 
             req.Host = @"ecard.tsinghua.edu.cn";
             req.Method = "POST";
@@ -109,15 +109,15 @@ namespace AccountingServer.Plugins.THUInfo
         }
 
         /// <summary>
-        ///     µÇÂ¼Ñ§Éú¿¨¹ÜÀíÏµÍ³
+        ///     ç™»å½•å­¦ç”Ÿå¡ç®¡ç†ç³»ç»Ÿ
         /// </summary>
-        /// <param name="url">ÁîÅÆ</param>
+        /// <param name="url">ä»¤ç‰Œ</param>
         private void LoginECard(string url)
         {
             var req = WebRequest.Create(url) as HttpWebRequest;
 
             if (req == null)
-                throw new WebException("µÇÂ¼Ñ§Éú¿¨¹ÜÀíÏµÍ³Ê±³öÏÖ´íÎó");
+                throw new WebException("ç™»å½•å­¦ç”Ÿå¡ç®¡ç†ç³»ç»Ÿæ—¶å‡ºç°é”™è¯¯");
 
             req.Host = @"ecard.tsinghua.edu.cn";
             req.Method = "GET";
@@ -132,16 +132,16 @@ namespace AccountingServer.Plugins.THUInfo
         }
 
         /// <summary>
-        ///     »ñÈ¡ÁîÅÆ
+        ///     è·å–ä»¤ç‰Œ
         /// </summary>
-        /// <returns>ÁîÅÆ</returns>
+        /// <returns>ä»¤ç‰Œ</returns>
         private string GetUrl()
         {
             var req =
                 WebRequest.Create(@"http://info.tsinghua.edu.cn/minichan/roamaction.jsp?id=159") as HttpWebRequest;
 
             if (req == null)
-                throw new WebException("»ñÈ¡ÁîÅÆÊ±³öÏÖ´íÎó");
+                throw new WebException("è·å–ä»¤ç‰Œæ—¶å‡ºç°é”™è¯¯");
 
             req.Host = @"info.tsinghua.edu.cn";
             req.Method = "GET";
@@ -157,7 +157,7 @@ namespace AccountingServer.Plugins.THUInfo
         }
 
         /// <summary>
-        ///     Ô¤»ñÈ¡ÁîÅÆ
+        ///     é¢„è·å–ä»¤ç‰Œ
         /// </summary>
         private void PrepareGetUrl()
         {
@@ -165,7 +165,7 @@ namespace AccountingServer.Plugins.THUInfo
                 WebRequest.Create(@"http://info.tsinghua.edu.cn/render.userLayoutRootNode.uP") as HttpWebRequest;
 
             if (req == null)
-                throw new WebException("»ñÈ¡ÁîÅÆÊ±³öÏÖ´íÎó");
+                throw new WebException("è·å–ä»¤ç‰Œæ—¶å‡ºç°é”™è¯¯");
 
             req.Host = @"info.tsinghua.edu.cn";
             req.Method = "GET";
@@ -180,10 +180,10 @@ namespace AccountingServer.Plugins.THUInfo
         }
 
         /// <summary>
-        ///     µÇÂ¼ĞÅÏ¢ÃÅ»§
+        ///     ç™»å½•ä¿¡æ¯é—¨æˆ·
         /// </summary>
-        /// <param name="username">ÓÃ»§Ãû</param>
-        /// <param name="password">ÃÜÂë</param>
+        /// <param name="username">ç”¨æˆ·å</param>
+        /// <param name="password">å¯†ç </param>
         private void LoginInfo(string username, string password)
         {
             var buf =
@@ -192,7 +192,7 @@ namespace AccountingServer.Plugins.THUInfo
             var req = WebRequest.Create(@"http://info.tsinghua.edu.cn/Login") as HttpWebRequest;
 
             if (req == null)
-                throw new WebException("µÇÂ¼ĞÅÏ¢ÃÅ»§Ê±³öÏÖ´íÎó");
+                throw new WebException("ç™»å½•ä¿¡æ¯é—¨æˆ·æ—¶å‡ºç°é”™è¯¯");
 
             req.Host = @"info.tsinghua.edu.cn";
             req.Method = "POST";
@@ -211,10 +211,10 @@ namespace AccountingServer.Plugins.THUInfo
         }
 
         /// <summary>
-        ///     ±£´æÁÙÊ±ÎÄ¼ş
+        ///     ä¿å­˜ä¸´æ—¶æ–‡ä»¶
         /// </summary>
-        /// <param name="stream">Á÷</param>
-        /// <returns>ÁÙÊ±ÎÄ¼şÃû</returns>
+        /// <param name="stream">æµ</param>
+        /// <returns>ä¸´æ—¶æ–‡ä»¶å</returns>
         private static string SaveTempFile(Stream stream)
         {
             var buf = new byte[1024];
@@ -236,9 +236,9 @@ namespace AccountingServer.Plugins.THUInfo
         }
 
         /// <summary>
-        ///     ¶ÁÈ¡xlsÊı¾İ
+        ///     è¯»å–xlsæ•°æ®
         /// </summary>
-        /// <returns>Êı¾İ</returns>
+        /// <returns>æ•°æ®</returns>
         private IEnumerable<TransactionRecord> GetData()
         {
             var strCon = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + m_FileName +

@@ -1,10 +1,10 @@
-using AccountingServer.Entities;
+ï»¿using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 
 namespace AccountingServer.DAL.Serializer
 {
     /// <summary>
-    ///     ÕÛ¾É¼ÆËã±íÌõÄ¿ĞòÁĞ»¯Æ÷
+    ///     æŠ˜æ—§è®¡ç®—è¡¨æ¡ç›®åºåˆ—åŒ–å™¨
     /// </summary>
     internal class AssetItemSerializer : BaseSerializer<AssetItem>
     {

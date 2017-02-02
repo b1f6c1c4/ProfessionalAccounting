@@ -1,27 +1,27 @@
-using System;
+ï»¿using System;
 using System.Text;
 using AccountingServer.Entities;
 
 namespace AccountingServer.DAL
 {
     /// <summary>
-    ///     MongoDbÊı¾İ¿â²éÑ¯
+    ///     MongoDbæ•°æ®åº“æŸ¥è¯¢
     /// </summary>
     internal static class MongoDbJavascript
     {
         /// <summary>
-        ///     Ï¸Ä¿¼ìË÷Ê½µÄJavascript±íÊ¾
+        ///     ç»†ç›®æ£€ç´¢å¼çš„Javascriptè¡¨ç¤º
         /// </summary>
-        /// <param name="query">Ï¸Ä¿¼ìË÷Ê½</param>
-        /// <returns>Javascript±íÊ¾</returns>
+        /// <param name="query">ç»†ç›®æ£€ç´¢å¼</param>
+        /// <returns>Javascriptè¡¨ç¤º</returns>
         public static string GetJavascriptFilter(IQueryCompunded<IDetailQueryAtom> query) =>
             GetJavascriptFilter(query, GetJavascriptFilter);
 
         /// <summary>
-        ///     Ô­×ÓÏ¸Ä¿¼ìË÷Ê½µÄJavascript±íÊ¾
+        ///     åŸå­ç»†ç›®æ£€ç´¢å¼çš„Javascriptè¡¨ç¤º
         /// </summary>
-        /// <param name="f">Ï¸Ä¿¼ìË÷Ê½</param>
-        /// <returns>Javascript±íÊ¾</returns>
+        /// <param name="f">ç»†ç›®æ£€ç´¢å¼</param>
+        /// <returns>Javascriptè¡¨ç¤º</returns>
         private static string GetJavascriptFilter(IDetailQueryAtom f)
         {
             var sb = new StringBuilder();
@@ -60,11 +60,11 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     Ò»°ã¼ìË÷Ê½µÄJavascript±íÊ¾
+        ///     ä¸€èˆ¬æ£€ç´¢å¼çš„Javascriptè¡¨ç¤º
         /// </summary>
-        /// <param name="query">¼ìË÷Ê½</param>
-        /// <param name="atomFilter">Ô­×Ó¼ìË÷Ê½µÄJavascript±íÊ¾</param>
-        /// <returns>Javascript±íÊ¾</returns>
+        /// <param name="query">æ£€ç´¢å¼</param>
+        /// <param name="atomFilter">åŸå­æ£€ç´¢å¼çš„Javascriptè¡¨ç¤º</param>
+        /// <returns>Javascriptè¡¨ç¤º</returns>
         private static string GetJavascriptFilter<TAtom>(IQueryCompunded<TAtom> query, Func<TAtom, string> atomFilter)
             where TAtom : class
         {
@@ -74,7 +74,7 @@ namespace AccountingServer.DAL
 
             var f = query as IQueryAry<TAtom>;
             if (f == null)
-                throw new ArgumentException("¼ìË÷Ê½ÀàĞÍÎ´Öª", nameof(query));
+                throw new ArgumentException("æ£€ç´¢å¼ç±»å‹æœªçŸ¥", nameof(query));
 
             var sb = new StringBuilder();
             sb.AppendLine("function (entity) {");
@@ -104,7 +104,7 @@ namespace AccountingServer.DAL
                     sb.AppendLine($"({GetJavascriptFilter(f.Filter2, atomFilter)})(entity)");
                     break;
                 default:
-                    throw new ArgumentException("ÔËËãÀàĞÍÎ´Öª", nameof(query));
+                    throw new ArgumentException("è¿ç®—ç±»å‹æœªçŸ¥", nameof(query));
             }
 
             sb.AppendLine(";");
