@@ -44,9 +44,9 @@ namespace AccountingServer.Plugins.Utilities
         public override string ListHelp()
         {
             var sb = new StringBuilder();
-            sb.AppendLine(base.ListHelp());
+            sb.Append(base.ListHelp());
             foreach (var util in Templates.Config.Templates)
-                sb.AppendLine($"{util.Name}\t\t{util.Description}");
+                sb.AppendLine($"{util.Name,20}{util.Description}");
 
             return sb.ToString();
         }

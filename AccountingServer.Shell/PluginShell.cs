@@ -85,7 +85,7 @@ namespace AccountingServer.Shell
         {
             var sb = new StringBuilder();
             foreach (var info in m_Infos.Config.Infos)
-                sb.AppendLine($"{info.Alias}\t{info.ClassName}\t{info.AssemblyName}");
+                sb.AppendLine($"{info.Alias,8}{info.ClassName,20}{info.AssemblyName}");
 
             return sb.ToString();
         }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
+using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
@@ -193,7 +194,7 @@ namespace AccountingServer.Plugins.THUInfo
 
                 var tmp = d.Voucher.Details.Where(dd => dd.Title == 6602).ToArray();
                 var content = tmp.Length == 1 ? tmp.First().Content : string.Empty;
-                sb.AppendLine($"{d.Voucher.ID}\t{d.Detail.Remark}\t{content}\t{record.Endpoint}");
+                sb.AppendLine($"{d.Voucher.ID,28}{d.Detail.Remark.CPadRight(20)}{content.CPadRight(20)}{record.Endpoint}");
             }
 
             return new UnEditableText(sb.ToString());
