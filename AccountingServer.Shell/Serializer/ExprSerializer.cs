@@ -84,7 +84,7 @@ namespace AccountingServer.Shell.Serializer
             var remark = Parsing.Quoted(ref expr, '%');
             Parsing.TrimStartComment(ref expr);
             var typeT = VoucherType.Ordinary;
-            var type = Parsing.Token(ref expr, false, t => Enum.TryParse(t, out typeT)) != null ? (VoucherType?)typeT : null;
+            var type = Parsing.Token(ref expr, false, t => TryParse(t, out typeT)) != null ? (VoucherType?)typeT : null;
             Parsing.TrimStartComment(ref expr);
             var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))?.ToUpperInvariant();
 
@@ -102,6 +102,60 @@ namespace AccountingServer.Shell.Serializer
                     Date = date,
                     Details = lst
                 };
+        }
+
+        /// <summary>
+        ///     解析记账凭证类别表达式
+        /// </summary>
+        /// <param name="s">表达式</param>
+        /// <param name="typeT">记账凭证类别</param>
+        /// <returns>是否解析成功</returns>
+        private static bool TryParse(string s, out VoucherType typeT)
+        {
+            if (s == "Ordinary")
+            {
+                typeT = VoucherType.Ordinary;
+                return true;
+            }
+
+            if (s == "Carry")
+            {
+                typeT = VoucherType.Carry;
+                return true;
+            }
+
+            if (s == "AnnualCarry")
+            {
+                typeT = VoucherType.AnnualCarry;
+                return true;
+            }
+
+            if (s == "Depreciation")
+            {
+                typeT = VoucherType.Depreciation;
+                return true;
+            }
+
+            if (s == "Devalue")
+            {
+                typeT = VoucherType.Devalue;
+                return true;
+            }
+
+            if (s == "Amortization")
+            {
+                typeT = VoucherType.Amortization;
+                return true;
+            }
+
+            if (s == "Uncertain")
+            {
+                typeT = VoucherType.Uncertain;
+                return true;
+            }
+
+            typeT = VoucherType.General;
+            return false;
         }
 
         /// <summary>
