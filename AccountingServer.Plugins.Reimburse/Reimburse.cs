@@ -59,7 +59,7 @@ namespace AccountingServer.Plugins.Reimburse
             sb.AppendLine(base.ListHelp());
             foreach (var reim in Templates.Config.Templates)
                 sb.AppendLine(
-                    $"{reim.Name}\t\t{reim.Query} {(reim.IsLeftExtended ? "[~X]" : "[X]")} `{(reim.ByTitle ? "t" : "")}{(reim.BySubTitle ? "s" : "")}{(reim.ByCountent ? "c" : "")}{(reim.ByRemark ? "r" : "")}");
+                    $"{reim.Name.CPadRight(18)}{reim.Query} {(reim.IsLeftExtended ? "[~X]" : "[X]")} `{(reim.ByTitle ? "t" : "")}{(reim.BySubTitle ? "s" : "")}{(reim.ByCountent ? "c" : "")}{(reim.ByRemark ? "r" : "")}{(reim.ByTitle || reim.BySubTitle || reim.ByCountent || reim.ByRemark ? "" : "v")}");
 
             return sb.ToString();
         }
