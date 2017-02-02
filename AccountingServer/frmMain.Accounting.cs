@@ -50,19 +50,19 @@ namespace AccountingServer
 
                 if (scintilla.Text[end] == '\n' &&
                     result[result.Length - 1] != '\n')
-                    scintilla.Text = scintilla.Text.Remove(begin, end - begin - 1)
-                        .Insert(begin, result);
+                {
+                    scintilla.DeleteRange(begin, end - begin - 1);
+                    scintilla.InsertText(begin, result);
+                }
                 else
-                    scintilla.Text = scintilla.Text.Remove(begin, end - begin + 1)
-                        .Insert(begin, result);
-                scintilla.SelectionStart = begin;
-                scintilla.SelectionEnd = result.Length - begin;
+                {
+                    scintilla.DeleteRange(begin, end - begin + 1);
+                    scintilla.InsertText(begin, result);
+                }
             }
             catch (Exception exception)
             {
-                scintilla.Text = scintilla.Text.Insert(end + 1, exception.ToString());
-                scintilla.SelectionStart = begin;
-                scintilla.SelectionEnd = end;
+                scintilla.InsertText(end + 1, exception.ToString());
             }
 
             scintilla.ScrollCaret();
@@ -104,17 +104,19 @@ namespace AccountingServer
                     throw new ApplicationException("提交的内容类型未知");
                 // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
                 if (scintilla.Text[end] == '}')
-                    scintilla.Text = scintilla.Text.Insert(end + 1, "*/").Insert(begin, "/*");
+                {
+                    scintilla.InsertText(end + 1, "*/");
+                    scintilla.InsertText(begin, "/*");
+                }
                 else //if (scintilla.Text[end] == '\n')
-                    scintilla.Text = scintilla.Text.Insert(end - 1, "*/").Insert(begin, "/*");
-                scintilla.SelectionStart = begin;
-                scintilla.SelectionEnd = end + 4;
+                {
+                    scintilla.InsertText(end - 1, "*/");
+                    scintilla.InsertText(begin, "/*");
+                }
             }
             catch (Exception exception)
             {
-                scintilla.Text = scintilla.Text.Insert(end, exception.ToString());
-                scintilla.SelectionStart = begin;
-                scintilla.SelectionEnd = end - begin;
+                scintilla.InsertText(end, exception.ToString());
             }
 
             scintilla.ScrollCaret();
@@ -142,13 +144,11 @@ namespace AccountingServer
                     scintilla.AppendText(result);
                     var lng = scintilla.Text.Length;
                     scintilla.SelectionStart = lng;
-                    scintilla.SelectionEnd = lng;
                     textBoxCommand.BackColor = Color.FromArgb(0, 200, 0);
                 }
                 else
                 {
                     scintilla.Text = result;
-                    scintilla.SelectionEnd = scintilla.SelectionStart;
                     textBoxCommand.BackColor = Color.FromArgb(75, 255, 75);
                 }
 
@@ -163,7 +163,6 @@ namespace AccountingServer
                     scintilla.AppendText(exception.ToString());
                     var lng = scintilla.Text.Length;
                     scintilla.SelectionStart = lng;
-                    scintilla.SelectionEnd = lng;
                 }
                 else
                     scintilla.Text = exception.ToString();
