@@ -15,6 +15,7 @@ namespace AccountingServer.Plugins.Interest
     /// <summary>
     ///     自动计算利息收入和还款
     /// </summary>
+    // ReSharper disable once UnusedMember.Global
     public class InterestRevenue : PluginBase
     {
         public InterestRevenue(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
@@ -32,8 +33,8 @@ namespace AccountingServer.Plugins.Interest
             var loans = Accountant.RunGroupedQuery($"T1221 {content.Quotation('\'')} ``r").ToList();
             var rmk =
                 loans.Single(
-                        b => b.Remark != null &&
-                            b.Remark.StartsWith(remark, StringComparison.InvariantCultureIgnoreCase) &&
+                        b =>
+                            b.Remark?.StartsWith(remark, StringComparison.InvariantCultureIgnoreCase) == true &&
                             !b.Remark.EndsWith("-利息", StringComparison.Ordinal))
                     .Remark;
 

@@ -26,12 +26,15 @@ namespace AccountingServer.Shell.Carry
         public IQueryResult Execute(string expr)
         {
             expr = expr.Rest();
-            if (expr?.Initital() == "ap")
-                return DoCarry(expr.Rest());
-            if (expr?.Initital() == "rst")
-                return ResetCarry(expr.Rest());
-
-            throw new InvalidOperationException("表达式无效");
+            switch (expr?.Initital())
+            {
+                case "ap":
+                    return DoCarry(expr.Rest());
+                case "rst":
+                    return ResetCarry(expr.Rest());
+                default:
+                    throw new InvalidOperationException("表达式无效");
+            }
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
@@ -8,6 +9,7 @@ namespace AccountingServer.Shell.Util
     /// <summary>
     ///     À©Õ¹µÄ×Ö·û´®Æ¥Åä
     /// </summary>
+    [SuppressMessage("ReSharper", "UnusedParameter.Global")]
     public static class ParseHelper
     {
         /// <summary>

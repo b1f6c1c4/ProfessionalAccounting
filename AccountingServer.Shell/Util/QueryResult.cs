@@ -1,5 +1,4 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace AccountingServer.Shell.Util
 {
@@ -20,24 +19,6 @@ namespace AccountingServer.Shell.Util
     public class Succeed : IQueryResult
     {
         public override string ToString() => "OK";
-
-        /// <inheritdoc />
-        public bool AutoReturn => true;
-    }
-
-    /// <summary>
-    ///     失败
-    /// </summary>
-    public class Failed : IQueryResult
-    {
-        /// <summary>
-        ///     异常
-        /// </summary>
-        private readonly Exception m_Exception;
-
-        public Failed(Exception exception) { m_Exception = exception; }
-
-        public override string ToString() => m_Exception.ToString();
 
         /// <inheritdoc />
         public bool AutoReturn => true;

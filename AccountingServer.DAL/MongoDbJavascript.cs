@@ -60,47 +60,6 @@ namespace AccountingServer.DAL
         }
 
         /// <summary>
-        ///     分期检索式的Javascript表示
-        /// </summary>
-        /// <param name="query">分期检索式</param>
-        /// <returns>Javascript表示</returns>
-        // ReSharper disable once MemberCanBePrivate.Global
-        public static string GetJavascriptFilter(IQueryCompunded<IDistributedQueryAtom> query) =>
-            GetJavascriptFilter(query, GetJavascriptFilter);
-
-        /// <summary>
-        ///     原子分期检索式的Javascript表示
-        /// </summary>
-        /// <param name="f">分期检索式</param>
-        /// <returns>Javascript表示</returns>
-        private static string GetJavascriptFilter(IDistributedQueryAtom f)
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine("function(a) {");
-            if (f?.Filter == null)
-                sb.AppendLine("    return true;");
-            else
-            {
-                if (f.Filter.ID.HasValue)
-                    sb.AppendLine(
-                        $"    if (a._id.toString() != BinData(3,'{Convert.ToBase64String(f.Filter.ID.Value.ToByteArray())}')) return false;");
-                if (f.Filter.Name != null)
-                    sb.AppendLine(
-                        f.Filter.Name == string.Empty
-                            ? "    if (a.name != null) return false;"
-                            : $"    if (a.name != '{f.Filter.Name.Replace("\'", "\\\'")}') return false;");
-                if (f.Filter.Remark != null)
-                    sb.AppendLine(
-                        f.Filter.Remark == string.Empty
-                            ? "    if (a.remark != null) return false;"
-                            : $"    if (a.remark != '{f.Filter.Remark.Replace("\'", "\\\'")}') return false;");
-                sb.AppendLine("    return true;");
-            }
-            sb.AppendLine("}");
-            return sb.ToString();
-        }
-
-        /// <summary>
         ///     一般检索式的Javascript表示
         /// </summary>
         /// <param name="query">检索式</param>

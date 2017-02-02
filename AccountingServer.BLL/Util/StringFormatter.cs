@@ -45,20 +45,5 @@ namespace AccountingServer.BLL.Util
 
             return new string(chr, length - s.Length - Reg.Matches(s).Count) + s;
         }
-
-        /// <summary>
-        ///     使用分隔符连接字符串
-        /// </summary>
-        /// <param name="path">原字符串</param>
-        /// <param name="token">要连接上的字符串</param>
-        /// <param name="interval">分隔符</param>
-        /// <returns>新字符串</returns>
-        public static string Merge(this string path, string token, string interval = "-")
-        {
-            if (path.Length == 0)
-                return token;
-
-            return path + interval + token;
-        }
     }
 }

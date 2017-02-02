@@ -12,13 +12,13 @@ namespace AccountingServer.Entities.Util
             Dir = dir;
         }
 
-        public VoucherDetail Filter { get; set; }
-        public int Dir { get; set; }
+        public VoucherDetail Filter { get; }
+        public int Dir { get; }
     }
 
     public class QueryAryBase<TAtom> : IQueryAry<TAtom> where TAtom : class
     {
-        public QueryAryBase(OperatorType op, IList<IQueryCompunded<TAtom>> queries)
+        protected QueryAryBase(OperatorType op, IList<IQueryCompunded<TAtom>> queries)
         {
             Operator = op;
             if (queries.Count == 0)
@@ -89,8 +89,8 @@ namespace AccountingServer.Entities.Util
         }
 
         public bool ForAll { get; set; }
-        public Voucher VoucherFilter { get; set; }
-        public DateFilter Range { get; set; }
+        public Voucher VoucherFilter { get; }
+        public DateFilter Range { get; }
         public IQueryCompunded<IDetailQueryAtom> DetailFilter { get; set; }
     }
 

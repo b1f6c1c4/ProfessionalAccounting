@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 using AccountingServer.Entities;
 
@@ -21,6 +22,7 @@ namespace AccountingServer.Plugins.Utilities
     }
 
     [Serializable]
+    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public class UtilTemplate : Voucher
     {
         [XmlAttribute("name")]

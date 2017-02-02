@@ -16,6 +16,7 @@ namespace AccountingServer.Plugins.YieldRate
     /// <summary>
     ///     实际收益率计算
     /// </summary>
+    // ReSharper disable once UnusedMember.Global
     public class YieldRate : PluginBase
     {
         public YieldRate(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }

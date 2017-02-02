@@ -80,22 +80,6 @@ namespace AccountingServer.DAL
             Connected = true;
         }
 
-        /// <inheritdoc />
-        public void Disconnect()
-        {
-            if (!Connected)
-                return;
-
-            m_Db = null;
-            m_Vouchers = null;
-            m_Assets = null;
-            m_Amortizations = null;
-
-            m_Client = null;
-
-            Connected = false;
-        }
-
         #endregion
 
         #region Voucher

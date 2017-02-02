@@ -141,51 +141,48 @@ namespace AccountingServer
 
         private bool textBoxCommand_Key(Keys keyData)
         {
-            if (keyData == Keys.Escape)
+            switch (keyData)
             {
-                FocusTextBoxCommand();
-                return true;
-            }
-
-            if (keyData == Keys.Tab)
-            {
-                scintilla.Focus();
-                scintilla.SelectionStart = scintilla.TextLength;
-                scintilla.ScrollCaret();
-                return true;
-            }
-
-            if (keyData == Keys.Enter)
-                if (string.IsNullOrWhiteSpace(textBoxCommand.Text))
-                {
-                    scintilla.InsertText(scintilla.Lines[scintilla.CurrentLine].Position, m_Shell.EmptyVoucher);
+                case Keys.Escape:
+                    FocusTextBoxCommand();
+                    return true;
+                case Keys.Tab:
                     scintilla.Focus();
-                    scintilla.SelectionStart = scintilla.Lines[scintilla.CurrentLine + 1].Position;
+                    scintilla.SelectionStart = scintilla.TextLength;
                     scintilla.ScrollCaret();
-                }
-                else
-                    return ExecuteCommand(false);
+                    return true;
+                case Keys.Enter:
+                    if (string.IsNullOrWhiteSpace(textBoxCommand.Text))
+                    {
+                        scintilla.InsertText(scintilla.Lines[scintilla.CurrentLine].Position, m_Shell.EmptyVoucher);
+                        scintilla.Focus();
+                        scintilla.SelectionStart = scintilla.Lines[scintilla.CurrentLine + 1].Position;
+                        scintilla.ScrollCaret();
+                        return true;
+                    }
 
-            if (keyData == (Keys.Enter | Keys.Shift))
-                return ExecuteCommand(true);
+                    return ExecuteCommand(false);
+                case Keys.Enter | Keys.Shift:
+                    return ExecuteCommand(true);
+            }
 
             return false;
         }
 
         private bool scintilla_Key(Keys keyData)
         {
-            if (keyData == Keys.Escape)
+            switch (keyData)
             {
-                FocusTextBoxCommand();
-                return true;
+                case Keys.Escape:
+                    FocusTextBoxCommand();
+                    return true;
+                case Keys.Enter | Keys.Alt:
+                    return PerformUpsert();
+                case Keys.Delete | Keys.Alt:
+                    return PerformRemoval();
+                default:
+                    return false;
             }
-
-            if (keyData == (Keys.Enter | Keys.Alt))
-                return PerformUpsert();
-            if (keyData == (Keys.Delete | Keys.Alt))
-                return PerformRemoval();
-
-            return false;
         }
     }
 }

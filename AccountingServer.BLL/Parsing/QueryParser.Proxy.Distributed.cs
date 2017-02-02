@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 
@@ -12,6 +13,7 @@ namespace AccountingServer.BLL.Parsing
             /// <summary>
             ///     分期过滤器
             /// </summary>
+            [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
             private sealed class MyDistributedFilter : IDistributed
             {
                 /// <inheritdoc />
@@ -24,14 +26,12 @@ namespace AccountingServer.BLL.Parsing
                 public DateTime? Date { get; set; }
 
                 /// <inheritdoc />
-                // ReSharper disable once UnusedAutoPropertyAccessor.Local
                 public double? Value { get; set; }
 
                 /// <inheritdoc />
                 public string Remark { get; set; }
 
                 /// <inheritdoc />
-                // ReSharper disable once UnusedAutoPropertyAccessor.Local
                 public IEnumerable<IDistributedItem> TheSchedule { get; set; }
             }
 
@@ -62,23 +62,27 @@ namespace AccountingServer.BLL.Parsing
                         return OperatorType.None;
 
                     if (distributedQ().Length == 1)
+                        switch (Op.Text)
+                        {
+                            case "+":
+                                return OperatorType.Identity;
+                            case "-":
+                                return OperatorType.Complement;
+                            default:
+                                throw new MemberAccessException("表达式错误");
+                        }
+
+                    switch (Op.Text)
                     {
-                        if (Op.Text == "+")
-                            return OperatorType.Identity;
-                        if (Op.Text == "-")
-                            return OperatorType.Complement;
-
-                        throw new MemberAccessException("表达式错误");
+                        case "+":
+                            return OperatorType.Union;
+                        case "-":
+                            return OperatorType.Substract;
+                        case "*":
+                            return OperatorType.Intersect;
+                        default:
+                            throw new MemberAccessException("表达式错误");
                     }
-
-                    if (Op.Text == "+")
-                        return OperatorType.Union;
-                    if (Op.Text == "-")
-                        return OperatorType.Substract;
-                    if (Op.Text == "*")
-                        return OperatorType.Intersect;
-
-                    throw new MemberAccessException("表达式错误");
                 }
             }
 

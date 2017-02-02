@@ -60,11 +60,11 @@ namespace AccountingServer.DAL.Serializer
 
         public abstract TId GetId(T entity);
 
-        public abstract void SetId(T entity, TId id);
+        protected abstract void SetId(T entity, TId id);
 
-        public abstract bool IsNull(TId id);
+        protected abstract bool IsNull(TId id);
 
-        public abstract TId MakeId(IMongoCollection<T> container, T entity);
+        protected abstract TId MakeId(IMongoCollection<T> container, T entity);
 
         public bool FillId(IMongoCollection<T> container, T entity)
         {

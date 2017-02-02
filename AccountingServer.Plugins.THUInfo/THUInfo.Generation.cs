@@ -6,6 +6,7 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.Plugins.THUInfo
 {
+    // ReSharper disable once UnusedMember.Global
     public partial class THUInfo
     {
         /// <summary>

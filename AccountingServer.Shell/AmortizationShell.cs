@@ -240,7 +240,7 @@ namespace AccountingServer.Shell
 
             var bookValue = Accountant.GetBookValueOn(amort, dt);
             if (dt.HasValue &&
-                (!bookValue.HasValue || bookValue.Value.IsZero()))
+                bookValue?.IsZero() != true)
                 return null;
 
             sb.AppendLine(

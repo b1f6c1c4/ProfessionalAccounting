@@ -37,12 +37,15 @@ namespace AccountingServer.Shell
         public IQueryResult Execute(string expr)
         {
             expr = expr.Rest();
-            if (expr == "1")
-                return BasicCheck();
-            if (expr == "2")
-                return AdvancedCheck();
-
-            throw new InvalidOperationException("表达式无效");
+            switch (expr)
+            {
+                case "1":
+                    return BasicCheck();
+                case "2":
+                    return AdvancedCheck();
+                default:
+                    throw new InvalidOperationException("表达式无效");
+            }
         }
 
         /// <inheritdoc />

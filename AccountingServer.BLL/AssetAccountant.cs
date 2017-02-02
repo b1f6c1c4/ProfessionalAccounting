@@ -31,13 +31,7 @@ namespace AccountingServer.BLL
                 !asset.Value.HasValue)
                 return;
 
-            List<AssetItem> lst;
-            if (asset.Schedule == null)
-                lst = new List<AssetItem>();
-            else if (asset.Schedule is List<AssetItem>)
-                lst = asset.Schedule as List<AssetItem>;
-            else
-                lst = asset.Schedule.ToList();
+            var lst = asset.Schedule?.ToList() ?? new List<AssetItem>();
 
             foreach (var assetItem in lst)
                 if (assetItem is DepreciateItem ||
@@ -60,8 +54,8 @@ namespace AccountingServer.BLL
                         });
             else if (lst[0].Remark != AssetItem.IgnoranceMark)
             {
-                (lst[0] as AcquisationItem).Date = asset.Date;
-                (lst[0] as AcquisationItem).OrigValue = asset.Value.Value;
+                ((AcquisationItem)lst[0]).Date = asset.Date;
+                ((AcquisationItem)lst[0]).OrigValue = asset.Value.Value;
             }
 
             var bookValue = 0D;
@@ -141,7 +135,7 @@ namespace AccountingServer.BLL
                                 item =>
                                     item is AcquisationItem &&
                                     (!voucher.Date.HasValue || item.Date == voucher.Date) &&
-                                    ((item as AcquisationItem).OrigValue - value).IsZero())
+                                    (((AcquisationItem)item).OrigValue - value).IsZero())
                             .ToList();
 
                         if (lst.Count == 1)
@@ -268,7 +262,7 @@ namespace AccountingServer.BLL
                         {
                             Title = asset.Title,
                             Content = asset.StringID,
-                            Fund = (item as AcquisationItem).OrigValue
+                            Fund = ((AcquisationItem)item).OrigValue
                         });
 
             if (item is DepreciateItem)
@@ -282,13 +276,13 @@ namespace AccountingServer.BLL
                             Title = asset.DepreciationExpenseTitle,
                             SubTitle = asset.DepreciationExpenseSubTitle,
                             Content = asset.StringID,
-                            Fund = (item as DepreciateItem).Amount
+                            Fund = ((DepreciateItem)item).Amount
                         },
                     new VoucherDetail
                         {
                             Title = asset.DepreciationTitle,
                             Content = asset.StringID,
-                            Fund = -(item as DepreciateItem).Amount
+                            Fund = -((DepreciateItem)item).Amount
                         });
 
             if (item is DevalueItem)
@@ -302,13 +296,13 @@ namespace AccountingServer.BLL
                             Title = asset.DevaluationExpenseTitle,
                             SubTitle = asset.DevaluationExpenseSubTitle,
                             Content = asset.StringID,
-                            Fund = (item as DevalueItem).Amount
+                            Fund = ((DevalueItem)item).Amount
                         },
                     new VoucherDetail
                         {
                             Title = asset.DevaluationTitle,
                             Content = asset.StringID,
-                            Fund = -(item as DevalueItem).Amount
+                            Fund = -((DevalueItem)item).Amount
                         });
 
             if (item is DispositionItem)

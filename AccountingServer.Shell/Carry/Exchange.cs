@@ -120,14 +120,12 @@ namespace AccountingServer.Shell.Carry
             var res = req.GetResponse();
             using (var stream = res.GetResponseStream())
             {
-                if (stream != null)
-                {
-                    var reader = new StreamReader(stream);
-                    var json = JObject.Parse(reader.ReadToEnd());
-                    return json["rates"][to].Value<double>();
-                }
+                if (stream == null)
+                    throw new NetworkInformationException();
 
-                throw new NetworkInformationException();
+                var reader = new StreamReader(stream);
+                var json = JObject.Parse(reader.ReadToEnd());
+                return json["rates"][to].Value<double>();
             }
         }
     }

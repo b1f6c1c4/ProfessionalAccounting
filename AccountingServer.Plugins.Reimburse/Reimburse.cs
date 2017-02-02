@@ -15,6 +15,7 @@ namespace AccountingServer.Plugins.Reimburse
     /// <summary>
     ///     报销
     /// </summary>
+    // ReSharper disable once UnusedMember.Global
     public class Reimburse : PluginBase
     {
         private static readonly ConfigManager<ReimTemplates> Templates =

@@ -54,15 +54,18 @@ namespace AccountingServer.Shell
         /// <inheritdoc />
         public IQueryResult Execute(string expr)
         {
-            if (expr == "con")
-                return ConnectServer();
-
-            if (expr == "exit")
-                Environment.Exit(0);
-            if (expr == "T")
-                return ListTitles();
-            if (expr == "?")
-                return ListHelp();
+            switch (expr)
+            {
+                case "con":
+                    return ConnectServer();
+                case "exit":
+                    Environment.Exit(0);
+                    break;
+                case "T":
+                    return ListTitles();
+                case "?":
+                    return ListHelp();
+            }
 
             return m_Composer.Execute(expr);
         }

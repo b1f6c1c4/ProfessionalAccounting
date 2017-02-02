@@ -14,7 +14,7 @@ namespace AccountingServer.Shell
     /// <summary>
     ///     插件表达式解释器
     /// </summary>
-    public class PluginShell : IShellComponent
+    internal class PluginShell : IShellComponent
     {
         private readonly Dictionary<string, PluginBase> m_Plugins;
 
@@ -59,10 +59,7 @@ namespace AccountingServer.Shell
             if (help)
             {
                 Parsing.Eof(expr);
-                if (plgName == "")
-                    return new UnEditableText(ListPlugins());
-
-                return new UnEditableText(GetHelp(plgName));
+                return plgName == "" ? new UnEditableText(ListPlugins()) : new UnEditableText(GetHelp(plgName));
             }
 
             return GetPlugin(plgName).Execute(expr);

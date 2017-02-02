@@ -137,8 +137,6 @@ namespace AccountingServer.BLL.Util
         // ReSharper disable once MemberCanBePrivate.Global
         public ISubtotal SubtotalArgs { get; set; }
 
-        public SubtotalTraver(ISubtotal args) { SubtotalArgs = args; }
-
         /// <summary>
         ///     遍历分类汇总结果
         /// </summary>

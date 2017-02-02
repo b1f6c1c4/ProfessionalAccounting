@@ -112,10 +112,10 @@ namespace AccountingServer.DAL.Serializer
         }
 
         public override Guid? GetId(Asset entity) => entity.ID;
-        public override void SetId(Asset entity, Guid? id) => entity.ID = id;
-        public override bool IsNull(Guid? id) => !id.HasValue;
+        protected override void SetId(Asset entity, Guid? id) => entity.ID = id;
+        protected override bool IsNull(Guid? id) => !id.HasValue;
 
-        public override Guid? MakeId(IMongoCollection<Asset> container, Asset entity) =>
+        protected override Guid? MakeId(IMongoCollection<Asset> container, Asset entity) =>
             Guid.NewGuid();
     }
 }
