@@ -14,6 +14,7 @@ namespace AccountingServer.Plugins.BankBalance
     /// <summary>
     ///     计算日均余额
     /// </summary>
+    // ReSharper disable once UnusedMember.Global
     public class AverageDailyBalance : PluginBase
     {
         public AverageDailyBalance(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }

@@ -21,7 +21,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     入账日期
         /// </summary>
-        DateTime? Date { get; set; }
+        DateTime? Date { get; }
 
         /// <summary>
         ///     全体
@@ -59,10 +59,5 @@ namespace AccountingServer.Entities
         ///     <para>不存储在数据库中</para>
         /// </summary>
         double Value { get; }
-
-        /// <summary>
-        ///     备注
-        /// </summary>
-        string Remark { get; }
     }
 }

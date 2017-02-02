@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.Entities;
-using AccountingServer.Entities.Util;
 
 namespace AccountingServer.BLL.Util
 {
@@ -128,80 +127,6 @@ namespace AccountingServer.BLL.Util
                             Fund = fund
                         };
             }
-        }
-
-        /// <summary>
-        ///     按检索式对记账凭证执行分类汇总
-        /// </summary>
-        /// <param name="vouchers">记账凭证</param>
-        /// <param name="query">检索式</param>
-        /// <returns>分类汇总结果</returns>
-        public static IEnumerable<Balance> SelectVoucherDetailsGrouped(this IEnumerable<Voucher> vouchers,
-            IGroupedQuery query)
-        {
-            SubtotalLevel level;
-            if (query.Subtotal.AggrType != AggregationType.None)
-                level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l) | SubtotalLevel.Day;
-            else
-                level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
-
-            Func<Voucher, VoucherDetail, Balance> fullSelector =
-                (v, d) =>
-                    new Balance
-                        {
-                            Date = v.Date,
-                            Title = d.Title,
-                            SubTitle = d.SubTitle,
-                            Content = d.Content,
-                            Remark = d.Remark,
-                            // ReSharper disable once PossibleInvalidOperationException
-                            Fund = d.Fund.Value
-                        };
-            Func<Balance, Balance> keySelector =
-                b =>
-                    new Balance
-                        {
-                            Date = level.HasFlag(SubtotalLevel.Day) ? b.Date : null,
-                            Title = level.HasFlag(SubtotalLevel.Title) ? b.Title : null,
-                            SubTitle = level.HasFlag(SubtotalLevel.SubTitle) ? b.SubTitle : null,
-                            Content = level.HasFlag(SubtotalLevel.Content) ? b.Content : null,
-                            Remark = level.HasFlag(SubtotalLevel.Remark) ? b.Remark : null
-                        };
-            Func<Balance, IEnumerable<double>, Balance> reducer =
-                (b, bs) =>
-                    new Balance
-                        {
-                            Date = b.Date,
-                            Title = b.Title,
-                            SubTitle = b.SubTitle,
-                            Content = b.Content,
-                            Remark = b.Remark,
-                            Fund = bs.Sum()
-                        };
-            if (query.VoucherEmitQuery.DetailEmitFilter == null)
-            {
-                var ff = query.VoucherEmitQuery.VoucherQuery as IVoucherQueryAtom;
-                if (ff == null)
-                    throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query));
-
-                return
-                    vouchers.Where(v => v.IsMatch(ff))
-                        .SelectMany(
-                            v =>
-                                v.Details.Where(d => d.IsMatch(ff.DetailFilter))
-                                    .Select(d => fullSelector(v, d)))
-                        .GroupBy(keySelector, b => b.Fund, reducer, new BalanceComparer());
-            }
-
-            return
-                vouchers.Where(v => v.IsMatch(query.VoucherEmitQuery.VoucherQuery))
-                    .SelectMany(
-                        v =>
-                            v.Details.Where(
-                                    d =>
-                                        d.IsMatch(query.VoucherEmitQuery.DetailEmitFilter.DetailFilter))
-                                .Select(d => fullSelector(v, d)))
-                    .GroupBy(keySelector, b => b.Fund, reducer, new BalanceComparer());
         }
     }
 }

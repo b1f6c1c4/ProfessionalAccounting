@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
@@ -40,8 +41,6 @@ namespace AccountingServer.BLL
 
         public void Connect() => m_Db.Connect();
 
-        public void Disconnect() => m_Db.Disconnect();
-
         #endregion
 
         #region Voucher
@@ -75,6 +74,7 @@ namespace AccountingServer.BLL
 
         #region Asset
 
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public Asset SelectAsset(Guid id)
         {
             var result = m_Db.SelectAsset(id);
@@ -93,6 +93,7 @@ namespace AccountingServer.BLL
 
         public bool DeleteAsset(Guid id) => m_Db.DeleteAsset(id);
 
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter) => m_Db.DeleteAssets(filter);
 
         public bool Upsert(Asset entity) => m_Db.Upsert(entity);
@@ -111,6 +112,7 @@ namespace AccountingServer.BLL
 
         #region Amort
 
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public Amortization SelectAmortization(Guid id)
         {
             var result = m_Db.SelectAmortization(id);
@@ -129,6 +131,7 @@ namespace AccountingServer.BLL
 
         public bool DeleteAmortization(Guid id) => m_Db.DeleteAmortization(id);
 
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
             => m_Db.DeleteAmortizations(filter);
 

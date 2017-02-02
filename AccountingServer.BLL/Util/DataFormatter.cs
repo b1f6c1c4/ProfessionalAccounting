@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using AccountingServer.Entities;
 
 namespace AccountingServer.BLL.Util
@@ -123,55 +122,6 @@ namespace AccountingServer.BLL.Util
                     : $"[{value.StartDate.AsDate()}~]";
 
             return value.Nullable ? "[]" : "[~null]";
-        }
-
-        /// <summary>
-        ///     格式化日期过滤器
-        /// </summary>
-        /// <param name="value">日期过滤器</param>
-        /// <returns>格式化后的日期过滤器</returns>
-        public static string AsDateRange(this DateFilter? value) => !value.HasValue ? "[]" : value.Value.AsDateRange();
-
-        /// <summary>
-        ///     解析日期
-        /// </summary>
-        /// <param name="value">格式化后的日期</param>
-        /// <returns>日期</returns>
-        public static DateTime? AsDate(this string value)
-        {
-            DateTime val;
-            if (DateTime.TryParseExact(value, "yyyyMMdd", null, DateTimeStyles.AllowWhiteSpaces, out val))
-                return val;
-
-            return null;
-        }
-
-        /// <summary>
-        ///     解析金额
-        /// </summary>
-        /// <param name="value">格式化后的金额</param>
-        /// <returns>金额</returns>
-        public static double? AsCurrency(this string value)
-        {
-            double val;
-            if (double.TryParse(value, out val))
-                return val;
-
-            return null;
-        }
-
-        /// <summary>
-        ///     解析科目编号
-        /// </summary>
-        /// <param name="value">格式化后的编号</param>
-        /// <returns>编号</returns>
-        public static int? AsTitleOrSubTitle(this string value)
-        {
-            int val;
-            if (int.TryParse(value, out val))
-                return val;
-
-            return null;
         }
     }
 }

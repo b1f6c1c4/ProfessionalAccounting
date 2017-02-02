@@ -21,11 +21,6 @@ namespace AccountingServer.DAL
         /// </summary>
         void Connect();
 
-        /// <summary>
-        ///     ¶Ï¿ª·þÎñÆ÷
-        /// </summary>
-        void Disconnect();
-
         #endregion
 
         #region Voucher

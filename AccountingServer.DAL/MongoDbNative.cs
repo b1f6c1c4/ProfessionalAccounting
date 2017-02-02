@@ -127,30 +127,27 @@ namespace AccountingServer.DAL
                     f.Dir > 0
                         ? Builders<VoucherDetail>.Filter.Gt("fund", -VoucherDetail.Tolerance)
                         : Builders<VoucherDetail>.Filter.Lt("fund", +VoucherDetail.Tolerance));
-            if (f.Filter != null)
-            {
-                if (f.Filter.Title != null)
-                    lst.Add(Builders<VoucherDetail>.Filter.Eq("title", f.Filter.Title.Value));
-                if (f.Filter.SubTitle != null)
-                    lst.Add(
-                        f.Filter.SubTitle == 00
-                            ? Builders<VoucherDetail>.Filter.Exists("subtitle", false)
-                            : Builders<VoucherDetail>.Filter.Eq("subtitle", f.Filter.SubTitle.Value));
-                if (f.Filter.Content != null)
-                    lst.Add(
-                        f.Filter.Content == string.Empty
-                            ? Builders<VoucherDetail>.Filter.Exists("content", false)
-                            : Builders<VoucherDetail>.Filter.Eq("content", f.Filter.Content));
-                if (f.Filter.Remark != null)
-                    lst.Add(
-                        f.Filter.Remark == string.Empty
-                            ? Builders<VoucherDetail>.Filter.Exists("remark", false)
-                            : Builders<VoucherDetail>.Filter.Eq("remark", f.Filter.Remark));
-                if (f.Filter.Fund != null)
-                    lst.Add(
-                        Builders<VoucherDetail>.Filter.Gte("fund", f.Filter.Fund.Value - VoucherDetail.Tolerance) &
-                        Builders<VoucherDetail>.Filter.Lte("fund", f.Filter.Fund.Value + VoucherDetail.Tolerance));
-            }
+            if (f.Filter?.Title != null)
+                lst.Add(Builders<VoucherDetail>.Filter.Eq("title", f.Filter.Title.Value));
+            if (f.Filter?.SubTitle != null)
+                lst.Add(
+                    f.Filter.SubTitle == 00
+                        ? Builders<VoucherDetail>.Filter.Exists("subtitle", false)
+                        : Builders<VoucherDetail>.Filter.Eq("subtitle", f.Filter.SubTitle.Value));
+            if (f.Filter?.Content != null)
+                lst.Add(
+                    f.Filter.Content == string.Empty
+                        ? Builders<VoucherDetail>.Filter.Exists("content", false)
+                        : Builders<VoucherDetail>.Filter.Eq("content", f.Filter.Content));
+            if (f.Filter?.Remark != null)
+                lst.Add(
+                    f.Filter.Remark == string.Empty
+                        ? Builders<VoucherDetail>.Filter.Exists("remark", false)
+                        : Builders<VoucherDetail>.Filter.Eq("remark", f.Filter.Remark));
+            if (f.Filter?.Fund != null)
+                lst.Add(
+                    Builders<VoucherDetail>.Filter.Gte("fund", f.Filter.Fund.Value - VoucherDetail.Tolerance) &
+                    Builders<VoucherDetail>.Filter.Lte("fund", f.Filter.Fund.Value + VoucherDetail.Tolerance));
             return Builders<VoucherDetail>.Filter.And(lst);
         }
 

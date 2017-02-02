@@ -112,50 +112,33 @@ namespace AccountingServer.Shell.Serializer
         /// <returns>是否解析成功</returns>
         private static bool TryParse(string s, out VoucherType typeT)
         {
-            if (s == "Ordinary")
+            switch (s)
             {
-                typeT = VoucherType.Ordinary;
-                return true;
+                case "Ordinary":
+                    typeT = VoucherType.Ordinary;
+                    return true;
+                case "Carry":
+                    typeT = VoucherType.Carry;
+                    return true;
+                case "AnnualCarry":
+                    typeT = VoucherType.AnnualCarry;
+                    return true;
+                case "Depreciation":
+                    typeT = VoucherType.Depreciation;
+                    return true;
+                case "Devalue":
+                    typeT = VoucherType.Devalue;
+                    return true;
+                case "Amortization":
+                    typeT = VoucherType.Amortization;
+                    return true;
+                case "Uncertain":
+                    typeT = VoucherType.Uncertain;
+                    return true;
+                default:
+                    typeT = VoucherType.General;
+                    return false;
             }
-
-            if (s == "Carry")
-            {
-                typeT = VoucherType.Carry;
-                return true;
-            }
-
-            if (s == "AnnualCarry")
-            {
-                typeT = VoucherType.AnnualCarry;
-                return true;
-            }
-
-            if (s == "Depreciation")
-            {
-                typeT = VoucherType.Depreciation;
-                return true;
-            }
-
-            if (s == "Devalue")
-            {
-                typeT = VoucherType.Devalue;
-                return true;
-            }
-
-            if (s == "Amortization")
-            {
-                typeT = VoucherType.Amortization;
-                return true;
-            }
-
-            if (s == "Uncertain")
-            {
-                typeT = VoucherType.Uncertain;
-                return true;
-            }
-
-            typeT = VoucherType.General;
-            return false;
         }
 
         /// <summary>

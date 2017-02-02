@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
@@ -251,14 +249,5 @@ namespace AccountingServer.Shell
         /// <param name="rng">日期过滤器</param>
         /// <returns>执行结果</returns>
         protected abstract IQueryResult ExecuteCheck(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng);
-
-        /// <summary>
-        ///     对分期进行排序
-        /// </summary>
-        /// <param name="enumerable">分期</param>
-        /// <returns>排序后的分期</returns>
-        protected static IEnumerable<T> Sort<T>(IEnumerable<T> enumerable)
-            where T : IDistributed
-            => enumerable.OrderBy(o => o.Date, new DateComparer()).ThenBy(o => o.Name).ThenBy(o => o.ID);
     }
 }

@@ -17,7 +17,7 @@ namespace AccountingServer.Shell.Util
         /// </summary>
         /// <param name="strings">字符串</param>
         /// <returns>新字符串，如无非空字符串则为空</returns>
-        public static string NotNullJoin(IEnumerable<string> strings)
+        private static string NotNullJoin(IEnumerable<string> strings)
         {
             var flag = false;
 
@@ -51,8 +51,9 @@ namespace AccountingServer.Shell.Util
                 : f.AsCurrency());
 
             var helper =
-                new SubtotalTraver<object, Tuple<double, string>>(args)
+                new SubtotalTraver<object, Tuple<double, string>>
                     {
+                        SubtotalArgs = args,
                         LeafNoneAggr =
                             (path, cat, depth, val) =>
                                 new Tuple<double, string>(val, ts(val)),

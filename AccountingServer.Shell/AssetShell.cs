@@ -252,7 +252,7 @@ namespace AccountingServer.Shell
 
             var bookValue = Accountant.GetBookValueOn(asset, dt);
             if (dt.HasValue &&
-                (!bookValue.HasValue || bookValue.Value.IsZero()))
+                bookValue?.IsZero() != true)
                 return null;
 
             sb.AppendLine(
@@ -279,27 +279,27 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="assetItem">折旧计算表条目</param>
         /// <returns>格式化的信息</returns>
-        private static string ListAssetItem(AssetItem assetItem)
+        private static string ListAssetItem(IDistributedItem assetItem)
         {
             if (assetItem is AcquisationItem)
                 return string.Format(
                     "   {0:yyyMMdd} ACQ:{1} ={3} ({2})",
                     assetItem.Date,
-                    (assetItem as AcquisationItem).OrigValue.AsCurrency().CPadLeft(13),
+                    ((AcquisationItem)assetItem).OrigValue.AsCurrency().CPadLeft(13),
                     assetItem.VoucherID,
                     assetItem.Value.AsCurrency().CPadLeft(13));
             if (assetItem is DepreciateItem)
                 return string.Format(
                     "   {0:yyyMMdd} DEP:{1} ={3} ({2})",
                     assetItem.Date,
-                    (assetItem as DepreciateItem).Amount.AsCurrency().CPadLeft(13),
+                    ((DepreciateItem)assetItem).Amount.AsCurrency().CPadLeft(13),
                     assetItem.VoucherID,
                     assetItem.Value.AsCurrency().CPadLeft(13));
             if (assetItem is DevalueItem)
                 return string.Format(
                     "   {0:yyyMMdd} DEV:{1} ={3} ({2})",
                     assetItem.Date,
-                    (assetItem as DevalueItem).Amount.AsCurrency().CPadLeft(13),
+                    ((DevalueItem)assetItem).Amount.AsCurrency().CPadLeft(13),
                     assetItem.VoucherID,
                     assetItem.Value.AsCurrency().CPadLeft(13));
             if (assetItem is DispositionItem)

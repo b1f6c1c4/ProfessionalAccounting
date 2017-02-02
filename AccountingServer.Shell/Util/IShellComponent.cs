@@ -56,7 +56,7 @@ namespace AccountingServer.Shell.Util
     /// <summary>
     ///     复合表达式解释组件
     /// </summary>
-    internal class ShellComposer : IShellComponent, IEnumerable
+    internal sealed class ShellComposer : IShellComponent, IEnumerable
     {
         private readonly List<IShellComponent> m_Components = new List<IShellComponent>();
 
@@ -67,7 +67,7 @@ namespace AccountingServer.Shell.Util
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>组件</returns>
-        protected IShellComponent FirstExecutable(string expr)
+        private IShellComponent FirstExecutable(string expr)
         {
             var comp = m_Components.FirstOrDefault(s => s.IsExecutable(expr));
             if (comp == null)
@@ -77,22 +77,13 @@ namespace AccountingServer.Shell.Util
         }
 
         /// <inheritdoc />
-        public virtual IQueryResult Execute(string expr) => FirstExecutable(expr).Execute(expr);
+        public IQueryResult Execute(string expr) => FirstExecutable(expr).Execute(expr);
 
         /// <inheritdoc />
         public bool IsExecutable(string expr) => m_Components.Any(s => s.IsExecutable(expr));
 
         /// <inheritdoc />
         public IEnumerator GetEnumerator() => m_Components.GetEnumerator();
-    }
-
-    /// <summary>
-    ///     复合表达式解释器
-    /// </summary>
-    internal sealed class ShellRestComposer : ShellComposer
-    {
-        /// <inheritdoc />
-        public override IQueryResult Execute(string expr) => FirstExecutable(expr).Execute(expr.Rest());
     }
 
     internal static class ExprHelper

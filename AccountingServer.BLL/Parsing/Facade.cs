@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using AccountingServer.Entities;
 using Antlr4.Runtime;
 
 namespace AccountingServer.BLL.Parsing
 {
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public abstract class FacadeBase
     {
         internal virtual T Parse<T>(ref string s, Func<QueryParser, T> func)
@@ -115,6 +117,7 @@ namespace AccountingServer.BLL.Parsing
         /// </summary>
         /// <param name="facade">占位符</param>
         /// <param name="expr">表达式</param>
+        // ReSharper disable once UnusedParameter.Global
         public static void Eof(this FacadeBase facade, string expr)
         {
             if (!string.IsNullOrWhiteSpace(expr))

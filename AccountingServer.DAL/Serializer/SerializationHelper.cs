@@ -67,16 +67,14 @@ namespace AccountingServer.DAL.Serializer
             if (!bsonReader.ReadName(expected, ref read))
                 return false;
 
-            if (bsonReader.CurrentBsonType == BsonType.Null)
+            switch (bsonReader.CurrentBsonType)
             {
-                bsonReader.ReadNull();
-                return false;
-            }
-
-            if (bsonReader.CurrentBsonType == BsonType.Undefined)
-            {
-                bsonReader.ReadUndefined();
-                return false;
+                case BsonType.Null:
+                    bsonReader.ReadNull();
+                    return false;
+                case BsonType.Undefined:
+                    bsonReader.ReadUndefined();
+                    return false;
             }
 
             return true;

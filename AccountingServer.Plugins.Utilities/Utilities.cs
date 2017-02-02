@@ -15,6 +15,7 @@ namespace AccountingServer.Plugins.Utilities
     /// <summary>
     ///     常见记账凭证自动填写
     /// </summary>
+    // ReSharper disable once UnusedMember.Global
     public class Utilities : PluginBase
     {
         private static readonly ConfigManager<UtilTemplates> Templates =
@@ -29,9 +30,11 @@ namespace AccountingServer.Plugins.Utilities
             while (!string.IsNullOrWhiteSpace(expr))
             {
                 var voucher = GenerateVoucher(ref expr);
-                if (voucher != null)
-                    if (Accountant.Upsert(voucher))
-                        count++;
+                if (voucher == null)
+                    continue;
+
+                if (Accountant.Upsert(voucher))
+                    count++;
             }
 
             return new NumberAffected(count);
@@ -91,10 +94,7 @@ namespace AccountingServer.Plugins.Utilities
                 }
             }
 
-            if (num.IsZero())
-                return null;
-
-            return MakeVoucher(template, num, time);
+            return num.IsZero() ? null : MakeVoucher(template, num, time);
         }
 
         /// <summary>

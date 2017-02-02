@@ -87,13 +87,7 @@ namespace AccountingServer.BLL
                 !amort.Value.HasValue)
                 return;
 
-            List<AmortItem> lst;
-            if (amort.Schedule == null)
-                lst = new List<AmortItem>();
-            else if (amort.Schedule is List<AmortItem>)
-                lst = amort.Schedule as List<AmortItem>;
-            else
-                lst = amort.Schedule.ToList();
+            var lst = amort.Schedule?.ToList() ?? new List<AmortItem>();
 
             lst.Sort((item1, item2) => DateHelper.CompareDate(item1.Date, item2.Date));
 

@@ -101,10 +101,10 @@ namespace AccountingServer.DAL.Serializer
         }
 
         public override ObjectId GetId(Voucher entity) => entity.ID != null ? new ObjectId(entity.ID) : ObjectId.Empty;
-        public override void SetId(Voucher entity, ObjectId id) => entity.ID = id.ToString();
-        public override bool IsNull(ObjectId id) => id == ObjectId.Empty;
+        protected override void SetId(Voucher entity, ObjectId id) => entity.ID = id.ToString();
+        protected override bool IsNull(ObjectId id) => id == ObjectId.Empty;
 
-        public override ObjectId MakeId(IMongoCollection<Voucher> container, Voucher entity) =>
+        protected override ObjectId MakeId(IMongoCollection<Voucher> container, Voucher entity) =>
             (ObjectId)new ObjectIdGenerator().GenerateId(container, entity);
     }
 }

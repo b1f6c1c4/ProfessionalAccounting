@@ -73,12 +73,16 @@ namespace AccountingServer.BLL.Parsing
                 {
                     if (Direction == null)
                         return 0;
-                    if (Direction.Text == ">")
-                        return 1;
-                    if (Direction.Text == "<")
-                        return -1;
 
-                    throw new MemberAccessException("表达式错误");
+                    switch (Direction.Text)
+                    {
+                        case ">":
+                            return 1;
+                        case "<":
+                            return -1;
+                        default:
+                            throw new MemberAccessException("表达式错误");
+                    }
                 }
             }
         }
@@ -94,23 +98,27 @@ namespace AccountingServer.BLL.Parsing
                         return OperatorType.None;
 
                     if (details().Length == 1)
+                        switch (Op.Text)
+                        {
+                            case "+":
+                                return OperatorType.Identity;
+                            case "-":
+                                return OperatorType.Complement;
+                            default:
+                                throw new MemberAccessException("表达式错误");
+                        }
+
+                    switch (Op.Text)
                     {
-                        if (Op.Text == "+")
-                            return OperatorType.Identity;
-                        if (Op.Text == "-")
-                            return OperatorType.Complement;
-
-                        throw new MemberAccessException("表达式错误");
+                        case "+":
+                            return OperatorType.Union;
+                        case "-":
+                            return OperatorType.Substract;
+                        case "*":
+                            return OperatorType.Intersect;
+                        default:
+                            throw new MemberAccessException("表达式错误");
                     }
-
-                    if (Op.Text == "+")
-                        return OperatorType.Union;
-                    if (Op.Text == "-")
-                        return OperatorType.Substract;
-                    if (Op.Text == "*")
-                        return OperatorType.Intersect;
-
-                    throw new MemberAccessException("表达式错误");
                 }
             }
 

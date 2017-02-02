@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Xml.Serialization;
 using AccountingServer.BLL;
@@ -79,6 +80,7 @@ namespace AccountingServer.Shell.Serializer
     }
 
     [Serializable]
+    [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
     public class Abbreviation : ITitle
     {
         [XmlAttribute("string")]
@@ -95,8 +97,5 @@ namespace AccountingServer.Shell.Serializer
 
         [DefaultValue(null)]
         public string Content { get; set; }
-
-        [DefaultValue(null)]
-        public string Remark { get; set; }
     }
 }

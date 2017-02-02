@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace AccountingServer.Entities.Util
@@ -14,20 +15,17 @@ namespace AccountingServer.Entities.Util
         /// <param name="voucher">记账凭证</param>
         /// <param name="filter">记账凭证过滤器</param>
         /// <returns>是否符合</returns>
-        public static bool IsMatch(this Voucher voucher, Voucher filter)
+        private static bool IsMatch(this Voucher voucher, Voucher filter)
         {
-            if (filter == null)
-                return true;
-
-            if (filter.ID != null)
+            if (filter?.ID != null)
                 if (filter.ID != voucher.ID)
                     return false;
 
-            if (filter.Date != null)
+            if (filter?.Date != null)
                 if (filter.Date != voucher.Date)
                     return false;
 
-            if (filter.Type != null)
+            if (filter?.Type != null)
                 switch (filter.Type)
                 {
                     case VoucherType.Ordinary:
@@ -49,7 +47,7 @@ namespace AccountingServer.Entities.Util
                         break;
                 }
 
-            if (filter.Remark != null)
+            if (filter?.Remark != null)
                 if (filter.Remark == string.Empty)
                 {
                     if (!string.IsNullOrEmpty(voucher.Remark))
@@ -138,6 +136,7 @@ namespace AccountingServer.Entities.Util
                 : voucher.Details.Any(d => d.IsMatch(query.DetailFilter));
         }
 
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public static bool IsMatch(this Voucher voucher, IQueryCompunded<IVoucherQueryAtom> query)
             => IsMatch(query, q => IsMatch(voucher, q));
 
@@ -152,32 +151,31 @@ namespace AccountingServer.Entities.Util
         {
             if (query == null)
                 return true;
-            if (query is TAtom)
-                return atomPredictor(query as TAtom);
 
-            if (query is IQueryAry<TAtom>)
+            var atom = query as TAtom;
+            if (atom != null)
+                return atomPredictor(atom);
+
+            var ary = query as IQueryAry<TAtom>;
+            if (ary == null)
+                throw new ArgumentException("检索式类型未知", nameof(query));
+
+            switch (ary.Operator)
             {
-                var f = query as IQueryAry<TAtom>;
-
-                switch (f.Operator)
-                {
-                    case OperatorType.None:
-                    case OperatorType.Identity:
-                        return IsMatch(f.Filter1, atomPredictor);
-                    case OperatorType.Complement:
-                        return !IsMatch(f.Filter1, atomPredictor);
-                    case OperatorType.Union:
-                        return IsMatch(f.Filter1, atomPredictor) || IsMatch(f.Filter2, atomPredictor);
-                    case OperatorType.Intersect:
-                        return IsMatch(f.Filter1, atomPredictor) && IsMatch(f.Filter2, atomPredictor);
-                    case OperatorType.Substract:
-                        return IsMatch(f.Filter1, atomPredictor) && !IsMatch(f.Filter2, atomPredictor);
-                    default:
-                        throw new ArgumentException("运算类型未知", nameof(query));
-                }
+                case OperatorType.None:
+                case OperatorType.Identity:
+                    return IsMatch(ary.Filter1, atomPredictor);
+                case OperatorType.Complement:
+                    return !IsMatch(ary.Filter1, atomPredictor);
+                case OperatorType.Union:
+                    return IsMatch(ary.Filter1, atomPredictor) || IsMatch(ary.Filter2, atomPredictor);
+                case OperatorType.Intersect:
+                    return IsMatch(ary.Filter1, atomPredictor) && IsMatch(ary.Filter2, atomPredictor);
+                case OperatorType.Substract:
+                    return IsMatch(ary.Filter1, atomPredictor) && !IsMatch(ary.Filter2, atomPredictor);
+                default:
+                    throw new ArgumentException("运算类型未知", nameof(query));
             }
-
-            throw new ArgumentException("检索式类型未知", nameof(query));
         }
     }
 }

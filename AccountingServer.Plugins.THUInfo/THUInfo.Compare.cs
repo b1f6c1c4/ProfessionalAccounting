@@ -11,6 +11,7 @@ using AccountingServer.Shell.Util;
 
 namespace AccountingServer.Plugins.THUInfo
 {
+    // ReSharper disable once UnusedMember.Global
     public partial class THUInfo
     {
         /// <summary>

@@ -17,6 +17,7 @@ namespace AccountingServer.Plugins.THUInfo
     /// <summary>
     ///     从info.tsinghua.edu.cn更新账户
     /// </summary>
+    // ReSharper disable once UnusedMember.Global
     public partial class THUInfo : PluginBase
     {
         /// <summary>
@@ -154,17 +155,15 @@ namespace AccountingServer.Plugins.THUInfo
             foreach (var voucher in AutoGenerate(problems.Records, pars, out fail))
                 Accountant.Upsert(voucher);
 
-            if (fail.Any())
-            {
-                var sb = new StringBuilder();
-                sb.AppendLine("---Can not generate");
-                foreach (var r in fail)
-                    sb.AppendLine(r.ToString());
+            if (!fail.Any())
+                return new Succeed();
 
-                return new EditableText(sb.ToString());
-            }
+            var sb = new StringBuilder();
+            sb.AppendLine("---Can not generate");
+            foreach (var r in fail)
+                sb.AppendLine(r.ToString());
 
-            return new Succeed();
+            return new EditableText(sb.ToString());
         }
 
         /// <summary>
