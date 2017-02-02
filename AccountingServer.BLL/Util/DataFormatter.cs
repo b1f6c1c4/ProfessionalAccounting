@@ -1,18 +1,18 @@
-using System;
+ï»¿using System;
 using AccountingServer.Entities;
 
 namespace AccountingServer.BLL.Util
 {
     /// <summary>
-    ///     ¸ñÊ½»¯Êı¾İ
+    ///     æ ¼å¼åŒ–æ•°æ®
     /// </summary>
     public static class DataFormatter
     {
         /// <summary>
-        ///     ¸ñÊ½»¯½ğ¶î£¬ÓÃ¿Õ¸ñ´úÌæÄ©Î²µÄÁã
+        ///     æ ¼å¼åŒ–é‡‘é¢ï¼Œç”¨ç©ºæ ¼ä»£æ›¿æœ«å°¾çš„é›¶
         /// </summary>
-        /// <param name="value">½ğ¶î</param>
-        /// <returns>¸ñÊ½»¯ºóµÄ½ğ¶î</returns>
+        /// <param name="value">é‡‘é¢</param>
+        /// <returns>æ ¼å¼åŒ–åçš„é‡‘é¢</returns>
         public static string AsCurrency(this double value)
         {
             var s = $"{value:C4}";
@@ -20,61 +20,61 @@ namespace AccountingServer.BLL.Util
         }
 
         /// <summary>
-        ///     ¸ñÊ½»¯½ğ¶î£¬ÓÃ¿Õ¸ñ´úÌæÄ©Î²µÄÁã
+        ///     æ ¼å¼åŒ–é‡‘é¢ï¼Œç”¨ç©ºæ ¼ä»£æ›¿æœ«å°¾çš„é›¶
         /// </summary>
-        /// <param name="value">½ğ¶î</param>
-        /// <returns>¸ñÊ½»¯ºóµÄ½ğ¶î</returns>
+        /// <param name="value">é‡‘é¢</param>
+        /// <returns>æ ¼å¼åŒ–åçš„é‡‘é¢</returns>
         public static string AsCurrency(this double? value) => value.HasValue ? AsCurrency(value.Value) : string.Empty;
 
         /// <summary>
-        ///     ¸ñÊ½»¯Ò»¼¶¿ÆÄ¿±àºÅ
+        ///     æ ¼å¼åŒ–ä¸€çº§ç§‘ç›®ç¼–å·
         /// </summary>
-        /// <param name="value">Ò»¼¶¿ÆÄ¿±àºÅ</param>
-        /// <returns>¸ñÊ½»¯ºóµÄ±àºÅ</returns>
+        /// <param name="value">ä¸€çº§ç§‘ç›®ç¼–å·</param>
+        /// <returns>æ ¼å¼åŒ–åçš„ç¼–å·</returns>
         public static string AsTitle(this int value) => $"{value:0000}";
 
         /// <summary>
-        ///     ¸ñÊ½»¯Ò»¼¶¿ÆÄ¿±àºÅ
+        ///     æ ¼å¼åŒ–ä¸€çº§ç§‘ç›®ç¼–å·
         /// </summary>
-        /// <param name="value">Ò»¼¶¿ÆÄ¿±àºÅ</param>
-        /// <returns>¸ñÊ½»¯ºóµÄ±àºÅ</returns>
+        /// <param name="value">ä¸€çº§ç§‘ç›®ç¼–å·</param>
+        /// <returns>æ ¼å¼åŒ–åçš„ç¼–å·</returns>
         public static string AsTitle(this int? value) => value.HasValue ? AsTitle(value.Value) : string.Empty;
 
         /// <summary>
-        ///     ¸ñÊ½»¯¶ş¼¶¿ÆÄ¿±àºÅ
+        ///     æ ¼å¼åŒ–äºŒçº§ç§‘ç›®ç¼–å·
         /// </summary>
-        /// <param name="value">¶ş¼¶¿ÆÄ¿±àºÅ</param>
-        /// <returns>¸ñÊ½»¯ºóµÄ±àºÅ</returns>
+        /// <param name="value">äºŒçº§ç§‘ç›®ç¼–å·</param>
+        /// <returns>æ ¼å¼åŒ–åçš„ç¼–å·</returns>
         public static string AsSubTitle(this int value) => $"{value:00}";
 
         /// <summary>
-        ///     ¸ñÊ½»¯¶ş¼¶¿ÆÄ¿±àºÅ
+        ///     æ ¼å¼åŒ–äºŒçº§ç§‘ç›®ç¼–å·
         /// </summary>
-        /// <param name="value">¶ş¼¶¿ÆÄ¿±àºÅ</param>
-        /// <returns>¸ñÊ½»¯ºóµÄ±àºÅ</returns>
+        /// <param name="value">äºŒçº§ç§‘ç›®ç¼–å·</param>
+        /// <returns>æ ¼å¼åŒ–åçš„ç¼–å·</returns>
         public static string AsSubTitle(this int? value) => value.HasValue ? AsSubTitle(value.Value) : string.Empty;
 
 
         /// <summary>
-        ///     ¸ñÊ½»¯ÈÕÆÚ
+        ///     æ ¼å¼åŒ–æ—¥æœŸ
         /// </summary>
-        /// <param name="value">ÈÕÆÚ</param>
-        /// <returns>¸ñÊ½»¯ºóµÄÈÕÆÚ</returns>
+        /// <param name="value">æ—¥æœŸ</param>
+        /// <returns>æ ¼å¼åŒ–åçš„æ—¥æœŸ</returns>
         public static string AsDate(this DateTime value) => $"{value:yyyyMMdd}";
 
         /// <summary>
-        ///     ¸ñÊ½»¯ÈÕÆÚ
+        ///     æ ¼å¼åŒ–æ—¥æœŸ
         /// </summary>
-        /// <param name="value">ÈÕÆÚ</param>
-        /// <returns>¸ñÊ½»¯ºóµÄÈÕÆÚ</returns>
+        /// <param name="value">æ—¥æœŸ</param>
+        /// <returns>æ ¼å¼åŒ–åçš„æ—¥æœŸ</returns>
         public static string AsDate(this DateTime? value) => value.HasValue ? AsDate(value.Value) : "[null]";
 
         /// <summary>
-        ///     ¸ñÊ½»¯ÈÕÆÚ
+        ///     æ ¼å¼åŒ–æ—¥æœŸ
         /// </summary>
-        /// <param name="value">ÈÕÆÚ</param>
-        /// <param name="level">·ÖÀà²ã´Î</param>
-        /// <returns>¸ñÊ½»¯ºóµÄÈÕÆÚ</returns>
+        /// <param name="value">æ—¥æœŸ</param>
+        /// <param name="level">åˆ†ç±»å±‚æ¬¡</param>
+        /// <returns>æ ¼å¼åŒ–åçš„æ—¥æœŸ</returns>
         public static string AsDate(this DateTime? value, SubtotalLevel level)
         {
             if (!value.HasValue)
@@ -90,15 +90,15 @@ namespace AccountingServer.BLL.Util
                 case SubtotalLevel.Year:
                     return $"{value.Value.Year:D4}";
                 default:
-                    throw new ArgumentException("·ÖÀà²ã´Î²¢·Ç»ùÓÚÈÕÆÚ", nameof(level));
+                    throw new ArgumentException("åˆ†ç±»å±‚æ¬¡å¹¶éåŸºäºæ—¥æœŸ", nameof(level));
             }
         }
 
         /// <summary>
-        ///     ¸ñÊ½»¯ÈÕÆÚ¹ıÂËÆ÷
+        ///     æ ¼å¼åŒ–æ—¥æœŸè¿‡æ»¤å™¨
         /// </summary>
-        /// <param name="value">ÈÕÆÚ¹ıÂËÆ÷</param>
-        /// <returns>¸ñÊ½»¯ºóµÄÈÕÆÚ¹ıÂËÆ÷</returns>
+        /// <param name="value">æ—¥æœŸè¿‡æ»¤å™¨</param>
+        /// <returns>æ ¼å¼åŒ–åçš„æ—¥æœŸè¿‡æ»¤å™¨</returns>
         public static string AsDateRange(this DateFilter value)
         {
             if (value.NullOnly)

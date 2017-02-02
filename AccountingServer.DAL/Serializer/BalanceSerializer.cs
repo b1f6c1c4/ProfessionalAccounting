@@ -1,11 +1,11 @@
-using System;
+ï»¿using System;
 using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 
 namespace AccountingServer.DAL.Serializer
 {
     /// <summary>
-    ///     Óà¶î±íÌõÄ¿·´ĞòÁĞ»¯Æ÷£¨´ÓMapReduceµÄ½á¹ûÖĞ·´ĞòÁĞ»¯£©
+    ///     ä½™é¢è¡¨æ¡ç›®ååºåˆ—åŒ–å™¨ï¼ˆä»MapReduceçš„ç»“æœä¸­ååºåˆ—åŒ–ï¼‰
     /// </summary>
     internal class BalanceSerializer : BaseSerializer<Balance>
     {

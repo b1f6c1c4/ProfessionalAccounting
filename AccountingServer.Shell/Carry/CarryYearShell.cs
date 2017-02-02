@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.BLL;
@@ -11,12 +11,12 @@ using AccountingServer.Shell.Util;
 namespace AccountingServer.Shell.Carry
 {
     /// <summary>
-    ///     Äê¶È½á×ª±í´ïÊ½½âÊÍÆ÷
+    ///     å¹´åº¦ç»“è½¬è¡¨è¾¾å¼è§£é‡Šå™¨
     /// </summary>
     internal class CarryYearShell : IShellComponent
     {
         /// <summary>
-        ///     »ù±¾»á¼ÆÒµÎñ´¦ÀíÀà
+        ///     åŸºæœ¬ä¼šè®¡ä¸šåŠ¡å¤„ç†ç±»
         /// </summary>
         private readonly Accountant m_Accountant;
 
@@ -33,15 +33,15 @@ namespace AccountingServer.Shell.Carry
                 case "rst":
                     return ResetCarry(expr.Rest());
                 default:
-                    throw new InvalidOperationException("±í´ïÊ½ÎŞĞ§");
+                    throw new InvalidOperationException("è¡¨è¾¾å¼æ— æ•ˆ");
             }
         }
 
         /// <summary>
-        ///     Ö´ĞĞÌ¯Ïú
+        ///     æ‰§è¡Œæ‘Šé”€
         /// </summary>
-        /// <param name="expr">±í´ïÊ½</param>
-        /// <returns>Ö´ĞĞ½á¹û</returns>
+        /// <param name="expr">è¡¨è¾¾å¼</param>
+        /// <returns>æ‰§è¡Œç»“æœ</returns>
         private IQueryResult DoCarry(string expr)
         {
             var rng = BLL.Parsing.Facade.Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
@@ -54,7 +54,7 @@ namespace AccountingServer.Shell.Carry
             }
 
             if (!rng.EndDate.HasValue)
-                throw new ArgumentException("Ê±¼ä·¶Î§ÎŞºó½ç", nameof(expr));
+                throw new ArgumentException("æ—¶é—´èŒƒå›´æ— åç•Œ", nameof(expr));
 
             var dt = new DateTime((rng.StartDate ?? rng.EndDate.Value).Year, 1, 1);
 
@@ -68,10 +68,10 @@ namespace AccountingServer.Shell.Carry
         }
 
         /// <summary>
-        ///     È¡ÏûÌ¯Ïú
+        ///     å–æ¶ˆæ‘Šé”€
         /// </summary>
-        /// <param name="expr">±í´ïÊ½</param>
-        /// <returns>Ö´ĞĞ½á¹û</returns>
+        /// <param name="expr">è¡¨è¾¾å¼</param>
+        /// <returns>æ‰§è¡Œç»“æœ</returns>
         private IQueryResult ResetCarry(string expr)
         {
             var rng = BLL.Parsing.Facade.Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
@@ -86,10 +86,10 @@ namespace AccountingServer.Shell.Carry
 
 
         /// <summary>
-        ///     ÄêÄ©½á×ª
+        ///     å¹´æœ«ç»“è½¬
         /// </summary>
-        /// <param name="dt">Äê£¬ÈôÎª<c>null</c>Ôò±íÊ¾¶ÔÎŞÈÕÆÚ½øĞĞ½á×ª</param>
-        /// <param name="includeNull">ÊÇ·ñ¼ÆÈëÎŞÈÕÆÚ</param>
+        /// <param name="dt">å¹´ï¼Œè‹¥ä¸º<c>null</c>åˆ™è¡¨ç¤ºå¯¹æ— æ—¥æœŸè¿›è¡Œç»“è½¬</param>
+        /// <param name="includeNull">æ˜¯å¦è®¡å…¥æ— æ—¥æœŸ</param>
         private void CarryYear(DateTime? dt, bool includeNull = false)
         {
             DateTime? ed;

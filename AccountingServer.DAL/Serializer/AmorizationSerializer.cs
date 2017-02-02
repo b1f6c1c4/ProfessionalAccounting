@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 using MongoDB.Driver;
@@ -6,7 +6,7 @@ using MongoDB.Driver;
 namespace AccountingServer.DAL.Serializer
 {
     /// <summary>
-    ///     Ì¯ÏúĞòÁĞ»¯Æ÷
+    ///     æ‘Šé”€åºåˆ—åŒ–å™¨
     /// </summary>
     internal class AmortizationSerializer : BaseSerializer<Amortization, Guid?>
     {
