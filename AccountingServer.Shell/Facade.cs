@@ -48,7 +48,7 @@ namespace AccountingServer.Shell
                         new AccountingShell(m_Accountant, m_Serializer)
                     };
 
-            ConnectServer();
+            ConnectServer(null);
         }
 
         /// <inheritdoc />
@@ -56,8 +56,6 @@ namespace AccountingServer.Shell
         {
             switch (expr)
             {
-                case "con":
-                    return ConnectServer();
                 case "exit":
                     Environment.Exit(0);
                     break;
@@ -66,6 +64,10 @@ namespace AccountingServer.Shell
                 case "?":
                     return ListHelp();
             }
+
+            // ReSharper disable once ConvertIfStatementToReturnStatement
+            if (expr.StartsWith("con", StringComparison.Ordinal))
+                return ConnectServer(expr.Substring(3).TrimStart());
 
             return m_Composer.Execute(expr);
         }
@@ -112,11 +114,12 @@ namespace AccountingServer.Shell
         /// <summary>
         ///     连接数据库服务器
         /// </summary>
+        /// <param name="uri">地址</param>
         /// <returns>连接情况</returns>
-        private IQueryResult ConnectServer()
+        private IQueryResult ConnectServer(string uri)
         {
             if (!m_Accountant.Connected)
-                m_Accountant.Connect();
+                m_Accountant.Connect(uri);
             return new Succeed();
         }
 
