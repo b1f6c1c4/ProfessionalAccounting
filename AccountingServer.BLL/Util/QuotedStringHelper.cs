@@ -18,13 +18,6 @@ namespace AccountingServer.BLL.Util
             $"{chr}{unquoted.Replace(new string(chr, 1), new string(chr, 2))}{chr}";
 
         /// <summary>
-        ///     给标识符解除引号
-        /// </summary>
-        /// <param name="quoted">标识符</param>
-        /// <returns>原字符串</returns>
-        public static string Dequotation(this ITerminalNode quoted) => quoted?.GetText().Dequotation();
-
-        /// <summary>
         ///     给字符串解除引号
         /// </summary>
         /// <param name="quoted">字符串</param>
