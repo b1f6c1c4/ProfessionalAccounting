@@ -103,9 +103,9 @@ namespace AccountingServer.Shell
             var sb = new StringBuilder();
             foreach (var title in TitleManager.Titles)
             {
-                sb.AppendLine($"{title.Id.AsTitle(),8}{title.Name}");
+                sb.AppendLine($"{title.Id.AsTitle(),-8}{title.Name}");
                 foreach (var subTitle in title.SubTitles)
-                    sb.AppendLine($"{title.Id.AsTitle()}{subTitle.Id.AsSubTitle(),4}{subTitle.Name}");
+                    sb.AppendLine($"{title.Id.AsTitle()}{subTitle.Id.AsSubTitle(),-4}{subTitle.Name}");
             }
 
             return new UnEditableText(sb.ToString());
