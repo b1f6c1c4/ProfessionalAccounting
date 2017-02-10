@@ -68,16 +68,24 @@ namespace AccountingServer
         /// <summary>
         ///     获取当前正在编辑的文本
         /// </summary>
+        /// <param name="position">搜索位置</param>
         /// <param name="begin">起位置</param>
         /// <param name="end">止位置</param>
         /// <param name="typeName">类型</param>
-        /// <returns></returns>
-        private bool GetEditableText(out int begin, out int end, out string typeName)
+        /// <returns>是否找到</returns>
+        private bool GetEditableText(int position, out int begin, out int end, out string typeName)
         {
             begin = scintilla.Text.LastIndexOf(
                 "@new",
-                scintilla.SelectionEnd,
+                position,
                 StringComparison.Ordinal);
+
+            if (begin < 0)
+            {
+                end = -1;
+                typeName = null;
+                return false;
+            }
 
             typeName = null;
 
@@ -180,6 +188,12 @@ namespace AccountingServer
                     return PerformUpsert();
                 case Keys.Delete | Keys.Alt:
                     return PerformRemoval();
+                case Keys.Enter | Keys.Shift | Keys.Control | Keys.Alt:
+                    PerformUpserts();
+                    return true;
+                case Keys.Delete | Keys.Shift | Keys.Control | Keys.Alt:
+                    PerformRemovals();
+                    return true;
                 default:
                     return false;
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Threading;
 using AccountingServer.Shell;
 
 namespace AccountingServer
@@ -18,35 +19,47 @@ namespace AccountingServer
         private void PrepareAccounting() => m_Shell = new Facade();
 
         /// <summary>
+        ///     批量更新或添加
+        /// </summary>
+        private void PerformUpserts()
+        {
+            var pos = scintilla.TextLength;
+            while (PerformUpsert(out pos, pos)) { }
+        }
+
+        /// <summary>
         ///     更新或添加
         /// </summary>
+        /// <param name="position">搜索位置</param>
         /// <returns>是否成功</returns>
-        private bool PerformUpsert()
+        private bool PerformUpsert(int? position = null)
         {
+            int pos;
+            return PerformUpsert(out pos, position);
+        }
+
+        /// <summary>
+        ///     更新或添加
+        /// </summary>
+        /// <param name="newPosition">搜索位置</param>
+        /// <param name="position">开始位置</param>
+        /// <returns>是否成功</returns>
+        private bool PerformUpsert(out int newPosition, int? position = null)
+        {
+            newPosition = position ?? scintilla.SelectionEnd;
+
             int begin;
             int end;
             string typeName;
-            if (!GetEditableText(out begin, out end, out typeName))
+            if (!GetEditableText(newPosition, out begin, out end, out typeName))
                 return false;
 
             try
             {
                 var s = scintilla.Text.Substring(begin, end - begin + 1).Trim().Trim('@');
-                string result;
-                switch (typeName)
-                {
-                    case "Voucher":
-                        result = m_Shell.ExecuteVoucherUpsert(s);
-                        break;
-                    case "Asset":
-                        result = m_Shell.ExecuteAssetUpsert(s);
-                        break;
-                    case "Amortization":
-                        result = m_Shell.ExecuteAmortUpsert(s);
-                        break;
-                    default:
-                        return false;
-                }
+                var result = ExecuteUpsert(typeName, s);
+                if (result == null)
+                    return false;
 
                 if (scintilla.Text[end] == '\n' &&
                     result[result.Length - 1] != '\n')
@@ -59,10 +72,13 @@ namespace AccountingServer
                     scintilla.DeleteRange(begin, end - begin + 1);
                     scintilla.InsertText(begin, result);
                 }
+                newPosition = begin;
             }
             catch (Exception exception)
             {
-                scintilla.InsertText(end + 1, exception.ToString());
+                var result = exception + Environment.NewLine;
+                scintilla.InsertText(end + 1, result);
+                newPosition = begin;
             }
 
             scintilla.ScrollCaret();
@@ -70,35 +86,72 @@ namespace AccountingServer
         }
 
         /// <summary>
+        ///     执行更新或添加
+        /// </summary>
+        /// <param name="typeName">类型名称</param>
+        /// <param name="s">表示</param>
+        /// <returns>执行结果</returns>
+        private string ExecuteUpsert(string typeName, string s)
+        {
+            string result;
+            switch (typeName)
+            {
+                case "Voucher":
+                    result = m_Shell.ExecuteVoucherUpsert(s);
+                    break;
+                case "Asset":
+                    result = m_Shell.ExecuteAssetUpsert(s);
+                    break;
+                case "Amortization":
+                    result = m_Shell.ExecuteAmortUpsert(s);
+                    break;
+                default:
+                    return null;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///     批量删除
+        /// </summary>
+        private void PerformRemovals()
+        {
+            var pos = scintilla.TextLength;
+            while (PerformRemoval(out pos, pos)) { }
+        }
+
+        /// <summary>
         ///     删除
         /// </summary>
+        /// <param name="position">搜索位置</param>
         /// <returns>是否成功</returns>
-        private bool PerformRemoval()
+        private bool PerformRemoval(int? position = null)
         {
+            int pos;
+            return PerformRemoval(out pos, position);
+        }
+
+        /// <summary>
+        ///     删除
+        /// </summary>
+        /// <param name="newPosition">搜索位置</param>
+        /// <param name="position">搜索位置</param>
+        /// <returns>是否成功</returns>
+        private bool PerformRemoval(out int newPosition, int? position = null)
+        {
+            newPosition = position ?? scintilla.SelectionEnd;
+
             int begin;
             int end;
             string typeName;
-            if (!GetEditableText(out begin, out end, out typeName))
+            if (!GetEditableText(newPosition, out begin, out end, out typeName))
                 return false;
 
             try
             {
                 var s = scintilla.Text.Substring(begin, end - begin + 1).Trim().Trim('@');
-                bool result;
-                switch (typeName)
-                {
-                    case "Voucher":
-                        result = m_Shell.ExecuteVoucherRemoval(s);
-                        break;
-                    case "Asset":
-                        result = m_Shell.ExecuteAssetRemoval(s);
-                        break;
-                    case "Amortization":
-                        result = m_Shell.ExecuteAmortRemoval(s);
-                        break;
-                    default:
-                        return false;
-                }
+                var result = ExecuteRemoval(typeName, s);
 
                 if (!result)
                     throw new ApplicationException("提交的内容类型未知");
@@ -113,14 +166,44 @@ namespace AccountingServer
                     scintilla.InsertText(end - 1, "*/");
                     scintilla.InsertText(begin, "/*");
                 }
+                newPosition = begin;
             }
             catch (Exception exception)
             {
-                scintilla.InsertText(end, exception.ToString());
+                var result = exception + Environment.NewLine;
+                scintilla.InsertText(end + 1, result);
+                newPosition = begin;
             }
 
             scintilla.ScrollCaret();
             return true;
+        }
+
+        /// <summary>
+        ///     执行删除
+        /// </summary>
+        /// <param name="typeName">类型名称</param>
+        /// <param name="s">表示</param>
+        /// <returns>执行结果</returns>
+        private bool ExecuteRemoval(string typeName, string s)
+        {
+            bool result;
+            switch (typeName)
+            {
+                case "Voucher":
+                    result = m_Shell.ExecuteVoucherRemoval(s);
+                    break;
+                case "Asset":
+                    result = m_Shell.ExecuteAssetRemoval(s);
+                    break;
+                case "Amortization":
+                    result = m_Shell.ExecuteAmortRemoval(s);
+                    break;
+                default:
+                    return false;
+            }
+
+            return result;
         }
 
         /// <summary>
