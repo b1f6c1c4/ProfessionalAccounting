@@ -91,7 +91,7 @@ namespace AccountingServer.Shell.Serializer
             var typeT = VoucherType.Ordinary;
             var type = Parsing.Token(ref expr, false, t => TryParse(t, out typeT)) != null ? (VoucherType?)typeT : null;
             Parsing.TrimStartComment(ref expr);
-            var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))?.ToUpperInvariant();
+            var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))?.Substring(1).ToUpperInvariant();
 
             var lst = new List<VoucherDetail>();
             VoucherDetail d;
