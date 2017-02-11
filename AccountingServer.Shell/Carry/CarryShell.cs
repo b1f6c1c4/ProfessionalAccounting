@@ -141,43 +141,31 @@ namespace AccountingServer.Shell.Carry
 
             if (ed.HasValue)
             {
-                var res = m_Accountant.RunGroupedQuery($"T3999 [~{ed.AsDate()}] @@`c");
-                foreach (var bal in res)
-                {
-                    var val =
-                        m_Accountant
-                            .RunGroupedQuery($"T3999 '{Voucher.BaseCurrency}' [~{ed.AsDate()}] @{bal.Content}``v")
-                            .Single()
-                            .Fund;
-                    var coval = Exchange.From(ed.Value, bal.Content) * val;
-                    var diff = coval + bal.Fund;
-                    if (diff.IsZero())
-                        continue;
-
-                    var voucher =
-                        new Voucher
-                            {
-                                Date = ed,
-                                Currency = Voucher.BaseCurrency,
-                                Details =
-                                    new List<VoucherDetail>
+                var total =
+                    m_Accountant.RunGroupedQuery($"T3999 [~{ed.AsDate()}]`C")
+                        .Sum(bal => Exchange.From(ed.Value, bal.Currency) * bal.Fund);
+                if (!total.IsZero())
+                    m_Accountant.Upsert(new Voucher
+                        {
+                            Date = ed,
+                            Currency = Voucher.BaseCurrency,
+                            Type = VoucherType.Carry,
+                            Remark = "currency carry",
+                            Details = new List<VoucherDetail>
+                                {
+                                    new VoucherDetail
                                         {
-                                            new VoucherDetail
-                                                {
-                                                    Title = 3999,
-                                                    Content = bal.Content,
-                                                    Fund = -diff
-                                                },
-                                            new VoucherDetail
-                                                {
-                                                    Title = 6603,
-                                                    SubTitle = 03,
-                                                    Fund = diff
-                                                }
+                                            Title = 3999,
+                                            Fund = -total
+                                        },
+                                    new VoucherDetail
+                                        {
+                                            Title = 6603,
+                                            SubTitle = 03,
+                                            Fund = total
                                         }
-                            };
-                    m_Accountant.Upsert(voucher);
-                }
+                                }
+                        });
             }
 
             PartialCarry(
@@ -257,7 +245,6 @@ namespace AccountingServer.Shell.Carry
                         {
                             Title = 3999,
                             SubTitle = 01,
-                            Content = Voucher.BaseCurrency,
                             Fund = b
                         });
                 m_Accountant.Upsert(voucher);
@@ -274,7 +261,6 @@ namespace AccountingServer.Shell.Carry
                                         new VoucherDetail
                                             {
                                                 Title = 3999,
-                                                Content = grpCurrency.Key,
                                                 Remark = voucher.ID,
                                                 Fund = -cob
                                             },
@@ -282,7 +268,6 @@ namespace AccountingServer.Shell.Carry
                                             {
                                                 Title = 4103,
                                                 SubTitle = target ? 01 : (int?)null,
-                                                Content = grpCurrency.Key,
                                                 Fund = cob
                                             }
                                     }

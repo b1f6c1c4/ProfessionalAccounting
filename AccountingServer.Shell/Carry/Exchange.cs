@@ -115,6 +115,9 @@ namespace AccountingServer.Shell.Carry
         /// <returns>汇率</returns>
         private static double Invoke(DateTime date, string from, string to)
         {
+            if (from == to)
+                return 1;
+
             var req = WebRequest.CreateHttp($"http://api.fixer.io/{date:yyy-MM-dd}?base={from}&symbols={to}");
             req.KeepAlive = true;
             var res = req.GetResponse();
