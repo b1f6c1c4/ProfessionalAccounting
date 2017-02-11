@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
-namespace AccountingServer.Plugins.THUInfo
+namespace AccountingServer.Shell.Plugins.THUInfo
 {
     [Serializable]
     public class EndPointTemplates

@@ -11,14 +11,12 @@ using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using CredentialManagement;
-using static AccountingServer.BLL.Parsing.FacadeF;
 
-namespace AccountingServer.Plugins.THUInfo
+namespace AccountingServer.Shell.Plugins.THUInfo
 {
     /// <summary>
     ///     从info.tsinghua.edu.cn更新账户
     /// </summary>
-    // ReSharper disable once UnusedMember.Global
     public partial class THUInfo : PluginBase
     {
         /// <summary>
@@ -119,15 +117,15 @@ namespace AccountingServer.Plugins.THUInfo
         /// <inheritdoc />
         public override IQueryResult Execute(string expr)
         {
-            if (ParsingF.Optional(ref expr, "ep"))
+            if (FacadeF.ParsingF.Optional(ref expr, "ep"))
             {
-                ParsingF.Eof(expr);
+                FacadeF.ParsingF.Eof(expr);
                 return ShowEndPoints();
             }
 
-            if (ParsingF.Optional(ref expr, "cred"))
+            if (FacadeF.ParsingF.Optional(ref expr, "cred"))
             {
-                ParsingF.Eof(expr);
+                FacadeF.ParsingF.Eof(expr);
                 DropCredential();
                 FetchData();
             }
@@ -136,9 +134,9 @@ namespace AccountingServer.Plugins.THUInfo
             lock (m_Lock)
                 problems = Compare();
 
-            if (ParsingF.Optional(ref expr, "whatif"))
+            if (FacadeF.ParsingF.Optional(ref expr, "whatif"))
             {
-                ParsingF.Eof(expr);
+                FacadeF.ParsingF.Eof(expr);
                 return ShowComparison(problems);
             }
 
@@ -150,7 +148,7 @@ namespace AccountingServer.Plugins.THUInfo
 
             var pars = new List<string>();
             while (!string.IsNullOrWhiteSpace(expr))
-                pars.Add(ParsingF.Token(ref expr));
+                pars.Add(FacadeF.ParsingF.Token(ref expr));
 
             List<TransactionRecord> fail;
             foreach (var voucher in AutoGenerate(problems.Records, pars, out fail))
@@ -214,7 +212,7 @@ namespace AccountingServer.Plugins.THUInfo
                 var dt = DateTime.Now.Date;
                 try
                 {
-                    var dd = ParsingF.UniqueTime(ref xx);
+                    var dd = FacadeF.ParsingF.UniqueTime(ref xx);
                     if (dd == null)
                         throw new ApplicationException("无法处理无穷长时间以前的自动补全指令");
 

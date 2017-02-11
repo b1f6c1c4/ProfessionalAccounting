@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using AccountingServer.Entities;
 
-namespace AccountingServer.Plugins.THUInfo
+namespace AccountingServer.Shell.Plugins.THUInfo
 {
     // ReSharper disable once UnusedMember.Global
     public partial class THUInfo

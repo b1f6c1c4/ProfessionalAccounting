@@ -8,14 +8,12 @@ using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
-using static AccountingServer.BLL.Parsing.Facade;
 
-namespace AccountingServer.Plugins.Utilities
+namespace AccountingServer.Shell.Plugins.Utilities
 {
     /// <summary>
     ///     常见记账凭证自动填写
     /// </summary>
-    // ReSharper disable once UnusedMember.Global
     public class Utilities : PluginBase
     {
         private static readonly ConfigManager<UtilTemplates> Templates =
@@ -58,8 +56,8 @@ namespace AccountingServer.Plugins.Utilities
         /// <returns>记账凭证</returns>
         private Voucher GenerateVoucher(ref string expr)
         {
-            var time = Parsing.UniqueTime(ref expr) ?? DateTime.Today;
-            var abbr = Parsing.Token(ref expr);
+            var time = BLL.Parsing.Facade.Parsing.UniqueTime(ref expr) ?? DateTime.Today;
+            var abbr = BLL.Parsing.Facade.Parsing.Token(ref expr);
 
             var template = Templates.Config.Templates.FirstOrDefault(t => t.Name == abbr);
             if (template == null)
@@ -69,7 +67,7 @@ namespace AccountingServer.Plugins.Utilities
             if (template.TemplateType == UtilTemplateType.Value ||
                 template.TemplateType == UtilTemplateType.Fill)
             {
-                var valt = Parsing.Double(ref expr);
+                var valt = BLL.Parsing.Facade.Parsing.Double(ref expr);
                 double val;
                 if (valt.HasValue)
                     val = valt.Value;

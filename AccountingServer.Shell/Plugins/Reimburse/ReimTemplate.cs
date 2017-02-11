@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Xml.Serialization;
 using AccountingServer.Entities;
 
-namespace AccountingServer.Plugins.Reimburse
+namespace AccountingServer.Shell.Plugins.Reimburse
 {
     [Serializable]
     [XmlRoot("Templates")]

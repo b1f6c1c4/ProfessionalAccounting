@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.Entities.Util;
 
-namespace AccountingServer.Plugins.YieldRate
+namespace AccountingServer.Shell.Plugins.YieldRate
 {
     /// <summary>
     ///     收益率求解器
