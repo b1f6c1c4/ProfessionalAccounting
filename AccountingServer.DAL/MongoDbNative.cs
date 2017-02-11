@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AccountingServer.DAL.Serializer;
 using AccountingServer.Entities;
 using MongoDB.Bson;
@@ -12,6 +13,11 @@ namespace AccountingServer.DAL
     /// </summary>
     internal static class MongoDbNative
     {
+        private static FilterDefinition<T> And<T>(IReadOnlyCollection<FilterDefinition<T>> lst) =>
+            lst.Count == 0
+                ? Builders<T>.Filter.Empty
+                : (lst.Count == 1 ? lst.First() : Builders<T>.Filter.And(lst));
+
         /// <summary>
         ///     按编号查询<c>ObjectId</c>
         /// </summary>
@@ -82,7 +88,7 @@ namespace AccountingServer.DAL
             else if (vfilter.Currency != null)
                 lst.Add(Builders<Voucher>.Filter.Eq("currency", vfilter.Currency));
 
-            return Builders<Voucher>.Filter.And(lst);
+            return And(lst);
         }
 
         /// <summary>
@@ -105,7 +111,7 @@ namespace AccountingServer.DAL
             if (rng.Value.EndDate.HasValue)
                 lst.Add(Builders<Voucher>.Filter.Lte("date", rng.Value.EndDate));
 
-            var gather = Builders<Voucher>.Filter.And(lst);
+            var gather = And(lst);
             return rng.Value.Nullable
                 ? Builders<Voucher>.Filter.Eq<DateTime?>("date", null) | gather
                 : gather;
@@ -148,7 +154,7 @@ namespace AccountingServer.DAL
                 lst.Add(
                     Builders<VoucherDetail>.Filter.Gte("fund", f.Filter.Fund.Value - VoucherDetail.Tolerance) &
                     Builders<VoucherDetail>.Filter.Lte("fund", f.Filter.Fund.Value + VoucherDetail.Tolerance));
-            return Builders<VoucherDetail>.Filter.And(lst);
+            return And(lst);
         }
 
         /// <summary>
@@ -184,7 +190,7 @@ namespace AccountingServer.DAL
             else
                 lst.Add(Builders<Voucher>.Filter.ElemMatch("detail", v));
 
-            return Builders<Voucher>.Filter.And(lst);
+            return And(lst);
         }
 
         /// <summary>
@@ -221,7 +227,7 @@ namespace AccountingServer.DAL
                         ? Builders<T>.Filter.Exists("remark", false)
                         : Builders<T>.Filter.Eq("remark", f.Filter.Remark));
 
-            return Builders<T>.Filter.And(lst);
+            return And(lst);
         }
 
         /// <summary>
