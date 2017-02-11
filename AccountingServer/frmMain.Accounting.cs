@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Threading;
 using AccountingServer.Shell;
 
 namespace AccountingServer
