@@ -2,7 +2,7 @@
 using System.Globalization;
 using AccountingServer.BLL.Util;
 
-namespace AccountingServer.Plugins.THUInfo
+namespace AccountingServer.Shell.Plugins.THUInfo
 {
     /// <summary>
     ///     交易记录

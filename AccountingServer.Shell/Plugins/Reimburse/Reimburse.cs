@@ -8,14 +8,12 @@ using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Carry;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
-using static AccountingServer.BLL.Parsing.FacadeF;
 
-namespace AccountingServer.Plugins.Reimburse
+namespace AccountingServer.Shell.Plugins.Reimburse
 {
     /// <summary>
     ///     报销
     /// </summary>
-    // ReSharper disable once UnusedMember.Global
     public class Reimburse : PluginBase
     {
         private static readonly ConfigManager<ReimTemplates> Templates =
@@ -41,11 +39,11 @@ namespace AccountingServer.Plugins.Reimburse
             }
             else
             {
-                var rng = ParsingF.Range(ref expr);
+                var rng = FacadeF.ParsingF.Range(ref expr);
                 if (!rng.HasValue)
                     throw new ArgumentException("语法错误", nameof(expr));
 
-                ParsingF.Eof(expr);
+                FacadeF.ParsingF.Eof(expr);
                 the = rng.Value;
             }
 

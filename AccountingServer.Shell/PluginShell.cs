@@ -3,8 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
-using AccountingServer.Entities.Util;
-using AccountingServer.Plugins;
+using AccountingServer.Shell.Plugins;
+using AccountingServer.Shell.Plugins.BankBalance;
+using AccountingServer.Shell.Plugins.Interest;
+using AccountingServer.Shell.Plugins.Reimburse;
+using AccountingServer.Shell.Plugins.THUInfo;
+using AccountingServer.Shell.Plugins.Utilities;
+using AccountingServer.Shell.Plugins.YieldRate;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
@@ -18,23 +23,17 @@ namespace AccountingServer.Shell
     {
         private readonly Dictionary<string, PluginBase> m_Plugins;
 
-        private readonly ConfigManager<PluginInfos> m_Infos;
-
         public PluginShell(Accountant helper, IEntitySerializer serializer)
         {
-            m_Infos = new ConfigManager<PluginInfos>("Plugins.xml");
-            m_Plugins = new Dictionary<string, PluginBase>();
-            foreach (var info in m_Infos.Config.Infos)
-            {
-                var asm = AppDomain.CurrentDomain.Load(info.AssemblyName);
-                var type = asm.GetType(info.ClassName);
-                if (type == null)
-                    throw new ApplicationException($"无法从{info.AssemblyName}中加载{info.ClassName}");
-
-                m_Plugins.Add(
-                    info.Alias,
-                    (PluginBase)Activator.CreateInstance(type, helper, serializer));
-            }
+            m_Plugins = new Dictionary<string, PluginBase>
+                {
+                    { "adb", new AverageDailyBalance(helper, serializer) },
+                    { "ir", new InterestRevenue(helper, serializer) },
+                    { "rb", new Reimburse(helper, serializer) },
+                    { "f", new THUInfo(helper, serializer) },
+                    { "u", new Utilities(helper, serializer) },
+                    { "yr", new YieldRate(helper, serializer) }
+                };
         }
 
         /// <summary>
@@ -84,8 +83,8 @@ namespace AccountingServer.Shell
         private string ListPlugins()
         {
             var sb = new StringBuilder();
-            foreach (var info in m_Infos.Config.Infos)
-                sb.AppendLine($"{info.Alias,8}{info.ClassName,20}{info.AssemblyName}");
+            foreach (var info in m_Plugins)
+                sb.AppendLine($"{info.Key,-8}{info.Value.GetType().FullName}");
 
             return sb.ToString();
         }

@@ -9,14 +9,12 @@ using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
-using static AccountingServer.BLL.Parsing.FacadeF;
 
-namespace AccountingServer.Plugins.YieldRate
+namespace AccountingServer.Shell.Plugins.YieldRate
 {
     /// <summary>
     ///     实际收益率计算
     /// </summary>
-    // ReSharper disable once UnusedMember.Global
     public class YieldRate : PluginBase
     {
         public YieldRate(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
@@ -24,7 +22,7 @@ namespace AccountingServer.Plugins.YieldRate
         /// <inheritdoc />
         public override IQueryResult Execute(string expr)
         {
-            ParsingF.Eof(expr);
+            FacadeF.ParsingF.Eof(expr);
 
             var result = Accountant.RunGroupedQuery("{T1101}-{T110102+T610101+T611102 A}:T1101``cd");
             var resx = Accountant.RunGroupedQuery("T1101``c");

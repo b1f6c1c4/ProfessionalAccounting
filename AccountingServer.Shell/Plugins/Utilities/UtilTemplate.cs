@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 using AccountingServer.Entities;
 
-namespace AccountingServer.Plugins.Utilities
+namespace AccountingServer.Shell.Plugins.Utilities
 {
     [Serializable]
     [XmlRoot("Templates")]

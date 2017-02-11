@@ -31,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CredentialManagement, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CredentialManagement.1.0.2\lib\net35\CredentialManagement.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -42,6 +46,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Plugins\BankBalance\AverageDailyBalance.cs" />
+    <Compile Include="Plugins\Interest\InterestRevenue.cs" />
+    <Compile Include="Plugins\Reimburse\Reimburse.cs" />
+    <Compile Include="Plugins\Reimburse\ReimTemplate.cs" />
+    <Compile Include="Plugins\THUInfo\Crawler.cs" />
+    <Compile Include="Plugins\THUInfo\EndPointTemplate.cs" />
+    <Compile Include="Plugins\THUInfo\THUInfo.Compare.cs" />
+    <Compile Include="Plugins\THUInfo\THUInfo.cs" />
+    <Compile Include="Plugins\THUInfo\THUInfo.Generation.cs" />
+    <Compile Include="Plugins\THUInfo\TransactionRecord.cs" />
+    <Compile Include="Plugins\Utilities\Utilities.cs" />
+    <Compile Include="Plugins\Utilities\UtilTemplate.cs" />
+    <Compile Include="Plugins\YieldRate\YieldRate.cs" />
+    <Compile Include="Plugins\YieldRate\YieldRateSolver.cs" />
     <Compile Include="Serializer\AbbrSerializer.cs" />
     <Compile Include="AmortizationShell.cs" />
     <Compile Include="AssetShell.cs" />
@@ -58,7 +76,6 @@
     <Compile Include="AccountingShell.cs" />
     <Compile Include="Carry\CarryShell.cs" />
     <Compile Include="Util\SubtotalHelper.cs" />
-    <Compile Include="Plugins\Info.cs" />
     <Compile Include="Plugins\PluginBase.cs" />
     <Compile Include="Serializer\CSharpSerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -80,6 +97,24 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Plugins\BankBalance\Resources\Document.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Plugins\Interest\Resources\Document.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Plugins\Reimburse\Resources\Document.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Plugins\Utilities\Resources\Document.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Plugins\YieldRate\Resources\Document.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Plugins\THUInfo\Resources\Document.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

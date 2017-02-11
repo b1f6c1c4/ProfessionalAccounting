@@ -7,7 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 
-namespace AccountingServer.Plugins.THUInfo
+namespace AccountingServer.Shell.Plugins.THUInfo
 {
     internal class Crawler
     {
