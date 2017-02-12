@@ -8,6 +8,7 @@ using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
+using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Shell.Plugins.Interest
 {
@@ -21,12 +22,12 @@ namespace AccountingServer.Shell.Plugins.Interest
         /// <inheritdoc />
         public override IQueryResult Execute(string expr)
         {
-            var content = BLL.Parsing.Facade.Parsing.Token(ref expr);
-            var remark = BLL.Parsing.Facade.Parsing.Token(ref expr);
-            var rate = BLL.Parsing.Facade.Parsing.DoubleF(ref expr) / 10000D;
-            var all = BLL.Parsing.Facade.Parsing.Optional(ref expr, "all");
-            var endDate = !all ? BLL.Parsing.Facade.Parsing.UniqueTime(ref expr) : null;
-            BLL.Parsing.Facade.Parsing.Eof(expr);
+            var content = Parsing.Token(ref expr);
+            var remark = Parsing.Token(ref expr);
+            var rate = Parsing.DoubleF(ref expr) / 10000D;
+            var all = Parsing.Optional(ref expr, "all");
+            var endDate = !all ? Parsing.UniqueTime(ref expr) : null;
+            Parsing.Eof(expr);
 
             var loans = Accountant.RunGroupedQuery($"T1221 {content.Quotation('\'')} ``r").ToList();
             var rmk =
@@ -39,8 +40,8 @@ namespace AccountingServer.Shell.Plugins.Interest
             if (!all && !endDate.HasValue ||
                 endDate.HasValue)
             {
-                var filter = $"T1221 > {content.Quotation('\'')} {rmk.Quotation('"')}";
-                var filter0 = $"T1221 > {content.Quotation('\'')} {(rmk + "-利息").Quotation('"')}";
+                var filter = $"T1221 {content.Quotation('\'')} {rmk.Quotation('"')}";
+                var filter0 = $"T1221 {content.Quotation('\'')} {(rmk + "-利息").Quotation('"')}";
                 // ReSharper disable once PossibleInvalidOperationException
                 var lastD = Accountant.RunVoucherQuery(filter0)
                         .OrderByDescending(v => v.Date, new DateComparer())
