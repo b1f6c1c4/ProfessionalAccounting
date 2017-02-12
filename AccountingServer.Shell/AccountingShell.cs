@@ -107,7 +107,7 @@ namespace AccountingServer.Shell
         {
             var result = m_Accountant.SelectVoucherDetailsGrouped(query);
 
-            return new UnEditableText(SubtotalHelper.PresentSubtotal(result, query.Subtotal));
+            return new UnEditableText(new SubtotalHelper(result, query.Subtotal).PresentSubtotal());
         }
     }
 }
