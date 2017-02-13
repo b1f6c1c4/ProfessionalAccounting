@@ -252,7 +252,7 @@ namespace AccountingServer.Shell
 
             var bookValue = Accountant.GetBookValueOn(asset, dt);
             if (dt.HasValue &&
-                bookValue?.IsZero() != true)
+                !bookValue?.IsZero() != true)
                 return null;
 
             sb.AppendLine(
