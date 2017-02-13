@@ -1,67 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using static AccountingServer.Shell.Util.SubtotalPreHelper;
 
 namespace AccountingServer.Shell.Util
 {
     /// <summary>
     ///     分类汇总结果处理器
     /// </summary>
-    internal class SubtotalHelper : SubtotalTraver<object, Tuple<double, string>>
+    internal class RichSubtotalPre : SubtotalTraver<object, Tuple<double, string>>, ISubtotalPre
     {
         private const int Ident = 4;
-
-        private readonly IEnumerable<Balance> m_Res;
-
-        /// <summary>
-        ///     呈现分类汇总
-        /// </summary>
-        /// <param name="res">分类汇总结果</param>
-        /// <param name="args">分类汇总参数</param>
-        public SubtotalHelper(IEnumerable<Balance> res, ISubtotal args)
-        {
-            m_Res = res;
-            SubtotalArgs = args;
-        }
 
         private string Ts(double f) => SubtotalArgs.GatherType == GatheringType.Count
             ? f.ToString("N0")
             : f.AsCurrency();
 
-        /// <summary>
-        ///     用换行回车连接非空字符串
-        /// </summary>
-        /// <param name="strings">字符串</param>
-        /// <returns>新字符串，如无非空字符串则为空</returns>
-        private static string NotNullJoin(IEnumerable<string> strings)
+        /// <inheritdoc />
+        public string PresentSubtotal(IEnumerable<Balance> res)
         {
-            var flag = false;
-
-            var sb = new StringBuilder();
-            foreach (var s in strings)
-            {
-                if (s == null)
-                    continue;
-
-                if (sb.Length > 0)
-                    sb.AppendLine();
-                sb.Append(s);
-                flag = true;
-            }
-
-            return flag ? sb.ToString() : null;
-        }
-
-        /// <summary>
-        ///     执行分类汇总
-        /// </summary>
-        /// <returns>分类汇总结果</returns>
-        public string PresentSubtotal()
-        {
-            var traversal = Traversal(null, m_Res);
+            var traversal = Traversal(null, res);
 
             if (SubtotalArgs.Levels.Count == 0 &&
                 SubtotalArgs.AggrType == AggregationType.None)

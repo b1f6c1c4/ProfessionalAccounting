@@ -94,7 +94,7 @@ namespace AccountingServer.BLL.Util
         /// <summary>
         ///     分类汇总参数
         /// </summary>
-        protected ISubtotal SubtotalArgs { get; set; }
+        public ISubtotal SubtotalArgs { protected get; set; }
 
         /// <summary>
         ///     遍历分类汇总结果
