@@ -33,9 +33,15 @@ namespace AccountingServer.Shell
         /// <inheritdoc />
         public IQueryResult Execute(string expr)
         {
+            if (ParsingF.Token(ref expr, false, t => t == "Rps") != null)
+                return TryGroupedQuery(expr, new PreciseSubtotalPre());
+
+            if (ParsingF.Token(ref expr, false, t => t == "rps") != null)
+                return TryGroupedQuery(expr, new PreciseSubtotalPre(false));
+
             try
             {
-                return TryGroupedQuery(expr);
+                return TryGroupedQuery(expr, new RichSubtotalPre());
             }
             catch (Exception)
             {
@@ -73,12 +79,13 @@ namespace AccountingServer.Shell
         ///     按分类汇总检索式解析
         /// </summary>
         /// <param name="expr">表达式</param>
+        /// <param name="trav">呈现器</param>
         /// <returns>执行结果</returns>
-        private IQueryResult TryGroupedQuery(string expr)
+        private IQueryResult TryGroupedQuery(string expr, ISubtotalPre trav)
         {
             var res = ParsingF.GroupedQuery(ref expr);
             ParsingF.Eof(expr);
-            return PresentSubtotal(res);
+            return PresentSubtotal(res, trav);
         }
 
         /// <inheritdoc />
@@ -102,12 +109,13 @@ namespace AccountingServer.Shell
         ///     执行分类汇总检索式并呈现结果
         /// </summary>
         /// <param name="query">分类汇总检索式</param>
+        /// <param name="trav">呈现器</param>
         /// <returns>执行结果</returns>
-        private IQueryResult PresentSubtotal(IGroupedQuery query)
+        private IQueryResult PresentSubtotal(IGroupedQuery query, ISubtotalPre trav)
         {
             var result = m_Accountant.SelectVoucherDetailsGrouped(query);
-
-            return new UnEditableText(new SubtotalHelper(result, query.Subtotal).PresentSubtotal());
+            trav.SubtotalArgs = query.Subtotal;
+            return new UnEditableText(trav.PresentSubtotal(result));
         }
     }
 }
