@@ -33,6 +33,11 @@ namespace AccountingServer.DAL
                         f.Dir > 0
                             ? "    if (d.fund <= 0) return false;"
                             : "    if (d.fund >= 0) return false;");
+                if (f.Filter?.Currency != null)
+                    if (f.Filter.Currency == VoucherDetail.BaseCurrency)
+                        sb.AppendLine("    if (d.currency != null) return false;");
+                    else
+                        sb.AppendLine($"    if (d.currency != '{f.Filter.Currency.Replace("\'", "\\\'")}') return false;");
                 if (f.Filter?.Title != null)
                     sb.AppendLine($"    if (d.title != {f.Filter.Title}) return false;");
                 if (f.Filter?.SubTitle != null)
