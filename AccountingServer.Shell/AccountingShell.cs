@@ -3,6 +3,7 @@ using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.FacadeF;
@@ -34,10 +35,50 @@ namespace AccountingServer.Shell
         public IQueryResult Execute(string expr)
         {
             if (ParsingF.Token(ref expr, false, t => t == "Rps") != null)
-                return TryGroupedQuery(expr, new PreciseSubtotalPre());
+            {
+                try
+                {
+                    return TryGroupedQuery(expr, new PreciseSubtotalPre());
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+
+                try
+                {
+                    return TryDetailQuery(expr);
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+
+                throw new InvalidOperationException("表达式无效");
+            }
 
             if (ParsingF.Token(ref expr, false, t => t == "rps") != null)
-                return TryGroupedQuery(expr, new PreciseSubtotalPre(false));
+            {
+                try
+                {
+                    return TryGroupedQuery(expr, new PreciseSubtotalPre(false));
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+
+                try
+                {
+                    return TryDetailQuery(expr);
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+
+                throw new InvalidOperationException("表达式无效");
+            }
 
             try
             {
@@ -101,6 +142,35 @@ namespace AccountingServer.Shell
             var sb = new StringBuilder();
             foreach (var voucher in m_Accountant.SelectVouchers(query))
                 sb.Append(m_Serializer.PresentVoucher(voucher));
+
+            return new EditableText(sb.ToString());
+        }
+
+        /// <summary>
+        ///     按细目检索式解析
+        /// </summary>
+        /// <param name="expr">表达式</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult TryDetailQuery(string expr)
+        {
+            var res = ParsingF.DetailQuery(ref expr);
+            ParsingF.Eof(expr);
+            return PresentDetailQuery(res);
+        }
+
+        /// <summary>
+        ///     执行细目检索式并呈现结果
+        /// </summary>
+        /// <param name="query">细目检索式</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult PresentDetailQuery(IVoucherDetailQuery query)
+        {
+            var sb = new StringBuilder();
+            var q = query.DetailEmitFilter?.DetailFilter ?? (query.VoucherQuery as IVoucherQueryAtom)?.DetailFilter;
+            foreach (var voucher in m_Accountant.SelectVouchers(query.VoucherQuery))
+            foreach (var d in voucher.Details)
+                if (d.IsMatch(q))
+                        sb.Append(m_Serializer.PresentVoucherDetail(d));
 
             return new EditableText(sb.ToString());
         }

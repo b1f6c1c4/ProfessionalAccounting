@@ -64,6 +64,12 @@ namespace AccountingServer.BLL.Parsing
         public IQueryCompunded<IVoucherQueryAtom> VoucherQuery(ref string s)
             => Parse(ref s, p => p.vouchers());
 
+        public IVoucherDetailQuery DetailQuery(string s)
+            => DetailQuery(ref s);
+
+        public IVoucherDetailQuery DetailQuery(ref string s)
+            => Parse(ref s, p => p.voucherDetailQuery());
+
         public IGroupedQuery GroupedQuery(string s)
             => GroupedQuery(ref s);
 

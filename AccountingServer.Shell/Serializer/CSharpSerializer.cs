@@ -75,12 +75,8 @@ namespace AccountingServer.Shell.Serializer
 
         #region Voucher
 
-        /// <summary>
-        ///     将细目用C#表示
-        /// </summary>
-        /// <param name="detail">细目</param>
-        /// <returns>C#表达式</returns>
-        private static string PresentVoucherDetail(VoucherDetail detail)
+        /// <inheritdoc />
+        public string PresentVoucherDetail(VoucherDetail detail)
         {
             if (detail == null)
                 return string.Empty;

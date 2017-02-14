@@ -22,6 +22,13 @@ namespace AccountingServer.Shell.Serializer
         Voucher ParseVoucher(string str);
 
         /// <summary>
+        ///     将细目用C#表示
+        /// </summary>
+        /// <param name="detail">细目</param>
+        /// <returns>C#表达式</returns>
+        string PresentVoucherDetail(VoucherDetail detail);
+
+        /// <summary>
         ///     将资产表示
         /// </summary>
         /// <param name="asset">资产</param>
