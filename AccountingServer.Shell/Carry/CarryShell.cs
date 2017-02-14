@@ -119,25 +119,24 @@ namespace AccountingServer.Shell.Carry
                 rng = DateFilter.TheNullOnly;
             }
 
-            PartialCarry(
-                m_Accountant.RunGroupedQuery($"({CarrySettings.Config.ExpensesQuery}) - @@ {rng.AsDateRange()}`Ctsc"),
-                ed,
-                true);
-
-            PartialCarry(
-                m_Accountant.RunGroupedQuery($"({CarrySettings.Config.Revenue1Query}) - @@ {rng.AsDateRange()}`Ctsc"),
-                ed,
-                false);
-
-            PartialCarry(
-                m_Accountant.RunGroupedQuery($"({CarrySettings.Config.Revenue2Query}) - @@ {rng.AsDateRange()}`Ctsc"),
-                ed,
-                true);
+            var targets = GetTargets(ed).ToList();
+            foreach (var target in targets)
+                PartialCarry(target, rng, false);
 
             if (ed.HasValue)
             {
                 var total =
                     m_Accountant.RunGroupedQuery($"T3999 [~{ed.AsDate()}]`C")
+                        .Select(
+                            bal => new Balance
+                                {
+                                    Currency = bal.Currency,
+                                    Fund = bal.Fund +
+                                        // ReSharper disable once PossibleInvalidOperationException
+                                        targets.SelectMany(t => t.Voucher.Details)
+                                            .Where(d => d.Currency == bal.Currency && d.Title == 3999)
+                                            .Sum(d => d.Fund.Value)
+                                })
                         .Sum(bal => Exchange.From(ed.Value, bal.Currency) * bal.Fund);
                 if (!total.IsZero())
                     m_Accountant.Upsert(new Voucher
@@ -162,40 +161,40 @@ namespace AccountingServer.Shell.Carry
                         });
             }
 
-            PartialCarry(
-                m_Accountant.RunGroupedQuery($"({CarrySettings.Config.ExpensesQuery}) * @@ {rng.AsDateRange()}`Ctsc"),
-                ed,
-                true);
+            foreach (var target in targets)
+                PartialCarry(target, rng, true);
 
-            PartialCarry(
-                m_Accountant.RunGroupedQuery($"({CarrySettings.Config.Revenue1Query}) * @@ {rng.AsDateRange()}`Ctsc"),
-                ed,
-                false);
-
-            PartialCarry(
-                m_Accountant.RunGroupedQuery($"({CarrySettings.Config.Revenue2Query}) * @@ {rng.AsDateRange()}`Ctsc"),
-                ed,
-                true);
+            foreach (var target in targets)
+            {
+                target.Voucher.Details.Add(
+                    new VoucherDetail
+                        {
+                            Title = 4103,
+                            SubTitle = target.IsSpecial ? 01 : (int?)null,
+                            Fund = target.Value
+                        });
+                m_Accountant.Upsert(target.Voucher);
+            }
         }
 
         /// <summary>
-        ///     部分月末结转
+        ///     按目标月末结转
         /// </summary>
-        /// <param name="res">检索结果</param>
-        /// <param name="ed">日期</param>
-        /// <param name="target">是否专用</param>
-        private void PartialCarry(IEnumerable<Balance> res, DateTime? ed, bool target)
+        /// <param name="target">目标</param>
+        /// <param name="rng">范围</param>
+        /// <param name="baseCurrency">是否为基准</param>
+        /// <returns>结转记账凭证</returns>
+        private void PartialCarry(CarryTarget target, DateFilter rng, bool baseCurrency)
         {
+            var total = 0D;
+            var ed = rng.NullOnly ? null : rng.EndDate;
+            var voucher = target.Voucher;
+            var res =
+                m_Accountant.RunGroupedQuery(
+                    $"({target.Query}) {(baseCurrency ? '*' : '-')}@@ {rng.AsDateRange()}`Ctsc");
             foreach (var grpCurrency in res.GroupByCurrency())
             {
                 var b = 0D;
-                var voucher =
-                    new Voucher
-                        {
-                            Date = ed,
-                            Type = VoucherType.Carry,
-                            Details = new List<VoucherDetail>()
-                        };
                 foreach (var balance in grpCurrency)
                 {
                     b += balance.Fund;
@@ -215,14 +214,7 @@ namespace AccountingServer.Shell.Carry
 
                 if (grpCurrency.Key == VoucherDetail.BaseCurrency)
                 {
-                    voucher.Details.Add(
-                        new VoucherDetail
-                            {
-                                Title = 4103,
-                                SubTitle = target ? 01 : (int?)null,
-                                Fund = b
-                            });
-                    m_Accountant.Upsert(voucher);
+                    total += b;
                     continue;
                 }
 
@@ -242,19 +234,55 @@ namespace AccountingServer.Shell.Carry
                 voucher.Details.Add(
                     new VoucherDetail
                         {
+                            Currency = VoucherDetail.BaseCurrency,
                             Title = 3999,
                             Remark = voucher.ID,
                             Fund = -cob
                         });
-                voucher.Details.Add(
-                    new VoucherDetail
-                        {
-                            Title = 4103,
-                            SubTitle = target ? 01 : (int?)null,
-                            Fund = cob
-                        });
-                m_Accountant.Upsert(voucher);
+                total += cob;
             }
+
+            target.Value += total;
+        }
+
+        private static IEnumerable<CarryTarget> GetTargets(DateTime? ed)
+        {
+            yield return new CarryTarget
+                {
+                    Query = CarrySettings.Config.ExpensesQuery,
+                    Value = 0D,
+                    Voucher = new Voucher
+                        {
+                            Date = ed,
+                            Type = VoucherType.Carry,
+                            Details = new List<VoucherDetail>()
+                        },
+                    IsSpecial = true
+                };
+            yield return new CarryTarget
+                {
+                    Query = CarrySettings.Config.Revenue1Query,
+                    Value = 0D,
+                    Voucher = new Voucher
+                        {
+                            Date = ed,
+                            Type = VoucherType.Carry,
+                            Details = new List<VoucherDetail>()
+                        },
+                    IsSpecial = false
+                };
+            yield return new CarryTarget
+                {
+                    Query = CarrySettings.Config.Revenue2Query,
+                    Value = 0D,
+                    Voucher = new Voucher
+                        {
+                            Date = ed,
+                            Type = VoucherType.Carry,
+                            Details = new List<VoucherDetail>()
+                        },
+                    IsSpecial = true
+                };
         }
     }
 
@@ -267,5 +295,16 @@ namespace AccountingServer.Shell.Carry
         [XmlElement("Revenue1")] public string Revenue1Query;
 
         [XmlElement("Revenue2")] public string Revenue2Query;
+    }
+
+    internal class CarryTarget
+    {
+        public Voucher Voucher { get; set; }
+
+        public string Query { get; set; }
+
+        public double Value { get; set; }
+
+        public bool IsSpecial { get; set; }
     }
 }
