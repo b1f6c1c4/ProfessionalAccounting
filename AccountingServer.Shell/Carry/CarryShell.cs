@@ -8,6 +8,7 @@ using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Util;
+using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Shell.Carry
 {
@@ -56,8 +57,8 @@ namespace AccountingServer.Shell.Carry
         /// <returns>执行结果</returns>
         private IQueryResult DoCarry(string expr)
         {
-            var rng = BLL.Parsing.Facade.Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-            BLL.Parsing.Facade.Parsing.Eof(expr);
+            var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+            Parsing.Eof(expr);
 
             if (rng.NullOnly)
             {
@@ -90,8 +91,8 @@ namespace AccountingServer.Shell.Carry
         /// <returns>执行结果</returns>
         private IQueryResult ResetCarry(string expr)
         {
-            var rng = BLL.Parsing.Facade.Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-            BLL.Parsing.Facade.Parsing.Eof(expr);
+            var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+            Parsing.Eof(expr);
 
             var cnt = m_Accountant.DeleteVouchers($"{rng.AsDateRange()} Carry");
             return new NumberAffected(cnt);

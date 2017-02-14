@@ -7,6 +7,7 @@ using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
+using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Shell.Plugins.BankBalance
 {
@@ -20,9 +21,9 @@ namespace AccountingServer.Shell.Plugins.BankBalance
         /// <inheritdoc />
         public override IQueryResult Execute(string expr)
         {
-            var content = BLL.Parsing.Facade.Parsing.Token(ref expr);
-            var avg = BLL.Parsing.Facade.Parsing.DoubleF(ref expr);
-            BLL.Parsing.Facade.Parsing.Eof(expr);
+            var content = Parsing.Token(ref expr);
+            var avg = Parsing.DoubleF(ref expr);
+            Parsing.Eof(expr);
 
             var tdy = DateTime.Now.Date;
             var ldom = AccountantHelper.LastDayOfMonth(tdy.Year, tdy.Month);
