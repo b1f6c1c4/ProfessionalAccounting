@@ -52,7 +52,7 @@ details
 	;
 
 detailQuery
-	:	VoucherCurrency? title? SingleQuotedString? DoubleQuotedString? Direction=('>' | '<')?
+	:	VoucherCurrency? title? SingleQuotedString? DoubleQuotedString? Floating? Direction=('>' | '<')?
 	;
 
 title
@@ -121,6 +121,11 @@ distributedQAtom
 /*
  * Lexer Rules
  */
+
+Floating
+	:	'=' [1-9] ([0-9])* ('.' [0-9]+)?
+	|	'=' '0' '.' [0-9]+
+	;
 
 SubtotalFields
 	:	('t' | 's' | 'c' | 'r' | 'd' | 'w' | 'm' | 'y' | 'C')+

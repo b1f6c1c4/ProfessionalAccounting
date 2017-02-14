@@ -71,6 +71,12 @@ namespace AccountingServer.BLL.Parsing
                         filter.Currency = c == "@@" ? VoucherDetail.BaseCurrency : c.Substring(1).ToUpperInvariant();
                     }
 
+                    if (Floating() != null)
+                    {
+                        var f = Floating().GetText().Substring(1);
+                        filter.Fund = double.Parse(f);
+                    }
+
                     return filter;
                 }
             }
