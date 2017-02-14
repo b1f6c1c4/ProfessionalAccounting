@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 
-namespace AccountingServer.BLL.Util
+namespace AccountingServer.Shell.Subtotal
 {
     /// <summary>
     ///     分类汇总结果遍历器
     /// </summary>
     /// <typeparam name="TMedium">中间类型</typeparam>
     /// <typeparam name="TResult">输出类型</typeparam>
-    public abstract class SubtotalTraver<TMedium, TResult>
+    internal abstract class SubtotalTraver<TMedium, TResult>
     {
         /// <summary>
         ///     原子汇总项处理器

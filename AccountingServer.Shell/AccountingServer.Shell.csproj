@@ -60,8 +60,9 @@
     <Compile Include="Plugins\Utilities\UtilTemplate.cs" />
     <Compile Include="Plugins\YieldRate\YieldRate.cs" />
     <Compile Include="Plugins\YieldRate\YieldRateSolver.cs" />
-    <Compile Include="Util\ISubtotalPre.cs" />
-    <Compile Include="Util\PreciseSubtotalPre.cs" />
+    <Compile Include="Subtotal\SubtotalTraver.cs" />
+    <Compile Include="Subtotal\ISubtotalPre.cs" />
+    <Compile Include="Subtotal\PreciseSubtotalPre.cs" />
     <Compile Include="Serializer\AbbrSerializer.cs" />
     <Compile Include="AmortizationShell.cs" />
     <Compile Include="AssetShell.cs" />
@@ -77,7 +78,7 @@
     <Compile Include="CheckShell.cs" />
     <Compile Include="AccountingShell.cs" />
     <Compile Include="Carry\CarryShell.cs" />
-    <Compile Include="Util\RichSubtotalPre.cs" />
+    <Compile Include="Subtotal\RichSubtotalPre.cs" />
     <Compile Include="Plugins\PluginBase.cs" />
     <Compile Include="Serializer\CSharpSerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
