@@ -32,11 +32,11 @@ namespace AccountingServer.DAL.Serializer
                                 new Balance
                                     {
                                         Date = bR.ReadDateTime("date", ref read),
+                                        Currency = bR.ReadString("currency", ref read),
                                         Title = (int?)bR.ReadDouble("title", ref read),
                                         SubTitle = (int?)bR.ReadDouble("subtitle", ref read),
                                         Content = bR.ReadString("content", ref read),
-                                        Remark = bR.ReadString("remark", ref read),
-                                        Currency = bR.ReadString("currency", ref read)
+                                        Remark = bR.ReadString("remark", ref read)
                                     };
                             bR.ReadEndDocument();
                             return bal;

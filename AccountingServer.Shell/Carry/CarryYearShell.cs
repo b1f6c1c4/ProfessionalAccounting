@@ -115,7 +115,6 @@ namespace AccountingServer.Shell.Carry
                         {
                             Date = ed,
                             Type = VoucherType.AnnualCarry,
-                            Currency = Voucher.BaseCurrency,
                             Details =
                                 new List<VoucherDetail>
                                     {
@@ -130,7 +129,6 @@ namespace AccountingServer.Shell.Carry
                         {
                             Date = ed,
                             Type = VoucherType.AnnualCarry,
-                            Currency = Voucher.BaseCurrency,
                             Details =
                                 new List<VoucherDetail>
                                     {

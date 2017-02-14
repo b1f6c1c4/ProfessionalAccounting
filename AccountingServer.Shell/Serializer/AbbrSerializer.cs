@@ -23,6 +23,8 @@ namespace AccountingServer.Shell.Serializer
             var lst = new List<string>();
 
             Parsing.TrimStartComment(ref expr);
+            var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))?.Substring(1).ToUpperInvariant();
+            Parsing.TrimStartComment(ref expr);
             var title = Parsing.Title(ref expr);
             if (title == null)
             {
@@ -63,6 +65,7 @@ namespace AccountingServer.Shell.Serializer
 
             return new VoucherDetail
                 {
+                    Currency = currency,
                     Title = title.Title,
                     SubTitle = title.SubTitle,
                     Content = string.IsNullOrEmpty(content) ? null : content,

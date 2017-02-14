@@ -15,6 +15,7 @@ namespace AccountingServer.DAL.Serializer
             bsonReader.ReadStartDocument();
             var detail = new VoucherDetail
                 {
+                    Currency = bsonReader.ReadString("currency", ref read) ?? VoucherDetail.BaseCurrency,
                     Title = bsonReader.ReadInt32("title", ref read),
                     SubTitle = bsonReader.ReadInt32("subtitle", ref read),
                     Content = bsonReader.ReadString("content", ref read),
@@ -29,6 +30,8 @@ namespace AccountingServer.DAL.Serializer
         public override void Serialize(IBsonWriter bsonWriter, VoucherDetail detail)
         {
             bsonWriter.WriteStartDocument();
+            if (detail.Currency != VoucherDetail.BaseCurrency)
+                bsonWriter.WriteString("currency", detail.Currency);
             bsonWriter.Write("title", detail.Title);
             bsonWriter.Write("subtitle", detail.SubTitle);
             bsonWriter.Write("content", detail.Content);

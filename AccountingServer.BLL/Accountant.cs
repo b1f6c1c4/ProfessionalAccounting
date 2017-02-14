@@ -62,7 +62,9 @@ namespace AccountingServer.BLL
 
         public bool Upsert(Voucher entity)
         {
-            entity.Currency = entity.Currency?.ToUpperInvariant() ?? Voucher.BaseCurrency;
+            foreach (var d in entity.Details)
+                d.Currency = d.Currency?.ToUpperInvariant() ?? VoucherDetail.BaseCurrency;
+
             return m_Db.Upsert(entity);
         }
 

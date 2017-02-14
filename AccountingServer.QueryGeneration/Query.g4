@@ -40,7 +40,7 @@ vouchersB
 	;
 
 voucherQuery
-	:	details? Op=('A' | 'E')? range? CaretQuotedString? PercentQuotedString? VoucherType? VoucherCurrency?
+	:	details? Op=('A' | 'E')? range? CaretQuotedString? PercentQuotedString? VoucherType?
 	;
 
 details
@@ -52,7 +52,7 @@ details
 	;
 
 detailQuery
-	:	title? SingleQuotedString? DoubleQuotedString? Direction=('>' | '<')?
+	:	VoucherCurrency? title? SingleQuotedString? DoubleQuotedString? Direction=('>' | '<')?
 	;
 
 title

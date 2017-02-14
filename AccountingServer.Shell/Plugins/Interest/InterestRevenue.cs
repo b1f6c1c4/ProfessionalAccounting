@@ -131,7 +131,6 @@ namespace AccountingServer.Shell.Plugins.Interest
                     ?? new Voucher
                         {
                             Date = grp.Key,
-                            Currency = Voucher.BaseCurrency,
                             Details = new List<VoucherDetail>()
                         });
                 lastSettlement = grp.Key;
@@ -183,7 +182,6 @@ namespace AccountingServer.Shell.Plugins.Interest
                     new Voucher
                         {
                             Date = finalDay,
-                            Currency = Voucher.BaseCurrency,
                             Details = new List<VoucherDetail>()
                         });
         }

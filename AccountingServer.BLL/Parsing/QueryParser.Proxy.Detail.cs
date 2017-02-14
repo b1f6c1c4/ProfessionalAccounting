@@ -62,6 +62,15 @@ namespace AccountingServer.BLL.Parsing
                             Remark = DoubleQuotedString()?.GetText().Dequotation()
                         };
 
+                    if (VoucherCurrency() != null)
+                    {
+                        var c = VoucherCurrency().GetText();
+                        if (!c.StartsWith("@", StringComparison.Ordinal))
+                            throw new MemberAccessException("表达式错误");
+
+                        filter.Currency = c == "@@" ? VoucherDetail.BaseCurrency : c.Substring(1).ToUpperInvariant();
+                    }
+
                     return filter;
                 }
             }

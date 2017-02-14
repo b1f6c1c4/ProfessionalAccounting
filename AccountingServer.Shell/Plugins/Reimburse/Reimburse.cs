@@ -80,7 +80,7 @@ namespace AccountingServer.Shell.Plugins.Reimburse
                 {
                     var curr = grp.Key;
                     // ReSharper disable once PossibleInvalidOperationException
-                    var ratio = curr == Voucher.BaseCurrency ? 1 : f.From(rng.EndDate.Value, curr);
+                    var ratio = curr == VoucherDetail.BaseCurrency ? 1 : f.From(rng.EndDate.Value, curr);
                     foreach (var b in grp)
                     {
                         sb.Append(reim.Name);

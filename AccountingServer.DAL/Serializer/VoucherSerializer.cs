@@ -49,7 +49,6 @@ namespace AccountingServer.DAL.Serializer
 
             voucher.Details = bsonReader.ReadArray("detail", ref read, new VoucherDetailSerializer().Deserialize);
             voucher.Remark = bsonReader.ReadString("remark", ref read);
-            voucher.Currency = bsonReader.ReadString("currency", ref read) ?? Voucher.BaseCurrency;
             bsonReader.ReadEndDocument();
 
             return voucher;
@@ -95,8 +94,6 @@ namespace AccountingServer.DAL.Serializer
 
             if (voucher.Remark != null)
                 bsonWriter.WriteString("remark", voucher.Remark);
-            if (voucher.Currency != Voucher.BaseCurrency)
-                bsonWriter.WriteString("currency", voucher.Currency);
             bsonWriter.WriteEndDocument();
         }
 
