@@ -65,9 +65,9 @@ namespace AccountingServer.Shell.Serializer
                 {
                     Title = title.Title,
                     SubTitle = title.SubTitle,
-                    Content = content,
+                    Content = string.IsNullOrEmpty(content) ? null : content,
                     Fund = fund,
-                    Remark = remark
+                    Remark = string.IsNullOrEmpty(remark) ? null : remark
                 };
         }
     }
