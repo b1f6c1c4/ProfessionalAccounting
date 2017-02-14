@@ -37,24 +37,30 @@ namespace AccountingServer.Shell.Serializer
                     sb.AppendLine(voucher.Type.ToString());
 
                 foreach (var d in voucher.Details)
-                {
-                    var t = TitleManager.GetTitleName(d.Title);
-                    if (d.SubTitle.HasValue)
-                    {
-                        var s = TitleManager.GetTitleName(d.Title, d.SubTitle);
-                        sb.AppendLine($"// {t}-{s}");
-                    }
-                    else
-                        sb.AppendLine($"// {t}");
-                    if (d.Currency != null &&
-                        d.Currency != VoucherDetail.BaseCurrency)
-                        sb.Append($"@{d.Currency} ");
-                    sb.AppendLine(
-                        $"T{d.Title.AsTitle()}{d.SubTitle.AsSubTitle()} {d.Content?.Quotation('\'')} {d.Remark?.Quotation('\"')} {d.Fund}");
-                }
+                    sb.Append(PresentVoucherDetail(d));
             }
 
             sb.AppendLine("}@");
+            return sb.ToString();
+        }
+
+        /// <inheritdoc />
+        public string PresentVoucherDetail(VoucherDetail detail)
+        {
+            var sb = new StringBuilder();
+            var t = TitleManager.GetTitleName(detail.Title);
+            if (detail.SubTitle.HasValue)
+            {
+                var s = TitleManager.GetTitleName(detail.Title, detail.SubTitle);
+                sb.AppendLine($"// {t}-{s}");
+            }
+            else
+                sb.AppendLine($"// {t}");
+            if (detail.Currency != null &&
+                detail.Currency != VoucherDetail.BaseCurrency)
+                sb.Append($"@{detail.Currency} ");
+            sb.AppendLine(
+                $"T{detail.Title.AsTitle()}{detail.SubTitle.AsSubTitle()} {detail.Content?.Quotation('\'')} {detail.Remark?.Quotation('\"')} {detail.Fund}");
             return sb.ToString();
         }
 

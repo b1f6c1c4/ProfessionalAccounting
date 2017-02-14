@@ -267,6 +267,7 @@ namespace AccountingServer.Shell
 
         public string PresentVoucher(Voucher voucher) => Run(s => s.PresentVoucher(voucher));
         public Voucher ParseVoucher(string str) => Run(s => s.ParseVoucher(str));
+        public string PresentVoucherDetail(VoucherDetail detail) => Run(s => s.PresentVoucherDetail(detail));
         public string PresentAsset(Asset asset) => Run(s => s.PresentAsset(asset));
         public Asset ParseAsset(string str) => Run(s => s.ParseAsset(str));
         public string PresentAmort(Amortization amort) => Run(s => s.PresentAmort(amort));
