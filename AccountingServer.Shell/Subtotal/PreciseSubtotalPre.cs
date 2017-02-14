@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
-using static AccountingServer.Shell.Util.SubtotalPreHelper;
 
-namespace AccountingServer.Shell.Util
+namespace AccountingServer.Shell.Subtotal
 {
     /// <summary>
     ///     报告结果处理器
@@ -56,7 +55,7 @@ namespace AccountingServer.Shell.Util
         {
             var r = results.ToList();
             var val = r.Sum(t => t.Item1);
-            var report = NotNullJoin(r.Select(t => t.Item2));
+            var report = SubtotalPreHelper.NotNullJoin(r.Select(t => t.Item2));
             return new Tuple<double, string>(
                 val,
                 withSubtotal ? $"{path}\t{val:R}{Environment.NewLine}{report}" : report);

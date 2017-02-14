@@ -5,6 +5,7 @@ using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
+using AccountingServer.Shell.Subtotal;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.FacadeF;
 

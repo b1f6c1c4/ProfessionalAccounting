@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
-using static AccountingServer.Shell.Util.SubtotalPreHelper;
 
-namespace AccountingServer.Shell.Util
+namespace AccountingServer.Shell.Subtotal
 {
     /// <summary>
     ///     分类汇总结果处理器
@@ -84,7 +83,7 @@ namespace AccountingServer.Shell.Util
             var r = results.ToList();
             return new Tuple<double, string>(
                 r.Sum(t => t.Item1),
-                NotNullJoin(r.Select(t => t.Item2)));
+                SubtotalPreHelper.NotNullJoin(r.Select(t => t.Item2)));
         }
 
         protected override Tuple<double, string> ReduceA(object path, object newPath, Balance cat, int depth,
@@ -94,7 +93,7 @@ namespace AccountingServer.Shell.Util
             var last = r.LastOrDefault();
             return new Tuple<double, string>(
                 last?.Item1 ?? 0,
-                NotNullJoin(r.Select(t => t.Item2)));
+                SubtotalPreHelper.NotNullJoin(r.Select(t => t.Item2)));
         }
     }
 }

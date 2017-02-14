@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 using AccountingServer.Entities;
 
-namespace AccountingServer.Shell.Util
+namespace AccountingServer.Shell.Subtotal
 {
     /// <summary>
     ///     分类汇总结果处理器
