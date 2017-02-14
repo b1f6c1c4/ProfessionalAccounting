@@ -369,7 +369,6 @@ namespace AccountingServer.BLL
                     Date = isCollapsed ? null : item.Date,
                     Type = voucherType,
                     Remark = "automatically generated",
-                    Currency = Voucher.BaseCurrency,
                     Details = details.ToList()
                 };
             var res = Db.Upsert(voucher);

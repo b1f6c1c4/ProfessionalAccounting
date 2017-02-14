@@ -60,11 +60,6 @@ namespace AccountingServer.Entities
     public class Voucher
     {
         /// <summary>
-        ///     记账本位币
-        /// </summary>
-        public const string BaseCurrency = "CNY";
-
-        /// <summary>
         ///     编号
         /// </summary>
         [XmlAttribute("id")]
@@ -92,12 +87,6 @@ namespace AccountingServer.Entities
         /// </summary>
         [DefaultValue(VoucherType.Ordinary)]
         public VoucherType? Type { get; set; }
-
-        /// <summary>
-        ///     币种
-        /// </summary>
-        [XmlAttribute("currency")]
-        public string Currency { get; set; }
     }
 
     /// <summary>
@@ -110,6 +99,17 @@ namespace AccountingServer.Entities
         ///     判断金额相等的误差
         /// </summary>
         public const double Tolerance = 1e-8;
+
+        /// <summary>
+        ///     记账本位币
+        /// </summary>
+        public const string BaseCurrency = "CNY";
+
+        /// <summary>
+        ///     币种
+        /// </summary>
+        [XmlAttribute("currency")]
+        public string Currency { get; set; }
 
         /// <summary>
         ///     会计科目一级科目代码

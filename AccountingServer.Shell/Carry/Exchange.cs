@@ -101,10 +101,10 @@ namespace AccountingServer.Shell.Carry
     internal class FixerIoExchange : IExchange
     {
         /// <inheritdoc />
-        public double From(DateTime date, string target) => Invoke(date, target, Voucher.BaseCurrency);
+        public double From(DateTime date, string target) => Invoke(date, target, VoucherDetail.BaseCurrency);
 
         /// <inheritdoc />
-        public double To(DateTime date, string target) => Invoke(date, Voucher.BaseCurrency, target);
+        public double To(DateTime date, string target) => Invoke(date, VoucherDetail.BaseCurrency, target);
 
         /// <summary>
         ///     调用查询接口

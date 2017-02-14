@@ -135,11 +135,12 @@ namespace AccountingServer.Shell
         public string ExecuteVoucherUpsert(string code)
         {
             var voucher = m_Serializer.ParseVoucher(code);
-            // ReSharper disable once PossibleInvalidOperationException
-            var unc = voucher.Details.SingleOrDefault(d => !d.Fund.HasValue);
-            if (unc != null)
-                // ReSharper disable once PossibleInvalidOperationException
-                unc.Fund = -voucher.Details.Sum(d => d.Fund ?? 0D);
+            foreach (var grp in voucher.Details.GroupBy(d => d.Currency ?? VoucherDetail.BaseCurrency))
+            {
+                var unc = grp.SingleOrDefault(d => !d.Fund.HasValue);
+                if (unc != null)
+                    unc.Fund = -grp.Sum(d => d.Fund ?? 0D);
+            }
 
             if (!m_Accountant.Upsert(voucher))
                 throw new ApplicationException("更新或添加失败");

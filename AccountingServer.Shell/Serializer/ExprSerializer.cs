@@ -35,9 +35,6 @@ namespace AccountingServer.Shell.Serializer
                 if (voucher.Type.HasValue &&
                     voucher.Type != VoucherType.Ordinary)
                     sb.AppendLine(voucher.Type.ToString());
-                if (voucher.Currency != null &&
-                    voucher.Currency != Voucher.BaseCurrency)
-                    sb.AppendLine($"@{voucher.Currency}");
 
                 foreach (var d in voucher.Details)
                 {
@@ -49,6 +46,9 @@ namespace AccountingServer.Shell.Serializer
                     }
                     else
                         sb.AppendLine($"// {t}");
+                    if (d.Currency != null &&
+                        d.Currency != VoucherDetail.BaseCurrency)
+                        sb.Append($"@{d.Currency} ");
                     sb.AppendLine(
                         $"T{d.Title.AsTitle()}{d.SubTitle.AsSubTitle()} {d.Content?.Quotation('\'')} {d.Remark?.Quotation('\"')} {d.Fund}");
                 }
@@ -91,7 +91,6 @@ namespace AccountingServer.Shell.Serializer
             var typeT = VoucherType.Ordinary;
             var type = Parsing.Token(ref expr, false, t => TryParse(t, out typeT)) != null ? (VoucherType?)typeT : null;
             Parsing.TrimStartComment(ref expr);
-            var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))?.Substring(1).ToUpperInvariant();
 
             var lst = new List<VoucherDetail>();
             VoucherDetail d;
@@ -103,7 +102,6 @@ namespace AccountingServer.Shell.Serializer
                     ID = id,
                     Remark = remark,
                     Type = type,
-                    Currency = currency,
                     Date = date,
                     Details = lst
                 };
@@ -154,6 +152,8 @@ namespace AccountingServer.Shell.Serializer
         protected virtual VoucherDetail GetVoucherDetail(ref string expr)
         {
             Parsing.TrimStartComment(ref expr);
+            var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))?.Substring(1).ToUpperInvariant();
+            Parsing.TrimStartComment(ref expr);
             var title = Parsing.Title(ref expr);
             if (title == null)
                 return null;
@@ -183,6 +183,7 @@ namespace AccountingServer.Shell.Serializer
 
             return new VoucherDetail
                 {
+                    Currency = currency,
                     Title = title.Title,
                     SubTitle = title.SubTitle,
                     Content = string.IsNullOrEmpty(content) ? null : content,

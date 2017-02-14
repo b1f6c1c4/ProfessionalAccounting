@@ -35,15 +35,6 @@ namespace AccountingServer.BLL.Parsing
                             throw new MemberAccessException("表达式错误");
                     }
 
-                    if (VoucherCurrency() != null)
-                    {
-                        var c = VoucherCurrency().GetText();
-                        if (!c.StartsWith("@", StringComparison.Ordinal))
-                            throw new MemberAccessException("表达式错误");
-
-                        vfilter.Currency = c == "@@" ? Voucher.BaseCurrency : c.Substring(1).ToUpperInvariant();
-                    }
-
                     return vfilter;
                 }
             }

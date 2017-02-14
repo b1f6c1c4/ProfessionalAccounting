@@ -121,21 +121,21 @@ namespace AccountingServer.Shell.Carry
             PartialCarry(
                 m_Accountant
                     .RunGroupedQuery($"{CarrySettings.Config.ExpensesQuery} {rng.AsDateRange()}`Ctsc")
-                    .Where(b => b.Currency != Voucher.BaseCurrency),
+                    .Where(b => b.Currency != VoucherDetail.BaseCurrency),
                 ed,
                 true);
 
             PartialCarry(
                 m_Accountant
                     .RunGroupedQuery($"{CarrySettings.Config.Revenue1Query} {rng.AsDateRange()}`Ctsc")
-                    .Where(b => b.Currency != Voucher.BaseCurrency),
+                    .Where(b => b.Currency != VoucherDetail.BaseCurrency),
                 ed,
                 false);
 
             PartialCarry(
                 m_Accountant
                     .RunGroupedQuery($"{CarrySettings.Config.Revenue2Query} {rng.AsDateRange()}`Ctsc")
-                    .Where(b => b.Currency != Voucher.BaseCurrency),
+                    .Where(b => b.Currency != VoucherDetail.BaseCurrency),
                 ed,
                 true);
 
@@ -148,7 +148,6 @@ namespace AccountingServer.Shell.Carry
                     m_Accountant.Upsert(new Voucher
                         {
                             Date = ed,
-                            Currency = Voucher.BaseCurrency,
                             Type = VoucherType.Carry,
                             Remark = "currency carry",
                             Details = new List<VoucherDetail>
@@ -203,7 +202,6 @@ namespace AccountingServer.Shell.Carry
                         {
                             Date = ed,
                             Type = VoucherType.Carry,
-                            Currency = grpCurrency.Key,
                             Details = new List<VoucherDetail>()
                         };
                 foreach (var balance in grpCurrency)
@@ -212,6 +210,7 @@ namespace AccountingServer.Shell.Carry
                     voucher.Details.Add(
                         new VoucherDetail
                             {
+                                Currency = grpCurrency.Key,
                                 Title = balance.Title,
                                 SubTitle = balance.SubTitle,
                                 Content = balance.Content,
@@ -222,7 +221,7 @@ namespace AccountingServer.Shell.Carry
                 if (b.IsZero())
                     continue;
 
-                if (grpCurrency.Key == Voucher.BaseCurrency)
+                if (grpCurrency.Key == VoucherDetail.BaseCurrency)
                 {
                     voucher.Details.Add(
                         new VoucherDetail
@@ -243,38 +242,25 @@ namespace AccountingServer.Shell.Carry
                 voucher.Details.Add(
                     new VoucherDetail
                         {
+                            Currency = grpCurrency.Key,
                             Title = 3999,
                             SubTitle = 01,
                             Fund = b
                         });
-                m_Accountant.Upsert(voucher);
-
-                var covoucher =
-                    new Voucher
+                voucher.Details.Add(
+                    new VoucherDetail
                         {
-                            Date = ed,
-                            Type = VoucherType.Carry,
-                            Currency = Voucher.BaseCurrency,
-                            Details =
-                                new List<VoucherDetail>
-                                    {
-                                        new VoucherDetail
-                                            {
-                                                Title = 3999,
-                                                Remark = voucher.ID,
-                                                Fund = -cob
-                                            },
-                                        new VoucherDetail
-                                            {
-                                                Title = 4103,
-                                                SubTitle = target ? 01 : (int?)null,
-                                                Fund = cob
-                                            }
-                                    }
-                        };
-                m_Accountant.Upsert(covoucher);
-
-                voucher.Details.Single(d => d.Title == 3999).Remark = covoucher.ID;
+                            Title = 3999,
+                            Remark = voucher.ID,
+                            Fund = -cob
+                        });
+                voucher.Details.Add(
+                    new VoucherDetail
+                        {
+                            Title = 4103,
+                            SubTitle = target ? 01 : (int?)null,
+                            Fund = cob
+                        });
                 m_Accountant.Upsert(voucher);
             }
         }

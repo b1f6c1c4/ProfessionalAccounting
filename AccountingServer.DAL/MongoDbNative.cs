@@ -83,10 +83,6 @@ namespace AccountingServer.DAL
                     vfilter.Remark == string.Empty
                         ? Builders<Voucher>.Filter.Exists("remark", false)
                         : Builders<Voucher>.Filter.Eq("remark", vfilter.Remark));
-            if (vfilter.Currency == Voucher.BaseCurrency)
-                lst.Add(Builders<Voucher>.Filter.Exists("currency", false));
-            else if (vfilter.Currency != null)
-                lst.Add(Builders<Voucher>.Filter.Eq("currency", vfilter.Currency));
 
             return And(lst);
         }
@@ -133,6 +129,10 @@ namespace AccountingServer.DAL
                     f.Dir > 0
                         ? Builders<VoucherDetail>.Filter.Gt("fund", -VoucherDetail.Tolerance)
                         : Builders<VoucherDetail>.Filter.Lt("fund", +VoucherDetail.Tolerance));
+            if (f.Filter?.Currency == VoucherDetail.BaseCurrency)
+                lst.Add(Builders<VoucherDetail>.Filter.Exists("currency", false));
+            else if (f.Filter?.Currency != null)
+                lst.Add(Builders<VoucherDetail>.Filter.Eq("currency", f.Filter?.Currency));
             if (f.Filter?.Title != null)
                 lst.Add(Builders<VoucherDetail>.Filter.Eq("title", f.Filter.Title.Value));
             if (f.Filter?.SubTitle != null)

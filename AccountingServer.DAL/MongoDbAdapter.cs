@@ -96,7 +96,7 @@ namespace AccountingServer.DAL
                     .Select(
                         b =>
                         {
-                            b.Currency = b.Currency ?? Voucher.BaseCurrency;
+                            b.Currency = b.Currency ?? VoucherDetail.BaseCurrency;
                             return b;
                         });
 
@@ -271,7 +271,6 @@ namespace AccountingServer.DAL
             sb.AppendLine(";");
             preFilter = GetNativeFilter(query.VoucherQuery);
             sb.AppendLine(GetTheDateJavascript(level));
-            sb.AppendLine("    var theCurrency = this.currency;");
             sb.AppendLine("    this.detail.forEach(function(d) {");
             sb.AppendLine("        if (chk(d))");
             {
@@ -282,6 +281,8 @@ namespace AccountingServer.DAL
                     sb.Append("emit({");
                     if (level.HasFlag(SubtotalLevel.Day))
                         sb.Append("date: theDate,");
+                    if (level.HasFlag(SubtotalLevel.Currency))
+                        sb.Append("currency: d.currency,");
                     if (level.HasFlag(SubtotalLevel.Title))
                         sb.Append("title: d.title,");
                     if (level.HasFlag(SubtotalLevel.SubTitle))
@@ -290,8 +291,6 @@ namespace AccountingServer.DAL
                         sb.Append("content: d.content,");
                     if (level.HasFlag(SubtotalLevel.Remark))
                         sb.Append("remark: d.remark,");
-                    if (level.HasFlag(SubtotalLevel.Currency))
-                        sb.Append("currency: theCurrency,");
                     sb.Append(args.GatherType == GatheringType.Count ? "}, 1);" : "}, d.fund);");
                 }
             }

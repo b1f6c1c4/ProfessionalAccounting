@@ -60,13 +60,24 @@ namespace AccountingServer.Shell
             var sb = new StringBuilder();
             foreach (var voucher in m_Accountant.SelectVouchers(null))
             {
+                var flag = false;
                 // ReSharper disable once PossibleInvalidOperationException
-                var val = voucher.Details.Sum(d => d.Fund.Value);
-                if (val.IsZero())
-                    continue;
+                var grps = voucher.Details.GroupBy(d => d.Currency, d => d.Fund.Value);
+                foreach (var grp in grps)
+                {
+                    var val = grp.Sum();
+                    if (val.IsZero())
+                        continue;
 
-                sb.AppendLine(val > 0 ? $"/* Debit - Credit = {val:R} */" : $"/* Credit - Debit = {-val:R} */");
-                sb.Append(m_Serializer.PresentVoucher(voucher));
+                    flag = true;
+                    sb.AppendLine(
+                        val > 0
+                            ? $"/* @{grp.Key}: Debit - Credit = {val:R} */"
+                            : $"/* @{grp.Key}: Credit - Debit = {-val:R} */");
+                }
+
+                if (flag)
+                    sb.Append(m_Serializer.PresentVoucher(voucher));
             }
 
             if (sb.Length > 0)
