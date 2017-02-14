@@ -69,8 +69,8 @@ uniqueTime
 
 rangeCore
 	:	RangeNull | RangeAllNotNull
-	|	Begin=rangeCertainPoint Op=('~'|'=') End=rangeCertainPoint?
-	|	Op=('~'|'=') End=rangeCertainPoint
+	|	Begin=rangeCertainPoint Op=('~'|'~~') End=rangeCertainPoint?
+	|	Op=('~'|'~~') End=rangeCertainPoint
 	|	Certain=rangeCertainPoint
 	;
 
@@ -123,8 +123,8 @@ distributedQAtom
  */
 
 Floating
-	:	'=' [1-9] ([0-9])* ('.' [0-9]+)?
-	|	'=' '0' '.' [0-9]+
+	:	'=' Sign='-'? [1-9] ([0-9])* ('.' [0-9]+)?
+	|	'=' Sign='-'? '0' '.' [0-9]+
 	;
 
 SubtotalFields

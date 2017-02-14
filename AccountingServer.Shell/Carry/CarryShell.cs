@@ -119,23 +119,17 @@ namespace AccountingServer.Shell.Carry
             }
 
             PartialCarry(
-                m_Accountant
-                    .RunGroupedQuery($"{CarrySettings.Config.ExpensesQuery} {rng.AsDateRange()}`Ctsc")
-                    .Where(b => b.Currency != VoucherDetail.BaseCurrency),
+                m_Accountant.RunGroupedQuery($"({CarrySettings.Config.ExpensesQuery}) - @@ {rng.AsDateRange()}`Ctsc"),
                 ed,
                 true);
 
             PartialCarry(
-                m_Accountant
-                    .RunGroupedQuery($"{CarrySettings.Config.Revenue1Query} {rng.AsDateRange()}`Ctsc")
-                    .Where(b => b.Currency != VoucherDetail.BaseCurrency),
+                m_Accountant.RunGroupedQuery($"({CarrySettings.Config.Revenue1Query}) - @@ {rng.AsDateRange()}`Ctsc"),
                 ed,
                 false);
 
             PartialCarry(
-                m_Accountant
-                    .RunGroupedQuery($"{CarrySettings.Config.Revenue2Query} {rng.AsDateRange()}`Ctsc")
-                    .Where(b => b.Currency != VoucherDetail.BaseCurrency),
+                m_Accountant.RunGroupedQuery($"({CarrySettings.Config.Revenue2Query}) - @@ {rng.AsDateRange()}`Ctsc"),
                 ed,
                 true);
 
@@ -168,20 +162,17 @@ namespace AccountingServer.Shell.Carry
             }
 
             PartialCarry(
-                m_Accountant
-                    .RunGroupedQuery($"{CarrySettings.Config.ExpensesQuery} {rng.AsDateRange()} @@`Ctsc"),
+                m_Accountant.RunGroupedQuery($"({CarrySettings.Config.ExpensesQuery}) * @@ {rng.AsDateRange()}`Ctsc"),
                 ed,
                 true);
 
             PartialCarry(
-                m_Accountant
-                    .RunGroupedQuery($"{CarrySettings.Config.Revenue1Query} {rng.AsDateRange()} @@`Ctsc"),
+                m_Accountant.RunGroupedQuery($"({CarrySettings.Config.Revenue1Query}) * @@ {rng.AsDateRange()}`Ctsc"),
                 ed,
                 false);
 
             PartialCarry(
-                m_Accountant
-                    .RunGroupedQuery($"{CarrySettings.Config.Revenue2Query} {rng.AsDateRange()} @@`Ctsc"),
+                m_Accountant.RunGroupedQuery($"({CarrySettings.Config.Revenue2Query}) * @@ {rng.AsDateRange()}`Ctsc"),
                 ed,
                 true);
         }

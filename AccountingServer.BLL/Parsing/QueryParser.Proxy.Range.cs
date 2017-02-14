@@ -147,7 +147,7 @@ namespace AccountingServer.BLL.Parsing
                     if (End != null)
                         e = End.Range.EndDate;
                     var f = new DateFilter(s, e);
-                    if (Op.Text == "=")
+                    if (Op.Text == "~~")
                         f.Nullable ^= true;
                     return f;
                 }

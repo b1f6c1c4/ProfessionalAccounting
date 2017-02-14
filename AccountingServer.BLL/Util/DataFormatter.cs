@@ -108,7 +108,7 @@ namespace AccountingServer.BLL.Util
             {
                 if (value.StartDate.HasValue)
                     return value.Nullable
-                        ? $"[{value.StartDate.AsDate()}={value.EndDate.AsDate()}]"
+                        ? $"[{value.StartDate.AsDate()}~~{value.EndDate.AsDate()}]"
                         : $"[{value.StartDate.AsDate()}~{value.EndDate.AsDate()}]";
 
                 return value.Nullable
@@ -118,7 +118,7 @@ namespace AccountingServer.BLL.Util
 
             if (value.StartDate.HasValue)
                 return value.Nullable
-                    ? $"[{value.StartDate.AsDate()}=]"
+                    ? $"[{value.StartDate.AsDate()}~~]"
                     : $"[{value.StartDate.AsDate()}~]";
 
             return value.Nullable ? "[]" : "[~null]";

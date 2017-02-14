@@ -71,6 +71,10 @@ namespace AccountingServer.Entities.Util
             if (filter == null)
                 return true;
 
+            if (filter.Currency != null)
+                if (filter.Currency != voucherDetail.Currency)
+                    return false;
+
             if (filter.Title != null)
                 if (filter.Title != voucherDetail.Title)
                     return false;
