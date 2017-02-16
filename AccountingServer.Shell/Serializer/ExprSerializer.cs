@@ -100,7 +100,7 @@ namespace AccountingServer.Shell.Serializer
 
             var lst = new List<VoucherDetail>();
             VoucherDetail d;
-            while ((d = GetVoucherDetail(ref expr)) != null)
+            while ((d = ParseVoucherDetail(ref expr)) != null)
                 lst.Add(d);
 
             return new Voucher
@@ -150,12 +150,10 @@ namespace AccountingServer.Shell.Serializer
             }
         }
 
-        /// <summary>
-        ///     解析细目表达式
-        /// </summary>
-        /// <param name="expr">表达式</param>
-        /// <returns>细目</returns>
-        protected virtual VoucherDetail GetVoucherDetail(ref string expr)
+        /// <inheritdoc />
+        public virtual VoucherDetail ParseVoucherDetail(string expr) => ParseVoucherDetail(ref expr);
+
+        protected virtual VoucherDetail ParseVoucherDetail(ref string expr)
         {
             Parsing.TrimStartComment(ref expr);
             var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))?.Substring(1).ToUpperInvariant();

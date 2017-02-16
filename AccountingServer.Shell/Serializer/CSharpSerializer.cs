@@ -128,6 +128,9 @@ namespace AccountingServer.Shell.Serializer
         /// <inheritdoc />
         public Voucher ParseVoucher(string str) => (Voucher)ParseCSharp(str, typeof(Voucher));
 
+        /// <inheritdoc />
+        public VoucherDetail ParseVoucherDetail(string str) => (VoucherDetail)ParseCSharp(str, typeof(VoucherDetail));
+
         #endregion
 
         #region Asset

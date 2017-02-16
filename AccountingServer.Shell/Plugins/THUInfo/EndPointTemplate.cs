@@ -15,7 +15,8 @@ namespace AccountingServer.Shell.Plugins.THUInfo
     [Serializable]
     public class EndPointTemplate
     {
-        public string Name { get; set; }
+        [XmlElement("Detail")]
+        public List<string> DetailString { get; set; }
 
         [XmlArrayItem("Range")] public List<EndPointRange> Ranges;
     }

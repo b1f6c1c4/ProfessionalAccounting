@@ -11,6 +11,7 @@ using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using CredentialManagement;
+using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.Shell.Plugins.THUInfo
 {
@@ -117,15 +118,15 @@ namespace AccountingServer.Shell.Plugins.THUInfo
         /// <inheritdoc />
         public override IQueryResult Execute(string expr)
         {
-            if (FacadeF.ParsingF.Optional(ref expr, "ep"))
+            if (ParsingF.Optional(ref expr, "ep"))
             {
-                FacadeF.ParsingF.Eof(expr);
+                ParsingF.Eof(expr);
                 return ShowEndPoints();
             }
 
-            if (FacadeF.ParsingF.Optional(ref expr, "cred"))
+            if (ParsingF.Optional(ref expr, "cred"))
             {
-                FacadeF.ParsingF.Eof(expr);
+                ParsingF.Eof(expr);
                 DropCredential();
                 FetchData();
             }
@@ -134,9 +135,9 @@ namespace AccountingServer.Shell.Plugins.THUInfo
             lock (m_Lock)
                 problems = Compare();
 
-            if (FacadeF.ParsingF.Optional(ref expr, "whatif"))
+            if (ParsingF.Optional(ref expr, "whatif"))
             {
-                FacadeF.ParsingF.Eof(expr);
+                ParsingF.Eof(expr);
                 return ShowComparison(problems);
             }
 
@@ -146,12 +147,10 @@ namespace AccountingServer.Shell.Plugins.THUInfo
             if (!problems.Records.Any())
                 return new Succeed();
 
-            var pars = new List<string>();
-            while (!string.IsNullOrWhiteSpace(expr))
-                pars.Add(FacadeF.ParsingF.Token(ref expr));
+            ParsingF.Eof(expr);
 
             List<TransactionRecord> fail;
-            foreach (var voucher in AutoGenerate(problems.Records, pars, out fail))
+            foreach (var voucher in AutoGenerate(problems.Records, out fail))
                 Accountant.Upsert(voucher);
 
             if (!fail.Any())
@@ -196,68 +195,6 @@ namespace AccountingServer.Shell.Plugins.THUInfo
             }
 
             return new UnEditableText(sb.ToString());
-        }
-
-        /// <summary>
-        ///     解析自动补全指令
-        /// </summary>
-        /// <param name="pars">自动补全指令</param>
-        /// <returns>解析结果</returns>
-        private Dictionary<DateTime, List<Tuple<RegularType, string>>> GetDic(IReadOnlyList<string> pars)
-        {
-            var dic = new Dictionary<DateTime, List<Tuple<RegularType, string>>>();
-            foreach (var par in pars)
-            {
-                var xx = par;
-                var dt = DateTime.Now.Date;
-                try
-                {
-                    var dd = FacadeF.ParsingF.UniqueTime(ref xx);
-                    if (dd == null)
-                        throw new ApplicationException("无法处理无穷长时间以前的自动补全指令");
-
-                    dt = dd.Value;
-                }
-                catch (ApplicationException)
-                {
-                    throw;
-                }
-                catch (Exception)
-                {
-                    // ignored
-                }
-
-                var sp = xx.Split(new[] { ' ', '/', ',' }, StringSplitOptions.RemoveEmptyEntries);
-                if (sp.Length == 0)
-                    continue;
-
-                var lst = new List<Tuple<RegularType, string>>();
-                foreach (var s in sp)
-                    switch (s.Trim().ToLowerInvariant())
-                    {
-                        case "sp":
-                            lst.Add(new Tuple<RegularType, string>(RegularType.Shopping, "食品"));
-                            break;
-                        case "sh":
-                            lst.Add(new Tuple<RegularType, string>(RegularType.Shopping, "生活用品"));
-                            break;
-                        case "bg":
-                            lst.Add(new Tuple<RegularType, string>(RegularType.Shopping, "办公用品"));
-                            break;
-                        case "xz":
-                            lst.Add(new Tuple<RegularType, string>(RegularType.Charging, "洗澡卡"));
-                            break;
-                        case "xy":
-                            lst.Add(new Tuple<RegularType, string>(RegularType.Charging, "洗衣"));
-                            break;
-                        default:
-                            throw new ArgumentException("未知参数", nameof(pars));
-                    }
-
-                dic.Add(dt, lst);
-            }
-
-            return dic;
         }
     }
 }
