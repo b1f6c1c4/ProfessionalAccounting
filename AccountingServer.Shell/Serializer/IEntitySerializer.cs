@@ -5,7 +5,7 @@ namespace AccountingServer.Shell.Serializer
     /// <summary>
     ///     表示器
     /// </summary>
-    public interface IEntitySerializer
+    internal interface IEntitySerializer
     {
         /// <summary>
         ///     将记账凭证表示

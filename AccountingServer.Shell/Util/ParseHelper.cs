@@ -10,7 +10,7 @@ namespace AccountingServer.Shell.Util
     ///     扩展的字符串匹配
     /// </summary>
     [SuppressMessage("ReSharper", "UnusedParameter.Global")]
-    public static class ParseHelper
+    internal static class ParseHelper
     {
         /// <summary>
         ///     忽略空白和注释

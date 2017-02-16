@@ -5,7 +5,7 @@ using AccountingServer.Shell;
 namespace AccountingServer
 {
     // ReSharper disable once InconsistentNaming
-    public partial class frmMain
+    internal partial class frmMain
     {
         /// <summary>
         ///     控制台

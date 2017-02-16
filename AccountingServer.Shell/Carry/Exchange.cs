@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 
 namespace AccountingServer.Shell.Carry
 {
-    public static class ExchangeFactory
+    internal static class ExchangeFactory
     {
         public static IExchange Create() => new ExchangeCache(new FixerIoExchange());
     }
@@ -16,7 +16,7 @@ namespace AccountingServer.Shell.Carry
     /// <summary>
     ///     汇率查询
     /// </summary>
-    public interface IExchange
+    internal interface IExchange
     {
         /// <summary>
         ///     买入汇率

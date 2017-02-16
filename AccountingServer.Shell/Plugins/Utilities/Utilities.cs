@@ -15,7 +15,7 @@ namespace AccountingServer.Shell.Plugins.Utilities
     /// <summary>
     ///     常见记账凭证自动填写
     /// </summary>
-    public class Utilities : PluginBase
+    internal class Utilities : PluginBase
     {
         private static readonly ConfigManager<UtilTemplates> Templates =
             new ConfigManager<UtilTemplates>("Util.xml");

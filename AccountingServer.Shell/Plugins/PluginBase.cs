@@ -9,7 +9,7 @@ namespace AccountingServer.Shell.Plugins
     /// <summary>
     ///     插件基类
     /// </summary>
-    public abstract class PluginBase
+    internal abstract class PluginBase
     {
         /// <summary>
         ///     基本会计业务处理类

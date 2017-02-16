@@ -14,7 +14,7 @@ namespace AccountingServer.Shell.Plugins.BankBalance
     /// <summary>
     ///     计算日均余额
     /// </summary>
-    public class AverageDailyBalance : PluginBase
+    internal class AverageDailyBalance : PluginBase
     {
         public AverageDailyBalance(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
 

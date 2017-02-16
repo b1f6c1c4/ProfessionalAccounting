@@ -7,7 +7,7 @@ using ScintillaNET;
 namespace AccountingServer
 {
     // ReSharper disable once InconsistentNaming
-    public partial class frmMain : Form
+    internal partial class frmMain : Form
     {
         [DllImport("user32.dll")]
         private static extern bool SetProcessDPIAware();

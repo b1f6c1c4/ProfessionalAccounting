@@ -7,7 +7,7 @@ using AccountingServer.Entities;
 namespace AccountingServer.Shell.Plugins.THUInfo
 {
     // ReSharper disable once UnusedMember.Global
-    public partial class THUInfo
+    internal partial class THUInfo
     {
         /// <summary>
         ///     自动生成记账凭证
