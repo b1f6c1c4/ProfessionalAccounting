@@ -15,7 +15,7 @@ namespace AccountingServer.Shell.Plugins.YieldRate
     /// <summary>
     ///     实际收益率计算
     /// </summary>
-    public class YieldRate : PluginBase
+    internal class YieldRate : PluginBase
     {
         public YieldRate(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
 

@@ -12,7 +12,7 @@ using AccountingServer.Shell.Util;
 namespace AccountingServer.Shell.Plugins.THUInfo
 {
     // ReSharper disable once UnusedMember.Global
-    public partial class THUInfo
+    internal partial class THUInfo
     {
         /// <summary>
         ///     包含记账凭证信息的细目

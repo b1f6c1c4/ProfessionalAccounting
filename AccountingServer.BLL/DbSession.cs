@@ -2,7 +2,7 @@
 
 namespace AccountingServer.BLL
 {
-    public class DbSession
+    internal class DbSession
     {
         /// <summary>
         ///     数据库访问

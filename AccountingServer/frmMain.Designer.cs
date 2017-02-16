@@ -2,7 +2,7 @@
 
 namespace AccountingServer
 {
-    partial class frmMain
+    internal partial class frmMain
     {
         /// <summary>
         /// 必需的设计器变量。

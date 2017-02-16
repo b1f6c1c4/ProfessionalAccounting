@@ -18,7 +18,7 @@ namespace AccountingServer.Shell.Plugins.THUInfo
     /// <summary>
     ///     从info.tsinghua.edu.cn更新账户
     /// </summary>
-    public partial class THUInfo : PluginBase
+    internal partial class THUInfo : PluginBase
     {
         /// <summary>
         ///     对账忽略标志

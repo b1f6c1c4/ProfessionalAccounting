@@ -16,7 +16,7 @@ namespace AccountingServer.Shell.Util
     /// <summary>
     ///     成功
     /// </summary>
-    public class Succeed : IQueryResult
+    internal class Succeed : IQueryResult
     {
         public override string ToString() => "OK";
 
@@ -24,7 +24,7 @@ namespace AccountingServer.Shell.Util
         public bool AutoReturn => true;
     }
 
-    public class NumberAffected : IQueryResult
+    internal class NumberAffected : IQueryResult
     {
         /// <summary>
         ///     文档数
@@ -46,7 +46,7 @@ namespace AccountingServer.Shell.Util
     /// <summary>
     ///     文本
     /// </summary>
-    public abstract class Text : IQueryResult
+    internal abstract class Text : IQueryResult
     {
         /// <summary>
         ///     文字内容
@@ -67,7 +67,7 @@ namespace AccountingServer.Shell.Util
     /// <summary>
     ///     可编辑文本
     /// </summary>
-    public class EditableText : Text
+    internal class EditableText : Text
     {
         public EditableText(string text) : base(text) { }
 
@@ -78,7 +78,7 @@ namespace AccountingServer.Shell.Util
     /// <summary>
     ///     不可编辑文本
     /// </summary>
-    public class UnEditableText : Text
+    internal class UnEditableText : Text
     {
         public UnEditableText(string text) : base(text) { }
 

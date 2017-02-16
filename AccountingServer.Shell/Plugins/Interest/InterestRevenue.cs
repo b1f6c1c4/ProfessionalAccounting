@@ -15,7 +15,7 @@ namespace AccountingServer.Shell.Plugins.Interest
     /// <summary>
     ///     自动计算利息收入和还款
     /// </summary>
-    public class InterestRevenue : PluginBase
+    internal class InterestRevenue : PluginBase
     {
         public InterestRevenue(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
 
