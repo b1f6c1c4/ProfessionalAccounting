@@ -18,7 +18,7 @@ namespace AccountingServer.Shell.Serializer
 
         static AbbrSerializer() { Abbrs = new ConfigManager<Abbreviations>("Abbr.xml"); }
 
-        protected override VoucherDetail GetVoucherDetail(ref string expr)
+        protected override VoucherDetail ParseVoucherDetail(ref string expr)
         {
             var lst = new List<string>();
 
