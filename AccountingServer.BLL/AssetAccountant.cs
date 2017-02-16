@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AccountingServer.DAL;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 
@@ -12,7 +11,7 @@ namespace AccountingServer.BLL
     /// </summary>
     internal class AssetAccountant : DistributedAccountant
     {
-        public AssetAccountant(IDbAdapter db) : base(db) { }
+        public AssetAccountant(DbSession db) : base(db) { }
 
         /// <summary>
         ///     固定资产清理
@@ -260,6 +259,7 @@ namespace AccountingServer.BLL
                     VoucherType.Ordinary,
                     new VoucherDetail
                         {
+                            Currency = VoucherDetail.BaseCurrency,
                             Title = asset.Title,
                             Content = asset.StringID,
                             Fund = ((AcquisationItem)item).OrigValue
@@ -273,6 +273,7 @@ namespace AccountingServer.BLL
                     VoucherType.Depreciation,
                     new VoucherDetail
                         {
+                            Currency = VoucherDetail.BaseCurrency,
                             Title = asset.DepreciationExpenseTitle,
                             SubTitle = asset.DepreciationExpenseSubTitle,
                             Content = asset.StringID,
@@ -280,6 +281,7 @@ namespace AccountingServer.BLL
                         },
                     new VoucherDetail
                         {
+                            Currency = VoucherDetail.BaseCurrency,
                             Title = asset.DepreciationTitle,
                             Content = asset.StringID,
                             Fund = -((DepreciateItem)item).Amount
@@ -293,6 +295,7 @@ namespace AccountingServer.BLL
                     VoucherType.Devalue,
                     new VoucherDetail
                         {
+                            Currency = VoucherDetail.BaseCurrency,
                             Title = asset.DevaluationExpenseTitle,
                             SubTitle = asset.DevaluationExpenseSubTitle,
                             Content = asset.StringID,
@@ -300,6 +303,7 @@ namespace AccountingServer.BLL
                         },
                     new VoucherDetail
                         {
+                            Currency = VoucherDetail.BaseCurrency,
                             Title = asset.DevaluationTitle,
                             Content = asset.StringID,
                             Fund = -((DevalueItem)item).Amount
@@ -324,24 +328,28 @@ namespace AccountingServer.BLL
                     VoucherType.Ordinary,
                     new VoucherDetail
                         {
+                            Currency = VoucherDetail.BaseCurrency,
                             Title = asset.Title,
                             Content = asset.StringID,
                             Fund = -asset.Value
                         },
                     new VoucherDetail
                         {
+                            Currency = VoucherDetail.BaseCurrency,
                             Title = asset.DepreciationTitle,
                             Content = asset.StringID,
                             Fund = totalDep
                         },
                     new VoucherDetail
                         {
+                            Currency = VoucherDetail.BaseCurrency,
                             Title = asset.DevaluationTitle,
                             Content = asset.StringID,
                             Fund = totalDev
                         },
                     new VoucherDetail
                         {
+                            Currency = VoucherDetail.BaseCurrency,
                             Title = DefaultDispositionTitle,
                             Content = asset.StringID,
                             Fund = bookValue,

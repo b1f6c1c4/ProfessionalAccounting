@@ -14,9 +14,11 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     数据库访问
         /// </summary>
-        protected readonly IDbAdapter Db;
+        private readonly DbSession m_Db;
 
-        protected DistributedAccountant(IDbAdapter db) { Db = db; }
+        protected IDbAdapter Db => m_Db.Db;
+
+        protected DistributedAccountant(DbSession db) { m_Db = db; }
 
         /// <summary>
         ///     获取分期的剩余

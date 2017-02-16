@@ -179,7 +179,7 @@ namespace AccountingServer.Shell
             Func<Asset, IQueryCompunded<IVoucherQueryAtom>> getMainQ =
                 a =>
                     ParsingF.VoucherQuery(
-                        $"{{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} }}*{{ {{ Depreciation }} + {{ Devalue }} }}");
+                        $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}");
             return new NumberAffected(
                 Accountant.SelectAssets(distQuery)
                     .Sum(
