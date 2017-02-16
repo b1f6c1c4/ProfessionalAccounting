@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AccountingServer.DAL;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 
@@ -12,7 +11,7 @@ namespace AccountingServer.BLL
     /// </summary>
     internal class AmortAccountant : DistributedAccountant
     {
-        public AmortAccountant(IDbAdapter db) : base(db) { }
+        public AmortAccountant(DbSession db) : base(db) { }
 
         /// <summary>
         ///     获取本次摊销日期
@@ -223,6 +222,7 @@ namespace AccountingServer.BLL
             var lst = template.Details.Select(
                 detail => new VoucherDetail
                     {
+                        Currency = detail.Currency,
                         Title = detail.Title,
                         SubTitle = detail.SubTitle,
                         Content = detail.Content,
