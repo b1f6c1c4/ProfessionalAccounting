@@ -49,18 +49,20 @@ namespace AccountingServer.Shell.Serializer
         {
             var sb = new StringBuilder();
             var t = TitleManager.GetTitleName(detail.Title);
-            if (detail.SubTitle.HasValue)
-            {
-                var s = TitleManager.GetTitleName(detail.Title, detail.SubTitle);
-                sb.AppendLine($"// {t}-{s}");
-            }
-            else
-                sb.AppendLine($"// {t}");
+            sb.AppendLine(
+                detail.SubTitle.HasValue
+                    ? $"// {t}-{TitleManager.GetTitleName(detail.Title, detail.SubTitle)}"
+                    : $"// {t}");
             if (detail.Currency != null &&
                 detail.Currency != VoucherDetail.BaseCurrency)
                 sb.Append($"@{detail.Currency} ");
-            sb.AppendLine(
-                $"T{detail.Title.AsTitle()}{detail.SubTitle.AsSubTitle()} {detail.Content?.Quotation('\'')} {detail.Remark?.Quotation('\"')} {detail.Fund}");
+            sb.Append($"T{detail.Title.AsTitle()}{detail.SubTitle.AsSubTitle()} ");
+            if (detail.Content == null &&
+                detail.Remark != null)
+                sb.Append("''");
+            else
+                sb.Append(detail.Content?.Quotation('\''));
+            sb.AppendLine($" {detail.Remark?.Quotation('\"')} {detail.Fund}");
             return sb.ToString();
         }
 
