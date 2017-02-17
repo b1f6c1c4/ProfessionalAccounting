@@ -46,7 +46,7 @@ namespace AccountingServer.Shell.Plugins.THUInfo
 
         /// <inheritdoc />
         public override string ToString() => string.Format(
-            "@ {4:s}: #{0}{1}{2}{3} {5}",
+            "{4:s}\t{0}\t{1}\t{2}\t{3}\t{5}",
             Index.ToString(CultureInfo.InvariantCulture).CPadRight(4),
             Location.CPadRight(17),
             Type.CPadRight(23),

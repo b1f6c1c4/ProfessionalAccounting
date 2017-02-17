@@ -44,30 +44,38 @@ namespace AccountingServer.Shell.Plugins.THUInfo
             foreach (var rec in recordsGroup)
             {
                 var ep = Convert.ToInt32(rec.Endpoint);
-                var res = Templates.Where(t => t.Ranges.Any(iv => iv.Start <= ep && iv.End >= ep)).ToList();
+                var res = Templates.Where(
+                        t =>
+                            (t.Type == null || t.Type == rec.Type) &&
+                            t.Ranges?.Any(iv => iv.Start <= ep && iv.End >= ep) != false)
+                    .ToList();
+
                 if (res.Count == 1)
                 {
                     var voucher = new Voucher
                         {
                             Date = recordsGroup.Key.Date,
-                            Details = new List<VoucherDetail>
-                                {
-                                    new VoucherDetail
-                                        {
-                                            Title = 1012,
-                                            SubTitle = 05,
-                                            Fund = -rec.Fund,
-                                            Remark = rec.Index.ToString(CultureInfo.InvariantCulture)
-                                        }
-                                }
+                            Details = new List<VoucherDetail>()
                         };
 
+                    var coeff = 0D;
                     foreach (var s in res[0].DetailString)
                     {
                         var d = Serializer.ParseVoucherDetail(s);
+                        // ReSharper disable once PossibleInvalidOperationException
+                        coeff -= d.Fund.Value;
                         d.Fund *= rec.Fund;
                         voucher.Details.Add(d);
                     }
+
+                    voucher.Details.Add(
+                        new VoucherDetail
+                            {
+                                Title = 1012,
+                                SubTitle = 05,
+                                Fund = coeff * rec.Fund,
+                                Remark = rec.Index.ToString(CultureInfo.InvariantCulture)
+                            });
 
                     result.Add(voucher);
                 }
