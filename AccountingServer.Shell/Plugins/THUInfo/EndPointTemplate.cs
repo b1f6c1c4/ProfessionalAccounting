@@ -18,6 +18,9 @@ namespace AccountingServer.Shell.Plugins.THUInfo
         [XmlElement("Detail")]
         public List<string> DetailString { get; set; }
 
+        [XmlElement("Type")]
+        public string Type { get; set; }
+
         [XmlArrayItem("Range")] public List<EndPointRange> Ranges;
     }
 

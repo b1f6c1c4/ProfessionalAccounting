@@ -115,51 +115,61 @@ namespace AccountingServer.Shell.Plugins.THUInfo
             return cred;
         }
 
-        /// <inheritdoc />
-        public override IQueryResult Execute(string expr)
+        private IQueryResult DoCompare(bool force, out Problems problems)
         {
-            if (ParsingF.Optional(ref expr, "ep"))
-            {
-                ParsingF.Eof(expr);
-                return ShowEndPoints();
-            }
-
-            if (ParsingF.Optional(ref expr, "cred"))
-            {
-                ParsingF.Eof(expr);
-                DropCredential();
-                FetchData();
-            }
-
-            Problems problems;
             lock (m_Lock)
                 problems = Compare();
 
-            if (ParsingF.Optional(ref expr, "whatif"))
-            {
-                ParsingF.Eof(expr);
+            if (problems.Any || force)
                 return ShowComparison(problems);
+
+            return null;
+        }
+
+        /// <inheritdoc />
+    public override IQueryResult Execute(string expr)
+        {
+            Problems problems;
+
+            expr = expr.TrimStart();
+            switch (expr)
+            {
+                case "ep":
+                    return ShowEndPoints();
+                case "raw":
+                    return ShowRawRecords();
+                case "cred":
+                    DropCredential();
+                    FetchData();
+                    return new Succeed();
+                case "whatif":
+                    return DoCompare(true, out problems);
+                case "":
+                    break;
+                default:
+                    throw new InvalidOperationException("表达式无效");
             }
 
-            if (problems.Any)
-                return ShowComparison(problems);
+            var t = DoCompare(false, out problems);
+            if (t != null)
+                return t;
 
-            if (!problems.Records.Any())
-                return new Succeed();
-
-            ParsingF.Eof(expr);
+            var sb = new StringBuilder();
+            sb.AppendLine("---Generated");
 
             List<TransactionRecord> fail;
             foreach (var voucher in AutoGenerate(problems.Records, out fail))
+            {
                 Accountant.Upsert(voucher);
+                sb.AppendLine(Serializer.PresentVoucher(voucher));
+            }
 
-            if (!fail.Any())
-                return new Succeed();
-
-            var sb = new StringBuilder();
-            sb.AppendLine("---Can not generate");
-            foreach (var r in fail)
-                sb.AppendLine(r.ToString());
+            if (fail.Any())
+            {
+                sb.AppendLine("---Can not generate");
+                foreach (var r in fail)
+                    sb.AppendLine(r.ToString());
+            }
 
             return new EditableText(sb.ToString());
         }
@@ -193,6 +203,21 @@ namespace AccountingServer.Shell.Plugins.THUInfo
                 var content = tmp.Length == 1 ? tmp.First().Content : string.Empty;
                 sb.AppendLine($"{d.Voucher.ID,28}{d.Detail.Remark.CPadRight(20)}{content.CPadRight(20)}{record.Endpoint}");
             }
+
+            return new UnEditableText(sb.ToString());
+        }
+
+        /// <summary>
+        ///     列出原始记录
+        /// </summary>
+        /// <returns>执行结果</returns>
+        private IQueryResult ShowRawRecords()
+        {
+            var sb = new StringBuilder();
+
+            lock (m_Lock)
+                foreach (var record in m_Crawler.Result)
+                    sb.AppendLine(record.ToString());
 
             return new UnEditableText(sb.ToString());
         }
