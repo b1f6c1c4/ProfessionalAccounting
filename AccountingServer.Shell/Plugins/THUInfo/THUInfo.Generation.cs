@@ -47,7 +47,7 @@ namespace AccountingServer.Shell.Plugins.THUInfo
                 var res = Templates.Where(
                         t =>
                             (t.Type == null || t.Type == rec.Type) &&
-                            t.Ranges?.Any(iv => iv.Start <= ep && iv.End >= ep) != false)
+                            (t.Ranges?.Any() != true || t.Ranges.Any(iv => iv.Start <= ep && iv.End >= ep)))
                     .ToList();
 
                 if (res.Count == 1)
