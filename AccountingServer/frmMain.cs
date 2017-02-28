@@ -162,9 +162,11 @@ namespace AccountingServer
                 case Keys.Enter:
                     if (string.IsNullOrWhiteSpace(textBoxCommand.Text))
                     {
-                        scintilla.InsertText(scintilla.Lines[scintilla.CurrentLine].Position, m_Shell.EmptyVoucher);
+                        var line = scintilla.CurrentLine;
+                        scintilla.InsertText(scintilla.Lines[line].Position, m_Shell.EmptyVoucher);
                         scintilla.Focus();
-                        scintilla.SelectionStart = scintilla.Lines[scintilla.CurrentLine + 1].Position;
+                        scintilla.SelectionStart = scintilla.Lines[line + 1].Position;
+                        scintilla.SelectionEnd = scintilla.SelectionStart;
                         scintilla.ScrollCaret();
                         return true;
                     }
