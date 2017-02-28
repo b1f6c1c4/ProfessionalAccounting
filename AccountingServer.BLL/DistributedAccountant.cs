@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using AccountingServer.DAL;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 
@@ -14,11 +13,9 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     数据库访问
         /// </summary>
-        private readonly DbSession m_Db;
+        protected readonly DbSession Db;
 
-        protected IDbAdapter Db => m_Db.Db;
-
-        protected DistributedAccountant(DbSession db) { m_Db = db; }
+        protected DistributedAccountant(DbSession db) { Db = db; }
 
         /// <summary>
         ///     获取分期的剩余
