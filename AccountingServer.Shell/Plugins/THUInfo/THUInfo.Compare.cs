@@ -99,13 +99,9 @@ namespace AccountingServer.Shell.Plugins.THUInfo
         {
             var data = new List<TransactionRecord>(m_Crawler.Result);
 
-            var voucherQuery = new VoucherQueryAtomBase { DetailFilter = DetailQuery };
             var bin = new HashSet<int>();
             var binConflict = new HashSet<int>();
-            foreach (var d in Accountant.SelectVouchers(voucherQuery)
-                .SelectMany(
-                    v => v.Details.Where(d => d.IsMatch(DetailQuery))
-                        .Select(d => new VDetail { Detail = d, Voucher = v })))
+            foreach (var d in GetVDetails())
             {
                 var id = Convert.ToInt32(d.Detail.Remark);
                 if (!bin.Add(id))

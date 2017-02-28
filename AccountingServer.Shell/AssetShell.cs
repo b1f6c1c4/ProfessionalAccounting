@@ -174,21 +174,18 @@ namespace AccountingServer.Shell
         }
 
         protected override IQueryResult ExecuteResetHard(IQueryCompunded<IDistributedQueryAtom> distQuery,
-            IQueryCompunded<IVoucherQueryAtom> query)
-        {
-            Func<Asset, IQueryCompunded<IVoucherQueryAtom>> getMainQ =
-                a =>
-                    ParsingF.VoucherQuery(
-                        $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}");
-            return new NumberAffected(
-                Accountant.SelectAssets(distQuery)
-                    .Sum(
-                        a => Accountant.DeleteVouchers(
-                            new VoucherQueryAryBase
-                            (
-                                OperatorType.Intersect,
-                                new[] { query, getMainQ(a) }))));
-        }
+            IQueryCompunded<IVoucherQueryAtom> query) => new NumberAffected(
+            Accountant.SelectAssets(distQuery)
+                .Sum(
+                    a => Accountant.DeleteVouchers(
+                        new VoucherQueryAryBase
+                        (
+                            OperatorType.Intersect,
+                            new[]
+                                {
+                                    query, ParsingF.VoucherQuery(
+                                        $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}")
+                                }))));
 
         /// <inheritdoc />
         protected override IQueryResult ExecuteApply(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,

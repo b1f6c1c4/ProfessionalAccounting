@@ -54,7 +54,7 @@ namespace AccountingServer.Entities.Util
 
     public class DetailQueryAryBase : QueryAryBase<IDetailQueryAtom>
     {
-        public DetailQueryAryBase(OperatorType op, IList<IQueryCompunded<IDetailQueryAtom>> queries) : base(op, queries) { }
+        private DetailQueryAryBase(OperatorType op, IList<IQueryCompunded<IDetailQueryAtom>> queries) : base(op, queries) { }
 
         public DetailQueryAryBase(IEnumerable<VoucherDetail> filters, bool useAnd, int dir = 0)
             : this(
@@ -66,17 +66,6 @@ namespace AccountingServer.Entities.Util
 
     public struct VoucherQueryAtomBase : IVoucherQueryAtom
     {
-        public VoucherQueryAtomBase(Voucher vfilter = null, VoucherDetail filter = null, DateFilter? rng = null,
-            int dir = 0,
-            bool forAll = false)
-            : this()
-        {
-            VoucherFilter = vfilter;
-            ForAll = forAll;
-            Range = rng ?? DateFilter.Unconstrained;
-            DetailFilter = new DetailQueryAtomBase(filter, dir);
-        }
-
         public VoucherQueryAtomBase(Voucher vfilter = null, IEnumerable<VoucherDetail> filters = null,
             DateFilter? rng = null, bool useAnd = false, int dir = 0,
             bool forAll = false)

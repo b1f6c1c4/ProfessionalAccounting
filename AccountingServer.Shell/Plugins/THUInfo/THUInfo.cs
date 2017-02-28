@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AccountingServer.BLL;
+using AccountingServer.BLL.Parsing;
 using AccountingServer.BLL.Util;
-using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
@@ -22,22 +22,6 @@ namespace AccountingServer.Shell.Plugins.THUInfo
         ///     对账忽略标志
         /// </summary>
         private const string IgnoranceMark = "reconciliation";
-
-        private static readonly IQueryCompunded<IDetailQueryAtom> DetailQuery =
-            new DetailQueryAryBase(
-                OperatorType.Substract,
-                new IQueryCompunded<IDetailQueryAtom>[]
-                    {
-                        new DetailQueryAtomBase(new VoucherDetail { Title = 1012, SubTitle = 05 }),
-                        new DetailQueryAryBase(
-                            OperatorType.Union,
-                            new IQueryCompunded<IDetailQueryAtom>[]
-                                {
-                                    new DetailQueryAtomBase(new VoucherDetail { Remark = "" }),
-                                    new DetailQueryAtomBase(new VoucherDetail { Remark = IgnoranceMark })
-                                }
-                        )
-                    });
 
         private static readonly ConfigManager<EndPointTemplates> EndPointTemplates;
 
@@ -125,7 +109,7 @@ namespace AccountingServer.Shell.Plugins.THUInfo
         }
 
         /// <inheritdoc />
-    public override IQueryResult Execute(string expr)
+        public override IQueryResult Execute(string expr)
         {
             Problems problems;
 
@@ -187,12 +171,8 @@ namespace AccountingServer.Shell.Plugins.THUInfo
         private IQueryResult ShowEndPoints()
         {
             var sb = new StringBuilder();
-            var voucherQuery = new VoucherQueryAtomBase { DetailFilter = DetailQuery };
             var bin = new HashSet<int>();
-            foreach (var d in Accountant.SelectVouchers(voucherQuery)
-                .SelectMany(
-                    v => v.Details.Where(d => d.IsMatch(DetailQuery))
-                        .Select(d => new VDetail { Detail = d, Voucher = v })))
+            foreach (var d in GetVDetails())
             {
                 var id = Convert.ToInt32(d.Detail.Remark);
                 if (!bin.Add(id))
@@ -207,11 +187,22 @@ namespace AccountingServer.Shell.Plugins.THUInfo
 
                 var tmp = d.Voucher.Details.Where(dd => dd.Title == 6602).ToArray();
                 var content = tmp.Length == 1 ? tmp.First().Content : string.Empty;
-                sb.AppendLine($"{d.Voucher.ID,28}{d.Detail.Remark.CPadRight(20)}{content.CPadRight(20)}{record.Endpoint}");
+                sb.AppendLine(
+                    $"{d.Voucher.ID,28}{d.Detail.Remark.CPadRight(20)}{content.CPadRight(20)}{record.Endpoint}");
             }
 
             return new UnEditableText(sb.ToString());
         }
+
+        private IEnumerable<VDetail> GetVDetails() =>
+            Accountant.RunVoucherQuery("T101205")
+                .SelectMany(
+                    v =>
+                        v.Details.Where(
+                                d =>
+                                    d.Title == 1012 && d.SubTitle == 05
+                                    && d.Remark != null && d.Remark != IgnoranceMark)
+                            .Select(d => new VDetail { Detail = d, Voucher = v }));
 
         /// <summary>
         ///     列出原始记录
