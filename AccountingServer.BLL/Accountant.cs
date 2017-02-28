@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using AccountingServer.DAL;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 
@@ -14,8 +13,6 @@ namespace AccountingServer.BLL
     public class Accountant
     {
         private readonly DbSession m_Db;
-
-        private IDbAdapter Db => m_Db.Db;
 
         private readonly AssetAccountant m_AssetAccountant;
 
@@ -34,14 +31,14 @@ namespace AccountingServer.BLL
 
         #region Voucher
 
-        public Voucher SelectVoucher(string id) => Db.SelectVoucher(id);
+        public Voucher SelectVoucher(string id) => m_Db.SelectVoucher(id);
 
         public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query)
-            => Db.SelectVouchers(query);
+            => m_Db.SelectVouchers(query);
 
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
-            var res = Db.SelectVoucherDetailsGrouped(query);
+            var res = m_Db.SelectVoucherDetailsGrouped(query);
             if (query.Subtotal.AggrType != AggregationType.ChangedDay &&
                 query.Subtotal.GatherType == GatheringType.NonZero)
                 return res.Where(b => !b.Fund.IsZero());
@@ -49,16 +46,16 @@ namespace AccountingServer.BLL
             return res;
         }
 
-        public bool DeleteVoucher(string id) => Db.DeleteVoucher(id);
+        public bool DeleteVoucher(string id) => m_Db.DeleteVoucher(id);
 
-        public long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query) => Db.DeleteVouchers(query);
+        public long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query) => m_Db.DeleteVouchers(query);
 
         public bool Upsert(Voucher entity)
         {
             foreach (var d in entity.Details)
                 d.Currency = d.Currency?.ToUpperInvariant() ?? VoucherDetail.BaseCurrency;
 
-            return Db.Upsert(entity);
+            return m_Db.Upsert(entity);
         }
 
         #endregion
@@ -68,26 +65,26 @@ namespace AccountingServer.BLL
         [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public Asset SelectAsset(Guid id)
         {
-            var result = Db.SelectAsset(id);
+            var result = m_Db.SelectAsset(id);
             AssetAccountant.InternalRegular(result);
             return result;
         }
 
         public IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            foreach (var asset in Db.SelectAssets(filter))
+            foreach (var asset in m_Db.SelectAssets(filter))
             {
                 AssetAccountant.InternalRegular(asset);
                 yield return asset;
             }
         }
 
-        public bool DeleteAsset(Guid id) => Db.DeleteAsset(id);
+        public bool DeleteAsset(Guid id) => m_Db.DeleteAsset(id);
 
         [SuppressMessage("ReSharper", "UnusedMember.Global")]
-        public long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter) => Db.DeleteAssets(filter);
+        public long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter) => m_Db.DeleteAssets(filter);
 
-        public bool Upsert(Asset entity) => Db.Upsert(entity);
+        public bool Upsert(Asset entity) => m_Db.Upsert(entity);
 
         public IEnumerable<Voucher> RegisterVouchers(Asset asset, DateFilter rng,
             IQueryCompunded<IVoucherQueryAtom> query)
@@ -106,27 +103,27 @@ namespace AccountingServer.BLL
         [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public Amortization SelectAmortization(Guid id)
         {
-            var result = Db.SelectAmortization(id);
+            var result = m_Db.SelectAmortization(id);
             AmortAccountant.InternalRegular(result);
             return result;
         }
 
         public IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            foreach (var amort in Db.SelectAmortizations(filter))
+            foreach (var amort in m_Db.SelectAmortizations(filter))
             {
                 AmortAccountant.InternalRegular(amort);
                 yield return amort;
             }
         }
 
-        public bool DeleteAmortization(Guid id) => Db.DeleteAmortization(id);
+        public bool DeleteAmortization(Guid id) => m_Db.DeleteAmortization(id);
 
         [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
-            => Db.DeleteAmortizations(filter);
+            => m_Db.DeleteAmortizations(filter);
 
-        public bool Upsert(Amortization entity) => Db.Upsert(entity);
+        public bool Upsert(Amortization entity) => m_Db.Upsert(entity);
 
         public IEnumerable<Voucher> RegisterVouchers(Amortization amort, DateFilter rng,
             IQueryCompunded<IVoucherQueryAtom> query)
