@@ -153,7 +153,6 @@ namespace AccountingServer.Shell.Plugins.THUInfo
                 return t;
 
             var sb = new StringBuilder();
-            sb.AppendLine("---Generated");
 
             List<TransactionRecord> fail;
             foreach (var voucher in AutoGenerate(problems.Records, out fail))
@@ -169,6 +168,15 @@ namespace AccountingServer.Shell.Plugins.THUInfo
                     sb.AppendLine(r.ToString());
             }
 
+            Problems problems2;
+            var cmp = DoCompare(true, out problems2) as EditableText;
+            if (cmp != null)
+                sb.AppendLine(cmp.ToString());
+
+            if (sb.Length <= 0)
+                return new Succeed();
+
+            sb.Insert(0, "---Generated" + Environment.NewLine);
             return new EditableText(sb.ToString());
         }
 
