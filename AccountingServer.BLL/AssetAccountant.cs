@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
+using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.BLL
 {
@@ -105,78 +107,42 @@ namespace AccountingServer.BLL
             if (asset.Remark == Asset.IgnoranceMark)
                 yield break;
 
+            foreach (
+                var voucher in
+                Db.SelectVouchers(ParsingF.VoucherQuery($"T{asset.Title.AsTitle()} {asset.StringID.Quotation('\'')}"))
+                    .Where(v => v.IsMatch(query)))
             {
-                var filter = new VoucherDetail
-                    {
-                        Title = asset.Title,
-                        Content = asset.StringID
-                    };
-                foreach (
-                    var voucher in
-                    Db.SelectVouchers(
-                        new VoucherQueryAryBase(
-                            OperatorType.Intersect,
-                            new[] { query, new VoucherQueryAtomBase(filter: filter) })))
+                if (voucher.Remark == Asset.IgnoranceMark)
+                    continue;
+
+                if (asset.Schedule.Any(item => item.VoucherID == voucher.ID))
+                    continue;
+
+                // ReSharper disable once PossibleInvalidOperationException
+                var value =
+                    voucher.Details.Single(d => d.Title == asset.Title && d.Content == asset.StringID).Fund.Value;
+
+                if (value > 0)
                 {
-                    if (voucher.Remark == Asset.IgnoranceMark)
-                        continue;
+                    var lst = asset.Schedule.Where(item => item.Date.Within(rng))
+                        .Where(
+                            item =>
+                                item is AcquisationItem &&
+                                (!voucher.Date.HasValue || item.Date == voucher.Date) &&
+                                (((AcquisationItem)item).OrigValue - value).IsZero())
+                        .ToList();
 
-                    if (asset.Schedule.Any(item => item.VoucherID == voucher.ID))
-                        continue;
-
-                    // ReSharper disable once PossibleInvalidOperationException
-                    var value = voucher.Details.Single(d => d.IsMatch(filter)).Fund.Value;
-
-                    if (value > 0)
-                    {
-                        var lst = asset.Schedule.Where(item => item.Date.Within(rng))
-                            .Where(
-                                item =>
-                                    item is AcquisationItem &&
-                                    (!voucher.Date.HasValue || item.Date == voucher.Date) &&
-                                    (((AcquisationItem)item).OrigValue - value).IsZero())
-                            .ToList();
-
-                        if (lst.Count == 1)
-                            lst[0].VoucherID = voucher.ID;
-                        else
-                            yield return voucher;
-                    }
-                    else if (value < 0)
-                    {
-                        var lst = asset.Schedule.Where(item => item.Date.Within(rng))
-                            .Where(
-                                item =>
-                                    item is DispositionItem &&
-                                    (!voucher.Date.HasValue || item.Date == voucher.Date))
-                            .ToList();
-
-                        if (lst.Count == 1)
-                            lst[0].VoucherID = voucher.ID;
-                        else
-                            yield return voucher;
-                    }
+                    if (lst.Count == 1)
+                        lst[0].VoucherID = voucher.ID;
                     else
                         yield return voucher;
                 }
-            }
-            {
-                var filter = new VoucherDetail
-                    {
-                        Title = asset.DepreciationTitle,
-                        Content = asset.StringID
-                    };
-                foreach (var voucher in Db.SelectVouchers(new VoucherQueryAtomBase(filter: filter)))
+                else if (value < 0)
                 {
-                    if (voucher.Remark == Asset.IgnoranceMark)
-                        continue;
-
-                    if (asset.Schedule.Any(item => item.VoucherID == voucher.ID))
-                        continue;
-
-                    var lst = asset.Schedule.Where(
+                    var lst = asset.Schedule.Where(item => item.Date.Within(rng))
+                        .Where(
                             item =>
-                                item is DepreciateItem &&
+                                item is DispositionItem &&
                                 (!voucher.Date.HasValue || item.Date == voucher.Date))
                         .ToList();
 
@@ -185,32 +151,54 @@ namespace AccountingServer.BLL
                     else
                         yield return voucher;
                 }
+                else
+                    yield return voucher;
             }
+
+            foreach (
+                var voucher in
+                Db.SelectVouchers(
+                    ParsingF.VoucherQuery($"T{asset.DepreciationTitle.AsTitle()} {asset.StringID.Quotation('\'')}")))
             {
-                var filter = new VoucherDetail
-                    {
-                        Title = asset.DevaluationTitle,
-                        Content = asset.StringID
-                    };
-                foreach (var voucher in Db.SelectVouchers(new VoucherQueryAtomBase(filter: filter)))
-                {
-                    if (voucher.Remark == Asset.IgnoranceMark)
-                        continue;
+                if (voucher.Remark == Asset.IgnoranceMark)
+                    continue;
 
-                    if (asset.Schedule.Any(item => item.VoucherID == voucher.ID))
-                        continue;
+                if (asset.Schedule.Any(item => item.VoucherID == voucher.ID))
+                    continue;
 
-                    var lst = asset.Schedule.Where(
-                            item =>
-                                item is DevalueItem &&
-                                (!voucher.Date.HasValue || item.Date == voucher.Date))
-                        .ToList();
+                var lst = asset.Schedule.Where(
+                        item =>
+                            item is DepreciateItem &&
+                            (!voucher.Date.HasValue || item.Date == voucher.Date))
+                    .ToList();
 
-                    if (lst.Count == 1)
-                        lst[0].VoucherID = voucher.ID;
-                    else
-                        yield return voucher;
-                }
+                if (lst.Count == 1)
+                    lst[0].VoucherID = voucher.ID;
+                else
+                    yield return voucher;
+            }
+
+            foreach (
+                var voucher in
+                Db.SelectVouchers(
+                    ParsingF.VoucherQuery($"T{asset.DevaluationTitle.AsTitle()} {asset.StringID.Quotation('\'')}")))
+            {
+                if (voucher.Remark == Asset.IgnoranceMark)
+                    continue;
+
+                if (asset.Schedule.Any(item => item.VoucherID == voucher.ID))
+                    continue;
+
+                var lst = asset.Schedule.Where(
+                        item =>
+                            item is DevalueItem &&
+                            (!voucher.Date.HasValue || item.Date == voucher.Date))
+                    .ToList();
+
+                if (lst.Count == 1)
+                    lst[0].VoucherID = voucher.ID;
+                else
+                    yield return voucher;
             }
         }
 
