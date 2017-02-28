@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 
 namespace AccountingServer.BLL
 {
-    internal class DbSession : IDbAdapter
+    internal class DbSession
     {
         /// <summary>
         ///     数据库访问
@@ -57,7 +59,14 @@ namespace AccountingServer.BLL
             => Db.SelectVouchers(query);
 
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
-            => Db.SelectVoucherDetailsGrouped(query);
+        {
+            var res = Db.SelectVoucherDetailsGrouped(query);
+            if (query.Subtotal.AggrType != AggregationType.ChangedDay &&
+                query.Subtotal.GatherType == GatheringType.NonZero)
+                return res.Where(b => !b.Fund.IsZero());
+
+            return res;
+        }
 
         public bool DeleteVoucher(string id)
             => Db.DeleteVoucher(id);
@@ -116,6 +125,10 @@ namespace AccountingServer.BLL
             => Db.DeleteAmortizations(filter);
 
         public bool Upsert(Amortization entity)
-            => Db.Upsert(entity);
+        {
+            Regularize(entity.Template);
+
+            return Db.Upsert(entity);
+        }
     }
 }
