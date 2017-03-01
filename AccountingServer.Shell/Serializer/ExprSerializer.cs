@@ -153,7 +153,12 @@ namespace AccountingServer.Shell.Serializer
         }
 
         /// <inheritdoc />
-        public virtual VoucherDetail ParseVoucherDetail(string expr) => ParseVoucherDetail(ref expr);
+        public virtual VoucherDetail ParseVoucherDetail(string expr)
+        {
+            var res = ParseVoucherDetail(ref expr);
+            Parsing.Eof(expr);
+            return res;
+        }
 
         protected virtual VoucherDetail ParseVoucherDetail(ref string expr)
         {
