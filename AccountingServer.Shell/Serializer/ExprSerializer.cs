@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
@@ -160,16 +161,18 @@ namespace AccountingServer.Shell.Serializer
             return res;
         }
 
-        protected virtual VoucherDetail ParseVoucherDetail(ref string expr)
+        private VoucherDetail ParseVoucherDetail(ref string expr)
         {
+            var lst = new List<string>();
+
             Parsing.TrimStartComment(ref expr);
             var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))?.Substring(1).ToUpperInvariant();
             Parsing.TrimStartComment(ref expr);
             var title = Parsing.Title(ref expr);
             if (title == null)
-                return null;
+                if (AlternativeTitle(ref expr, lst, ref title))
+                    return null;
 
-            var lst = new List<string>();
             double? fund;
 
             while (true)
@@ -192,6 +195,12 @@ namespace AccountingServer.Shell.Serializer
             var content = lst.Count >= 1 ? lst[0] : null;
             var remark = lst.Count >= 2 ? lst[1] : null;
 
+            if (content == "G()")
+                content = Guid.NewGuid().ToString().ToUpperInvariant();
+
+            if (remark == "G()")
+                remark = Guid.NewGuid().ToString().ToUpperInvariant();
+
             return new VoucherDetail
                 {
                     Currency = currency,
@@ -202,6 +211,8 @@ namespace AccountingServer.Shell.Serializer
                     Remark = string.IsNullOrEmpty(remark) ? null : remark
                 };
         }
+
+        protected virtual bool AlternativeTitle(ref string expr, ICollection<string> lst, ref ITitle title) => false;
 
         public string PresentAsset(Asset asset) { throw new NotImplementedException(); }
         public Asset ParseAsset(string str) { throw new NotImplementedException(); }

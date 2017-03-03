@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Xml.Serialization;
 using AccountingServer.BLL;
-using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
@@ -18,60 +17,20 @@ namespace AccountingServer.Shell.Serializer
 
         static AbbrSerializer() { Abbrs = new ConfigManager<Abbreviations>("Abbr.xml"); }
 
-        protected override VoucherDetail ParseVoucherDetail(ref string expr)
+        protected override bool AlternativeTitle(ref string expr, ICollection<string> lst, ref ITitle title)
         {
-            var lst = new List<string>();
+            Abbreviation d = null;
+            if (
+                Parsing.Token(
+                    ref expr,
+                    false,
+                    t => (d = Abbrs.Config.Abbrs.FirstOrDefault(a => a.Abbr == t)) != null) == null)
+                return true;
 
-            Parsing.TrimStartComment(ref expr);
-            var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))?.Substring(1).ToUpperInvariant();
-            Parsing.TrimStartComment(ref expr);
-            var title = Parsing.Title(ref expr);
-            if (title == null)
-            {
-                Abbreviation d = null;
-                if (
-                    Parsing.Token(
-                        ref expr,
-                        false,
-                        t => (d = Abbrs.Config.Abbrs.FirstOrDefault(a => a.Abbr == t)) != null) == null)
-                    return null;
-
-                title = d;
-                if (!d.Editable)
-                    lst.Add(d.Content);
-            }
-
-            double? fund;
-
-            while (true)
-            {
-                Parsing.TrimStartComment(ref expr);
-                if ((fund = Parsing.Double(ref expr)) != null)
-                    break;
-
-                Parsing.TrimStartComment(ref expr);
-                if (Parsing.Optional(ref expr, "null"))
-                    break;
-
-                if (lst.Count > 2)
-                    throw new ArgumentException("语法错误", nameof(expr));
-
-                Parsing.TrimStartComment(ref expr);
-                lst.Add(Parsing.Token(ref expr));
-            }
-
-            var content = lst.Count >= 1 ? lst[0] : null;
-            var remark = lst.Count >= 2 ? lst[1] : null;
-
-            return new VoucherDetail
-                {
-                    Currency = currency,
-                    Title = title.Title,
-                    SubTitle = title.SubTitle,
-                    Content = string.IsNullOrEmpty(content) ? null : content,
-                    Fund = fund,
-                    Remark = string.IsNullOrEmpty(remark) ? null : remark
-                };
+            title = d;
+            if (!d.Editable)
+                lst.Add(d.Content);
+            return false;
         }
     }
 
