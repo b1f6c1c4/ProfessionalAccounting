@@ -54,7 +54,7 @@ namespace AccountingServer.Shell.Serializer
             sb.AppendLine("        }");
             sb.AppendLine("        private static string G()");
             sb.AppendLine("        {");
-            sb.AppendLine("            return Guid.NewGuid().ToString().ToUpper();");
+            sb.AppendLine("            return Guid.NewGuid().ToString().ToUpperInvariant();");
             sb.AppendLine("        }");
             sb.AppendLine($"        public static {type.FullName} GetObject()");
             sb.AppendLine("        {");
