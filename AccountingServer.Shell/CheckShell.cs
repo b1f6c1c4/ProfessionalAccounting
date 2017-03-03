@@ -43,6 +43,11 @@ namespace AccountingServer.Shell
                     return BasicCheck();
                 case "2":
                     return AdvancedCheck();
+                case "3":
+                    if (m_Accountant.RunVoucherQuery("A").Any(voucher => !m_Accountant.Upsert(voucher)))
+                        throw new ApplicationException("未知错误");
+
+                    return new Succeed();
                 default:
                     throw new InvalidOperationException("表达式无效");
             }
