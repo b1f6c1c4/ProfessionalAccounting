@@ -22,6 +22,22 @@ namespace AccountingServer.BLL
 
         public void Connect(string uri) => Db = Facade.Create(uri);
 
+        private static int Compare<T>(T? lhs, T? rhs)
+            where T:struct,IComparable<T>
+        {
+            if (lhs.HasValue &&
+                rhs.HasValue)
+                return lhs.Value.CompareTo(rhs.Value);
+
+            if (lhs.HasValue)
+                return 1;
+
+            if (rhs.HasValue)
+                return -1;
+
+            return 0;
+        }
+
         [SuppressMessage("ReSharper", "PossibleInvalidOperationException")]
         private static int TheComparison(VoucherDetail lhs, VoucherDetail rhs)
         {
@@ -32,11 +48,11 @@ namespace AccountingServer.BLL
             if (res != 0)
                 return res;
 
-            res = lhs.Title.Value.CompareTo(rhs.Title.Value);
+            res = Compare(lhs.Title, rhs.Title);
             if (res != 0)
                 return res;
 
-            res = lhs.SubTitle.Value.CompareTo(rhs.SubTitle.Value);
+            res = Compare(lhs.SubTitle, rhs.SubTitle);
             if (res != 0)
                 return res;
 
