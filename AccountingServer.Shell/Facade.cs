@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Resources;
@@ -6,6 +7,7 @@ using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Carry;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
@@ -134,13 +136,34 @@ namespace AccountingServer.Shell
         /// <returns>新记账凭证的C#代码</returns>
         public string ExecuteVoucherUpsert(string code)
         {
+            var lst = new List<VoucherDetail>();
+
             var voucher = m_Serializer.ParseVoucher(code);
             foreach (var grp in voucher.Details.GroupBy(d => d.Currency ?? VoucherDetail.BaseCurrency))
             {
                 var unc = grp.SingleOrDefault(d => !d.Fund.HasValue);
+                var sum = grp.Sum(d => d.Fund ?? 0D);
                 if (unc != null)
-                    unc.Fund = -grp.Sum(d => d.Fund ?? 0D);
+                {
+                    lst = null;
+                    unc.Fund = -sum;
+                    continue;
+                }
+
+                // ReSharper disable once PossibleInvalidOperationException
+                if (!sum.IsZero())
+                    lst?.Add(
+                        new VoucherDetail
+                            {
+                                Currency = grp.Key,
+                                Title = 3999,
+                                Fund = -sum
+                            });
             }
+
+            if (lst != null &&
+                lst.Count >= 2)
+                voucher.Details.AddRange(lst);
 
             if (!m_Accountant.Upsert(voucher))
                 throw new ApplicationException("更新或添加失败");
