@@ -240,12 +240,13 @@ namespace AccountingServer.DAL
             Func<TAtom, FilterDefinition<T>> atomFilter)
             where TAtom : class
         {
-            if (query == null ||
-                query is TAtom)
-                return atomFilter((TAtom)query);
+            if (query == null)
+                return atomFilter(null);
 
-            var f = query as IQueryAry<TAtom>;
-            if (f == null)
+            if (query is TAtom a)
+                return atomFilter(a);
+
+            if (!(query is IQueryAry<TAtom> f))
                 throw new ArgumentException("检索式类型未知", nameof(query));
 
             switch (f.Operator)

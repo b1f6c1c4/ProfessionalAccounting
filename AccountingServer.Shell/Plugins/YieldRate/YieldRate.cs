@@ -34,9 +34,9 @@ namespace AccountingServer.Shell.Plugins.YieldRate
                         resx,
                         grp => grp.Key,
                         rsx => rsx.Content,
-                        (grp, bal) => new Tuple<IGrouping<string, Balance>, double>(grp, bal.Fund)))
+                        (grp, bal) => (Group: grp, Value: bal.Fund)))
                 sb.AppendLine(
-                    $"{tpl.Item1.Key}\t{GetRate(tpl.Item1.OrderBy(b => b.Date, new DateComparer()).ToList(), tpl.Item2) * 360:P2}");
+                    $"{tpl.Group.Key}\t{GetRate(tpl.Group.OrderBy(b => b.Date, new DateComparer()).ToList(), tpl.Value) * 360:P2}");
 
             return new UnEditableText(sb.ToString());
         }

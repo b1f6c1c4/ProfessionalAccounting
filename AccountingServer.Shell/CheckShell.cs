@@ -107,7 +107,7 @@ namespace AccountingServer.Shell
                                     $"T{title.Id.AsTitle()}00 {(title.Direction < 0 ? ">" : "<")} G")
                                 .SelectMany(
                                     v => v.Details.Where(d => d.Title == title.Id)
-                                        .Select(d => new Tuple<Voucher, VoucherDetail>(v, d))),
+                                        .Select(d => (Voucher: v, Detail: d))),
                             $"T{title.Id.AsTitle()}00",
                             sb);
                     else if (Math.Abs(title.Direction) == 2)
@@ -127,7 +127,7 @@ namespace AccountingServer.Shell
                                         v.Details.Where(
                                                 d =>
                                                     d.Title == title.Id && d.SubTitle == subTitle.Id)
-                                            .Select(d => new Tuple<Voucher, VoucherDetail>(v, d))),
+                                            .Select(d => (Voucher: v, Detail: d))),
                             $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}",
                             sb);
                     else if (Math.Abs(subTitle.Direction) == 2)
@@ -160,13 +160,13 @@ namespace AccountingServer.Shell
             }
         }
 
-        private static void DoCheck(IEnumerable<Tuple<Voucher, VoucherDetail>> res, string info,
+        private static void DoCheck(IEnumerable<(Voucher Voucher, VoucherDetail Detail)> res, string info,
             StringBuilder sb)
         {
             foreach (var d in res)
             {
                 // ReSharper disable PossibleInvalidOperationException
-                sb.AppendLine($"{d.Item1.ID} {d.Item1.Date:yyyyMMdd} {info} {d.Item2.Content}:{d.Item2.Fund.Value:R}");
+                sb.AppendLine($"{d.Voucher.ID} {d.Voucher.Date:yyyyMMdd} {info} {d.Detail.Content}:{d.Detail.Fund.Value:R}");
                 sb.AppendLine();
                 // ReSharper restore PossibleInvalidOperationException
             }

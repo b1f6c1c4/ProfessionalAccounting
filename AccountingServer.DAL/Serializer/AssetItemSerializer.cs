@@ -40,12 +40,12 @@ namespace AccountingServer.DAL.Serializer
             bsonWriter.Write("date", item.Date);
             bsonWriter.Write("remark", item.Remark);
 
-            if (item is AcquisationItem)
-                bsonWriter.Write("acq", ((AcquisationItem)item).OrigValue);
-            else if (item is DepreciateItem)
-                bsonWriter.Write("dep", ((DepreciateItem)item).Amount);
-            else if (item is DevalueItem)
-                bsonWriter.Write("devto", ((DevalueItem)item).FairValue);
+            if (item is AcquisationItem acq)
+                bsonWriter.Write("acq", acq.OrigValue);
+            else if (item is DepreciateItem dep)
+                bsonWriter.Write("dep", dep.Amount);
+            else if (item is DevalueItem dev)
+                bsonWriter.Write("devto", dev.FairValue);
             else if (item is DispositionItem)
                 bsonWriter.WriteNull("dispo");
             bsonWriter.WriteEndDocument();

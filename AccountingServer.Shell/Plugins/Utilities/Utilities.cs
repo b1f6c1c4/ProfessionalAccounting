@@ -60,25 +60,14 @@ namespace AccountingServer.Shell.Plugins.Utilities
             var time = Parsing.UniqueTime(ref expr) ?? DateTime.Today;
             var abbr = Parsing.Token(ref expr);
 
-            var template = Templates.Config.Templates.FirstOrDefault(t => t.Name == abbr);
-            if (template == null)
-                throw new KeyNotFoundException($"找不到常见记账凭证{abbr}");
+            var template = Templates.Config.Templates.FirstOrDefault(t => t.Name == abbr) ?? throw new KeyNotFoundException($"找不到常见记账凭证{abbr}");
 
             var num = 1D;
             if (template.TemplateType == UtilTemplateType.Value ||
                 template.TemplateType == UtilTemplateType.Fill)
             {
                 var valt = Parsing.Double(ref expr);
-                double val;
-                if (valt.HasValue)
-                    val = valt.Value;
-                else
-                {
-                    if (!template.Default.HasValue)
-                        throw new ApplicationException($"常见记账凭证{template.Name}没有默认值");
-
-                    val = template.Default.Value;
-                }
+                var val = valt.HasValue ? valt.Value : (template.Default ?? throw new ApplicationException($"常见记账凭证{template.Name}没有默认值"));
 
                 if (template.TemplateType == UtilTemplateType.Value)
                     num = val;

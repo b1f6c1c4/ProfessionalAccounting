@@ -21,9 +21,7 @@ namespace AccountingServer.Shell.Plugins.THUInfo
             failed = new List<TransactionRecord>();
             foreach (var grp in records.GroupBy(r => r.Date))
             {
-                List<Voucher> res0;
-                List<TransactionRecord> lst;
-                GenerateCommon(grp, out res0, out lst);
+                GenerateCommon(grp, out var res0, out var _);
                 res = res.Concat(res0);
             }
 

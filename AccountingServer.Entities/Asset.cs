@@ -116,7 +116,7 @@ namespace AccountingServer.Entities
         ///     编号的标准存储格式
         /// </summary>
         // ReSharper disable once UnusedMember.Global
-        public string StringID { get { return ID.ToString().ToUpperInvariant(); } set { ID = Guid.Parse(value); } }
+        public string StringID { get => ID.ToString().ToUpperInvariant(); set => ID = Guid.Parse(value); }
 
         /// <inheritdoc />
         public string Name { get; set; }
@@ -202,7 +202,7 @@ namespace AccountingServer.Entities
             if (res != 0)
                 return res;
 
-            Func<AssetItem, int> getType = t =>
+            int GetType(AssetItem t)
             {
                 if (t is AcquisationItem)
                     return 0;
@@ -214,8 +214,9 @@ namespace AccountingServer.Entities
                     return 3;
 
                 throw new ArgumentException("计算表条目类型未知");
-            };
-            return getType(x).CompareTo(getType(y));
+            }
+
+            return GetType(x).CompareTo(GetType(y));
         }
     }
 }

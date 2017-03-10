@@ -67,14 +67,8 @@ namespace AccountingServer.Shell.Util
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>组件</returns>
-        private IShellComponent FirstExecutable(string expr)
-        {
-            var comp = m_Components.FirstOrDefault(s => s.IsExecutable(expr));
-            if (comp == null)
-                throw new InvalidOperationException("表达式无效");
-
-            return comp;
-        }
+        private IShellComponent FirstExecutable(string expr) =>
+            m_Components.FirstOrDefault(s => s.IsExecutable(expr)) ?? throw new InvalidOperationException("表达式无效");
 
         /// <inheritdoc />
         public IQueryResult Execute(string expr) => FirstExecutable(expr).Execute(expr);

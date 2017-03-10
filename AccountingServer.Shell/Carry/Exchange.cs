@@ -78,19 +78,21 @@ namespace AccountingServer.Shell.Carry
         private static double RetriveCache(DateTime date, string target,
             IDictionary<string, Dictionary<DateTime, double>> cache, Func<double> func)
         {
-            double val;
-            Dictionary<DateTime, double> dic;
-            if (!cache.TryGetValue(target, out dic))
+            if (!cache.TryGetValue(target, out Dictionary<DateTime, double> dic))
             {
-                val = func();
-                dic = new Dictionary<DateTime, double> { { date, val } };
+                var v = func();
+                dic = new Dictionary<DateTime, double> { { date, v } };
                 cache.Add(target, dic);
+                return v;
             }
-            else if (!dic.TryGetValue(date, out val))
+
+            if (!dic.TryGetValue(date, out var val))
             {
-                val = func();
-                dic.Add(date, val);
+                var v = func();
+                dic.Add(date, v);
+                return v;
             }
+
             return val;
         }
     }

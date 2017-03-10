@@ -45,7 +45,7 @@ namespace AccountingServer.BLL
             lst.Sort(new AssetItemComparer());
 
             if (lst.Count == 0 ||
-                !(lst[0] is AcquisationItem))
+                !(lst[0] is AcquisationItem acq0))
                 lst.Insert(
                     0,
                     new AcquisationItem
@@ -55,27 +55,27 @@ namespace AccountingServer.BLL
                         });
             else if (lst[0].Remark != AssetItem.IgnoranceMark)
             {
-                ((AcquisationItem)lst[0]).Date = asset.Date;
-                ((AcquisationItem)lst[0]).OrigValue = asset.Value.Value;
+                acq0.Date = asset.Date;
+                acq0.OrigValue = asset.Value.Value;
             }
 
             var bookValue = 0D;
             for (var i = 0; i < lst.Count; i++)
             {
                 var item = lst[i];
-                if (item is AcquisationItem)
+                if (item is AcquisationItem acq)
                 {
-                    bookValue += (item as AcquisationItem).OrigValue;
+                    bookValue += acq.OrigValue;
                     item.Value = bookValue;
                 }
-                else if (item is DepreciateItem)
+                else if (item is DepreciateItem dep)
                 {
-                    bookValue -= (item as DepreciateItem).Amount;
+                    bookValue -= dep.Amount;
                     item.Value = bookValue;
                 }
-                else if (item is DevalueItem)
+                else if (item is DevalueItem dev)
                 {
-                    if (bookValue <= (item as DevalueItem).FairValue
+                    if (bookValue <= dev.FairValue
                         &&
                         item.Remark != AssetItem.IgnoranceMark)
                     {
@@ -83,9 +83,9 @@ namespace AccountingServer.BLL
                         continue;
                     }
 
-                    (item as DevalueItem).Amount = bookValue - (item as DevalueItem).FairValue;
-                    bookValue = (item as DevalueItem).FairValue;
-                    item.Value = (item as DevalueItem).FairValue;
+                    dev.Amount = bookValue - dev.FairValue;
+                    bookValue = dev.FairValue;
+                    item.Value = dev.FairValue;
                 }
                 else if (item is DispositionItem)
                     bookValue = 0;
@@ -239,7 +239,7 @@ namespace AccountingServer.BLL
         private bool UpdateItem(Asset asset, AssetItem item, double bookValue, bool isCollapsed = false,
             bool editOnly = false)
         {
-            if (item is AcquisationItem)
+            if (item is AcquisationItem acq)
                 return UpdateVoucher(
                     item,
                     isCollapsed,
@@ -250,10 +250,10 @@ namespace AccountingServer.BLL
                             Currency = VoucherDetail.BaseCurrency,
                             Title = asset.Title,
                             Content = asset.StringID,
-                            Fund = ((AcquisationItem)item).OrigValue
+                            Fund = acq.OrigValue
                         });
 
-            if (item is DepreciateItem)
+            if (item is DepreciateItem dep)
                 return UpdateVoucher(
                     item,
                     isCollapsed,
@@ -265,17 +265,17 @@ namespace AccountingServer.BLL
                             Title = asset.DepreciationExpenseTitle,
                             SubTitle = asset.DepreciationExpenseSubTitle,
                             Content = asset.StringID,
-                            Fund = ((DepreciateItem)item).Amount
+                            Fund = dep.Amount
                         },
                     new VoucherDetail
                         {
                             Currency = VoucherDetail.BaseCurrency,
                             Title = asset.DepreciationTitle,
                             Content = asset.StringID,
-                            Fund = -((DepreciateItem)item).Amount
+                            Fund = -dep.Amount
                         });
 
-            if (item is DevalueItem)
+            if (item is DevalueItem dev)
                 return UpdateVoucher(
                     item,
                     isCollapsed,
@@ -287,14 +287,14 @@ namespace AccountingServer.BLL
                             Title = asset.DevaluationExpenseTitle,
                             SubTitle = asset.DevaluationExpenseSubTitle,
                             Content = asset.StringID,
-                            Fund = ((DevalueItem)item).Amount
+                            Fund = dev.Amount
                         },
                     new VoucherDetail
                         {
                             Currency = VoucherDetail.BaseCurrency,
                             Title = asset.DevaluationTitle,
                             Content = asset.StringID,
-                            Fund = -((DevalueItem)item).Amount
+                            Fund = -dev.Amount
                         });
 
             if (item is DispositionItem)
@@ -409,9 +409,7 @@ namespace AccountingServer.BLL
                 if (d.Remark == Asset.IgnoranceMark)
                     continue;
 
-                bool sucess;
-                bool mo;
-                UpdateDetail(d, voucher, out sucess, out mo, editOnly);
+                UpdateDetail(d, voucher, out bool sucess, out bool mo, editOnly);
                 if (!sucess)
                     return false;
 
