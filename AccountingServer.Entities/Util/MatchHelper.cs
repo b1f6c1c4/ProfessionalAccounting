@@ -156,12 +156,10 @@ namespace AccountingServer.Entities.Util
             if (query == null)
                 return true;
 
-            var atom = query as TAtom;
-            if (atom != null)
+            if (query is TAtom atom)
                 return atomPredictor(atom);
 
-            var ary = query as IQueryAry<TAtom>;
-            if (ary == null)
+            if (!(query is IQueryAry<TAtom> ary))
                 throw new ArgumentException("检索式类型未知", nameof(query));
 
             switch (ary.Operator)

@@ -31,11 +31,7 @@ namespace AccountingServer
         /// </summary>
         /// <param name="position">搜索位置</param>
         /// <returns>是否成功</returns>
-        private bool PerformUpsert(int? position = null)
-        {
-            int pos;
-            return PerformUpsert(out pos, position);
-        }
+        private bool PerformUpsert(int? position = null) => PerformUpsert(out int _, position);
 
         /// <summary>
         ///     更新或添加
@@ -47,10 +43,7 @@ namespace AccountingServer
         {
             newPosition = position ?? scintilla.SelectionEnd;
 
-            int begin;
-            int end;
-            string typeName;
-            if (!GetEditableText(newPosition, out begin, out end, out typeName))
+            if (!GetEditableText(newPosition, out int begin, out int end, out string typeName))
                 return false;
 
             try
@@ -125,11 +118,7 @@ namespace AccountingServer
         /// </summary>
         /// <param name="position">搜索位置</param>
         /// <returns>是否成功</returns>
-        private bool PerformRemoval(int? position = null)
-        {
-            int pos;
-            return PerformRemoval(out pos, position);
-        }
+        private bool PerformRemoval(int? position = null) => PerformRemoval(out int _, position);
 
         /// <summary>
         ///     删除
@@ -141,10 +130,7 @@ namespace AccountingServer
         {
             newPosition = position ?? scintilla.SelectionEnd;
 
-            int begin;
-            int end;
-            string typeName;
-            if (!GetEditableText(newPosition, out begin, out end, out typeName))
+            if (!GetEditableText(newPosition, out int begin, out int end, out string typeName))
                 return false;
 
             try

@@ -278,25 +278,25 @@ namespace AccountingServer.Shell
         /// <returns>格式化的信息</returns>
         private static string ListAssetItem(IDistributedItem assetItem)
         {
-            if (assetItem is AcquisationItem)
+            if (assetItem is AcquisationItem acq)
                 return string.Format(
                     "   {0:yyyMMdd} ACQ:{1} ={3} ({2})",
                     assetItem.Date,
-                    ((AcquisationItem)assetItem).OrigValue.AsCurrency().CPadLeft(13),
+                    acq.OrigValue.AsCurrency().CPadLeft(13),
                     assetItem.VoucherID,
                     assetItem.Value.AsCurrency().CPadLeft(13));
-            if (assetItem is DepreciateItem)
+            if (assetItem is DepreciateItem dep)
                 return string.Format(
                     "   {0:yyyMMdd} DEP:{1} ={3} ({2})",
                     assetItem.Date,
-                    ((DepreciateItem)assetItem).Amount.AsCurrency().CPadLeft(13),
+                    dep.Amount.AsCurrency().CPadLeft(13),
                     assetItem.VoucherID,
                     assetItem.Value.AsCurrency().CPadLeft(13));
-            if (assetItem is DevalueItem)
+            if (assetItem is DevalueItem dev)
                 return string.Format(
                     "   {0:yyyMMdd} DEV:{1} ={3} ({2})",
                     assetItem.Date,
-                    ((DevalueItem)assetItem).Amount.AsCurrency().CPadLeft(13),
+                    dev.Amount.AsCurrency().CPadLeft(13),
                     assetItem.VoucherID,
                     assetItem.Value.AsCurrency().CPadLeft(13));
             if (assetItem is DispositionItem)

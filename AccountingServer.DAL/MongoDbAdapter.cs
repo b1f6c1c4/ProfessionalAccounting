@@ -87,8 +87,7 @@ namespace AccountingServer.DAL
         {
             const string reduce =
                 "function(key, values) { return Array.sum(values); }";
-            FilterDefinition<Voucher> preFilter;
-            var map = GetMapJavascript(query.VoucherEmitQuery, query.Subtotal, out preFilter);
+            var map = GetMapJavascript(query.VoucherEmitQuery, query.Subtotal, out var preFilter);
             var options = new MapReduceOptions<Voucher, Balance> { Filter = preFilter };
             var balances = m_Vouchers.MapReduce(map, reduce, options).ToEnumerable();
             if (query.Subtotal.Levels.Contains(SubtotalLevel.Currency))
@@ -261,8 +260,7 @@ namespace AccountingServer.DAL
                 sb.Append(GetEmitFilterJavascript(query.DetailEmitFilter));
             else
             {
-                var dQuery = query.VoucherQuery as IVoucherQueryAtom;
-                if (dQuery == null)
+                if (!(query.VoucherQuery is IVoucherQueryAtom dQuery))
                     throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query));
 
                 sb.Append(GetJavascriptFilter(dQuery.DetailFilter));

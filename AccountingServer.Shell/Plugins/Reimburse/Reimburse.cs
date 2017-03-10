@@ -8,6 +8,7 @@ using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Carry;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
+using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.Shell.Plugins.Reimburse
 {
@@ -39,12 +40,8 @@ namespace AccountingServer.Shell.Plugins.Reimburse
             }
             else
             {
-                var rng = FacadeF.ParsingF.Range(ref expr);
-                if (!rng.HasValue)
-                    throw new ArgumentException("语法错误", nameof(expr));
-
-                FacadeF.ParsingF.Eof(expr);
-                the = rng.Value;
+                the = ParsingF.Range(ref expr) ?? throw new ArgumentException("语法错误", nameof(expr));
+                ParsingF.Eof(expr);
             }
 
             return DoReimbursement(the);

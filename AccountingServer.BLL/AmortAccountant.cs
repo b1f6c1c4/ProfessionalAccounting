@@ -195,9 +195,7 @@ namespace AccountingServer.BLL
                 if (d.Remark == Amortization.IgnoranceMark)
                     continue;
 
-                bool sucess;
-                bool mo;
-                UpdateDetail(d, voucher, out sucess, out mo, editOnly);
+                UpdateDetail(d, voucher, out var sucess, out var mo, editOnly);
                 if (!sucess)
                     return false;
 

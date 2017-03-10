@@ -26,8 +26,7 @@ namespace AccountingServer.BLL.Parsing
                     if (VoucherType() != null)
                     {
                         var s = VoucherType().GetText();
-                        VoucherType type;
-                        if (Enum.TryParse(s, out type))
+                        if (Enum.TryParse(s, out VoucherType type))
                             vfilter.Type = type;
                         else if (s == "G")
                             vfilter.Type = Entities.VoucherType.General;

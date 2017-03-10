@@ -68,8 +68,7 @@ namespace AccountingServer.Shell.Plugins.YieldRate
                 var flag = false;
                 while (true)
                 {
-                    double v, d;
-                    Value(b, out v, out d);
+                    Value(b, out double v, out double d);
                     if (v.IsZero())
                     {
                         flag = true;

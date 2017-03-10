@@ -54,12 +54,11 @@ namespace AccountingServer.Shell.Carry
                 return new Succeed();
             }
 
-            if (!rng.EndDate.HasValue)
-                throw new ArgumentException("时间范围无后界", nameof(expr));
+            var ed = rng.EndDate ?? throw new ArgumentException("时间范围无后界", nameof(expr));
 
-            var dt = new DateTime((rng.StartDate ?? rng.EndDate.Value).Year, 1, 1);
+            var dt = new DateTime((rng.StartDate ?? ed).Year, 1, 1);
 
-            while (dt <= rng.EndDate.Value)
+            while (dt <= ed)
             {
                 CarryYear(dt, !rng.StartDate.HasValue);
                 dt = dt.AddYears(1);

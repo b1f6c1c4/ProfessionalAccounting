@@ -218,10 +218,7 @@ namespace AccountingServer.Shell.Carry
                     continue;
                 }
 
-                if (!ed.HasValue)
-                    throw new InvalidOperationException("无穷长时间以前不存在汇率");
-
-                var cob = Exchange.From(ed.Value, grpCurrency.Key) * b;
+                var cob = Exchange.From(ed ?? throw new InvalidOperationException("无穷长时间以前不存在汇率"), grpCurrency.Key) * b;
 
                 voucher.Details.Add(
                     new VoucherDetail

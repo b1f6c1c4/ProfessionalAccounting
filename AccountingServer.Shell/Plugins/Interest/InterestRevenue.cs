@@ -112,11 +112,10 @@ namespace AccountingServer.Shell.Plugins.Interest
                         $"(T1221 {content.Quotation('\'')})*({rmk.Quotation('"')}+{(rmk + "-利息").Quotation('"')}) {rng.AsDateRange()}")
                     .GroupBy(v => v.Date).OrderBy(grp => grp.Key, new DateComparer()))
             {
-                if (!grp.Key.HasValue)
-                    throw new ApplicationException("无法处理无穷长时间以前的利息收入");
+                var key = grp.Key ?? throw new ApplicationException("无法处理无穷长时间以前的利息收入");
 
                 if (!lastSettlement.HasValue)
-                    lastSettlement = grp.Key;
+                    lastSettlement = key;
 
                 // Settle Interest
                 interestIntegral += SettleInterest(
@@ -124,16 +123,16 @@ namespace AccountingServer.Shell.Plugins.Interest
                     rmk,
                     rate,
                     capitalIntegral,
-                    grp.Key.Value.Subtract(lastSettlement.Value).Days,
+                    key.Subtract(lastSettlement.Value).Days,
                     grp.SingleOrDefault(
                         v =>
                             v.Details.Any(d => d.IsMatch(interestPattern, 1)))
                     ?? new Voucher
                         {
-                            Date = grp.Key,
+                            Date = key,
                             Details = new List<VoucherDetail>()
                         });
-                lastSettlement = grp.Key;
+                lastSettlement = key;
 
                 // Settle Loan
                 // ReSharper disable once PossibleInvalidOperationException

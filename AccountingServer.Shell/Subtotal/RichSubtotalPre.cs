@@ -9,7 +9,7 @@ namespace AccountingServer.Shell.Subtotal
     /// <summary>
     ///     分类汇总结果处理器
     /// </summary>
-    internal class RichSubtotalPre : SubtotalTraver<object, Tuple<double, string>>, ISubtotalPre
+    internal class RichSubtotalPre : SubtotalTraver<object, (double Value, string Report)>, ISubtotalPre
     {
         private const int Ident = 4;
 
@@ -24,24 +24,25 @@ namespace AccountingServer.Shell.Subtotal
 
             if (SubtotalArgs.Levels.Count == 0 &&
                 SubtotalArgs.AggrType == AggregationType.None)
-                return traversal.Item2;
+                return traversal.Report;
 
-            return Ts(traversal.Item1) + ":" + Environment.NewLine + traversal.Item2;
+            return Ts(traversal.Value) + ":" + Environment.NewLine + traversal.Report;
         }
 
-        protected override Tuple<double, string> LeafNoneAggr(object path, Balance cat, int depth, double val)
-            => new Tuple<double, string>(val, Ts(val));
+        protected override (double Value, string Report) LeafNoneAggr(object path, Balance cat, int depth, double val)
+            => (Value: val, Report: Ts(val));
 
-        protected override Tuple<double, string> LeafAggregated(object path, Balance cat, int depth, Balance bal) =>
-            new Tuple<double, string>(
-                bal.Fund,
-                $"{new string(' ', depth * Ident)}{bal.Date.AsDate().CPadRight(38)}{Ts(bal.Fund).CPadLeft(12 + 2 * depth)}");
+        protected override (double Value, string Report) LeafAggregated(object path, Balance cat, int depth, Balance bal)
+            => (Value: bal.Fund,
+                Report:
+                $"{new string(' ', depth * Ident)}{bal.Date.AsDate().CPadRight(38)}{Ts(bal.Fund).CPadLeft(12 + 2 * depth)}"
+                );
 
         protected override object Map(object path, Balance cat, int depth, SubtotalLevel level) => null;
         protected override object MapA(object path, Balance cat, int depth, AggregationType type) => null;
 
-        protected override Tuple<double, string> MediumLevel(object path, object newPath, Balance cat, int depth,
-            SubtotalLevel level, Tuple<double, string> r)
+        protected override (double Value, string Report) MediumLevel(object path, object newPath, Balance cat, int depth,
+            SubtotalLevel level, (double Value, string Report) r)
         {
             string str;
             switch (level)
@@ -68,32 +69,30 @@ namespace AccountingServer.Shell.Subtotal
 
             if (depth == SubtotalArgs.Levels.Count - 1 &&
                 SubtotalArgs.AggrType == AggregationType.None)
-                return new Tuple<double, string>(
-                    r.Item1,
-                    $"{new string(' ', depth * Ident)}{str.CPadRight(38)}{r.Item2.CPadLeft(12 + 2 * depth)}");
+                return (Value: r.Value,
+                    Report: $"{new string(' ', depth * Ident)}{str.CPadRight(38)}{r.Report.CPadLeft(12 + 2 * depth)}");
 
-            return new Tuple<double, string>(
-                r.Item1,
-                $"{new string(' ', depth * Ident)}{str.CPadRight(38)}{Ts(r.Item1).CPadLeft(12 + 2 * depth)}{Environment.NewLine}{r.Item2}");
+            return (Value: r.Value,
+                Report:
+                $"{new string(' ', depth * Ident)}{str.CPadRight(38)}{Ts(r.Value).CPadLeft(12 + 2 * depth)}{Environment.NewLine}{r.Report}"
+                );
         }
 
-        protected override Tuple<double, string> Reduce(object path, Balance cat, int depth, SubtotalLevel level,
-            IEnumerable<Tuple<double, string>> results)
+        protected override (double Value, string Report) Reduce(object path, Balance cat, int depth, SubtotalLevel level,
+            IEnumerable<(double Value, string Report)> results)
         {
             var r = results.ToList();
-            return new Tuple<double, string>(
-                r.Sum(t => t.Item1),
-                SubtotalPreHelper.NotNullJoin(r.Select(t => t.Item2)));
+            return (Value: r.Sum(t => t.Value),
+                Report: SubtotalPreHelper.NotNullJoin(r.Select(t => t.Report)));
         }
 
-        protected override Tuple<double, string> ReduceA(object path, object newPath, Balance cat, int depth,
-            AggregationType type, IEnumerable<Tuple<double, string>> results)
+        protected override (double Value, string Report) ReduceA(object path, object newPath, Balance cat, int depth,
+            AggregationType type, IEnumerable<(double Value, string Report)> results)
         {
             var r = results.ToList();
             var last = r.LastOrDefault();
-            return new Tuple<double, string>(
-                last?.Item1 ?? 0,
-                SubtotalPreHelper.NotNullJoin(r.Select(t => t.Item2)));
+            return (Value: r.Any() ? last.Value : 0,
+                Report: SubtotalPreHelper.NotNullJoin(r.Select(t => t.Report)));
         }
     }
 }

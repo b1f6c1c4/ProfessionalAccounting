@@ -157,31 +157,30 @@ namespace AccountingServer.Shell.Serializer
             sb.AppendLine("    Schedule = new List<AssetItem> {");
             if (asset.Schedule != null)
             {
-                Action<AssetItem, string> present =
-                    (item, str) =>
+                void Present(AssetItem item, string str)
+                {
+                    sb.Append($"        new {item.GetType().Name.CPadRight(16)} {{ ");
+                    sb.Append(item.Date.HasValue ? $"Date = D(\"{item.Date:yyyy-MM-dd}\"), " : "Date = null, ");
+                    sb.Append($"VoucherID = {(ProcessString(item.VoucherID) + ",").CPadRight(27)}");
+                    sb.Append(str.CPadRight(30));
+                    sb.Append($"Value = {item.Value.ToString(CultureInfo.InvariantCulture).CPadRight(16)} ");
+                    if (item.Remark != null)
                     {
-                        sb.Append($"        new {item.GetType().Name.CPadRight(16)} {{ ");
-                        sb.Append(item.Date.HasValue ? $"Date = D(\"{item.Date:yyyy-MM-dd}\"), " : "Date = null, ");
-                        sb.Append($"VoucherID = {(ProcessString(item.VoucherID) + ",").CPadRight(27)}");
-                        sb.Append(str.CPadRight(30));
-                        sb.Append($"Value = {item.Value.ToString(CultureInfo.InvariantCulture).CPadRight(16)} ");
-                        if (item.Remark != null)
-                        {
-                            sb.Append("".CPadLeft(30));
-                            sb.Append($", Remark = {ProcessString(item.Remark)} ");
-                        }
-                        sb.AppendLine("},");
-                    };
+                        sb.Append("".CPadLeft(30));
+                        sb.Append($", Remark = {ProcessString(item.Remark)} ");
+                    }
+                    sb.AppendLine("},");
+                }
 
                 foreach (var item in asset.Schedule)
-                    if (item is AcquisationItem)
-                        present(item, $"OrigValue = {(item as AcquisationItem).OrigValue},");
-                    else if (item is DepreciateItem)
-                        present(item, $"Amount    = {(item as DepreciateItem).Amount},");
-                    else if (item is DevalueItem)
-                        present(item, $"FairValue = {(item as DevalueItem).FairValue},");
+                    if (item is AcquisationItem acq)
+                        Present(item, $"OrigValue = {acq.OrigValue},");
+                    else if (item is DepreciateItem dep)
+                        Present(item, $"Amount    = {dep.Amount},");
+                    else if (item is DevalueItem dev)
+                        Present(item, $"FairValue = {dev.FairValue},");
                     else if (item is DispositionItem)
-                        present(item, "");
+                        Present(item, "");
 
                 sb.AppendLine("} }@");
             }

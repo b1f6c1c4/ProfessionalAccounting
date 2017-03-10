@@ -138,8 +138,8 @@ namespace AccountingServer.Shell.Plugins.THUInfo
 
             var sb = new StringBuilder();
 
-            List<TransactionRecord> fail;
-            foreach (var voucher in AutoGenerate(problems.Records, out fail))
+            var vouchers = AutoGenerate(problems.Records, out List<TransactionRecord> fail);
+            foreach (var voucher in vouchers)
             {
                 Accountant.Upsert(voucher);
                 sb.AppendLine(Serializer.PresentVoucher(voucher));
@@ -152,9 +152,7 @@ namespace AccountingServer.Shell.Plugins.THUInfo
                     sb.AppendLine(r.ToString());
             }
 
-            Problems problems2;
-            var cmp = DoCompare(true, out problems2) as EditableText;
-            if (cmp != null)
+            if (DoCompare(true, out var _) is EditableText cmp)
                 sb.AppendLine(cmp.ToString());
 
             if (sb.Length <= 0)

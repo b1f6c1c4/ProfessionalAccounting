@@ -52,10 +52,7 @@ namespace AccountingServer.BLL
             sucess = false;
             modified = false;
 
-            if (!expected.Fund.HasValue)
-                throw new ArgumentException("应填细目的金额为null", nameof(expected));
-
-            var fund = expected.Fund.Value;
+            var fund = expected.Fund ?? throw new ArgumentException("应填细目的金额为null", nameof(expected));
             expected.Fund = null;
             var isEliminated = fund.IsZero();
 
