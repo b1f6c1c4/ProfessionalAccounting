@@ -27,16 +27,22 @@ emit
 	;
 
 vouchers
-	:	vouchersB
+	:	vouchers2
 	|	voucherQuery
 	;
 
-vouchersB
-	:	vouchersB Op='*' vouchersB
-	|	vouchersB Op=('+' | '-') vouchersB
-	|	Op=('+' | '-') vouchersB
-	|	'{' voucherQuery '}'
-	|	'{' vouchersB '}'
+vouchers2
+	:	vouchers2 Op=('+' | '-') vouchers1
+	|	Op=('+' | '-')? vouchers1
+	;
+
+vouchers1
+	:	vouchers0 (Op='*' vouchers1)?
+	;
+
+vouchers0
+	:	'{' voucherQuery '}'
+	|	'{' vouchers2 '}'
 	;
 
 voucherQuery
@@ -44,10 +50,16 @@ voucherQuery
 	;
 
 details
-	:	details Op='*' details
-	|	details Op=('+' | '-') details
-	|	Op=('+' | '-') details
-	|	detailQuery
+	:	details Op=('+' | '-') details1
+	|	Op=('+' | '-')? details1
+	;
+
+details1
+	:	details0 (Op='*' details1)?
+	;
+
+details0
+	:	detailQuery
 	|	'(' details ')'
 	;
 
@@ -108,12 +120,19 @@ rangeDay
 	;
 
 distributedQ
-	:	distributedQ Op='*' distributedQ
-	|	distributedQ Op=('+' | '-') distributedQ
-	|	Op=('+' | '-') distributedQ
-	|	distributedQAtom
+	:	distributedQ Op=('+' | '-') distributedQ1
+	|	Op=('+' | '-')? distributedQ1
+	;
+
+distributedQ1
+	:	distributedQ0 (Op='*' distributedQ1)?
+	;
+
+distributedQ0
+	:	distributedQAtom
 	|	'(' distributedQ ')'
 	;
+
 distributedQAtom
 	:	Guid? DollarQuotedString? PercentQuotedString? ('[[' rangeCore ']]')?
 	;

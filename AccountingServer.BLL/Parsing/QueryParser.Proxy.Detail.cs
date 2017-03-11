@@ -112,7 +112,7 @@ namespace AccountingServer.BLL.Parsing
                     if (Op == null)
                         return OperatorType.None;
 
-                    if (details().Length == 1)
+                    if (details() == null)
                         switch (Op.Text)
                         {
                             case "+":
@@ -129,8 +129,6 @@ namespace AccountingServer.BLL.Parsing
                             return OperatorType.Union;
                         case "-":
                             return OperatorType.Substract;
-                        case "*":
-                            return OperatorType.Intersect;
                         default:
                             throw new MemberAccessException("表达式错误");
                     }
@@ -142,15 +140,39 @@ namespace AccountingServer.BLL.Parsing
             {
                 get
                 {
-                    if (detailQuery() != null)
-                        return detailQuery();
+                    if (details() != null)
+                        return details();
 
-                    return details(0);
+                    return details1();
                 }
             }
 
             /// <inheritdoc />
-            public IQueryCompunded<IDetailQueryAtom> Filter2 => details(1);
+            public IQueryCompunded<IDetailQueryAtom> Filter2 => details1();
+        }
+
+        public partial class Details1Context : IQueryAry<IDetailQueryAtom>
+        {
+            /// <inheritdoc />
+            public OperatorType Operator => Op == null ? OperatorType.None : OperatorType.Intersect;
+
+            /// <inheritdoc />
+            public IQueryCompunded<IDetailQueryAtom> Filter1 => details0();
+
+            /// <inheritdoc />
+            public IQueryCompunded<IDetailQueryAtom> Filter2 => details1();
+        }
+
+        public partial class Details0Context : IQueryAry<IDetailQueryAtom>
+        {
+            /// <inheritdoc />
+            public OperatorType Operator => OperatorType.None;
+
+            /// <inheritdoc />
+            public IQueryCompunded<IDetailQueryAtom> Filter1 => detailQuery() ?? (IQueryCompunded<IDetailQueryAtom>)details();
+
+            /// <inheritdoc />
+            public IQueryCompunded<IDetailQueryAtom> Filter2 => null;
         }
     }
 }

@@ -58,7 +58,7 @@ namespace AccountingServer.BLL.Parsing
                     if (voucherQuery() != null)
                         return voucherQuery();
 
-                    return vouchersB();
+                    return vouchers2();
                 }
             }
 
@@ -66,7 +66,7 @@ namespace AccountingServer.BLL.Parsing
             public IQueryCompunded<IVoucherQueryAtom> Filter2 { get { throw new MemberAccessException("表达式错误"); } }
         }
 
-        public partial class VouchersBContext : IQueryAry<IVoucherQueryAtom>
+        public partial class Vouchers2Context : IQueryAry<IVoucherQueryAtom>
         {
             /// <inheritdoc />
             public OperatorType Operator
@@ -76,7 +76,7 @@ namespace AccountingServer.BLL.Parsing
                     if (Op == null)
                         return OperatorType.None;
 
-                    if (vouchersB().Length == 1)
+                    if (vouchers2() == null)
                         switch (Op.Text)
                         {
                             case "+":
@@ -93,8 +93,6 @@ namespace AccountingServer.BLL.Parsing
                             return OperatorType.Union;
                         case "-":
                             return OperatorType.Substract;
-                        case "*":
-                            return OperatorType.Intersect;
                         default:
                             throw new MemberAccessException("表达式错误");
                     }
@@ -106,15 +104,39 @@ namespace AccountingServer.BLL.Parsing
             {
                 get
                 {
-                    if (voucherQuery() != null)
-                        return voucherQuery();
+                    if (vouchers2() != null)
+                        return vouchers2();
 
-                    return vouchersB(0);
+                    return vouchers1();
                 }
             }
 
             /// <inheritdoc />
-            public IQueryCompunded<IVoucherQueryAtom> Filter2 => vouchersB(1);
+            public IQueryCompunded<IVoucherQueryAtom> Filter2 => vouchers1();
+        }
+
+        public partial class Vouchers1Context : IQueryAry<IVoucherQueryAtom>
+        {
+            /// <inheritdoc />
+            public OperatorType Operator => Op == null ? OperatorType.None : OperatorType.Intersect;
+
+            /// <inheritdoc />
+            public IQueryCompunded<IVoucherQueryAtom> Filter1 => vouchers0();
+
+            /// <inheritdoc />
+            public IQueryCompunded<IVoucherQueryAtom> Filter2 => vouchers1();
+        }
+
+        public partial class Vouchers0Context : IQueryAry<IVoucherQueryAtom>
+        {
+            /// <inheritdoc />
+            public OperatorType Operator => OperatorType.None;
+
+            /// <inheritdoc />
+            public IQueryCompunded<IVoucherQueryAtom> Filter1 => voucherQuery() ?? (IQueryCompunded<IVoucherQueryAtom>)vouchers2();
+
+            /// <inheritdoc />
+            public IQueryCompunded<IVoucherQueryAtom> Filter2 => null;
         }
 
         public partial class SubtotalContext : ISubtotal
