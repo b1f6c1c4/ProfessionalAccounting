@@ -98,7 +98,7 @@ namespace AccountingServer.DAL
                 return Builders<Voucher>.Filter.Empty;
 
             if (rng.Value.NullOnly)
-                return Builders<Voucher>.Filter.Eq<DateTime?>("date", null);
+                return Builders<Voucher>.Filter.Exists("date", false);
 
             var lst = new List<FilterDefinition<Voucher>>();
 
@@ -109,8 +109,8 @@ namespace AccountingServer.DAL
 
             var gather = And(lst);
             return rng.Value.Nullable
-                ? Builders<Voucher>.Filter.Eq<DateTime?>("date", null) | gather
-                : gather;
+                ? Builders<Voucher>.Filter.Exists("date", false) | gather
+                : Builders<Voucher>.Filter.Exists("date") & gather;
         }
 
         /// <summary>
