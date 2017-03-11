@@ -61,7 +61,7 @@ namespace AccountingServer.BLL.Parsing
                     if (Op == null)
                         return OperatorType.None;
 
-                    if (distributedQ().Length == 1)
+                    if (distributedQ() == null)
                         switch (Op.Text)
                         {
                             case "+":
@@ -78,8 +78,6 @@ namespace AccountingServer.BLL.Parsing
                             return OperatorType.Union;
                         case "-":
                             return OperatorType.Substract;
-                        case "*":
-                            return OperatorType.Intersect;
                         default:
                             throw new MemberAccessException("表达式错误");
                     }
@@ -91,15 +89,39 @@ namespace AccountingServer.BLL.Parsing
             {
                 get
                 {
-                    if (distributedQAtom() != null)
-                        return distributedQAtom();
+                    if (distributedQ() != null)
+                        return distributedQ();
 
-                    return distributedQ(0);
+                    return distributedQ1();
                 }
             }
 
             /// <inheritdoc />
-            public IQueryCompunded<IDistributedQueryAtom> Filter2 => distributedQ(1);
+            public IQueryCompunded<IDistributedQueryAtom> Filter2 => distributedQ1();
+        }
+
+        public partial class DistributedQ1Context : IQueryAry<IDistributedQueryAtom>
+        {
+            /// <inheritdoc />
+            public OperatorType Operator => Op == null ? OperatorType.None : OperatorType.Intersect;
+
+            /// <inheritdoc />
+            public IQueryCompunded<IDistributedQueryAtom> Filter1 => distributedQ0();
+
+            /// <inheritdoc />
+            public IQueryCompunded<IDistributedQueryAtom> Filter2 => distributedQ1();
+        }
+
+        public partial class DistributedQ0Context : IQueryAry<IDistributedQueryAtom>
+        {
+            /// <inheritdoc />
+            public OperatorType Operator => OperatorType.None;
+
+            /// <inheritdoc />
+            public IQueryCompunded<IDistributedQueryAtom> Filter1 => distributedQAtom() ?? (IQueryCompunded<IDistributedQueryAtom>)distributedQ();
+
+            /// <inheritdoc />
+            public IQueryCompunded<IDistributedQueryAtom> Filter2 => null;
         }
     }
 }
