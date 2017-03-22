@@ -57,7 +57,7 @@ namespace AccountingServer.DAL
                             : $"    if (d.remark != '{f.Filter.Remark.Replace("\'", "\\\'")}') return false;");
                 if (f.Filter?.Fund != null)
                     sb.AppendLine(
-                        $"    if (Math.abs(d.fund - {f.Filter.Fund:r}) > {VoucherDetail.Tolerance:R})) return false;");
+                        $"    if (Math.abs(d.fund - {f.Filter.Fund:r}) > {VoucherDetail.Tolerance:R}) return false;");
             }
             sb.AppendLine("    return true;");
             sb.AppendLine("}");
