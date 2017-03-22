@@ -33,7 +33,14 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        public IQueryResult Execute(string expr)
+        public IQueryResult Execute(string expr) => Parse(expr)();
+
+        /// <summary>
+        ///     解析表达式
+        /// </summary>
+        /// <param name="expr">表达式</param>
+        /// <returns>解析结果</returns>
+        private Func<IQueryResult> Parse(string expr)
         {
             if (ParsingF.Token(ref expr, false, t => t == "Rps") != null)
             {
@@ -107,14 +114,14 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>执行结果</returns>
-        private IQueryResult TryVoucherQuery(string expr)
+        private Func<IQueryResult> TryVoucherQuery(string expr)
         {
             if (string.IsNullOrWhiteSpace(expr))
                 throw new ApplicationException("不允许执行空白检索式");
 
             var res = ParsingF.VoucherQuery(ref expr);
             ParsingF.Eof(expr);
-            return PresentVoucherQuery(res);
+            return () => PresentVoucherQuery(res);
         }
 
         /// <summary>
@@ -123,11 +130,11 @@ namespace AccountingServer.Shell
         /// <param name="expr">表达式</param>
         /// <param name="trav">呈现器</param>
         /// <returns>执行结果</returns>
-        private IQueryResult TryGroupedQuery(string expr, ISubtotalPre trav)
+        private Func<IQueryResult> TryGroupedQuery(string expr, ISubtotalPre trav)
         {
             var res = ParsingF.GroupedQuery(ref expr);
             ParsingF.Eof(expr);
-            return PresentSubtotal(res, trav);
+            return () => PresentSubtotal(res, trav);
         }
 
         /// <inheritdoc />
@@ -152,11 +159,11 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>执行结果</returns>
-        private IQueryResult TryDetailQuery(string expr)
+        private Func<IQueryResult> TryDetailQuery(string expr)
         {
             var res = ParsingF.DetailQuery(ref expr);
             ParsingF.Eof(expr);
-            return PresentDetailQuery(res);
+            return () => PresentDetailQuery(res);
         }
 
         /// <summary>
