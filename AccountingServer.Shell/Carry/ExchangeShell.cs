@@ -23,8 +23,7 @@ namespace AccountingServer.Shell.Carry
             }
             var date = Parsing.UniqueTime(ref expr) ?? DateTime.Today;
             Parsing.Eof(expr);
-            var exg = ExchangeFactory.Create();
-            var res = rev ? exg.To(date, curr) : exg.From(date, curr);
+            var res = rev ? ExchangeFactory.Instance.To(date, curr) : ExchangeFactory.Instance.From(date, curr);
 
             return new UnEditableText((res * val.Value).ToString("R"));
         }

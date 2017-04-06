@@ -46,11 +46,6 @@ namespace AccountingServer.Shell.Carry
             new ConfigManager<CarrySettings>("Carry.xml");
 
         /// <summary>
-        ///     汇率查询
-        /// </summary>
-        private static readonly IExchange Exchange = ExchangeFactory.Create();
-
-        /// <summary>
         ///     执行摊销
         /// </summary>
         /// <param name="expr">表达式</param>
@@ -137,7 +132,7 @@ namespace AccountingServer.Shell.Carry
                                             .Where(d => d.Currency == bal.Currency && d.Title == 3999)
                                             .Sum(d => d.Fund.Value)
                                 })
-                        .Sum(bal => Exchange.From(ed.Value, bal.Currency) * bal.Fund);
+                        .Sum(bal => ExchangeFactory.Instance.From(ed.Value, bal.Currency) * bal.Fund);
                 if (!total.IsZero())
                     m_Accountant.Upsert(new Voucher
                         {
@@ -218,7 +213,7 @@ namespace AccountingServer.Shell.Carry
                     continue;
                 }
 
-                var cob = Exchange.From(ed ?? throw new InvalidOperationException("无穷长时间以前不存在汇率"), grpCurrency.Key) * b;
+                var cob = ExchangeFactory.Instance.From(ed ?? throw new InvalidOperationException("无穷长时间以前不存在汇率"), grpCurrency.Key) * b;
 
                 voucher.Details.Add(
                     new VoucherDetail
