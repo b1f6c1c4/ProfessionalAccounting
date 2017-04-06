@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Carry\ExchangeShell.cs" />
     <Compile Include="Plugins\BankBalance\AverageDailyBalance.cs" />
     <Compile Include="Plugins\Interest\InterestRevenue.cs" />
     <Compile Include="Plugins\Reimburse\Reimburse.cs" />
