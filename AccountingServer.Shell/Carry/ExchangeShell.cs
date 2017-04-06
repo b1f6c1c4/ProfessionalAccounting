@@ -1,0 +1,34 @@
+﻿using System;
+using AccountingServer.BLL.Parsing;
+using AccountingServer.Shell.Util;
+using static AccountingServer.BLL.Parsing.Facade;
+
+namespace AccountingServer.Shell.Carry
+{
+    /// <summary>
+    ///     汇率
+    /// </summary>
+    internal class ExchangeShell : IShellComponent
+    {
+        public IQueryResult Execute(string expr)
+        {
+            expr = expr.Rest();
+            var rev = true;
+            var val = Parsing.Double(ref expr);
+            var curr = Parsing.Token(ref expr).ToUpperInvariant();
+            if (!val.HasValue)
+            {
+                rev = false;
+                val = Parsing.DoubleF(ref expr);
+            }
+            var date = Parsing.UniqueTime(ref expr) ?? DateTime.Today;
+            Parsing.Eof(expr);
+            var exg = ExchangeFactory.Create();
+            var res = rev ? exg.To(date, curr) : exg.From(date, curr);
+
+            return new UnEditableText((res * val.Value).ToString("R"));
+        }
+
+        public bool IsExecutable(string expr) => expr.Initital() == "?e";
+    }
+}

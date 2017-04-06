@@ -44,6 +44,7 @@ namespace AccountingServer.Shell
                         new CheckShell(m_Accountant, m_Serializer),
                         new CarryShell(m_Accountant),
                         new CarryYearShell(m_Accountant),
+                        new ExchangeShell(),
                         new AssetShell(m_Accountant, m_Serializer),
                         new AmortizationShell(m_Accountant, m_Serializer),
                         new PluginShell(m_Accountant, m_Serializer),
