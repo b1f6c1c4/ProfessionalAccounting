@@ -183,7 +183,11 @@ namespace AccountingServer.DAL
             if (f == null)
                 return Builders<Voucher>.Filter.Empty;
 
-            var lst = new List<FilterDefinition<Voucher>> { GetNativeFilter(f.VoucherFilter), GetNativeFilter(f.Range) };
+            var lst = new List<FilterDefinition<Voucher>>
+                {
+                    GetNativeFilter(f.VoucherFilter),
+                    GetNativeFilter(f.Range)
+                };
             var v = GetNativeFilter(f.DetailFilter, GetNativeFilter);
             if (f.ForAll)
                 lst.Add(!Builders<Voucher>.Filter.ElemMatch("detail", !v));

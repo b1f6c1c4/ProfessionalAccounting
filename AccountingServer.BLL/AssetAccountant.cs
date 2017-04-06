@@ -75,8 +75,7 @@ namespace AccountingServer.BLL
                 }
                 else if (item is DevalueItem dev)
                 {
-                    if (bookValue <= dev.FairValue
-                        &&
+                    if (bookValue <= dev.FairValue &&
                         item.Remark != AssetItem.IgnoranceMark)
                     {
                         lst.RemoveAt(i--);
@@ -303,12 +302,14 @@ namespace AccountingServer.BLL
                         it =>
                             DateHelper.CompareDate(it.Date, item.Date) < 0 &&
                             it is DepreciateItem)
-                    .Cast<DepreciateItem>().Aggregate(0D, (td, it) => td + it.Amount);
+                    .Cast<DepreciateItem>()
+                    .Aggregate(0D, (td, it) => td + it.Amount);
                 var totalDev = asset.Schedule.Where(
                         it =>
                             DateHelper.CompareDate(it.Date, item.Date) < 0 &&
                             it is DevalueItem)
-                    .Cast<DevalueItem>().Aggregate(0D, (td, it) => td + it.Amount);
+                    .Cast<DevalueItem>()
+                    .Aggregate(0D, (td, it) => td + it.Amount);
                 return UpdateVoucher(
                     item,
                     isCollapsed,
@@ -476,8 +477,7 @@ namespace AccountingServer.BLL
 
                             flag = true;
 
-                            if (dt.Year == asset.Date.Value.Year
-                                &&
+                            if (dt.Year == asset.Date.Value.Year &&
                                 dt.Month == asset.Date.Value.Month)
                             {
                                 dt = AccountantHelper.LastDayOfMonth(dt.Year, dt.Month + 1);

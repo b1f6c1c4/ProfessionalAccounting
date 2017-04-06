@@ -22,7 +22,7 @@ namespace AccountingServer.Shell.Carry
         /// </summary>
         private readonly Accountant m_Accountant;
 
-        public CarryShell(Accountant helper) { m_Accountant = helper; }
+        public CarryShell(Accountant helper) => m_Accountant = helper;
 
         /// <inheritdoc />
         public IQueryResult Execute(string expr)
@@ -134,26 +134,27 @@ namespace AccountingServer.Shell.Carry
                                 })
                         .Sum(bal => ExchangeFactory.Instance.From(ed.Value, bal.Currency) * bal.Fund);
                 if (!total.IsZero())
-                    m_Accountant.Upsert(new Voucher
-                        {
-                            Date = ed,
-                            Type = VoucherType.Carry,
-                            Remark = "currency carry",
-                            Details = new List<VoucherDetail>
-                                {
-                                    new VoucherDetail
-                                        {
-                                            Title = 3999,
-                                            Fund = -total
-                                        },
-                                    new VoucherDetail
-                                        {
-                                            Title = 6603,
-                                            SubTitle = 03,
-                                            Fund = total
-                                        }
-                                }
-                        });
+                    m_Accountant.Upsert(
+                        new Voucher
+                            {
+                                Date = ed,
+                                Type = VoucherType.Carry,
+                                Remark = "currency carry",
+                                Details = new List<VoucherDetail>
+                                    {
+                                        new VoucherDetail
+                                            {
+                                                Title = 3999,
+                                                Fund = -total
+                                            },
+                                        new VoucherDetail
+                                            {
+                                                Title = 6603,
+                                                SubTitle = 03,
+                                                Fund = total
+                                            }
+                                    }
+                            });
             }
 
             foreach (var target in targets)
@@ -213,7 +214,9 @@ namespace AccountingServer.Shell.Carry
                     continue;
                 }
 
-                var cob = ExchangeFactory.Instance.From(ed ?? throw new InvalidOperationException("无穷长时间以前不存在汇率"), grpCurrency.Key) * b;
+                var cob = ExchangeFactory.Instance.From(
+                    ed ?? throw new InvalidOperationException("无穷长时间以前不存在汇率"),
+                    grpCurrency.Key) * b;
 
                 voucher.Details.Add(
                     new VoucherDetail

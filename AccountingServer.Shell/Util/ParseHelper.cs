@@ -38,7 +38,8 @@ namespace AccountingServer.Shell.Util
         /// <param name="allow">允许括号</param>
         /// <param name="predicate">是否有效</param>
         /// <returns>字符串</returns>
-        public static string Token(this FacadeBase facade, ref string expr, bool allow = true, Func<string, bool> predicate = null)
+        public static string Token(this FacadeBase facade, ref string expr, bool allow = true,
+            Func<string, bool> predicate = null)
         {
             expr = expr.TrimStart();
             if (expr.Length == 0)

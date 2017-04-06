@@ -47,7 +47,8 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        protected override IQueryResult ExecuteRegister(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
+        protected override IQueryResult ExecuteRegister(IQueryCompunded<IDistributedQueryAtom> distQuery,
+            DateFilter rng,
             IQueryCompunded<IVoucherQueryAtom> query)
         {
             var sb = new StringBuilder();
@@ -178,8 +179,7 @@ namespace AccountingServer.Shell
             Accountant.SelectAssets(distQuery)
                 .Sum(
                     a => Accountant.DeleteVouchers(
-                        new VoucherQueryAryBase
-                        (
+                        new VoucherQueryAryBase(
                             OperatorType.Intersect,
                             new[]
                                 {

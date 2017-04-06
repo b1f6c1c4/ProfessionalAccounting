@@ -38,10 +38,7 @@ namespace AccountingServer.Shell.Plugins.Utilities
         public string Query { get; set; }
 
         [XmlAttribute("default")]
-        public string DefaultString
-        {
-            get => Default?.ToString("R"); set => Default = Convert.ToDouble(value);
-        }
+        public string DefaultString { get => Default?.ToString("R"); set => Default = Convert.ToDouble(value); }
 
         [XmlIgnore]
         public double? Default { get; set; }

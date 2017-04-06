@@ -185,7 +185,8 @@ namespace AccountingServer.Shell
         /// <param name="rng">日期过滤器</param>
         /// <param name="query">记账凭证检索式</param>
         /// <returns>执行结果</returns>
-        protected abstract IQueryResult ExecuteRegister(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
+        protected abstract IQueryResult ExecuteRegister(IQueryCompunded<IDistributedQueryAtom> distQuery,
+            DateFilter rng,
             IQueryCompunded<IVoucherQueryAtom> query);
 
         /// <summary>

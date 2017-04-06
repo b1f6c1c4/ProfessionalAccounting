@@ -23,10 +23,7 @@ namespace AccountingServer.Shell.Subtotal
             return traversal.Report;
         }
 
-        public PreciseSubtotalPre(bool withSubtotal = true)
-        {
-            m_WithSubtotal = withSubtotal;
-        }
+        public PreciseSubtotalPre(bool withSubtotal = true) => m_WithSubtotal = withSubtotal;
 
         /// <summary>
         ///     使用分隔符连接字符串
@@ -50,7 +47,8 @@ namespace AccountingServer.Shell.Subtotal
         /// <param name="results">次级查询输出</param>
         /// <param name="withSubtotal">是否包含分类汇总</param>
         /// <returns>报告</returns>
-        private static (double Value, string Report) Gather(string path, IEnumerable<(double Value, string Report)> results,
+        private static (double Value, string Report) Gather(string path,
+            IEnumerable<(double Value, string Report)> results,
             bool withSubtotal = true)
         {
             var r = results.ToList();
@@ -60,10 +58,12 @@ namespace AccountingServer.Shell.Subtotal
                 Report: withSubtotal ? $"{path}\t{val:R}{Environment.NewLine}{report}" : report);
         }
 
-        protected override (double Value, string Report) LeafNoneAggr(string path, Balance cat, int depth, double val) =>
+        protected override (double Value, string Report) LeafNoneAggr(string path, Balance cat, int depth,
+            double val) =>
             (Value: val, Report: $"{path}\t{val:R}");
 
-        protected override (double Value, string Report) LeafAggregated(string path, Balance cat, int depth, Balance bal) =>
+        protected override (double Value, string Report) LeafAggregated(string path, Balance cat, int depth,
+            Balance bal) =>
             (Value: bal.Fund, Report: $"{Merge(path, bal.Date.AsDate())}\t{bal.Fund:R}");
 
         protected override string Map(string path, Balance cat, int depth, SubtotalLevel level)
@@ -87,10 +87,12 @@ namespace AccountingServer.Shell.Subtotal
 
         protected override string MapA(string path, Balance cat, int depth, AggregationType type) => path;
 
-        protected override (double Value, string Report) MediumLevel(string path, string newPath, Balance cat, int depth,
+        protected override (double Value, string Report) MediumLevel(string path, string newPath, Balance cat,
+            int depth,
             SubtotalLevel level, (double Value, string Report) r) => r;
 
-        protected override (double Value, string Report) Reduce(string path, Balance cat, int depth, SubtotalLevel level,
+        protected override (double Value, string Report) Reduce(string path, Balance cat, int depth,
+            SubtotalLevel level,
             IEnumerable<(double Value, string Report)> results) => Gather(path, results, m_WithSubtotal);
 
         protected override (double Value, string Report) ReduceA(string path, string newPath, Balance cat, int depth,

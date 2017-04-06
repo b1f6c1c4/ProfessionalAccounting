@@ -60,21 +60,25 @@ namespace AccountingServer.Shell.Plugins.Utilities
             var time = Parsing.UniqueTime(ref expr) ?? DateTime.Today;
             var abbr = Parsing.Token(ref expr);
 
-            var template = Templates.Config.Templates.FirstOrDefault(t => t.Name == abbr) ?? throw new KeyNotFoundException($"找不到常见记账凭证{abbr}");
+            var template = Templates.Config.Templates.FirstOrDefault(t => t.Name == abbr) ??
+                throw new KeyNotFoundException($"找不到常见记账凭证{abbr}");
 
             var num = 1D;
             if (template.TemplateType == UtilTemplateType.Value ||
                 template.TemplateType == UtilTemplateType.Fill)
             {
                 var valt = Parsing.Double(ref expr);
-                var val = valt.HasValue ? valt.Value : (template.Default ?? throw new ApplicationException($"常见记账凭证{template.Name}没有默认值"));
+                var val = valt.HasValue
+                    ? valt.Value
+                    : (template.Default ?? throw new ApplicationException($"常见记账凭证{template.Name}没有默认值"));
 
                 if (template.TemplateType == UtilTemplateType.Value)
                     num = val;
                 else
                 {
                     var arr = Accountant
-                        .RunGroupedQuery($"{template.Query} [~{time:yyyyMMdd}] ``v").ToArray();
+                        .RunGroupedQuery($"{template.Query} [~{time:yyyyMMdd}] ``v")
+                        .ToArray();
                     if (arr.Length == 0)
                         num = val;
                     else
@@ -105,7 +109,8 @@ namespace AccountingServer.Shell.Plugins.Utilities
                                     Content = d.Content,
                                     Fund = num * d.Fund,
                                     Remark = d.Remark
-                                }).ToList();
+                                })
+                    .ToList();
             var voucher = new Voucher
                 {
                     Date = time,

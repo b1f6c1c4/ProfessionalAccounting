@@ -76,7 +76,7 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        public bool IsExecutable(string expr) { throw new InvalidOperationException(); }
+        public bool IsExecutable(string expr) => throw new InvalidOperationException();
 
         #region Miscellaneous
 

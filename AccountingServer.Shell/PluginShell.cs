@@ -23,9 +23,8 @@ namespace AccountingServer.Shell
     {
         private readonly Dictionary<string, PluginBase> m_Plugins;
 
-        public PluginShell(Accountant helper, IEntitySerializer serializer)
-        {
-            m_Plugins = new Dictionary<string, PluginBase>
+        public PluginShell(Accountant helper, IEntitySerializer serializer) => m_Plugins =
+            new Dictionary<string, PluginBase>
                 {
                     { "adb", new AverageDailyBalance(helper, serializer) },
                     { "ir", new InterestRevenue(helper, serializer) },
@@ -34,7 +33,6 @@ namespace AccountingServer.Shell
                     { "u", new Utilities(helper, serializer) },
                     { "yr", new YieldRate(helper, serializer) }
                 };
-        }
 
         /// <summary>
         ///     根据名称检索插件

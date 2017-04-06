@@ -54,7 +54,9 @@ namespace AccountingServer.Entities.Util
 
     public class DetailQueryAryBase : QueryAryBase<IDetailQueryAtom>
     {
-        private DetailQueryAryBase(OperatorType op, IList<IQueryCompunded<IDetailQueryAtom>> queries) : base(op, queries) { }
+        private DetailQueryAryBase(OperatorType op, IList<IQueryCompunded<IDetailQueryAtom>> queries) : base(
+            op,
+            queries) { }
 
         public DetailQueryAryBase(IEnumerable<VoucherDetail> filters, bool useAnd, int dir = 0)
             : this(

@@ -37,7 +37,8 @@ namespace AccountingServer.DAL
                     if (f.Filter.Currency == VoucherDetail.BaseCurrency)
                         sb.AppendLine("    if (d.currency != null) return false;");
                     else
-                        sb.AppendLine($"    if (d.currency != '{f.Filter.Currency.Replace("\'", "\\\'")}') return false;");
+                        sb.AppendLine(
+                            $"    if (d.currency != '{f.Filter.Currency.Replace("\'", "\\\'")}') return false;");
                 if (f.Filter?.Title != null)
                     sb.AppendLine($"    if (d.title != {f.Filter.Title}) return false;");
                 if (f.Filter?.SubTitle != null)

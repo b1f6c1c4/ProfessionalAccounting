@@ -16,7 +16,9 @@ namespace AccountingServer.Shell.Plugins.BankBalance
     /// </summary>
     internal class AverageDailyBalance : PluginBase
     {
-        public AverageDailyBalance(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
+        public AverageDailyBalance(Accountant accountant, IEntitySerializer serializer) : base(
+            accountant,
+            serializer) { }
 
         /// <inheritdoc />
         public override IQueryResult Execute(string expr)

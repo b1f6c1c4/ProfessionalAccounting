@@ -63,7 +63,7 @@ namespace AccountingServer.BLL.Parsing
             }
 
             /// <inheritdoc />
-            public IQueryCompunded<IVoucherQueryAtom> Filter2 { get { throw new MemberAccessException("表达式错误"); } }
+            public IQueryCompunded<IVoucherQueryAtom> Filter2 => throw new MemberAccessException("表达式错误");
         }
 
         public partial class Vouchers2Context : IQueryAry<IVoucherQueryAtom>
@@ -133,7 +133,8 @@ namespace AccountingServer.BLL.Parsing
             public OperatorType Operator => OperatorType.None;
 
             /// <inheritdoc />
-            public IQueryCompunded<IVoucherQueryAtom> Filter1 => voucherQuery() ?? (IQueryCompunded<IVoucherQueryAtom>)vouchers2();
+            public IQueryCompunded<IVoucherQueryAtom> Filter1 => voucherQuery() ??
+                (IQueryCompunded<IVoucherQueryAtom>)vouchers2();
 
             /// <inheritdoc />
             public IQueryCompunded<IVoucherQueryAtom> Filter2 => null;
@@ -203,7 +204,8 @@ namespace AccountingServer.BLL.Parsing
                                 }
 
                                 throw new MemberAccessException("表达式错误");
-                            }).ToList();
+                            })
+                        .ToList();
                 }
             }
 

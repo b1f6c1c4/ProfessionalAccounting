@@ -166,7 +166,9 @@ namespace AccountingServer.Shell.Serializer
             var lst = new List<string>();
 
             Parsing.TrimStartComment(ref expr);
-            var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))?.Substring(1).ToUpperInvariant();
+            var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))
+                ?.Substring(1)
+                .ToUpperInvariant();
             Parsing.TrimStartComment(ref expr);
             var title = Parsing.Title(ref expr);
             if (title == null)
@@ -214,9 +216,9 @@ namespace AccountingServer.Shell.Serializer
 
         protected virtual bool AlternativeTitle(ref string expr, ICollection<string> lst, ref ITitle title) => false;
 
-        public string PresentAsset(Asset asset) { throw new NotImplementedException(); }
-        public Asset ParseAsset(string str) { throw new NotImplementedException(); }
-        public string PresentAmort(Amortization amort) { throw new NotImplementedException(); }
-        public Amortization ParseAmort(string str) { throw new NotImplementedException(); }
+        public string PresentAsset(Asset asset) => throw new NotImplementedException();
+        public Asset ParseAsset(string str) => throw new NotImplementedException();
+        public string PresentAmort(Amortization amort) => throw new NotImplementedException();
+        public Amortization ParseAmort(string str) => throw new NotImplementedException();
     }
 }

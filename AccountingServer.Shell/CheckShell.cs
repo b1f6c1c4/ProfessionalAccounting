@@ -166,7 +166,8 @@ namespace AccountingServer.Shell
             foreach (var d in res)
             {
                 // ReSharper disable PossibleInvalidOperationException
-                sb.AppendLine($"{d.Voucher.ID} {d.Voucher.Date:yyyyMMdd} {info} {d.Detail.Content}:{d.Detail.Fund.Value:R}");
+                sb.AppendLine(
+                    $"{d.Voucher.ID} {d.Voucher.Date:yyyyMMdd} {info} {d.Detail.Content}:{d.Detail.Fund.Value:R}");
                 sb.AppendLine();
                 // ReSharper restore PossibleInvalidOperationException
             }

@@ -32,7 +32,8 @@ namespace AccountingServer.Shell.Subtotal
         protected override (double Value, string Report) LeafNoneAggr(object path, Balance cat, int depth, double val)
             => (Value: val, Report: Ts(val));
 
-        protected override (double Value, string Report) LeafAggregated(object path, Balance cat, int depth, Balance bal)
+        protected override (double Value, string Report) LeafAggregated(object path, Balance cat, int depth,
+            Balance bal)
             => (Value: bal.Fund,
                 Report:
                 $"{new string(' ', depth * Ident)}{bal.Date.AsDate().CPadRight(38)}{Ts(bal.Fund).CPadLeft(12 + 2 * depth)}"
@@ -41,7 +42,8 @@ namespace AccountingServer.Shell.Subtotal
         protected override object Map(object path, Balance cat, int depth, SubtotalLevel level) => null;
         protected override object MapA(object path, Balance cat, int depth, AggregationType type) => null;
 
-        protected override (double Value, string Report) MediumLevel(object path, object newPath, Balance cat, int depth,
+        protected override (double Value, string Report) MediumLevel(object path, object newPath, Balance cat,
+            int depth,
             SubtotalLevel level, (double Value, string Report) r)
         {
             string str;
@@ -78,7 +80,8 @@ namespace AccountingServer.Shell.Subtotal
                 );
         }
 
-        protected override (double Value, string Report) Reduce(object path, Balance cat, int depth, SubtotalLevel level,
+        protected override (double Value, string Report) Reduce(object path, Balance cat, int depth,
+            SubtotalLevel level,
             IEnumerable<(double Value, string Report)> results)
         {
             var r = results.ToList();

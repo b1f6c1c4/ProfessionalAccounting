@@ -31,7 +31,7 @@ namespace AccountingServer.Shell.Plugins.THUInfo
 
         private readonly object m_Lock = new object();
 
-        static THUInfo() { EndPointTemplates = new ConfigManager<EndPointTemplates>("EndPoint.xml"); }
+        static THUInfo() => EndPointTemplates = new ConfigManager<EndPointTemplates>("EndPoint.xml");
 
         public THUInfo(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer)
         {
