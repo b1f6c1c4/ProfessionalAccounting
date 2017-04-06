@@ -57,7 +57,7 @@ namespace AccountingServer.Shell.Carry
         private readonly ConcurrentDictionary<(string, DateTime), double> m_ToCache =
             new ConcurrentDictionary<(string, DateTime), double>();
 
-        public ExchangeCache(IExchange exchange) { m_Exchange = exchange; }
+        public ExchangeCache(IExchange exchange) => m_Exchange = exchange;
 
         /// <inheritdoc />
         public double From(DateTime date, string target)

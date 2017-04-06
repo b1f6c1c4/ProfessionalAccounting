@@ -84,7 +84,8 @@ namespace AccountingServer.Shell.Plugins.THUInfo
             var buf =
                 Encoding.UTF8
                     .GetBytes("begindate=&enddate=&transtype=&dept=");
-            var req = WebRequest.CreateHttp(@"http://ecard.tsinghua.edu.cn/user/ExDetailsDown.do?") ?? throw new WebException("下载xls文档时出现错误");
+            var req = WebRequest.CreateHttp(@"http://ecard.tsinghua.edu.cn/user/ExDetailsDown.do?") ??
+                throw new WebException("下载xls文档时出现错误");
 
             req.Host = @"ecard.tsinghua.edu.cn";
             req.Method = "POST";
@@ -132,7 +133,8 @@ namespace AccountingServer.Shell.Plugins.THUInfo
         private string GetUrl()
         {
             var req =
-                WebRequest.CreateHttp(@"http://info.tsinghua.edu.cn/minichan/roamaction.jsp?id=159") ?? throw new WebException("获取令牌时出现错误");
+                WebRequest.CreateHttp(@"http://info.tsinghua.edu.cn/minichan/roamaction.jsp?id=159") ??
+                throw new WebException("获取令牌时出现错误");
 
             req.Host = @"info.tsinghua.edu.cn";
             req.Method = "GET";
@@ -153,7 +155,8 @@ namespace AccountingServer.Shell.Plugins.THUInfo
         private void PrepareGetUrl()
         {
             var req =
-                WebRequest.CreateHttp(@"http://info.tsinghua.edu.cn/render.userLayoutRootNode.uP") ?? throw new WebException("获取令牌时出现错误");
+                WebRequest.CreateHttp(@"http://info.tsinghua.edu.cn/render.userLayoutRootNode.uP") ??
+                throw new WebException("获取令牌时出现错误");
 
             req.Host = @"info.tsinghua.edu.cn";
             req.Method = "GET";
@@ -177,7 +180,8 @@ namespace AccountingServer.Shell.Plugins.THUInfo
             var buf =
                 Encoding.GetEncoding("GBK")
                     .GetBytes($"redirect=NO&userName={username}&password={password}");
-            var req = WebRequest.CreateHttp(@"http://info.tsinghua.edu.cn/Login") ?? throw new WebException("登录信息门户时出现错误");
+            var req = WebRequest.CreateHttp(@"http://info.tsinghua.edu.cn/Login") ??
+                throw new WebException("登录信息门户时出现错误");
 
             req.Host = @"info.tsinghua.edu.cn";
             req.Method = "POST";

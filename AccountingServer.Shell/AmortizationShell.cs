@@ -53,7 +53,8 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        protected override IQueryResult ExecuteRegister(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
+        protected override IQueryResult ExecuteRegister(IQueryCompunded<IDistributedQueryAtom> distQuery,
+            DateFilter rng,
             IQueryCompunded<IVoucherQueryAtom> query)
         {
             var sb = new StringBuilder();
@@ -181,7 +182,7 @@ namespace AccountingServer.Shell
 
         /// <inheritdoc />
         protected override IQueryResult ExecuteResetHard(IQueryCompunded<IDistributedQueryAtom> distQuery,
-            IQueryCompunded<IVoucherQueryAtom> query) { throw new InvalidOperationException(); }
+            IQueryCompunded<IVoucherQueryAtom> query) => throw new InvalidOperationException();
 
         /// <inheritdoc />
         protected override IQueryResult ExecuteApply(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
@@ -246,7 +247,7 @@ namespace AccountingServer.Shell
             sb.AppendLine(
                 $"{amort.StringID} {amort.Name.CPadRight(35)}{amort.Date:yyyyMMdd}" +
                 $"{amort.Value.AsCurrency().CPadLeft(13)}{(dt.HasValue ? bookValue.AsCurrency().CPadLeft(13) : "-".CPadLeft(13))}" +
-                $"{((amort.TotalDays?.ToString(CultureInfo.InvariantCulture) ?? "-").CPadLeft(4))}{amort.Interval.ToString().CPadLeft(20)}");
+                $"{(amort.TotalDays?.ToString(CultureInfo.InvariantCulture) ?? "-").CPadLeft(4)}{amort.Interval.ToString().CPadLeft(20)}");
             if (showSchedule && amort.Schedule != null)
                 foreach (var amortItem in amort.Schedule)
                 {

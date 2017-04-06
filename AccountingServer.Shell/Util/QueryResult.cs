@@ -35,7 +35,7 @@ namespace AccountingServer.Shell.Util
         ///     文档数
         /// </summary>
         /// <param name="n"></param>
-        public NumberAffected(long n) { m_N = n; }
+        public NumberAffected(long n) => m_N = n;
 
         public override string ToString() => m_N.ToString(CultureInfo.InvariantCulture);
 
@@ -56,7 +56,7 @@ namespace AccountingServer.Shell.Util
         /// <summary>
         ///     文字内容
         /// </summary>
-        protected Text(string text) { m_Text = text; }
+        protected Text(string text) => m_Text = text;
 
         public override string ToString() => m_Text;
 

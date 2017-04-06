@@ -120,7 +120,8 @@ namespace AccountingServer.BLL.Parsing
         {
             public static implicit operator DateTime?(UniqueTimeCoreContext context)
             {
-                if (context == null || context.RangeNull() != null)
+                if (context == null ||
+                    context.RangeNull() != null)
                     return null;
 
                 return context.Day;

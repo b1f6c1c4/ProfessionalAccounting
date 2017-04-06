@@ -15,7 +15,7 @@ namespace AccountingServer.Shell.Serializer
     {
         private static readonly ConfigManager<Abbreviations> Abbrs;
 
-        static AbbrSerializer() { Abbrs = new ConfigManager<Abbreviations>("Abbr.xml"); }
+        static AbbrSerializer() => Abbrs = new ConfigManager<Abbreviations>("Abbr.xml");
 
         protected override bool AlternativeTitle(ref string expr, ICollection<string> lst, ref ITitle title)
         {

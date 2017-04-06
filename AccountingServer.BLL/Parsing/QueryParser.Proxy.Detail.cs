@@ -169,7 +169,8 @@ namespace AccountingServer.BLL.Parsing
             public OperatorType Operator => OperatorType.None;
 
             /// <inheritdoc />
-            public IQueryCompunded<IDetailQueryAtom> Filter1 => detailQuery() ?? (IQueryCompunded<IDetailQueryAtom>)details();
+            public IQueryCompunded<IDetailQueryAtom> Filter1 => detailQuery() ??
+                (IQueryCompunded<IDetailQueryAtom>)details();
 
             /// <inheritdoc />
             public IQueryCompunded<IDetailQueryAtom> Filter2 => null;

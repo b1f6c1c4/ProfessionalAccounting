@@ -118,7 +118,8 @@ namespace AccountingServer.BLL.Parsing
             public OperatorType Operator => OperatorType.None;
 
             /// <inheritdoc />
-            public IQueryCompunded<IDistributedQueryAtom> Filter1 => distributedQAtom() ?? (IQueryCompunded<IDistributedQueryAtom>)distributedQ();
+            public IQueryCompunded<IDistributedQueryAtom> Filter1 => distributedQAtom() ??
+                (IQueryCompunded<IDistributedQueryAtom>)distributedQ();
 
             /// <inheritdoc />
             public IQueryCompunded<IDistributedQueryAtom> Filter2 => null;

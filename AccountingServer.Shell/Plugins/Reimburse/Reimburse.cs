@@ -76,7 +76,9 @@ namespace AccountingServer.Shell.Plugins.Reimburse
                 {
                     var curr = grp.Key;
                     // ReSharper disable once PossibleInvalidOperationException
-                    var ratio = curr == VoucherDetail.BaseCurrency ? 1 : ExchangeFactory.Instance.From(rng.EndDate.Value, curr);
+                    var ratio = curr == VoucherDetail.BaseCurrency
+                        ? 1
+                        : ExchangeFactory.Instance.From(rng.EndDate.Value, curr);
                     foreach (var b in grp)
                     {
                         sb.Append(reim.Name);
@@ -84,7 +86,8 @@ namespace AccountingServer.Shell.Plugins.Reimburse
                             sb.Append($"/{TitleManager.GetTitleName(b.Title)}");
                         if (reim.BySubTitle)
                             sb.Append($"/{TitleManager.GetTitleName(b.Title, b.SubTitle)}");
-                        if (reim.ByCountent && !reim.HideCountent)
+                        if (reim.ByCountent &&
+                            !reim.HideCountent)
                             sb.Append($"/{b.Content}");
                         if (reim.ByRemark)
                             sb.Append($"/{b.Remark}");

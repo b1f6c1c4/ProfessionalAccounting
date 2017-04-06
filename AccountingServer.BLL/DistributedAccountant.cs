@@ -15,7 +15,7 @@ namespace AccountingServer.BLL
         /// </summary>
         protected readonly DbSession Db;
 
-        protected DistributedAccountant(DbSession db) { Db = db; }
+        protected DistributedAccountant(DbSession db) => Db = db;
 
         /// <summary>
         ///     获取分期的剩余

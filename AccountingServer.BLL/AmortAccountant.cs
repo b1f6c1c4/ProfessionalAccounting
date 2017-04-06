@@ -60,7 +60,9 @@ namespace AccountingServer.BLL
                 case AmortizeInterval.SameDayOfWeek:
                     return last.AddDays(7);
                 case AmortizeInterval.LastDayOfWeek:
-                    return last.DayOfWeek == DayOfWeek.Sunday ? last.AddDays(7) : last.AddDays(14 - (int)last.DayOfWeek);
+                    return last.DayOfWeek == DayOfWeek.Sunday
+                        ? last.AddDays(7)
+                        : last.AddDays(14 - (int)last.DayOfWeek);
                 case AmortizeInterval.SameDayOfMonth:
                     return last.AddMonths(1);
                 case AmortizeInterval.LastDayOfMonth:
@@ -92,7 +94,7 @@ namespace AccountingServer.BLL
 
             var resiValue = amort.Value.Value;
             foreach (var item in lst)
-                item.Value = (resiValue -= item.Amount);
+                item.Value = resiValue -= item.Amount;
 
             amort.Schedule = lst;
         }
@@ -127,7 +129,8 @@ namespace AccountingServer.BLL
                 {
                     var lst = amort.Schedule
                         .Where(item => item.Date.Within(rng))
-                        .Where(item => item.Date == voucher.Date).ToList();
+                        .Where(item => item.Date == voucher.Date)
+                        .ToList();
 
                     if (lst.Count == 1)
                         lst[0].VoucherID = voucher.ID;
@@ -218,18 +221,19 @@ namespace AccountingServer.BLL
         private bool GenerateVoucher(AmortItem item, bool isCollapsed, Voucher template)
         {
             var lst = template.Details.Select(
-                detail => new VoucherDetail
-                    {
-                        Currency = detail.Currency,
-                        Title = detail.Title,
-                        SubTitle = detail.SubTitle,
-                        Content = detail.Content,
-                        Fund =
-                            detail.Remark == AmortItem.IgnoranceMark
-                                ? detail.Fund
-                                : item.Amount * detail.Fund,
-                        Remark = item.Remark
-                    }).ToList();
+                    detail => new VoucherDetail
+                        {
+                            Currency = detail.Currency,
+                            Title = detail.Title,
+                            SubTitle = detail.SubTitle,
+                            Content = detail.Content,
+                            Fund =
+                                detail.Remark == AmortItem.IgnoranceMark
+                                    ? detail.Fund
+                                    : item.Amount * detail.Fund,
+                            Remark = item.Remark
+                        })
+                .ToList();
             var voucher = new Voucher
                 {
                     Date = isCollapsed ? null : item.Date,

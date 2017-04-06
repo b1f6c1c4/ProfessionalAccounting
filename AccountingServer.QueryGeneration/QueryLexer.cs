@@ -1,5 +1,4 @@
-﻿// ReSharper disable UnusedMember.Global
-namespace AccountingServer.QueryGeneration
+﻿namespace AccountingServer.QueryGeneration
 {
     public class QueryLexer { }
 }

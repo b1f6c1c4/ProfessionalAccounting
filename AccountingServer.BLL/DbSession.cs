@@ -23,7 +23,7 @@ namespace AccountingServer.BLL
         public void Connect(string uri) => Db = Facade.Create(uri);
 
         private static int Compare<T>(T? lhs, T? rhs)
-            where T:struct,IComparable<T>
+            where T : struct, IComparable<T>
         {
             if (lhs.HasValue &&
                 rhs.HasValue)

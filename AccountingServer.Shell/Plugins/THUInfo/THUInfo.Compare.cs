@@ -150,7 +150,8 @@ namespace AccountingServer.Shell.Plugins.THUInfo
                         v.Details.Where(
                                 d =>
                                     d.Title == 1012 && d.Title == 05 && d.Remark == null)
-                            .Select(d => new VDetail { Detail = d, Voucher = v })).ToList();
+                            .Select(d => new VDetail { Detail = d, Voucher = v }))
+                .ToList();
 
             var noRemark = new List<Problem>();
             var tooMuch = new List<Problem>();
@@ -162,10 +163,11 @@ namespace AccountingServer.Shell.Plugins.THUInfo
                 var grp = dfgrp;
                 var acc =
                     account.Where(
-                        d =>
-                            d.Voucher.Date == grp.Key.Date &&
-                            // ReSharper disable once PossibleInvalidOperationException
-                            (Math.Abs(d.Detail.Fund.Value) - grp.Key.Fund).IsZero()).ToList();
+                            d =>
+                                d.Voucher.Date == grp.Key.Date &&
+                                // ReSharper disable once PossibleInvalidOperationException
+                                (Math.Abs(d.Detail.Fund.Value) - grp.Key.Fund).IsZero())
+                        .ToList();
                 noRecord.RemoveAll(acc.Contains);
                 switch (acc.Count.CompareTo(grp.Count()))
                 {

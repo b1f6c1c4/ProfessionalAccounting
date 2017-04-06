@@ -21,7 +21,7 @@ namespace AccountingServer.Shell.Carry
         /// </summary>
         private readonly Accountant m_Accountant;
 
-        public CarryYearShell(Accountant helper) { m_Accountant = helper; }
+        public CarryYearShell(Accountant helper) => m_Accountant = helper;
 
         /// <inheritdoc />
         public IQueryResult Execute(string expr)

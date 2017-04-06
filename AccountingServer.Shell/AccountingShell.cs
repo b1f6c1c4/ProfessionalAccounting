@@ -178,7 +178,7 @@ namespace AccountingServer.Shell
             foreach (var voucher in m_Accountant.SelectVouchers(query.VoucherQuery))
             foreach (var d in voucher.Details)
                 if (d.IsMatch(q))
-                        sb.Append(m_Serializer.PresentVoucherDetail(d));
+                    sb.Append(m_Serializer.PresentVoucherDetail(d));
 
             return new EditableText(sb.ToString());
         }

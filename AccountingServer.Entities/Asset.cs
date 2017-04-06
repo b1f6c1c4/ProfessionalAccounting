@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AccountingServer.Entities
 {
@@ -196,6 +197,7 @@ namespace AccountingServer.Entities
     public class AssetItemComparer : IComparer<AssetItem>
     {
         /// <inheritdoc />
+        [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
         public int Compare(AssetItem x, AssetItem y)
         {
             var res = DateHelper.CompareDate(x.Date, y.Date);

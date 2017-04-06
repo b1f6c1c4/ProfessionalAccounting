@@ -45,10 +45,12 @@ namespace AccountingServer.Shell.Plugins.Interest
                 // ReSharper disable once PossibleInvalidOperationException
                 var lastD = Accountant.RunVoucherQuery(filter0)
                         .OrderByDescending(v => v.Date, new DateComparer())
-                        .FirstOrDefault()?.Date ??
+                        .FirstOrDefault()
+                        ?.Date ??
                     Accountant.RunVoucherQuery(filter)
                         .OrderBy(v => v.Date, new DateComparer())
-                        .First().Date.Value;
+                        .First()
+                        .Date.Value;
                 var capQuery = $"{filter} [~{lastD.AsDate()}]``v";
                 var intQuery = $"{filter0} [~{lastD.AsDate()}]``v";
                 var capitalIntegral = Accountant.RunGroupedQuery(capQuery).SingleOrDefault()?.Fund ?? 0;
@@ -110,7 +112,8 @@ namespace AccountingServer.Shell.Plugins.Interest
                 Accountant
                     .RunVoucherQuery(
                         $"(T1221 {content.Quotation('\'')})*({rmk.Quotation('"')}+{(rmk + "-利息").Quotation('"')}) {rng.AsDateRange()}")
-                    .GroupBy(v => v.Date).OrderBy(grp => grp.Key, new DateComparer()))
+                    .GroupBy(v => v.Date)
+                    .OrderBy(grp => grp.Key, new DateComparer()))
             {
                 var key = grp.Key ?? throw new ApplicationException("无法处理无穷长时间以前的利息收入");
 
