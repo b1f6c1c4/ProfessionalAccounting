@@ -67,7 +67,6 @@ namespace AccountingServer.Shell.Plugins.Reimburse
         private IQueryResult DoReimbursement(DateFilter rng)
         {
             var sb = new StringBuilder();
-            var f = ExchangeFactory.Create();
             foreach (var reim in Templates.Config.Templates)
             {
                 var gq = Accountant
@@ -77,7 +76,7 @@ namespace AccountingServer.Shell.Plugins.Reimburse
                 {
                     var curr = grp.Key;
                     // ReSharper disable once PossibleInvalidOperationException
-                    var ratio = curr == VoucherDetail.BaseCurrency ? 1 : f.From(rng.EndDate.Value, curr);
+                    var ratio = curr == VoucherDetail.BaseCurrency ? 1 : ExchangeFactory.Instance.From(rng.EndDate.Value, curr);
                     foreach (var b in grp)
                     {
                         sb.Append(reim.Name);

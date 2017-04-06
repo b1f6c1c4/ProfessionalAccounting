@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -10,7 +10,7 @@ namespace AccountingServer.Shell.Carry
 {
     internal static class ExchangeFactory
     {
-        public static IExchange Create() => new ExchangeCache(new FixerIoExchange());
+        public static IExchange Instance { get; } = new ExchangeCache(new FixerIoExchange());
     }
 
     /// <summary>
@@ -48,53 +48,24 @@ namespace AccountingServer.Shell.Carry
         /// <summary>
         ///     买入缓存
         /// </summary>
-        private readonly Dictionary<string, Dictionary<DateTime, double>> m_FromCache =
-            new Dictionary<string, Dictionary<DateTime, double>>();
+        private readonly ConcurrentDictionary<(string, DateTime), double> m_FromCache =
+            new ConcurrentDictionary<(string, DateTime), double>();
 
         /// <summary>
         ///     卖出缓存
         /// </summary>
-        private readonly Dictionary<string, Dictionary<DateTime, double>> m_ToCache =
-            new Dictionary<string, Dictionary<DateTime, double>>();
+        private readonly ConcurrentDictionary<(string, DateTime), double> m_ToCache =
+            new ConcurrentDictionary<(string, DateTime), double>();
 
         public ExchangeCache(IExchange exchange) { m_Exchange = exchange; }
 
         /// <inheritdoc />
         public double From(DateTime date, string target)
-            => RetriveCache(date, target, m_FromCache, () => m_Exchange.From(date, target));
+            => m_FromCache.GetOrAdd((target, date), _ => m_Exchange.From(date, target));
 
         /// <inheritdoc />
         public double To(DateTime date, string target)
-            => RetriveCache(date, target, m_ToCache, () => m_Exchange.To(date, target));
-
-        /// <summary>
-        ///     尝试读取缓存
-        /// </summary>
-        /// <param name="date">日期</param>
-        /// <param name="target">目标</param>
-        /// <param name="cache">缓存</param>
-        /// <param name="func">缓存失效则调用</param>
-        /// <returns>结果</returns>
-        private static double RetriveCache(DateTime date, string target,
-            IDictionary<string, Dictionary<DateTime, double>> cache, Func<double> func)
-        {
-            if (!cache.TryGetValue(target, out Dictionary<DateTime, double> dic))
-            {
-                var v = func();
-                dic = new Dictionary<DateTime, double> { { date, v } };
-                cache.Add(target, dic);
-                return v;
-            }
-
-            if (!dic.TryGetValue(date, out var val))
-            {
-                var v = func();
-                dic.Add(date, v);
-                return v;
-            }
-
-            return val;
-        }
+            => m_ToCache.GetOrAdd((target, date), _ => m_Exchange.To(date, target));
     }
 
     /// <summary>
