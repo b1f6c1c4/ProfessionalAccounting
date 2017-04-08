@@ -11,6 +11,9 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         [XmlElement]
         public string QuickAsset { get; set; }
 
+        [XmlElement]
+        public bool Reimburse { get; set; }
+
         [XmlArray("Debts")] [XmlArrayItem("SimpleDebt", typeof(SimpleDebt))]
         [XmlArrayItem("CreditCard", typeof(CreditCard))] public List<Debt> Debts;
     }

@@ -30,11 +30,14 @@ namespace AccountingServer.Shell.Plugins.CashFlow
             var init = Accountant.RunGroupedQuery($"{Templates.Config.QuickAsset} [~.]``v").Single().Fund;
             lst.Add((DateTime.Today, init));
 
-            var rb = new Reimburse.Reimburse(Accountant, Serializer);
-            rb.DoReimbursement(Reimburse.Reimburse.DateRange, out var rbVal);
-            // ReSharper disable once PossibleInvalidOperationException
-            var rbF = Reimburse.Reimburse.DateRange.EndDate.Value;
-            lst.Add((rbF, rbVal));
+            if (Templates.Config.Reimburse)
+            {
+                var rb = new Reimburse.Reimburse(Accountant, Serializer);
+                rb.DoReimbursement(Reimburse.Reimburse.DateRange, out var rbVal);
+                // ReSharper disable once PossibleInvalidOperationException
+                var rbF = Reimburse.Reimburse.DateRange.EndDate.Value;
+                lst.Add((rbF, rbVal));
+            }
 
             foreach (var debt in Templates.Config.Debts)
                 switch (debt)
