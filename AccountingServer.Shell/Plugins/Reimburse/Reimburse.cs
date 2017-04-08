@@ -27,7 +27,21 @@ namespace AccountingServer.Shell.Plugins.Reimburse
         {
             DateFilter the;
             if (string.IsNullOrWhiteSpace(expr))
+                the = DateRange;
+            else
             {
+                the = ParsingF.Range(ref expr) ?? throw new ArgumentException("语法错误", nameof(expr));
+                ParsingF.Eof(expr);
+            }
+
+            return DoReimbursement(the, out var _);
+        }
+
+        public static DateFilter DateRange
+        {
+            get
+            {
+                DateFilter the;
                 var now = DateTime.Today;
                 if (now.Day > Templates.Config.Day)
                     the = new DateFilter(
@@ -37,14 +51,8 @@ namespace AccountingServer.Shell.Plugins.Reimburse
                     the = new DateFilter(
                         new DateTime(now.Year, now.Month, Templates.Config.Day + 1).AddMonths(-1),
                         new DateTime(now.Year, now.Month, Templates.Config.Day));
+                return the;
             }
-            else
-            {
-                the = ParsingF.Range(ref expr) ?? throw new ArgumentException("语法错误", nameof(expr));
-                ParsingF.Eof(expr);
-            }
-
-            return DoReimbursement(the);
         }
 
         /// <inheritdoc />
@@ -63,9 +71,11 @@ namespace AccountingServer.Shell.Plugins.Reimburse
         ///     执行报销
         /// </summary>
         /// <param name="rng">财月</param>
+        /// <param name="val">金额</param>
         /// <returns>执行结果</returns>
-        private IQueryResult DoReimbursement(DateFilter rng)
+        public IQueryResult DoReimbursement(DateFilter rng, out double val)
         {
+            val = 0;
             var sb = new StringBuilder();
             foreach (var reim in Templates.Config.Templates)
             {
@@ -92,6 +102,8 @@ namespace AccountingServer.Shell.Plugins.Reimburse
                         if (reim.ByRemark)
                             sb.Append($"/{b.Remark}");
                         sb.AppendLine($"\t{curr}\t{b.Fund}\t{ratio}\t{reim.Ratio}");
+
+                        val += ratio * b.Fund * reim.Ratio;
                     }
                 }
             }
