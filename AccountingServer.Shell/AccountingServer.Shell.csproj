@@ -51,6 +51,8 @@
   <ItemGroup>
     <Compile Include="Carry\ExchangeShell.cs" />
     <Compile Include="Plugins\BankBalance\AverageDailyBalance.cs" />
+    <Compile Include="Plugins\CashFlow\CashFlow.cs" />
+    <Compile Include="Plugins\CashFlow\CashTemplate.cs" />
     <Compile Include="Plugins\Interest\InterestRevenue.cs" />
     <Compile Include="Plugins\Reimburse\Reimburse.cs" />
     <Compile Include="Plugins\Reimburse\ReimTemplate.cs" />
@@ -122,6 +124,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Plugins\THUInfo\Resources\Document.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Plugins\CashFlow\Resources\Document.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

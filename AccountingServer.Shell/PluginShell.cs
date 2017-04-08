@@ -5,6 +5,7 @@ using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.Shell.Plugins;
 using AccountingServer.Shell.Plugins.BankBalance;
+using AccountingServer.Shell.Plugins.CashFlow;
 using AccountingServer.Shell.Plugins.Interest;
 using AccountingServer.Shell.Plugins.Reimburse;
 using AccountingServer.Shell.Plugins.THUInfo;
@@ -28,6 +29,7 @@ namespace AccountingServer.Shell
                 {
                     { "adb", new AverageDailyBalance(helper, serializer) },
                     { "ir", new InterestRevenue(helper, serializer) },
+                    { "cf", new CashFlow(helper, serializer) },
                     { "rb", new Reimburse(helper, serializer) },
                     { "f", new THUInfo(helper, serializer) },
                     { "u", new Utilities(helper, serializer) },
