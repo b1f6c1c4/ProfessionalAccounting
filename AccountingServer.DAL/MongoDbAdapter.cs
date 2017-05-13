@@ -259,12 +259,10 @@ namespace AccountingServer.DAL
             if (query.DetailEmitFilter != null)
                 sb.Append(GetEmitFilterJavascript(query.DetailEmitFilter));
             else
-            {
-                if (!(query.VoucherQuery is IVoucherQueryAtom dQuery))
-                    throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query));
-
-                sb.Append(GetJavascriptFilter(dQuery.DetailFilter));
-            }
+                sb.Append(
+                    query.VoucherQuery is IVoucherQueryAtom dQuery
+                        ? GetJavascriptFilter(dQuery.DetailFilter)
+                        : throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query)));
 
             sb.AppendLine(";");
             preFilter = GetNativeFilter(query.VoucherQuery);
