@@ -223,7 +223,6 @@ namespace AccountingServer.Shell.Carry
                         {
                             Currency = grpCurrency.Key,
                             Title = 3999,
-                            SubTitle = 01,
                             Fund = b
                         });
                 voucher.Details.Add(
