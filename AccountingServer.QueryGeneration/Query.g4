@@ -23,7 +23,7 @@ voucherDetailQuery
 	;
 
 emit
-	:	Op='A' | ':' details
+	:	':' details
 	;
 
 vouchers
@@ -46,7 +46,7 @@ vouchers0
 	;
 
 voucherQuery
-	:	details? Op=('A' | 'E')? range? CaretQuotedString? PercentQuotedString? VoucherType?
+	:	details? Op='A'? range? CaretQuotedString? PercentQuotedString? VoucherType?
 	;
 
 details
