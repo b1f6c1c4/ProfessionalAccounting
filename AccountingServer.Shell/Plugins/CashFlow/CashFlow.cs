@@ -39,10 +39,10 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                 lst.Add((rbF, rbVal));
             }
 
-            foreach (var debt in Templates.Config.Debts)
+            foreach (var debt in Templates.Config.Items)
                 switch (debt)
                 {
-                    case SimpleDebt sd:
+                    case SimpleItem sd:
                         lst.Add((sd.Day, Accountant.RunGroupedQuery($"{sd.Query}``v").Single().Fund));
                         break;
 
