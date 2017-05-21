@@ -42,6 +42,10 @@ namespace AccountingServer.Shell.Plugins.CashFlow
             foreach (var debt in Templates.Config.Items)
                 switch (debt)
                 {
+                    case FixedItem fi:
+                        lst.Add((fi.Day, fi.Fund));
+                        break;
+
                     case SimpleItem sd:
                         lst.Add((sd.Day, Accountant.RunGroupedQuery($"{sd.Query}``v").Single().Fund));
                         break;

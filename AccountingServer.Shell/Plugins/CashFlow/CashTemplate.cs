@@ -15,6 +15,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         public bool Reimburse { get; set; }
 
         [XmlArray("Items")]
+        [XmlArrayItem("FixedItem", typeof(FixedItem))]
         [XmlArrayItem("SimpleItem", typeof(SimpleItem))]
         [XmlArrayItem("CreditCard", typeof(CreditCard))]
         public List<CashFlowItem> Items;
@@ -22,6 +23,16 @@ namespace AccountingServer.Shell.Plugins.CashFlow
 
     [Serializable]
     public abstract class CashFlowItem { }
+
+    [Serializable]
+    public class FixedItem : CashFlowItem
+    {
+        [XmlAttribute("day")]
+        public DateTime Day { get; set; }
+
+        [XmlAttribute("fund")]
+        public double Fund { get; set; }
+    }
 
     [Serializable]
     public class SimpleItem : CashFlowItem
