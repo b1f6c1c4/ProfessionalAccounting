@@ -14,15 +14,17 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         [XmlElement]
         public bool Reimburse { get; set; }
 
-        [XmlArray("Debts")] [XmlArrayItem("SimpleDebt", typeof(SimpleDebt))]
-        [XmlArrayItem("CreditCard", typeof(CreditCard))] public List<Debt> Debts;
+        [XmlArray("Items")]
+        [XmlArrayItem("SimpleItem", typeof(SimpleItem))]
+        [XmlArrayItem("CreditCard", typeof(CreditCard))]
+        public List<CashFlowItem> Items;
     }
 
     [Serializable]
-    public abstract class Debt { }
+    public abstract class CashFlowItem { }
 
     [Serializable]
-    public class SimpleDebt : Debt
+    public class SimpleItem : CashFlowItem
     {
         [XmlAttribute("day")]
         public DateTime Day { get; set; }
@@ -32,7 +34,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
     }
 
     [Serializable]
-    public class CreditCard : Debt
+    public class CreditCard : CashFlowItem
     {
         [XmlAttribute("repay")]
         public int RepaymentDay { get; set; }
