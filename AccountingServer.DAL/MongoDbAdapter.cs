@@ -8,7 +8,6 @@ using AccountingServer.Entities;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using static AccountingServer.DAL.MongoDbNative;
-using static AccountingServer.DAL.MongoDbJavascript;
 
 namespace AccountingServer.DAL
 {
@@ -80,7 +79,7 @@ namespace AccountingServer.DAL
 
         /// <inheritdoc />
         public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query) =>
-            m_Vouchers.Find(GetNQuery(query)).ToEnumerable();
+            m_Vouchers.Find(query.Accept(new MongoDbNativeVoucher())).ToEnumerable();
 
         /// <inheritdoc />
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
@@ -112,7 +111,7 @@ namespace AccountingServer.DAL
         /// <inheritdoc />
         public long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query)
         {
-            var res = m_Vouchers.DeleteMany(GetNQuery(query));
+            var res = m_Vouchers.DeleteMany(query.Accept(new MongoDbNativeVoucher()));
             return res.DeletedCount;
         }
 
@@ -128,7 +127,7 @@ namespace AccountingServer.DAL
 
         /// <inheritdoc />
         public IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter) =>
-            m_Assets.FindSync(GetNQuery<Asset>(filter)).ToEnumerable();
+            m_Assets.FindSync(filter.Accept(new MongoDbNativeDistributed<Asset>())).ToEnumerable();
 
         /// <inheritdoc />
         public bool DeleteAsset(Guid id)
@@ -150,7 +149,7 @@ namespace AccountingServer.DAL
         /// <inheritdoc />
         public long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            var res = m_Assets.DeleteMany(GetNQuery<Asset>(filter));
+            var res = m_Assets.DeleteMany(filter.Accept(new MongoDbNativeDistributed<Asset>()));
             return res.DeletedCount;
         }
 
@@ -164,7 +163,7 @@ namespace AccountingServer.DAL
 
         /// <inheritdoc />
         public IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter) =>
-            m_Amortizations.FindSync(GetNQuery<Amortization>(filter)).ToEnumerable();
+            m_Amortizations.FindSync(filter.Accept(new MongoDbNativeDistributed<Amortization>())).ToEnumerable();
 
         /// <inheritdoc />
         public bool DeleteAmortization(Guid id)
@@ -186,7 +185,7 @@ namespace AccountingServer.DAL
         /// <inheritdoc />
         public long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
         {
-            var res = m_Amortizations.DeleteMany(GetNQuery<Amortization>(filter));
+            var res = m_Amortizations.DeleteMany(filter.Accept(new MongoDbNativeDistributed<Amortization>()));
             return res.DeletedCount;
         }
 
@@ -233,7 +232,7 @@ namespace AccountingServer.DAL
         /// <param name="emitQuery">细目映射检索式</param>
         /// <returns>Javascript表示</returns>
         private static string GetEmitFilterJavascript(IEmit emitQuery) =>
-            GetJavascriptFilter(emitQuery.DetailFilter);
+            emitQuery.DetailFilter.Accept(new MongoDbJavascriptDetail());
 
         /// <summary>
         ///     映射函数的Javascript表示
@@ -261,11 +260,11 @@ namespace AccountingServer.DAL
             else
                 sb.Append(
                     query.VoucherQuery is IVoucherQueryAtom dQuery
-                        ? GetJavascriptFilter(dQuery.DetailFilter)
+                        ? dQuery.DetailFilter.Accept(new MongoDbJavascriptDetail())
                         : throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query)));
 
             sb.AppendLine(";");
-            preFilter = GetNativeFilter(query.VoucherQuery);
+            preFilter = query.VoucherQuery.Accept(new MongoDbNativeVoucher());
             sb.AppendLine(GetTheDateJavascript(level));
             sb.AppendLine("    this.detail.forEach(function(d) {");
             sb.AppendLine("        if (chk(d))");
