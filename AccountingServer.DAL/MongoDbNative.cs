@@ -242,32 +242,34 @@ namespace AccountingServer.DAL
         /// <returns>Native表示</returns>
         private static FilterDefinition<T> GetNativeFilter<T, TAtom>(IQueryCompunded<TAtom> query,
             Func<TAtom, FilterDefinition<T>> atomFilter)
+            where TAtom : class => query?.Accept(new MongoDbNativeVisitor<T, TAtom>(atomFilter)) ?? atomFilter(null);
+
+        private sealed class MongoDbNativeVisitor<T, TAtom> : IQueryVisitor<TAtom, FilterDefinition<T>>
             where TAtom : class
         {
-            if (query == null)
-                return atomFilter(null);
+            private readonly Func<TAtom, FilterDefinition<T>> m_AtomFilter;
 
-            if (query is TAtom a)
-                return atomFilter(a);
+            public MongoDbNativeVisitor(Func<TAtom, FilterDefinition<T>> atomFilter) => m_AtomFilter = atomFilter;
 
-            if (!(query is IQueryAry<TAtom> f))
-                throw new ArgumentException("检索式类型未知", nameof(query));
-
-            switch (f.Operator)
+            public FilterDefinition<T> Visit(TAtom query) => m_AtomFilter(query);
+            public FilterDefinition<T> Visit(IQueryAry<TAtom> query)
             {
-                case OperatorType.None:
-                case OperatorType.Identity:
-                    return GetNativeFilter(f.Filter1, atomFilter);
-                case OperatorType.Complement:
-                    return !GetNativeFilter(f.Filter1, atomFilter);
-                case OperatorType.Union:
-                    return GetNativeFilter(f.Filter1, atomFilter) | GetNativeFilter(f.Filter2, atomFilter);
-                case OperatorType.Intersect:
-                    return GetNativeFilter(f.Filter1, atomFilter) & GetNativeFilter(f.Filter2, atomFilter);
-                case OperatorType.Substract:
-                    return GetNativeFilter(f.Filter1, atomFilter) & !GetNativeFilter(f.Filter2, atomFilter);
-                default:
-                    throw new ArgumentException("运算类型未知", nameof(query));
+                switch (query.Operator)
+                {
+                    case OperatorType.None:
+                    case OperatorType.Identity:
+                        return query.Filter1.Accept(this);
+                    case OperatorType.Complement:
+                        return !query.Filter1.Accept(this);
+                    case OperatorType.Union:
+                        return query.Filter1.Accept(this) | query.Filter2.Accept(this);
+                    case OperatorType.Intersect:
+                        return query.Filter1.Accept(this) & query.Filter2.Accept(this);
+                    case OperatorType.Substract:
+                        return query.Filter1.Accept(this) & !query.Filter2.Accept(this);
+                    default:
+                        throw new ArgumentException("运算类型未知", nameof(query));
+                }
             }
         }
     }

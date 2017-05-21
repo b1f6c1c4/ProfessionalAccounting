@@ -72,51 +72,54 @@ namespace AccountingServer.DAL
         /// <param name="atomFilter">原子检索式的Javascript表示</param>
         /// <returns>Javascript表示</returns>
         private static string GetJavascriptFilter<TAtom>(IQueryCompunded<TAtom> query, Func<TAtom, string> atomFilter)
+            where TAtom : class => query?.Accept(new MongoDbJavascriptVisitor<TAtom>(atomFilter)) ?? atomFilter(null);
+
+        private sealed class MongoDbJavascriptVisitor<TAtom> : IQueryVisitor<TAtom, string>
             where TAtom : class
         {
-            if (query == null)
-                return atomFilter(null);
+            private readonly Func<TAtom, string> m_AtomFilter;
 
-            if (query is TAtom a)
-                return atomFilter(a);
+            public MongoDbJavascriptVisitor(Func<TAtom, string> atomFilter) => m_AtomFilter = atomFilter;
 
-            if (!(query is IQueryAry<TAtom> f))
-                throw new ArgumentException("检索式类型未知", nameof(query));
+            public string Visit(TAtom query) => m_AtomFilter(query);
 
-            var sb = new StringBuilder();
-            sb.AppendLine("function (entity) {");
-            sb.AppendLine("    return ");
-            switch (f.Operator)
+            public string Visit(IQueryAry<TAtom> query)
             {
-                case OperatorType.None:
-                case OperatorType.Identity:
-                    sb.AppendLine($"({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
-                    break;
-                case OperatorType.Complement:
-                    sb.AppendLine($"!({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
-                    break;
-                case OperatorType.Union:
-                    sb.AppendLine($"({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
-                    sb.AppendLine("||");
-                    sb.AppendLine($"({GetJavascriptFilter(f.Filter2, atomFilter)})(entity)");
-                    break;
-                case OperatorType.Intersect:
-                    sb.AppendLine($"({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
-                    sb.AppendLine("&&");
-                    sb.AppendLine($"({GetJavascriptFilter(f.Filter2, atomFilter)})(entity)");
-                    break;
-                case OperatorType.Substract:
-                    sb.AppendLine($"({GetJavascriptFilter(f.Filter1, atomFilter)})(entity)");
-                    sb.AppendLine("&& !");
-                    sb.AppendLine($"({GetJavascriptFilter(f.Filter2, atomFilter)})(entity)");
-                    break;
-                default:
-                    throw new ArgumentException("运算类型未知", nameof(query));
-            }
+                var sb = new StringBuilder();
+                sb.AppendLine("function (entity) {");
+                sb.AppendLine("    return ");
+                switch (query.Operator)
+                {
+                    case OperatorType.None:
+                    case OperatorType.Identity:
+                        sb.AppendLine($"({query.Filter1.Accept(this)})(entity)");
+                        break;
+                    case OperatorType.Complement:
+                        sb.AppendLine($"!({query.Filter1.Accept(this)})(entity)");
+                        break;
+                    case OperatorType.Union:
+                        sb.AppendLine($"({query.Filter1.Accept(this)})(entity)");
+                        sb.AppendLine("||");
+                        sb.AppendLine($"({query.Filter2.Accept(this)})(entity)");
+                        break;
+                    case OperatorType.Intersect:
+                        sb.AppendLine($"({query.Filter1.Accept(this)})(entity)");
+                        sb.AppendLine("&&");
+                        sb.AppendLine($"({query.Filter2.Accept(this)})(entity)");
+                        break;
+                    case OperatorType.Substract:
+                        sb.AppendLine($"({query.Filter1.Accept(this)})(entity)");
+                        sb.AppendLine("&& !");
+                        sb.AppendLine($"({query.Filter2.Accept(this)})(entity)");
+                        break;
+                    default:
+                        throw new ArgumentException("运算类型未知", nameof(query));
+                }
 
-            sb.AppendLine(";");
-            sb.AppendLine("}");
-            return sb.ToString();
+                sb.AppendLine(";");
+                sb.AppendLine("}");
+                return sb.ToString();
+            }
         }
     }
 }
