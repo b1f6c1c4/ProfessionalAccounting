@@ -14,6 +14,9 @@ namespace AccountingServer.Entities.Util
 
         public VoucherDetail Filter { get; }
         public int Dir { get; }
+
+        public void Accept(IQueryVisitor<IDetailQueryAtom> visitor) => visitor.Visit(this);
+        public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
     }
 
     public class QueryAryBase<TAtom> : IQueryAry<TAtom> where TAtom : class
@@ -50,6 +53,9 @@ namespace AccountingServer.Entities.Util
         public OperatorType Operator { get; }
         public IQueryCompunded<TAtom> Filter1 { get; }
         public IQueryCompunded<TAtom> Filter2 { get; }
+
+        public void Accept(IQueryVisitor<TAtom> visitor) => visitor.Visit(this);
+        public T Accept<T>(IQueryVisitor<TAtom, T> visitor) => visitor.Visit(this);
     }
 
     public class DetailQueryAryBase : QueryAryBase<IDetailQueryAtom>
@@ -83,6 +89,9 @@ namespace AccountingServer.Entities.Util
         public Voucher VoucherFilter { get; }
         public DateFilter Range { get; }
         public IQueryCompunded<IDetailQueryAtom> DetailFilter { get; set; }
+
+        public void Accept(IQueryVisitor<IVoucherQueryAtom> visitor) => visitor.Visit(this);
+        public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
     }
 
     public class VoucherQueryAryBase : QueryAryBase<IVoucherQueryAtom>

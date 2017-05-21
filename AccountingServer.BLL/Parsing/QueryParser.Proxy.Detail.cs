@@ -100,6 +100,12 @@ namespace AccountingServer.BLL.Parsing
                     }
                 }
             }
+
+            /// <inheritdoc />
+            public void Accept(IQueryVisitor<IDetailQueryAtom> visitor) => visitor.Visit(this);
+
+            /// <inheritdoc />
+            public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
         public partial class DetailsContext : IQueryAry<IDetailQueryAtom>
@@ -149,6 +155,12 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IDetailQueryAtom> Filter2 => details1();
+
+            /// <inheritdoc />
+            public void Accept(IQueryVisitor<IDetailQueryAtom> visitor) => visitor.Visit(this);
+
+            /// <inheritdoc />
+            public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
         public partial class Details1Context : IQueryAry<IDetailQueryAtom>
@@ -161,6 +173,12 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IDetailQueryAtom> Filter2 => details1();
+
+            /// <inheritdoc />
+            public void Accept(IQueryVisitor<IDetailQueryAtom> visitor) => visitor.Visit(this);
+
+            /// <inheritdoc />
+            public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
         public partial class Details0Context : IQueryAry<IDetailQueryAtom>
@@ -174,6 +192,12 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IDetailQueryAtom> Filter2 => null;
+
+            /// <inheritdoc />
+            public void Accept(IQueryVisitor<IDetailQueryAtom> visitor) => visitor.Visit(this);
+
+            /// <inheritdoc />
+            public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
         }
     }
 }

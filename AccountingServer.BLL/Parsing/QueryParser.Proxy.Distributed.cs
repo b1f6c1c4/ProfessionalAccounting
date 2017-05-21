@@ -49,6 +49,12 @@ namespace AccountingServer.BLL.Parsing
                     return filter;
                 }
             }
+
+            /// <inheritdoc />
+            public void Accept(IQueryVisitor<IDistributedQueryAtom> visitor) => visitor.Visit(this);
+
+            /// <inheritdoc />
+            public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
         public partial class DistributedQContext : IQueryAry<IDistributedQueryAtom>
@@ -98,6 +104,12 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IDistributedQueryAtom> Filter2 => distributedQ1();
+
+            /// <inheritdoc />
+            public void Accept(IQueryVisitor<IDistributedQueryAtom> visitor) => visitor.Visit(this);
+
+            /// <inheritdoc />
+            public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
         public partial class DistributedQ1Context : IQueryAry<IDistributedQueryAtom>
@@ -110,6 +122,12 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IDistributedQueryAtom> Filter2 => distributedQ1();
+
+            /// <inheritdoc />
+            public void Accept(IQueryVisitor<IDistributedQueryAtom> visitor) => visitor.Visit(this);
+
+            /// <inheritdoc />
+            public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
         public partial class DistributedQ0Context : IQueryAry<IDistributedQueryAtom>
@@ -123,6 +141,12 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IDistributedQueryAtom> Filter2 => null;
+
+            /// <inheritdoc />
+            public void Accept(IQueryVisitor<IDistributedQueryAtom> visitor) => visitor.Visit(this);
+
+            /// <inheritdoc />
+            public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
         }
     }
 }

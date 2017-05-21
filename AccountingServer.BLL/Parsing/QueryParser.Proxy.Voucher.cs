@@ -43,6 +43,12 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IDetailQueryAtom> DetailFilter => details();
+
+            /// <inheritdoc />
+            public void Accept(IQueryVisitor<IVoucherQueryAtom> visitor) => visitor.Visit(this);
+
+            /// <inheritdoc />
+            public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
         public partial class VouchersContext : IQueryAry<IVoucherQueryAtom>
@@ -64,6 +70,12 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IVoucherQueryAtom> Filter2 => throw new MemberAccessException("表达式错误");
+
+            /// <inheritdoc />
+            public void Accept(IQueryVisitor<IVoucherQueryAtom> visitor) => visitor.Visit(this);
+
+            /// <inheritdoc />
+            public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
         public partial class Vouchers2Context : IQueryAry<IVoucherQueryAtom>
@@ -113,6 +125,12 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IVoucherQueryAtom> Filter2 => vouchers1();
+
+            /// <inheritdoc />
+            public void Accept(IQueryVisitor<IVoucherQueryAtom> visitor) => visitor.Visit(this);
+
+            /// <inheritdoc />
+            public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
         public partial class Vouchers1Context : IQueryAry<IVoucherQueryAtom>
@@ -125,6 +143,12 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IVoucherQueryAtom> Filter2 => vouchers1();
+
+            /// <inheritdoc />
+            public void Accept(IQueryVisitor<IVoucherQueryAtom> visitor) => visitor.Visit(this);
+
+            /// <inheritdoc />
+            public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
         public partial class Vouchers0Context : IQueryAry<IVoucherQueryAtom>
@@ -138,6 +162,12 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IVoucherQueryAtom> Filter2 => null;
+
+            /// <inheritdoc />
+            public void Accept(IQueryVisitor<IVoucherQueryAtom> visitor) => visitor.Visit(this);
+
+            /// <inheritdoc />
+            public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
         public partial class SubtotalContext : ISubtotal
