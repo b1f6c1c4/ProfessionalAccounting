@@ -13,11 +13,6 @@ namespace AccountingServer.DAL
     /// </summary>
     internal static class MongoDbNative
     {
-        private static FilterDefinition<T> And<T>(IReadOnlyCollection<FilterDefinition<T>> lst) =>
-            lst.Count == 0
-                ? Builders<T>.Filter.Empty
-                : (lst.Count == 1 ? lst.First() : Builders<T>.Filter.And(lst));
-
         /// <summary>
         ///     按编号查询<c>ObjectId</c>
         /// </summary>
@@ -32,7 +27,106 @@ namespace AccountingServer.DAL
         /// <returns>Bson查询</returns>
         public static FilterDefinition<T> GetNQuery<T>(Guid? id) =>
             Builders<T>.Filter.Eq("_id", id.HasValue ? id.Value.ToBsonValue() as BsonValue : BsonNull.Value);
+    }
 
+    internal abstract class MongoDbNativeVisitor<T, TAtom> : IQueryVisitor<TAtom, FilterDefinition<T>>
+        where TAtom : class
+    {
+        public abstract FilterDefinition<T> Visit(TAtom query);
+
+        public FilterDefinition<T> Visit(IQueryAry<TAtom> query)
+        {
+            switch (query.Operator)
+            {
+                case OperatorType.None:
+                case OperatorType.Identity:
+                    return query.Filter1.Accept(this);
+                case OperatorType.Complement:
+                    return !query.Filter1.Accept(this);
+                case OperatorType.Union:
+                    return query.Filter1.Accept(this) | query.Filter2.Accept(this);
+                case OperatorType.Intersect:
+                    return query.Filter1.Accept(this) & query.Filter2.Accept(this);
+                case OperatorType.Substract:
+                    return query.Filter1.Accept(this) & !query.Filter2.Accept(this);
+                default:
+                    throw new ArgumentException("运算类型未知", nameof(query));
+            }
+        }
+
+        protected static FilterDefinition<TX> And<TX>(IReadOnlyCollection<FilterDefinition<TX>> lst) =>
+            lst.Count == 0
+                ? Builders<TX>.Filter.Empty
+                : (lst.Count == 1 ? lst.First() : Builders<TX>.Filter.And(lst));
+
+        /// <summary>
+        ///     日期过滤器的Native表示
+        /// </summary>
+        /// <param name="rng">日期过滤器</param>
+        /// <returns>Native表示</returns>
+        protected static FilterDefinition<Voucher> GetNativeFilter(DateFilter? rng)
+        {
+            if (rng == null)
+                return Builders<Voucher>.Filter.Empty;
+
+            if (rng.Value.NullOnly)
+                return Builders<Voucher>.Filter.Exists("date", false);
+
+            var lst = new List<FilterDefinition<Voucher>>();
+
+            if (rng.Value.StartDate.HasValue)
+                lst.Add(Builders<Voucher>.Filter.Gte("date", rng.Value.StartDate));
+            if (rng.Value.EndDate.HasValue)
+                lst.Add(Builders<Voucher>.Filter.Lte("date", rng.Value.EndDate));
+
+            var gather = And(lst);
+            return rng.Value.Nullable
+                ? Builders<Voucher>.Filter.Exists("date", false) | gather
+                : Builders<Voucher>.Filter.Exists("date") & gather;
+        }
+    }
+
+    internal class MongoDbNativeDetail : MongoDbNativeVisitor<VoucherDetail, IDetailQueryAtom>
+    {
+        public override FilterDefinition<VoucherDetail> Visit(IDetailQueryAtom query)
+        {
+            var lst = new List<FilterDefinition<VoucherDetail>>();
+            if (query.Dir != 0)
+                lst.Add(
+                    query.Dir > 0
+                        ? Builders<VoucherDetail>.Filter.Gt("fund", -VoucherDetail.Tolerance)
+                        : Builders<VoucherDetail>.Filter.Lt("fund", +VoucherDetail.Tolerance));
+            if (query.Filter?.Currency == VoucherDetail.BaseCurrency)
+                lst.Add(Builders<VoucherDetail>.Filter.Exists("currency", false));
+            else if (query.Filter?.Currency != null)
+                lst.Add(Builders<VoucherDetail>.Filter.Eq("currency", query.Filter?.Currency));
+            if (query.Filter?.Title != null)
+                lst.Add(Builders<VoucherDetail>.Filter.Eq("title", query.Filter.Title.Value));
+            if (query.Filter?.SubTitle != null)
+                lst.Add(
+                    query.Filter.SubTitle == 00
+                        ? Builders<VoucherDetail>.Filter.Exists("subtitle", false)
+                        : Builders<VoucherDetail>.Filter.Eq("subtitle", query.Filter.SubTitle.Value));
+            if (query.Filter?.Content != null)
+                lst.Add(
+                    query.Filter.Content == string.Empty
+                        ? Builders<VoucherDetail>.Filter.Exists("content", false)
+                        : Builders<VoucherDetail>.Filter.Eq("content", query.Filter.Content));
+            if (query.Filter?.Remark != null)
+                lst.Add(
+                    query.Filter.Remark == string.Empty
+                        ? Builders<VoucherDetail>.Filter.Exists("remark", false)
+                        : Builders<VoucherDetail>.Filter.Eq("remark", query.Filter.Remark));
+            if (query.Filter?.Fund != null)
+                lst.Add(
+                    Builders<VoucherDetail>.Filter.Gte("fund", query.Filter.Fund.Value - VoucherDetail.Tolerance) &
+                    Builders<VoucherDetail>.Filter.Lte("fund", query.Filter.Fund.Value + VoucherDetail.Tolerance));
+            return And(lst);
+        }
+    }
+
+    internal class MongoDbNativeVoucher : MongoDbNativeVisitor<Voucher, IVoucherQueryAtom>
+    {
         /// <summary>
         ///     记账凭证过滤器的Native表示
         /// </summary>
@@ -87,190 +181,46 @@ namespace AccountingServer.DAL
             return And(lst);
         }
 
-        /// <summary>
-        ///     日期过滤器的Native表示
-        /// </summary>
-        /// <param name="rng">日期过滤器</param>
-        /// <returns>Native表示</returns>
-        private static FilterDefinition<Voucher> GetNativeFilter(DateFilter? rng)
+        public override FilterDefinition<Voucher> Visit(IVoucherQueryAtom query)
         {
-            if (rng == null)
-                return Builders<Voucher>.Filter.Empty;
-
-            if (rng.Value.NullOnly)
-                return Builders<Voucher>.Filter.Exists("date", false);
-
-            var lst = new List<FilterDefinition<Voucher>>();
-
-            if (rng.Value.StartDate.HasValue)
-                lst.Add(Builders<Voucher>.Filter.Gte("date", rng.Value.StartDate));
-            if (rng.Value.EndDate.HasValue)
-                lst.Add(Builders<Voucher>.Filter.Lte("date", rng.Value.EndDate));
-
-            var gather = And(lst);
-            return rng.Value.Nullable
-                ? Builders<Voucher>.Filter.Exists("date", false) | gather
-                : Builders<Voucher>.Filter.Exists("date") & gather;
-        }
-
-        /// <summary>
-        ///     原子细目检索式的Native表示
-        /// </summary>
-        /// <param name="f">细目检索式</param>
-        /// <returns>Native表示</returns>
-        private static FilterDefinition<VoucherDetail> GetNativeFilter(IDetailQueryAtom f)
-        {
-            if (f == null)
-                return Builders<VoucherDetail>.Filter.Empty;
-
-            var lst = new List<FilterDefinition<VoucherDetail>>();
-            if (f.Dir != 0)
-                lst.Add(
-                    f.Dir > 0
-                        ? Builders<VoucherDetail>.Filter.Gt("fund", -VoucherDetail.Tolerance)
-                        : Builders<VoucherDetail>.Filter.Lt("fund", +VoucherDetail.Tolerance));
-            if (f.Filter?.Currency == VoucherDetail.BaseCurrency)
-                lst.Add(Builders<VoucherDetail>.Filter.Exists("currency", false));
-            else if (f.Filter?.Currency != null)
-                lst.Add(Builders<VoucherDetail>.Filter.Eq("currency", f.Filter?.Currency));
-            if (f.Filter?.Title != null)
-                lst.Add(Builders<VoucherDetail>.Filter.Eq("title", f.Filter.Title.Value));
-            if (f.Filter?.SubTitle != null)
-                lst.Add(
-                    f.Filter.SubTitle == 00
-                        ? Builders<VoucherDetail>.Filter.Exists("subtitle", false)
-                        : Builders<VoucherDetail>.Filter.Eq("subtitle", f.Filter.SubTitle.Value));
-            if (f.Filter?.Content != null)
-                lst.Add(
-                    f.Filter.Content == string.Empty
-                        ? Builders<VoucherDetail>.Filter.Exists("content", false)
-                        : Builders<VoucherDetail>.Filter.Eq("content", f.Filter.Content));
-            if (f.Filter?.Remark != null)
-                lst.Add(
-                    f.Filter.Remark == string.Empty
-                        ? Builders<VoucherDetail>.Filter.Exists("remark", false)
-                        : Builders<VoucherDetail>.Filter.Eq("remark", f.Filter.Remark));
-            if (f.Filter?.Fund != null)
-                lst.Add(
-                    Builders<VoucherDetail>.Filter.Gte("fund", f.Filter.Fund.Value - VoucherDetail.Tolerance) &
-                    Builders<VoucherDetail>.Filter.Lte("fund", f.Filter.Fund.Value + VoucherDetail.Tolerance));
-            return And(lst);
-        }
-
-        /// <summary>
-        ///     记账凭证检索式的Native表示
-        /// </summary>
-        /// <param name="query">记账凭证检索式</param>
-        /// <returns>Native表示</returns>
-        public static FilterDefinition<Voucher> GetNativeFilter(IQueryCompunded<IVoucherQueryAtom> query) =>
-            GetNativeFilter(query, GetNativeFilter);
-
-        /// <summary>
-        ///     记账凭证检索式的查询
-        /// </summary>
-        /// <param name="query">记账凭证检索式</param>
-        /// <returns>查询</returns>
-        public static FilterDefinition<Voucher> GetNQuery(IQueryCompunded<IVoucherQueryAtom> query) =>
-            GetNativeFilter(query);
-
-        /// <summary>
-        ///     原子记账凭证检索式的Native表示
-        /// </summary>
-        /// <param name="f">记账凭证检索式</param>
-        /// <returns>Native表示</returns>
-        private static FilterDefinition<Voucher> GetNativeFilter(IVoucherQueryAtom f)
-        {
-            if (f == null)
-                return Builders<Voucher>.Filter.Empty;
-
             var lst = new List<FilterDefinition<Voucher>>
                 {
-                    GetNativeFilter(f.VoucherFilter),
-                    GetNativeFilter(f.Range)
+                    GetNativeFilter(query.VoucherFilter),
+                    GetNativeFilter(query.Range)
                 };
-            var v = GetNativeFilter(f.DetailFilter, GetNativeFilter);
-            if (f.ForAll)
+            var v = query.DetailFilter.Accept(new MongoDbNativeDetail());
+            if (query.ForAll)
                 lst.Add(!Builders<Voucher>.Filter.ElemMatch("detail", !v));
             else
                 lst.Add(Builders<Voucher>.Filter.ElemMatch("detail", v));
 
             return And(lst);
         }
+    }
 
-        /// <summary>
-        ///     分期检索式的查询
-        /// </summary>
-        /// <param name="query">分期检索式</param>
-        /// <returns>查询</returns>
-        public static FilterDefinition<T> GetNQuery<T>(IQueryCompunded<IDistributedQueryAtom> query)
-            where T : IDistributed =>
-            GetNativeFilter(query, GetNativeFilter<T>);
-
-        /// <summary>
-        ///     原子分期检索式的Native表示
-        /// </summary>
-        /// <param name="f">分期检索式</param>
-        /// <returns>Native表示</returns>
-        private static FilterDefinition<T> GetNativeFilter<T>(IDistributedQueryAtom f)
-            where T : IDistributed
+    internal class MongoDbNativeDistributed<T> : MongoDbNativeVisitor<T, IDistributedQueryAtom>
+        where T : IDistributed
+    {
+        public override FilterDefinition<T> Visit(IDistributedQueryAtom query)
         {
-            if (f?.Filter == null)
+            if (query?.Filter == null)
                 return Builders<T>.Filter.Empty;
 
             var lst = new List<FilterDefinition<T>>();
-            if (f.Filter.ID.HasValue)
-                lst.Add(Builders<T>.Filter.Eq("_id", f.Filter.ID.Value));
-            if (f.Filter.Name != null)
+            if (query.Filter.ID.HasValue)
+                lst.Add(Builders<T>.Filter.Eq("_id", query.Filter.ID.Value));
+            if (query.Filter.Name != null)
                 lst.Add(
-                    f.Filter.Name == string.Empty
+                    query.Filter.Name == string.Empty
                         ? Builders<T>.Filter.Exists("name", false)
-                        : Builders<T>.Filter.Eq("name", f.Filter.Name));
-            if (f.Filter.Remark != null)
+                        : Builders<T>.Filter.Eq("name", query.Filter.Name));
+            if (query.Filter.Remark != null)
                 lst.Add(
-                    f.Filter.Remark == string.Empty
+                    query.Filter.Remark == string.Empty
                         ? Builders<T>.Filter.Exists("remark", false)
-                        : Builders<T>.Filter.Eq("remark", f.Filter.Remark));
+                        : Builders<T>.Filter.Eq("remark", query.Filter.Remark));
 
             return And(lst);
-        }
-
-        /// <summary>
-        ///     一般检索式的Native表示
-        /// </summary>
-        /// <param name="query">检索式</param>
-        /// <param name="atomFilter">原子检索式的Native表示</param>
-        /// <returns>Native表示</returns>
-        private static FilterDefinition<T> GetNativeFilter<T, TAtom>(IQueryCompunded<TAtom> query,
-            Func<TAtom, FilterDefinition<T>> atomFilter)
-            where TAtom : class => query?.Accept(new MongoDbNativeVisitor<T, TAtom>(atomFilter)) ?? atomFilter(null);
-
-        private sealed class MongoDbNativeVisitor<T, TAtom> : IQueryVisitor<TAtom, FilterDefinition<T>>
-            where TAtom : class
-        {
-            private readonly Func<TAtom, FilterDefinition<T>> m_AtomFilter;
-
-            public MongoDbNativeVisitor(Func<TAtom, FilterDefinition<T>> atomFilter) => m_AtomFilter = atomFilter;
-
-            public FilterDefinition<T> Visit(TAtom query) => m_AtomFilter(query);
-            public FilterDefinition<T> Visit(IQueryAry<TAtom> query)
-            {
-                switch (query.Operator)
-                {
-                    case OperatorType.None:
-                    case OperatorType.Identity:
-                        return query.Filter1.Accept(this);
-                    case OperatorType.Complement:
-                        return !query.Filter1.Accept(this);
-                    case OperatorType.Union:
-                        return query.Filter1.Accept(this) | query.Filter2.Accept(this);
-                    case OperatorType.Intersect:
-                        return query.Filter1.Accept(this) & query.Filter2.Accept(this);
-                    case OperatorType.Substract:
-                        return query.Filter1.Accept(this) & !query.Filter2.Accept(this);
-                    default:
-                        throw new ArgumentException("运算类型未知", nameof(query));
-                }
-            }
         }
     }
 }
