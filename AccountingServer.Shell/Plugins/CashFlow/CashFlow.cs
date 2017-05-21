@@ -5,6 +5,7 @@ using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.BLL.Util;
+using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Carry;
 using AccountingServer.Shell.Serializer;
@@ -25,29 +26,73 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         /// <inheritdoc />
         public override IQueryResult Execute(string expr)
         {
-            var lst = new List<(DateTime Date, double Value)>();
+            var rst = new Dictionary<DateTime, double[]>();
 
-            var init = Accountant.RunGroupedQuery($"{Templates.Config.QuickAsset} [~.]``v").Single().Fund;
-            lst.Add((DateTime.Today, init));
+            var n = Templates.Config.Accounts.Count;
+            for (var i = 0; i < n; i++)
+                foreach (var item in GetItems(Templates.Config.Accounts[i]))
+                {
+                    if (!rst.ContainsKey(item.Date))
+                        rst.Add(item.Date, new double[n]);
 
-            if (Templates.Config.Reimburse)
+                    rst[item.Date][i] += item.Value;
+                }
+
+            var aggs = new double[n];
+
+            var sb = new StringBuilder();
+            sb.Append("Date");
+            for (var i = 0; i < n; i++)
+                sb.Append($"\t{Templates.Config.Accounts[i].Currency ?? VoucherDetail.BaseCurrency}\tSum");
+
+            sb.AppendLine("\tAll");
+
+            foreach (var kvp in rst.OrderBy(kvp => kvp.Key))
+            {
+                sb.Append($"{kvp.Key.AsDate()}");
+
+                var sum = 0D;
+                for (var i = 0; i < n; i++)
+                {
+                    aggs[i] += kvp.Value[i];
+                    sum += aggs[i] * ExchangeFactory.Instance.From(
+                        kvp.Key,
+                        Templates.Config.Accounts[i].Currency ?? VoucherDetail.BaseCurrency);
+                    sb.Append($"\t{kvp.Value[i]:R}\t{aggs[i]:R}");
+                }
+
+                sb.AppendLine($"\t{sum:R}");
+            }
+
+            return new UnEditableText(sb.ToString());
+        }
+
+        private IEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account)
+        {
+            var curr = string.IsNullOrEmpty(account.Currency) ? "@@" : $"@{account.Currency}";
+            var init = Accountant.RunGroupedQuery($"{curr}*({account.QuickAsset}) [~.]``v").SingleOrDefault()?.Fund ?? 0;
+            yield return (DateTime.Today, init);
+
+            if (account.Reimburse)
             {
                 var rb = new Reimburse.Reimburse(Accountant, Serializer);
                 rb.DoReimbursement(Reimburse.Reimburse.DateRange, out var rbVal);
                 // ReSharper disable once PossibleInvalidOperationException
                 var rbF = Reimburse.Reimburse.DateRange.EndDate.Value;
-                lst.Add((rbF, rbVal));
+                yield return (rbF, rbVal);
             }
 
-            foreach (var debt in Templates.Config.Items)
+            foreach (var debt in account.Items)
                 switch (debt)
                 {
                     case FixedItem fi:
-                        lst.Add((fi.Day, fi.Fund));
+                        yield return (fi.Day, fi.Fund);
+
                         break;
 
                     case SimpleItem sd:
-                        lst.Add((sd.Day, Accountant.RunGroupedQuery($"{sd.Query}``v").Single().Fund));
+                        yield return (sd.Day, Accountant.RunGroupedQuery($"{curr}*({sd.Query})``v").Single().Fund);
+
                         break;
 
                     case CreditCard cd:
@@ -66,7 +111,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                                 continue;
 
                             var ratio = ExchangeFactory.Instance.From(mo, b.Currency);
-                            lst.Add((mo, b.Fund * ratio));
+                            yield return (mo, b.Fund * ratio);
                         }
 
                         break;
@@ -74,20 +119,6 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                     default:
                         throw new InvalidOperationException();
                 }
-
-            var sb = new StringBuilder();
-            var agg = 0D;
-            foreach (var item in lst.GroupBy(
-                    item => item.Date,
-                    item => item.Value,
-                    (d, vs) => (Date:d, Value:vs.Sum()))
-                .OrderBy(item => item.Date))
-            {
-                agg += item.Value;
-                sb.AppendLine($"{item.Date.AsDate()}\t{item.Value:R}\t{agg:R}");
-            }
-
-            return new UnEditableText(sb.ToString());
         }
     }
 }
