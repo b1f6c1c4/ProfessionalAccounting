@@ -151,32 +151,34 @@ namespace AccountingServer.Entities.Util
         /// <param name="atomPredictor">原子检索式成立条件</param>
         /// <returns>是否成立</returns>
         public static bool IsMatch<TAtom>(IQueryCompunded<TAtom> query, Func<TAtom, bool> atomPredictor)
-            where TAtom : class
+            where TAtom : class => query?.Accept(new MatchHelperVisitor<TAtom>(atomPredictor)) ?? true;
+
+        private sealed class MatchHelperVisitor<TAtom> : IQueryVisitor<TAtom, bool> where TAtom : class
         {
-            if (query == null)
-                return true;
+            private readonly Func<TAtom, bool> m_AtomPredictor;
 
-            if (query is TAtom atom)
-                return atomPredictor(atom);
+            public MatchHelperVisitor(Func<TAtom, bool> atomPredictor) => m_AtomPredictor = atomPredictor;
 
-            if (!(query is IQueryAry<TAtom> ary))
-                throw new ArgumentException("检索式类型未知", nameof(query));
+            public bool Visit(TAtom query) => m_AtomPredictor(query);
 
-            switch (ary.Operator)
+            public bool Visit(IQueryAry<TAtom> query)
             {
-                case OperatorType.None:
-                case OperatorType.Identity:
-                    return IsMatch(ary.Filter1, atomPredictor);
-                case OperatorType.Complement:
-                    return !IsMatch(ary.Filter1, atomPredictor);
-                case OperatorType.Union:
-                    return IsMatch(ary.Filter1, atomPredictor) || IsMatch(ary.Filter2, atomPredictor);
-                case OperatorType.Intersect:
-                    return IsMatch(ary.Filter1, atomPredictor) && IsMatch(ary.Filter2, atomPredictor);
-                case OperatorType.Substract:
-                    return IsMatch(ary.Filter1, atomPredictor) && !IsMatch(ary.Filter2, atomPredictor);
-                default:
-                    throw new ArgumentException("运算类型未知", nameof(query));
+                switch (query.Operator)
+                {
+                    case OperatorType.None:
+                    case OperatorType.Identity:
+                        return query.Filter1.Accept(this);
+                    case OperatorType.Complement:
+                        return !query.Filter1.Accept(this);
+                    case OperatorType.Union:
+                        return query.Filter1.Accept(this) || query.Filter2.Accept(this);
+                    case OperatorType.Intersect:
+                        return query.Filter1.Accept(this) && query.Filter2.Accept(this);
+                    case OperatorType.Substract:
+                        return query.Filter1.Accept(this) && !query.Filter2.Accept(this);
+                    default:
+                        throw new ArgumentException("运算类型未知", nameof(query));
+                }
             }
         }
     }
