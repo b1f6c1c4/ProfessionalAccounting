@@ -42,7 +42,6 @@ namespace AccountingServer.Entities
     ///     一般检索式
     /// </summary>
     /// <typeparam name="TAtom">原子检索式的类型</typeparam>
-    // ReSharper disable once UnusedTypeParameter
     public interface IQueryCompunded<TAtom> where TAtom : class
     {
         /// <summary>
