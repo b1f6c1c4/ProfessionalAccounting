@@ -104,7 +104,7 @@ namespace AccountingServer.Shell.Util
         public static string Rest(this string str)
         {
             var id = str.IndexOfAny(new[] { ' ', '-' });
-            return id < 0 ? null : str.Substring(id + 1).TrimStart();
+            return id < 0 ? "" : str.Substring(id + 1).TrimStart();
         }
     }
 }
