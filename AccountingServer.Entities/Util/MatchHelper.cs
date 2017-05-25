@@ -15,7 +15,7 @@ namespace AccountingServer.Entities.Util
         /// <param name="voucher">记账凭证</param>
         /// <param name="filter">记账凭证过滤器</param>
         /// <returns>是否符合</returns>
-        private static bool IsMatch(this Voucher voucher, Voucher filter)
+        public static bool IsMatch(this Voucher voucher, Voucher filter)
         {
             if (filter?.ID != null)
                 if (filter.ID != voucher.ID)
@@ -40,8 +40,8 @@ namespace AccountingServer.Entities.Util
 
                         break;
                     case VoucherType.General:
-                        if (filter.Type != VoucherType.Carry &&
-                            filter.Type != VoucherType.AnnualCarry)
+                        if (voucher.Type == VoucherType.Carry ||
+                            voucher.Type == VoucherType.AnnualCarry)
                             return false;
 
                         break;
@@ -103,8 +103,9 @@ namespace AccountingServer.Entities.Util
                     return false;
 
             if (dir != 0)
-                if (dir > 0 && voucherDetail.Fund < 0 ||
-                    dir < 0 && voucherDetail.Fund > 0)
+                if (!voucherDetail.Fund.HasValue ||
+                    dir > 0 && voucherDetail.Fund < -VoucherDetail.Tolerance ||
+                    dir < 0 && voucherDetail.Fund > +VoucherDetail.Tolerance)
                     return false;
 
             if (filter.Remark != null)
