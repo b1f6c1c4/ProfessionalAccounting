@@ -8,12 +8,12 @@ using AccountingServer.Entities.Util;
 
 namespace AccountingServer.BLL
 {
-    internal class DbSession
+    public class DbSession
     {
         /// <summary>
         ///     数据库访问
         /// </summary>
-        private IDbAdapter Db { get; set; }
+        public IDbAdapter Db { private get; set; }
 
         /// <summary>
         ///     获取是否已经连接到数据库
@@ -39,7 +39,7 @@ namespace AccountingServer.BLL
         }
 
         [SuppressMessage("ReSharper", "PossibleInvalidOperationException")]
-        private static int TheComparison(VoucherDetail lhs, VoucherDetail rhs)
+        public static int TheComparison(VoucherDetail lhs, VoucherDetail rhs)
         {
             // ReSharper disable once JoinDeclarationAndInitializer
             int res;
@@ -97,7 +97,7 @@ namespace AccountingServer.BLL
             return Db.Upsert(entity);
         }
 
-        private static void Regularize(Voucher entity)
+        public static void Regularize(Voucher entity)
         {
             if (entity.Details == null)
                 entity.Details = new List<VoucherDetail>();
