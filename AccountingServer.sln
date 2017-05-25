@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.Entities", "AccountingServer.Entities\AccountingServer.Entities.csproj", "{7246DEB7-BDA2-49D8-9490-3ED074219106}"
 EndProject
@@ -25,6 +25,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.QueryGeneration", "AccountingServer.QueryGeneration\AccountingServer.QueryGeneration.csproj", "{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shell", "Shell", "{15EBBDC7-0339-4A91-922A-D4A6FE4D6F5C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.Entities.Test", "AccountingServer.Entities.Test\AccountingServer.Entities.Test.csproj", "{C191C8E8-413E-4AAF-B34E-37B533EF889B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,6 +56,10 @@ Global
 		{0DDC759F-23DE-4443-A97C-4EDC1C40690C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C191C8E8-413E-4AAF-B34E-37B533EF889B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C191C8E8-413E-4AAF-B34E-37B533EF889B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C191C8E8-413E-4AAF-B34E-37B533EF889B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C191C8E8-413E-4AAF-B34E-37B533EF889B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -65,5 +71,6 @@ Global
 		{28C2EDB0-CE1E-473E-9CA6-70E29A1408A4} = {A75E43E2-65F1-4826-8B28-D90DDC15777D}
 		{0DDC759F-23DE-4443-A97C-4EDC1C40690C} = {15EBBDC7-0339-4A91-922A-D4A6FE4D6F5C}
 		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F} = {13C35141-C1A9-46DB-9ED4-3310DCD021FC}
+		{C191C8E8-413E-4AAF-B34E-37B533EF889B} = {A3156D54-41A5-4265-A07B-0E80030A4EE6}
 	EndGlobalSection
 EndGlobal
