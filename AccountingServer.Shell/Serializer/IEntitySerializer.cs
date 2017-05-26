@@ -1,11 +1,12 @@
-﻿using AccountingServer.Entities;
+﻿using System;
+using AccountingServer.Entities;
 
 namespace AccountingServer.Shell.Serializer
 {
     /// <summary>
     ///     表示器
     /// </summary>
-    internal interface IEntitySerializer
+    public interface IEntitySerializer
     {
         /// <summary>
         ///     将记账凭证表示
@@ -62,5 +63,10 @@ namespace AccountingServer.Shell.Serializer
         /// <param name="str">表示</param>
         /// <returns>摊销</returns>
         Amortization ParseAmort(string str);
+    }
+
+    internal static class SerializerHelper
+    {
+        public static string Wrap(this string str) => $"@{str}@" + Environment.NewLine;
     }
 }

@@ -82,7 +82,7 @@ namespace AccountingServer.Shell
                 }
 
                 if (flag)
-                    sb.Append(m_Serializer.PresentVoucher(voucher));
+                    sb.Append(m_Serializer.PresentVoucher(voucher).Wrap());
             }
 
             if (sb.Length > 0)

@@ -169,7 +169,7 @@ namespace AccountingServer.Shell
             if (!m_Accountant.Upsert(voucher))
                 throw new ApplicationException("更新或添加失败");
 
-            return m_Serializer.PresentVoucher(voucher);
+            return m_Serializer.PresentVoucher(voucher).Wrap();
         }
 
         /// <summary>
@@ -256,7 +256,7 @@ namespace AccountingServer.Shell
         /// <summary>
         ///     空记账凭证的表示
         /// </summary>
-        public string EmptyVoucher => m_Serializer.PresentVoucher(null);
+        public string EmptyVoucher => m_Serializer.PresentVoucher(null).Wrap();
     }
 
     internal class AlternativeSerializer : IEntitySerializer

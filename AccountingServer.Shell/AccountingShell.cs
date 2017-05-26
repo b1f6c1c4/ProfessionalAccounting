@@ -149,7 +149,7 @@ namespace AccountingServer.Shell
         {
             var sb = new StringBuilder();
             foreach (var voucher in m_Accountant.SelectVouchers(query))
-                sb.Append(m_Serializer.PresentVoucher(voucher));
+                sb.Append(m_Serializer.PresentVoucher(voucher).Wrap());
 
             return new EditableText(sb.ToString());
         }

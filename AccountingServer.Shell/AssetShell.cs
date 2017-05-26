@@ -55,7 +55,7 @@ namespace AccountingServer.Shell
             foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
             {
                 foreach (var voucher in Accountant.RegisterVouchers(a, rng, query))
-                    sb.Append(Serializer.PresentVoucher(voucher));
+                    sb.Append(Serializer.PresentVoucher(voucher).Wrap());
 
                 Accountant.Upsert(a);
             }
@@ -265,7 +265,7 @@ namespace AccountingServer.Shell
                 {
                     sb.AppendLine(ListAssetItem(assetItem));
                     if (assetItem.VoucherID != null)
-                        sb.AppendLine(Serializer.PresentVoucher(Accountant.SelectVoucher(assetItem.VoucherID)));
+                        sb.AppendLine(Serializer.PresentVoucher(Accountant.SelectVoucher(assetItem.VoucherID)).Wrap());
                 }
 
             return sb.ToString();

@@ -17,7 +17,7 @@ namespace AccountingServer.Shell.Plugins.Reimburse
     /// </summary>
     internal class Reimburse : PluginBase
     {
-        private static readonly ConfigManager<ReimTemplates> Templates =
+        public static IConfigManager<ReimTemplates> Templates { private get; set; } =
             new ConfigManager<ReimTemplates>("Reim.xml");
 
         public Reimburse(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }

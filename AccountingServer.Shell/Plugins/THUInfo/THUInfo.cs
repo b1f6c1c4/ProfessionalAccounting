@@ -23,7 +23,8 @@ namespace AccountingServer.Shell.Plugins.THUInfo
         /// </summary>
         private const string IgnoranceMark = "reconciliation";
 
-        private static readonly ConfigManager<EndPointTemplates> EndPointTemplates;
+        public static IConfigManager<EndPointTemplates> EndPointTemplates { private get; set; } =
+            new ConfigManager<EndPointTemplates>("EndPoint.xml");
 
         private static IReadOnlyList<EndPointTemplate> Templates => EndPointTemplates.Config.Templates.AsReadOnly();
 
@@ -31,7 +32,6 @@ namespace AccountingServer.Shell.Plugins.THUInfo
 
         private readonly object m_Lock = new object();
 
-        static THUInfo() => EndPointTemplates = new ConfigManager<EndPointTemplates>("EndPoint.xml");
 
         public THUInfo(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer)
         {
@@ -142,7 +142,7 @@ namespace AccountingServer.Shell.Plugins.THUInfo
             foreach (var voucher in vouchers)
             {
                 Accountant.Upsert(voucher);
-                sb.AppendLine(Serializer.PresentVoucher(voucher));
+                sb.AppendLine(Serializer.PresentVoucher(voucher).Wrap());
             }
 
             if (fail.Any())

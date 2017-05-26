@@ -17,7 +17,7 @@ namespace AccountingServer.Shell.Plugins.Utilities
     /// </summary>
     internal class Utilities : PluginBase
     {
-        private static readonly ConfigManager<UtilTemplates> Templates =
+        public static IConfigManager<UtilTemplates> Templates { private get; set; } =
             new ConfigManager<UtilTemplates>("Util.xml");
 
         public Utilities(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
