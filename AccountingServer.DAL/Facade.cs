@@ -1,5 +1,4 @@
 ﻿using System;
-using MongoDB.Driver;
 
 namespace AccountingServer.DAL
 {
@@ -10,7 +9,7 @@ namespace AccountingServer.DAL
             uri = uri ?? "mongodb://localhost";
 
             if (uri.StartsWith("mongodb://", StringComparison.Ordinal))
-                return new MongoDbAdapter(MongoClientSettings.FromUrl(new MongoUrl(uri)));
+                return new MongoDbAdapter(uri);
 
             throw new NotSupportedException("Uri无效");
         }

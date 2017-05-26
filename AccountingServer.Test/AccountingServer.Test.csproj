@@ -35,6 +35,9 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.0.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -55,11 +58,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IntegrationTest\DAL\DbTest.cs" />
     <Compile Include="UnitTest\Entities\AccountantHelperTest.cs" />
     <Compile Include="UnitTest\Entities\DateHelperTest.cs" />
     <Compile Include="UnitTest\BLL\DbSessionTest.cs" />
     <Compile Include="UnitTest\Entities\MatchHelperTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Util.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -68,6 +73,10 @@
     <ProjectReference Include="..\AccountingServer.BLL\AccountingServer.BLL.csproj">
       <Project>{4f938d5a-6b22-4150-a74c-8203fdf1d215}</Project>
       <Name>AccountingServer.BLL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AccountingServer.DAL\AccountingServer.DAL.csproj">
+      <Project>{2CAB5DC7-A5A8-47A4-9D46-BFE2A474BB48}</Project>
+      <Name>AccountingServer.DAL</Name>
     </ProjectReference>
     <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj">
       <Project>{7246deb7-bda2-49d8-9490-3ed074219106}</Project>
