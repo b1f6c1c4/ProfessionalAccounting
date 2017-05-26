@@ -42,7 +42,7 @@ namespace AccountingServer.Shell.Carry
         /// <inheritdoc />
         public bool IsExecutable(string expr) => expr.Initital() == "ca";
 
-        private static readonly ConfigManager<CarrySettings> CarrySettings =
+        public static IConfigManager<CarrySettings> CarrySettings { private get; set; } =
             new ConfigManager<CarrySettings>("Carry.xml");
 
         /// <summary>

@@ -7,6 +7,7 @@ using AccountingServer.BLL.Parsing;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
+using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 
 namespace AccountingServer.Shell.Plugins.THUInfo
@@ -212,7 +213,7 @@ namespace AccountingServer.Shell.Plugins.THUInfo
                 foreach (var r in problem.Records)
                     sb.AppendLine(r.ToString());
                 foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
-                    sb.AppendLine(Serializer.PresentVoucher(v));
+                    sb.AppendLine(Serializer.PresentVoucher(v).Wrap());
 
                 sb.AppendLine();
             }
@@ -222,7 +223,7 @@ namespace AccountingServer.Shell.Plugins.THUInfo
                 foreach (var r in problem.Records)
                     sb.AppendLine(r.ToString());
                 foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
-                    sb.AppendLine(Serializer.PresentVoucher(v));
+                    sb.AppendLine(Serializer.PresentVoucher(v).Wrap());
 
                 sb.AppendLine();
             }
@@ -232,7 +233,7 @@ namespace AccountingServer.Shell.Plugins.THUInfo
                 foreach (var r in problem.Records)
                     sb.AppendLine(r.ToString());
                 foreach (var v in problem.Details.Select(d => d.Voucher).Distinct())
-                    sb.AppendLine(Serializer.PresentVoucher(v));
+                    sb.AppendLine(Serializer.PresentVoucher(v).Wrap());
 
                 sb.AppendLine();
             }
@@ -241,7 +242,7 @@ namespace AccountingServer.Shell.Plugins.THUInfo
             {
                 sb.AppendLine("---No Record");
                 foreach (var v in problems.NoRecord.Select(d => d.Voucher).Distinct())
-                    sb.AppendLine(Serializer.PresentVoucher(v));
+                    sb.AppendLine(Serializer.PresentVoucher(v).Wrap());
             }
 
             if (sb.Length == 0)

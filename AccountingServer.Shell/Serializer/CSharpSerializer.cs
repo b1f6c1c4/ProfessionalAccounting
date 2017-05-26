@@ -8,7 +8,7 @@ using Microsoft.CSharp;
 
 namespace AccountingServer.Shell.Serializer
 {
-    internal class CSharpSerializer : IEntitySerializer
+    public class CSharpSerializer : IEntitySerializer
     {
         /// <summary>
         ///     转义字符串
@@ -106,10 +106,10 @@ namespace AccountingServer.Shell.Serializer
         public string PresentVoucher(Voucher voucher)
         {
             if (voucher == null)
-                return "@null@";
+                return "new Voucher { }";
 
             var sb = new StringBuilder();
-            sb.Append("@new Voucher {");
+            sb.Append("new Voucher {");
             sb.Append($"  ID = {ProcessString(voucher.ID)},");
             sb.AppendLine();
             sb.AppendLine(voucher.Date.HasValue ? $"    Date = D(\"{voucher.Date:yyyy-MM-dd}\")," : "    Date = null,");
@@ -121,7 +121,7 @@ namespace AccountingServer.Shell.Serializer
             foreach (var detail in voucher.Details)
                 sb.Append(PresentVoucherDetail(detail));
 
-            sb.AppendLine("} }@");
+            sb.Append("} }");
             return sb.ToString();
         }
 
@@ -221,7 +221,7 @@ namespace AccountingServer.Shell.Serializer
             sb.Append($"    TotalDays = {amort.TotalDays}, Interval = AmortizeInterval.{amort.Interval},");
             sb.AppendLine();
             sb.Append("Template = ");
-            sb.Append(PresentVoucher(amort.Template).Trim().Trim('@'));
+            sb.Append(PresentVoucher(amort.Template));
             sb.AppendLine(",");
             if (amort.Remark != null)
             {

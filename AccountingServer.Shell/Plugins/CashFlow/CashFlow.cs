@@ -18,7 +18,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
     /// </summary>
     internal class CashFlow : PluginBase
     {
-        private static readonly ConfigManager<CashTemplates> Templates =
+        public static IConfigManager<CashTemplates> Templates { private get; set; } =
             new ConfigManager<CashTemplates>("Cash.xml");
 
         public CashFlow(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }

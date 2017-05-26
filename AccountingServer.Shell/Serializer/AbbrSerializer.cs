@@ -11,11 +11,10 @@ using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Shell.Serializer
 {
-    internal class AbbrSerializer : ExprSerializer
+    public class AbbrSerializer : ExprSerializer
     {
-        private static readonly ConfigManager<Abbreviations> Abbrs;
-
-        static AbbrSerializer() => Abbrs = new ConfigManager<Abbreviations>("Abbr.xml");
+        public static IConfigManager<Abbreviations> Abbrs { private get; set; } =
+            new ConfigManager<Abbreviations>("Abbr.xml");
 
         protected override bool AlternativeTitle(ref string expr, ICollection<string> lst, ref ITitle title)
         {

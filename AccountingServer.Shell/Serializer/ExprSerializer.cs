@@ -13,7 +13,7 @@ namespace AccountingServer.Shell.Serializer
     /// <summary>
     ///     实体表达式
     /// </summary>
-    internal class ExprSerializer : IEntitySerializer
+    public class ExprSerializer : IEntitySerializer
     {
         private const string TheToken = "new Voucher {";
 
@@ -21,7 +21,7 @@ namespace AccountingServer.Shell.Serializer
         public string PresentVoucher(Voucher voucher)
         {
             var sb = new StringBuilder();
-            sb.Append($"@{TheToken}");
+            sb.Append(TheToken);
             if (voucher == null)
             {
                 sb.AppendLine();
@@ -41,7 +41,7 @@ namespace AccountingServer.Shell.Serializer
                     sb.Append(PresentVoucherDetail(d));
             }
 
-            sb.AppendLine("}@");
+            sb.Append("}");
             return sb.ToString();
         }
 
