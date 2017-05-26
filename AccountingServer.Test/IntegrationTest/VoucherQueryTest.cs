@@ -100,12 +100,12 @@ namespace AccountingServer.Test.IntegrationTest
         protected override void ResetVouchers() => m_Voucher = null;
 
         [Theory]
-        public override void RunTestA(bool expected, string query) { base.RunTestA(expected, query); }
+        public override void RunTestA(bool expected, string query) => base.RunTestA(expected, query);
     }
 
     [Collection("DbTestCollection")]
     [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
-    public class VoucherDbTest : VoucherQueryTestBase,IDisposable
+    public class VoucherDbTest : VoucherQueryTestBase, IDisposable
     {
         private readonly IDbAdapter m_Adapter;
 
@@ -126,6 +126,6 @@ namespace AccountingServer.Test.IntegrationTest
         protected override void ResetVouchers() => m_Adapter.DeleteVouchers(null);
 
         [Theory]
-        public override void RunTestA(bool expected, string query) { base.RunTestA(expected, query); }
+        public override void RunTestA(bool expected, string query) => base.RunTestA(expected, query);
     }
 }
