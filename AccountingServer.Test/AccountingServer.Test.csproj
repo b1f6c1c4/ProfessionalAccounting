@@ -5,11 +5,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2B07F8C3-EE12-49D0-9057-908AD41FD983}</ProjectGuid>
+    <ProjectGuid>{80DCCEC9-EE8D-43C1-BC74-8A45AE10FBCB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AccountingServer.BLL.Test</RootNamespace>
-    <AssemblyName>AccountingServer.BLL.Test</AssemblyName>
+    <RootNamespace>AccountingServer.Test</RootNamespace>
+    <AssemblyName>AccountingServer.Test</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -55,29 +55,24 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DbSessionTest.cs" />
+    <Compile Include="UnitTest\Entities\AccountantHelperTest.cs" />
+    <Compile Include="UnitTest\Entities\DateHelperTest.cs" />
+    <Compile Include="UnitTest\BLL\DbSessionTest.cs" />
+    <Compile Include="UnitTest\Entities\MatchHelperTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AccountingServer.BLL\AccountingServer.BLL.csproj">
       <Project>{4f938d5a-6b22-4150-a74c-8203fdf1d215}</Project>
       <Name>AccountingServer.BLL</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AccountingServer.DAL\AccountingServer.DAL.csproj">
-      <Project>{2cab5dc7-a5a8-47a4-9d46-bfe2a474bb48}</Project>
-      <Name>AccountingServer.DAL</Name>
-    </ProjectReference>
     <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj">
-      <Project>{7246DEB7-BDA2-49D8-9490-3ED074219106}</Project>
+      <Project>{7246deb7-bda2-49d8-9490-3ed074219106}</Project>
       <Name>AccountingServer.Entities</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

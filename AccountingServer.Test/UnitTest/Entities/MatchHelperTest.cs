@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using Xunit;
 
-namespace AccountingServer.Entities.Test
+namespace AccountingServer.Test.UnitTest.Entities
 {
     [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
     public class MatchHelperTest

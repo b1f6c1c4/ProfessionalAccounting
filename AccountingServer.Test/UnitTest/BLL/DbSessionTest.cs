@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using AccountingServer.BLL;
 using AccountingServer.Entities;
 using Xunit;
 
-namespace AccountingServer.BLL.Test
+namespace AccountingServer.Test.UnitTest.BLL
 {
     public class DbSessionTest
     {
