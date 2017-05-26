@@ -58,7 +58,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IntegrationTest\DAL\DbTest.cs" />
+    <Compile Include="IntegrationTest\DbTest.cs" />
+    <Compile Include="IntegrationTest\VoucherQueryTest.cs" />
     <Compile Include="UnitTest\BLL\QuotedStringTest.cs" />
     <Compile Include="UnitTest\Entities\AccountantHelperTest.cs" />
     <Compile Include="UnitTest\Entities\DateHelperTest.cs" />
