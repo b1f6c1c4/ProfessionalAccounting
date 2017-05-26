@@ -21,119 +21,167 @@ namespace AccountingServer.Test.UnitTest.BLL
                 };
 
             Assert.Equal(0, DbSession.TheComparison(rhs, rhs));
-            Assert.Equal(-1, DbSession.TheComparison(new VoucherDetail
-                {
-                    Currency = "USC",
-                    Title = 1235,
-                    SubTitle = 07,
-                    Content = "abd",
-                    Remark = "deg",
-                    Fund = 123.46
-            }, rhs));
-            Assert.Equal(+1, DbSession.TheComparison(new VoucherDetail
-                {
-                    Currency = "USE",
-                    Title = 1233,
-                    SubTitle = 05,
-                    Content = "abb",
-                    Remark = "dee",
-                    Fund = 123.44
-            }, rhs));
+            Assert.Equal(
+                -1,
+                DbSession.TheComparison(
+                    new VoucherDetail
+                        {
+                            Currency = "USC",
+                            Title = 1235,
+                            SubTitle = 07,
+                            Content = "abd",
+                            Remark = "deg",
+                            Fund = 123.46
+                        },
+                    rhs));
+            Assert.Equal(
+                +1,
+                DbSession.TheComparison(
+                    new VoucherDetail
+                        {
+                            Currency = "USE",
+                            Title = 1233,
+                            SubTitle = 05,
+                            Content = "abb",
+                            Remark = "dee",
+                            Fund = 123.44
+                        },
+                    rhs));
 
-            Assert.Equal(-1, DbSession.TheComparison(new VoucherDetail
-                {
-                    Currency = "USD",
-                    Title = 1233,
-                    SubTitle = 07,
-                    Content = "abd",
-                    Remark = "deg",
-                    Fund = 123.46
-            }, rhs));
-            Assert.Equal(+1, DbSession.TheComparison(new VoucherDetail
-                {
-                    Currency = "USD",
-                    Title = 1235,
-                    SubTitle = 05,
-                    Content = "abb",
-                    Remark = "dee",
-                    Fund = 123.44
-            }, rhs));
+            Assert.Equal(
+                -1,
+                DbSession.TheComparison(
+                    new VoucherDetail
+                        {
+                            Currency = "USD",
+                            Title = 1233,
+                            SubTitle = 07,
+                            Content = "abd",
+                            Remark = "deg",
+                            Fund = 123.46
+                        },
+                    rhs));
+            Assert.Equal(
+                +1,
+                DbSession.TheComparison(
+                    new VoucherDetail
+                        {
+                            Currency = "USD",
+                            Title = 1235,
+                            SubTitle = 05,
+                            Content = "abb",
+                            Remark = "dee",
+                            Fund = 123.44
+                        },
+                    rhs));
 
-            Assert.Equal(-1, DbSession.TheComparison(new VoucherDetail
-                {
-                    Currency = "USD",
-                    Title = 1234,
-                    SubTitle = 05,
-                    Content = "abd",
-                    Remark = "deg",
-                    Fund = 123.46
-            }, rhs));
-            Assert.Equal(+1, DbSession.TheComparison(new VoucherDetail
-                {
-                    Currency = "USD",
-                    Title = 1234,
-                    SubTitle = 07,
-                    Content = "abb",
-                    Remark = "dee",
-                    Fund = 123.44
-            }, rhs));
+            Assert.Equal(
+                -1,
+                DbSession.TheComparison(
+                    new VoucherDetail
+                        {
+                            Currency = "USD",
+                            Title = 1234,
+                            SubTitle = 05,
+                            Content = "abd",
+                            Remark = "deg",
+                            Fund = 123.46
+                        },
+                    rhs));
+            Assert.Equal(
+                +1,
+                DbSession.TheComparison(
+                    new VoucherDetail
+                        {
+                            Currency = "USD",
+                            Title = 1234,
+                            SubTitle = 07,
+                            Content = "abb",
+                            Remark = "dee",
+                            Fund = 123.44
+                        },
+                    rhs));
 
-            Assert.Equal(-1, DbSession.TheComparison(new VoucherDetail
-                {
-                    Currency = "USD",
-                    Title = 1234,
-                    SubTitle = 06,
-                    Content = "abb",
-                    Remark = "deg",
-                    Fund = 123.46
-            }, rhs));
-            Assert.Equal(+1, DbSession.TheComparison(new VoucherDetail
-                {
-                    Currency = "USD",
-                    Title = 1234,
-                    SubTitle = 06,
-                    Content = "abd",
-                    Remark = "dee",
-                    Fund = 123.44
-            }, rhs));
+            Assert.Equal(
+                -1,
+                DbSession.TheComparison(
+                    new VoucherDetail
+                        {
+                            Currency = "USD",
+                            Title = 1234,
+                            SubTitle = 06,
+                            Content = "abb",
+                            Remark = "deg",
+                            Fund = 123.46
+                        },
+                    rhs));
+            Assert.Equal(
+                +1,
+                DbSession.TheComparison(
+                    new VoucherDetail
+                        {
+                            Currency = "USD",
+                            Title = 1234,
+                            SubTitle = 06,
+                            Content = "abd",
+                            Remark = "dee",
+                            Fund = 123.44
+                        },
+                    rhs));
 
-            Assert.Equal(-1, DbSession.TheComparison(new VoucherDetail
-                {
-                    Currency = "USD",
-                    Title = 1234,
-                    SubTitle = 06,
-                    Content = "abc",
-                    Remark = "dee",
-                    Fund = 123.46
-                }, rhs));
-            Assert.Equal(+1, DbSession.TheComparison(new VoucherDetail
-                {
-                    Currency = "USD",
-                    Title = 1234,
-                    SubTitle = 06,
-                    Content = "abc",
-                    Remark = "deg",
-                    Fund = 123.44
-                }, rhs));
+            Assert.Equal(
+                -1,
+                DbSession.TheComparison(
+                    new VoucherDetail
+                        {
+                            Currency = "USD",
+                            Title = 1234,
+                            SubTitle = 06,
+                            Content = "abc",
+                            Remark = "dee",
+                            Fund = 123.46
+                        },
+                    rhs));
+            Assert.Equal(
+                +1,
+                DbSession.TheComparison(
+                    new VoucherDetail
+                        {
+                            Currency = "USD",
+                            Title = 1234,
+                            SubTitle = 06,
+                            Content = "abc",
+                            Remark = "deg",
+                            Fund = 123.44
+                        },
+                    rhs));
 
-            Assert.Equal(-1, DbSession.TheComparison(new VoucherDetail
-                {
-                    Currency = "USD",
-                    Title = 1234,
-                    SubTitle = 06,
-                    Content = "abc",
-                    Remark = "def",
-                    Fund = 123.44
-                }, rhs));
-            Assert.Equal(+1, DbSession.TheComparison(new VoucherDetail
-                {
-                    Currency = "USD",
-                    Title = 1234,
-                    SubTitle = 06,
-                    Content = "abc",
-                    Remark = "def",
-                    Fund = 123.46
-                }, rhs));
+            Assert.Equal(
+                -1,
+                DbSession.TheComparison(
+                    new VoucherDetail
+                        {
+                            Currency = "USD",
+                            Title = 1234,
+                            SubTitle = 06,
+                            Content = "abc",
+                            Remark = "def",
+                            Fund = 123.44
+                        },
+                    rhs));
+            Assert.Equal(
+                +1,
+                DbSession.TheComparison(
+                    new VoucherDetail
+                        {
+                            Currency = "USD",
+                            Title = 1234,
+                            SubTitle = 06,
+                            Content = "abc",
+                            Remark = "def",
+                            Fund = 123.46
+                        },
+                    rhs));
         }
 
         [Fact]

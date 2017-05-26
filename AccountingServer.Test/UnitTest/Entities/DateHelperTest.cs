@@ -8,7 +8,6 @@ namespace AccountingServer.Test.UnitTest.Entities
     [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
     public class DateHelperTest
     {
-
         [Theory]
         [InlineData(0, null, null)]
         [InlineData(+1, "2017-01-01", null)]
