@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // 有关程序集的一般信息由以下
 // 控制。更改这些特性值可修改
 // 与程序集关联的信息。
-[assembly: AssemblyTitle("AccountingServer.BLL.Test")]
+[assembly: AssemblyTitle("AccountingServer.Test")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("AccountingServer.BLL.Test")]
+[assembly: AssemblyProduct("AccountingServer.Test")]
 [assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // 如果此项目向 COM 公开，则下列 GUID 用于类型库的 ID
-[assembly: Guid("2b07f8c3-ee12-49d0-9057-908ad41fd983")]
+[assembly: Guid("80dccec9-ee8d-43c1-bc74-8a45ae10fbcb")]
 
 // 程序集的版本信息由下列四个值组成:
 //

@@ -2,7 +2,7 @@
 using AccountingServer.Entities.Util;
 using Xunit;
 
-namespace AccountingServer.Entities.Test
+namespace AccountingServer.Test.UnitTest.Entities
 {
     [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
     public class AccountantHelperTest
