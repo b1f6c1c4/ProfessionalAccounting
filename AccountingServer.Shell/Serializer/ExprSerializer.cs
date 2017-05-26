@@ -172,7 +172,7 @@ namespace AccountingServer.Shell.Serializer
             Parsing.TrimStartComment(ref expr);
             var title = Parsing.Title(ref expr);
             if (title == null)
-                if (AlternativeTitle(ref expr, lst, ref title))
+                if (!AlternativeTitle(ref expr, lst, ref title))
                     return null;
 
             double? fund;
