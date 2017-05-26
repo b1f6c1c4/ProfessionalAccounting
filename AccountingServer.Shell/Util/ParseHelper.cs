@@ -10,7 +10,7 @@ namespace AccountingServer.Shell.Util
     ///     扩展的字符串匹配
     /// </summary>
     [SuppressMessage("ReSharper", "UnusedParameter.Global")]
-    internal static class ParseHelper
+    public static class ParseHelper
     {
         /// <summary>
         ///     忽略空白和注释
@@ -20,14 +20,14 @@ namespace AccountingServer.Shell.Util
         public static void TrimStartComment(this FacadeBase facade, ref string expr)
         {
             expr = expr.TrimStart();
-            if (expr.Length <= 2 ||
-                expr[0] != '/' ||
-                expr[1] != '/')
-                return;
-
-            var index = expr.IndexOf(Environment.NewLine, 2, StringComparison.Ordinal);
-            expr = expr.Substring(index + Environment.NewLine.Length);
-            expr = expr.TrimStart();
+            while (expr.Length > 2 &&
+                expr[0] == '/' &&
+                expr[1] == '/')
+            {
+                var index = expr.IndexOf(Environment.NewLine, 2, StringComparison.Ordinal);
+                expr = expr.Substring(index + Environment.NewLine.Length);
+                expr = expr.TrimStart();
+            }
         }
 
         /// <summary>
@@ -48,7 +48,15 @@ namespace AccountingServer.Shell.Util
             if (allow)
                 if (expr[0] == '\'' ||
                     expr[0] == '"')
-                    return facade.Quoted(ref expr);
+                {
+                    var tmp = expr;
+                    var res = facade.Quoted(ref expr);
+                    if (!predicate?.Invoke(res) != true)
+                        return res;
+
+                    expr = tmp;
+                    return null;
+                }
 
             var id = 1;
             while (id < expr.Length)
@@ -88,8 +96,8 @@ namespace AccountingServer.Shell.Util
         /// <param name="facade">占位符</param>
         /// <param name="expr">表达式</param>
         /// <returns>数</returns>
-        public static double DoubleF(this FacadeBase facade, ref string expr)
-            => double.Parse(facade.Token(ref expr, false));
+        public static double DoubleF(this FacadeBase facade, ref string expr) => Double(facade, ref expr) ??
+            throw new FormatException();
 
         /// <summary>
         ///     匹配可选的非零长度字符串
@@ -127,10 +135,10 @@ namespace AccountingServer.Shell.Util
                 ch != c)
                 return null;
 
-            var id = 0;
+            var id = -1;
             while (true)
             {
-                id = expr.IndexOf(ch, id + 1);
+                id = expr.IndexOf(ch, id + 2);
                 if (id < 0)
                     throw new ArgumentException("语法错误", nameof(expr));
 
