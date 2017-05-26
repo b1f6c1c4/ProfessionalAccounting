@@ -5,8 +5,9 @@ using AccountingServer.DAL;
 using AccountingServer.Entities;
 using Xunit;
 
-namespace AccountingServer.Test.IntegrationTest.DAL
+namespace AccountingServer.Test.IntegrationTest
 {
+    [Collection("DbTestCollection")]
     public class DbTest : IDisposable
     {
         private readonly IDbAdapter m_Adapter;
