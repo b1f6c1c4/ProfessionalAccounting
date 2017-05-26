@@ -20,9 +20,8 @@ namespace AccountingServer.Shell.Serializer
             if (s == null)
                 return "null";
 
-            s = s.Replace("\\", "\\\\");
-            s = s.Replace("\"", "\\\"");
-            return "\"" + s + "\"";
+            s = s.Replace("\"", "\"\"");
+            return $"@\"{s}\"";
         }
 
         /// <summary>

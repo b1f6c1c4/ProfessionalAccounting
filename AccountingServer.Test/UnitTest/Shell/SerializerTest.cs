@@ -28,13 +28,13 @@ namespace AccountingServer.Test.UnitTest.Shell
 
             var voucher1 = new Voucher
                 {
-                    Type = VoucherType.Ordinary,
+                    Date = new DateTime(2017, 1, 1),
+                    Type = VoucherType.Uncertain,
                     Remark = " t 't\"-.\" %@!@#$%^&*( ",
                     Details = new List<VoucherDetail>
                         {
                             new VoucherDetail
                                 {
-                                    Currency = VoucherDetail.BaseCurrency,
                                     Title = 1001,
                                     Content = "%@!@#$%^&*(\nas\rdf\\",
                                     Fund = 123.45

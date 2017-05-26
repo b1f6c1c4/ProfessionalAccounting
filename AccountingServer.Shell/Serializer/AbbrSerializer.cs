@@ -24,12 +24,12 @@ namespace AccountingServer.Shell.Serializer
                     ref expr,
                     false,
                     t => (d = Abbrs.Config.Abbrs.FirstOrDefault(a => a.Abbr == t)) != null) == null)
-                return true;
+                return false;
 
             title = d;
             if (!d.Editable)
                 lst.Add(d.Content);
-            return false;
+            return true;
         }
     }
 
