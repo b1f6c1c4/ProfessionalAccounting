@@ -49,8 +49,8 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(false, "2018-01-01", "2017-01-01")]
         public void VoucherMatchTestDate(bool expected, string valueS, string filterS)
         {
-            var value = DateHelperTest.DateTimeFromString(valueS);
-            var filter = DateHelperTest.DateTimeFromString(filterS);
+            var value = valueS.ToDateTime();
+            var filter = filterS.ToDateTime();
             Assert.Equal(expected, MatchHelper.IsMatch(new Voucher { Date = value }, new Voucher { Date = filter }));
         }
 

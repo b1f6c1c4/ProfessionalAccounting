@@ -19,7 +19,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData("2100-04-30", 2100, 4)]
         public void LastDayOfMonthTest(string expectedS, int year, int month)
         {
-            var expected = DateHelperTest.DateTimeFromString(expectedS);
+            var expected = expectedS.ToDateTime();
             Assert.Equal(expected, AccountantHelper.LastDayOfMonth(year, month));
         }
     }

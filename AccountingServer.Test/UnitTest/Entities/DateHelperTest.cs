@@ -8,7 +8,6 @@ namespace AccountingServer.Test.UnitTest.Entities
     [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
     public class DateHelperTest
     {
-        public static DateTime? DateTimeFromString(string b1S) => b1S == null ? (DateTime?)null : DateTime.Parse(b1S);
 
         [Theory]
         [InlineData(0, null, null)]
@@ -18,8 +17,8 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(+1, "2017-01-02", "2017-01-01")]
         public void CompareDateTest(int expected, string b1S, string b2S)
         {
-            var b1 = DateTimeFromString(b1S);
-            var b2 = DateTimeFromString(b2S);
+            var b1 = b1S.ToDateTime();
+            var b2 = b2S.ToDateTime();
 
             var result = DateHelper.CompareDate(b1, b2);
             if (expected == 0)
