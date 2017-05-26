@@ -72,12 +72,8 @@ namespace AccountingServer.BLL.Util
         /// <summary>
         ///     会计科目信息文档
         /// </summary>
-        private static readonly ConfigManager<TitleInfos> TitleInfos;
-
-        /// <summary>
-        ///     读取会计科目信息
-        /// </summary>
-        static TitleManager() => TitleInfos = new ConfigManager<TitleInfos>("Titles.xml");
+        public static IConfigManager<TitleInfos> TitleInfos { private get; set; } =
+            new ConfigManager<TitleInfos>("Titles.xml");
 
         /// <summary>
         ///     返回所有会计科目编号和名称

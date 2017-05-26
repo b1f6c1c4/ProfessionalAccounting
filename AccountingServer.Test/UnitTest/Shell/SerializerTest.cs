@@ -1,46 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using AccountingServer.DAL;
+using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using AccountingServer.Shell.Serializer;
 using Xunit;
 
-namespace AccountingServer.Test.IntegrationTest.DAL
+namespace AccountingServer.Test.UnitTest.Shell
 {
-    public class DbTest : IDisposable
+    public class SerializerTest
     {
-        private readonly IDbAdapter m_Adapter;
-
-        public DbTest()
+        public SerializerTest()
         {
-            m_Adapter = Facade.Create("mongodb://localhost/accounting-test");
+            AbbrSerializer.Abbrs =
+                new MockConfigManager<Abbreviations>(new Abbreviations { Abbrs = new List<Abbreviation>() });
 
-            m_Adapter.DeleteVouchers(null);
-            m_Adapter.DeleteAssets(null);
-            m_Adapter.DeleteAmortizations(null);
+            TitleManager.TitleInfos =
+                new MockConfigManager<TitleInfos>(new TitleInfos { Titles = new List<TitleInfo>() });
         }
 
-        public void Dispose()
+        [Theory]
+        [InlineData(typeof(CSharpSerializer))]
+        [InlineData(typeof(ExprSerializer))]
+        [InlineData(typeof(AbbrSerializer))]
+        public void VoucherTest(Type type)
         {
-            m_Adapter.DeleteVouchers(null);
-            m_Adapter.DeleteAssets(null);
-            m_Adapter.DeleteAmortizations(null);
-        }
+            var serializer = (IEntitySerializer)Activator.CreateInstance(type);
 
-        [Fact]
-        public void VoucherStoreTest()
-        {
             var voucher1 = new Voucher
                 {
                     Type = VoucherType.Ordinary,
-                    Remark = "tt",
+                    Remark = " t 't\"-.\" %@!@#$%^&*( ",
                     Details = new List<VoucherDetail>
                         {
                             new VoucherDetail
                                 {
                                     Currency = VoucherDetail.BaseCurrency,
                                     Title = 1001,
-                                    Content = "asdf",
+                                    Content = "%@!@#$%^&*(\nas\rdf\\",
                                     Fund = 123.45
                                 },
                             new VoucherDetail
@@ -49,14 +45,12 @@ namespace AccountingServer.Test.IntegrationTest.DAL
                                     Title = 1002,
                                     SubTitle = 12,
                                     Fund = -123.45,
-                                    Remark = "qwer"
+                                    Remark = "\\qw\ter%@!@#$%^&*(%"
                                 }
                         }
                 };
 
-            m_Adapter.Upsert(voucher1);
-
-            var voucher2 = m_Adapter.SelectVouchers(null).Single();
+            var voucher2 = serializer.ParseVoucher(serializer.PresentVoucher(voucher1));
 
             Assert.Equal(voucher1, voucher2, new VoucherEqualityComparer());
         }

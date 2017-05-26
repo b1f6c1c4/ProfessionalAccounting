@@ -52,4 +52,11 @@ namespace AccountingServer.Test
 
         public int GetHashCode(VoucherDetail obj) => obj.Fund?.GetHashCode() ?? 0;
     }
+
+    public class MockConfigManager<T> : IConfigManager<T>
+    {
+        public T Config { get; }
+
+        public MockConfigManager(T config) => Config = config;
+    }
 }

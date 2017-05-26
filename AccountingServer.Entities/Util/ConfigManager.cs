@@ -5,10 +5,22 @@ using System.Xml.Serialization;
 namespace AccountingServer.Entities.Util
 {
     /// <summary>
+    ///     配置文件管理
+    /// </summary>
+    /// <typeparam name="T">配置文件类型</typeparam>
+    public interface IConfigManager<out T>
+    {
+        /// <summary>
+        ///     配置文件
+        /// </summary>
+        T Config { get; }
+    }
+
+    /// <summary>
     ///     配置文件管理器
     /// </summary>
     /// <typeparam name="T">配置文件类型</typeparam>
-    public class ConfigManager<T>
+    public class ConfigManager<T> : IConfigManager<T>
     {
         /// <summary>
         ///     文件名
@@ -45,9 +57,7 @@ namespace AccountingServer.Entities.Util
             }
         }
 
-        /// <summary>
-        ///     配置文件
-        /// </summary>
+        /// <inheritdoc />
         public T Config
         {
             get
