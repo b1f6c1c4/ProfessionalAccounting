@@ -113,17 +113,17 @@ namespace AccountingServer.Test.IntegrationTest
         {
             m_Adapter = Facade.Create("mongodb://localhost/accounting-test");
 
-            m_Adapter.DeleteVouchers(null);
+            m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
         }
 
-        public void Dispose() => m_Adapter.DeleteVouchers(null);
+        public void Dispose() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
 
         protected override void PrepareVoucher(Voucher voucher) => m_Adapter.Upsert(voucher);
 
         protected override bool RunQuery(IQueryCompunded<IVoucherQueryAtom> query) => m_Adapter.SelectVouchers(query)
             .SingleOrDefault() != null;
 
-        protected override void ResetVouchers() => m_Adapter.DeleteVouchers(null);
+        protected override void ResetVouchers() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
 
         [Theory]
         public override void RunTestA(bool expected, string query) => base.RunTestA(expected, query);
