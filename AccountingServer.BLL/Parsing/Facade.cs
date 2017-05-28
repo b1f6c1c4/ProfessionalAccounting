@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using Antlr4.Runtime;
 
 namespace AccountingServer.BLL.Parsing
@@ -62,7 +63,8 @@ namespace AccountingServer.BLL.Parsing
             => VoucherQuery(ref s);
 
         public IQueryCompunded<IVoucherQueryAtom> VoucherQuery(ref string s)
-            => Parse(ref s, p => p.vouchers());
+            => (IQueryCompunded<IVoucherQueryAtom>)Parse(ref s, p => p.vouchers()) ??
+                VoucherQueryUnconstrained.Instance;
 
         public IVoucherDetailQuery DetailQuery(string s)
             => DetailQuery(ref s);
@@ -80,7 +82,8 @@ namespace AccountingServer.BLL.Parsing
             => DistributedQuery(ref s);
 
         public IQueryCompunded<IDistributedQueryAtom> DistributedQuery(ref string s)
-            => Parse(ref s, p => p.distributedQ());
+            => (IQueryCompunded<IDistributedQueryAtom>)Parse(ref s, p => p.distributedQ()) ??
+                DistributedQueryUnconstrained.Instance;
     }
 
     public sealed class FacadeF : FacadeBase
