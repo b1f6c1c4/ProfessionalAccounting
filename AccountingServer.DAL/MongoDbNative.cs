@@ -64,23 +64,23 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="rng">日期过滤器</param>
         /// <returns>Native表示</returns>
-        protected static FilterDefinition<Voucher> GetNativeFilter(DateFilter? rng)
+        protected static FilterDefinition<Voucher> GetNativeFilter(DateFilter rng)
         {
             if (rng == null)
                 return Builders<Voucher>.Filter.Empty;
 
-            if (rng.Value.NullOnly)
+            if (rng.NullOnly)
                 return Builders<Voucher>.Filter.Exists("date", false);
 
             var lst = new List<FilterDefinition<Voucher>>();
 
-            if (rng.Value.StartDate.HasValue)
-                lst.Add(Builders<Voucher>.Filter.Gte("date", rng.Value.StartDate));
-            if (rng.Value.EndDate.HasValue)
-                lst.Add(Builders<Voucher>.Filter.Lte("date", rng.Value.EndDate));
+            if (rng.StartDate.HasValue)
+                lst.Add(Builders<Voucher>.Filter.Gte("date", rng.StartDate));
+            if (rng.EndDate.HasValue)
+                lst.Add(Builders<Voucher>.Filter.Lte("date", rng.EndDate));
 
             var gather = And(lst);
-            return rng.Value.Nullable
+            return rng.Nullable
                 ? Builders<Voucher>.Filter.Exists("date", false) | gather
                 : Builders<Voucher>.Filter.Exists("date") & gather;
         }
