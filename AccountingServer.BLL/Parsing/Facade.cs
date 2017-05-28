@@ -53,10 +53,10 @@ namespace AccountingServer.BLL.Parsing
         public DateTime? UniqueTime(ref string s)
             => Parse(ref s, p => p.uniqueTime());
 
-        public DateFilter? Range(string s)
+        public DateFilter Range(string s)
             => Range(ref s);
 
-        public DateFilter? Range(ref string s)
+        public DateFilter Range(ref string s)
             => Parse(ref s, p => p.range())?.Range;
 
         public IQueryCompunded<IVoucherQueryAtom> VoucherQuery(string s)

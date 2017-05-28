@@ -138,7 +138,7 @@ namespace AccountingServer.BLL.Parsing
                     if (RangeNull() != null)
                         return DateFilter.TheNullOnly;
                     if (RangeAllNotNull() != null)
-                        return new DateFilter { Nullable = false, NullOnly = false };
+                        return DateFilter.TheNotNull;
                     if (Certain != null)
                         return Certain.Range;
 

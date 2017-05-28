@@ -6,7 +6,7 @@ namespace AccountingServer.Entities
     /// <summary>
     ///     日期过滤器
     /// </summary>
-    public struct DateFilter : IDateRange
+    public class DateFilter : IDateRange
     {
         /// <summary>
         ///     是否只允许无日期（若为<c>true</c>，则无须考虑<c>Nullable</c>）
@@ -31,24 +31,17 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     任意日期
         /// </summary>
-        public static DateFilter Unconstrained = new DateFilter
-            {
-                NullOnly = false,
-                Nullable = true,
-                StartDate = null,
-                EndDate = null
-            };
+        public static DateFilter Unconstrained { get; } = new DateFilter(null, null);
 
         /// <summary>
         ///     仅限无日期
         /// </summary>
-        public static DateFilter TheNullOnly = new DateFilter
-            {
-                NullOnly = true,
-                Nullable = true,
-                StartDate = null,
-                EndDate = null
-            };
+        public static DateFilter TheNullOnly { get; } = new DateFilter(null, null) { NullOnly = true };
+
+        /// <summary>
+        ///     非无日期
+        /// </summary>
+        public static DateFilter TheNotNull { get; } = new DateFilter(null, null) { Nullable = false };
 
         public DateFilter(DateTime? startDate, DateTime? endDate)
         {
@@ -108,15 +101,10 @@ namespace AccountingServer.Entities
             if (!dt.HasValue)
                 return rng.Nullable;
 
-            if (rng.StartDate.HasValue)
-                if (dt < rng.StartDate.Value)
-                    return false;
+            if (dt < rng.StartDate)
+                return false;
 
-            if (rng.EndDate.HasValue)
-                if (dt > rng.EndDate.Value)
-                    return false;
-
-            return true;
+            return !(dt > rng.EndDate);
         }
     }
 }
