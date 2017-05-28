@@ -179,13 +179,10 @@ namespace AccountingServer.Shell
             Accountant.SelectAssets(distQuery)
                 .Sum(
                     a => Accountant.DeleteVouchers(
-                        new VoucherQueryAryBase(
-                            OperatorType.Intersect,
-                            new[]
-                                {
-                                    query, ParsingF.VoucherQuery(
-                                        $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}")
-                                }))));
+                        new IntersectQueries<IVoucherQueryAtom>(
+                            query,
+                            ParsingF.VoucherQuery(
+                                $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}")))));
 
         /// <inheritdoc />
         protected override IQueryResult ExecuteApply(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,

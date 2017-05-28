@@ -58,6 +58,7 @@
     <Compile Include="Parsing\QueryParser.Proxy.Range.cs" />
     <Compile Include="Parsing\QueryParser.Proxy.Voucher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Util\QueryHelper.cs" />
     <Compile Include="Util\QuotedStringHelper.cs" />
     <Compile Include="Util\StringFormatter.cs" />
     <Compile Include="Util\TitleManager.cs" />
