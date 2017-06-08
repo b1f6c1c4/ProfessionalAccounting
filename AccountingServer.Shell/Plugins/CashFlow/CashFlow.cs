@@ -71,7 +71,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         {
             var curr = string.IsNullOrEmpty(account.Currency) ? "@@" : $"@{account.Currency}";
             var init = Accountant.RunGroupedQuery($"{curr}*({account.QuickAsset}) [~.]``v").SingleOrDefault()?.Fund ?? 0;
-            yield return (DateTime.Today, init);
+            yield return (DateTime.Today.CastUtc(), init);
 
             if (account.Reimburse)
             {
@@ -97,17 +97,17 @@ namespace AccountingServer.Shell.Plugins.CashFlow
 
                     case CreditCard cd:
                         foreach (var b in Accountant.RunGroupedQuery(
-                            $"({cd.Query})*(<+(-@@)) [{DateTime.Today.AddMonths(-3).AsDate()}~]`Cd"))
+                            $"({cd.Query})*(<+(-@@)) [{DateTime.Today.CastUtc().AddMonths(-3).AsDate()}~]`Cd"))
                         {
                             // ReSharper disable once PossibleInvalidOperationException
                             var d = b.Date.Value;
-                            var mo = new DateTime(d.Year, d.Month, 1);
+                            var mo = new DateTime(d.Year, d.Month, 1).CastUtc();
                             if (d.Day >= cd.BillDay)
                                 mo = mo.AddMonths(1);
                             if (cd.RepaymentDay <= cd.BillDay)
                                 mo = mo.AddMonths(1);
                             mo = mo.AddDays(cd.RepaymentDay - 1);
-                            if (mo <= DateTime.Today)
+                            if (mo <= DateTime.Today.CastUtc())
                                 continue;
 
                             var ratio = ExchangeFactory.Instance.From(mo, b.Currency);

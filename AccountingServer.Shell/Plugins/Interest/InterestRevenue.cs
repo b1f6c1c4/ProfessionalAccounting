@@ -62,7 +62,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                     ref capitalIntegral,
                     ref interestIntegral,
                     lastD,
-                    endDate ?? DateTime.Now.Date);
+                    endDate ?? DateTime.Today.CastUtc());
             }
             else
             {
@@ -75,7 +75,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                     ref capitalIntegral,
                     ref interestIntegral,
                     null,
-                    DateTime.Now.Date);
+                    DateTime.Today.CastUtc());
             }
             return new Succeed();
         }

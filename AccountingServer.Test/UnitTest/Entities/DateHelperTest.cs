@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using Xunit;
 
 namespace AccountingServer.Test.UnitTest.Entities
@@ -33,7 +34,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(true, "2017-01-01")]
         public void WithinTestUnconstrained(bool expected, string valueS)
         {
-            var value = valueS == null ? (DateTime?)null : DateTime.Parse(valueS);
+            var value = valueS == null ? (DateTime?)null : DateTime.Parse(valueS).CastUtc();
             Assert.Equal(expected, DateHelper.Within(value, DateFilter.Unconstrained));
         }
 
@@ -42,7 +43,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(false, "2017-01-01")]
         public void WithinTestNullOnly(bool expected, string valueS)
         {
-            var value = valueS == null ? (DateTime?)null : DateTime.Parse(valueS);
+            var value = valueS == null ? (DateTime?)null : DateTime.Parse(valueS).CastUtc();
             Assert.Equal(expected, DateHelper.Within(value, DateFilter.TheNullOnly));
         }
 
@@ -53,8 +54,8 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(false, "2017-01-02")]
         public void WithinTestBy(bool expected, string valueS)
         {
-            var value = valueS == null ? (DateTime?)null : DateTime.Parse(valueS);
-            var filter = new DateFilter(null, new DateTime(2017, 1, 1));
+            var value = valueS == null ? (DateTime?)null : DateTime.Parse(valueS).CastUtc();
+            var filter = new DateFilter(null, new DateTime(2017, 1, 1).CastUtc());
             Assert.True(filter.Nullable);
             Assert.Equal(expected, DateHelper.Within(value, filter));
         }
@@ -66,8 +67,8 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(false, "2017-01-02")]
         public void WithinTestByA(bool expected, string valueS)
         {
-            var value = valueS == null ? (DateTime?)null : DateTime.Parse(valueS);
-            var filter = new DateFilter(null, new DateTime(2017, 1, 1)) { Nullable = false };
+            var value = valueS == null ? (DateTime?)null : DateTime.Parse(valueS).CastUtc();
+            var filter = new DateFilter(null, new DateTime(2017, 1, 1).CastUtc()) { Nullable = false };
             Assert.Equal(expected, DateHelper.Within(value, filter));
         }
 
@@ -78,8 +79,8 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(true, "2017-01-02")]
         public void WithinTestSince(bool expected, string valueS)
         {
-            var value = valueS == null ? (DateTime?)null : DateTime.Parse(valueS);
-            var filter = new DateFilter(new DateTime(2017, 1, 1), null);
+            var value = valueS == null ? (DateTime?)null : DateTime.Parse(valueS).CastUtc();
+            var filter = new DateFilter(new DateTime(2017, 1, 1).CastUtc(), null);
             Assert.False(filter.Nullable);
             Assert.Equal(expected, DateHelper.Within(value, filter));
         }
@@ -91,8 +92,8 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(true, "2017-01-02")]
         public void WithinTestSinceA(bool expected, string valueS)
         {
-            var value = valueS == null ? (DateTime?)null : DateTime.Parse(valueS);
-            var filter = new DateFilter(new DateTime(2017, 1, 1), null) { Nullable = true };
+            var value = valueS == null ? (DateTime?)null : DateTime.Parse(valueS).CastUtc();
+            var filter = new DateFilter(new DateTime(2017, 1, 1).CastUtc(), null) { Nullable = true };
             Assert.Equal(expected, DateHelper.Within(value, filter));
         }
     }

@@ -167,7 +167,7 @@ namespace AccountingServer.DAL.Serializer
                 expected,
                 ref read,
                 () =>
-                    BsonUtils.ToDateTimeFromMillisecondsSinceEpoch(bsonReader.ReadDateTime()).ToLocalTime());
+                    BsonUtils.ToDateTimeFromMillisecondsSinceEpoch(bsonReader.ReadDateTime()).ToUniversalTime());
 
         /// <summary>
         ///     安全地读入<c>null</c>类型的字段
