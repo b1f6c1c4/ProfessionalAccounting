@@ -45,12 +45,12 @@ namespace AccountingServer.Shell.Plugins.Reimburse
                 var now = DateTime.Today;
                 if (now.Day > Templates.Config.Day)
                     the = new DateFilter(
-                        new DateTime(now.Year, now.Month, Templates.Config.Day + 1),
-                        new DateTime(now.Year, now.Month, Templates.Config.Day).AddMonths(1));
+                        new DateTime(now.Year, now.Month, Templates.Config.Day + 1).CastUtc(),
+                        new DateTime(now.Year, now.Month, Templates.Config.Day).AddMonths(1).CastUtc());
                 else
                     the = new DateFilter(
-                        new DateTime(now.Year, now.Month, Templates.Config.Day + 1).AddMonths(-1),
-                        new DateTime(now.Year, now.Month, Templates.Config.Day));
+                        new DateTime(now.Year, now.Month, Templates.Config.Day + 1).AddMonths(-1).CastUtc(),
+                        new DateTime(now.Year, now.Month, Templates.Config.Day).CastUtc());
                 return the;
             }
         }

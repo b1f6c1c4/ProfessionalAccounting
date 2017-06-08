@@ -8,7 +8,9 @@ namespace AccountingServer.Test
 {
     public static class Util
     {
-        public static DateTime? ToDateTime(this string b1S) => b1S == null ? (DateTime?)null : DateTime.Parse(b1S);
+        public static DateTime? ToDateTime(this string b1S) => b1S == null
+            ? (DateTime?)null
+            : DateTime.Parse(b1S).CastUtc();
     }
 
     public class VoucherEqualityComparer : IEqualityComparer<Voucher>

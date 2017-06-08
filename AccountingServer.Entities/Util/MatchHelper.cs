@@ -182,5 +182,7 @@ namespace AccountingServer.Entities.Util
                 }
             }
         }
+
+        public static DateTime CastUtc(this DateTime dt) => new DateTime(dt.Ticks, DateTimeKind.Utc);
     }
 }

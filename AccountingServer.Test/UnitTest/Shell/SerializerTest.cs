@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using Xunit;
 
@@ -28,7 +29,7 @@ namespace AccountingServer.Test.UnitTest.Shell
 
             var voucher1 = new Voucher
                 {
-                    Date = new DateTime(2017, 1, 1),
+                    Date = new DateTime(2017, 1, 1).CastUtc(),
                     Type = VoucherType.Uncertain,
                     Remark = " t 't\"-.\" %@!@#$%^&*( ",
                     Details = new List<VoucherDetail>

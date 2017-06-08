@@ -49,7 +49,7 @@ namespace AccountingServer.Shell.Serializer
             sb.AppendLine("    {");
             sb.AppendLine("        private static DateTime D(string s)");
             sb.AppendLine("        {");
-            sb.AppendLine("            return DateTime.Parse(s);");
+            sb.AppendLine("            return DateTime.Parse(s+\"Z\").ToUniversalTime();");
             sb.AppendLine("        }");
             sb.AppendLine("        private static string G()");
             sb.AppendLine("        {");

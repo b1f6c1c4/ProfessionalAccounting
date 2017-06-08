@@ -34,6 +34,7 @@ namespace AccountingServer.Test.IntegrationTest
         {
             var voucher1 = new Voucher
                 {
+                    Date = new DateTime(2017, 1, 1).CastUtc(),
                     Type = VoucherType.Ordinary,
                     Remark = "tt",
                     Details = new List<VoucherDetail>

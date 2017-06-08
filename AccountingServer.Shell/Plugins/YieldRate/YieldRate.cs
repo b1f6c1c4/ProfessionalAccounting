@@ -53,7 +53,7 @@ namespace AccountingServer.Shell.Plugins.YieldRate
             if (!pv.IsZero())
                 return
                     new YieldRateSolver(
-                        lst.Select(b => DateTime.Today.Subtract(b.Date.Value).TotalDays).Concat(new[] { 0D }),
+                        lst.Select(b => DateTime.Today.CastUtc().Subtract(b.Date.Value).TotalDays).Concat(new[] { 0D }),
                         lst.Select(b => b.Fund).Concat(new[] { -pv })).Solve();
 
             return

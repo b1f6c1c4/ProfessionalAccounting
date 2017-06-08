@@ -27,9 +27,9 @@ namespace AccountingServer.Shell.Plugins.BankBalance
             var avg = Parsing.DoubleF(ref expr);
             Parsing.Eof(expr);
 
-            var tdy = DateTime.Now.Date;
+            var tdy = DateTime.Today.CastUtc();
             var ldom = AccountantHelper.LastDayOfMonth(tdy.Year, tdy.Month);
-            var srng = new DateFilter(new DateTime(tdy.Year, tdy.Month, 1), tdy);
+            var srng = new DateFilter(new DateTime(tdy.Year, tdy.Month, 1).CastUtc(), tdy);
             var balance =
                 Accountant.RunGroupedQuery($"T1002 {content.Quotation('\'')} [~{tdy.AsDate()}]`vD{srng.AsDateRange()}")
                     .AggregateEveryDay(srng);

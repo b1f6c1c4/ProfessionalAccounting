@@ -5,6 +5,7 @@ using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
@@ -93,7 +94,7 @@ namespace AccountingServer.Shell.Serializer
             Parsing.TrimStartComment(ref expr);
             var id = Parsing.Quoted(ref expr, '^');
             Parsing.TrimStartComment(ref expr);
-            var date = Parsing.UniqueTime(ref expr) ?? DateTime.Today; // TODO
+            var date = Parsing.UniqueTime(ref expr) ?? DateTime.Today.CastUtc(); // TODO
             Parsing.TrimStartComment(ref expr);
             var remark = Parsing.Quoted(ref expr, '%');
             Parsing.TrimStartComment(ref expr);

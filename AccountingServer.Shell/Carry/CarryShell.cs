@@ -65,7 +65,7 @@ namespace AccountingServer.Shell.Carry
                 !rng.EndDate.HasValue)
                 throw new ArgumentException("时间范围无界", nameof(expr));
 
-            var dt = new DateTime(rng.StartDate.Value.Year, rng.StartDate.Value.Month, 1);
+            var dt = new DateTime(rng.StartDate.Value.Year, rng.StartDate.Value.Month, 1).CastUtc();
 
             while (dt <= rng.EndDate.Value)
             {
@@ -104,7 +104,7 @@ namespace AccountingServer.Shell.Carry
             DateFilter rng;
             if (dt.HasValue)
             {
-                var sd = new DateTime(dt.Value.Year, dt.Value.Month, 1);
+                var sd = new DateTime(dt.Value.Year, dt.Value.Month, 1).CastUtc();
                 ed = AccountantHelper.LastDayOfMonth(dt.Value.Year, dt.Value.Month);
                 rng = new DateFilter(sd, ed);
             }

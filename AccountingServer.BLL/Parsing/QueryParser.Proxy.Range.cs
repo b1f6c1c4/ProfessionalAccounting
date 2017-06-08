@@ -1,5 +1,6 @@
 ﻿using System;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 
 namespace AccountingServer.BLL.Parsing
 {
@@ -24,8 +25,8 @@ namespace AccountingServer.BLL.Parsing
 
             public static implicit operator DateTime(RangeDayContext context) =>
                 context.RangeDeltaDay() != null
-                    ? DateTime.Now.Date.AddDays(1 - context.RangeDeltaDay().GetText().Length)
-                    : DateTime.ParseExact(context.RangeADay().GetText(), "yyyyMMdd", null);
+                    ? DateTime.Today.AddDays(1 - context.RangeDeltaDay().GetText().Length).CastUtc()
+                    : DateTime.ParseExact(context.RangeADay().GetText(), "yyyyMMdd", null).CastUtc();
         }
 
         public partial class RangeWeekContext : IDateRange
@@ -36,9 +37,10 @@ namespace AccountingServer.BLL.Parsing
                 get
                 {
                     var delta = 1 - RangeDeltaWeek().GetText().Length;
-                    var dt = DateTime.Now.Date;
+                    var dt = DateTime.Today;
                     dt = dt.AddDays(dt.DayOfWeek == DayOfWeek.Sunday ? -6 : 1 - (int)dt.DayOfWeek);
                     dt = dt.AddDays(delta * 7);
+                    dt = dt.CastUtc();
                     return new DateFilter(dt, dt.AddDays(7));
                 }
             }
@@ -55,11 +57,12 @@ namespace AccountingServer.BLL.Parsing
                     if (RangeDeltaMonth() != null)
                     {
                         var delta = int.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
-                        dt = new DateTime(DateTime.Now.Date.Year, DateTime.Now.Month, 1);
+                        dt = new DateTime(DateTime.Today.Year, DateTime.Now.Month, 1);
                         dt = dt.AddMonths(-delta);
                     }
                     else
                         dt = DateTime.ParseExact(RangeAMonth().GetText() + "01", "yyyyMMdd", null);
+                    dt = dt.CastUtc();
                     return new DateFilter(dt, dt.AddMonths(1).AddDays(-1));
                 }
             }
@@ -73,7 +76,7 @@ namespace AccountingServer.BLL.Parsing
                 get
                 {
                     var year = int.Parse(RangeAYear().GetText());
-                    return new DateFilter(new DateTime(year, 1, 1), new DateTime(year, 12, 31));
+                    return new DateFilter(new DateTime(year, 1, 1).CastUtc(), new DateTime(year, 12, 31).CastUtc());
                 }
             }
         }

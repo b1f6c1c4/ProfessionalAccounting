@@ -87,7 +87,7 @@ namespace AccountingServer.Test.UnitTest.Entities
             var filter = new Voucher
                 {
                     ID = "abc",
-                    Date = new DateTime(2017, 1, 1),
+                    Date = new DateTime(2017, 1, 1).CastUtc(),
                     Type = VoucherType.Ordinary,
                     Remark = "abc"
                 };
@@ -97,7 +97,7 @@ namespace AccountingServer.Test.UnitTest.Entities
                     new Voucher
                         {
                             ID = "abc0",
-                            Date = new DateTime(2017, 1, 1),
+                            Date = new DateTime(2017, 1, 1).CastUtc(),
                             Type = VoucherType.Ordinary,
                             Remark = "abc"
                         },
@@ -107,7 +107,7 @@ namespace AccountingServer.Test.UnitTest.Entities
                     new Voucher
                         {
                             ID = "abc",
-                            Date = new DateTime(2018, 1, 1),
+                            Date = new DateTime(2018, 1, 1).CastUtc(),
                             Type = VoucherType.Ordinary,
                             Remark = "abc"
                         },
@@ -117,7 +117,7 @@ namespace AccountingServer.Test.UnitTest.Entities
                     new Voucher
                         {
                             ID = "abc",
-                            Date = new DateTime(2017, 1, 1),
+                            Date = new DateTime(2017, 1, 1).CastUtc(),
                             Type = VoucherType.Carry,
                             Remark = "abc"
                         },
@@ -127,7 +127,7 @@ namespace AccountingServer.Test.UnitTest.Entities
                     new Voucher
                         {
                             ID = "abc",
-                            Date = new DateTime(2017, 1, 1),
+                            Date = new DateTime(2017, 1, 1).CastUtc(),
                             Type = VoucherType.Ordinary,
                             Remark = "abc0"
                         },
@@ -137,7 +137,7 @@ namespace AccountingServer.Test.UnitTest.Entities
                     new Voucher
                         {
                             ID = "abc",
-                            Date = new DateTime(2017, 1, 1),
+                            Date = new DateTime(2017, 1, 1).CastUtc(),
                             Type = VoucherType.Ordinary,
                             Remark = "abc"
                         },

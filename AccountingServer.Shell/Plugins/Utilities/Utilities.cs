@@ -57,7 +57,7 @@ namespace AccountingServer.Shell.Plugins.Utilities
         /// <returns>记账凭证</returns>
         private Voucher GenerateVoucher(ref string expr)
         {
-            var time = Parsing.UniqueTime(ref expr) ?? DateTime.Today;
+            var time = Parsing.UniqueTime(ref expr) ?? DateTime.Today.CastUtc();
             var abbr = Parsing.Token(ref expr);
 
             var template = Templates.Config.Templates.FirstOrDefault(t => t.Name == abbr) ??
