@@ -80,7 +80,7 @@ namespace AccountingServer.DAL
 
         /// <inheritdoc />
         public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query) =>
-            m_Vouchers.Find(query.Accept(new MongoDbNativeVoucher()))
+            m_Vouchers.Find(query.Accept(new MongoDbNativeVoucher())).Sort(Builders<Voucher>.Sort.Ascending("date"))
                 .ToEnumerable();
 
         private static FilterDefinition<BsonDocument> GetChk(IVoucherDetailQuery query)
@@ -112,7 +112,8 @@ namespace AccountingServer.DAL
                     ["fund"] = "$detail.fund",
                     ["remark"] = "$detail.remark"
                 };
-            return m_Vouchers.Aggregate().Match(preF).Project(pprj).Unwind("detail").Match(chk).Project(prj)
+            var srt = Builders<Voucher>.Sort.Ascending("date");
+            return m_Vouchers.Aggregate().Match(preF).Sort(srt).Project(pprj).Unwind("detail").Match(chk).Project(prj)
                 .ToEnumerable().Select(b => BsonSerializer.Deserialize<VoucherDetail>(b));
         }
 
@@ -237,8 +238,10 @@ namespace AccountingServer.DAL
                         ["total"] = new BsonDocument { ["$sum"] = "$detail.fund" }
                     };
 
+            var srt = Builders<BsonDocument>.Sort.Ascending("_id");
+
             var balances = m_Vouchers.Aggregate().Match(preF).Project(pprj).Unwind("detail").Match(chk).Group(grp)
-                .ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
+                .Sort(srt).ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
             if (query.Subtotal.Levels.Contains(SubtotalLevel.Currency))
                 return balances
                     .Select(
