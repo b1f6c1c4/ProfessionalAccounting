@@ -3,7 +3,6 @@ using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.Entities;
-using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Subtotal;
 using AccountingServer.Shell.Util;
@@ -174,11 +173,8 @@ namespace AccountingServer.Shell
         private IQueryResult PresentDetailQuery(IVoucherDetailQuery query)
         {
             var sb = new StringBuilder();
-            var q = query.DetailEmitFilter?.DetailFilter ?? (query.VoucherQuery as IVoucherQueryAtom)?.DetailFilter;
-            foreach (var voucher in m_Accountant.SelectVouchers(query.VoucherQuery))
-            foreach (var d in voucher.Details)
-                if (d.IsMatch(q))
-                    sb.Append(m_Serializer.PresentVoucherDetail(d));
+            foreach (var d in m_Accountant.SelectVoucherDetails(query))
+                sb.Append(m_Serializer.PresentVoucherDetail(d));
 
             return new EditableText(sb.ToString());
         }

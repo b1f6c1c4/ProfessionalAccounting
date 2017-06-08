@@ -83,11 +83,42 @@ namespace AccountingServer.DAL
             m_Vouchers.Find(query.Accept(new MongoDbNativeVoucher()))
                 .ToEnumerable();
 
+        private static FilterDefinition<BsonDocument> GetChk(IVoucherDetailQuery query)
+        {
+            var visitor = new MongoDbNativeDetailUnwinded();
+            return query.DetailEmitFilter != null
+                ? query.DetailEmitFilter.DetailFilter.Accept(visitor)
+                : (query.VoucherQuery is IVoucherQueryAtom dQuery
+                    ? dQuery.DetailFilter.Accept(visitor)
+                    : throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query)));
+        }
+
+        /// <inheritdoc />
+        public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
+        {
+            var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher());
+            var chk = GetChk(query);
+            var pprj = new BsonDocument
+                {
+                    ["_id"] = false,
+                    ["detail"] = true
+                };
+            var prj = new BsonDocument
+                {
+                    ["currency"] = "$detail.currency",
+                    ["title"] = "$detail.title",
+                    ["subtitle"] = "$detail.subtitle",
+                    ["content"] = "$detail.content",
+                    ["fund"] = "$detail.fund",
+                    ["remark"] = "$detail.remark"
+                };
+            return m_Vouchers.Aggregate().Match(preF).Project(pprj).Unwind("detail").Match(chk).Project(prj)
+                .ToEnumerable().Select(b => BsonSerializer.Deserialize<VoucherDetail>(b));
+        }
+
         /// <inheritdoc />
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
-            var preF = query.VoucherEmitQuery.VoucherQuery.Accept(new MongoDbNativeVoucher());
-
             SubtotalLevel level;
             var lv = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
             if (query.Subtotal.AggrType != AggregationType.None)
@@ -95,12 +126,8 @@ namespace AccountingServer.DAL
             else
                 level = lv;
 
-            var visitor = new MongoDbNativeDetailUnwinded();
-            var chk = query.VoucherEmitQuery.DetailEmitFilter != null
-                ? query.VoucherEmitQuery.DetailEmitFilter.DetailFilter.Accept(visitor)
-                : (query.VoucherEmitQuery.VoucherQuery is IVoucherQueryAtom dQuery
-                    ? dQuery.DetailFilter.Accept(visitor)
-                    : throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query)));
+            var preF = query.VoucherEmitQuery.VoucherQuery.Accept(new MongoDbNativeVoucher());
+            var chk = GetChk(query.VoucherEmitQuery);
 
             BsonDocument pprj;
             if (!level.HasFlag(SubtotalLevel.Day))
