@@ -89,11 +89,11 @@ namespace AccountingServer.DAL
             var preF = query.VoucherEmitQuery.VoucherQuery.Accept(new MongoDbNativeVoucher());
 
             SubtotalLevel level;
+            var lv = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
             if (query.Subtotal.AggrType != AggregationType.None)
-                level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l) |
-                    SubtotalLevel.Day;
+                level = lv | SubtotalLevel.Day;
             else
-                level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
+                level = lv;
 
             var visitor = new MongoDbNativeDetailUnwinded();
             var chk = query.VoucherEmitQuery.DetailEmitFilter != null
@@ -102,11 +102,89 @@ namespace AccountingServer.DAL
                     ? dQuery.DetailFilter.Accept(visitor)
                     : throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query)));
 
-            // TODO: sb.AppendLine(GetTheDateJavascript(level));
+            BsonDocument pprj;
+            if (!level.HasFlag(SubtotalLevel.Day))
+                pprj = new BsonDocument
+                    {
+                        ["_id"] = false,
+                        ["detail"] = true
+                    };
+            else if (!level.HasFlag(SubtotalLevel.Week))
+                pprj = new BsonDocument
+                    {
+                        ["_id"] = false,
+                        ["detail"] = true,
+                        ["date"] = true
+                    };
+            else
+            {
+                BsonDocument days;
+                if (level.HasFlag(SubtotalLevel.Year))
+                    days = new BsonDocument
+                        {
+                            ["$dayOfYear"] = "$date"
+                        };
+                else if (level.HasFlag(SubtotalLevel.Month))
+                    days = new BsonDocument
+                        {
+                            ["$dayOfMonth"] = "$date"
+                        };
+                else // if (level.HasFlag(SubtotalLevel.Week))
+                    days = new BsonDocument
+                        {
+                            ["$dayOfWeek"] = "$date"
+                        };
+                pprj = new BsonDocument
+                    {
+                        ["_id"] = false,
+                        ["detail"] = true,
+                        ["date"] = new BsonDocument
+                            {
+                                ["$switch"] = new BsonDocument
+                                    {
+                                        ["branches"] = new BsonArray
+                                            {
+                                                new BsonDocument
+                                                    {
+                                                        ["case"] = new BsonDocument
+                                                            {
+                                                                ["$eq"] = new BsonArray
+                                                                    {
+                                                                        new BsonDocument
+                                                                            {
+                                                                                ["$type"] = "$date"
+                                                                            },
+                                                                        "missing"
+                                                                    }
+                                                            },
+                                                        ["then"] = BsonNull.Value
+                                                    }
+                                            },
+                                        ["default"] = new BsonDocument
+                                            {
+                                                ["$subtract"] =
+                                                new BsonArray
+                                                    {
+                                                        "$date",
+                                                        new BsonDocument
+                                                            {
+                                                                ["$multiply"] =
+                                                                new BsonArray
+                                                                    {
+                                                                        days,
+                                                                        24 * 60 * 60 * 1000
+                                                                    }
+                                                            }
+                                                    }
+                                            }
+                                    }
+                            }
+                    };
+            }
 
             var prj = new BsonDocument();
             if (level.HasFlag(SubtotalLevel.Day))
-                ; // TODO
+                prj["date"] = "$date";
             if (level.HasFlag(SubtotalLevel.Currency))
                 prj["currency"] = "$detail.currency";
             if (level.HasFlag(SubtotalLevel.Title))
@@ -117,6 +195,7 @@ namespace AccountingServer.DAL
                 prj["content"] = "$detail.content";
             if (level.HasFlag(SubtotalLevel.Remark))
                 prj["remark"] = "$detail.remark";
+
             BsonDocument grp;
             if (query.Subtotal.GatherType == GatheringType.Count)
                 grp = new BsonDocument
@@ -131,8 +210,8 @@ namespace AccountingServer.DAL
                         ["total"] = new BsonDocument { ["$sum"] = "$detail.fund" }
                     };
 
-            var balances = m_Vouchers.Aggregate().Match(preF).Unwind("detail").Match(chk).Group(grp).ToEnumerable()
-                .Select(b => BsonSerializer.Deserialize<Balance>(b));
+            var balances = m_Vouchers.Aggregate().Match(preF).Project(pprj).Unwind("detail").Match(chk).Group(grp)
+                .ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
             if (query.Subtotal.Levels.Contains(SubtotalLevel.Currency))
                 return balances
                     .Select(
