@@ -22,8 +22,15 @@ namespace AccountingServer.DAL
         ///     按检索式查找记账凭证
         /// </summary>
         /// <param name="query">检索式</param>
-        /// <returns>任一细目匹配检索式的记账凭证</returns>
+        /// <returns>匹配检索式的记账凭证</returns>
         IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query);
+
+        /// <summary>
+        ///     按检索式查找细目
+        /// </summary>
+        /// <param name="query">检索式</param>
+        /// <returns>匹配检索式的细目</returns>
+        IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query);
 
         /// <summary>
         ///     按检索式执行分类汇总

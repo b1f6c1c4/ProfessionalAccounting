@@ -74,6 +74,9 @@ namespace AccountingServer.BLL
         public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query)
             => Db.SelectVouchers(query);
 
+        public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
+            => Db.SelectVoucherDetails(query);
+
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
             var res = Db.SelectVoucherDetailsGrouped(query);
