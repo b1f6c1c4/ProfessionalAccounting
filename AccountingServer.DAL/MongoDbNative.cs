@@ -86,43 +86,58 @@ namespace AccountingServer.DAL
         }
     }
 
-    internal class MongoDbNativeDetail : MongoDbNativeVisitor<VoucherDetail, IDetailQueryAtom>
+    internal abstract class MongoDbNativeDetail<T> : MongoDbNativeVisitor<T, IDetailQueryAtom>
     {
-        public override FilterDefinition<VoucherDetail> Visit(IDetailQueryAtom query)
+        private bool Unwinded { get; }
+
+        protected MongoDbNativeDetail(bool unwinded = false) => Unwinded = unwinded;
+
+        public override FilterDefinition<T> Visit(IDetailQueryAtom query)
         {
-            var lst = new List<FilterDefinition<VoucherDetail>>();
+            var p = "";
+            if (Unwinded)
+                p = "detail.";
+
+            var lst = new List<FilterDefinition<T>>();
             if (query.Dir != 0)
                 lst.Add(
                     query.Dir > 0
-                        ? Builders<VoucherDetail>.Filter.Gt("fund", -VoucherDetail.Tolerance)
-                        : Builders<VoucherDetail>.Filter.Lt("fund", +VoucherDetail.Tolerance));
+                        ? Builders<T>.Filter.Gt(p + "fund", -VoucherDetail.Tolerance)
+                        : Builders<T>.Filter.Lt(p + "fund", +VoucherDetail.Tolerance));
             if (query.Filter?.Currency == VoucherDetail.BaseCurrency)
-                lst.Add(Builders<VoucherDetail>.Filter.Exists("currency", false));
+                lst.Add(Builders<T>.Filter.Exists(p + "currency", false));
             else if (query.Filter?.Currency != null)
-                lst.Add(Builders<VoucherDetail>.Filter.Eq("currency", query.Filter?.Currency));
+                lst.Add(Builders<T>.Filter.Eq(p + "currency", query.Filter?.Currency));
             if (query.Filter?.Title != null)
-                lst.Add(Builders<VoucherDetail>.Filter.Eq("title", query.Filter.Title.Value));
+                lst.Add(Builders<T>.Filter.Eq(p + "title", query.Filter.Title.Value));
             if (query.Filter?.SubTitle != null)
                 lst.Add(
                     query.Filter.SubTitle == 00
-                        ? Builders<VoucherDetail>.Filter.Exists("subtitle", false)
-                        : Builders<VoucherDetail>.Filter.Eq("subtitle", query.Filter.SubTitle.Value));
+                        ? Builders<T>.Filter.Exists(p + "subtitle", false)
+                        : Builders<T>.Filter.Eq(p + "subtitle", query.Filter.SubTitle.Value));
             if (query.Filter?.Content != null)
                 lst.Add(
                     query.Filter.Content == string.Empty
-                        ? Builders<VoucherDetail>.Filter.Exists("content", false)
-                        : Builders<VoucherDetail>.Filter.Eq("content", query.Filter.Content));
+                        ? Builders<T>.Filter.Exists(p + "content", false)
+                        : Builders<T>.Filter.Eq(p + "content", query.Filter.Content));
             if (query.Filter?.Remark != null)
                 lst.Add(
                     query.Filter.Remark == string.Empty
-                        ? Builders<VoucherDetail>.Filter.Exists("remark", false)
-                        : Builders<VoucherDetail>.Filter.Eq("remark", query.Filter.Remark));
+                        ? Builders<T>.Filter.Exists(p + "remark", false)
+                        : Builders<T>.Filter.Eq(p + "remark", query.Filter.Remark));
             if (query.Filter?.Fund != null)
                 lst.Add(
-                    Builders<VoucherDetail>.Filter.Gte("fund", query.Filter.Fund.Value - VoucherDetail.Tolerance) &
-                    Builders<VoucherDetail>.Filter.Lte("fund", query.Filter.Fund.Value + VoucherDetail.Tolerance));
+                    Builders<T>.Filter.Gte(p + "fund", query.Filter.Fund.Value - VoucherDetail.Tolerance) &
+                    Builders<T>.Filter.Lte(p + "fund", query.Filter.Fund.Value + VoucherDetail.Tolerance));
             return And(lst);
         }
+    }
+
+    internal class MongoDbNativeDetail : MongoDbNativeDetail<VoucherDetail> { }
+
+    internal class MongoDbNativeDetailUnwinded : MongoDbNativeDetail<BsonDocument>
+    {
+        public MongoDbNativeDetailUnwinded() : base(true) { }
     }
 
     internal class MongoDbNativeVoucher : MongoDbNativeVisitor<Voucher, IVoucherQueryAtom>
