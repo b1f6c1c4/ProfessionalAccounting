@@ -60,14 +60,33 @@ namespace AccountingServer.Entities
         Year = 0b0010_0110_0000
     }
 
-
+    /// <summary>
+    ///     分类汇总结果
+    /// </summary>
     public interface ISubtotalResult
     {
+        /// <summary>
+        ///     值
+        /// </summary>
         double Fund { get; }
 
+        /// <summary>
+        ///     子项
+        /// </summary>
         IEnumerable<ISubtotalResult> Items { get; }
 
+        /// <summary>
+        ///     二次分配
+        /// </summary>
+        /// <param name="visitor">访问者</param>
         void Accept(ISubtotalVisitor visitor);
+
+        /// <summary>
+        ///     二次分配
+        /// </summary>
+        /// <typeparam name="T">返回值类型</typeparam>
+        /// <param name="visitor">访问者</param>
+        /// <returns>访问者返回值</returns>
         T Accept<T>(ISubtotalVisitor<T> visitor);
     }
 
@@ -75,8 +94,6 @@ namespace AccountingServer.Entities
 
     public interface ISubtotalDate : ISubtotalResult
     {
-        AggregationType Aggr { get; }
-
         SubtotalLevel Level { get; }
 
         DateTime? Date { get; }
@@ -107,6 +124,9 @@ namespace AccountingServer.Entities
         string Remark { get; }
     }
 
+    /// <summary>
+    ///     分类汇总结果访问者
+    /// </summary>
     public interface ISubtotalVisitor
     {
         void Visit(ISubtotalRoot sub);
@@ -118,6 +138,10 @@ namespace AccountingServer.Entities
         void Visit(ISubtotalRemark sub);
     }
 
+    /// <summary>
+    ///     分类汇总结果访问者
+    /// </summary>
+    /// <typeparam name="T">返回值类型</typeparam>
     public interface ISubtotalVisitor<out T>
     {
         T Visit(ISubtotalRoot sub);
