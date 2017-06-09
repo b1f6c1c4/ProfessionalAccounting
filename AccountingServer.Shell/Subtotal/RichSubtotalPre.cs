@@ -10,7 +10,7 @@ namespace AccountingServer.Shell.Subtotal
     {
         private const int Ident = 4;
 
-        private string Ts(double f) => Par.GatherType == GatheringType.Count
+        private string Ts(double f) => Ga == GatheringType.Count
             ? f.ToString("N0")
             : f.AsCurrency();
 
