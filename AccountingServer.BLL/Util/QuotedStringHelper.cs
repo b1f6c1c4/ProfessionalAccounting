@@ -14,7 +14,7 @@ namespace AccountingServer.BLL.Util
         /// <param name="chr">引号</param>
         /// <returns>字符串</returns>
         public static string Quotation(this string unquoted, char chr) =>
-            $"{chr}{unquoted.Replace(new string(chr, 1), new string(chr, 2))}{chr}";
+            $"{chr}{(unquoted ?? "").Replace(new string(chr, 1), new string(chr, 2))}{chr}";
 
         /// <summary>
         ///     给字符串解除引号

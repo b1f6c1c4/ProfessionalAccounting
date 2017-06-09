@@ -29,7 +29,8 @@ namespace AccountingServer.Shell.Plugins.Interest
             var endDate = !all ? Parsing.UniqueTime(ref expr) : null;
             Parsing.Eof(expr);
 
-            var loans = Accountant.RunGroupedQuery($"T1221 {content.Quotation('\'')} ``r").ToList();
+            var loans = Accountant.RunGroupedQuery($"T1221 {content.Quotation('\'')} ``r").Items.Cast<ISubtotalRemark>()
+                .ToList();
             var rmk =
                 loans.Single(
                         b =>
@@ -53,8 +54,8 @@ namespace AccountingServer.Shell.Plugins.Interest
                         .Date.Value;
                 var capQuery = $"{filter} [~{lastD.AsDate()}]``v";
                 var intQuery = $"{filter0} [~{lastD.AsDate()}]``v";
-                var capitalIntegral = Accountant.RunGroupedQuery(capQuery).SingleOrDefault()?.Fund ?? 0;
-                var interestIntegral = Accountant.RunGroupedQuery(intQuery).SingleOrDefault()?.Fund ?? 0;
+                var capitalIntegral = Accountant.RunGroupedQuery(capQuery).Fund;
+                var interestIntegral = Accountant.RunGroupedQuery(intQuery).Fund;
                 Regularize(
                     content,
                     rmk,

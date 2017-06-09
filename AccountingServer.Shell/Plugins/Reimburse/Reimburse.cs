@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
@@ -75,6 +76,7 @@ namespace AccountingServer.Shell.Plugins.Reimburse
         /// <returns>执行结果</returns>
         public IQueryResult DoReimbursement(DateFilter rng, out double val)
         {
+            throw new NotImplementedException(); // TODO!!!
             val = 0;
             var sb = new StringBuilder();
             foreach (var reim in Templates.Config.Templates)
@@ -82,14 +84,15 @@ namespace AccountingServer.Shell.Plugins.Reimburse
                 var gq = Accountant
                     .RunGroupedQuery(
                         $"{reim.Query} [{(reim.IsLeftExtended ? "" : rng.StartDate.AsDate())}~{rng.EndDate.AsDate()}] G `C{(reim.ByTitle ? "t" : "")}{(reim.BySubTitle ? "s" : "")}{(reim.ByCountent ? "c" : "")}{(reim.ByRemark ? "r" : "")}");
-                foreach (var grp in gq.GroupByCurrency())
+                foreach (var grp in gq.Items.Cast<ISubtotalCurrency>())
                 {
-                    var curr = grp.Key;
+                    var curr = grp.Currency;
                     // ReSharper disable once PossibleInvalidOperationException
                     var ratio = curr == VoucherDetail.BaseCurrency
                         ? 1
                         : ExchangeFactory.Instance.From(rng.EndDate.Value, curr);
-                    foreach (var b in grp)
+
+                    /*foreach (var b in grp)
                     {
                         sb.Append(reim.Name);
                         if (reim.ByTitle)
@@ -104,7 +107,7 @@ namespace AccountingServer.Shell.Plugins.Reimburse
                         sb.AppendLine($"\t{curr}\t{b.Fund}\t{ratio}\t{reim.Ratio}");
 
                         val += ratio * b.Fund * reim.Ratio;
-                    }
+                    }*/
                 }
             }
 

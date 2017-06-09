@@ -122,7 +122,7 @@ namespace AccountingServer.Shell.Carry
             {
                 var total =
                     m_Accountant.RunGroupedQuery($"T3999 [~{ed.AsDate()}]`C")
-                        .Select(
+                        .Items.Cast<ISubtotalCurrency>().Select(
                             bal => new Balance
                                 {
                                     Currency = bal.Currency,
@@ -188,27 +188,26 @@ namespace AccountingServer.Shell.Carry
             var res =
                 m_Accountant.RunGroupedQuery(
                     $"({target.Query}) {(baseCurrency ? '*' : '-')}@@ {rng.AsDateRange()}`Ctsc");
-            foreach (var grpCurrency in res.GroupByCurrency())
+            foreach (var grpC in res.Items.Cast<ISubtotalCurrency>())
             {
-                var b = 0D;
-                foreach (var balance in grpCurrency)
-                {
-                    b += balance.Fund;
+                var b = grpC.Fund;
+                foreach (var grpt in grpC.Items.Cast<ISubtotalTitle>())
+                foreach (var grps in grpt.Items.Cast<ISubtotalSubTitle>())
+                foreach (var grpc in grps.Items.Cast<ISubtotalContent>())
                     voucher.Details.Add(
                         new VoucherDetail
                             {
-                                Currency = grpCurrency.Key,
-                                Title = balance.Title,
-                                SubTitle = balance.SubTitle,
-                                Content = balance.Content,
-                                Fund = -balance.Fund
+                                Currency = grpC.Currency,
+                                Title = grpt.Title,
+                                SubTitle = grps.SubTitle,
+                                Content = grpc.Content,
+                                Fund = -grpc.Fund
                             });
-                }
 
                 if (b.IsZero())
                     continue;
 
-                if (grpCurrency.Key == VoucherDetail.BaseCurrency)
+                if (grpC.Currency == VoucherDetail.BaseCurrency)
                 {
                     total += b;
                     continue;
@@ -216,12 +215,12 @@ namespace AccountingServer.Shell.Carry
 
                 var cob = ExchangeFactory.Instance.From(
                     ed ?? throw new InvalidOperationException("无穷长时间以前不存在汇率"),
-                    grpCurrency.Key) * b;
+                    grpC.Currency) * b;
 
                 voucher.Details.Add(
                     new VoucherDetail
                         {
-                            Currency = grpCurrency.Key,
+                            Currency = grpC.Currency,
                             Title = 3999,
                             Fund = b
                         });

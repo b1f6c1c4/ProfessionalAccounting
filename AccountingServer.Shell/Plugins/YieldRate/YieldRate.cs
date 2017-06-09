@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
-using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
@@ -29,14 +28,14 @@ namespace AccountingServer.Shell.Plugins.YieldRate
             var sb = new StringBuilder();
             foreach (
                 var tpl in
-                result.GroupByContent()
+                result.Items.Cast<ISubtotalContent>()
                     .Join(
-                        resx,
-                        grp => grp.Key,
+                        resx.Items.Cast<ISubtotalContent>(),
+                        grp => grp.Content,
                         rsx => rsx.Content,
                         (grp, bal) => (Group: grp, Value: bal.Fund)))
                 sb.AppendLine(
-                    $"{tpl.Group.Key}\t{GetRate(tpl.Group.OrderBy(b => b.Date, new DateComparer()).ToList(), tpl.Value) * 360:P2}");
+                    $"{tpl.Group.Content}\t{GetRate(tpl.Group.Items.Cast<ISubtotalDate>().OrderBy(b => b.Date, new DateComparer()).ToList(), tpl.Value) * 360:P2}");
 
             return new UnEditableText(sb.ToString());
         }
@@ -47,7 +46,7 @@ namespace AccountingServer.Shell.Plugins.YieldRate
         /// <param name="lst">现金流</param>
         /// <param name="pv">现值</param>
         /// <returns>实际收益率</returns>
-        private static double GetRate(IReadOnlyList<Balance> lst, double pv)
+        private static double GetRate(IReadOnlyList<ISubtotalDate> lst, double pv)
         {
             // ReSharper disable PossibleInvalidOperationException
             if (!pv.IsZero())

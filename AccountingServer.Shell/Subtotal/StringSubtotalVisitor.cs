@@ -7,19 +7,33 @@ namespace AccountingServer.Shell.Subtotal
     /// <summary>
     ///     分类汇总结果处理器
     /// </summary>
-    internal interface ISubtotalPre
+    internal abstract class StringSubtotalVisitor : ISubtotalVisitor
     {
+        protected StringBuilder Sb;
+
+        protected ISubtotal Par;
+
         /// <summary>
         ///     执行分类汇总
         /// </summary>
-        /// <param name="res">分类汇总结果</param>
+        /// <param name="raw">分类汇总结果</param>
+        /// <param name="par">分类汇总参数</param>
         /// <returns>分类汇总结果</returns>
-        string PresentSubtotal(IEnumerable<Balance> res);
+        public string PresentSubtotal(ISubtotalResult raw, ISubtotal par)
+        {
+            Par = par;
+            Sb = new StringBuilder();
+            raw?.Accept(this);
+            return Sb.ToString();
+        }
 
-        /// <summary>
-        ///     分类汇总参数
-        /// </summary>
-        ISubtotal SubtotalArgs { set; }
+        public abstract void Visit(ISubtotalRoot sub);
+        public abstract void Visit(ISubtotalDate sub);
+        public abstract void Visit(ISubtotalCurrency sub);
+        public abstract void Visit(ISubtotalTitle sub);
+        public abstract void Visit(ISubtotalSubTitle sub);
+        public abstract void Visit(ISubtotalContent sub);
+        public abstract void Visit(ISubtotalRemark sub);
     }
 
     internal static class SubtotalPreHelper

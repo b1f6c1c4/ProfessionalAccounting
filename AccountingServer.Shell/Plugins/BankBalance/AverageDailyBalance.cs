@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
@@ -30,13 +31,12 @@ namespace AccountingServer.Shell.Plugins.BankBalance
             var tdy = DateTime.Today.CastUtc();
             var ldom = AccountantHelper.LastDayOfMonth(tdy.Year, tdy.Month);
             var srng = new DateFilter(new DateTime(tdy.Year, tdy.Month, 1).CastUtc(), tdy);
-            var balance =
-                Accountant.RunGroupedQuery($"T1002 {content.Quotation('\'')} [~{tdy.AsDate()}]`vD{srng.AsDateRange()}")
-                    .AggregateEveryDay(srng);
+            var balance = Accountant.RunGroupedQuery(
+                $"T1002 {content.Quotation('\'')} [~{tdy.AsDate()}]`vD{srng.AsDateRange()}");
 
             var bal = 0D;
             var btd = 0D;
-            foreach (var b in balance)
+            foreach (var b in balance.Items.Cast<ISubtotalDate>())
                 if (b.Date == tdy)
                     btd += b.Fund;
                 else

@@ -26,11 +26,14 @@ namespace AccountingServer.BLL
 
     internal class SubtotalDate : SubtotalResult, ISubtotalDate
     {
-        public SubtotalDate(DateTime? date, SubtotalLevel level)
+        public SubtotalDate(DateTime? date, SubtotalLevel level, AggregationType aggr = AggregationType.None)
         {
             Date = date;
             Level = level;
+            Aggr = aggr;
         }
+
+        public AggregationType Aggr { get; }
 
         public SubtotalLevel Level { get; }
 
@@ -90,27 +93,78 @@ namespace AccountingServer.BLL
         private readonly ISubtotal m_Par;
         private int m_Depth;
 
-        public ISubtotalResult Result { get; }
+        public SubtotalBuilder(ISubtotal par) => m_Par = par;
 
-        public SubtotalBuilder(IEnumerable<Balance> raw, ISubtotal par)
+        public ISubtotalResult Build(IEnumerable<Balance> raw)
         {
-            if (par.AggrType != AggregationType.ChangedDay &&
-                par.GatherType == GatheringType.NonZero)
+            if (m_Par.AggrType != AggregationType.ChangedDay &&
+                m_Par.GatherType == GatheringType.NonZero)
                 raw = raw.Where(b => !b.Fund.IsZero());
 
-            m_Par = par;
-
             m_Depth = 0;
-            Result = Build(new SubtotalRoot(), raw);
+            return Build(new SubtotalRoot(), raw);
         }
 
         private ISubtotalResult Build(SubtotalResult sub, IEnumerable<Balance> raw)
         {
             if (m_Par.Levels.Count == m_Depth)
-            {
-                sub.Fund = raw.Sum(b => b.Fund);
-                return sub;
-            }
+                switch (m_Par.AggrType)
+                {
+                    case AggregationType.None:
+                        sub.Fund = raw.Sum(b => b.Fund);
+                        return sub;
+                    case AggregationType.ChangedDay:
+                        sub.TheItems = raw.GroupBy(b => b.Date)
+                            .Select(
+                                grp => new SubtotalDate(grp.Key, SubtotalLevel.None, AggregationType.ChangedDay)
+                                    {
+                                        Fund = sub.Fund += grp.Sum(b => b.Fund)
+                                    }).Cast<ISubtotalResult>().ToList();
+                        return sub;
+                    case AggregationType.EveryDay:
+                        sub.TheItems = new List<ISubtotalResult>();
+                        var last = m_Par.EveryDayRange.Range.StartDate?.AddDays(-1);
+
+                        void Append(DateTime? curr)
+                        {
+                            if (last.HasValue &&
+                                curr.HasValue)
+                                while (last < curr)
+                                {
+                                    last = last.Value.AddDays(1);
+                                    sub.TheItems.Add(
+                                        new SubtotalDate(last, SubtotalLevel.None, AggregationType.EveryDay)
+                                            {
+                                                Fund = sub.Fund
+                                            });
+                                }
+                            else
+                                sub.TheItems.Add(
+                                    new SubtotalDate(curr, SubtotalLevel.None, AggregationType.EveryDay)
+                                        {
+                                            Fund = sub.Fund
+                                        });
+
+                            if (DateHelper.CompareDate(last, curr) < 0)
+                                last = curr;
+                        }
+
+                        foreach (var grp in raw.GroupBy(b => b.Date))
+                        {
+                            if (m_Par.EveryDayRange.Range.EndDate.HasValue)
+                                if (DateHelper.CompareDate(last, grp.Key) < 0)
+                                    Append(m_Par.EveryDayRange.Range.EndDate);
+
+                            sub.Fund += grp.Sum(b => b.Fund);
+
+                            if (grp.Key.Within(m_Par.EveryDayRange.Range))
+                                Append(grp.Key);
+                        }
+
+                        return sub;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
 
             var level = m_Par.Levels[m_Depth];
 

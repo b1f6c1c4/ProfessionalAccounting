@@ -147,7 +147,7 @@ namespace AccountingServer.BLL.Parsing
             return acc.DeleteVouchers(res);
         }
 
-        public static IEnumerable<Balance> RunGroupedQuery(this Accountant acc, string str)
+        public static ISubtotalResult RunGroupedQuery(this Accountant acc, string str)
         {
             var res = FacadeF.ParsingF.GroupedQuery(ref str);
             FacadeF.ParsingF.Eof(str);
