@@ -38,7 +38,7 @@ namespace AccountingServer.BLL
         public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
             => m_Db.SelectVoucherDetails(query);
 
-        public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
+        public ISubtotalResult SelectVoucherDetailsGrouped(IGroupedQuery query)
             => m_Db.SelectVoucherDetailsGrouped(query);
 
         public bool DeleteVoucher(string id)

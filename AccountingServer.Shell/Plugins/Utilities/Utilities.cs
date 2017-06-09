@@ -76,13 +76,8 @@ namespace AccountingServer.Shell.Plugins.Utilities
                     num = val;
                 else
                 {
-                    var arr = Accountant
-                        .RunGroupedQuery($"{template.Query} [~{time:yyyyMMdd}] ``v")
-                        .ToArray();
-                    if (arr.Length == 0)
-                        num = val;
-                    else
-                        num = arr[0].Fund - val;
+                    var arr = Accountant.RunGroupedQuery($"{template.Query} [~{time:yyyyMMdd}] ``v").Fund;
+                    num = arr - val;
                 }
             }
 

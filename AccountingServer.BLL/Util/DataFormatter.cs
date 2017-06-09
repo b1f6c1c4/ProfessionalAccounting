@@ -82,6 +82,7 @@ namespace AccountingServer.BLL.Util
 
             switch (level)
             {
+                case SubtotalLevel.None:
                 case SubtotalLevel.Day:
                 case SubtotalLevel.Week:
                     return value.AsDate();

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
-using AccountingServer.Entities.Util;
 
 namespace AccountingServer.BLL
 {
@@ -77,14 +75,11 @@ namespace AccountingServer.BLL
         public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
             => Db.SelectVoucherDetails(query);
 
-        public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
+        public ISubtotalResult SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
             var res = Db.SelectVoucherDetailsGrouped(query);
-            if (query.Subtotal.AggrType != AggregationType.ChangedDay &&
-                query.Subtotal.GatherType == GatheringType.NonZero)
-                return res.Where(b => !b.Fund.IsZero());
-
-            return res;
+            var conv = new SubtotalBuilder(query.Subtotal);
+            return conv.Build(res);
         }
 
         public bool DeleteVoucher(string id)

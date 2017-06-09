@@ -75,6 +75,8 @@ namespace AccountingServer.Entities
 
     public interface ISubtotalDate : ISubtotalResult
     {
+        AggregationType Aggr { get; }
+
         SubtotalLevel Level { get; }
 
         DateTime? Date { get; }

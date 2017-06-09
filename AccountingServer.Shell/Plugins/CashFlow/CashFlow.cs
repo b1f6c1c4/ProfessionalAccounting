@@ -70,7 +70,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         private IEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account)
         {
             var curr = string.IsNullOrEmpty(account.Currency) ? "@@" : $"@{account.Currency}";
-            var init = Accountant.RunGroupedQuery($"{curr}*({account.QuickAsset}) [~.]``v").SingleOrDefault()?.Fund ?? 0;
+            var init = Accountant.RunGroupedQuery($"{curr}*({account.QuickAsset}) [~.]``v").Fund;
             yield return (DateTime.Today.CastUtc(), init);
 
             if (account.Reimburse)
@@ -91,13 +91,14 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         break;
 
                     case SimpleItem sd:
-                        yield return (sd.Day, Accountant.RunGroupedQuery($"{curr}*({sd.Query})``v").Single().Fund);
+                        yield return (sd.Day, Accountant.RunGroupedQuery($"{curr}*({sd.Query})``v").Fund);
 
                         break;
 
                     case CreditCard cd:
-                        foreach (var b in Accountant.RunGroupedQuery(
-                            $"({cd.Query})*(<+(-@@)) [{DateTime.Today.CastUtc().AddMonths(-3).AsDate()}~]`Cd"))
+                        foreach (var grpC in Accountant.RunGroupedQuery(
+                            $"({cd.Query})*(<+(-@@)) [{DateTime.Today.CastUtc().AddMonths(-3).AsDate()}~]`Cd").Items.Cast<ISubtotalCurrency>())
+                        foreach (var b in grpC.Items.Cast<ISubtotalDate>())
                         {
                             // ReSharper disable once PossibleInvalidOperationException
                             var d = b.Date.Value;
@@ -110,7 +111,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                             if (mo <= DateTime.Today.CastUtc())
                                 continue;
 
-                            var ratio = ExchangeFactory.Instance.From(mo, b.Currency);
+                            var ratio = ExchangeFactory.Instance.From(mo, grpC.Currency);
                             yield return (mo, b.Fund * ratio);
                         }
 

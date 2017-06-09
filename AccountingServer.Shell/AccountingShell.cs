@@ -129,7 +129,7 @@ namespace AccountingServer.Shell
         /// <param name="expr">表达式</param>
         /// <param name="trav">呈现器</param>
         /// <returns>执行结果</returns>
-        private Func<IQueryResult> TryGroupedQuery(string expr, ISubtotalPre trav)
+        private Func<IQueryResult> TryGroupedQuery(string expr, StringSubtotalVisitor trav)
         {
             var res = ParsingF.GroupedQuery(ref expr);
             ParsingF.Eof(expr);
@@ -185,11 +185,10 @@ namespace AccountingServer.Shell
         /// <param name="query">分类汇总检索式</param>
         /// <param name="trav">呈现器</param>
         /// <returns>执行结果</returns>
-        private IQueryResult PresentSubtotal(IGroupedQuery query, ISubtotalPre trav)
+        private IQueryResult PresentSubtotal(IGroupedQuery query, StringSubtotalVisitor trav)
         {
             var result = m_Accountant.SelectVoucherDetailsGrouped(query);
-            trav.SubtotalArgs = query.Subtotal;
-            return new UnEditableText(trav.PresentSubtotal(result));
+            return new UnEditableText(trav.PresentSubtotal(result, query.Subtotal));
         }
     }
 }

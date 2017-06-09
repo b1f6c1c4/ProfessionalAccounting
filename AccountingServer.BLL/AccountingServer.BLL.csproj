@@ -49,7 +49,6 @@
     <Compile Include="Subtotal.cs" />
     <Compile Include="Util\DataFormatter.cs" />
     <Compile Include="DistributedAccountant.cs" />
-    <Compile Include="Util\GroupingHelper.cs" />
     <Compile Include="ITitle.cs" />
     <Compile Include="Parsing\Facade.cs" />
     <Compile Include="Parsing\QueryLexer.cs" />

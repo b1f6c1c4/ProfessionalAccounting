@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.BLL.Util;
@@ -106,8 +105,8 @@ namespace AccountingServer.Shell.Carry
                 rng = DateFilter.TheNullOnly;
             }
 
-            var b00 = m_Accountant.RunGroupedQuery($"T410300 {rng.AsDateRange()}`v").Single().Fund;
-            var b01 = m_Accountant.RunGroupedQuery($"T410301 {rng.AsDateRange()}`v").Single().Fund;
+            var b00 = m_Accountant.RunGroupedQuery($"T410300 {rng.AsDateRange()}`v").Fund;
+            var b01 = m_Accountant.RunGroupedQuery($"T410301 {rng.AsDateRange()}`v").Fund;
 
             if (!b00.IsZero())
                 m_Accountant.Upsert(

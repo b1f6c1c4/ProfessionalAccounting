@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using AccountingServer.BLL.Util;
+﻿using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 
 namespace AccountingServer.Shell.Subtotal
@@ -9,93 +6,50 @@ namespace AccountingServer.Shell.Subtotal
     /// <summary>
     ///     分类汇总结果处理器
     /// </summary>
-    internal class RichSubtotalPre : SubtotalTraver<object, (double Value, string Report)>, ISubtotalPre
+    internal class RichSubtotalPre : StringSubtotalVisitor
     {
         private const int Ident = 4;
 
-        private string Ts(double f) => SubtotalArgs.GatherType == GatheringType.Count
+        private string Ts(double f) => Par.GatherType == GatheringType.Count
             ? f.ToString("N0")
             : f.AsCurrency();
 
-        /// <inheritdoc />
-        public string PresentSubtotal(IEnumerable<Balance> res)
+        private int? m_Title;
+        private int m_Depth;
+        private string Idents => new string(' ', (m_Depth > 0 ? m_Depth - 1 : 0) * Ident);
+
+        private void ShowSubtotal(ISubtotalResult sub, string str)
         {
-            var traversal = Traversal(null, res);
+            str = str ?? "";
+            Sb.AppendLine($"{Idents}{str.CPadRight(38)}{Ts(sub.Fund).CPadLeft(12 + 2 * m_Depth)}");
+            if (sub.Items == null)
+                return;
 
-            if (SubtotalArgs.Levels.Count == 0 &&
-                SubtotalArgs.AggrType == AggregationType.None)
-                return traversal.Report;
+            m_Depth++;
+            foreach (var item in sub.Items)
+                item.Accept(this);
 
-            return Ts(traversal.Value) + ":" + Environment.NewLine + traversal.Report;
+            m_Depth--;
         }
 
-        protected override (double Value, string Report) LeafNoneAggr(object path, Balance cat, int depth, double val)
-            => (Value: val, Report: Ts(val));
+        public override void Visit(ISubtotalRoot sub) => ShowSubtotal(sub, null);
 
-        protected override (double Value, string Report) LeafAggregated(object path, Balance cat, int depth,
-            Balance bal)
-            => (Value: bal.Fund,
-                Report:
-                $"{new string(' ', depth * Ident)}{bal.Date.AsDate().CPadRight(38)}{Ts(bal.Fund).CPadLeft(12 + 2 * depth)}"
-                );
+        public override void Visit(ISubtotalDate sub) => ShowSubtotal(sub, sub.Date.AsDate(sub.Level));
 
-        protected override object Map(object path, Balance cat, int depth, SubtotalLevel level) => null;
-        protected override object MapA(object path, Balance cat, int depth, AggregationType type) => null;
+        public override void Visit(ISubtotalCurrency sub) => ShowSubtotal(sub, $"@{sub.Currency}");
 
-        protected override (double Value, string Report) MediumLevel(object path, object newPath, Balance cat,
-            int depth,
-            SubtotalLevel level, (double Value, string Report) r)
+        public override void Visit(ISubtotalTitle sub)
         {
-            string str;
-            switch (level)
-            {
-                case SubtotalLevel.Title:
-                    str = $"{cat.Title.AsTitle()} {TitleManager.GetTitleName(cat.Title)}:";
-                    break;
-                case SubtotalLevel.SubTitle:
-                    str = $"{cat.SubTitle.AsSubTitle()} {TitleManager.GetTitleName(cat.Title, cat.SubTitle)}:";
-                    break;
-                case SubtotalLevel.Content:
-                    str = $"{cat.Content}:";
-                    break;
-                case SubtotalLevel.Remark:
-                    str = $"{cat.Remark}:";
-                    break;
-                case SubtotalLevel.Currency:
-                    str = $"@{cat.Currency}:";
-                    break;
-                default:
-                    str = $"{cat.Date.AsDate(level)}:";
-                    break;
-            }
-
-            if (depth == SubtotalArgs.Levels.Count - 1 &&
-                SubtotalArgs.AggrType == AggregationType.None)
-                return (Value: r.Value,
-                    Report: $"{new string(' ', depth * Ident)}{str.CPadRight(38)}{r.Report.CPadLeft(12 + 2 * depth)}");
-
-            return (Value: r.Value,
-                Report:
-                $"{new string(' ', depth * Ident)}{str.CPadRight(38)}{Ts(r.Value).CPadLeft(12 + 2 * depth)}{Environment.NewLine}{r.Report}"
-                );
+            m_Title = sub.Title;
+            ShowSubtotal(sub, $"{sub.Title.AsTitle()} {TitleManager.GetTitleName(sub.Title)}");
         }
 
-        protected override (double Value, string Report) Reduce(object path, Balance cat, int depth,
-            SubtotalLevel level,
-            IEnumerable<(double Value, string Report)> results)
-        {
-            var r = results.ToList();
-            return (Value: r.Sum(t => t.Value),
-                Report: SubtotalPreHelper.NotNullJoin(r.Select(t => t.Report)));
-        }
+        public override void Visit(ISubtotalSubTitle sub) => ShowSubtotal(
+            sub,
+            $"{sub.SubTitle.AsSubTitle()} {TitleManager.GetTitleName(m_Title, sub.SubTitle)}");
 
-        protected override (double Value, string Report) ReduceA(object path, object newPath, Balance cat, int depth,
-            AggregationType type, IEnumerable<(double Value, string Report)> results)
-        {
-            var r = results.ToList();
-            var last = r.LastOrDefault();
-            return (Value: r.Any() ? last.Value : 0,
-                Report: SubtotalPreHelper.NotNullJoin(r.Select(t => t.Report)));
-        }
+        public override void Visit(ISubtotalContent sub) => ShowSubtotal(sub, sub.Content.Quotation('\''));
+
+        public override void Visit(ISubtotalRemark sub) => ShowSubtotal(sub, sub.Remark.Quotation('"'));
     }
 }

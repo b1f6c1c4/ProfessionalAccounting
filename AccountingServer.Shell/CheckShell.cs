@@ -113,7 +113,7 @@ namespace AccountingServer.Shell
                     else if (Math.Abs(title.Direction) == 2)
                         DoCheck(
                             title.Direction,
-                            m_Accountant.RunGroupedQuery($"T{title.Id.AsTitle()}00 G`cD"),
+                            m_Accountant.RunGroupedQuery($"T{title.Id.AsTitle()}00 G`CcD"),
                             $"T{title.Id.AsTitle()}00",
                             sb);
 
@@ -133,7 +133,7 @@ namespace AccountingServer.Shell
                     else if (Math.Abs(subTitle.Direction) == 2)
                         DoCheck(
                             subTitle.Direction,
-                            m_Accountant.RunGroupedQuery($"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} G`cD"),
+                            m_Accountant.RunGroupedQuery($"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} G`CcD"),
                             $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}",
                             sb);
             }
@@ -144,19 +144,20 @@ namespace AccountingServer.Shell
             return new Succeed();
         }
 
-        private static void DoCheck(int dir, IEnumerable<Balance> res, string info, StringBuilder sb)
+        private static void DoCheck(int dir, ISubtotalResult res, string info, StringBuilder sb)
         {
-            foreach (var grpContent in res.GroupByContent())
-            foreach (var balance in grpContent.AggregateChangedDay())
+            foreach (var grpC in res.Items.Cast<ISubtotalCurrency>())
+            foreach (var grpc in grpC.Items.Cast<ISubtotalContent>())
+            foreach (var grpd in grpc.Items.Cast<ISubtotalDate>())
             {
                 if (dir > 0 &&
-                    balance.Fund.IsNonNegative())
+                    grpd.Fund.IsNonNegative())
                     continue;
                 if (dir < 0 &&
-                    balance.Fund.IsNonPositive())
+                    grpd.Fund.IsNonPositive())
                     continue;
 
-                sb.AppendLine($"{balance.Date:yyyyMMdd} {info} {grpContent.Key}:{balance.Fund:R}");
+                sb.AppendLine($"{grpd.Date:yyyyMMdd} {info} {grpc.Content}:@{grpC.Currency} {grpd.Fund:R}");
             }
         }
 
