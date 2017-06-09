@@ -1,27 +1,27 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using System.Text;
 using AccountingServer.Entities;
 
 namespace AccountingServer.Shell.Subtotal
 {
     /// <summary>
-    ///     ·ÖÀà»ã×Ü½á¹û´¦ÀíÆ÷
+    ///     åˆ†ç±»æ±‡æ€»ç»“æœå¤„ç†å™¨
     /// </summary>
     internal abstract class StringSubtotalVisitor : ISubtotalVisitor
     {
         protected StringBuilder Sb;
 
-        protected ISubtotal Par;
+        protected GatheringType Ga;
 
         /// <summary>
-        ///     Ö´ĞĞ·ÖÀà»ã×Ü
+        ///     æ‰§è¡Œåˆ†ç±»æ±‡æ€»
         /// </summary>
-        /// <param name="raw">·ÖÀà»ã×Ü½á¹û</param>
-        /// <param name="par">·ÖÀà»ã×Ü²ÎÊı</param>
-        /// <returns>·ÖÀà»ã×Ü½á¹û</returns>
-        public string PresentSubtotal(ISubtotalResult raw, ISubtotal par)
+        /// <param name="raw">åˆ†ç±»æ±‡æ€»ç»“æœ</param>
+        /// <param name="ga">æ±‡æ€»ç±»å‹</param>
+        /// <returns>åˆ†ç±»æ±‡æ€»ç»“æœ</returns>
+        public string PresentSubtotal(ISubtotalResult raw, GatheringType ga)
         {
-            Par = par;
+            Ga = ga;
             Sb = new StringBuilder();
             raw?.Accept(this);
             return Sb.ToString();
@@ -39,10 +39,10 @@ namespace AccountingServer.Shell.Subtotal
     internal static class SubtotalPreHelper
     {
         /// <summary>
-        ///     ÓÃ»»ĞĞÁ¬½Ó·Ç¿Õ×Ö·û´®
+        ///     ç”¨æ¢è¡Œè¿æ¥éç©ºå­—ç¬¦ä¸²
         /// </summary>
-        /// <param name="strings">×Ö·û´®</param>
-        /// <returns>ĞÂ×Ö·û´®£¬ÈçÎŞ·Ç¿Õ×Ö·û´®ÔòÎª¿Õ</returns>
+        /// <param name="strings">å­—ç¬¦ä¸²</param>
+        /// <returns>æ–°å­—ç¬¦ä¸²ï¼Œå¦‚æ— éç©ºå­—ç¬¦ä¸²åˆ™ä¸ºç©º</returns>
         internal static string NotNullJoin(IEnumerable<string> strings)
         {
             var flag = false;
