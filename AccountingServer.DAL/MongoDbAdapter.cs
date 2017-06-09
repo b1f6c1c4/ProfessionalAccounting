@@ -150,17 +150,45 @@ namespace AccountingServer.DAL
                 if (level.HasFlag(SubtotalLevel.Year))
                     days = new BsonDocument
                         {
-                            ["$dayOfYear"] = "$date"
+                            ["$subtract"] = new BsonArray
+                                {
+                                    new BsonDocument
+                                        {
+                                            ["$dayOfYear"] = "$date"
+                                        },
+                                    1
+                                }
                         };
                 else if (level.HasFlag(SubtotalLevel.Month))
                     days = new BsonDocument
                         {
-                            ["$dayOfMonth"] = "$date"
+                            ["$subtract"] = new BsonArray
+                                {
+                                    new BsonDocument
+                                        {
+                                            ["$dayOfMonth"] = "$date"
+                                        },
+                                    1
+                                }
                         };
                 else // if (level.HasFlag(SubtotalLevel.Week))
                     days = new BsonDocument
                         {
-                            ["$dayOfWeek"] = "$date"
+                            ["$mod"] = new BsonArray
+                                {
+                                    new BsonDocument
+                                        {
+                                            ["$add"] = new BsonArray
+                                                {
+                                                    new BsonDocument
+                                                        {
+                                                            ["$dayOfWeek"] = "$date"
+                                                        },
+                                                    5
+                                                }
+                                        },
+                                    7
+                                }
                         };
                 pprj = new BsonDocument
                     {

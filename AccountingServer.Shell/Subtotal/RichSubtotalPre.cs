@@ -20,8 +20,12 @@ namespace AccountingServer.Shell.Subtotal
 
         private void ShowSubtotal(ISubtotalResult sub, string str)
         {
-            str = str ?? "";
             Sb.AppendLine($"{Idents}{str.CPadRight(38)}{Ts(sub.Fund).CPadLeft(12 + 2 * m_Depth)}");
+            VisitChildren(sub);
+        }
+
+        private void VisitChildren(ISubtotalResult sub)
+        {
             if (sub.Items == null)
                 return;
 
@@ -32,7 +36,11 @@ namespace AccountingServer.Shell.Subtotal
             m_Depth--;
         }
 
-        public override void Visit(ISubtotalRoot sub) => ShowSubtotal(sub, null);
+        public override void Visit(ISubtotalRoot sub)
+        {
+            Sb.AppendLine($"{Idents}{Ts(sub.Fund)}");
+            VisitChildren(sub);
+        }
 
         public override void Visit(ISubtotalDate sub) => ShowSubtotal(sub, sub.Date.AsDate(sub.Level));
 

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using AccountingServer.Entities.Util;
 
 namespace AccountingServer.Shell.Plugins.THUInfo
 {
@@ -250,7 +251,7 @@ namespace AccountingServer.Shell.Plugins.THUInfo
                            Location = row[1].ToString().Trim(),
                            Type = row[2].ToString().Trim(),
                            Endpoint = row[3].ToString().Trim(),
-                           Time = Convert.ToDateTime(row[4]),
+                           Time = Convert.ToDateTime(row[4]).CastUtc(),
                            Fund = Convert.ToDouble(row[5])
                        };
         }
