@@ -41,7 +41,7 @@ namespace AccountingServer.BLL.Parsing
                     dt = dt.AddDays(dt.DayOfWeek == DayOfWeek.Sunday ? -6 : 1 - (int)dt.DayOfWeek);
                     dt = dt.AddDays(delta * 7);
                     dt = dt.CastUtc();
-                    return new DateFilter(dt, dt.AddDays(7));
+                    return new DateFilter(dt, dt.AddDays(6));
                 }
             }
         }

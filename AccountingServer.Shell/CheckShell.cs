@@ -63,7 +63,7 @@ namespace AccountingServer.Shell
         private IQueryResult BasicCheck()
         {
             var sb = new StringBuilder();
-            foreach (var voucher in m_Accountant.SelectVouchers(null))
+            foreach (var voucher in m_Accountant.SelectVouchers(VoucherQueryUnconstrained.Instance))
             {
                 var flag = false;
                 // ReSharper disable once PossibleInvalidOperationException
