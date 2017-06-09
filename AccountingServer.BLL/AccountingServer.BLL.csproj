@@ -46,6 +46,7 @@
     <Compile Include="DbSession.cs" />
     <Compile Include="AssetAccountant.cs" />
     <Compile Include="Accountant.cs" />
+    <Compile Include="Subtotal.cs" />
     <Compile Include="Util\DataFormatter.cs" />
     <Compile Include="DistributedAccountant.cs" />
     <Compile Include="Util\GroupingHelper.cs" />

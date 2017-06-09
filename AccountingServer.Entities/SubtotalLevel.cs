@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace AccountingServer.Entities
 {
@@ -57,5 +58,72 @@ namespace AccountingServer.Entities
         ///     按年分类
         /// </summary>
         Year = 0b0010_0110_0000
+    }
+
+
+    public interface ISubtotalResult
+    {
+        double Fund { get; }
+
+        IEnumerable<ISubtotalResult> Items { get; }
+
+        void Accept(ISubtotalVisitor visitor);
+        T Accept<T>(ISubtotalVisitor<T> visitor);
+    }
+
+    public interface ISubtotalRoot : ISubtotalResult { }
+
+    public interface ISubtotalDate : ISubtotalResult
+    {
+        SubtotalLevel Level { get; }
+
+        DateTime? Date { get; }
+    }
+
+    public interface ISubtotalCurrency : ISubtotalResult
+    {
+        string Currency { get; }
+    }
+
+    public interface ISubtotalTitle : ISubtotalResult
+    {
+        int? Title { get; }
+    }
+
+    public interface ISubtotalSubTitle : ISubtotalResult
+    {
+        int? SubTitle { get; }
+    }
+
+    public interface ISubtotalContent : ISubtotalResult
+    {
+        string Content { get; }
+    }
+
+    public interface ISubtotalRemark : ISubtotalResult
+    {
+        string Remark { get; }
+    }
+
+    public interface ISubtotalVisitor
+    {
+        void Visit(ISubtotalRoot sub);
+        void Visit(ISubtotalDate sub);
+        void Visit(ISubtotalCurrency sub);
+        void Visit(ISubtotalTitle sub);
+        void Visit(ISubtotalSubTitle sub);
+        void Visit(ISubtotalContent sub);
+        void Visit(ISubtotalRemark sub);
+    }
+
+    public interface ISubtotalVisitor<out T>
+    {
+        T Visit(ISubtotalRoot sub);
+        T Visit(ISubtotalDate sub);
+        T Visit(ISubtotalCurrency sub);
+        T Visit(ISubtotalTitle sub);
+        T Visit(ISubtotalSubTitle sub);
+        T Visit(ISubtotalContent sub);
+        T Visit(ISubtotalRemark sub);
     }
 }
