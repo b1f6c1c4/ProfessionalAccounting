@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -116,42 +115,6 @@ namespace AccountingServer.BLL.Parsing
             {
                 return null;
             }
-        }
-    }
-
-    public static class Helper
-    {
-        /// <summary>
-        ///     匹配EOF
-        /// </summary>
-        /// <param name="facade">占位符</param>
-        /// <param name="expr">表达式</param>
-        // ReSharper disable once UnusedParameter.Global
-        public static void Eof(this FacadeBase facade, string expr)
-        {
-            if (!string.IsNullOrWhiteSpace(expr))
-                throw new ArgumentException("语法错误", nameof(expr));
-        }
-
-        public static IEnumerable<Voucher> RunVoucherQuery(this Accountant acc, string str)
-        {
-            var res = FacadeF.ParsingF.VoucherQuery(ref str);
-            FacadeF.ParsingF.Eof(str);
-            return acc.SelectVouchers(res);
-        }
-
-        public static long DeleteVouchers(this Accountant acc, string str)
-        {
-            var res = FacadeF.ParsingF.VoucherQuery(ref str);
-            FacadeF.ParsingF.Eof(str);
-            return acc.DeleteVouchers(res);
-        }
-
-        public static ISubtotalResult RunGroupedQuery(this Accountant acc, string str)
-        {
-            var res = FacadeF.ParsingF.GroupedQuery(ref str);
-            FacadeF.ParsingF.Eof(str);
-            return acc.SelectVoucherDetailsGrouped(res);
         }
     }
 }
