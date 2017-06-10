@@ -26,13 +26,13 @@ namespace AccountingServer.Shell
         public PluginShell(Accountant helper, IEntitySerializer serializer) => m_Plugins =
             new Dictionary<string, PluginBase>
                 {
-                    { "adb", new AverageDailyBalance(helper, serializer) },
-                    { "ir", new InterestRevenue(helper, serializer) },
-                    { "cf", new CashFlow(helper, serializer) },
-                    { "rb", new Reimburse(helper, serializer) },
-                    { "f", new THUInfo(helper, serializer) },
-                    { "u", new Utilities(helper, serializer) },
-                    { "yr", new YieldRate(helper, serializer) }
+                    ["adb"] = new AverageDailyBalance(helper, serializer),
+                    ["ir"] = new InterestRevenue(helper, serializer),
+                    ["cf"] = new CashFlow(helper, serializer),
+                    ["rb"] = new Reimburse(helper, serializer),
+                    ["f"] = new THUInfo(helper, serializer),
+                    ["u"] = new Utilities(helper, serializer),
+                    ["yr"] = new YieldRate(helper, serializer)
                 };
 
         /// <summary>
