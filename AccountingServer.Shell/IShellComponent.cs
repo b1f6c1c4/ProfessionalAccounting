@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AccountingServer.Shell.Util
+namespace AccountingServer.Shell
 {
     /// <summary>
     ///     表达式解释组件
