@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Serializer;
@@ -70,6 +71,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                 };
 
             var voucher2 = serializer.ParseVoucher(serializer.PresentVoucher(voucher1));
+            voucher2.Type = voucher2.Type ?? VoucherType.Ordinary;
 
             Assert.Equal(voucher1, voucher2, new VoucherEqualityComparer());
         }
@@ -95,6 +97,14 @@ namespace AccountingServer.Test.UnitTest.Shell
 
         [Theory]
         public override void VoucherTest(string dt, VoucherType type) { base.VoucherTest(dt, type); }
+
+        [Fact]
+        public void OtherTest()
+        {
+            var serializer = GetSerializer();
+
+            Assert.Equal(null, serializer.ParseVoucher(@"new Voucher { T1001 null }").Details.Single().Fund);
+        }
     }
 
     public class AbbrSerializerTest : SerializerTest
