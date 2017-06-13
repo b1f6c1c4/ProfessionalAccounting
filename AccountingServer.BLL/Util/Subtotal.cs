@@ -88,7 +88,7 @@ namespace AccountingServer.BLL.Util
     /// <summary>
     ///     分类汇总结果建造者
     /// </summary>
-    internal class SubtotalBuilder
+    public class SubtotalBuilder
     {
         private readonly ISubtotal m_Par;
         private int m_Depth;
@@ -187,7 +187,7 @@ namespace AccountingServer.BLL.Util
                     sub.TheItems = new List<ISubtotalResult>();
                     var last = m_Par.EveryDayRange.Range.StartDate?.AddDays(-1);
 
-                    void Append(DateTime? curr)
+                    void Append(DateTime? curr, double oldFund, double fund)
                     {
                         if (last.HasValue &&
                             curr.HasValue)
@@ -197,31 +197,59 @@ namespace AccountingServer.BLL.Util
                                 sub.TheItems.Add(
                                     new SubtotalDate(last, SubtotalLevel.None)
                                         {
-                                            Fund = sub.Fund
+                                            Fund = last == curr ? fund : oldFund
                                         });
                             }
                         else
                             sub.TheItems.Add(
                                 new SubtotalDate(curr, SubtotalLevel.None)
                                     {
-                                        Fund = sub.Fund
+                                        Fund = fund
                                     });
 
                         if (DateHelper.CompareDate(last, curr) < 0)
                             last = curr;
                     }
 
+                    var flag = true;
+                    var tmp0 = 0D;
+                    var forcedNull =
+                        (m_Par.EveryDayRange.Range.StartDate.HasValue || m_Par.EveryDayRange.Range.NullOnly) &&
+                        m_Par.EveryDayRange.Range.Nullable;
                     foreach (var grp in raw.GroupBy(b => b.Date))
                     {
-                        if (m_Par.EveryDayRange.Range.EndDate.HasValue)
-                            if (DateHelper.CompareDate(last, grp.Key) < 0)
-                                Append(m_Par.EveryDayRange.Range.EndDate);
+                        if (flag &&
+                            grp.Key != null &&
+                            forcedNull)
+                            sub.TheItems.Add(
+                                new SubtotalDate(null, SubtotalLevel.None)
+                                    {
+                                        Fund = 0
+                                    });
+                        flag = false;
 
+                        var tmp = sub.Fund;
                         sub.Fund += grp.Sum(b => b.Fund);
 
+                        if (DateHelper.CompareDate(grp.Key, m_Par.EveryDayRange.Range.EndDate) <= 0)
+                            tmp0 = sub.Fund;
                         if (grp.Key.Within(m_Par.EveryDayRange.Range))
-                            Append(grp.Key);
+                            Append(grp.Key, tmp, sub.Fund);
                     }
+
+                    if (flag && forcedNull)
+                        sub.TheItems.Add(
+                            new SubtotalDate(null, SubtotalLevel.None)
+                                {
+                                    Fund = 0
+                                });
+
+                    if (m_Par.EveryDayRange.Range.EndDate.HasValue &&
+                        DateHelper.CompareDate(last, m_Par.EveryDayRange.Range.EndDate) < 0)
+                        Append(m_Par.EveryDayRange.Range.EndDate, tmp0, tmp0);
+                    else if (m_Par.EveryDayRange.Range.StartDate.HasValue &&
+                        last == m_Par.EveryDayRange.Range.StartDate.Value.AddDays(-1))
+                        Append(m_Par.EveryDayRange.Range.StartDate, sub.Fund, sub.Fund);
 
                     return sub;
                 default:

@@ -48,11 +48,34 @@ namespace AccountingServer.Test
                 y.Fund.HasValue)
                 if (!(x.Fund.Value - y.Fund.Value).IsZero())
                     return false;
+            if (x.Content != y.Content)
+                return false;
 
             return x.Remark == y.Remark;
         }
 
         public int GetHashCode(VoucherDetail obj) => obj.Fund?.GetHashCode() ?? 0;
+    }
+
+    public class BalanceEqualityComparer : IEqualityComparer<Balance>
+    {
+        public bool Equals(Balance x, Balance y)
+        {
+            if (x.Currency != y.Currency)
+                return false;
+            if (x.Title != y.Title)
+                return false;
+            if (x.SubTitle != y.SubTitle)
+                return false;
+            if (!(x.Fund - y.Fund).IsZero())
+                return false;
+            if (x.Content != y.Content)
+                return false;
+
+            return x.Remark == y.Remark;
+        }
+
+        public int GetHashCode(Balance obj) => obj.Fund.GetHashCode();
     }
 
     public class MockConfigManager<T> : IConfigManager<T>
