@@ -6,6 +6,14 @@ namespace AccountingServer.Test.UnitTest.Shell
 {
     public class ParseTest
     {
+        [Fact]
+        public void EofTest()
+        {
+            ParseHelper.Eof(null, null);
+            ParseHelper.Eof(null, "");
+            Assert.Throws(typeof(ArgumentException), () => ParseHelper.Eof(null, "asdf"));
+        }
+
         [Theory]
         [InlineData("", "\t // \r\n ")]
         [InlineData("simple test", "\t // \r\n simple test")]
@@ -108,6 +116,7 @@ namespace AccountingServer.Test.UnitTest.Shell
         }
 
         [Theory]
+        [InlineData(null, "\t", "", null)]
         [InlineData("", " ''t es", "t es", null)]
         [InlineData(null, "  s-im_ple test", "s-im_ple test", '"')]
         [InlineData("-im_ple te", "  s-im_ple test", "t", null)]
@@ -119,6 +128,13 @@ namespace AccountingServer.Test.UnitTest.Shell
         {
             Assert.Equal(expected, ParseHelper.Quoted(null, ref expr, c));
             Assert.Equal(remain, expr);
+        }
+
+        [Fact]
+        public void QuotedTest2()
+        {
+            var expr = " '";
+            Assert.Throws(typeof(ArgumentException), () => ParseHelper.Quoted(null, ref expr));
         }
     }
 }
