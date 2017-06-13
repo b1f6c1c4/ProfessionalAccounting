@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
-using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using Xunit;
 
 namespace AccountingServer.Test.UnitTest.Shell
 {
-    public class SerializerTest
+    public abstract class SerializerTest
     {
-        public SerializerTest()
+        protected SerializerTest()
         {
             AbbrSerializer.Abbrs =
                 new MockConfigManager<Abbreviations>(new Abbreviations { Abbrs = new List<Abbreviation>() });
@@ -19,18 +18,31 @@ namespace AccountingServer.Test.UnitTest.Shell
                 new MockConfigManager<TitleInfos>(new TitleInfos { Titles = new List<TitleInfo>() });
         }
 
-        [Theory]
-        [InlineData(typeof(CSharpSerializer))]
-        [InlineData(typeof(ExprSerializer))]
-        [InlineData(typeof(AbbrSerializer))]
-        public void VoucherTest(Type type)
+        protected abstract IEntitySerializer GetSerializer();
+
+        public virtual void SimpleTest()
         {
-            var serializer = (IEntitySerializer)Activator.CreateInstance(type);
+            var serializer = GetSerializer();
+
+            Assert.Throws(typeof(FormatException), () => serializer.ParseVoucher(""));
+            Assert.Throws(typeof(FormatException), () => serializer.ParseVoucher("new Voucher {"));
+        }
+
+        [InlineData(null, VoucherType.Ordinary)]
+        [InlineData("2017-01-01", VoucherType.Uncertain)]
+        [InlineData(null, VoucherType.Carry)]
+        [InlineData(null, VoucherType.AnnualCarry)]
+        [InlineData("2017-01-01", VoucherType.Depreciation)]
+        [InlineData(null, VoucherType.Devalue)]
+        [InlineData("2017-01-01", VoucherType.Amortization)]
+        public virtual void VoucherTest(string dt, VoucherType type)
+        {
+            var serializer = GetSerializer();
 
             var voucher1 = new Voucher
                 {
-                    Date = new DateTime(2017, 1, 1).CastUtc(),
-                    Type = VoucherType.Uncertain,
+                    Date = dt.ToDateTime(),
+                    Type = type,
                     Remark = " t 't\"-.\" %@!@#$%^&*( ",
                     Details = new List<VoucherDetail>
                         {
@@ -47,6 +59,12 @@ namespace AccountingServer.Test.UnitTest.Shell
                                     SubTitle = 12,
                                     Fund = -123.45,
                                     Remark = "\\qw\ter%@!@#$%^&*(%"
+                                },
+                            new VoucherDetail
+                                {
+                                    Title = 5555,
+                                    Fund = -5,
+                                    Remark = "  7' 46r0*\" &)%\" *%)^ Q23'4"
                                 }
                         }
                 };
@@ -55,5 +73,38 @@ namespace AccountingServer.Test.UnitTest.Shell
 
             Assert.Equal(voucher1, voucher2, new VoucherEqualityComparer());
         }
+    }
+
+    public class CSharpSerializerTest : SerializerTest
+    {
+        protected override IEntitySerializer GetSerializer() => new CSharpSerializer();
+
+        [Fact]
+        public override void SimpleTest() { base.SimpleTest(); }
+
+        [Theory]
+        public override void VoucherTest(string dt, VoucherType type) { base.VoucherTest(dt, type); }
+    }
+
+    public class ExprSerializerTest : SerializerTest
+    {
+        protected override IEntitySerializer GetSerializer() => new ExprSerializer();
+
+        [Fact]
+        public override void SimpleTest() { base.SimpleTest(); }
+
+        [Theory]
+        public override void VoucherTest(string dt, VoucherType type) { base.VoucherTest(dt, type); }
+    }
+
+    public class AbbrSerializerTest : SerializerTest
+    {
+        protected override IEntitySerializer GetSerializer() => new AbbrSerializer();
+
+        [Fact]
+        public override void SimpleTest() { base.SimpleTest(); }
+
+        [Theory]
+        public override void VoucherTest(string dt, VoucherType type) { base.VoucherTest(dt, type); }
     }
 }

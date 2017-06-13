@@ -46,9 +46,33 @@ namespace AccountingServer.DAL
 
         #endregion
 
-        /// <summary>
-        ///     注册Bson序列化器
-        /// </summary>
+        private static readonly BsonDocument ProjectDetails = new BsonDocument
+            {
+                ["_id"] = false,
+                ["detail"] = true
+            };
+
+        private static readonly BsonDocument ProjectDate = new BsonDocument
+            {
+                ["_id"] = false,
+                ["detail"] = true,
+                ["date"] = true
+            };
+
+        private static readonly BsonDocument ProjectDetail = new BsonDocument
+            {
+                ["currency"] = "$detail.currency",
+                ["title"] = "$detail.title",
+                ["subtitle"] = "$detail.subtitle",
+                ["content"] = "$detail.content",
+                ["fund"] = "$detail.fund",
+                ["remark"] = "$detail.remark"
+            };
+
+        private static readonly BsonDocument ProjectYear;
+        private static readonly BsonDocument ProjectMonth;
+        private static readonly BsonDocument ProjectWeek;
+
         static MongoDbAdapter()
         {
             BsonSerializer.RegisterSerializer(new VoucherSerializer());
@@ -58,139 +82,9 @@ namespace AccountingServer.DAL
             BsonSerializer.RegisterSerializer(new AmortizationSerializer());
             BsonSerializer.RegisterSerializer(new AmortItemSerializer());
             BsonSerializer.RegisterSerializer(new BalanceSerializer());
-        }
 
-        public MongoDbAdapter(string uri)
-        {
-            var url = new MongoUrl(uri);
-            m_Client = new MongoClient(MongoClientSettings.FromUrl(url));
-
-            m_Db = m_Client.GetDatabase(url.DatabaseName ?? "accounting");
-
-            m_Vouchers = m_Db.GetCollection<Voucher>("voucher");
-            m_Assets = m_Db.GetCollection<Asset>("asset");
-            m_Amortizations = m_Db.GetCollection<Amortization>("amortization");
-        }
-
-        #region Voucher
-
-        /// <inheritdoc />
-        public Voucher SelectVoucher(string id) =>
-            m_Vouchers.FindSync(GetNQuery<Voucher>(id)).FirstOrDefault();
-
-        /// <inheritdoc />
-        public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query) =>
-            m_Vouchers.Find(query.Accept(new MongoDbNativeVoucher())).Sort(Builders<Voucher>.Sort.Ascending("date"))
-                .ToEnumerable();
-
-        private static FilterDefinition<BsonDocument> GetChk(IVoucherDetailQuery query)
-        {
-            var visitor = new MongoDbNativeDetailUnwinded();
-            return query.DetailEmitFilter != null
-                ? query.DetailEmitFilter.DetailFilter.Accept(visitor)
-                : (query.VoucherQuery is IVoucherQueryAtom dQuery
-                    ? dQuery.DetailFilter.Accept(visitor)
-                    : throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query)));
-        }
-
-        /// <inheritdoc />
-        public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
-        {
-            var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher());
-            var chk = GetChk(query);
-            var pprj = new BsonDocument
-                {
-                    ["_id"] = false,
-                    ["detail"] = true
-                };
-            var prj = new BsonDocument
-                {
-                    ["currency"] = "$detail.currency",
-                    ["title"] = "$detail.title",
-                    ["subtitle"] = "$detail.subtitle",
-                    ["content"] = "$detail.content",
-                    ["fund"] = "$detail.fund",
-                    ["remark"] = "$detail.remark"
-                };
-            var srt = Builders<Voucher>.Sort.Ascending("date");
-            return m_Vouchers.Aggregate().Match(preF).Sort(srt).Project(pprj).Unwind("detail").Match(chk).Project(prj)
-                .ToEnumerable().Select(b => BsonSerializer.Deserialize<VoucherDetail>(b));
-        }
-
-        /// <inheritdoc />
-        public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
-        {
-            SubtotalLevel level;
-            var lv = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
-            if (query.Subtotal.AggrType != AggregationType.None)
-                level = lv | SubtotalLevel.Day;
-            else
-                level = lv;
-
-            var preF = query.VoucherEmitQuery.VoucherQuery.Accept(new MongoDbNativeVoucher());
-            var chk = GetChk(query.VoucherEmitQuery);
-
-            BsonDocument pprj;
-            if (!level.HasFlag(SubtotalLevel.Day))
-                pprj = new BsonDocument
-                    {
-                        ["_id"] = false,
-                        ["detail"] = true
-                    };
-            else if (!level.HasFlag(SubtotalLevel.Week))
-                pprj = new BsonDocument
-                    {
-                        ["_id"] = false,
-                        ["detail"] = true,
-                        ["date"] = true
-                    };
-            else
-            {
-                BsonDocument days;
-                if (level.HasFlag(SubtotalLevel.Year))
-                    days = new BsonDocument
-                        {
-                            ["$subtract"] = new BsonArray
-                                {
-                                    new BsonDocument
-                                        {
-                                            ["$dayOfYear"] = "$date"
-                                        },
-                                    1
-                                }
-                        };
-                else if (level.HasFlag(SubtotalLevel.Month))
-                    days = new BsonDocument
-                        {
-                            ["$subtract"] = new BsonArray
-                                {
-                                    new BsonDocument
-                                        {
-                                            ["$dayOfMonth"] = "$date"
-                                        },
-                                    1
-                                }
-                        };
-                else // if (level.HasFlag(SubtotalLevel.Week))
-                    days = new BsonDocument
-                        {
-                            ["$mod"] = new BsonArray
-                                {
-                                    new BsonDocument
-                                        {
-                                            ["$add"] = new BsonArray
-                                                {
-                                                    new BsonDocument
-                                                        {
-                                                            ["$dayOfWeek"] = "$date"
-                                                        },
-                                                    5
-                                                }
-                                        },
-                                    7
-                                }
-                        };
-                pprj = new BsonDocument
+            BsonDocument MakeProject(BsonValue days)
+                => new BsonDocument
                     {
                         ["_id"] = false,
                         ["detail"] = true,
@@ -236,7 +130,119 @@ namespace AccountingServer.DAL
                                     }
                             }
                     };
-            }
+
+            ProjectYear = MakeProject(
+                new BsonDocument
+                    {
+                        ["$subtract"] = new BsonArray
+                            {
+                                new BsonDocument
+                                    {
+                                        ["$dayOfYear"] = "$date"
+                                    },
+                                1
+                            }
+                    });
+            ProjectMonth = MakeProject(
+                new BsonDocument
+                    {
+                        ["$subtract"] = new BsonArray
+                            {
+                                new BsonDocument
+                                    {
+                                        ["$dayOfMonth"] = "$date"
+                                    },
+                                1
+                            }
+                    });
+            ProjectWeek = MakeProject(
+                new BsonDocument
+                    {
+                        ["$mod"] = new BsonArray
+                            {
+                                new BsonDocument
+                                    {
+                                        ["$add"] = new BsonArray
+                                            {
+                                                new BsonDocument
+                                                    {
+                                                        ["$dayOfWeek"] = "$date"
+                                                    },
+                                                5
+                                            }
+                                    },
+                                7
+                            }
+                    });
+        }
+
+        public MongoDbAdapter(string uri)
+        {
+            var url = new MongoUrl(uri);
+            m_Client = new MongoClient(MongoClientSettings.FromUrl(url));
+
+            m_Db = m_Client.GetDatabase(url.DatabaseName ?? "accounting");
+
+            m_Vouchers = m_Db.GetCollection<Voucher>("voucher");
+            m_Assets = m_Db.GetCollection<Asset>("asset");
+            m_Amortizations = m_Db.GetCollection<Amortization>("amortization");
+        }
+
+        #region Voucher
+
+        /// <inheritdoc />
+        public Voucher SelectVoucher(string id) =>
+            m_Vouchers.FindSync(GetNQuery<Voucher>(id)).FirstOrDefault();
+
+        /// <inheritdoc />
+        public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query) =>
+            m_Vouchers.Find(query.Accept(new MongoDbNativeVoucher())).Sort(Builders<Voucher>.Sort.Ascending("date"))
+                .ToEnumerable();
+
+        private static FilterDefinition<BsonDocument> GetChk(IVoucherDetailQuery query)
+        {
+            var visitor = new MongoDbNativeDetailUnwinded();
+            return query.DetailEmitFilter != null
+                ? query.DetailEmitFilter.DetailFilter.Accept(visitor)
+                : (query.VoucherQuery is IVoucherQueryAtom dQuery
+                    ? dQuery.DetailFilter.Accept(visitor)
+                    : throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query)));
+        }
+
+        /// <inheritdoc />
+        public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
+        {
+            var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher());
+            var chk = GetChk(query);
+            var srt = Builders<Voucher>.Sort.Ascending("date");
+            return m_Vouchers.Aggregate().Match(preF).Sort(srt).Project(ProjectDetails).Unwind("detail").Match(chk)
+                .Project(ProjectDetail).ToEnumerable().Select(b => BsonSerializer.Deserialize<VoucherDetail>(b));
+        }
+
+        /// <inheritdoc />
+        public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
+        {
+            SubtotalLevel level;
+            var lv = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
+            if (query.Subtotal.AggrType != AggregationType.None)
+                level = lv | SubtotalLevel.Day;
+            else
+                level = lv;
+
+            var preF = query.VoucherEmitQuery.VoucherQuery.Accept(new MongoDbNativeVoucher());
+            var chk = GetChk(query.VoucherEmitQuery);
+
+            BsonDocument pprj;
+            if (!level.HasFlag(SubtotalLevel.Day))
+                pprj = ProjectDetails;
+            else if (!level.HasFlag(SubtotalLevel.Week))
+                pprj = ProjectDate;
+            else if (level.HasFlag(SubtotalLevel.Year))
+                pprj = ProjectYear;
+            else if (level.HasFlag(SubtotalLevel.Month))
+                pprj = ProjectMonth;
+            else // if (level.HasFlag(SubtotalLevel.Week))
+                pprj = ProjectWeek;
 
             var prj = new BsonDocument();
             if (level.HasFlag(SubtotalLevel.Day))
