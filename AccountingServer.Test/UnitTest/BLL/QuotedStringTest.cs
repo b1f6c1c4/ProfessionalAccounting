@@ -23,6 +23,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [Fact]
         public void DequotationTest()
         {
+            Assert.Equal(null, QuotedStringHelper.Dequotation(null));
             Assert.Equal("", "".Dequotation());
             Assert.Throws(typeof(ArgumentException), () => "\'".Dequotation());
             Assert.Throws(typeof(ArgumentException), () => "\'aaerv\"".Dequotation());

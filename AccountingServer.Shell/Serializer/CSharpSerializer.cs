@@ -125,10 +125,30 @@ namespace AccountingServer.Shell.Serializer
         }
 
         /// <inheritdoc />
-        public Voucher ParseVoucher(string str) => (Voucher)ParseCSharp(str, typeof(Voucher));
+        public Voucher ParseVoucher(string str)
+        {
+            try
+            {
+                return (Voucher)ParseCSharp(str, typeof(Voucher));
+            }
+            catch (Exception e)
+            {
+                throw new FormatException("格式错误", e);
+            }
+        }
 
         /// <inheritdoc />
-        public VoucherDetail ParseVoucherDetail(string str) => (VoucherDetail)ParseCSharp(str, typeof(VoucherDetail));
+        public VoucherDetail ParseVoucherDetail(string str)
+        {
+            try
+            {
+                return (VoucherDetail)ParseCSharp(str, typeof(VoucherDetail));
+            }
+            catch (Exception e)
+            {
+                throw new FormatException("格式错误", e);
+            }
+        }
 
         #endregion
 
@@ -190,7 +210,17 @@ namespace AccountingServer.Shell.Serializer
         }
 
         /// <inheritdoc />
-        public Asset ParseAsset(string str) => (Asset)ParseCSharp(str, typeof(Asset));
+        public Asset ParseAsset(string str)
+        {
+            try
+            {
+                return (Asset)ParseCSharp(str, typeof(Asset));
+            }
+            catch (Exception e)
+            {
+                throw new FormatException("格式错误", e);
+            }
+        }
 
         #endregion
 
@@ -257,7 +287,17 @@ namespace AccountingServer.Shell.Serializer
         }
 
         /// <inheritdoc />
-        public Amortization ParseAmort(string str) => (Amortization)ParseCSharp(str, typeof(Amortization));
+        public Amortization ParseAmort(string str)
+        {
+            try
+            {
+                return (Amortization)ParseCSharp(str, typeof(Amortization));
+            }
+            catch (Exception e)
+            {
+                throw new FormatException("格式错误", e);
+            }
+        }
 
         #endregion
     }

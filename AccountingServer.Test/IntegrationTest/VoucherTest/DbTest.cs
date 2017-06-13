@@ -18,15 +18,11 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
             m_Adapter = Facade.Create("mongodb://localhost/accounting-test");
 
             m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
-            m_Adapter.DeleteAssets(DistributedQueryUnconstrained.Instance);
-            m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance);
         }
 
         public void Dispose()
         {
             m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
-            m_Adapter.DeleteAssets(DistributedQueryUnconstrained.Instance);
-            m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance);
         }
 
         [Theory]
@@ -67,8 +63,15 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
             m_Adapter.Upsert(voucher1);
 
             var voucher2 = m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).Single();
-
             Assert.Equal(voucher1, voucher2, new VoucherEqualityComparer());
+
+            var voucher3 = m_Adapter.SelectVoucher(voucher1.ID);
+            Assert.Equal(voucher1, voucher3, new VoucherEqualityComparer());
+
+            Assert.True(m_Adapter.DeleteVoucher(voucher1.ID));
+            Assert.False(m_Adapter.DeleteVoucher(voucher1.ID));
+
+            Assert.False(m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).Any());
         }
     }
 }

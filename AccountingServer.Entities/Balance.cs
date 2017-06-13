@@ -41,22 +41,5 @@ namespace AccountingServer.Entities
         ///     余额
         /// </summary>
         public double Fund { get; set; }
-
-        public Balance() { }
-
-        /// <summary>
-        ///     深拷贝
-        /// </summary>
-        /// <param name="orig">源</param>
-        public Balance(Balance orig)
-        {
-            Date = orig.Date;
-            Title = orig.Title;
-            SubTitle = orig.SubTitle;
-            Content = orig.Content;
-            Remark = orig.Remark;
-            Currency = orig.Currency;
-            Fund = orig.Fund;
-        }
     }
 }
