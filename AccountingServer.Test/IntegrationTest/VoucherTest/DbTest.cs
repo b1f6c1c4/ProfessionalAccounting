@@ -6,7 +6,7 @@ using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using Xunit;
 
-namespace AccountingServer.Test.IntegrationTest
+namespace AccountingServer.Test.IntegrationTest.VoucherTest
 {
     [Collection("DbTestCollection")]
     public class DbTest : IDisposable
@@ -29,13 +29,20 @@ namespace AccountingServer.Test.IntegrationTest
             m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance);
         }
 
-        [Fact]
-        public void VoucherStoreTest()
+        [Theory]
+        [InlineData(null, VoucherType.Ordinary)]
+        [InlineData("2017-01-01", VoucherType.Uncertain)]
+        [InlineData(null, VoucherType.Carry)]
+        [InlineData(null, VoucherType.AnnualCarry)]
+        [InlineData("2017-01-01", VoucherType.Depreciation)]
+        [InlineData(null, VoucherType.Devalue)]
+        [InlineData("2017-01-01", VoucherType.Amortization)]
+        public void VoucherStoreTest(string dt, VoucherType type)
         {
             var voucher1 = new Voucher
                 {
-                    Date = new DateTime(2017, 1, 1).CastUtc(),
-                    Type = VoucherType.Ordinary,
+                    Date = dt.ToDateTime(),
+                    Type = type,
                     Remark = "tt",
                     Details = new List<VoucherDetail>
                         {

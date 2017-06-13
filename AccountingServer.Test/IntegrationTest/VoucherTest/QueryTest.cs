@@ -8,9 +8,9 @@ using AccountingServer.Entities.Util;
 using Xunit;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
-namespace AccountingServer.Test.IntegrationTest
+namespace AccountingServer.Test.IntegrationTest.VoucherTest
 {
-    public abstract class VoucherQueryTestBase
+    public abstract class QueryTestBase
     {
         protected virtual void PrepareVoucher(Voucher voucher) { }
         protected abstract bool RunQuery(IQueryCompunded<IVoucherQueryAtom> query);
@@ -88,7 +88,7 @@ namespace AccountingServer.Test.IntegrationTest
     }
 
     [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
-    public class VoucherMatchTest : VoucherQueryTestBase
+    public class MatchTest : QueryTestBase
     {
         private Voucher m_Voucher;
         protected override void PrepareVoucher(Voucher voucher) => m_Voucher = voucher;
@@ -105,11 +105,11 @@ namespace AccountingServer.Test.IntegrationTest
 
     [Collection("DbTestCollection")]
     [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
-    public class VoucherDbTest : VoucherQueryTestBase, IDisposable
+    public class DbQueryTest : QueryTestBase, IDisposable
     {
         private readonly IDbAdapter m_Adapter;
 
-        public VoucherDbTest()
+        public DbQueryTest()
         {
             m_Adapter = Facade.Create("mongodb://localhost/accounting-test");
 
