@@ -11,6 +11,7 @@ namespace AccountingServer.Test.UnitTest.Entities
     {
         [Theory]
         [InlineData(0, null, null)]
+        [InlineData(-1, null, "2017-01-01")]
         [InlineData(+1, "2017-01-01", null)]
         [InlineData(-1, "2016-12-31", "2017-01-01")]
         [InlineData(0, "2017-01-01", "2017-01-01")]

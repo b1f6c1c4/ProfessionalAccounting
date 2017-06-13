@@ -26,6 +26,12 @@ namespace AccountingServer.Test.UnitTest.Entities
 
         #region VoucherMatchTest
 
+        [Fact]
+        public void VoucherMatchTestNull()
+        {
+            Assert.True(MatchHelper.IsMatch(new Voucher { ID = "id", Remark = "rmk" }, (Voucher)null));
+        }
+
         [Theory]
         [InlineData(true, null, null)]
         [InlineData(true, "", null)]
@@ -147,6 +153,15 @@ namespace AccountingServer.Test.UnitTest.Entities
         #endregion
 
         #region DetailMatchTest
+
+        [Fact]
+        public void DetailMatchTestNull()
+        {
+            Assert.True(
+                MatchHelper.IsMatch(
+                    new VoucherDetail { Content = "cnt", Fund = 10, Remark = "rmk" },
+                    (VoucherDetail)null));
+        }
 
         [Theory]
         [InlineData(true, null, null)]
