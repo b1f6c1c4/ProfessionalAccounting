@@ -73,6 +73,18 @@ namespace AccountingServer.DAL
         private static readonly BsonDocument ProjectMonth;
         private static readonly BsonDocument ProjectWeek;
 
+        private static readonly BsonDocument FilterNonZero = new BsonDocument
+            {
+                ["total"] = new BsonDocument
+                    {
+                        ["$not"] = new BsonDocument
+                            {
+                                ["$gt"] = -VoucherDetail.Tolerance,
+                                ["$lt"] = +VoucherDetail.Tolerance
+                            }
+                    }
+            };
+
         static MongoDbAdapter()
         {
             BsonSerializer.RegisterSerializer(new VoucherSerializer());
@@ -271,8 +283,11 @@ namespace AccountingServer.DAL
                         ["total"] = new BsonDocument { ["$sum"] = "$detail.fund" }
                     };
 
-            var balances = m_Vouchers.Aggregate().Match(preF).Project(pprj).Unwind("detail").Match(chk).Group(grp)
-                .ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
+            var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Unwind("detail").Match(chk).Group(grp);
+            if (query.Subtotal.AggrType != AggregationType.ChangedDay &&
+                query.Subtotal.GatherType == GatheringType.NonZero)
+                fluent = fluent.Match(FilterNonZero);
+            var balances = fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
             if (level.HasFlag(SubtotalLevel.Currency))
                 return balances
                     .Select(

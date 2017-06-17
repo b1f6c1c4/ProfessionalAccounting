@@ -102,10 +102,6 @@ namespace AccountingServer.BLL.Util
         /// <returns>分类汇总结果</returns>
         public ISubtotalResult Build(IEnumerable<Balance> raw)
         {
-            if (m_Par.AggrType != AggregationType.ChangedDay &&
-                m_Par.GatherType == GatheringType.NonZero)
-                raw = raw.Where(b => !b.Fund.IsZero());
-
             m_Depth = 0;
             return Build(new SubtotalRoot(), raw);
         }
@@ -119,6 +115,9 @@ namespace AccountingServer.BLL.Util
             m_Depth++;
             BuildChildren(sub, raw, level);
             m_Depth--;
+            if (!sub.TheItems.Any())
+                return null;
+
             sub.Fund = sub.TheItems.Sum(isr => isr.Fund);
             return sub;
         }
@@ -129,39 +128,39 @@ namespace AccountingServer.BLL.Util
             {
                 case SubtotalLevel.Title:
                     sub.TheItems = raw.GroupBy(b => b.Title)
-                        .Select(g => Build(new SubtotalTitle(g.Key), g)).ToList();
+                        .Select(g => Build(new SubtotalTitle(g.Key), g)).Where(g => g != null).ToList();
                     break;
                 case SubtotalLevel.SubTitle:
                     sub.TheItems = raw.GroupBy(b => b.SubTitle)
-                        .Select(g => Build(new SubtotalSubTitle(g.Key), g)).ToList();
+                        .Select(g => Build(new SubtotalSubTitle(g.Key), g)).Where(g => g != null).ToList();
                     break;
                 case SubtotalLevel.Content:
                     sub.TheItems = raw.GroupBy(b => b.Content)
-                        .Select(g => Build(new SubtotalContent(g.Key), g)).ToList();
+                        .Select(g => Build(new SubtotalContent(g.Key), g)).Where(g => g != null).ToList();
                     break;
                 case SubtotalLevel.Remark:
                     sub.TheItems = raw.GroupBy(b => b.Remark)
-                        .Select(g => Build(new SubtotalRemark(g.Key), g)).ToList();
+                        .Select(g => Build(new SubtotalRemark(g.Key), g)).Where(g => g != null).ToList();
                     break;
                 case SubtotalLevel.Currency:
                     sub.TheItems = raw.GroupBy(b => b.Currency)
-                        .Select(g => Build(new SubtotalCurrency(g.Key), g)).ToList();
+                        .Select(g => Build(new SubtotalCurrency(g.Key), g)).Where(g => g != null).ToList();
                     break;
                 case SubtotalLevel.Day:
                     sub.TheItems = raw.GroupBy(b => b.Date)
-                        .Select(g => Build(new SubtotalDate(g.Key, SubtotalLevel.Day), g)).ToList();
+                        .Select(g => Build(new SubtotalDate(g.Key, SubtotalLevel.Day), g)).Where(g => g != null).ToList();
                     break;
                 case SubtotalLevel.Week:
                     sub.TheItems = raw.GroupBy(b => b.Date)
-                        .Select(g => Build(new SubtotalDate(g.Key, SubtotalLevel.Week), g)).ToList();
+                        .Select(g => Build(new SubtotalDate(g.Key, SubtotalLevel.Week), g)).Where(g => g != null).ToList();
                     break;
                 case SubtotalLevel.Month:
                     sub.TheItems = raw.GroupBy(b => b.Date)
-                        .Select(g => Build(new SubtotalDate(g.Key, SubtotalLevel.Month), g)).ToList();
+                        .Select(g => Build(new SubtotalDate(g.Key, SubtotalLevel.Month), g)).Where(g => g != null).ToList();
                     break;
                 case SubtotalLevel.Year:
                     sub.TheItems = raw.GroupBy(b => b.Date)
-                        .Select(g => Build(new SubtotalDate(g.Key, SubtotalLevel.Year), g)).ToList();
+                        .Select(g => Build(new SubtotalDate(g.Key, SubtotalLevel.Year), g)).Where(g => g != null).ToList();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -174,6 +173,10 @@ namespace AccountingServer.BLL.Util
             {
                 case AggregationType.None:
                     sub.Fund = BuildEquiPhase(raw);
+                    if (m_Par.GatherType == GatheringType.NonZero &&
+                        sub.Fund.IsZero())
+                        return null;
+
                     return sub;
                 case AggregationType.ChangedDay:
                     sub.TheItems = raw.GroupBy(b => b.Date).OrderBy(grp => grp.Key)
