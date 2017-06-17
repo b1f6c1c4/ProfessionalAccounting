@@ -176,7 +176,7 @@ namespace AccountingServer.BLL.Util
                     sub.Fund = BuildEquiPhase(raw);
                     return sub;
                 case AggregationType.ChangedDay:
-                    sub.TheItems = raw.GroupBy(b => b.Date)
+                    sub.TheItems = raw.GroupBy(b => b.Date).OrderBy(grp => grp.Key)
                         .Select(
                             grp => new SubtotalDate(grp.Key, SubtotalLevel.None)
                                 {
@@ -216,7 +216,7 @@ namespace AccountingServer.BLL.Util
                     var forcedNull =
                         (m_Par.EveryDayRange.Range.StartDate.HasValue || m_Par.EveryDayRange.Range.NullOnly) &&
                         m_Par.EveryDayRange.Range.Nullable;
-                    foreach (var grp in raw.GroupBy(b => b.Date))
+                    foreach (var grp in raw.GroupBy(b => b.Date).OrderBy(grp => grp.Key))
                     {
                         if (flag &&
                             grp.Key != null &&

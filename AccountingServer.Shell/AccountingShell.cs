@@ -187,7 +187,7 @@ namespace AccountingServer.Shell
         private IQueryResult PresentSubtotal(IGroupedQuery query, StringSubtotalVisitor trav)
         {
             var result = m_Accountant.SelectVoucherDetailsGrouped(query);
-            return new UnEditableText(trav.PresentSubtotal(result, query.Subtotal.GatherType));
+            return new UnEditableText(trav.PresentSubtotal(result, query.Subtotal));
         }
     }
 }

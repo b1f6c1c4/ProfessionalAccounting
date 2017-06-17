@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using AccountingServer.Entities;
 
 namespace AccountingServer.Shell.Subtotal
@@ -12,18 +15,67 @@ namespace AccountingServer.Shell.Subtotal
 
         protected GatheringType Ga;
 
+        protected int Depth;
+
+        private ISubtotal m_Par;
+
         /// <summary>
         ///     执行分类汇总
         /// </summary>
         /// <param name="raw">分类汇总结果</param>
-        /// <param name="ga">汇总类型</param>
+        /// <param name="par">参数</param>
         /// <returns>分类汇总结果</returns>
-        public string PresentSubtotal(ISubtotalResult raw, GatheringType ga)
+        public string PresentSubtotal(ISubtotalResult raw, ISubtotal par)
         {
-            Ga = ga;
+            m_Par = par;
+            Ga = par.GatherType;
             Sb = new StringBuilder();
+            Depth = 0;
             raw?.Accept(this);
             return Sb.ToString();
+        }
+
+        protected void VisitChildren(ISubtotalResult sub)
+        {
+            if (sub.Items == null)
+                return;
+
+            IEnumerable<ISubtotalResult> items;
+            if (Depth < m_Par.Levels.Count)
+                switch (m_Par.Levels[Depth])
+                {
+                    case SubtotalLevel.Title:
+                        items = sub.Items.Cast<ISubtotalTitle>().OrderBy(s => s.Title);
+                        break;
+                    case SubtotalLevel.SubTitle:
+                        items = sub.Items.Cast<ISubtotalSubTitle>().OrderBy(s => s.SubTitle);
+                        break;
+                    case SubtotalLevel.Content:
+                        items = sub.Items.Cast<ISubtotalContent>().OrderBy(s => s.Content);
+                        break;
+                    case SubtotalLevel.Remark:
+                        items = sub.Items.Cast<ISubtotalRemark>().OrderBy(s => s.Remark);
+                        break;
+                    case SubtotalLevel.Currency:
+                        items = sub.Items.Cast<ISubtotalCurrency>().OrderBy(s => s.Currency);
+                        break;
+                    case SubtotalLevel.Day:
+                    case SubtotalLevel.Week:
+                    case SubtotalLevel.Month:
+                    case SubtotalLevel.Year:
+                        items = sub.Items.Cast<ISubtotalDate>().OrderBy(s => s.Date);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            else
+                items = sub.Items;
+
+            Depth++;
+            foreach (var item in items)
+                item.Accept(this);
+
+            Depth--;
         }
 
         public abstract void Visit(ISubtotalRoot sub);

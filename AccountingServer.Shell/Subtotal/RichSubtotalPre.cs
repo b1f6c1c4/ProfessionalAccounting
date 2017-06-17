@@ -15,25 +15,12 @@ namespace AccountingServer.Shell.Subtotal
             : f.AsCurrency();
 
         private int? m_Title;
-        private int m_Depth;
-        private string Idents => new string(' ', (m_Depth > 0 ? m_Depth - 1 : 0) * Ident);
+        private string Idents => new string(' ', (Depth > 0 ? Depth - 1 : 0) * Ident);
 
         private void ShowSubtotal(ISubtotalResult sub, string str)
         {
-            Sb.AppendLine($"{Idents}{str.CPadRight(38)}{Ts(sub.Fund).CPadLeft(12 + 2 * m_Depth)}");
+            Sb.AppendLine($"{Idents}{str.CPadRight(38)}{Ts(sub.Fund).CPadLeft(12 + 2 * Depth)}");
             VisitChildren(sub);
-        }
-
-        private void VisitChildren(ISubtotalResult sub)
-        {
-            if (sub.Items == null)
-                return;
-
-            m_Depth++;
-            foreach (var item in sub.Items)
-                item.Accept(this);
-
-            m_Depth--;
         }
 
         public override void Visit(ISubtotalRoot sub)
