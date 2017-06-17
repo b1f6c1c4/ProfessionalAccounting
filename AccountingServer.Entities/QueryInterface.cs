@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace AccountingServer.Entities
 {
@@ -250,6 +251,11 @@ namespace AccountingServer.Entities
         ///     日期累加的范围
         /// </summary>
         IDateRange EveryDayRange { get; }
+
+        /// <summary>
+        ///     币种等值日期
+        /// </summary>
+        DateTime? EquivalentDate { get; }
     }
 
     /// <summary>

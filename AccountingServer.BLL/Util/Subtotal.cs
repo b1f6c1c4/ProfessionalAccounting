@@ -113,7 +113,7 @@ namespace AccountingServer.BLL.Util
         private ISubtotalResult Build(SubtotalResult sub, IEnumerable<Balance> raw)
         {
             if (m_Par.Levels.Count == m_Depth)
-                return BuildFinalPhase(sub, raw);
+                return BuildAggrPhase(sub, raw);
 
             var level = m_Par.Levels[m_Depth];
             m_Depth++;
@@ -168,19 +168,19 @@ namespace AccountingServer.BLL.Util
             }
         }
 
-        private ISubtotalResult BuildFinalPhase(SubtotalResult sub, IEnumerable<Balance> raw)
+        private ISubtotalResult BuildAggrPhase(SubtotalResult sub, IEnumerable<Balance> raw)
         {
             switch (m_Par.AggrType)
             {
                 case AggregationType.None:
-                    sub.Fund = raw.Sum(b => b.Fund);
+                    sub.Fund = BuildEquiPhase(raw);
                     return sub;
                 case AggregationType.ChangedDay:
                     sub.TheItems = raw.GroupBy(b => b.Date)
                         .Select(
                             grp => new SubtotalDate(grp.Key, SubtotalLevel.None)
                                 {
-                                    Fund = sub.Fund += grp.Sum(b => b.Fund)
+                                    Fund = sub.Fund += BuildEquiPhase(grp)
                                 }).Cast<ISubtotalResult>().ToList();
                     return sub;
                 case AggregationType.EveryDay:
@@ -229,7 +229,7 @@ namespace AccountingServer.BLL.Util
                         flag = false;
 
                         var tmp = sub.Fund;
-                        sub.Fund += grp.Sum(b => b.Fund);
+                        sub.Fund += BuildEquiPhase(grp);
 
                         if (DateHelper.CompareDate(grp.Key, m_Par.EveryDayRange.Range.EndDate) <= 0)
                             tmp0 = sub.Fund;
@@ -256,5 +256,9 @@ namespace AccountingServer.BLL.Util
                     throw new ArgumentOutOfRangeException();
             }
         }
+
+        private double BuildEquiPhase(IEnumerable<Balance> raw) => m_Par.EquivalentDate.HasValue
+            ? raw.Sum(b => b.Fund * ExchangeFactory.Instance.From(m_Par.EquivalentDate.Value, b.Currency))
+            : raw.Sum(b => b.Fund);
     }
 }

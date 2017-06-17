@@ -6,9 +6,9 @@ using System.Net.NetworkInformation;
 using AccountingServer.Entities;
 using Newtonsoft.Json.Linq;
 
-namespace AccountingServer.Shell.Carry
+namespace AccountingServer.BLL.Util
 {
-    internal static class ExchangeFactory
+    public static class ExchangeFactory
     {
         public static IExchange Instance { get; } = new ExchangeCache(new FixerIoExchange());
     }
@@ -16,7 +16,7 @@ namespace AccountingServer.Shell.Carry
     /// <summary>
     ///     汇率查询
     /// </summary>
-    internal interface IExchange
+    public interface IExchange
     {
         /// <summary>
         ///     买入汇率
