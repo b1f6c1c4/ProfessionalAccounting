@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 
@@ -83,5 +85,25 @@ namespace AccountingServer.Test
         public T Config { get; }
 
         public MockConfigManager(T config) => Config = config;
+    }
+
+    public class MockExchange : IExchange, IEnumerable
+    {
+        private readonly Dictionary<Tuple<DateTime, string>, double> m_Dic =
+            new Dictionary<Tuple<DateTime, string>, double>();
+
+        public void Add(DateTime date, string target, double val) => m_Dic.Add(
+            new Tuple<DateTime, string>(date, target),
+            val);
+
+        public double From(DateTime date, string target) => target == VoucherDetail.BaseCurrency
+            ? 1
+            : m_Dic[new Tuple<DateTime, string>(date, target)];
+
+        public double To(DateTime date, string target) => target == VoucherDetail.BaseCurrency
+            ? 1
+            : 1D / m_Dic[new Tuple<DateTime, string>(date, target)];
+
+        public IEnumerator GetEnumerator() => m_Dic.GetEnumerator();
     }
 }
