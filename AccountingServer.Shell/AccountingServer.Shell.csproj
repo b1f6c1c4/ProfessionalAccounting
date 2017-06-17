@@ -54,8 +54,8 @@
     <Compile Include="Plugins\CashFlow\CashFlow.cs" />
     <Compile Include="Plugins\CashFlow\CashTemplate.cs" />
     <Compile Include="Plugins\Interest\InterestRevenue.cs" />
-    <Compile Include="Plugins\Reimburse\Reimburse.cs" />
-    <Compile Include="Plugins\Reimburse\ReimTemplate.cs" />
+    <Compile Include="Plugins\Composite\Composite.cs" />
+    <Compile Include="Plugins\Composite\Inquiry.cs" />
     <Compile Include="Plugins\THUInfo\Crawler.cs" />
     <Compile Include="Plugins\THUInfo\EndPointTemplate.cs" />
     <Compile Include="Plugins\THUInfo\THUInfo.Compare.cs" />
@@ -112,7 +112,7 @@
     <EmbeddedResource Include="Plugins\Interest\Resources\Document.txt" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Plugins\Reimburse\Resources\Document.txt" />
+    <EmbeddedResource Include="Plugins\Composite\Resources\Document.txt" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Plugins\Utilities\Resources\Document.txt" />
