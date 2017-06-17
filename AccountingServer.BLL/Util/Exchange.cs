@@ -10,7 +10,7 @@ namespace AccountingServer.BLL.Util
 {
     public static class ExchangeFactory
     {
-        public static IExchange Instance { get; } = new ExchangeCache(new FixerIoExchange());
+        public static IExchange Instance { get; set; } = new ExchangeCache(new FixerIoExchange());
     }
 
     /// <summary>
