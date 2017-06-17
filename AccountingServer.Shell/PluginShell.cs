@@ -5,8 +5,8 @@ using AccountingServer.BLL;
 using AccountingServer.Shell.Plugins;
 using AccountingServer.Shell.Plugins.BankBalance;
 using AccountingServer.Shell.Plugins.CashFlow;
+using AccountingServer.Shell.Plugins.Composite;
 using AccountingServer.Shell.Plugins.Interest;
-using AccountingServer.Shell.Plugins.Reimburse;
 using AccountingServer.Shell.Plugins.THUInfo;
 using AccountingServer.Shell.Plugins.Utilities;
 using AccountingServer.Shell.Plugins.YieldRate;
@@ -29,7 +29,7 @@ namespace AccountingServer.Shell
                     ["adb"] = new AverageDailyBalance(helper, serializer),
                     ["ir"] = new InterestRevenue(helper, serializer),
                     ["cf"] = new CashFlow(helper, serializer),
-                    ["rb"] = new Reimburse(helper, serializer),
+                    ["c"] = new Composite(helper, serializer),
                     ["f"] = new THUInfo(helper, serializer),
                     ["u"] = new Utilities(helper, serializer),
                     ["yr"] = new YieldRate(helper, serializer)

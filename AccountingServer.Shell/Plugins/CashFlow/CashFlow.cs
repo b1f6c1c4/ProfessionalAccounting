@@ -71,12 +71,14 @@ namespace AccountingServer.Shell.Plugins.CashFlow
             var init = Accountant.RunGroupedQuery($"{curr}*({account.QuickAsset}) [~.]``v").Fund;
             yield return (DateTime.Today.CastUtc(), init);
 
-            if (account.Reimburse)
+            if (account.Reimburse != null)
             {
-                var rb = new Reimburse.Reimburse(Accountant, Serializer);
-                rb.DoReimbursement(Reimburse.Reimburse.DateRange, out var rbVal);
+                var rb = new Composite.Composite(Accountant, Serializer);
+                var tmp = Composite.Composite.GetTemplate(account.Reimburse);
+                var rng = Composite.Composite.DateRange(tmp.Day);
+                rb.DoInquiry(rng, tmp, out var rbVal);
                 // ReSharper disable once PossibleInvalidOperationException
-                var rbF = Reimburse.Reimburse.DateRange.EndDate.Value;
+                var rbF = rng.EndDate.Value;
                 yield return (rbF, rbVal);
             }
 

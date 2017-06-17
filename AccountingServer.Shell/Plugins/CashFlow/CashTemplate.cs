@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Xml.Serialization;
 
 namespace AccountingServer.Shell.Plugins.CashFlow
@@ -23,8 +22,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         public string QuickAsset { get; set; }
 
         [XmlElement]
-        [DefaultValue(false)]
-        public bool Reimburse { get; set; }
+        public string Reimburse { get; set; }
 
         [XmlArray("Items")]
         [XmlArrayItem("FixedItem", typeof(FixedItem))]
