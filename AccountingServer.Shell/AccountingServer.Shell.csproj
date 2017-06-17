@@ -72,7 +72,6 @@
     <Compile Include="AmortizationShell.cs" />
     <Compile Include="AssetShell.cs" />
     <Compile Include="Carry\CarryYearShell.cs" />
-    <Compile Include="Carry\Exchange.cs" />
     <Compile Include="DistributedShell.cs" />
     <Compile Include="Serializer\ExprSerializer.cs" />
     <Compile Include="Facade.cs" />

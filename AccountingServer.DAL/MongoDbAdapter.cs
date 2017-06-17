@@ -222,12 +222,11 @@ namespace AccountingServer.DAL
         /// <inheritdoc />
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
-            SubtotalLevel level;
-            var lv = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
+            var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
             if (query.Subtotal.AggrType != AggregationType.None)
-                level = lv | SubtotalLevel.Day;
-            else
-                level = lv;
+                level |= SubtotalLevel.Day;
+            if (query.Subtotal.EquivalentDate.HasValue)
+                level |= SubtotalLevel.Currency;
 
             var preF = query.VoucherEmitQuery.VoucherQuery.Accept(new MongoDbNativeVoucher());
             var chk = GetChk(query.VoucherEmitQuery);
@@ -276,7 +275,7 @@ namespace AccountingServer.DAL
 
             var balances = m_Vouchers.Aggregate().Match(preF).Project(pprj).Unwind("detail").Match(chk).Group(grp)
                 .Sort(srt).ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
-            if (query.Subtotal.Levels.Contains(SubtotalLevel.Currency))
+            if (level.HasFlag(SubtotalLevel.Currency))
                 return balances
                     .Select(
                         b =>

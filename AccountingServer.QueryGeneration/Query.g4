@@ -9,12 +9,16 @@ groupedQuery
 	;
 
 subtotal
-	:	SubtotalMark=('`' | '``' | '!') SubtotalFields? subtotalAggr?
+	:	SubtotalMark=('`' | '``' | '!') SubtotalFields? subtotalAggr? subtotalEqui?
 	;
 
 subtotalAggr
 	:	'D' IsAll='[]'?
 	|	'D' '[' rangeCore ']'
+	;
+
+subtotalEqui
+	:	'X' ('[' rangeDay ']')?
 	;
 
 voucherDetailQuery

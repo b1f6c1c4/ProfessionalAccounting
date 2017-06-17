@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 
 namespace AccountingServer.BLL.Parsing
 {
@@ -263,6 +264,18 @@ namespace AccountingServer.BLL.Parsing
                         return DateFilter.Unconstrained;
 
                     return subtotalAggr().rangeCore();
+                }
+            }
+
+            /// <inheritdoc />
+            public DateTime? EquivalentDate
+            {
+                get
+                {
+                    if (subtotalEqui() == null)
+                        return null;
+
+                    return subtotalEqui().rangeDay() ?? DateTime.Today.CastUtc();
                 }
             }
         }
