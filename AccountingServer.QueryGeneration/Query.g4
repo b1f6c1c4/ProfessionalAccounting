@@ -9,7 +9,8 @@ groupedQuery
 	;
 
 subtotal
-	:	SubtotalMark=('`' | '``' | '!') SubtotalFields? subtotalAggr? subtotalEqui?
+	:	SubtotalMark=('`' | '``') SubtotalFields? subtotalAggr? subtotalEqui?
+	|	SubtotalMark='!' SubtotalFields? subtotalAggr?
 	;
 
 subtotalAggr
