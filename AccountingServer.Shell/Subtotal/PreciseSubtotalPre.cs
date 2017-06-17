@@ -37,9 +37,7 @@ namespace AccountingServer.Shell.Subtotal
         {
             if (m_WithSubtotal || sub.Items == null)
                 Sb.AppendLine($"{m_Path}\t{sub.Fund:R}");
-            if (sub.Items != null)
-                foreach (var item in sub.Items)
-                    item.Accept(this);
+            VisitChildren(sub);
         }
 
         public override void Visit(ISubtotalRoot sub) => ShowSubtotal(sub);

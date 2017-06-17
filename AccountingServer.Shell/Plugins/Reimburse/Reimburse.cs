@@ -96,7 +96,7 @@ namespace AccountingServer.Shell.Plugins.Reimburse
                     sb.Append(
                         new ReimburseVisitor(curr, ratio, reim.Ratio, reim.Name).PresentSubtotal(
                             grp,
-                            query.Subtotal.GatherType));
+                            query.Subtotal));
                 }
             }
 

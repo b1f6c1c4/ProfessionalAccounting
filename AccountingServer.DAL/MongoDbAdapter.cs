@@ -271,10 +271,8 @@ namespace AccountingServer.DAL
                         ["total"] = new BsonDocument { ["$sum"] = "$detail.fund" }
                     };
 
-            var srt = Builders<BsonDocument>.Sort.Ascending("_id");
-
             var balances = m_Vouchers.Aggregate().Match(preF).Project(pprj).Unwind("detail").Match(chk).Group(grp)
-                .Sort(srt).ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
+                .ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
             if (level.HasFlag(SubtotalLevel.Currency))
                 return balances
                     .Select(

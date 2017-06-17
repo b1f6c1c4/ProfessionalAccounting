@@ -198,11 +198,17 @@ namespace AccountingServer.BLL.Parsing
                 get
                 {
                     if (SubtotalFields() == null)
-                        return new[]
-                            {
-                                SubtotalLevel.Currency, SubtotalLevel.Title, SubtotalLevel.SubTitle,
-                                SubtotalLevel.Content
-                            };
+                        if (subtotalEqui() == null)
+                            return new[]
+                                {
+                                    SubtotalLevel.Currency, SubtotalLevel.Title, SubtotalLevel.SubTitle,
+                                    SubtotalLevel.Content
+                                };
+                        else
+                            return new[]
+                                {
+                                    SubtotalLevel.Title, SubtotalLevel.SubTitle, SubtotalLevel.Content
+                                };
 
                     if (SubtotalFields().GetText() == "v")
                         return new SubtotalLevel[0];
