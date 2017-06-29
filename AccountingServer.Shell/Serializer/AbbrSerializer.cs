@@ -16,7 +16,10 @@ namespace AccountingServer.Shell.Serializer
         public static IConfigManager<Abbreviations> Abbrs { private get; set; } =
             new ConfigManager<Abbreviations>("Abbr.xml");
 
-        protected override bool AlternativeTitle(ref string expr, ICollection<string> lst, ref ITitle title)
+        protected override bool AlternativeTitle(ref string expr, ICollection<string> lst, ref ITitle title) =>
+            GetAlternativeTitle(ref expr, lst, ref title);
+
+        public static bool GetAlternativeTitle(ref string expr, ICollection<string> lst, ref ITitle title)
         {
             Abbreviation d = null;
             if (
