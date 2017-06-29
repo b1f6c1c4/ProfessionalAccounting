@@ -170,7 +170,7 @@ namespace AccountingServer.Shell.Serializer
             return res;
         }
 
-        private VoucherDetail ParseVoucherDetail(ref string expr)
+        public VoucherDetail ParseVoucherDetail(ref string expr)
         {
             var lst = new List<string>();
 
