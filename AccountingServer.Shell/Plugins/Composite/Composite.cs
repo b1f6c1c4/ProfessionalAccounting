@@ -149,12 +149,12 @@ namespace AccountingServer.Shell.Plugins.Composite
                         ? 1
                         : ExchangeFactory.Instance.From(m_Rng.EndDate.Value, curr);
 
-                    fmt = new CurrencyDecorator(fmt, curr, ratio);
+                    var theFmt = new CurrencyDecorator(fmt, curr, ratio);
 
-                    val += fmt.GetFund(grp.Fund);
+                    val += theFmt.GetFund(grp.Fund);
 
                     m_Sb.Append(
-                        new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), fmt)
+                        new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), theFmt)
                             .PresentSubtotal(grp, query.Subtotal));
                 }
             else
