@@ -115,6 +115,21 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                             yield return (mo, b.Fund * ratio);
                         }
 
+                        foreach (var b in Accountant.RunGroupedQuery(
+                            $"({cd.Query})*(@@>) [{DateTime.Today.CastUtc().AddMonths(-3).AsDate()}~]`d").Items.Cast<ISubtotalDate>())
+                        {
+                            // ReSharper disable once PossibleInvalidOperationException
+                            var d = b.Date.Value;
+                            var mo = new DateTime(d.Year, d.Month, 1).CastUtc();
+                            if (d.Day > cd.RepaymentDay)
+                                mo = mo.AddMonths(1);
+                            mo = mo.AddDays(cd.RepaymentDay - 1);
+                            if (mo <= DateTime.Today.CastUtc())
+                                continue;
+
+                            yield return (mo, b.Fund);
+                        }
+
                         break;
 
                     default:
