@@ -1,0 +1,10 @@
+﻿CreditCardConvert帮助文档
+
+信用卡自动购汇插件CreditCardConvert
+别名：ccc
+第一个参数为信用卡尾号
+第二个参数为币种
+然后重复：
+	日期（可以只写日）
+	外币金额
+	本币金额

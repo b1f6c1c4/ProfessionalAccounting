@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Plugins\CreditCardConvert\CreditCardConvert.cs" />
     <Compile Include="Serializer\AlternativeSerializer.cs" />
     <Compile Include="Carry\ExchangeShell.cs" />
     <Compile Include="Plugins\BankBalance\AverageDailyBalance.cs" />
@@ -126,6 +127,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Plugins\CashFlow\Resources\Document.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Plugins\CreditCardConvert\Resources\Document.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
