@@ -248,7 +248,7 @@ namespace AccountingServer.Shell.Serializer
             var resLst = new List<Item>();
 
             var reg = new Regex(
-                @"(?<num>[0-9]+(?:\.[0-9]{1,2})?)(?:(?<plus>\+[0-9]+(?:\.[0-9]{1,2})?)|(?<minus>-[0-9]+(?:\.[0-9]{1,2})?))?");
+                @"(?<num>[0-9]+(?:\.[0-9]+)?)(?:(?<plus>\+[0-9]+(?:\.[0-9]+)?)|(?<minus>-[0-9]+(?:\.[0-9]+)?))?");
             while (true)
             {
                 var res = Parsing.Token(ref expr, false, reg.IsMatch);
