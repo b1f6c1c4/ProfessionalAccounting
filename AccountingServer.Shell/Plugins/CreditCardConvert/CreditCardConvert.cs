@@ -60,14 +60,17 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                 var ds = voucher.Details.Where(d => d.Title == 2241 && d.Content == content).ToList();
                 if (ds.Count > 2)
                     throw new ApplicationException("过多相关细目");
+
                 if (ds.Count == 2)
                 {
                     // ReSharper disable PossibleInvalidOperationException
                     var v1 = ds[0].Fund.Value;
                     var v2 = ds[1].Fund.Value;
                     // ReSharper restore PossibleInvalidOperationException
+
                     if (v1 < 0 &&
                         v2 > 0)
+                    {
                         convs.Add(
                             new Conversion
                                 {
@@ -77,8 +80,12 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                                     OriginCurrency = ds[1].Currency,
                                     OriginFund = v2
                                 });
-                    else if (v1 > 0 &&
+                        continue;
+                    }
+
+                    if (v1 > 0 &&
                         v2 < 0)
+                    {
                         convs.Add(
                             new Conversion
                                 {
@@ -88,18 +95,20 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                                     OriginCurrency = ds[0].Currency,
                                     OriginFund = v1
                                 });
-                    else
-                        throw new ApplicationException("没有买入");
+                        continue;
+                    }
                 }
-                // ReSharper disable once PossibleInvalidOperationException
-                else if (ds[0].Fund.Value < 0)
-                    trans.Add(
-                        new Trans
-                            {
-                                Date = voucher.Date,
-                                RawCurrency = ds[0].Currency,
-                                RawFund = -ds[0].Fund.Value
-                            });
+
+                trans.AddRange(
+                    // ReSharper disable once PossibleInvalidOperationException
+                    ds.Where(d => d.Fund.Value < 0)
+                        .Select(
+                            d => new Trans
+                                {
+                                    Date = voucher.Date,
+                                    RawCurrency = d.Currency,
+                                    RawFund = -d.Fund.Value
+                                }));
             }
 
             foreach (var tran in trans)
@@ -117,7 +126,10 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
             var sb = new StringBuilder();
             foreach (var tran in trans.OrderByDescending(t => t.Date))
             {
-                sb.Append($"{tran.Date.AsDate()} @{tran.RawCurrency} {tran.RawFund.AsCurrency().CPadLeft(15)}");
+                sb.Append(tran.Date.AsDate());
+                if (tran.RawCurrency == VoucherDetail.BaseCurrency)
+                    sb.Append("                              ");
+                sb.Append($" @{tran.RawCurrency} {tran.RawFund.AsCurrency().CPadLeft(15)}");
                 if (tran.TheConversion != null)
                     sb.AppendLine(
                         $" {tran.TheConversion.Date.AsDate()} @{tran.TheConversion.TargetCurrency} {tran.TheConversion.TargetFund.AsCurrency().CPadLeft(15)}");
