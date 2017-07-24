@@ -165,7 +165,7 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                 var to = ParsingF.DoubleF(ref expr);
                 var voucher = new Voucher
                     {
-                        Date = date,
+                        Date = date.Value.CastUtc(),
                         Details = new List<VoucherDetail>
                             {
                                 new VoucherDetail
