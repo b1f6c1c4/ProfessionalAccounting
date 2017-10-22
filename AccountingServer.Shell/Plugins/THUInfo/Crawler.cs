@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.OleDb;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using AccountingServer.Entities.Util;
+using ExcelDataReader;
 
 namespace AccountingServer.Shell.Plugins.THUInfo
 {
@@ -231,17 +231,19 @@ namespace AccountingServer.Shell.Plugins.THUInfo
         /// <returns>数据</returns>
         private IEnumerable<TransactionRecord> GetData()
         {
-            var strCon = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + m_FileName +
-                ";Extended Properties='Excel 8.0;IMEX=1'";
-            var conn = new OleDbConnection(strCon);
-            conn.Open();
+            DataSet ds;
 
-            var cmd = new OleDbDataAdapter("SELECT * FROM [Sheet1$]", conn);
-            var ds = new DataSet();
-
-            cmd.Fill(ds, "[Sheet1$]");
-
-            conn.Close();
+            using (var stream = File.Open(m_FileName, FileMode.Open, FileAccess.Read))
+            using (var reader = ExcelReaderFactory.CreateReader(stream))
+                ds = reader.AsDataSet(
+                    new ExcelDataSetConfiguration
+                        {
+                            ConfigureDataTable =
+                                tr => new ExcelDataTableConfiguration
+                                    {
+                                        UseHeaderRow = true
+                                    }
+                        });
 
             return from DataRow row in ds.Tables[0].Rows
                    where !row.IsNull(4) && !row.IsNull(5)
