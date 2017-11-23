@@ -205,7 +205,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             voucher.Details = null;
             DbSession.Regularize(voucher);
             // ReSharper disable once PossibleNullReferenceException
-            Assert.Equal(0, voucher.Details.Count);
+            Assert.Empty(voucher.Details);
         }
     }
 }

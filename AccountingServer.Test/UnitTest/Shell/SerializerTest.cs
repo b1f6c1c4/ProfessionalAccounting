@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.BLL.Util;
@@ -25,17 +26,27 @@ namespace AccountingServer.Test.UnitTest.Shell
         {
             var serializer = GetSerializer();
 
-            Assert.Throws(typeof(FormatException), () => serializer.ParseVoucher(""));
-            Assert.Throws(typeof(FormatException), () => serializer.ParseVoucher("new Voucher {"));
+            Assert.Throws<FormatException>(() => serializer.ParseVoucher(""));
+            Assert.Throws<FormatException>(() => serializer.ParseVoucher("new Voucher {"));
         }
 
-        [InlineData(null, VoucherType.Ordinary)]
-        [InlineData("2017-01-01", VoucherType.Uncertain)]
-        [InlineData(null, VoucherType.Carry)]
-        [InlineData(null, VoucherType.AnnualCarry)]
-        [InlineData("2017-01-01", VoucherType.Depreciation)]
-        [InlineData(null, VoucherType.Devalue)]
-        [InlineData("2017-01-01", VoucherType.Amortization)]
+        protected class DataProvider : IEnumerable<object[]>
+        {
+            private static readonly List<object[]> Data = new List<object[]>
+                {
+                    new object[] { null, VoucherType.Ordinary },
+                    new object[] { "2017-01-01", VoucherType.Uncertain },
+                    new object[] { null, VoucherType.Carry },
+                    new object[] { null, VoucherType.AnnualCarry },
+                    new object[] { "2017-01-01", VoucherType.Depreciation },
+                    new object[] { null, VoucherType.Devalue },
+                    new object[] { "2017-01-01", VoucherType.Amortization }
+                };
+
+            public IEnumerator<object[]> GetEnumerator() => Data.GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() => Data.GetEnumerator();
+        }
+
         public virtual void VoucherTest(string dt, VoucherType type)
         {
             var serializer = GetSerializer();
@@ -85,6 +96,7 @@ namespace AccountingServer.Test.UnitTest.Shell
         public override void SimpleTest() { base.SimpleTest(); }
 
         [Theory]
+        [ClassData(typeof(DataProvider))]
         public override void VoucherTest(string dt, VoucherType type) { base.VoucherTest(dt, type); }
     }
 
@@ -96,6 +108,7 @@ namespace AccountingServer.Test.UnitTest.Shell
         public override void SimpleTest() { base.SimpleTest(); }
 
         [Theory]
+        [ClassData(typeof(DataProvider))]
         public override void VoucherTest(string dt, VoucherType type) { base.VoucherTest(dt, type); }
 
         [Fact]
@@ -103,7 +116,7 @@ namespace AccountingServer.Test.UnitTest.Shell
         {
             var serializer = GetSerializer();
 
-            Assert.Equal(null, serializer.ParseVoucher(@"new Voucher { T1001 null }").Details.Single().Fund);
+            Assert.Null(serializer.ParseVoucher(@"new Voucher { T1001 null }").Details.Single().Fund);
         }
     }
 
@@ -115,6 +128,7 @@ namespace AccountingServer.Test.UnitTest.Shell
         public override void SimpleTest() { base.SimpleTest(); }
 
         [Theory]
+        [ClassData(typeof(DataProvider))]
         public override void VoucherTest(string dt, VoucherType type) { base.VoucherTest(dt, type); }
     }
 }
