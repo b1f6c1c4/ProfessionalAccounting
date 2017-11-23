@@ -69,7 +69,7 @@ namespace AccountingServer.Shell.Serializer
             return
                 resultAssembly.GetType("AccountingServer.Shell.Dynamic.ObjectCreator")
                     .GetMethod("GetObject")
-                    .Invoke(null, null);
+                    ?.Invoke(null, null);
         }
 
         #region Voucher

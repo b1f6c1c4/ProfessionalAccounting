@@ -59,5 +59,10 @@ namespace AccountingServer.Entities
         ///     <para>不存储在数据库中</para>
         /// </summary>
         double Value { get; }
+
+        /// <summary>
+        ///     备注
+        /// </summary>
+        string Remark { get; }
     }
 }

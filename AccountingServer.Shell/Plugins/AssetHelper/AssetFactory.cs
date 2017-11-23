@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using AccountingServer.BLL;
-using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
-using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
@@ -27,6 +24,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
             var voucherID = Parsing.Token(ref expr);
             Guid? guid = null;
             var guidT = Guid.Empty;
+            // ReSharper disable once AccessToModifiedClosure
             if (Parsing.Token(ref expr, true, s => Guid.TryParse(expr, out guidT)) != null)
                 guid = guidT;
             var name = Parsing.Token(ref expr);
