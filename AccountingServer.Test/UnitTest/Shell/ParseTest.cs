@@ -11,7 +11,7 @@ namespace AccountingServer.Test.UnitTest.Shell
         {
             ParseHelper.Eof(null, null);
             ParseHelper.Eof(null, "");
-            Assert.Throws(typeof(ArgumentException), () => ParseHelper.Eof(null, "asdf"));
+            Assert.Throws<ArgumentException>(() => ParseHelper.Eof(null, "asdf"));
         }
 
         [Theory]
@@ -98,7 +98,7 @@ namespace AccountingServer.Test.UnitTest.Shell
         public void DoubleFTest(double? expected, string expr, string remain)
         {
             if (expected == null)
-                Assert.Throws(typeof(FormatException), () => ParseHelper.DoubleF(null, ref expr));
+                Assert.Throws<FormatException>(() => ParseHelper.DoubleF(null, ref expr));
             else
                 Assert.Equal(expected, ParseHelper.DoubleF(null, ref expr));
             Assert.Equal(remain, expr);
@@ -134,7 +134,7 @@ namespace AccountingServer.Test.UnitTest.Shell
         public void QuotedTest2()
         {
             var expr = " '";
-            Assert.Throws(typeof(ArgumentException), () => ParseHelper.Quoted(null, ref expr));
+            Assert.Throws<ArgumentException>(() => ParseHelper.Quoted(null, ref expr));
         }
     }
 }
