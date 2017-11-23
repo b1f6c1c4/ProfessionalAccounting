@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using ScintillaNET;
 
@@ -9,12 +8,8 @@ namespace AccountingServer
     // ReSharper disable once InconsistentNaming
     internal partial class frmMain : Form
     {
-        [DllImport("user32.dll")]
-        private static extern bool SetProcessDPIAware();
-
         public frmMain()
         {
-            SetProcessDPIAware();
             InitializeComponent();
             scintilla.Dock = DockStyle.Fill;
 
