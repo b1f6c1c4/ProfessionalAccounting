@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Shell.Plugins;
+using AccountingServer.Shell.Plugins.AssetHelper;
 using AccountingServer.Shell.Plugins.BankBalance;
 using AccountingServer.Shell.Plugins.CashFlow;
 using AccountingServer.Shell.Plugins.Composite;
@@ -28,6 +29,7 @@ namespace AccountingServer.Shell
             new Dictionary<string, PluginBase>
                 {
                     ["adb"] = new AverageDailyBalance(helper, serializer),
+                    ["af"] = new AssetFactory(helper, serializer),
                     ["ir"] = new InterestRevenue(helper, serializer),
                     ["cf"] = new CashFlow(helper, serializer),
                     ["c"] = new Composite(helper, serializer),
