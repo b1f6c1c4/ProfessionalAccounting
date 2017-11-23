@@ -43,7 +43,7 @@ namespace AccountingServer
         {
             newPosition = position ?? scintilla.SelectionEnd;
 
-            if (!GetEditableText(newPosition, out int begin, out int end, out string typeName))
+            if (!GetEditableText(newPosition, out var begin, out var end, out var typeName))
                 return false;
 
             try
@@ -130,7 +130,7 @@ namespace AccountingServer
         {
             newPosition = position ?? scintilla.SelectionEnd;
 
-            if (!GetEditableText(newPosition, out int begin, out int end, out string typeName))
+            if (!GetEditableText(newPosition, out var begin, out var end, out var typeName))
                 return false;
 
             try

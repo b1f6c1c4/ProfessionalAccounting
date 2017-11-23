@@ -137,7 +137,7 @@ namespace AccountingServer.Shell.Plugins.THUInfo
 
             var sb = new StringBuilder();
 
-            var vouchers = AutoGenerate(problems.Records, out List<TransactionRecord> fail);
+            var vouchers = AutoGenerate(problems.Records, out var fail);
             foreach (var voucher in vouchers)
             {
                 Accountant.Upsert(voucher);
@@ -175,7 +175,9 @@ namespace AccountingServer.Shell.Plugins.THUInfo
                 if (!bin.Add(id))
                     continue;
 
-                var record = m_Crawler.Result.SingleOrDefault(r => r.Index == id);
+                TransactionRecord record;
+                lock (m_Lock)
+                    record = m_Crawler.Result.SingleOrDefault(r => r.Index == id);
                 if (record == null)
                     continue;
                 // ReSharper disable once PossibleInvalidOperationException

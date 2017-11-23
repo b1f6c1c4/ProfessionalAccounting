@@ -51,6 +51,12 @@ namespace AccountingServer.Shell.Serializer
         {
             public bool Equals(VoucherDetail x, VoucherDetail y)
             {
+                if (x == null &&
+                    y == null)
+                    return true;
+                if (x == null ||
+                    y == null)
+                    return false;
                 if (x.Currency != y.Currency)
                     return false;
                 if (x.Title != y.Title)

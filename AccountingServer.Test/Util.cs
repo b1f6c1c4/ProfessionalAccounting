@@ -19,6 +19,12 @@ namespace AccountingServer.Test
     {
         public bool Equals(Voucher x, Voucher y)
         {
+            if (x == null &&
+                y == null)
+                return true;
+            if (x == null ||
+                y == null)
+                return false;
             if (x.ID != y.ID)
                 return false;
             if (x.Date != y.Date)
@@ -38,6 +44,12 @@ namespace AccountingServer.Test
     {
         public bool Equals(VoucherDetail x, VoucherDetail y)
         {
+            if (x == null &&
+                y == null)
+                return true;
+            if (x == null ||
+                y == null)
+                return false;
             if (x.Currency != y.Currency)
                 return false;
             if (x.Title != y.Title)
@@ -63,6 +75,12 @@ namespace AccountingServer.Test
     {
         public bool Equals(Balance x, Balance y)
         {
+            if (x == null &&
+                y == null)
+                return true;
+            if (x == null ||
+                y == null)
+                return false;
             if (x.Currency != y.Currency)
                 return false;
             if (x.Title != y.Title)

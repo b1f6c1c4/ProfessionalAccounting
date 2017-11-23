@@ -410,7 +410,7 @@ namespace AccountingServer.BLL
                 if (d.Remark == Asset.IgnoranceMark)
                     continue;
 
-                UpdateDetail(d, voucher, out bool sucess, out bool mo, editOnly);
+                UpdateDetail(d, voucher, out var sucess, out var mo, editOnly);
                 if (!sucess)
                     return false;
 
