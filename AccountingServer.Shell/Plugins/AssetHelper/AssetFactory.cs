@@ -25,7 +25,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
             Guid? guid = null;
             var guidT = Guid.Empty;
             // ReSharper disable once AccessToModifiedClosure
-            if (Parsing.Token(ref expr, true, s => Guid.TryParse(expr, out guidT)) != null)
+            if (Parsing.Token(ref expr, true, s => Guid.TryParse(s, out guidT)) != null)
                 guid = guidT;
             var name = Parsing.Token(ref expr);
             var lifeT = Parsing.Double(ref expr);
@@ -36,7 +36,11 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
                 throw new ApplicationException("找不到记账凭证");
 
             var detail = voucher.Details.Single(
-                vd => (vd.Title == 1601 || vd.Title == 1701) && (!guid.HasValue || vd.Content == guid.ToString()));
+                vd => (vd.Title == 1601 || vd.Title == 1701) &&
+                    (!guid.HasValue || string.Equals(
+                        vd.Content,
+                        guid.ToString(),
+                        StringComparison.OrdinalIgnoreCase)));
 
             var isFixed = detail.Title == 1601;
             var life = (int?)lifeT ?? (isFixed ? 3 : 0);
@@ -69,6 +73,9 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
                         }
                 };
 
+            Accountant.Upsert(asset);
+            // ReSharper disable once PossibleInvalidOperationException
+            asset = Accountant.SelectAsset(asset.ID.Value);
             Accountant.Depreciate(asset);
             Accountant.Upsert(asset);
 
