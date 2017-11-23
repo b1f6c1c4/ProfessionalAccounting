@@ -1,0 +1,8 @@
+﻿AssetHelper帮助文档
+
+资产插件AssetFactory
+别名：af
+VoucherID
+Guid（可选）
+Name
+Life（可选，固定资产默认3，无形资产默认0）
