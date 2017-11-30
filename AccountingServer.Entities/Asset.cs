@@ -206,14 +206,14 @@ namespace AccountingServer.Entities
 
             int GetType(AssetItem t)
             {
-                if (t is AcquisationItem)
-                    return 0;
-                if (t is DispositionItem)
-                    return 0; // 不对资产的取得和处置加以区分
                 if (t is DepreciateItem)
-                    return 2;
+                    return 1;
                 if (t is DevalueItem)
+                    return 2;
+                if (t is AcquisationItem)
                     return 3;
+                if (t is DispositionItem)
+                    return 3; // 不对资产的取得和处置加以区分
 
                 throw new ArgumentException("计算表条目类型未知");
             }
