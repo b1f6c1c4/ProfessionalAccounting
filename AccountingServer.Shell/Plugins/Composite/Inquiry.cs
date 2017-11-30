@@ -84,7 +84,7 @@ namespace AccountingServer.Shell.Plugins.Composite
         public bool ByContent { get; set; }
 
         [XmlAttribute("hideContent")]
-        public bool HideCountent { get; set; }
+        public bool HideContent { get; set; }
 
         [XmlAttribute("byRemark")]
         public bool ByRemark { get; set; }
