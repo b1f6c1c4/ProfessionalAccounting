@@ -24,13 +24,14 @@ namespace AccountingServer.BLL
         ///     调整资产计算表
         /// </summary>
         /// <param name="asset">资产</param>
-        public static void InternalRegular(Asset asset)
+        /// <returns>资产</returns>
+        public static Asset InternalRegular(Asset asset)
         {
             if (asset.Remark == Asset.IgnoranceMark)
-                return;
+                return asset;
             if (!asset.Date.HasValue ||
                 !asset.Value.HasValue)
-                return;
+                return asset;
 
             var lst = asset.Schedule?.ToList() ?? new List<AssetItem>();
 
@@ -91,6 +92,7 @@ namespace AccountingServer.BLL
             }
 
             asset.Schedule = lst;
+            return asset;
         }
 
         /// <summary>

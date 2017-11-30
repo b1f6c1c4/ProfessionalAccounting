@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AccountingServer.Entities;
 
 namespace AccountingServer.BLL
@@ -59,21 +60,10 @@ namespace AccountingServer.BLL
 
         #region Asset
 
-        public Asset SelectAsset(Guid id)
-        {
-            var result = m_Db.SelectAsset(id);
-            AssetAccountant.InternalRegular(result);
-            return result;
-        }
+        public Asset SelectAsset(Guid id) => AssetAccountant.InternalRegular(m_Db.SelectAsset(id));
 
         public IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter)
-        {
-            foreach (var asset in m_Db.SelectAssets(filter))
-            {
-                AssetAccountant.InternalRegular(asset);
-                yield return asset;
-            }
-        }
+            => m_Db.SelectAssets(filter).Select(AssetAccountant.InternalRegular);
 
         public bool DeleteAsset(Guid id)
             => m_Db.DeleteAsset(id);
