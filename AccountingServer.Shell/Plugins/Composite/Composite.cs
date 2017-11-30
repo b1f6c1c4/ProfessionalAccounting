@@ -154,7 +154,7 @@ namespace AccountingServer.Shell.Plugins.Composite
                     val += theFmt.GetFund(grp.Fund);
 
                     m_Sb.Append(
-                        new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), theFmt)
+                        new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), theFmt, inq.HideContent)
                             .PresentSubtotal(grp, query.Subtotal));
                 }
             else
@@ -162,7 +162,7 @@ namespace AccountingServer.Shell.Plugins.Composite
                 val += fmt.GetFund(gq.Fund);
 
                 m_Sb.Append(
-                    new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), fmt)
+                    new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), fmt, inq.HideContent)
                         .PresentSubtotal(gq, query.Subtotal));
             }
 
@@ -221,11 +221,13 @@ namespace AccountingServer.Shell.Plugins.Composite
     internal class SubtotalVisitor : StringSubtotalVisitor
     {
         private readonly IFundFormatter m_Formatter;
+        private readonly bool m_HideContent;
 
-        public SubtotalVisitor(string path, IFundFormatter formatter)
+        public SubtotalVisitor(string path, IFundFormatter formatter, bool hideContent)
         {
             m_Path = path;
             m_Formatter = formatter;
+            m_HideContent = hideContent;
         }
 
         private string m_Path;
@@ -274,7 +276,8 @@ namespace AccountingServer.Shell.Plugins.Composite
         public override void Visit(ISubtotalContent sub)
         {
             var prev = m_Path;
-            m_Path = Composite.Merge(m_Path, sub.Content);
+            if (!m_HideContent)
+                m_Path = Composite.Merge(m_Path, sub.Content);
             ShowSubtotal(sub);
             m_Path = prev;
         }
