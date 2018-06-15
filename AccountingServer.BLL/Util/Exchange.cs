@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Xml.Serialization;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using Newtonsoft.Json.Linq;
 
 namespace AccountingServer.BLL.Util
@@ -68,11 +71,24 @@ namespace AccountingServer.BLL.Util
             => m_ToCache.GetOrAdd((target, date), _ => m_Exchange.To(date, target));
     }
 
+    [Serializable]
+    [XmlRoot("Exchange")]
+    public class ExchangeInfo
+    {
+        [XmlElement("access_key")] public string AccessKey;
+    }
+
     /// <summary>
     ///     利用fixer.io查询汇率
     /// </summary>
     internal class FixerIoExchange : IExchange
     {
+        /// <summary>
+        ///     汇率API配置
+        /// </summary>
+        public static IConfigManager<ExchangeInfo> ExchangeInfo { private get; set; } =
+            new ConfigManager<ExchangeInfo>("Exchange.xml");
+
         /// <inheritdoc />
         public double From(DateTime date, string target) => Invoke(date, target, VoucherDetail.BaseCurrency);
 
@@ -91,7 +107,8 @@ namespace AccountingServer.BLL.Util
             if (from == to)
                 return 1;
 
-            var req = WebRequest.CreateHttp($"http://api.fixer.io/{date:yyy-MM-dd}?base={from}&symbols={to}");
+            var req = WebRequest.CreateHttp(
+                $"http://data.fixer.io/{date:yyy-MM-dd}?access_key={ExchangeInfo.Config.AccessKey}&symbols={from},{to}");
             req.KeepAlive = true;
             var res = req.GetResponse();
             using (var stream = res.GetResponseStream())
@@ -101,7 +118,7 @@ namespace AccountingServer.BLL.Util
 
                 var reader = new StreamReader(stream);
                 var json = JObject.Parse(reader.ReadToEnd());
-                return json["rates"][to].Value<double>();
+                return json["rates"][to].Value<double>() / json["rates"][from].Value<double>();
             }
         }
     }
