@@ -70,6 +70,7 @@
     <Compile Include="Plugins\YieldRate\YieldRate.cs" />
     <Compile Include="Plugins\YieldRate\YieldRateSolver.cs" />
     <Compile Include="Serializer\DiscountSerializer.cs" />
+    <Compile Include="Subtotal\RawSubtotal.cs" />
     <Compile Include="Subtotal\StringSubtotalVisitor.cs" />
     <Compile Include="Subtotal\PreciseSubtotalPre.cs" />
     <Compile Include="Serializer\AbbrSerializer.cs" />
