@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
@@ -104,10 +105,12 @@ namespace AccountingServer.Shell.Carry
                 rng = DateFilter.TheNullOnly;
             }
 
-            var b00 = m_Accountant.RunGroupedQuery($"T410300 {rng.AsDateRange()}`v").Fund;
-            var b01 = m_Accountant.RunGroupedQuery($"T410301 {rng.AsDateRange()}`v").Fund;
+            var b00s = m_Accountant.RunGroupedQuery($"T410300 {rng.AsDateRange()}`C");
+            var b01s = m_Accountant.RunGroupedQuery($"T410301 {rng.AsDateRange()}`C");
 
-            if (!b00.IsZero())
+            foreach (var grpC in b00s.Items.Cast<ISubtotalCurrency>())
+            {
+                var b00 = grpC.Fund;
                 m_Accountant.Upsert(
                     new Voucher
                         {
@@ -116,12 +119,15 @@ namespace AccountingServer.Shell.Carry
                             Details =
                                 new List<VoucherDetail>
                                     {
-                                        new VoucherDetail { Title = 4101, Fund = b00 },
-                                        new VoucherDetail { Title = 4103, Fund = -b00 }
+                                        new VoucherDetail { Title = 4101, Currency = grpC.Currency, Fund = b00 },
+                                        new VoucherDetail { Title = 4103, Currency = grpC.Currency, Fund = -b00 }
                                     }
                         });
+            }
 
-            if (!b01.IsZero())
+            foreach (var grpC in b01s.Items.Cast<ISubtotalCurrency>())
+            {
+                var b01 = grpC.Fund;
                 m_Accountant.Upsert(
                     new Voucher
                         {
@@ -130,10 +136,23 @@ namespace AccountingServer.Shell.Carry
                             Details =
                                 new List<VoucherDetail>
                                     {
-                                        new VoucherDetail { Title = 4101, SubTitle = 01, Fund = b01 },
-                                        new VoucherDetail { Title = 4103, SubTitle = 01, Fund = -b01 }
+                                        new VoucherDetail
+                                            {
+                                                Title = 4101,
+                                                SubTitle = 01,
+                                                Currency = grpC.Currency,
+                                                Fund = b01
+                                            },
+                                        new VoucherDetail
+                                            {
+                                                Title = 4103,
+                                                SubTitle = 01,
+                                                Currency = grpC.Currency,
+                                                Fund = -b01
+                                            }
                                     }
                         });
+            }
         }
     }
 }
