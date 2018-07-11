@@ -143,11 +143,13 @@ namespace AccountingServer.Shell.Carry
                                     {
                                         new VoucherDetail
                                             {
+                                                Currency = BaseCurrency.At(ed),
                                                 Title = 3999,
                                                 Fund = -total
                                             },
                                         new VoucherDetail
                                             {
+                                                Currency = BaseCurrency.At(ed),
                                                 Title = 6603,
                                                 SubTitle = 03,
                                                 Fund = total
@@ -163,8 +165,9 @@ namespace AccountingServer.Shell.Carry
             {
                 target.Voucher.Details.Add(
                     new VoucherDetail
-                        {
-                            Title = 4103,
+                    {
+                        Currency = BaseCurrency.At(target.Voucher.Date),
+                        Title = 4103,
                             SubTitle = target.IsSpecial ? 01 : (int?)null,
                             Fund = target.Value
                         });
@@ -184,9 +187,10 @@ namespace AccountingServer.Shell.Carry
             var total = 0D;
             var ed = rng.NullOnly ? null : rng.EndDate;
             var voucher = target.Voucher;
+            var baseCur = BaseCurrency.At(ed);
             var res =
                 m_Accountant.RunGroupedQuery(
-                    $"({target.Query}) {(baseCurrency ? '*' : '-')}@@ {rng.AsDateRange()}`Ctsc");
+                    $"({target.Query}) {(baseCurrency ? '*' : '-')}@{baseCur} {rng.AsDateRange()}`Ctsc");
             foreach (var grpC in res.Items.Cast<ISubtotalCurrency>())
             {
                 var b = grpC.Fund;
@@ -206,7 +210,7 @@ namespace AccountingServer.Shell.Carry
                 if (b.IsZero())
                     continue;
 
-                if (grpC.Currency == VoucherDetail.BaseCurrency)
+                if (grpC.Currency == baseCur)
                 {
                     total += b;
                     continue;
@@ -226,7 +230,7 @@ namespace AccountingServer.Shell.Carry
                 voucher.Details.Add(
                     new VoucherDetail
                         {
-                            Currency = VoucherDetail.BaseCurrency,
+                            Currency = baseCur,
                             Title = 3999,
                             Remark = voucher.ID,
                             Fund = -cob

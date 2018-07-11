@@ -102,12 +102,7 @@ namespace AccountingServer.BLL
                 entity.Details = new List<VoucherDetail>();
 
             foreach (var d in entity.Details)
-            {
-                if (d.Currency == null)
-                    d.Currency = VoucherDetail.BaseCurrency;
-
-                d.Currency = d.Currency.ToUpper();
-            }
+                d.Currency = d.Currency.ToUpperInvariant();
 
             entity.Details.Sort(TheComparison);
         }

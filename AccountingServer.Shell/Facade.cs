@@ -141,7 +141,7 @@ namespace AccountingServer.Shell
             var lst = new List<VoucherDetail>();
 
             var voucher = m_Serializer.ParseVoucher(code);
-            foreach (var grp in voucher.Details.GroupBy(d => d.Currency ?? VoucherDetail.BaseCurrency))
+            foreach (var grp in voucher.Details.GroupBy(d => d.Currency ?? BaseCurrency.Now))
             {
                 var unc = grp.SingleOrDefault(d => !d.Fund.HasValue);
                 var sum = grp.Sum(d => d.Fund ?? 0D);

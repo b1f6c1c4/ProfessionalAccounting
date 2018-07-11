@@ -68,7 +68,7 @@ namespace AccountingServer.BLL.Parsing
                         if (!c.StartsWith("@", StringComparison.Ordinal))
                             throw new MemberAccessException("表达式错误");
 
-                        filter.Currency = c == "@@" ? VoucherDetail.BaseCurrency : c.Substring(1).ToUpperInvariant();
+                        filter.Currency = c == "@@" ? BaseCurrency.Now : c.Substring(1).ToUpperInvariant();
                     }
 
                     if (Floating() != null)

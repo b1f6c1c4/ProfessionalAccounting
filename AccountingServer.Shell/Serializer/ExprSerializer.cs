@@ -55,8 +55,7 @@ namespace AccountingServer.Shell.Serializer
                 detail.SubTitle.HasValue
                     ? $"// {t}-{TitleManager.GetTitleName(detail.Title, detail.SubTitle)}"
                     : $"// {t}");
-            if (detail.Currency != null &&
-                detail.Currency != VoucherDetail.BaseCurrency)
+            if (detail.Currency != BaseCurrency.Now)
                 sb.Append($"@{detail.Currency} ");
             sb.Append($"T{detail.Title.AsTitle()}{detail.SubTitle.AsSubTitle()} ");
             if (detail.Content == null &&
@@ -176,8 +175,9 @@ namespace AccountingServer.Shell.Serializer
 
             Parsing.TrimStartComment(ref expr);
             var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))
-                ?.Substring(1)
-                .ToUpperInvariant();
+                    ?.Substring(1)
+                    .ToUpperInvariant()
+                ?? BaseCurrency.Now;
             Parsing.TrimStartComment(ref expr);
             var title = Parsing.Title(ref expr);
             if (title == null)

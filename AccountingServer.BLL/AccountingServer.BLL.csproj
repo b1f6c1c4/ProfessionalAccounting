@@ -52,6 +52,7 @@
     <Compile Include="DbSession.cs" />
     <Compile Include="AssetAccountant.cs" />
     <Compile Include="Accountant.cs" />
+    <Compile Include="Util\BaseCurrency.cs" />
     <Compile Include="Util\Exchange.cs" />
     <Compile Include="Util\Subtotal.cs" />
     <Compile Include="Util\DataFormatter.cs" />

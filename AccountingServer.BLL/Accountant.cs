@@ -49,12 +49,7 @@ namespace AccountingServer.BLL
             => m_Db.DeleteVouchers(query);
 
         public bool Upsert(Voucher entity)
-        {
-            foreach (var d in entity.Details)
-                d.Currency = d.Currency?.ToUpperInvariant() ?? VoucherDetail.BaseCurrency;
-
-            return m_Db.Upsert(entity);
-        }
+            => m_Db.Upsert(entity);
 
         #endregion
 

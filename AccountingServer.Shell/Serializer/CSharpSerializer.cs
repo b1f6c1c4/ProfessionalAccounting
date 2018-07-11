@@ -82,8 +82,7 @@ namespace AccountingServer.Shell.Serializer
 
             var sb = new StringBuilder();
             sb.Append("        new VoucherDetail { ");
-            if (detail.Currency != VoucherDetail.BaseCurrency)
-                sb.AppendLine($"Currency = {ProcessString(detail.Currency)},");
+            sb.AppendLine($"Currency = {ProcessString(detail.Currency)},");
             sb.Append($"Title = {detail.Title:0}, ");
             sb.Append(
                 detail.SubTitle.HasValue

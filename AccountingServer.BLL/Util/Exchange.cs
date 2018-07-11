@@ -90,10 +90,10 @@ namespace AccountingServer.BLL.Util
             new ConfigManager<ExchangeInfo>("Exchange.xml");
 
         /// <inheritdoc />
-        public double From(DateTime date, string target) => Invoke(date, target, VoucherDetail.BaseCurrency);
+        public double From(DateTime date, string target) => Invoke(date, target, BaseCurrency.Now);
 
         /// <inheritdoc />
-        public double To(DateTime date, string target) => Invoke(date, VoucherDetail.BaseCurrency, target);
+        public double To(DateTime date, string target) => Invoke(date, BaseCurrency.Now, target);
 
         /// <summary>
         ///     调用查询接口

@@ -145,7 +145,7 @@ namespace AccountingServer.Shell.Plugins.Composite
                 {
                     var curr = grp.Currency;
                     // ReSharper disable once PossibleInvalidOperationException
-                    var ratio = curr == VoucherDetail.BaseCurrency
+                    var ratio = curr == BaseCurrency.Now
                         ? 1
                         : ExchangeFactory.Instance.From(m_Rng.EndDate.Value, curr);
 
