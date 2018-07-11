@@ -126,6 +126,11 @@ namespace AccountingServer.Entities
         public DateTime? Date { get; set; }
 
         /// <summary>
+        ///     币种
+        /// </summary>
+        public string Currency { get; set; }
+
+        /// <summary>
         ///     资产原值
         /// </summary>
         public double? Value { get; set; }
