@@ -1,8 +1,0 @@
-﻿THUInfo帮助文档
-
-从info.tsinghua.edu.cn上自动更新账户插件THUInfo
-(无)：对账，如可以自动记账则记账；
-raw：显示全部原始消费记录；
-ep：显示终端编号列表；
-cred：更新用户名和密码并重新获取消费记录；
-whatif：只进行对账。
