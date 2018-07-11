@@ -10,9 +10,11 @@ namespace AccountingServer.Shell.Subtotal
     {
         private const int Ident = 4;
 
+        private string m_Currency;
+
         private string Ts(double f) => Ga == GatheringType.Count
             ? f.ToString("N0")
-            : f.AsCurrency();
+            : f.AsCurrency(m_Currency);
 
         private int? m_Title;
         private string Idents => new string(' ', (Depth > 0 ? Depth - 1 : 0) * Ident);
@@ -31,7 +33,12 @@ namespace AccountingServer.Shell.Subtotal
 
         public override void Visit(ISubtotalDate sub) => ShowSubtotal(sub, sub.Date.AsDate(sub.Level));
 
-        public override void Visit(ISubtotalCurrency sub) => ShowSubtotal(sub, $"@{sub.Currency}");
+        public override void Visit(ISubtotalCurrency sub)
+        {
+            m_Currency = sub.Currency;
+            ShowSubtotal(sub, $"@{sub.Currency}");
+            m_Currency = null;
+        }
 
         public override void Visit(ISubtotalTitle sub)
         {

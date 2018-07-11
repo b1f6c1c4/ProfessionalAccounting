@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 
 namespace AccountingServer.Shell.Subtotal
@@ -57,7 +58,8 @@ namespace AccountingServer.Shell.Subtotal
                         items = sub.Items.Cast<ISubtotalRemark>().OrderBy(s => s.Remark);
                         break;
                     case SubtotalLevel.Currency:
-                        items = sub.Items.Cast<ISubtotalCurrency>().OrderBy(s => s.Currency);
+                        items = sub.Items.Cast<ISubtotalCurrency>()
+                            .OrderBy(s => s.Currency == BaseCurrency.Now ? null : s.Currency);
                         break;
                     case SubtotalLevel.Day:
                     case SubtotalLevel.Week:

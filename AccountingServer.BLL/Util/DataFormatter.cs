@@ -1,21 +1,52 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Xml.Serialization;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 
 namespace AccountingServer.BLL.Util
 {
+    [Serializable]
+    [XmlRoot("Symbols")]
+    public class CurrencySymbols
+    {
+        [XmlElement("Symbol")] public List<CurrencySymbol> Symbols;
+    }
+
+    [Serializable]
+    public class CurrencySymbol
+    {
+        [XmlAttribute("currency")]
+        public string Currency { get; set; }
+
+        [XmlText]
+        public string Symbol { get; set; }
+    }
+
     /// <summary>
     ///     格式化数据
     /// </summary>
     public static class DataFormatter
     {
         /// <summary>
+        ///     记账本位币信息文档
+        /// </summary>
+        public static IConfigManager<CurrencySymbols> CurrencySymbols { private get; set; } =
+            new ConfigManager<CurrencySymbols>("Symbol.xml");
+
+        /// <summary>
         ///     格式化金额，用空格代替末尾的零
         /// </summary>
         /// <param name="value">金额</param>
+        /// <param name="curr">币种</param>
         /// <returns>格式化后的金额</returns>
-        public static string AsCurrency(this double value)
+        public static string AsCurrency(this double value, string curr = null)
         {
-            var s = $"{value:C4}";
+            var sym = curr == null
+                ? ""
+                : CurrencySymbols.Config.Symbols.SingleOrDefault(cs => cs.Currency == curr)?.Symbol ?? curr + " ";
+            var s = $"{sym}{value:N4}";
             return s.TrimEnd('0').CPadRight(s.Length);
         }
 
@@ -23,8 +54,10 @@ namespace AccountingServer.BLL.Util
         ///     格式化金额，用空格代替末尾的零
         /// </summary>
         /// <param name="value">金额</param>
+        /// <param name="curr">币种</param>
         /// <returns>格式化后的金额</returns>
-        public static string AsCurrency(this double? value) => value.HasValue ? AsCurrency(value.Value) : string.Empty;
+        public static string AsCurrency(this double? value, string curr = null) =>
+            value.HasValue ? AsCurrency(value.Value, curr) : string.Empty;
 
         /// <summary>
         ///     格式化一级科目编号
