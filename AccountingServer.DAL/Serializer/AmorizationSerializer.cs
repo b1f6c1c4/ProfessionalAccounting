@@ -10,6 +10,9 @@ namespace AccountingServer.DAL.Serializer
     /// </summary>
     internal class AmortizationSerializer : BaseSerializer<Amortization, Guid?>
     {
+        private static readonly AmortItemSerializer ItemSerializer = new AmortItemSerializer();
+        private static readonly VoucherSerializer VoucherSerializer = new VoucherSerializer();
+
         public override Amortization Deserialize(IBsonReader bsonReader)
         {
             string read = null;
@@ -49,8 +52,8 @@ namespace AccountingServer.DAL.Serializer
                     break;
             }
 
-            amort.Template = bsonReader.ReadDocument("template", ref read, new VoucherSerializer().Deserialize);
-            amort.Schedule = bsonReader.ReadArray("schedule", ref read, new AmortItemSerializer().Deserialize);
+            amort.Template = bsonReader.ReadDocument("template", ref read, VoucherSerializer.Deserialize);
+            amort.Schedule = bsonReader.ReadArray("schedule", ref read, ItemSerializer.Deserialize);
             amort.Remark = bsonReader.ReadString("remark", ref read);
             bsonReader.ReadEndDocument();
             return amort;
@@ -92,14 +95,13 @@ namespace AccountingServer.DAL.Serializer
             if (amort.Template != null)
             {
                 bsonWriter.WriteName("template");
-                new VoucherSerializer().Serialize(bsonWriter, amort.Template);
+                VoucherSerializer.Serialize(bsonWriter, amort.Template);
             }
             if (amort.Schedule != null)
             {
                 bsonWriter.WriteStartArray("schedule");
-                var serializer = new AmortItemSerializer();
                 foreach (var item in amort.Schedule)
-                    serializer.Serialize(bsonWriter, item);
+                    ItemSerializer.Serialize(bsonWriter, item);
 
                 bsonWriter.WriteEndArray();
             }

@@ -10,6 +10,8 @@ namespace AccountingServer.DAL.Serializer
     /// </summary>
     internal class AssetSerializer : BaseSerializer<Asset, Guid?>
     {
+        private static readonly AssetItemSerializer ItemSerializer = new AssetItemSerializer();
+
         public override Asset Deserialize(IBsonReader bsonReader)
         {
             string read = null;
@@ -56,7 +58,7 @@ namespace AccountingServer.DAL.Serializer
                 asset.DevaluationExpenseSubTitle = asset.DevaluationExpenseTitle % 100;
                 asset.DevaluationExpenseTitle /= 100;
             }
-            asset.Schedule = bsonReader.ReadArray("schedule", ref read, new AssetItemSerializer().Deserialize);
+            asset.Schedule = bsonReader.ReadArray("schedule", ref read, ItemSerializer.Deserialize);
             asset.Remark = bsonReader.ReadString("remark", ref read);
             bsonReader.ReadEndDocument();
             return asset;
@@ -100,9 +102,8 @@ namespace AccountingServer.DAL.Serializer
             if (asset.Schedule != null)
             {
                 bsonWriter.WriteStartArray("schedule");
-                var serializer = new AssetItemSerializer();
                 foreach (var item in asset.Schedule)
-                    serializer.Serialize(bsonWriter, item);
+                    ItemSerializer.Serialize(bsonWriter, item);
 
                 bsonWriter.WriteEndArray();
             }

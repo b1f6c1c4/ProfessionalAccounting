@@ -104,9 +104,7 @@ namespace AccountingServer.DAL
                     query.Dir > 0
                         ? Builders<T>.Filter.Gt(p + "fund", -VoucherDetail.Tolerance)
                         : Builders<T>.Filter.Lt(p + "fund", +VoucherDetail.Tolerance));
-            if (query.Filter?.Currency == VoucherDetail.BaseCurrency)
-                lst.Add(Builders<T>.Filter.Exists(p + "currency", false));
-            else if (query.Filter?.Currency != null)
+            if (query.Filter?.Currency != null)
                 lst.Add(Builders<T>.Filter.Eq(p + "currency", query.Filter?.Currency));
             if (query.Filter?.Title != null)
                 lst.Add(Builders<T>.Filter.Eq(p + "title", query.Filter.Title.Value));
