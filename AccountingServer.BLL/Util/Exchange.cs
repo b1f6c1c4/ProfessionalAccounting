@@ -107,7 +107,7 @@ namespace AccountingServer.BLL.Util
             if (from == to)
                 return 1;
 
-            var endpoint = date > DateTime.Now ? "latest" : date.ToString("yyyy-MM-dd");
+            var endpoint = date > DateTime.UtcNow ? "latest" : date.ToString("yyyy-MM-dd");
             var req = WebRequest.CreateHttp(
                 $"http://data.fixer.io/api/{endpoint}?access_key={ExchangeInfo.Config.AccessKey}&symbols={from},{to}");
             req.KeepAlive = true;
