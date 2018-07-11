@@ -54,11 +54,13 @@ namespace AccountingServer.DAL.Serializer
                 asset.DepreciationExpenseSubTitle = asset.DepreciationExpenseTitle % 100;
                 asset.DepreciationExpenseTitle /= 100;
             }
+
             if (asset.DevaluationExpenseTitle > 100)
             {
                 asset.DevaluationExpenseSubTitle = asset.DevaluationExpenseTitle % 100;
                 asset.DevaluationExpenseTitle /= 100;
             }
+
             asset.Schedule = bsonReader.ReadArray("schedule", ref read, ItemSerializer.Deserialize);
             asset.Remark = bsonReader.ReadString("remark", ref read);
             bsonReader.ReadEndDocument();

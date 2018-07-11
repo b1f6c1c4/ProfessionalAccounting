@@ -153,7 +153,8 @@ namespace AccountingServer.Shell.Serializer
                         SubTitle = it.SubTitle,
                         Content = it.Content,
                         Remark = it.Remark
-                    }, new DetailEqualityComparer()))
+                    },
+                new DetailEqualityComparer()))
             {
                 // ReSharper disable once PossibleInvalidOperationException
                 grp.Key.Fund = grp.Sum(it => it.Fund.Value);

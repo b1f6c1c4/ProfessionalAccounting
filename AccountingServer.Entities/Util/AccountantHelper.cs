@@ -38,6 +38,7 @@ namespace AccountingServer.Entities.Util
                 month -= 12;
                 year++;
             }
+
             while (month < 1)
             {
                 month += 12;

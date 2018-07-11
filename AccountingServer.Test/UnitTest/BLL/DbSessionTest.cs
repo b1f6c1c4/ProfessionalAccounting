@@ -192,14 +192,14 @@ namespace AccountingServer.Test.UnitTest.BLL
                     Details = new List<VoucherDetail>
                         {
                             new VoucherDetail { Currency = "jPy" },
-                            new VoucherDetail { Currency = null }
+                            new VoucherDetail { Currency = "Cny" }
                         }
                 };
 
             DbSession.Regularize(voucher);
 
             Assert.Equal(2, voucher.Details.Count);
-            Assert.Equal(VoucherDetail.BaseCurrency, voucher.Details[0].Currency);
+            Assert.Equal("CNY", voucher.Details[0].Currency);
             Assert.Equal("JPY", voucher.Details[1].Currency);
 
             voucher.Details = null;

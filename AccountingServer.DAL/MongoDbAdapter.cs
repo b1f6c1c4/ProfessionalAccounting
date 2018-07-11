@@ -125,19 +125,19 @@ namespace AccountingServer.DAL
                                         ["default"] = new BsonDocument
                                             {
                                                 ["$subtract"] =
-                                                new BsonArray
-                                                    {
-                                                        "$date",
-                                                        new BsonDocument
-                                                            {
-                                                                ["$multiply"] =
-                                                                new BsonArray
-                                                                    {
-                                                                        days,
-                                                                        24 * 60 * 60 * 1000
-                                                                    }
-                                                            }
-                                                    }
+                                                    new BsonArray
+                                                        {
+                                                            "$date",
+                                                            new BsonDocument
+                                                                {
+                                                                    ["$multiply"] =
+                                                                        new BsonArray
+                                                                            {
+                                                                                days,
+                                                                                24 * 60 * 60 * 1000
+                                                                            }
+                                                                }
+                                                        }
                                             }
                                     }
                             }

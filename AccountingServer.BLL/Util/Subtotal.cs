@@ -160,7 +160,8 @@ namespace AccountingServer.BLL.Util
             m_Depth++;
             BuildChildren(sub, raw, level);
             m_Depth--;
-            if (!sub.TheItems.Any() && !(sub is ISubtotalRoot))
+            if (!sub.TheItems.Any() &&
+                !(sub is ISubtotalRoot))
                 return null;
 
             sub.Fund = sub.TheItems.Sum(isr => isr.Fund);

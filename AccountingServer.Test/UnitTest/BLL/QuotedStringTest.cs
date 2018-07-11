@@ -15,10 +15,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [InlineData("simple", '"')]
         [InlineData("'s'i'm'ple'''", '"')]
         [InlineData("\"\"'s\\'i'm\"'\"ple'\"''\"", '"')]
-        public void QuotationTest(string text, char ch)
-        {
-            Assert.Equal(text ?? "", text.Quotation(ch).Dequotation());
-        }
+        public void QuotationTest(string text, char ch) { Assert.Equal(text ?? "", text.Quotation(ch).Dequotation()); }
 
         [Fact]
         public void DequotationTest()

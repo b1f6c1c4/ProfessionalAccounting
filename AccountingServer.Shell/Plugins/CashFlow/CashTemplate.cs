@@ -8,8 +8,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
     [XmlRoot("Templates")]
     public class CashTemplates
     {
-        [XmlElement("Account")]
-        public List<CashAccount> Accounts;
+        [XmlElement("Account")] public List<CashAccount> Accounts;
     }
 
     [Serializable]

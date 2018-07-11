@@ -165,9 +165,9 @@ namespace AccountingServer.Shell.Carry
             {
                 target.Voucher.Details.Add(
                     new VoucherDetail
-                    {
-                        Currency = BaseCurrency.At(target.Voucher.Date),
-                        Title = 4103,
+                        {
+                            Currency = BaseCurrency.At(target.Voucher.Date),
+                            Title = 4103,
                             SubTitle = target.IsSpecial ? 01 : (int?)null,
                             Fund = target.Value
                         });
