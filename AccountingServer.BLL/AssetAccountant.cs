@@ -248,7 +248,7 @@ namespace AccountingServer.BLL
                     VoucherType.Ordinary,
                     new VoucherDetail
                         {
-                            Currency = VoucherDetail.BaseCurrency,
+                            Currency = asset.Currency,
                             Title = asset.Title,
                             Content = asset.StringID,
                             Fund = acq.OrigValue
@@ -262,7 +262,7 @@ namespace AccountingServer.BLL
                     VoucherType.Depreciation,
                     new VoucherDetail
                         {
-                            Currency = VoucherDetail.BaseCurrency,
+                            Currency = asset.Currency,
                             Title = asset.DepreciationExpenseTitle,
                             SubTitle = asset.DepreciationExpenseSubTitle,
                             Content = asset.StringID,
@@ -270,7 +270,7 @@ namespace AccountingServer.BLL
                         },
                     new VoucherDetail
                         {
-                            Currency = VoucherDetail.BaseCurrency,
+                            Currency = asset.Currency,
                             Title = asset.DepreciationTitle,
                             Content = asset.StringID,
                             Fund = -dep.Amount
@@ -284,7 +284,7 @@ namespace AccountingServer.BLL
                     VoucherType.Devalue,
                     new VoucherDetail
                         {
-                            Currency = VoucherDetail.BaseCurrency,
+                            Currency = asset.Currency,
                             Title = asset.DevaluationExpenseTitle,
                             SubTitle = asset.DevaluationExpenseSubTitle,
                             Content = asset.StringID,
@@ -292,7 +292,7 @@ namespace AccountingServer.BLL
                         },
                     new VoucherDetail
                         {
-                            Currency = VoucherDetail.BaseCurrency,
+                            Currency = asset.Currency,
                             Title = asset.DevaluationTitle,
                             Content = asset.StringID,
                             Fund = -dev.Amount
@@ -319,28 +319,28 @@ namespace AccountingServer.BLL
                     VoucherType.Ordinary,
                     new VoucherDetail
                         {
-                            Currency = VoucherDetail.BaseCurrency,
+                            Currency = asset.Currency,
                             Title = asset.Title,
                             Content = asset.StringID,
                             Fund = -asset.Value
                         },
                     new VoucherDetail
                         {
-                            Currency = VoucherDetail.BaseCurrency,
+                            Currency = asset.Currency,
                             Title = asset.DepreciationTitle,
                             Content = asset.StringID,
                             Fund = totalDep
                         },
                     new VoucherDetail
                         {
-                            Currency = VoucherDetail.BaseCurrency,
+                            Currency = asset.Currency,
                             Title = asset.DevaluationTitle,
                             Content = asset.StringID,
                             Fund = totalDev
                         },
                     new VoucherDetail
                         {
-                            Currency = VoucherDetail.BaseCurrency,
+                            Currency = asset.Currency,
                             Title = DefaultDispositionTitle,
                             Content = asset.StringID,
                             Fund = bookValue,

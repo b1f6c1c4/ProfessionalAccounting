@@ -50,6 +50,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
                     StringID = detail.Content,
                     Name = name,
                     Date = voucher.Date,
+                    Currency = detail.Currency,
                     Value = detail.Fund,
                     Salvge = life == 0 ? detail.Fund : (isFixed ? detail.Fund * 0.05 : 0),
                     Life = life,
