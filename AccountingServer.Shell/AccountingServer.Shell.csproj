@@ -65,12 +65,6 @@
     <Compile Include="Plugins\Interest\InterestRevenue.cs" />
     <Compile Include="Plugins\Composite\Composite.cs" />
     <Compile Include="Plugins\Composite\Inquiry.cs" />
-    <Compile Include="Plugins\THUInfo\Crawler.cs" />
-    <Compile Include="Plugins\THUInfo\EndPointTemplate.cs" />
-    <Compile Include="Plugins\THUInfo\THUInfo.Compare.cs" />
-    <Compile Include="Plugins\THUInfo\THUInfo.cs" />
-    <Compile Include="Plugins\THUInfo\THUInfo.Generation.cs" />
-    <Compile Include="Plugins\THUInfo\TransactionRecord.cs" />
     <Compile Include="Plugins\Utilities\Utilities.cs" />
     <Compile Include="Plugins\Utilities\UtilTemplate.cs" />
     <Compile Include="Plugins\YieldRate\YieldRate.cs" />
@@ -129,9 +123,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Plugins\YieldRate\Resources\Document.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Plugins\THUInfo\Resources\Document.txt" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Plugins\CashFlow\Resources\Document.txt" />

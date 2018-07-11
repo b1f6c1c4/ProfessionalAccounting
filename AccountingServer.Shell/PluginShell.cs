@@ -9,7 +9,6 @@ using AccountingServer.Shell.Plugins.CashFlow;
 using AccountingServer.Shell.Plugins.Composite;
 using AccountingServer.Shell.Plugins.CreditCardConvert;
 using AccountingServer.Shell.Plugins.Interest;
-using AccountingServer.Shell.Plugins.THUInfo;
 using AccountingServer.Shell.Plugins.Utilities;
 using AccountingServer.Shell.Plugins.YieldRate;
 using AccountingServer.Shell.Serializer;
@@ -34,7 +33,6 @@ namespace AccountingServer.Shell
                     ["cf"] = new CashFlow(helper, serializer),
                     ["c"] = new Composite(helper, serializer),
                     ["ccc"] = new CreditCardConvert(helper, serializer),
-                    ["f"] = new THUInfo(helper, serializer),
                     ["u"] = new Utilities(helper, serializer),
                     ["yr"] = new YieldRate(helper, serializer)
                 };
