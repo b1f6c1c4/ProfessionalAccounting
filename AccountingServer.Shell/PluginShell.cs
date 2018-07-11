@@ -29,6 +29,7 @@ namespace AccountingServer.Shell
                 {
                     ["adb"] = new AverageDailyBalance(helper, serializer),
                     ["af"] = new AssetFactory(helper, serializer),
+                    ["ad"] = new AssetDisposition(helper, serializer),
                     ["ir"] = new InterestRevenue(helper, serializer),
                     ["cf"] = new CashFlow(helper, serializer),
                     ["c"] = new Composite(helper, serializer),

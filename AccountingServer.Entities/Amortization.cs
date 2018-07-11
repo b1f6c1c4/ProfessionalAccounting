@@ -122,7 +122,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     摊销计算表
         /// </summary>
-        public IList<AmortItem> Schedule { get; set; }
+        public List<AmortItem> Schedule { get; set; }
 
         /// <inheritdoc />
         public string Remark { get; set; }

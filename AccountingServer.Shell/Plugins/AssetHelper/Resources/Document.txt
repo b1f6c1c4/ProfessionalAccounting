@@ -6,3 +6,8 @@ VoucherID
 Guid（可选）
 Name
 Life（可选，固定资产默认3，无形资产默认0）
+
+资产处置插件AssetDisposition
+别名：ad
+VoucherID
+Guid*（可选）
