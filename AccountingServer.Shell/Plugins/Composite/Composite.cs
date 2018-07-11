@@ -205,7 +205,9 @@ namespace AccountingServer.Shell.Plugins.Composite
         }
 
         public override double GetFund(double value) => Internal.GetFund(value) * m_ExgRatio;
-        public override string GetFundString(double value) => $"{m_Curr}\t{m_ExgRatio}\t{Internal.GetFundString(value)}";
+
+        public override string GetFundString(double value) =>
+            $"{m_Curr}\t{m_ExgRatio}\t{Internal.GetFundString(value)}";
     }
 
     internal class RatioDecorator : BaseFundFormatterDecorator

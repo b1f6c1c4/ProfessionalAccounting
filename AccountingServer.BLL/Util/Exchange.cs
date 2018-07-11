@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Xml.Serialization;
-using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using Newtonsoft.Json.Linq;
 

@@ -97,7 +97,8 @@ namespace AccountingServer.Shell.Plugins.CashFlow
 
                     case CreditCard cd:
                         foreach (var grpC in Accountant.RunGroupedQuery(
-                            $"({cd.Query})*(<+(-@@)) [{DateTime.Today.CastUtc().AddMonths(-3).AsDate()}~]`Cd").Items.Cast<ISubtotalCurrency>())
+                                $"({cd.Query})*(<+(-@@)) [{DateTime.Today.CastUtc().AddMonths(-3).AsDate()}~]`Cd").Items
+                            .Cast<ISubtotalCurrency>())
                         foreach (var b in grpC.Items.Cast<ISubtotalDate>())
                         {
                             // ReSharper disable once PossibleInvalidOperationException
@@ -116,7 +117,8 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         }
 
                         foreach (var b in Accountant.RunGroupedQuery(
-                            $"({cd.Query})*(@@>) [{DateTime.Today.CastUtc().AddMonths(-3).AsDate()}~]`d").Items.Cast<ISubtotalDate>())
+                                $"({cd.Query})*(@@>) [{DateTime.Today.CastUtc().AddMonths(-3).AsDate()}~]`d").Items
+                            .Cast<ISubtotalDate>())
                         {
                             // ReSharper disable once PossibleInvalidOperationException
                             var d = b.Date.Value;

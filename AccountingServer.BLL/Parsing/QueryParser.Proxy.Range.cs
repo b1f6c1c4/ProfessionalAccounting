@@ -62,6 +62,7 @@ namespace AccountingServer.BLL.Parsing
                     }
                     else
                         dt = DateTime.ParseExact(RangeAMonth().GetText() + "01", "yyyyMMdd", null);
+
                     dt = dt.CastUtc();
                     return new DateFilter(dt, dt.AddMonths(1).AddDays(-1));
                 }

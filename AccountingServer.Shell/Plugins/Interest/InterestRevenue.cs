@@ -77,6 +77,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                     null,
                     DateTime.Today.CastUtc());
             }
+
             return new Succeed();
         }
 
@@ -288,12 +289,14 @@ namespace AccountingServer.Shell.Plugins.Interest
                         i--;
                         continue;
                     }
+
                     // ReSharper disable once PossibleInvalidOperationException
                     if (!(voucher.Details[i].Fund.Value - capVol).IsZero())
                     {
                         voucher.Details[i].Fund = -capVol;
                         flag = true;
                     }
+
                     capFlag = true;
                 }
 
@@ -306,12 +309,14 @@ namespace AccountingServer.Shell.Plugins.Interest
                         i--;
                         continue;
                     }
+
                     // ReSharper disable once PossibleInvalidOperationException
                     if (!(voucher.Details[i].Fund.Value - intVol).IsZero())
                     {
                         voucher.Details[i].Fund = -intVol;
                         flag = true;
                     }
+
                     intFlag = true;
                 }
             }
@@ -329,6 +334,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                         });
                 flag = true;
             }
+
             if (!intFlag &&
                 !intVol.IsZero())
             {
@@ -342,6 +348,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                         });
                 flag = true;
             }
+
             if (flag)
                 Accountant.Upsert(voucher);
         }

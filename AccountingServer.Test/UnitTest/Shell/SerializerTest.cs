@@ -13,6 +13,15 @@ namespace AccountingServer.Test.UnitTest.Shell
     {
         protected SerializerTest()
         {
+            BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
+                new BaseCurrencyInfos
+                    {
+                        Infos = new List<BaseCurrencyInfo>
+                            {
+                                new BaseCurrencyInfo { Date = null, Currency = "CNY" }
+                            }
+                    });
+
             AbbrSerializer.Abbrs =
                 new MockConfigManager<Abbreviations>(new Abbreviations { Abbrs = new List<Abbreviation>() });
 
@@ -60,6 +69,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                         {
                             new VoucherDetail
                                 {
+                                    Currency = "JPY",
                                     Title = 1001,
                                     Content = "%@!@#$%^&*(\nas\rdf\\",
                                     Fund = 123.45
@@ -74,6 +84,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                                 },
                             new VoucherDetail
                                 {
+                                    Currency = "EUR",
                                     Title = 5555,
                                     Fund = -5,
                                     Remark = "  7' 46r0*\" &)%\" *%)^ Q23'4"

@@ -188,6 +188,7 @@ namespace AccountingServer.Shell.Serializer
                         sb.Append("".CPadLeft(30));
                         sb.Append($", Remark = {ProcessString(item.Remark)} ");
                     }
+
                     sb.AppendLine("},");
                 }
 
@@ -245,6 +246,7 @@ namespace AccountingServer.Shell.Serializer
             }
             else
                 sb.AppendLine("    Date = null,");
+
             sb.Append($"    Value = {amort.Value}, ");
             sb.AppendLine();
             sb.Append($"    TotalDays = {amort.TotalDays}, Interval = AmortizeInterval.{amort.Interval},");
@@ -257,6 +259,7 @@ namespace AccountingServer.Shell.Serializer
                 sb.Append($"    Remark = {ProcessString(amort.Remark)},");
                 sb.AppendLine();
             }
+
             if (amort.Schedule != null)
             {
                 sb.AppendLine("    Schedule = new List<AmortItem> {");
@@ -272,6 +275,7 @@ namespace AccountingServer.Shell.Serializer
                         sb.Append("".CPadLeft(30));
                         sb.Append($", Remark = {ProcessString(item.Remark)} ");
                     }
+
                     sb.AppendLine("},");
                 }
 

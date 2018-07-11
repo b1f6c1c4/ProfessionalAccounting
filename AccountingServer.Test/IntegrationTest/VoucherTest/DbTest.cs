@@ -20,10 +20,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
             m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
         }
 
-        public void Dispose()
-        {
-            m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
-        }
+        public void Dispose() { m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance); }
 
         [Theory]
         [InlineData(null, VoucherType.Ordinary)]
@@ -44,7 +41,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                         {
                             new VoucherDetail
                                 {
-                                    Currency = VoucherDetail.BaseCurrency,
+                                    Currency = "CNY",
                                     Title = 1001,
                                     Content = "asdf",
                                     Fund = 123.45

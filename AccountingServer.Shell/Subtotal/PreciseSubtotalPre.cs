@@ -41,6 +41,7 @@ namespace AccountingServer.Shell.Subtotal
         }
 
         public override void Visit(ISubtotalRoot sub) => ShowSubtotal(sub);
+
         public override void Visit(ISubtotalDate sub)
         {
             var prev = m_Path;
@@ -48,6 +49,7 @@ namespace AccountingServer.Shell.Subtotal
             ShowSubtotal(sub);
             m_Path = prev;
         }
+
         public override void Visit(ISubtotalCurrency sub)
         {
             var prev = m_Path;
@@ -55,6 +57,7 @@ namespace AccountingServer.Shell.Subtotal
             ShowSubtotal(sub);
             m_Path = prev;
         }
+
         public override void Visit(ISubtotalTitle sub)
         {
             var prev = m_Path;
@@ -63,6 +66,7 @@ namespace AccountingServer.Shell.Subtotal
             ShowSubtotal(sub);
             m_Path = prev;
         }
+
         public override void Visit(ISubtotalSubTitle sub)
         {
             var prev = m_Path;
@@ -70,6 +74,7 @@ namespace AccountingServer.Shell.Subtotal
             ShowSubtotal(sub);
             m_Path = prev;
         }
+
         public override void Visit(ISubtotalContent sub)
         {
             var prev = m_Path;
@@ -77,6 +82,7 @@ namespace AccountingServer.Shell.Subtotal
             ShowSubtotal(sub);
             m_Path = prev;
         }
+
         public override void Visit(ISubtotalRemark sub)
         {
             var prev = m_Path;

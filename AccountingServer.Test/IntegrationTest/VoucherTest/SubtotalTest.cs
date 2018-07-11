@@ -22,77 +22,79 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
 
             m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
 
-            m_Adapter.Upsert(new Voucher
-                {
-                    Date = new DateTime(2016, 12, 31).CastUtc(),
-                    Remark = "xrmk1",
-                    Details = new List<VoucherDetail>
-                        {
-                            new VoucherDetail
-                                {
-                                    Currency = "JPY",
-                                    Title = 1234,
-                                    SubTitle = 56,
-                                    Content = "cnt1",
-                                    Fund = 123.45,
-                                    Remark = "rmk1"
-                                },
-                            new VoucherDetail
-                                {
-                                    Currency = "JPY",
-                                    Title = 6541,
-                                    SubTitle = 98,
-                                    Content = "cnt1",
-                                    Fund = -123.45,
-                                    Remark = "rmk2"
-                                }
-                        }
-                });
+            m_Adapter.Upsert(
+                new Voucher
+                    {
+                        Date = new DateTime(2016, 12, 31).CastUtc(),
+                        Remark = "xrmk1",
+                        Details = new List<VoucherDetail>
+                            {
+                                new VoucherDetail
+                                    {
+                                        Currency = "JPY",
+                                        Title = 1234,
+                                        SubTitle = 56,
+                                        Content = "cnt1",
+                                        Fund = 123.45,
+                                        Remark = "rmk1"
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "JPY",
+                                        Title = 6541,
+                                        SubTitle = 98,
+                                        Content = "cnt1",
+                                        Fund = -123.45,
+                                        Remark = "rmk2"
+                                    }
+                            }
+                    });
 
-            m_Adapter.Upsert(new Voucher
-                {
-                    Date = new DateTime(2017, 02, 01).CastUtc(),
-                    Remark = "xrmk2",
-                    Details = new List<VoucherDetail>
-                        {
-                            new VoucherDetail
-                                {
-                                    Currency = "JPY",
-                                    Title = 1234,
-                                    SubTitle = 56,
-                                    Content = "cnt1",
-                                    Fund = 78.53,
-                                    Remark = "rmk1"
-                                },
-                            new VoucherDetail
-                                {
-                                    Currency = "JPY",
-                                    Title = 6541,
-                                    SubTitle = 98,
-                                    Content = "cnt1",
-                                    Fund = -78.53,
-                                    Remark = "rmk2"
-                                },
-                            new VoucherDetail
-                                {
-                                    Currency = "USD",
-                                    Title = 1234,
-                                    SubTitle = 56,
-                                    Content = "cnt2",
-                                    Fund = 66.66,
-                                    Remark = "rmk1"
-                                },
-                            new VoucherDetail
-                                {
-                                    Currency = "USD",
-                                    Title = 6541,
-                                    SubTitle = 98,
-                                    Content = "cnt2",
-                                    Fund = -66.66,
-                                    Remark = "rmk2"
-                                }
-                        }
-                });
+            m_Adapter.Upsert(
+                new Voucher
+                    {
+                        Date = new DateTime(2017, 02, 01).CastUtc(),
+                        Remark = "xrmk2",
+                        Details = new List<VoucherDetail>
+                            {
+                                new VoucherDetail
+                                    {
+                                        Currency = "JPY",
+                                        Title = 1234,
+                                        SubTitle = 56,
+                                        Content = "cnt1",
+                                        Fund = 78.53,
+                                        Remark = "rmk1"
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "JPY",
+                                        Title = 6541,
+                                        SubTitle = 98,
+                                        Content = "cnt1",
+                                        Fund = -78.53,
+                                        Remark = "rmk2"
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 1234,
+                                        SubTitle = 56,
+                                        Content = "cnt2",
+                                        Fund = 66.66,
+                                        Remark = "rmk1"
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 6541,
+                                        SubTitle = 98,
+                                        Content = "cnt2",
+                                        Fund = -66.66,
+                                        Remark = "rmk2"
+                                    }
+                            }
+                    });
         }
 
         public void Dispose() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);

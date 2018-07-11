@@ -97,6 +97,7 @@ namespace AccountingServer.DAL.Serializer
                 bsonWriter.WriteName("template");
                 VoucherSerializer.Serialize(bsonWriter, amort.Template);
             }
+
             if (amort.Schedule != null)
             {
                 bsonWriter.WriteStartArray("schedule");

@@ -64,6 +64,7 @@ namespace AccountingServer
                     scintilla.DeleteRange(begin, end - begin + 1);
                     scintilla.InsertText(begin, result);
                 }
+
                 newPosition = begin;
             }
             catch (Exception exception)
@@ -151,6 +152,7 @@ namespace AccountingServer
                     scintilla.InsertText(end - 1, "*/");
                     scintilla.InsertText(begin, "/*");
                 }
+
                 newPosition = begin;
             }
             catch (Exception exception)
@@ -234,6 +236,7 @@ namespace AccountingServer
                 }
                 else
                     scintilla.Text = exception.ToString();
+
                 textBoxCommand.BackColor = Color.FromArgb(255, 70, 70);
                 return false;
             }

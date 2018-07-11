@@ -30,8 +30,7 @@ namespace AccountingServer.Shell.Plugins.Composite
     [XmlRoot("Templates")]
     public class CompositeTemplates
     {
-        [XmlElement("Template")]
-        public List<Template> Templates;
+        [XmlElement("Template")] public List<Template> Templates;
     }
 
     [Serializable]
@@ -48,8 +47,7 @@ namespace AccountingServer.Shell.Plugins.Composite
     [Serializable]
     public class InquiriesHub : BaseInquiry
     {
-        [XmlElement("InquiriesHub", typeof(InquiriesHub))]
-        [XmlElement("Inquiry", typeof(Inquiry))]
+        [XmlElement("InquiriesHub", typeof(InquiriesHub))] [XmlElement("Inquiry", typeof(Inquiry))]
         public List<BaseInquiry> Inquiries;
 
         public override T Accept<T>(IInquiryVisitor<T> visitor) => visitor.Visit(this);

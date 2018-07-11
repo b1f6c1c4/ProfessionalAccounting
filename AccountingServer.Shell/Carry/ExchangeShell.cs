@@ -1,7 +1,7 @@
 ﻿using System;
+using AccountingServer.BLL.Util;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Util;
-using AccountingServer.BLL.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Shell.Carry
@@ -22,6 +22,7 @@ namespace AccountingServer.Shell.Carry
                 rev = false;
                 val = Parsing.DoubleF(ref expr);
             }
+
             var date = Parsing.UniqueTime(ref expr) ?? DateTime.Today.CastUtc();
             Parsing.Eof(expr);
             var res = rev ? ExchangeFactory.Instance.To(date, curr) : ExchangeFactory.Instance.From(date, curr);

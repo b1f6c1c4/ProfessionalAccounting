@@ -11,11 +11,22 @@ namespace AccountingServer.Test.UnitTest.BLL
 {
     public class SubtotalTest
     {
-        public SubtotalTest() => ExchangeFactory.Instance = new MockExchange
-            {
-                { new DateTime(2017, 1, 1).CastUtc(), "JPY", 456 },
-                { new DateTime(2017, 1, 1).CastUtc(), "USD", 789 }
-            };
+        public SubtotalTest()
+        {
+            BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
+                new BaseCurrencyInfos
+                    {
+                        Infos = new List<BaseCurrencyInfo>
+                            {
+                                new BaseCurrencyInfo { Date = null, Currency = "CNY" }
+                            }
+                    });
+            ExchangeFactory.Instance = new MockExchange
+                {
+                    { new DateTime(2017, 1, 1).CastUtc(), "JPY", 456 },
+                    { new DateTime(2017, 1, 1).CastUtc(), "USD", 789 }
+                };
+        }
 
         [Fact]
         public void TestCurrency()

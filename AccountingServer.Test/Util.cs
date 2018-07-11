@@ -114,11 +114,11 @@ namespace AccountingServer.Test
             new Tuple<DateTime, string>(date, target),
             val);
 
-        public double From(DateTime date, string target) => target == VoucherDetail.BaseCurrency
+        public double From(DateTime date, string target) => target == BaseCurrency.Now
             ? 1
             : m_Dic[new Tuple<DateTime, string>(date, target)];
 
-        public double To(DateTime date, string target) => target == VoucherDetail.BaseCurrency
+        public double To(DateTime date, string target) => target == BaseCurrency.Now
             ? 1
             : 1D / m_Dic[new Tuple<DateTime, string>(date, target)];
 

@@ -88,6 +88,7 @@ namespace AccountingServer.Shell.Plugins.BankBalance
                             : $"Plan: Debit {(avx - btd).AsCurrency()}, Balance {avx.AsCurrency()}");
                 }
             }
+
             return new UnEditableText(sb.ToString());
         }
     }

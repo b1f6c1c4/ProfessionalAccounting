@@ -102,6 +102,7 @@ namespace AccountingServer.Shell.Serializer
             {
                 // ignore
             }
+
             Parsing.TrimStartComment(ref expr);
             var remark = Parsing.Quoted(ref expr, '%');
             Parsing.TrimStartComment(ref expr);
