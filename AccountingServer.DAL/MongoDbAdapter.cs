@@ -287,17 +287,7 @@ namespace AccountingServer.DAL
             if (query.Subtotal.AggrType != AggregationType.ChangedDay &&
                 query.Subtotal.GatherType == GatheringType.NonZero)
                 fluent = fluent.Match(FilterNonZero);
-            var balances = fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
-            if (level.HasFlag(SubtotalLevel.Currency))
-                return balances
-                    .Select(
-                        b =>
-                        {
-                            b.Currency = b.Currency ?? VoucherDetail.BaseCurrency;
-                            return b;
-                        });
-
-            return balances;
+            return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
         }
 
         /// <inheritdoc />
