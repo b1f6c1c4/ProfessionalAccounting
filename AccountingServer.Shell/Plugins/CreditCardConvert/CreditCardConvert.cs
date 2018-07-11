@@ -127,8 +127,6 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
             foreach (var tran in trans.OrderByDescending(t => t.Date))
             {
                 sb.Append(tran.Date.AsDate());
-                if (tran.RawCurrency == VoucherDetail.BaseCurrency)
-                    sb.Append("                              ");
                 sb.Append($" @{tran.RawCurrency} {tran.RawFund.AsCurrency().CPadLeft(15)}");
                 if (tran.TheConversion != null)
                     sb.AppendLine(

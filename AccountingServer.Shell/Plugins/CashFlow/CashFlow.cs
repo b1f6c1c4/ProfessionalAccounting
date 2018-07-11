@@ -41,7 +41,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
             var sb = new StringBuilder();
             sb.Append("Date");
             for (var i = 0; i < n; i++)
-                sb.Append($"\t{Templates.Config.Accounts[i].Currency ?? VoucherDetail.BaseCurrency}\tSum");
+                sb.Append($"\t{Templates.Config.Accounts[i].Currency}\tSum");
 
             sb.AppendLine("\tAll");
 
@@ -55,7 +55,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                     aggs[i] += kvp.Value[i];
                     sum += aggs[i] * ExchangeFactory.Instance.From(
                         kvp.Key,
-                        Templates.Config.Accounts[i].Currency ?? VoucherDetail.BaseCurrency);
+                        Templates.Config.Accounts[i].Currency);
                     sb.Append($"\t{kvp.Value[i]:R}\t{aggs[i]:R}");
                 }
 

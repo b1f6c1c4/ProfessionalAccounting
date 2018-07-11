@@ -101,11 +101,6 @@ namespace AccountingServer.Entities
         public const double Tolerance = 1e-8;
 
         /// <summary>
-        ///     记账本位币
-        /// </summary>
-        public const string BaseCurrency = "CNY";
-
-        /// <summary>
         ///     币种
         /// </summary>
         [XmlAttribute("currency")]
