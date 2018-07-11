@@ -40,55 +40,23 @@ namespace AccountingServer.Shell
         /// <returns>解析结果</returns>
         private Func<IQueryResult> Parse(string expr)
         {
+            var isRaw = false;
+            StringSubtotalVisitor visitor;
             if (ParsingF.Token(ref expr, false, t => t == "Rps") != null)
+                visitor = new PreciseSubtotalPre();
+            else if (ParsingF.Token(ref expr, false, t => t == "rps") != null)
+                visitor = new PreciseSubtotalPre(false);
+            else if (ParsingF.Token(ref expr, false, t => t == "raw") != null)
             {
-                try
-                {
-                    return TryGroupedQuery(expr, new PreciseSubtotalPre());
-                }
-                catch (Exception)
-                {
-                    // ignored
-                }
-
-                try
-                {
-                    return TryDetailQuery(expr);
-                }
-                catch (Exception)
-                {
-                    // ignored
-                }
-
-                throw new InvalidOperationException("表达式无效");
+                visitor = new RawSubtotal();
+                isRaw = true;
             }
-
-            if (ParsingF.Token(ref expr, false, t => t == "rps") != null)
-            {
-                try
-                {
-                    return TryGroupedQuery(expr, new PreciseSubtotalPre(false));
-                }
-                catch (Exception)
-                {
-                    // ignored
-                }
-
-                try
-                {
-                    return TryDetailQuery(expr);
-                }
-                catch (Exception)
-                {
-                    // ignored
-                }
-
-                throw new InvalidOperationException("表达式无效");
-            }
+            else
+                visitor = new RichSubtotalPre();
 
             try
             {
-                return TryGroupedQuery(expr, new RichSubtotalPre());
+                return TryGroupedQuery(expr, visitor);
             }
             catch (Exception)
             {
@@ -97,7 +65,7 @@ namespace AccountingServer.Shell
 
             try
             {
-                return TryVoucherQuery(expr);
+                return isRaw ? TryDetailQuery(expr) : TryVoucherQuery(expr);
             }
             catch (Exception)
             {
