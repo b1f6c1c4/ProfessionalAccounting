@@ -183,7 +183,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     资产折旧计算表
         /// </summary>
-        public IList<AssetItem> Schedule { get; set; }
+        public List<AssetItem> Schedule { get; set; }
 
         /// <inheritdoc />
         public string Remark { get; set; }

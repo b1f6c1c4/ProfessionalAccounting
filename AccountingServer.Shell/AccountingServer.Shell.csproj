@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Plugins\AssetHelper\AssetDisposition.cs" />
     <Compile Include="Plugins\AssetHelper\AssetFactory.cs" />
     <Compile Include="Plugins\CreditCardConvert\CreditCardConvert.cs" />
     <Compile Include="Serializer\AlternativeSerializer.cs" />
