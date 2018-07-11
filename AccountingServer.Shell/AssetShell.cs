@@ -250,12 +250,19 @@ namespace AccountingServer.Shell
 
             sb.AppendLine(
                 $"{asset.StringID} {asset.Name.CPadRight(35)}{asset.Date:yyyyMMdd}" +
-                $"{asset.Value.AsCurrency().CPadLeft(13)}{(dt.HasValue ? bookValue.AsCurrency().CPadLeft(13) : "-".CPadLeft(13))}" +
-                $"{asset.Salvge.AsCurrency().CPadLeft(13)}{asset.Title.AsTitle().CPadLeft(5)}" +
-                $"{asset.DepreciationTitle.AsTitle().CPadLeft(5)}{asset.DevaluationTitle.AsTitle().CPadLeft(5)}" +
-                $"{asset.DepreciationExpenseTitle.AsTitle().CPadLeft(5)}{asset.DepreciationExpenseSubTitle.AsSubTitle()}" +
-                $"{asset.DevaluationExpenseTitle.AsTitle().CPadLeft(5)}{asset.DevaluationExpenseSubTitle.AsSubTitle()}" +
-                $"{asset.Life.ToString().CPadLeft(4)}{asset.Method.ToString().CPadLeft(20)}");
+                asset.Value.AsCurrency(asset.Currency).CPadLeft(13) +
+                (dt.HasValue ? bookValue.AsCurrency(asset.Currency).CPadLeft(13) : "-".CPadLeft(13)) +
+                asset.Salvge.AsCurrency(asset.Currency).CPadLeft(13) +
+                asset.Title.AsTitle().CPadLeft(5) +
+                asset.DepreciationTitle.AsTitle().CPadLeft(5) +
+                asset.DevaluationTitle.AsTitle().CPadLeft(5) +
+                asset.DepreciationExpenseTitle.AsTitle().CPadLeft(5) +
+                asset.DepreciationExpenseSubTitle.AsSubTitle() +
+                asset.DevaluationExpenseTitle.AsTitle().CPadLeft(5) +
+                asset.DevaluationExpenseSubTitle.AsSubTitle() +
+                asset.Life.ToString().CPadLeft(4) +
+                asset.Method.ToString().CPadLeft(20));
+
             if (showSchedule && asset.Schedule != null)
                 foreach (var assetItem in asset.Schedule)
                 {

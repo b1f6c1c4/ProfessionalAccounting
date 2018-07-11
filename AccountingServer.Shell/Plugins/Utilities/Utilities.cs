@@ -98,6 +98,7 @@ namespace AccountingServer.Shell.Plugins.Utilities
                         d =>
                             new VoucherDetail
                                 {
+                                    Currency = d.Currency,
                                     Title = d.Title,
                                     SubTitle = d.SubTitle,
                                     Content = d.Content,
