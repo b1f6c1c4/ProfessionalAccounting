@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using AccountingServer.BLL;
+using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Util;
@@ -100,7 +101,8 @@ namespace AccountingServer.Shell.Serializer
 
             var currency = Parsing.Token(ref expr, false, s => s.StartsWith("@", StringComparison.Ordinal))
                 ?.Substring(1)
-                .ToUpperInvariant();
+                .ToUpperInvariant()
+                ?? BaseCurrency.Now;
 
             var lst = new List<Item>();
             List<Item> ds;
