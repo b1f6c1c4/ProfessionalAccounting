@@ -12,7 +12,7 @@ namespace AccountingServer.BLL.Parsing
         public partial class VoucherQueryContext : IVoucherQueryAtom
         {
             /// <inheritdoc />
-            public bool ForAll => Op != null && Op.Text == "A";
+            public bool ForAll => MatchAllMark() != null;
 
             /// <inheritdoc />
             public Voucher VoucherFilter
@@ -178,17 +178,16 @@ namespace AccountingServer.BLL.Parsing
             {
                 get
                 {
-                    switch (SubtotalMark.Text)
-                    {
-                        case "`":
-                            return GatheringType.NonZero;
-                        case "``":
-                            return GatheringType.Zero;
-                        case "!":
-                            return GatheringType.Count;
-                        default:
-                            throw new MemberAccessException("表达式错误");
-                    }
+                    var text = Subtotal().GetText();
+                    if (text.StartsWith("``", StringComparison.Ordinal))
+                        return GatheringType.Zero;
+                    if (text.StartsWith("`", StringComparison.Ordinal))
+                        return GatheringType.NonZero;
+
+                    if (text.StartsWith("!", StringComparison.Ordinal))
+                        return GatheringType.Count;
+
+                    throw new MemberAccessException("表达式错误");
                 }
             }
 
@@ -197,7 +196,8 @@ namespace AccountingServer.BLL.Parsing
             {
                 get
                 {
-                    if (SubtotalFields() == null)
+                    var text = Subtotal().GetText().TrimStart('`', '!');
+                    if (text == "")
                         if (subtotalEqui() == null)
                             return new[]
                                 {
@@ -210,11 +210,10 @@ namespace AccountingServer.BLL.Parsing
                                     SubtotalLevel.Title, SubtotalLevel.SubTitle, SubtotalLevel.Content
                                 };
 
-                    if (SubtotalFields().GetText() == "v")
+                    if (text == "v")
                         return new SubtotalLevel[0];
 
-                    return SubtotalFields()
-                        .GetText()
+                    return text
                         .Select(
                             ch =>
                             {
@@ -253,7 +252,7 @@ namespace AccountingServer.BLL.Parsing
                 {
                     if (subtotalAggr() == null)
                         return AggregationType.None;
-                    if (subtotalAggr().IsAll == null &&
+                    if (subtotalAggr().AllDate() == null &&
                         subtotalAggr().rangeCore() == null)
                         return AggregationType.ChangedDay;
 
@@ -266,7 +265,7 @@ namespace AccountingServer.BLL.Parsing
             {
                 get
                 {
-                    if (subtotalAggr().IsAll != null)
+                    if (subtotalAggr().AllDate() != null)
                         return DateFilter.Unconstrained;
 
                     return subtotalAggr().rangeCore();
@@ -317,7 +316,7 @@ namespace AccountingServer.BLL.Parsing
             public IVoucherDetailQuery VoucherEmitQuery => voucherDetailQuery();
 
             /// <inheritdoc />
-            public ISubtotal Subtotal => subtotal();
+            ISubtotal IGroupedQuery.Subtotal => subtotal();
         }
     }
 }

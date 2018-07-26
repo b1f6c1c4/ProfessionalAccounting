@@ -110,7 +110,7 @@ namespace AccountingServer.BLL.Parsing
             {
                 get
                 {
-                    if (All != null)
+                    if (AllDate() != null)
                         return DateFilter.Unconstrained;
                     if (RangeNull() != null)
                         return DateFilter.TheNullOnly;
@@ -152,7 +152,7 @@ namespace AccountingServer.BLL.Parsing
                     if (End != null)
                         e = End.Range.EndDate;
                     var f = new DateFilter(s, e);
-                    if (Op.Text == "~~")
+                    if (Tilde().GetText() == "~~")
                         f.Nullable ^= true;
                     return f;
                 }
