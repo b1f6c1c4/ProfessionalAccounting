@@ -58,7 +58,7 @@ namespace AccountingServer.BLL.Parsing
                         {
                             Title = t?.Title,
                             SubTitle = t?.SubTitle,
-                            Content = SingleQuotedString()?.GetText().Dequotation(),
+                            Content = token()?.GetPureText(),
                             Remark = DoubleQuotedString()?.GetText().Dequotation()
                         };
 
@@ -86,11 +86,10 @@ namespace AccountingServer.BLL.Parsing
             {
                 get
                 {
-                    if (Direction == null)
-                        return 0;
-
-                    switch (Direction.Text)
+                    switch (Direction()?.GetText())
                     {
+                        case null:
+                            return 0;
                         case ">":
                             return 1;
                         case "<":
@@ -198,6 +197,12 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
+        }
+
+        public partial class TokenContext
+        {
+            public string GetPureText()
+                => SingleQuotedString()?.GetText().Dequotation() ?? GetText();
         }
     }
 }
