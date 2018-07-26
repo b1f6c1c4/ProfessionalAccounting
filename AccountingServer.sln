@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+VisualStudioVersion = 15.0.27130.2003
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.Entities", "AccountingServer.Entities\AccountingServer.Entities.csproj", "{7246DEB7-BDA2-49D8-9490-3ED074219106}"
 EndProject
@@ -54,8 +54,9 @@ Global
 		{0DDC759F-23DE-4443-A97C-4EDC1C40690C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DDC759F-23DE-4443-A97C-4EDC1C40690C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0DDC759F-23DE-4443-A97C-4EDC1C40690C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}.Debug|Any CPU.ActiveCfg = Gen|Any CPU
+		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}.Debug|Any CPU.Build.0 = Gen|Any CPU
+		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}.Release|Any CPU.ActiveCfg = Gen|Any CPU
 		{80DCCEC9-EE8D-43C1-BC74-8A45AE10FBCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{80DCCEC9-EE8D-43C1-BC74-8A45AE10FBCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80DCCEC9-EE8D-43C1-BC74-8A45AE10FBCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -71,5 +72,8 @@ Global
 		{28C2EDB0-CE1E-473E-9CA6-70E29A1408A4} = {A75E43E2-65F1-4826-8B28-D90DDC15777D}
 		{0DDC759F-23DE-4443-A97C-4EDC1C40690C} = {15EBBDC7-0339-4A91-922A-D4A6FE4D6F5C}
 		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F} = {13C35141-C1A9-46DB-9ED4-3310DCD021FC}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FA51778B-F993-4BC6-994B-093A1ED6DD00}
 	EndGlobalSection
 EndGlobal

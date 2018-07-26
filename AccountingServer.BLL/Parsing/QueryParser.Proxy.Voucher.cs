@@ -183,7 +183,6 @@ namespace AccountingServer.BLL.Parsing
                         return GatheringType.Zero;
                     if (text.StartsWith("`", StringComparison.Ordinal))
                         return GatheringType.NonZero;
-
                     if (text.StartsWith("!", StringComparison.Ordinal))
                         return GatheringType.Count;
 
