@@ -79,6 +79,11 @@ namespace AccountingServer.DAL
             if (rng.EndDate.HasValue)
                 lst.Add(Builders<Voucher>.Filter.Lte("date", rng.EndDate));
 
+            if (lst.Count == 0)
+                return rng.Nullable
+                    ? Builders<Voucher>.Filter.Empty
+                    : Builders<Voucher>.Filter.Exists("date");
+
             var gather = And(lst);
             return rng.Nullable
                 ? Builders<Voucher>.Filter.Exists("date", false) | gather

@@ -76,7 +76,7 @@ title
 	;
 
 range
-	:	SquareBra SquareKet
+	:	AllDate
 	|	Core=rangeCore
 	|	SquareBra Core=rangeCore SquareKet
 	;
@@ -303,5 +303,5 @@ WS
 	;
 
 Token
-	:	~[ \n\r\t'"`!~@$%^*()[\]{}+-]+
+	:	~[ \n\r\t'"`!~@$%^*=:.,<>()[\]{}+-]+
 	;
