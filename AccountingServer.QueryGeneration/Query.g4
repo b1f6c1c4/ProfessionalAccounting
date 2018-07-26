@@ -9,17 +9,16 @@ groupedQuery
 	;
 
 subtotal
-	:	SubtotalMark=('`' | '``') SubtotalFields? subtotalAggr? subtotalEqui?
-	|	SubtotalMark='!' SubtotalFields? subtotalAggr?
+	:	Subtotal subtotalAggr? subtotalEqui?
 	;
 
 subtotalAggr
-	:	'D' IsAll='[]'?
-	|	'D' '[' rangeCore ']'
+	:	AggrMark AllDate
+	|	AggrMark RoundBra rangeCore RoundKet
 	;
 
 subtotalEqui
-	:	'X' ('[' rangeDay ']')?
+	:	EquiMark (RoundBra rangeDay RoundKet)?
 	;
 
 voucherDetailQuery
@@ -28,7 +27,7 @@ voucherDetailQuery
 	;
 
 emit
-	:	':' details
+	:	EmitMark details
 	;
 
 vouchers
@@ -37,39 +36,39 @@ vouchers
 	;
 
 vouchers2
-	:	vouchers2 Op=('+' | '-') vouchers1
-	|	Op=('+' | '-')? vouchers1
+	:	vouchers2 Op=(Union | Substract) vouchers1
+	|	Op=(Union | Substract)? vouchers1
 	;
 
 vouchers1
-	:	vouchers0 (Op='*' vouchers1)?
+	:	vouchers0 (Op=Intersect vouchers1)?
 	;
 
 vouchers0
-	:	'{' voucherQuery '}'
-	|	'{' vouchers2 '}'
+	:	CurlyBra voucherQuery CurlyKet
+	|	CurlyBra vouchers2 CurlyKet
 	;
 
 voucherQuery
-	:	details? Op='A'? range? CaretQuotedString? PercentQuotedString? VoucherType?
+	:	details? MatchAllMark? range? CaretQuotedString? PercentQuotedString? VoucherType?
 	;
 
 details
-	:	details Op=('+' | '-') details1
-	|	Op=('+' | '-')? details1
+	:	details Op=(Union | Substract) details1
+	|	Op=(Union | Substract)? details1
 	;
 
 details1
-	:	details0 (Op='*' details1)?
+	:	details0 (Op=Intersect details1)?
 	;
 
 details0
 	:	detailQuery
-	|	'(' details ')'
+	|	RoundBra details RoundKet
 	;
 
 detailQuery
-	:	VoucherCurrency? title? SingleQuotedString? DoubleQuotedString? Floating? Direction=('>' | '<')?
+	:	VoucherCurrency? title? token? DoubleQuotedString? Floating? Direction?
 	;
 
 title
@@ -77,17 +76,20 @@ title
 	;
 
 range
-	:	'[]' | Core=rangeCore | '[' Core=rangeCore ']'
+	:	SquareBra SquareKet
+	|	Core=rangeCore
+	|	SquareBra Core=rangeCore SquareKet
 	;
 
 uniqueTime
-	:	Core=uniqueTimeCore | '[' Core=uniqueTimeCore ']'
+	:	Core=uniqueTimeCore
+	|	SquareBra Core=uniqueTimeCore SquareKet
 	;
 
 rangeCore
 	:	RangeNull | RangeAllNotNull
-	|	Begin=rangeCertainPoint Op=('~'|'~~') End=rangeCertainPoint?
-	|	Op=('~'|'~~') End=rangeCertainPoint
+	|	Begin=rangeCertainPoint Tilde End=rangeCertainPoint?
+	|	Tilde End=rangeCertainPoint
 	|	Certain=rangeCertainPoint
 	;
 
@@ -97,7 +99,8 @@ uniqueTimeCore
 	;
 
 rangePoint
-	:	RangeNull | All='[]'
+	:	RangeNull
+	|	AllDate
 	|	rangeCertainPoint
 	;
 
@@ -125,21 +128,25 @@ rangeDay
 	;
 
 distributedQ
-	:	distributedQ Op=('+' | '-') distributedQ1
-	|	Op=('+' | '-')? distributedQ1
+	:	distributedQ Op=(Union | Substract) distributedQ1
+	|	Op=(Union | Substract)? distributedQ1
 	;
 
 distributedQ1
-	:	distributedQ0 (Op='*' distributedQ1)?
+	:	distributedQ0 (Op=Intersect distributedQ1)?
 	;
 
 distributedQ0
 	:	distributedQAtom
-	|	'(' distributedQ ')'
+	|	RoundBra distributedQ RoundKet
 	;
 
 distributedQAtom
-	:	Guid? DollarQuotedString? PercentQuotedString? ('[[' rangeCore ']]')?
+	:	Guid? DollarQuotedString? PercentQuotedString? (SquareBra SquareBra rangeCore SquareKet SquareKet)?
+	;
+
+token
+	:	(SingleQuotedString | Guid | Token)
 	;
 
 /*
@@ -147,12 +154,21 @@ distributedQAtom
  */
 
 Floating
-	:	'=' Sign='-'? [1-9] ([0-9])* ('.' [0-9]+)?
-	|	'=' Sign='-'? '0' '.' [0-9]+
+	:	'=' '-'? [1-9] ([0-9])* ('.' [0-9]+)?
+	|	'=' '-'? '0' '.' [0-9]+
 	;
 
-SubtotalFields
-	:	('t' | 's' | 'c' | 'r' | 'd' | 'w' | 'm' | 'y' | 'C')+
+Subtotal
+	:	SubtotalMark SubtotalFields
+	;
+
+fragment SubtotalMark
+	:	'`' | '``'
+	|	'!'
+	;
+
+fragment SubtotalFields
+	:	[tscrdwmyC]*
 	|	'v'
 	;
 
@@ -228,16 +244,64 @@ DetailTitleSubTitle
 	:	'T' [1-9] [0-9] [0-9] [0-9] [0-9] [0-9]
 	;
 
+AllDate
+	:	'[]'
+	;
+
 Intersect
-	: '*'
+	:	'*'
 	;
 Union
-	: '+'
+	:	'+'
 	;
 Substract
-	: '-'
+	:	'-'
+	;
+RoundBra
+	:	'('
+	;
+RoundKet
+	:	')'
+	;
+SquareBra
+	:	'['
+	;
+SquareKet
+	:	']'
+	;
+CurlyBra
+	:	'{'
+	;
+CurlyKet
+	:	'}'
+	;
+
+Direction
+	:	'>' | '<'
+	;
+Tilde
+	:	'~' | '~~'
+	;
+
+MatchAllMark
+	:	'A'
+	;
+
+AggrMark
+	:	'D'
+	;
+EquiMark
+	:	'X'
+	;
+
+EmitMark
+	:	':'
 	;
 
 WS
-	:	' ' -> channel(HIDDEN)
+	:	[ \n\r\t] -> channel(HIDDEN)
+	;
+
+Token
+	:	~[ \n\r\t`!~@$%^*()[\]{}+-]+
 	;

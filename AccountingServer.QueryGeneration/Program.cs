@@ -11,11 +11,12 @@ namespace AccountingServer.QueryGeneration
     {
         private static void Main(string[] args)
         {
-            var method = "voucherQuery";
+            var method = "lexer";
+            var vocabulary = QueryLexer.DefaultVocabulary;
             var inputStream = new StreamReader(Console.OpenStandardInput());
             while (true)
             {
-                Console.Write($@"({method})> ");
+                Console.Write($"({method})> ");
                 var line = inputStream.ReadLine();
                 if (line.StartsWith("use "))
                 {
@@ -30,6 +31,19 @@ namespace AccountingServer.QueryGeneration
                 var input = new AntlrInputStream(line);
                 var lexer = new QueryLexer(input);
                 var tokens = new CommonTokenStream(lexer);
+                if (method == "lexer")
+                {
+                    var i = 0;
+                    while (true)
+                    {
+                        var t = tokens.Lt(++i);
+                        if (t.Type == -1)
+                            break;
+                        Console.WriteLine($"#{t.Type}({vocabulary.GetDisplayName(t.Type)})({vocabulary.GetLiteralName(t.Type)})({vocabulary.GetSymbolicName(t.Type)}) {t.Text}");
+                    }
+                    continue;
+                }
+
                 var parser = new QueryParser(tokens);
                 var tree = CallParser(parser, method);
                 Console.WriteLine(tree.ToStringTree(parser));
