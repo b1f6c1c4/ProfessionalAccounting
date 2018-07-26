@@ -1,4 +1,4 @@
-﻿namespace AccountingServer.QueryGeneration
+﻿namespace AccountingServer.BLL.Parsing
 {
-    public class QueryParser { }
+    public partial class QueryParser { }
 }
