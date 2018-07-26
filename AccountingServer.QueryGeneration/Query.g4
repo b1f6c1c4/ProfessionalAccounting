@@ -13,12 +13,12 @@ subtotal
 	;
 
 subtotalAggr
-	:	AggrMark AllDate
-	|	AggrMark RoundBra rangeCore RoundKet
+	:	AggrMark AllDate?
+	|	AggrMark SquareBra rangeCore SquareKet
 	;
 
 subtotalEqui
-	:	EquiMark (RoundBra rangeDay RoundKet)?
+	:	EquiMark (SquareBra rangeDay SquareKet)?
 	;
 
 voucherDetailQuery
@@ -303,5 +303,5 @@ WS
 	;
 
 Token
-	:	~[ \n\r\t`!~@$%^*()[\]{}+-]+
+	:	~[ \n\r\t'"`!~@$%^*()[\]{}+-]+
 	;
