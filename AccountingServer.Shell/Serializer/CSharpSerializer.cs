@@ -180,7 +180,7 @@ namespace AccountingServer.Shell.Serializer
                 {
                     sb.Append($"        new {item.GetType().Name.CPadRight(16)} {{ ");
                     sb.Append(item.Date.HasValue ? $"Date = D(\"{item.Date:yyyy-MM-dd}\"), " : "Date = null, ");
-                    sb.Append($"VoucherID = {(ProcessString(item.VoucherID) + ",").CPadRight(27)}");
+                    sb.Append($"VoucherID = {(ProcessString(item.VoucherID) + ",").CPadRight(28)}");
                     sb.Append(str.CPadRight(30));
                     sb.Append($"Value = {item.Value.ToString(CultureInfo.InvariantCulture).CPadRight(16)} ");
                     if (item.Remark != null)
@@ -267,7 +267,7 @@ namespace AccountingServer.Shell.Serializer
                 {
                     sb.Append("        new AmortItem { ");
                     sb.Append(item.Date.HasValue ? $"Date = D(\"{item.Date:yyyy-MM-dd}\"), " : "Date = null, ");
-                    sb.Append($"VoucherID = {(ProcessString(item.VoucherID) + ",").CPadRight(27)}");
+                    sb.Append($"VoucherID = {(ProcessString(item.VoucherID) + ",").CPadRight(28)}");
                     sb.Append($"Amount = {(item.Amount.ToString(CultureInfo.InvariantCulture) + ",").CPadRight(19)}");
                     sb.Append($"Value = {item.Value.ToString(CultureInfo.InvariantCulture).CPadRight(16)} ");
                     if (item.Remark != null)
