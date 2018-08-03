@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Drawing;
-using AccountingServer.Shell;
+using AccountingClient.Shell;
 
 namespace AccountingClient
 {
