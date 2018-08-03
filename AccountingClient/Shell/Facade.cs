@@ -80,6 +80,7 @@ namespace AccountingClient.Shell
             if (expr.StartsWith("always use ", StringComparison.OrdinalIgnoreCase))
             {
                 Settings.Default.Server = expr.Substring(11);
+                Settings.Default.Save();
                 if (!TryConnect())
                     throw m_Exception;
 

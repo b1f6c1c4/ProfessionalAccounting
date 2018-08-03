@@ -63,5 +63,10 @@
       <Name>AccountingServer.Shell</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Dockerfile">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
