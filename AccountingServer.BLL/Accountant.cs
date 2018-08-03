@@ -23,11 +23,6 @@ namespace AccountingServer.BLL
             m_AmortAccountant = new AmortAccountant(m_Db);
         }
 
-        public bool Connected => m_Db.Connected;
-
-        public void Connect(string uri)
-            => m_Db.Connect(uri);
-
         #region Voucher
 
         public Voucher SelectVoucher(string id)

@@ -4,9 +4,9 @@ namespace AccountingServer.DAL
 {
     public static class Facade
     {
-        public static IDbAdapter Create(string uri)
+        public static IDbAdapter Create()
         {
-            uri = uri ?? "mongodb://localhost";
+            var uri = Environment.GetEnvironmentVariable("MONGO_URI") ?? "mongodb://localhost";
 
             if (uri.StartsWith("mongodb://", StringComparison.Ordinal))
                 return new MongoDbAdapter(uri);
