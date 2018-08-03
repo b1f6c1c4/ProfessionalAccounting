@@ -34,5 +34,17 @@ namespace AccountingClient.Properties {
                 this["Server"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Cert {
+            get {
+                return ((string)(this["Cert"]));
+            }
+            set {
+                this["Cert"] = value;
+            }
+        }
     }
 }

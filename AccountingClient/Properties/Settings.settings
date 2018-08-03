@@ -7,5 +7,8 @@
     <Setting Name="Server" Type="System.String" Scope="User">
       <Value Profile="(Default)">http://localhost:3000</Value>
     </Setting>
+    <Setting Name="Cert" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>
