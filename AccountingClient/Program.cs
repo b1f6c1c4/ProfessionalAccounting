@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace AccountingServer
+namespace AccountingClient
 {
     internal static class Program
     {

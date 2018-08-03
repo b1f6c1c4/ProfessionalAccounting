@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using ScintillaNET;
 
-namespace AccountingServer
+namespace AccountingClient
 {
     // ReSharper disable once InconsistentNaming
     internal partial class frmMain : Form

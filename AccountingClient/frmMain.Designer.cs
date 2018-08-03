@@ -1,6 +1,4 @@
-﻿using System.Security.AccessControl;
-
-namespace AccountingServer
+﻿namespace AccountingClient
 {
     internal partial class frmMain
     {
