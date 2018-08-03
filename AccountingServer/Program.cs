@@ -18,11 +18,20 @@ namespace AccountingServer
 
         private static HttpResponse Server_OnHttpRequest(HttpRequest request)
         {
+            if (request.Method == "GET")
+            {
+                if (request.BaseUri == "/emptyVoucher")
+                    return GenerateHttpResponse(Facade.EmptyVoucher, "text/plain");
+
+                return new HttpResponse { ResponseCode = 404 };
+            }
+
+            if (request.Method != "POST")
+                return new HttpResponse { ResponseCode = 405 };
+
             switch (request.BaseUri)
             {
                 case "/execute":
-                    if (request.Method != "POST")
-                        return new HttpResponse { ResponseCode = 405 };
                     {
                         var expr = request.ReadToEnd();
                         var res = Facade.Execute(expr);
@@ -32,65 +41,44 @@ namespace AccountingServer
                         return response;
                     }
 
-                case "/voucher":
-                    switch (request.Method)
+                case "/voucherUpsert":
                     {
-                        case "GET":
-                            return GenerateHttpResponse(Facade.EmptyVoucher, "text/plain");
-                        case "POST":
-                            {
-                                var code = request.ReadToEnd();
-                                var res = Facade.ExecuteVoucherUpsert(code);
-                                return GenerateHttpResponse(res, "text/plain");
-                            }
-                        case "DELETE":
-                            {
-                                var code = request.ReadToEnd();
-                                var res = Facade.ExecuteVoucherRemoval(code);
-                                return new HttpResponse { ResponseCode = res ? 204 : 404 };
-                            }
-                        default:
-                            return new HttpResponse { ResponseCode = 405 };
+                        var code = request.ReadToEnd();
+                        var res = Facade.ExecuteVoucherUpsert(code);
+                        return GenerateHttpResponse(res, "text/plain");
+                    }
+                case "/voucherRemoval":
+                    {
+                        var code = request.ReadToEnd();
+                        var res = Facade.ExecuteVoucherRemoval(code);
+                        return new HttpResponse { ResponseCode = res ? 204 : 404 };
                     }
 
-                case "/asset":
-                    switch (request.Method)
+                case "/assetUpsert":
                     {
-                        case "POST":
-                            {
-                                var code = request.ReadToEnd();
-                                var res = Facade.ExecuteAssetUpsert(code);
-                                return GenerateHttpResponse(res, "text/plain");
-                            }
-                        case "DELETE":
-                            {
-                                var code = request.ReadToEnd();
-                                var res = Facade.ExecuteAssetRemoval(code);
-                                return new HttpResponse { ResponseCode = res ? 204 : 404 };
-                            }
-                        default:
-                            return new HttpResponse { ResponseCode = 405 };
+                        var code = request.ReadToEnd();
+                        var res = Facade.ExecuteAssetUpsert(code);
+                        return GenerateHttpResponse(res, "text/plain");
+                    }
+                case "/assertRemoval":
+                    {
+                        var code = request.ReadToEnd();
+                        var res = Facade.ExecuteAssetRemoval(code);
+                        return new HttpResponse { ResponseCode = res ? 204 : 404 };
                     }
 
-                case "/amort":
-                    switch (request.Method)
+                case "/amortUpsert":
                     {
-                        case "POST":
-                            {
-                                var code = request.ReadToEnd();
-                                var res = Facade.ExecuteAmortUpsert(code);
-                                return GenerateHttpResponse(res, "text/plain");
-                            }
-                        case "DELETE":
-                            {
-                                var code = request.ReadToEnd();
-                                var res = Facade.ExecuteAmortRemoval(code);
-                                return new HttpResponse { ResponseCode = res ? 204 : 404 };
-                            }
-                        default:
-                            return new HttpResponse { ResponseCode = 405 };
+                        var code = request.ReadToEnd();
+                        var res = Facade.ExecuteAmortUpsert(code);
+                        return GenerateHttpResponse(res, "text/plain");
                     }
-
+                case "/amortRemoval":
+                    {
+                        var code = request.ReadToEnd();
+                        var res = Facade.ExecuteAmortRemoval(code);
+                        return new HttpResponse { ResponseCode = res ? 204 : 404 };
+                    }
                 default:
                     return new HttpResponse { ResponseCode = 404 };
             }
