@@ -2,7 +2,7 @@
 using System.Drawing;
 using AccountingServer.Shell;
 
-namespace AccountingServer
+namespace AccountingClient
 {
     // ReSharper disable once InconsistentNaming
     internal partial class frmMain
