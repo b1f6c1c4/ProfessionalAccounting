@@ -43,7 +43,7 @@ namespace AccountingServer.Entities.Util
         /// <param name="filename">文件名</param>
         public ConfigManager(string filename)
         {
-            m_FileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filename);
+            m_FileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.d", filename);
 
             try
             {

@@ -1,0 +1,34 @@
+version: "2.3"
+services:
+
+  server:
+    build: ./AccountingServer/bin/Release
+    restart: always
+    ports:
+      - "18080:3000"
+    environment:
+      MONGO_URI: mongodb://mongo/accounting
+    volumes:
+      - /data/accounting/config.d:/opt/accounting/config.d
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - prod
+
+  mongo:
+    image: mongo
+    restart: always
+    volumes:
+      - /data/accounting/mongo:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'db.stats().ok' | mongo localhost:27017/accounting --quiet"]
+      interval: 15s
+      timeout: 10s
+      retries: 2
+    networks:
+      - prod
+
+networks:
+  prod:
+    driver: bridge
