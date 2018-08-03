@@ -14,12 +14,7 @@ namespace AccountingServer.BLL
         /// </summary>
         public IDbAdapter Db { private get; set; }
 
-        /// <summary>
-        ///     获取是否已经连接到数据库
-        /// </summary>
-        public bool Connected => Db != null;
-
-        public void Connect(string uri) => Db = Facade.Create(uri);
+        public DbSession() => Db = Facade.Create();
 
         private static int Compare<T>(T? lhs, T? rhs)
             where T : struct, IComparable<T>

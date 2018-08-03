@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.Remoting;
 using System.Text;
+using AccountingClient.Properties;
 
 namespace AccountingClient.Shell
 {
@@ -13,18 +14,35 @@ namespace AccountingClient.Shell
 
     internal class Facade
     {
-        private readonly HttpClient m_Client = new HttpClient();
+        private HttpClient m_Client;
+        private Exception m_Exception;
 
-        public Facade()
-        {
-            m_Client.BaseAddress = new Uri(@"http://localhost:3000");
-            EmptyVoucher = Run("GET", "/emptyVoucher");
-        }
+        public Facade() { TryConnect(); }
 
         public string EmptyVoucher { get; private set; }
 
+        private bool TryConnect(string uri = null)
+        {
+            m_Exception = null;
+
+            try
+            {
+                m_Client = new HttpClient { BaseAddress = new Uri(uri ?? Settings.Default.Server) };
+                EmptyVoucher = Run("GET", "/emptyVoucher");
+                return true;
+            }
+            catch (Exception e)
+            {
+                m_Exception = e;
+                return false;
+            }
+        }
+
         private HttpResult Run(string method, string url, string body = null)
         {
+            if (m_Exception != null)
+                throw m_Exception;
+
             HttpResponseMessage res;
             switch (method)
             {
@@ -46,9 +64,29 @@ namespace AccountingClient.Shell
             return new HttpResult { Message = res, Result = txt };
         }
 
-        public IQueryResult Execute(string code)
+        public IQueryResult Execute(string expr)
         {
-            var res = Run("POST", "/execute", code);
+            if (expr == "exit")
+                Environment.Exit(0);
+
+            if (expr.StartsWith("use ", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!TryConnect(expr.Substring(4)))
+                    throw m_Exception;
+
+                return new QueryResult { Result = "OK", AutoReturn = true };
+            }
+
+            if (expr.StartsWith("always use ", StringComparison.OrdinalIgnoreCase))
+            {
+                Settings.Default.Server = expr.Substring(11);
+                if (!TryConnect())
+                    throw m_Exception;
+
+                return new QueryResult { Result = "OK", AutoReturn = true };
+            }
+
+            var res = Run("POST", "/execute", expr);
             return new QueryResult
                 {
                     Result = res,
