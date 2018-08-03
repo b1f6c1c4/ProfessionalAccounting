@@ -32,6 +32,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nginx", "nginx", "{1F49F7D7-3D46-40FD-8314-5F210FB3852A}"
+	ProjectSection(SolutionItems) = preProject
+		nginx\default.conf = nginx\default.conf
+		nginx\Dockerfile = nginx\Dockerfile
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -82,6 +88,7 @@ Global
 		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F} = {13C35141-C1A9-46DB-9ED4-3310DCD021FC}
 		{28C2EDB0-CE1E-473E-9CA6-70E29A1408A4} = {A75E43E2-65F1-4826-8B28-D90DDC15777D}
 		{D0E1986D-0084-4480-A31A-C09B01DA92E1} = {15EBBDC7-0339-4A91-922A-D4A6FE4D6F5C}
+		{1F49F7D7-3D46-40FD-8314-5F210FB3852A} = {7F1EDC1B-C64B-4AEC-944F-23EF7A2F8460}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FA51778B-F993-4BC6-994B-093A1ED6DD00}

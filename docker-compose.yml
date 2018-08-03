@@ -1,11 +1,19 @@
 version: "2.3"
 services:
 
+  nginx:
+    build: ./nginx
+    restart: always
+    ports:
+      - "18080:443"
+    volumes:
+      - /data/accounting/certs:/opt/accounting/certs
+    networks:
+      - prod
+
   server:
     build: ./AccountingServer/bin/Release
     restart: always
-    ports:
-      - "18080:3000"
     environment:
       MONGO_URI: mongodb://mongo/accounting
     volumes:

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Runtime.Remoting;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using AccountingClient.Properties;
 
@@ -16,10 +19,29 @@ namespace AccountingClient.Shell
     {
         private HttpClient m_Client;
         private Exception m_Exception;
+        private WebRequestHandler m_Handler;
 
-        public Facade() { TryConnect(); }
+        public Facade()
+        {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            TryConnect();
+        }
 
         public string EmptyVoucher { get; private set; }
+
+        private static X509Certificate2Collection GetClientCertificate()
+        {
+            if (Settings.Default.Cert == "")
+                return null;
+
+            using (var userCaStore = new X509Store(StoreName.My, StoreLocation.CurrentUser))
+            {
+                userCaStore.Open(OpenFlags.ReadOnly);
+                var certificatesInStore = userCaStore.Certificates;
+                var findResult = certificatesInStore.Find(X509FindType.FindBySubjectName, Settings.Default.Cert, false);
+                return findResult.Count > 0 ? findResult : throw new AuthenticationException("找不到证书");
+            }
+        }
 
         private bool TryConnect(string uri = null)
         {
@@ -27,7 +49,11 @@ namespace AccountingClient.Shell
 
             try
             {
-                m_Client = new HttpClient { BaseAddress = new Uri(uri ?? Settings.Default.Server) };
+                m_Handler = new WebRequestHandler();
+                var certificate = GetClientCertificate();
+                if (certificate != null)
+                    m_Handler.ClientCertificates.AddRange(certificate);
+                m_Client = new HttpClient(m_Handler) { BaseAddress = new Uri(uri ?? Settings.Default.Server) };
                 EmptyVoucher = Run("GET", "/emptyVoucher");
                 return true;
             }
@@ -47,11 +73,11 @@ namespace AccountingClient.Shell
             switch (method)
             {
                 case "GET":
-                    res = m_Client.GetAsync(url).Result;
+                    res = m_Client.GetAsync("/api" + url).Result;
                     break;
                 case "POST":
                     var content = new StringContent(body, Encoding.UTF8, "text/plain");
-                    res = m_Client.PostAsync(url, content).Result;
+                    res = m_Client.PostAsync("/api" + url, content).Result;
                     break;
                 default:
                     throw new InvalidOperationException();
@@ -72,6 +98,16 @@ namespace AccountingClient.Shell
             if (expr.StartsWith("use ", StringComparison.OrdinalIgnoreCase))
             {
                 if (!TryConnect(expr.Substring(4)))
+                    throw m_Exception;
+
+                return new QueryResult { Result = "OK", AutoReturn = true };
+            }
+
+            if (expr.StartsWith("always use cert ", StringComparison.OrdinalIgnoreCase))
+            {
+                Settings.Default.Cert = expr.Substring(16);
+                Settings.Default.Save();
+                if (!TryConnect())
                     throw m_Exception;
 
                 return new QueryResult { Result = "OK", AutoReturn = true };
