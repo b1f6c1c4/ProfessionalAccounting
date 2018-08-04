@@ -4,7 +4,6 @@ using System.Linq;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
-using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
@@ -55,7 +54,7 @@ namespace AccountingServer.Shell.Carry
 
             var ed = rng.EndDate ?? throw new ArgumentException("时间范围无后界", nameof(expr));
 
-            var dt = new DateTime((rng.StartDate ?? ed).Year, 1, 1).CastUtc();
+            var dt = new DateTime((rng.StartDate ?? ed).Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
             while (dt <= ed)
             {
@@ -95,7 +94,7 @@ namespace AccountingServer.Shell.Carry
             DateFilter rng;
             if (dt.HasValue)
             {
-                var sd = new DateTime(dt.Value.Year, 1, 1).CastUtc();
+                var sd = new DateTime(dt.Value.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                 ed = sd.AddYears(1).AddDays(-1);
                 rng = new DateFilter(includeNull ? (DateTime?)null : sd, ed);
             }

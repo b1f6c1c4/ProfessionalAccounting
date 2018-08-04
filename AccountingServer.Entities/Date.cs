@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Threading;
 
 namespace AccountingServer.Entities
 {
@@ -106,5 +108,49 @@ namespace AccountingServer.Entities
 
             return !(dt > rng.EndDate);
         }
+    }
+
+    /// <summary>
+    ///     客户端时间
+    /// </summary>
+    public class ClientDateTime
+    {
+        // ReSharper disable once UnusedMember.Global
+        public static DateTime Parse(string str) => DateTime.Parse(
+            str,
+            null,
+            DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
+
+        // ReSharper disable once UnusedMember.Global
+        public static DateTime ParseExact(string str, string format) => DateTime.ParseExact(
+            str,
+            format,
+            null,
+            DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
+
+        // ReSharper disable once UnusedMember.Global
+        public static bool TryParse(string str, out DateTime result) => DateTime.TryParse(
+            str,
+            null,
+            DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal,
+            out result);
+
+        // ReSharper disable once UnusedMember.Global
+        public static bool TryParseExact(string str, string format, out DateTime result) => DateTime.TryParseExact(
+            str,
+            format,
+            null,
+            DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal,
+            out result);
+
+        private static readonly ThreadLocal<ClientDateTime> Instances = new ThreadLocal<ClientDateTime>();
+
+        private readonly DateTime m_Today;
+
+        private ClientDateTime(DateTime timestamp) => m_Today = timestamp.Date;
+
+        public static DateTime Today => Instances.Value?.m_Today ?? DateTime.Today;
+
+        public static void Set(DateTime timestamp) { Instances.Value = new ClientDateTime(timestamp); }
     }
 }

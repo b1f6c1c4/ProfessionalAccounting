@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
-using AccountingServer.Entities.Util;
 
 namespace AccountingServer.BLL.Parsing
 {
@@ -279,7 +278,7 @@ namespace AccountingServer.BLL.Parsing
                     if (subtotalEqui() == null)
                         return null;
 
-                    return subtotalEqui().rangeDay() ?? DateTime.Today.CastUtc();
+                    return subtotalEqui().rangeDay() ?? ClientDateTime.Today;
                 }
             }
         }

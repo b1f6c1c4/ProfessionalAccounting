@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
@@ -52,7 +51,7 @@ namespace AccountingServer.Shell.Plugins.YieldRate
             if (!pv.IsZero())
                 return
                     new YieldRateSolver(
-                        lst.Select(b => DateTime.Today.CastUtc().Subtract(b.Date.Value).TotalDays).Concat(new[] { 0D }),
+                        lst.Select(b => ClientDateTime.Today.Subtract(b.Date.Value).TotalDays).Concat(new[] { 0D }),
                         lst.Select(b => b.Fund).Concat(new[] { -pv })).Solve();
 
             return

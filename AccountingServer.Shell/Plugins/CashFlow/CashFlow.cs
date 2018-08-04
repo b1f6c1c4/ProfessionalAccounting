@@ -69,7 +69,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         {
             var curr = string.IsNullOrEmpty(account.Currency) ? "@@" : $"@{account.Currency}";
             var init = Accountant.RunGroupedQuery($"{curr}*({account.QuickAsset}) [~.]``v").Fund;
-            yield return (DateTime.Today.CastUtc(), init);
+            yield return (ClientDateTime.Today, init);
 
             if (account.Reimburse != null)
             {
@@ -97,19 +97,19 @@ namespace AccountingServer.Shell.Plugins.CashFlow
 
                     case CreditCard cd:
                         foreach (var grpC in Accountant.RunGroupedQuery(
-                                $"({cd.Query})*(<+(-@@)) [{DateTime.Today.CastUtc().AddMonths(-3).AsDate()}~]`Cd").Items
+                                $"({cd.Query})*(<+(-@@)) [{ClientDateTime.Today.AddMonths(-3).AsDate()}~]`Cd").Items
                             .Cast<ISubtotalCurrency>())
                         foreach (var b in grpC.Items.Cast<ISubtotalDate>())
                         {
                             // ReSharper disable once PossibleInvalidOperationException
                             var d = b.Date.Value;
-                            var mo = new DateTime(d.Year, d.Month, 1).CastUtc();
+                            var mo = new DateTime(d.Year, d.Month, 1, 0, 0, 0, DateTimeKind.Utc);
                             if (d.Day >= cd.BillDay)
                                 mo = mo.AddMonths(1);
                             if (cd.RepaymentDay <= cd.BillDay)
                                 mo = mo.AddMonths(1);
                             mo = mo.AddDays(cd.RepaymentDay - 1);
-                            if (mo <= DateTime.Today.CastUtc())
+                            if (mo <= ClientDateTime.Today)
                                 continue;
 
                             var ratio = ExchangeFactory.Instance.From(mo, grpC.Currency);
@@ -117,16 +117,16 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         }
 
                         foreach (var b in Accountant.RunGroupedQuery(
-                                $"({cd.Query})*(@@>) [{DateTime.Today.CastUtc().AddMonths(-3).AsDate()}~]`d").Items
+                                $"({cd.Query})*(@@>) [{ClientDateTime.Today.AddMonths(-3).AsDate()}~]`d").Items
                             .Cast<ISubtotalDate>())
                         {
                             // ReSharper disable once PossibleInvalidOperationException
                             var d = b.Date.Value;
-                            var mo = new DateTime(d.Year, d.Month, 1).CastUtc();
+                            var mo = new DateTime(d.Year, d.Month, 1, 0, 0, 0, DateTimeKind.Utc);
                             if (d.Day > cd.RepaymentDay)
                                 mo = mo.AddMonths(1);
                             mo = mo.AddDays(cd.RepaymentDay - 1);
-                            if (mo <= DateTime.Today.CastUtc())
+                            if (mo <= ClientDateTime.Today)
                                 continue;
 
                             yield return (mo, b.Fund);

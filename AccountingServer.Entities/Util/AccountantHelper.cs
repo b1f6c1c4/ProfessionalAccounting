@@ -45,7 +45,7 @@ namespace AccountingServer.Entities.Util
                 year--;
             }
 
-            return new DateTime(year, month, 1).AddMonths(1).AddDays(-1).CastUtc();
+            return new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(1).AddDays(-1);
         }
     }
 }

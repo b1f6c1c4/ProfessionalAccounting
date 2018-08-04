@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using AccountingServer.Entities;
 using AccountingServer.Http;
 using AccountingServer.Shell;
 using static AccountingServer.Http.HttpUtil;
@@ -28,6 +29,12 @@ namespace AccountingServer
 
             if (request.Method != "POST")
                 return new HttpResponse { ResponseCode = 405 };
+
+            if (!request.Header.ContainsKey("X-ClientDateTime") ||
+                !ClientDateTime.TryParse(request.Header["X-ClientDateTime"], out var timestamp))
+                return new HttpResponse { ResponseCode = 400 };
+
+            ClientDateTime.Set(timestamp);
 
             switch (request.BaseUri)
             {

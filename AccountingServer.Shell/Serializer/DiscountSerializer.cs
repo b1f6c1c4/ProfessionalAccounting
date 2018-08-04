@@ -89,7 +89,7 @@ namespace AccountingServer.Shell.Serializer
         private Voucher GetVoucher(ref string expr)
         {
             Parsing.TrimStartComment(ref expr);
-            DateTime? date = DateTime.Today.CastUtc();
+            DateTime? date = ClientDateTime.Today;
             try
             {
                 date = ParsingF.UniqueTime(ref expr);

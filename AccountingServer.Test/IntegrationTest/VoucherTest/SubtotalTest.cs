@@ -25,7 +25,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
             m_Adapter.Upsert(
                 new Voucher
                     {
-                        Date = new DateTime(2016, 12, 31).CastUtc(),
+                        Date = new DateTime(2016, 12, 31, 0, 0, 0, DateTimeKind.Utc),
                         Remark = "xrmk1",
                         Details = new List<VoucherDetail>
                             {
@@ -53,7 +53,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
             m_Adapter.Upsert(
                 new Voucher
                     {
-                        Date = new DateTime(2017, 02, 01).CastUtc(),
+                        Date = new DateTime(2017, 02, 01, 0, 0, 0, DateTimeKind.Utc),
                         Remark = "xrmk2",
                         Details = new List<VoucherDetail>
                             {

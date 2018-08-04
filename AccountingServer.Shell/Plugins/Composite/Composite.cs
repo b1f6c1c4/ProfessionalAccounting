@@ -47,20 +47,20 @@ namespace AccountingServer.Shell.Plugins.Composite
         public static DateFilter DateRange(int day)
         {
             DateFilter the;
-            var now = DateTime.Today;
+            var now = ClientDateTime.Today;
             if (day == 0)
                 return new DateFilter(
-                    new DateTime(now.Year, now.Month, 1).CastUtc(),
-                    new DateTime(now.Year, now.Month, 1).AddMonths(1).AddDays(-1).CastUtc());
+                    new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc),
+                    new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(1).AddDays(-1));
 
             if (now.Day > day)
                 the = new DateFilter(
-                    new DateTime(now.Year, now.Month, day + 1).CastUtc(),
-                    new DateTime(now.Year, now.Month, day).AddMonths(1).CastUtc());
+                    new DateTime(now.Year, now.Month, day + 1, 0, 0, 0, DateTimeKind.Utc),
+                    new DateTime(now.Year, now.Month, day, 0, 0, 0, DateTimeKind.Utc).AddMonths(1));
             else
                 the = new DateFilter(
-                    new DateTime(now.Year, now.Month, day + 1).AddMonths(-1).CastUtc(),
-                    new DateTime(now.Year, now.Month, day).CastUtc());
+                    new DateTime(now.Year, now.Month, day + 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-1),
+                    new DateTime(now.Year, now.Month, day, 0, 0, 0, DateTimeKind.Utc));
             return the;
         }
 
