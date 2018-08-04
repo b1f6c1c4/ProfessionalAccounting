@@ -26,9 +26,6 @@ namespace AccountingServer.BLL.Parsing
             }
 
             /// <inheritdoc />
-            public void Accept(IQueryVisitor<IDistributedQueryAtom> visitor) => visitor.Visit(this);
-
-            /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
 
             /// <summary>
@@ -106,9 +103,6 @@ namespace AccountingServer.BLL.Parsing
             public IQueryCompunded<IDistributedQueryAtom> Filter2 => distributedQ1();
 
             /// <inheritdoc />
-            public void Accept(IQueryVisitor<IDistributedQueryAtom> visitor) => visitor.Visit(this);
-
-            /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
@@ -122,9 +116,6 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IDistributedQueryAtom> Filter2 => distributedQ1();
-
-            /// <inheritdoc />
-            public void Accept(IQueryVisitor<IDistributedQueryAtom> visitor) => visitor.Visit(this);
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
@@ -141,9 +132,6 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IDistributedQueryAtom> Filter2 => null;
-
-            /// <inheritdoc />
-            public void Accept(IQueryVisitor<IDistributedQueryAtom> visitor) => visitor.Visit(this);
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);

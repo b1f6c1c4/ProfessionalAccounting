@@ -13,7 +13,6 @@ namespace AccountingServer.BLL.Util
 
         public IEnumerable<ISubtotalResult> Items => TheItems?.AsReadOnly();
 
-        public abstract void Accept(ISubtotalVisitor visitor);
         public abstract T Accept<T>(ISubtotalVisitor<T> visitor);
     }
 
@@ -25,7 +24,6 @@ namespace AccountingServer.BLL.Util
 
     internal class SubtotalRoot : SubtotalResult, ISubtotalRoot
     {
-        public override void Accept(ISubtotalVisitor visitor) => visitor.Visit(this);
         public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
     }
 
@@ -41,7 +39,6 @@ namespace AccountingServer.BLL.Util
 
         public DateTime? Date { get; }
 
-        public override void Accept(ISubtotalVisitor visitor) => visitor.Visit(this);
         public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
     }
 
@@ -59,7 +56,6 @@ namespace AccountingServer.BLL.Util
         public SubtotalCurrency(string currency) => Currency = currency;
         public string Currency { get; }
 
-        public override void Accept(ISubtotalVisitor visitor) => visitor.Visit(this);
         public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
     }
 
@@ -74,7 +70,6 @@ namespace AccountingServer.BLL.Util
         public SubtotalTitle(int? title) => Title = title;
         public int? Title { get; }
 
-        public override void Accept(ISubtotalVisitor visitor) => visitor.Visit(this);
         public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
     }
 
@@ -89,7 +84,6 @@ namespace AccountingServer.BLL.Util
         public SubtotalSubTitle(int? subTitle) => SubTitle = subTitle;
         public int? SubTitle { get; }
 
-        public override void Accept(ISubtotalVisitor visitor) => visitor.Visit(this);
         public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
     }
 
@@ -104,7 +98,6 @@ namespace AccountingServer.BLL.Util
         public SubtotalContent(string content) => Content = content;
         public string Content { get; }
 
-        public override void Accept(ISubtotalVisitor visitor) => visitor.Visit(this);
         public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
     }
 
@@ -119,7 +112,6 @@ namespace AccountingServer.BLL.Util
         public SubtotalRemark(string remark) => Remark = remark;
         public string Remark { get; }
 
-        public override void Accept(ISubtotalVisitor visitor) => visitor.Visit(this);
         public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
     }
 

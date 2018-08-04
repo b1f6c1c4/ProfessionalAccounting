@@ -17,7 +17,6 @@ namespace AccountingServer.BLL.Util
 
         public IQueryCompunded<TAtom> Filter2 { get; }
 
-        public void Accept(IQueryVisitor<TAtom> visitor) => visitor.Visit(this);
         public T Accept<T>(IQueryVisitor<TAtom, T> visitor) => visitor.Visit(this);
     }
 }

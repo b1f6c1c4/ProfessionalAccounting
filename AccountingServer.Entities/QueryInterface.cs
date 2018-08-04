@@ -3,6 +3,11 @@ using System.Collections.Generic;
 
 namespace AccountingServer.Entities
 {
+    public sealed class Nothing
+    {
+        public static Nothing AtAll => null;
+    }
+
     /// <summary>
     ///     运算符类型
     /// </summary>
@@ -48,12 +53,6 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     二次分配
         /// </summary>
-        /// <param name="visitor">访问者</param>
-        void Accept(IQueryVisitor<TAtom> visitor);
-
-        /// <summary>
-        ///     二次分配
-        /// </summary>
         /// <typeparam name="T">返回值类型</typeparam>
         /// <param name="visitor">访问者</param>
         /// <returns>访问者返回值</returns>
@@ -80,17 +79,6 @@ namespace AccountingServer.Entities
         ///     第二个检索式
         /// </summary>
         IQueryCompunded<TAtom> Filter2 { get; }
-    }
-
-    /// <summary>
-    ///     一般检索式访问者
-    /// </summary>
-    /// <typeparam name="TAtom">原子检索式的类型</typeparam>
-    public interface IQueryVisitor<TAtom> where TAtom : class
-    {
-        void Visit(TAtom query);
-
-        void Visit(IQueryAry<TAtom> query);
     }
 
     /// <summary>

@@ -11,13 +11,6 @@ namespace AccountingServer.Shell.Plugins.Composite
         public string Name { get; set; }
 
         public abstract T Accept<T>(IInquiryVisitor<T> visitor);
-        public abstract void Accept(IInquiryVisitor visitor);
-    }
-
-    public interface IInquiryVisitor
-    {
-        void Visit(InquiriesHub inq);
-        void Visit(Inquiry inq);
     }
 
     public interface IInquiryVisitor<out T>
@@ -51,7 +44,6 @@ namespace AccountingServer.Shell.Plugins.Composite
         public List<BaseInquiry> Inquiries;
 
         public override T Accept<T>(IInquiryVisitor<T> visitor) => visitor.Visit(this);
-        public override void Accept(IInquiryVisitor visitor) => visitor.Visit(this);
     }
 
     [Serializable]
@@ -88,6 +80,5 @@ namespace AccountingServer.Shell.Plugins.Composite
         public bool ByRemark { get; set; }
 
         public override T Accept<T>(IInquiryVisitor<T> visitor) => visitor.Visit(this);
-        public override void Accept(IInquiryVisitor visitor) => visitor.Visit(this);
     }
 }

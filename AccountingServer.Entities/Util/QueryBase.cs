@@ -12,7 +12,6 @@ namespace AccountingServer.Entities.Util
 
         public int Dir => 0;
 
-        public void Accept(IQueryVisitor<IDetailQueryAtom> visitor) => visitor.Visit(this);
         public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
     }
 
@@ -29,7 +28,6 @@ namespace AccountingServer.Entities.Util
 
         public IQueryCompunded<IDetailQueryAtom> DetailFilter => DetailQueryUnconstrained.Instance;
 
-        public void Accept(IQueryVisitor<IVoucherQueryAtom> visitor) => visitor.Visit(this);
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
     }
 
@@ -40,7 +38,6 @@ namespace AccountingServer.Entities.Util
 
         public IDistributed Filter { get; } = new TheFilter();
 
-        public void Accept(IQueryVisitor<IDistributedQueryAtom> visitor) => visitor.Visit(this);
         public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
 
         private sealed class TheFilter : IDistributed

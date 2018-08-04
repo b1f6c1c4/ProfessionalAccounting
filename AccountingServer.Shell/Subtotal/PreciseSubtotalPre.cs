@@ -40,55 +40,65 @@ namespace AccountingServer.Shell.Subtotal
             VisitChildren(sub);
         }
 
-        public override void Visit(ISubtotalRoot sub) => ShowSubtotal(sub);
+        public override Nothing Visit(ISubtotalRoot sub)
+        {
+            ShowSubtotal(sub);
+            return Nothing.AtAll;
+        }
 
-        public override void Visit(ISubtotalDate sub)
+        public override Nothing Visit(ISubtotalDate sub)
         {
             var prev = m_Path;
             m_Path = Merge(m_Path, sub.Date.AsDate(sub.Level));
             ShowSubtotal(sub);
             m_Path = prev;
+            return Nothing.AtAll;
         }
 
-        public override void Visit(ISubtotalCurrency sub)
+        public override Nothing Visit(ISubtotalCurrency sub)
         {
             var prev = m_Path;
             m_Path = Merge(m_Path, $"@{sub.Currency}");
             ShowSubtotal(sub);
             m_Path = prev;
+            return Nothing.AtAll;
         }
 
-        public override void Visit(ISubtotalTitle sub)
+        public override Nothing Visit(ISubtotalTitle sub)
         {
             var prev = m_Path;
             m_Path = Merge(m_Path, TitleManager.GetTitleName(sub.Title));
             m_Title = sub.Title;
             ShowSubtotal(sub);
             m_Path = prev;
+            return Nothing.AtAll;
         }
 
-        public override void Visit(ISubtotalSubTitle sub)
+        public override Nothing Visit(ISubtotalSubTitle sub)
         {
             var prev = m_Path;
             m_Path = Merge(m_Path, TitleManager.GetTitleName(m_Title, sub.SubTitle));
             ShowSubtotal(sub);
             m_Path = prev;
+            return Nothing.AtAll;
         }
 
-        public override void Visit(ISubtotalContent sub)
+        public override Nothing Visit(ISubtotalContent sub)
         {
             var prev = m_Path;
             m_Path = Merge(m_Path, sub.Content);
             ShowSubtotal(sub);
             m_Path = prev;
+            return Nothing.AtAll;
         }
 
-        public override void Visit(ISubtotalRemark sub)
+        public override Nothing Visit(ISubtotalRemark sub)
         {
             var prev = m_Path;
             m_Path = Merge(m_Path, sub.Remark);
             ShowSubtotal(sub);
             m_Path = prev;
+            return Nothing.AtAll;
         }
     }
 }

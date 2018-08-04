@@ -23,42 +23,52 @@ namespace AccountingServer.Shell.Subtotal
             VisitChildren(sub);
         }
 
-        public override void Visit(ISubtotalRoot sub) => ShowSubtotal(sub);
+        public override Nothing Visit(ISubtotalRoot sub)
+        {
+            ShowSubtotal(sub);
+            return Nothing.AtAll;
+        }
 
-        public override void Visit(ISubtotalDate sub)
+        public override Nothing Visit(ISubtotalDate sub)
         {
             Sb.AppendLine(sub.Date.AsDate());
             ShowSubtotal(sub);
+            return Nothing.AtAll;
         }
 
-        public override void Visit(ISubtotalCurrency sub)
+        public override Nothing Visit(ISubtotalCurrency sub)
         {
             m_Path.Currency = sub.Currency;
             ShowSubtotal(sub);
+            return Nothing.AtAll;
         }
 
-        public override void Visit(ISubtotalTitle sub)
+        public override Nothing Visit(ISubtotalTitle sub)
         {
             m_Path.Title = sub.Title;
             ShowSubtotal(sub);
+            return Nothing.AtAll;
         }
 
-        public override void Visit(ISubtotalSubTitle sub)
+        public override Nothing Visit(ISubtotalSubTitle sub)
         {
             m_Path.SubTitle = sub.SubTitle;
             ShowSubtotal(sub);
+            return Nothing.AtAll;
         }
 
-        public override void Visit(ISubtotalContent sub)
+        public override Nothing Visit(ISubtotalContent sub)
         {
             m_Path.Content = sub.Content;
             ShowSubtotal(sub);
+            return Nothing.AtAll;
         }
 
-        public override void Visit(ISubtotalRemark sub)
+        public override Nothing Visit(ISubtotalRemark sub)
         {
             m_Path.Remark = sub.Remark;
             ShowSubtotal(sub);
+            return Nothing.AtAll;
         }
     }
 }
