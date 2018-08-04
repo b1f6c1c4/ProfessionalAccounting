@@ -18,10 +18,10 @@ namespace AccountingServer.Shell
     /// </summary>
     internal class Succeed : IQueryResult
     {
-        public override string ToString() => "OK";
-
         /// <inheritdoc />
         public bool AutoReturn => true;
+
+        public override string ToString() => "OK";
     }
 
     internal class NumberAffected : IQueryResult
@@ -37,10 +37,10 @@ namespace AccountingServer.Shell
         /// <param name="n"></param>
         public NumberAffected(long n) => m_N = n;
 
-        public override string ToString() => m_N.ToString(CultureInfo.InvariantCulture);
-
         /// <inheritdoc />
         public bool AutoReturn => true;
+
+        public override string ToString() => m_N.ToString(CultureInfo.InvariantCulture);
     }
 
     /// <summary>
@@ -58,10 +58,10 @@ namespace AccountingServer.Shell
         /// </summary>
         protected Text(string text) => m_Text = text;
 
-        public override string ToString() => m_Text;
-
         /// <inheritdoc />
         public abstract bool AutoReturn { get; }
+
+        public override string ToString() => m_Text;
     }
 
     /// <summary>

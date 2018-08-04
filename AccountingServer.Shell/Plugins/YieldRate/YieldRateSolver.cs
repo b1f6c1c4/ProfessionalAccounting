@@ -11,11 +11,6 @@ namespace AccountingServer.Shell.Plugins.YieldRate
     internal class YieldRateSolver
     {
         /// <summary>
-        ///     期数
-        /// </summary>
-        private readonly int m_N;
-
-        /// <summary>
         ///     日期
         /// </summary>
         private readonly double[] m_Delta;
@@ -24,6 +19,11 @@ namespace AccountingServer.Shell.Plugins.YieldRate
         ///     现金流
         /// </summary>
         private readonly double[] m_Fund;
+
+        /// <summary>
+        ///     期数
+        /// </summary>
+        private readonly int m_N;
 
         public YieldRateSolver(IEnumerable<double> delta, IEnumerable<double> fund)
         {

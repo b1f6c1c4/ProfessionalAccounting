@@ -13,6 +13,9 @@ namespace AccountingServer.Shell.Subtotal
         /// </summary>
         private readonly bool m_WithSubtotal;
 
+        private string m_Path = "";
+        private int? m_Title;
+
         public PreciseSubtotalPre(bool withSubtotal = true) => m_WithSubtotal = withSubtotal;
 
         /// <summary>
@@ -29,9 +32,6 @@ namespace AccountingServer.Shell.Subtotal
 
             return path + interval + token;
         }
-
-        private string m_Path = "";
-        private int? m_Title;
 
         private void ShowSubtotal(ISubtotalResult sub)
         {

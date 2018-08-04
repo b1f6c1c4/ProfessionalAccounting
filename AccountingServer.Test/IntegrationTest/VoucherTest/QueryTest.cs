@@ -17,36 +17,6 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         protected abstract bool RunQuery(IQueryCompunded<IVoucherQueryAtom> query);
         protected virtual void ResetVouchers() { }
 
-        protected class DataProvider : IEnumerable<object[]>
-        {
-            private static readonly List<object[]> Data = new List<object[]>
-                {
-                    new object[] { true, "" },
-                    new object[] { true, "^59278b516c2f021e80f51912^[null]Uncertain%rmk%" },
-                    new object[] { true, "{^59278b516c2f021e80f51912^}-{null}*{Devalue}" },
-                    new object[] { true, "-{%rrr%}+{20170101}" },
-                    new object[] { false, "{^59278b516c2f021e80f51911^}+{G}*{%asdf%}" },
-                    new object[] { true, "@JPY T100105'cont1'>" },
-                    new object[] { true, "@JPY T123400\"remk2\"=-123.45" },
-                    new object[] { true, "@USD T2345'cont3'<" },
-                    new object[] { true, "@USD T3456'cont4'\"remk4\"=77.66" },
-                    new object[] { true, "{(T1234+T345605)*(''+'cont3')}-{Depreciation}-{Carry}" },
-                    new object[] { false, "T1002+'  '''+\" rmk\"+=77.66001" },
-                    new object[] { true, "(@USD+@JPY)*(=-123.45+>)+T2345 A" },
-                    new object[] { false, "(@USD+@JPY)*=-123.45+T2345 A" },
-                    new object[] { true, "{T1001+(T1234+(T2345)+T3456) A}-{AnnualCarry}" },
-                    new object[] { true, "+(T1001+(T1234+T2345))+T3456 A" },
-                    new object[] { true, "{((<+>)*())+=1*=2 A}-{Ordinary}" },
-                    new object[] { true, "-=1*=2 A" },
-                    new object[] { true, "{T1001 null Uncertain}*{T2345 G}-{T3456 A}" },
-                    new object[] { false, "{20170101~20180101}+{~~20160101}" },
-                    new object[] { true, "{20170101~~20180101}*{~20160101}" }
-                };
-
-            public IEnumerator<object[]> GetEnumerator() => Data.GetEnumerator();
-            IEnumerator IEnumerable.GetEnumerator() => Data.GetEnumerator();
-        }
-
         public virtual void RunTestA(bool expected, string query)
         {
             var voucher = new Voucher
@@ -95,6 +65,36 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
             PrepareVoucher(voucher);
             Assert.Equal(expected, RunQuery(ParsingF.VoucherQuery(query)));
             ResetVouchers();
+        }
+
+        protected class DataProvider : IEnumerable<object[]>
+        {
+            private static readonly List<object[]> Data = new List<object[]>
+                {
+                    new object[] { true, "" },
+                    new object[] { true, "^59278b516c2f021e80f51912^[null]Uncertain%rmk%" },
+                    new object[] { true, "{^59278b516c2f021e80f51912^}-{null}*{Devalue}" },
+                    new object[] { true, "-{%rrr%}+{20170101}" },
+                    new object[] { false, "{^59278b516c2f021e80f51911^}+{G}*{%asdf%}" },
+                    new object[] { true, "@JPY T100105'cont1'>" },
+                    new object[] { true, "@JPY T123400\"remk2\"=-123.45" },
+                    new object[] { true, "@USD T2345'cont3'<" },
+                    new object[] { true, "@USD T3456'cont4'\"remk4\"=77.66" },
+                    new object[] { true, "{(T1234+T345605)*(''+'cont3')}-{Depreciation}-{Carry}" },
+                    new object[] { false, "T1002+'  '''+\" rmk\"+=77.66001" },
+                    new object[] { true, "(@USD+@JPY)*(=-123.45+>)+T2345 A" },
+                    new object[] { false, "(@USD+@JPY)*=-123.45+T2345 A" },
+                    new object[] { true, "{T1001+(T1234+(T2345)+T3456) A}-{AnnualCarry}" },
+                    new object[] { true, "+(T1001+(T1234+T2345))+T3456 A" },
+                    new object[] { true, "{((<+>)*())+=1*=2 A}-{Ordinary}" },
+                    new object[] { true, "-=1*=2 A" },
+                    new object[] { true, "{T1001 null Uncertain}*{T2345 G}-{T3456 A}" },
+                    new object[] { false, "{20170101~20180101}+{~~20160101}" },
+                    new object[] { true, "{20170101~~20180101}*{~20160101}" }
+                };
+
+            public IEnumerator<object[]> GetEnumerator() => Data.GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() => Data.GetEnumerator();
         }
     }
 

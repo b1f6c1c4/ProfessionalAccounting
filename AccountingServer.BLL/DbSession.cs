@@ -9,12 +9,12 @@ namespace AccountingServer.BLL
 {
     public class DbSession
     {
+        public DbSession() => Db = Facade.Create();
+
         /// <summary>
         ///     数据库访问
         /// </summary>
         public IDbAdapter Db { private get; set; }
-
-        public DbSession() => Db = Facade.Create();
 
         private static int Compare<T>(T? lhs, T? rhs)
             where T : struct, IComparable<T>

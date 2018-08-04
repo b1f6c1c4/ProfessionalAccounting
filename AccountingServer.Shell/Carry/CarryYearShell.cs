@@ -36,6 +36,9 @@ namespace AccountingServer.Shell.Carry
             }
         }
 
+        /// <inheritdoc />
+        public bool IsExecutable(string expr) => expr.Initital() == "caa";
+
         /// <summary>
         ///     执行摊销
         /// </summary>
@@ -78,9 +81,6 @@ namespace AccountingServer.Shell.Carry
             var cnt = m_Accountant.DeleteVouchers($"{rng.AsDateRange()} AnnualCarry");
             return new NumberAffected(cnt);
         }
-
-        /// <inheritdoc />
-        public bool IsExecutable(string expr) => expr.Initital() == "caa";
 
 
         /// <summary>

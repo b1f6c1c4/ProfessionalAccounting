@@ -11,9 +11,9 @@ namespace AccountingServer.Entities
     public class DateFilter : IDateRange
     {
         /// <summary>
-        ///     是否只允许无日期（若为<c>true</c>，则无须考虑<c>Nullable</c>）
+        ///     截止日期（含）
         /// </summary>
-        public bool NullOnly;
+        public DateTime? EndDate;
 
         /// <summary>
         ///     是否允许无日期
@@ -21,14 +21,22 @@ namespace AccountingServer.Entities
         public bool Nullable;
 
         /// <summary>
+        ///     是否只允许无日期（若为<c>true</c>，则无须考虑<c>Nullable</c>）
+        /// </summary>
+        public bool NullOnly;
+
+        /// <summary>
         ///     开始日期（含）
         /// </summary>
         public DateTime? StartDate;
 
-        /// <summary>
-        ///     截止日期（含）
-        /// </summary>
-        public DateTime? EndDate;
+        public DateFilter(DateTime? startDate, DateTime? endDate)
+        {
+            NullOnly = false;
+            Nullable = !startDate.HasValue;
+            StartDate = startDate;
+            EndDate = endDate;
+        }
 
         /// <summary>
         ///     任意日期
@@ -44,14 +52,6 @@ namespace AccountingServer.Entities
         ///     非无日期
         /// </summary>
         public static DateFilter TheNotNull { get; } = new DateFilter(null, null) { Nullable = false };
-
-        public DateFilter(DateTime? startDate, DateTime? endDate)
-        {
-            NullOnly = false;
-            Nullable = !startDate.HasValue;
-            StartDate = startDate;
-            EndDate = endDate;
-        }
 
         /// <inheritdoc />
         public DateFilter Range => this;
@@ -115,6 +115,14 @@ namespace AccountingServer.Entities
     /// </summary>
     public class ClientDateTime
     {
+        private static readonly ThreadLocal<ClientDateTime> Instances = new ThreadLocal<ClientDateTime>();
+
+        private readonly DateTime m_Today;
+
+        private ClientDateTime(DateTime timestamp) => m_Today = timestamp.Date;
+
+        public static DateTime Today => Instances.Value?.m_Today ?? DateTime.Today;
+
         // ReSharper disable once UnusedMember.Global
         public static DateTime Parse(string str) => DateTime.Parse(
             str,
@@ -142,14 +150,6 @@ namespace AccountingServer.Entities
             null,
             DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal,
             out result);
-
-        private static readonly ThreadLocal<ClientDateTime> Instances = new ThreadLocal<ClientDateTime>();
-
-        private readonly DateTime m_Today;
-
-        private ClientDateTime(DateTime timestamp) => m_Today = timestamp.Date;
-
-        public static DateTime Today => Instances.Value?.m_Today ?? DateTime.Today;
 
         public static void Set(DateTime timestamp) { Instances.Value = new ClientDateTime(timestamp); }
     }

@@ -12,12 +12,12 @@ namespace AccountingServer.Shell.Subtotal
 
         private string m_Currency;
 
+        private int? m_Title;
+        private string Idents => new string(' ', (Depth > 0 ? Depth - 1 : 0) * Ident);
+
         private string Ts(double f) => Ga == GatheringType.Count
             ? f.ToString("N0")
             : f.AsCurrency(m_Currency);
-
-        private int? m_Title;
-        private string Idents => new string(' ', (Depth > 0 ? Depth - 1 : 0) * Ident);
 
         private void ShowSubtotal(ISubtotalResult sub, string str)
         {

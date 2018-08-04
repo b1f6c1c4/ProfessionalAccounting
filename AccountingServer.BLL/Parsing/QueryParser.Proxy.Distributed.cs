@@ -10,6 +10,27 @@ namespace AccountingServer.BLL.Parsing
     {
         public partial class DistributedQAtomContext : IDistributedQueryAtom
         {
+            /// <inheritdoc />
+            public IDistributed Filter
+            {
+                get
+                {
+                    var filter = new MyDistributedFilter
+                        {
+                            ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : (Guid?)null,
+                            Name = DollarQuotedString()?.GetText().Dequotation(),
+                            Remark = PercentQuotedString()?.GetText().Dequotation()
+                        };
+                    return filter;
+                }
+            }
+
+            /// <inheritdoc />
+            public void Accept(IQueryVisitor<IDistributedQueryAtom> visitor) => visitor.Visit(this);
+
+            /// <inheritdoc />
+            public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
+
             /// <summary>
             ///     分期过滤器
             /// </summary>
@@ -34,27 +55,6 @@ namespace AccountingServer.BLL.Parsing
                 /// <inheritdoc />
                 public IEnumerable<IDistributedItem> TheSchedule { get; set; }
             }
-
-            /// <inheritdoc />
-            public IDistributed Filter
-            {
-                get
-                {
-                    var filter = new MyDistributedFilter
-                        {
-                            ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : (Guid?)null,
-                            Name = DollarQuotedString()?.GetText().Dequotation(),
-                            Remark = PercentQuotedString()?.GetText().Dequotation()
-                        };
-                    return filter;
-                }
-            }
-
-            /// <inheritdoc />
-            public void Accept(IQueryVisitor<IDistributedQueryAtom> visitor) => visitor.Visit(this);
-
-            /// <inheritdoc />
-            public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
         public partial class DistributedQContext : IQueryAry<IDistributedQueryAtom>

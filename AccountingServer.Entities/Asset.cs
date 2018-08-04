@@ -110,30 +110,16 @@ namespace AccountingServer.Entities
         /// </summary>
         public const string IgnoranceMark = "reconciliation";
 
-        /// <inheritdoc />
-        public Guid? ID { get; set; }
-
         /// <summary>
         ///     编号的标准存储格式
         /// </summary>
         // ReSharper disable once UnusedMember.Global
         public string StringID { get => ID.ToString().ToUpperInvariant(); set => ID = Guid.Parse(value); }
 
-        /// <inheritdoc />
-        public string Name { get; set; }
-
-        /// <inheritdoc />
-        public DateTime? Date { get; set; }
-
         /// <summary>
         ///     币种
         /// </summary>
         public string Currency { get; set; }
-
-        /// <summary>
-        ///     资产原值
-        /// </summary>
-        public double? Value { get; set; }
 
         /// <summary>
         ///     预计净残值
@@ -189,6 +175,20 @@ namespace AccountingServer.Entities
         ///     资产折旧计算表
         /// </summary>
         public List<AssetItem> Schedule { get; set; }
+
+        /// <inheritdoc />
+        public Guid? ID { get; set; }
+
+        /// <inheritdoc />
+        public string Name { get; set; }
+
+        /// <inheritdoc />
+        public DateTime? Date { get; set; }
+
+        /// <summary>
+        ///     资产原值
+        /// </summary>
+        public double? Value { get; set; }
 
         /// <inheritdoc />
         public string Remark { get; set; }

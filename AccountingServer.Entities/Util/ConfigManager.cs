@@ -23,11 +23,6 @@ namespace AccountingServer.Entities.Util
     public class ConfigManager<T> : IConfigManager<T>
     {
         /// <summary>
-        ///     文件名
-        /// </summary>
-        private readonly string m_FileName;
-
-        /// <summary>
         ///     配置文件
         /// </summary>
         private readonly T m_Config;
@@ -36,6 +31,11 @@ namespace AccountingServer.Entities.Util
         ///     读取配置文件时发生的错误
         /// </summary>
         private readonly Exception m_Exception;
+
+        /// <summary>
+        ///     文件名
+        /// </summary>
+        private readonly string m_FileName;
 
         /// <summary>
         ///     读取配置文件；若发生错误，保存在<c>m_Exception</c>中

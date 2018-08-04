@@ -149,16 +149,16 @@ namespace AccountingServer.Shell
                     };
         }
 
+        /// <summary>
+        ///     首字母
+        /// </summary>
+        protected abstract string Initial { get; }
+
         /// <inheritdoc />
         public IQueryResult Execute(string expr) => m_Composer.Execute(expr.Rest());
 
         /// <inheritdoc />
         public bool IsExecutable(string expr) => expr.Initital() == Initial;
-
-        /// <summary>
-        ///     首字母
-        /// </summary>
-        protected abstract string Initial { get; }
 
         /// <summary>
         ///     执行列表表达式

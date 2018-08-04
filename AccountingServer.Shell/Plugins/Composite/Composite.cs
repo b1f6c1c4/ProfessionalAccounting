@@ -17,10 +17,10 @@ namespace AccountingServer.Shell.Plugins.Composite
     /// </summary>
     internal class Composite : PluginBase
     {
+        public Composite(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
+
         public static IConfigManager<CompositeTemplates> Templates { private get; set; } =
             new ConfigManager<CompositeTemplates>("Composite.xml");
-
-        public Composite(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
 
         /// <inheritdoc />
         public override IQueryResult Execute(string expr)
@@ -107,9 +107,9 @@ namespace AccountingServer.Shell.Plugins.Composite
 
     internal class InquiriesVisitor : IInquiryVisitor<double>
     {
-        private readonly StringBuilder m_Sb = new StringBuilder();
-        private readonly DateFilter m_Rng;
         private readonly Accountant m_Accountant;
+        private readonly DateFilter m_Rng;
+        private readonly StringBuilder m_Sb = new StringBuilder();
 
         private string m_Path = "";
 
@@ -225,15 +225,15 @@ namespace AccountingServer.Shell.Plugins.Composite
         private readonly IFundFormatter m_Formatter;
         private readonly bool m_HideContent;
 
+        private string m_Path;
+        private int? m_Title;
+
         public SubtotalVisitor(string path, IFundFormatter formatter, bool hideContent)
         {
             m_Path = path;
             m_Formatter = formatter;
             m_HideContent = hideContent;
         }
-
-        private string m_Path;
-        private int? m_Title;
 
         private void ShowSubtotal(ISubtotalResult sub)
         {

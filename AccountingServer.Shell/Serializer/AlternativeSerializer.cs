@@ -21,6 +21,15 @@ namespace AccountingServer.Shell.Serializer
             m_Secondary = secondary;
         }
 
+        public string PresentVoucher(Voucher voucher) => Run(s => s.PresentVoucher(voucher));
+        public Voucher ParseVoucher(string str) => Run(s => s.ParseVoucher(str));
+        public string PresentVoucherDetail(VoucherDetail detail) => Run(s => s.PresentVoucherDetail(detail));
+        public VoucherDetail ParseVoucherDetail(string str) => Run(s => s.ParseVoucherDetail(str));
+        public string PresentAsset(Asset asset) => Run(s => s.PresentAsset(asset));
+        public Asset ParseAsset(string str) => Run(s => s.ParseAsset(str));
+        public string PresentAmort(Amortization amort) => Run(s => s.PresentAmort(amort));
+        public Amortization ParseAmort(string str) => Run(s => s.ParseAmort(str));
+
         private TOut Run<TOut>(Func<IEntitySerializer, TOut> func)
         {
             try
@@ -32,14 +41,5 @@ namespace AccountingServer.Shell.Serializer
                 return func(m_Secondary);
             }
         }
-
-        public string PresentVoucher(Voucher voucher) => Run(s => s.PresentVoucher(voucher));
-        public Voucher ParseVoucher(string str) => Run(s => s.ParseVoucher(str));
-        public string PresentVoucherDetail(VoucherDetail detail) => Run(s => s.PresentVoucherDetail(detail));
-        public VoucherDetail ParseVoucherDetail(string str) => Run(s => s.ParseVoucherDetail(str));
-        public string PresentAsset(Asset asset) => Run(s => s.PresentAsset(asset));
-        public Asset ParseAsset(string str) => Run(s => s.ParseAsset(str));
-        public string PresentAmort(Amortization amort) => Run(s => s.PresentAmort(amort));
-        public Amortization ParseAmort(string str) => Run(s => s.ParseAmort(str));
     }
 }
