@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using AccountingServer.Entities;
 
 namespace AccountingServer.Shell.Serializer
@@ -65,8 +67,56 @@ namespace AccountingServer.Shell.Serializer
         Amortization ParseAmort(string str);
     }
 
+    internal interface IEntitiesSerializer : IEntitySerializer
+    {
+        /// <summary>
+        ///     将多个记账凭证表示
+        /// </summary>
+        /// <param name="vouchers">记账凭证</param>
+        /// <returns>表示</returns>
+        string PresentVouchers(IEnumerable<Voucher> vouchers);
+
+        /// <summary>
+        ///     将多个细目表示
+        /// </summary>
+        /// <param name="details">细目</param>
+        /// <returns>表示</returns>
+        string PresentVoucherDetails(IEnumerable<VoucherDetail> details);
+    }
+
     internal static class SerializerHelper
     {
         public static string Wrap(this string str) => $"@{str}@" + Environment.NewLine;
+    }
+
+    internal class TrivialEntitiesSerializer : IEntitiesSerializer
+    {
+        private readonly IEntitySerializer m_Serializer;
+        public TrivialEntitiesSerializer(IEntitySerializer serializer) => m_Serializer = serializer;
+
+        public string PresentVouchers(IEnumerable<Voucher> vouchers)
+        {
+            var sb = new StringBuilder();
+            foreach (var voucher in vouchers)
+                sb.Append(m_Serializer.PresentVoucher(voucher).Wrap());
+            return sb.ToString();
+        }
+
+        public string PresentVoucherDetails(IEnumerable<VoucherDetail> details)
+        {
+            var sb = new StringBuilder();
+            foreach (var detail in details)
+                sb.Append(m_Serializer.PresentVoucherDetail(detail).Wrap());
+            return sb.ToString();
+        }
+
+        public string PresentVoucher(Voucher voucher) => m_Serializer.PresentVoucher(voucher);
+        public Voucher ParseVoucher(string str) => m_Serializer.ParseVoucher(str);
+        public string PresentVoucherDetail(VoucherDetail detail) => m_Serializer.PresentVoucherDetail(detail);
+        public VoucherDetail ParseVoucherDetail(string str) => m_Serializer.ParseVoucherDetail(str);
+        public string PresentAsset(Asset asset) => m_Serializer.PresentAsset(asset);
+        public Asset ParseAsset(string str) => m_Serializer.ParseAsset(str);
+        public string PresentAmort(Amortization amort) => m_Serializer.PresentAmort(amort);
+        public Amortization ParseAmort(string str) => m_Serializer.ParseAmort(str);
     }
 }
