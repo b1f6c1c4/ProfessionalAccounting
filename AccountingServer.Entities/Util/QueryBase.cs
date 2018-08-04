@@ -5,9 +5,8 @@ namespace AccountingServer.Entities.Util
 {
     public sealed class DetailQueryUnconstrained : IDetailQueryAtom
     {
-        public static IDetailQueryAtom Instance { get; } = new DetailQueryUnconstrained();
-
         private DetailQueryUnconstrained() { }
+        public static IDetailQueryAtom Instance { get; } = new DetailQueryUnconstrained();
 
         public VoucherDetail Filter { get; } = new VoucherDetail();
 
@@ -19,9 +18,8 @@ namespace AccountingServer.Entities.Util
 
     public sealed class VoucherQueryUnconstrained : IVoucherQueryAtom
     {
-        public static IVoucherQueryAtom Instance { get; } = new VoucherQueryUnconstrained();
-
         private VoucherQueryUnconstrained() { }
+        public static IVoucherQueryAtom Instance { get; } = new VoucherQueryUnconstrained();
 
         public bool ForAll => true;
 
@@ -37,9 +35,13 @@ namespace AccountingServer.Entities.Util
 
     public sealed class DistributedQueryUnconstrained : IDistributedQueryAtom
     {
+        private DistributedQueryUnconstrained() { }
         public static IDistributedQueryAtom Instance { get; } = new DistributedQueryUnconstrained();
 
-        private DistributedQueryUnconstrained() { }
+        public IDistributed Filter { get; } = new TheFilter();
+
+        public void Accept(IQueryVisitor<IDistributedQueryAtom> visitor) => visitor.Visit(this);
+        public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
 
         private sealed class TheFilter : IDistributed
         {
@@ -55,10 +57,5 @@ namespace AccountingServer.Entities.Util
 
             public IEnumerable<IDistributedItem> TheSchedule => null;
         }
-
-        public IDistributed Filter { get; } = new TheFilter();
-
-        public void Accept(IQueryVisitor<IDistributedQueryAtom> visitor) => visitor.Visit(this);
-        public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
     }
 }

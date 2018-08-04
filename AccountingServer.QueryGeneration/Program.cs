@@ -39,8 +39,10 @@ namespace AccountingServer.QueryGeneration
                         var t = tokens.Lt(++i);
                         if (t.Type == -1)
                             break;
-                        Console.WriteLine($"#{t.Type}({vocabulary.GetDisplayName(t.Type)})({vocabulary.GetLiteralName(t.Type)})({vocabulary.GetSymbolicName(t.Type)}) {t.Text}");
+                        Console.WriteLine(
+                            $"#{t.Type}({vocabulary.GetDisplayName(t.Type)})({vocabulary.GetLiteralName(t.Type)})({vocabulary.GetSymbolicName(t.Type)}) {t.Text}");
                     }
+
                     continue;
                 }
 

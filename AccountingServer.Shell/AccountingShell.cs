@@ -33,6 +33,9 @@ namespace AccountingServer.Shell
         /// <inheritdoc />
         public IQueryResult Execute(string expr) => Parse(expr)();
 
+        /// <inheritdoc />
+        public bool IsExecutable(string expr) => true;
+
         /// <summary>
         ///     解析表达式
         /// </summary>
@@ -102,9 +105,6 @@ namespace AccountingServer.Shell
             ParsingF.Eof(expr);
             return () => PresentSubtotal(res, trav);
         }
-
-        /// <inheritdoc />
-        public bool IsExecutable(string expr) => true;
 
         /// <summary>
         ///     执行记账凭证检索式并呈现记账凭证

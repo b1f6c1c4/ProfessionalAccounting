@@ -10,11 +10,10 @@ namespace AccountingServer.BLL
     /// </summary>
     public class Accountant
     {
-        private readonly DbSession m_Db;
+        private readonly AmortAccountant m_AmortAccountant;
 
         private readonly AssetAccountant m_AssetAccountant;
-
-        private readonly AmortAccountant m_AmortAccountant;
+        private readonly DbSession m_Db;
 
         public Accountant()
         {

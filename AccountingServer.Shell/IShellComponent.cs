@@ -31,14 +31,14 @@ namespace AccountingServer.Shell
     internal class ShellComponent : IShellComponent
     {
         /// <summary>
-        ///     首段字符串
-        /// </summary>
-        private readonly string m_Initial;
-
-        /// <summary>
         ///     操作
         /// </summary>
         private readonly Func<string, IQueryResult> m_Action;
+
+        /// <summary>
+        ///     首段字符串
+        /// </summary>
+        private readonly string m_Initial;
 
         public ShellComponent(string initial, Func<string, IQueryResult> action)
         {
@@ -60,6 +60,15 @@ namespace AccountingServer.Shell
     {
         private readonly List<IShellComponent> m_Components = new List<IShellComponent>();
 
+        /// <inheritdoc />
+        public IEnumerator GetEnumerator() => m_Components.GetEnumerator();
+
+        /// <inheritdoc />
+        public IQueryResult Execute(string expr) => FirstExecutable(expr).Execute(expr);
+
+        /// <inheritdoc />
+        public bool IsExecutable(string expr) => m_Components.Any(s => s.IsExecutable(expr));
+
         public void Add(IShellComponent shell) => m_Components.Add(shell);
 
         /// <summary>
@@ -69,15 +78,6 @@ namespace AccountingServer.Shell
         /// <returns>组件</returns>
         private IShellComponent FirstExecutable(string expr) =>
             m_Components.FirstOrDefault(s => s.IsExecutable(expr)) ?? throw new InvalidOperationException("表达式无效");
-
-        /// <inheritdoc />
-        public IQueryResult Execute(string expr) => FirstExecutable(expr).Execute(expr);
-
-        /// <inheritdoc />
-        public bool IsExecutable(string expr) => m_Components.Any(s => s.IsExecutable(expr));
-
-        /// <inheritdoc />
-        public IEnumerator GetEnumerator() => m_Components.GetEnumerator();
     }
 
     internal static class ExprHelper

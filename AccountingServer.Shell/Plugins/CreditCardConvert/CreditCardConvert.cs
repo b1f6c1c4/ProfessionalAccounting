@@ -30,25 +30,6 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
             return ParsingF.Optional(ref expr, "q") ? Query(content, ref expr) : Create(content, ref expr);
         }
 
-        private sealed class Trans
-        {
-            public DateTime? Date;
-            public string RawCurrency;
-            public double RawFund;
-            public Conversion TheConversion;
-        }
-
-        private sealed class Conversion
-        {
-            public DateTime? Date;
-
-            public string OriginCurrency;
-            public double OriginFund;
-
-            public string TargetCurrency;
-            public double TargetFund;
-        }
-
         private IQueryResult Query(string content, ref string expr)
         {
             var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
@@ -199,6 +180,25 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
             }
 
             return new EditableText(sb.ToString());
+        }
+
+        private sealed class Trans
+        {
+            public DateTime? Date;
+            public string RawCurrency;
+            public double RawFund;
+            public Conversion TheConversion;
+        }
+
+        private sealed class Conversion
+        {
+            public DateTime? Date;
+
+            public string OriginCurrency;
+            public double OriginFund;
+
+            public string TargetCurrency;
+            public double TargetFund;
         }
     }
 }

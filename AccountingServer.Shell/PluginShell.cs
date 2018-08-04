@@ -38,13 +38,6 @@ namespace AccountingServer.Shell
                     ["yr"] = new YieldRate(helper, serializer)
                 };
 
-        /// <summary>
-        ///     根据名称检索插件
-        /// </summary>
-        /// <param name="name">名称</param>
-        /// <returns>插件</returns>
-        private PluginBase GetPlugin(string name) => m_Plugins[name];
-
         /// <inheritdoc />
         public IQueryResult Execute(string expr)
         {
@@ -70,6 +63,13 @@ namespace AccountingServer.Shell
         public bool IsExecutable(string expr)
             => expr.StartsWith("$", StringComparison.Ordinal)
                 || expr.StartsWith("?$", StringComparison.Ordinal);
+
+        /// <summary>
+        ///     根据名称检索插件
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <returns>插件</returns>
+        private PluginBase GetPlugin(string name) => m_Plugins[name];
 
         /// <summary>
         ///     显示插件帮助

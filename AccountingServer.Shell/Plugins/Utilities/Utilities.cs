@@ -16,10 +16,10 @@ namespace AccountingServer.Shell.Plugins.Utilities
     /// </summary>
     internal class Utilities : PluginBase
     {
+        public Utilities(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
+
         public static IConfigManager<UtilTemplates> Templates { private get; set; } =
             new ConfigManager<UtilTemplates>("Util.xml");
-
-        public Utilities(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
 
         /// <inheritdoc />
         public override IQueryResult Execute(string expr)

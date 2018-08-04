@@ -100,9 +100,8 @@ namespace AccountingServer.Test
 
     public class MockConfigManager<T> : IConfigManager<T>
     {
-        public T Config { get; }
-
         public MockConfigManager(T config) => Config = config;
+        public T Config { get; }
     }
 
     public class MockExchange : IExchange, IEnumerable
@@ -110,9 +109,7 @@ namespace AccountingServer.Test
         private readonly Dictionary<Tuple<DateTime, string>, double> m_Dic =
             new Dictionary<Tuple<DateTime, string>, double>();
 
-        public void Add(DateTime date, string target, double val) => m_Dic.Add(
-            new Tuple<DateTime, string>(date, target),
-            val);
+        public IEnumerator GetEnumerator() => m_Dic.GetEnumerator();
 
         public double From(DateTime date, string target) => target == BaseCurrency.Now
             ? 1
@@ -122,6 +119,8 @@ namespace AccountingServer.Test
             ? 1
             : 1D / m_Dic[new Tuple<DateTime, string>(date, target)];
 
-        public IEnumerator GetEnumerator() => m_Dic.GetEnumerator();
+        public void Add(DateTime date, string target, double val) => m_Dic.Add(
+            new Tuple<DateTime, string>(date, target),
+            val);
     }
 }

@@ -41,45 +41,13 @@ namespace AccountingServer.Shell.Serializer
             return v;
         }
 
-        private sealed class Item : VoucherDetail
-        {
-            public double DiscountFund { get; set; }
+        /// <inheritdoc />
+        public virtual VoucherDetail ParseVoucherDetail(string expr) => throw new NotImplementedException();
 
-            public bool UseActualFund { get; set; }
-        }
-
-        private sealed class DetailEqualityComparer : IEqualityComparer<VoucherDetail>
-        {
-            public bool Equals(VoucherDetail x, VoucherDetail y)
-            {
-                if (x == null &&
-                    y == null)
-                    return true;
-                if (x == null ||
-                    y == null)
-                    return false;
-                if (x.Currency != y.Currency)
-                    return false;
-                if (x.Title != y.Title)
-                    return false;
-                if (x.SubTitle != y.SubTitle)
-                    return false;
-                if (x.Content != y.Content)
-                    return false;
-                if (x.Fund.HasValue != y.Fund.HasValue)
-                    return false;
-                if (x.Fund.HasValue &&
-                    y.Fund.HasValue)
-                    if (!(x.Fund.Value - y.Fund.Value).IsZero())
-                        return false;
-
-                return x.Remark == y.Remark;
-            }
-
-            public int GetHashCode(VoucherDetail obj) => obj.Currency?.GetHashCode() | obj.Title?.GetHashCode() |
-                obj.SubTitle?.GetHashCode() | obj.Content?.GetHashCode() | obj.Fund?.GetHashCode() |
-                obj.Remark?.GetHashCode() ?? 0;
-        }
+        public string PresentAsset(Asset asset) => throw new NotImplementedException();
+        public Asset ParseAsset(string str) => throw new NotImplementedException();
+        public string PresentAmort(Amortization amort) => throw new NotImplementedException();
+        public Amortization ParseAmort(string str) => throw new NotImplementedException();
 
         /// <summary>
         ///     解析记账凭证表达式
@@ -100,8 +68,8 @@ namespace AccountingServer.Shell.Serializer
             }
 
             var currency = Parsing.Token(ref expr, false, s => s.StartsWith("@", StringComparison.Ordinal))
-                ?.Substring(1)
-                .ToUpperInvariant()
+                    ?.Substring(1)
+                    .ToUpperInvariant()
                 ?? BaseCurrency.Now;
 
             var lst = new List<Item>();
@@ -184,9 +152,6 @@ namespace AccountingServer.Shell.Serializer
                     Details = resLst
                 };
         }
-
-        /// <inheritdoc />
-        public virtual VoucherDetail ParseVoucherDetail(string expr) => throw new NotImplementedException();
 
         private VoucherDetail ParseVoucherDetail(string currency, ref string expr)
         {
@@ -298,9 +263,44 @@ namespace AccountingServer.Shell.Serializer
         protected virtual bool AlternativeTitle(ref string expr, ICollection<string> lst, ref ITitle title) =>
             AbbrSerializer.GetAlternativeTitle(ref expr, lst, ref title);
 
-        public string PresentAsset(Asset asset) => throw new NotImplementedException();
-        public Asset ParseAsset(string str) => throw new NotImplementedException();
-        public string PresentAmort(Amortization amort) => throw new NotImplementedException();
-        public Amortization ParseAmort(string str) => throw new NotImplementedException();
+        private sealed class Item : VoucherDetail
+        {
+            public double DiscountFund { get; set; }
+
+            public bool UseActualFund { get; set; }
+        }
+
+        private sealed class DetailEqualityComparer : IEqualityComparer<VoucherDetail>
+        {
+            public bool Equals(VoucherDetail x, VoucherDetail y)
+            {
+                if (x == null &&
+                    y == null)
+                    return true;
+                if (x == null ||
+                    y == null)
+                    return false;
+                if (x.Currency != y.Currency)
+                    return false;
+                if (x.Title != y.Title)
+                    return false;
+                if (x.SubTitle != y.SubTitle)
+                    return false;
+                if (x.Content != y.Content)
+                    return false;
+                if (x.Fund.HasValue != y.Fund.HasValue)
+                    return false;
+                if (x.Fund.HasValue &&
+                    y.Fund.HasValue)
+                    if (!(x.Fund.Value - y.Fund.Value).IsZero())
+                        return false;
+
+                return x.Remark == y.Remark;
+            }
+
+            public int GetHashCode(VoucherDetail obj) => obj.Currency?.GetHashCode() | obj.Title?.GetHashCode() |
+                obj.SubTitle?.GetHashCode() | obj.Content?.GetHashCode() | obj.Fund?.GetHashCode() |
+                obj.Remark?.GetHashCode() ?? 0;
+        }
     }
 }

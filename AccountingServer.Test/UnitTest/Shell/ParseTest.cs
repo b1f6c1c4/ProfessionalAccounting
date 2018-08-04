@@ -6,14 +6,6 @@ namespace AccountingServer.Test.UnitTest.Shell
 {
     public class ParseTest
     {
-        [Fact]
-        public void EofTest()
-        {
-            ParseHelper.Eof(null, null);
-            ParseHelper.Eof(null, "");
-            Assert.Throws<ArgumentException>(() => ParseHelper.Eof(null, "asdf"));
-        }
-
         [Theory]
         [InlineData("", "\t // \r\n ")]
         [InlineData("simple test", "\t // \r\n simple test")]
@@ -128,6 +120,14 @@ namespace AccountingServer.Test.UnitTest.Shell
         {
             Assert.Equal(expected, ParseHelper.Quoted(null, ref expr, c));
             Assert.Equal(remain, expr);
+        }
+
+        [Fact]
+        public void EofTest()
+        {
+            ParseHelper.Eof(null, null);
+            ParseHelper.Eof(null, "");
+            Assert.Throws<ArgumentException>(() => ParseHelper.Eof(null, "asdf"));
         }
 
         [Fact]

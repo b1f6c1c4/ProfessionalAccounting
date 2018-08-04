@@ -14,6 +14,12 @@ namespace AccountingServer.Shell.Plugins.CashFlow
     [Serializable]
     public class CashAccount
     {
+        [XmlArray("Items")]
+        [XmlArrayItem("FixedItem", typeof(FixedItem))]
+        [XmlArrayItem("SimpleItem", typeof(SimpleItem))]
+        [XmlArrayItem("CreditCard", typeof(CreditCard))]
+        public List<CashFlowItem> Items;
+
         [XmlAttribute("currency")]
         public string Currency { get; set; }
 
@@ -22,12 +28,6 @@ namespace AccountingServer.Shell.Plugins.CashFlow
 
         [XmlElement]
         public string Reimburse { get; set; }
-
-        [XmlArray("Items")]
-        [XmlArrayItem("FixedItem", typeof(FixedItem))]
-        [XmlArrayItem("SimpleItem", typeof(SimpleItem))]
-        [XmlArrayItem("CreditCard", typeof(CreditCard))]
-        public List<CashFlowItem> Items;
     }
 
     [Serializable]

@@ -100,42 +100,6 @@ namespace AccountingServer.BLL
             amort.Schedule = lst;
         }
 
-        private sealed class RegisteringDetailQuery : IDetailQueryAtom
-        {
-            public RegisteringDetailQuery(VoucherDetail filter) => Filter = filter;
-
-            public VoucherDetail Filter { get; }
-
-            public int Dir => 0;
-
-            public void Accept(IQueryVisitor<IDetailQueryAtom> visitor) => visitor.Visit(this);
-            public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
-        }
-
-        private sealed class RegisteringQuery : IVoucherQueryAtom
-        {
-            public RegisteringQuery(Amortization amort)
-            {
-                VoucherFilter = amort.Template;
-                DetailFilter = amort.Template.Details.Aggregate(
-                    (IQueryCompunded<IDetailQueryAtom>)DetailQueryUnconstrained.Instance,
-                    (query, filter) => new IntersectQueries<IDetailQueryAtom>(
-                        query,
-                        new RegisteringDetailQuery(filter)));
-            }
-
-            public bool ForAll => true;
-
-            public Voucher VoucherFilter { get; }
-
-            public DateFilter Range => DateFilter.Unconstrained;
-
-            public IQueryCompunded<IDetailQueryAtom> DetailFilter { get; }
-
-            public void Accept(IQueryVisitor<IVoucherQueryAtom> visitor) => visitor.Visit(this);
-            public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
-        }
-
         /// <summary>
         ///     找出未在摊销计算表中注册的记账凭证，并尝试建立引用
         /// </summary>
@@ -324,6 +288,42 @@ namespace AccountingServer.BLL
             }
 
             amort.Schedule = lst;
+        }
+
+        private sealed class RegisteringDetailQuery : IDetailQueryAtom
+        {
+            public RegisteringDetailQuery(VoucherDetail filter) => Filter = filter;
+
+            public VoucherDetail Filter { get; }
+
+            public int Dir => 0;
+
+            public void Accept(IQueryVisitor<IDetailQueryAtom> visitor) => visitor.Visit(this);
+            public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
+        }
+
+        private sealed class RegisteringQuery : IVoucherQueryAtom
+        {
+            public RegisteringQuery(Amortization amort)
+            {
+                VoucherFilter = amort.Template;
+                DetailFilter = amort.Template.Details.Aggregate(
+                    (IQueryCompunded<IDetailQueryAtom>)DetailQueryUnconstrained.Instance,
+                    (query, filter) => new IntersectQueries<IDetailQueryAtom>(
+                        query,
+                        new RegisteringDetailQuery(filter)));
+            }
+
+            public bool ForAll => true;
+
+            public Voucher VoucherFilter { get; }
+
+            public DateFilter Range => DateFilter.Unconstrained;
+
+            public IQueryCompunded<IDetailQueryAtom> DetailFilter { get; }
+
+            public void Accept(IQueryVisitor<IVoucherQueryAtom> visitor) => visitor.Visit(this);
+            public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
         }
     }
 }

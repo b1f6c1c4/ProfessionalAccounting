@@ -93,9 +93,8 @@ namespace AccountingServer.DAL
 
     internal abstract class MongoDbNativeDetail<T> : MongoDbNativeVisitor<T, IDetailQueryAtom>
     {
-        private bool Unwinded { get; }
-
         protected MongoDbNativeDetail(bool unwinded = false) => Unwinded = unwinded;
+        private bool Unwinded { get; }
 
         public override FilterDefinition<T> Visit(IDetailQueryAtom query)
         {

@@ -8,11 +8,10 @@ namespace AccountingServer.BLL.Util
 {
     internal abstract class SubtotalResult : ISubtotalResult
     {
+        public List<ISubtotalResult> TheItems { get; set; }
         public double Fund { get; set; }
 
         public IEnumerable<ISubtotalResult> Items => TheItems?.AsReadOnly();
-
-        public List<ISubtotalResult> TheItems { get; set; }
 
         public abstract void Accept(ISubtotalVisitor visitor);
         public abstract T Accept<T>(ISubtotalVisitor<T> visitor);

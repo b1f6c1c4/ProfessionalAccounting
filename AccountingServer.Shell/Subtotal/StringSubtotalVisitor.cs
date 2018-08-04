@@ -12,13 +12,20 @@ namespace AccountingServer.Shell.Subtotal
     /// </summary>
     internal abstract class StringSubtotalVisitor : ISubtotalVisitor
     {
-        protected StringBuilder Sb;
+        protected int Depth;
 
         protected GatheringType Ga;
 
-        protected int Depth;
-
         private ISubtotal m_Par;
+        protected StringBuilder Sb;
+
+        public abstract void Visit(ISubtotalRoot sub);
+        public abstract void Visit(ISubtotalDate sub);
+        public abstract void Visit(ISubtotalCurrency sub);
+        public abstract void Visit(ISubtotalTitle sub);
+        public abstract void Visit(ISubtotalSubTitle sub);
+        public abstract void Visit(ISubtotalContent sub);
+        public abstract void Visit(ISubtotalRemark sub);
 
         /// <summary>
         ///     执行分类汇总
@@ -79,13 +86,5 @@ namespace AccountingServer.Shell.Subtotal
 
             Depth--;
         }
-
-        public abstract void Visit(ISubtotalRoot sub);
-        public abstract void Visit(ISubtotalDate sub);
-        public abstract void Visit(ISubtotalCurrency sub);
-        public abstract void Visit(ISubtotalTitle sub);
-        public abstract void Visit(ISubtotalSubTitle sub);
-        public abstract void Visit(ISubtotalContent sub);
-        public abstract void Visit(ISubtotalRemark sub);
     }
 }

@@ -82,6 +82,19 @@ namespace AccountingServer.Shell.Serializer
             return v;
         }
 
+        /// <inheritdoc />
+        public virtual VoucherDetail ParseVoucherDetail(string expr)
+        {
+            var res = ParseVoucherDetail(ref expr);
+            Parsing.Eof(expr);
+            return res;
+        }
+
+        public string PresentAsset(Asset asset) => throw new NotImplementedException();
+        public Asset ParseAsset(string str) => throw new NotImplementedException();
+        public string PresentAmort(Amortization amort) => throw new NotImplementedException();
+        public Amortization ParseAmort(string str) => throw new NotImplementedException();
+
         /// <summary>
         ///     解析记账凭证表达式
         /// </summary>
@@ -161,14 +174,6 @@ namespace AccountingServer.Shell.Serializer
             }
         }
 
-        /// <inheritdoc />
-        public virtual VoucherDetail ParseVoucherDetail(string expr)
-        {
-            var res = ParseVoucherDetail(ref expr);
-            Parsing.Eof(expr);
-            return res;
-        }
-
         public VoucherDetail ParseVoucherDetail(ref string expr)
         {
             var lst = new List<string>();
@@ -224,10 +229,5 @@ namespace AccountingServer.Shell.Serializer
         }
 
         protected virtual bool AlternativeTitle(ref string expr, ICollection<string> lst, ref ITitle title) => false;
-
-        public string PresentAsset(Asset asset) => throw new NotImplementedException();
-        public Asset ParseAsset(string str) => throw new NotImplementedException();
-        public string PresentAmort(Amortization amort) => throw new NotImplementedException();
-        public Amortization ParseAmort(string str) => throw new NotImplementedException();
     }
 }

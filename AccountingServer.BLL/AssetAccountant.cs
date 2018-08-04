@@ -13,12 +13,12 @@ namespace AccountingServer.BLL
     /// </summary>
     internal class AssetAccountant : DistributedAccountant
     {
-        public AssetAccountant(DbSession db) : base(db) { }
-
         /// <summary>
         ///     固定资产清理
         /// </summary>
         private const int DefaultDispositionTitle = 1606;
+
+        public AssetAccountant(DbSession db) : base(db) { }
 
         /// <summary>
         ///     调整资产计算表

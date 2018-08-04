@@ -55,7 +55,14 @@ namespace AccountingServer.BLL.Parsing
                     if (RangeDeltaMonth() != null)
                     {
                         var delta = int.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
-                        dt = new DateTime(ClientDateTime.Today.Year, ClientDateTime.Today.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+                        dt = new DateTime(
+                            ClientDateTime.Today.Year,
+                            ClientDateTime.Today.Month,
+                            1,
+                            0,
+                            0,
+                            0,
+                            DateTimeKind.Utc);
                         dt = dt.AddMonths(-delta);
                     }
                     else
@@ -74,7 +81,9 @@ namespace AccountingServer.BLL.Parsing
                 get
                 {
                     var year = int.Parse(RangeAYear().GetText());
-                    return new DateFilter(new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(year, 12, 31, 0, 0, 0, DateTimeKind.Utc));
+                    return new DateFilter(
+                        new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                        new DateTime(year, 12, 31, 0, 0, 0, DateTimeKind.Utc));
                 }
             }
         }

@@ -23,6 +23,9 @@ namespace AccountingServer.Shell.Carry
 
         public CarryShell(Accountant helper) => m_Accountant = helper;
 
+        public static IConfigManager<CarrySettings> CarrySettings { private get; set; } =
+            new ConfigManager<CarrySettings>("Carry.xml");
+
         /// <inheritdoc />
         public IQueryResult Execute(string expr)
         {
@@ -40,9 +43,6 @@ namespace AccountingServer.Shell.Carry
 
         /// <inheritdoc />
         public bool IsExecutable(string expr) => expr.Initital() == "ca";
-
-        public static IConfigManager<CarrySettings> CarrySettings { private get; set; } =
-            new ConfigManager<CarrySettings>("Carry.xml");
 
         /// <summary>
         ///     执行摊销

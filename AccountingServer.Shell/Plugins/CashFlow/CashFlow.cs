@@ -16,10 +16,10 @@ namespace AccountingServer.Shell.Plugins.CashFlow
     /// </summary>
     internal class CashFlow : PluginBase
     {
+        public CashFlow(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
+
         public static IConfigManager<CashTemplates> Templates { private get; set; } =
             new ConfigManager<CashTemplates>("Cash.xml");
-
-        public CashFlow(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
 
         /// <inheritdoc />
         public override IQueryResult Execute(string expr)

@@ -17,35 +17,6 @@ namespace AccountingServer.DAL
     [SuppressMessage("ReSharper", "PrivateFieldCanBeConvertedToLocalVariable")]
     internal class MongoDbAdapter : IDbAdapter
     {
-        #region Member
-
-        /// <summary>
-        ///     MongoDb客户端
-        /// </summary>
-        private readonly MongoClient m_Client;
-
-        /// <summary>
-        ///     MongoDb数据库
-        /// </summary>
-        private readonly IMongoDatabase m_Db;
-
-        /// <summary>
-        ///     记账凭证集合
-        /// </summary>
-        private readonly IMongoCollection<Voucher> m_Vouchers;
-
-        /// <summary>
-        ///     资产集合
-        /// </summary>
-        private readonly IMongoCollection<Asset> m_Assets;
-
-        /// <summary>
-        ///     摊销集合
-        /// </summary>
-        private readonly IMongoCollection<Amortization> m_Amortizations;
-
-        #endregion
-
         private static readonly BsonDocument ProjectDetails = new BsonDocument
             {
                 ["_id"] = false,
@@ -199,6 +170,50 @@ namespace AccountingServer.DAL
             m_Assets = m_Db.GetCollection<Asset>("asset");
             m_Amortizations = m_Db.GetCollection<Amortization>("amortization");
         }
+
+        private static bool Upsert<T, TId>(IMongoCollection<T> collection, T entity, BaseSerializer<T, TId> idProvider)
+        {
+            if (idProvider.FillId(collection, entity))
+            {
+                collection.InsertOne(entity);
+                return true;
+            }
+
+            var res = collection.ReplaceOne(
+                Builders<T>.Filter.Eq("_id", idProvider.GetId(entity)),
+                entity,
+                new UpdateOptions { IsUpsert = true });
+            return res.ModifiedCount <= 1;
+        }
+
+        #region Member
+
+        /// <summary>
+        ///     MongoDb客户端
+        /// </summary>
+        private readonly MongoClient m_Client;
+
+        /// <summary>
+        ///     MongoDb数据库
+        /// </summary>
+        private readonly IMongoDatabase m_Db;
+
+        /// <summary>
+        ///     记账凭证集合
+        /// </summary>
+        private readonly IMongoCollection<Voucher> m_Vouchers;
+
+        /// <summary>
+        ///     资产集合
+        /// </summary>
+        private readonly IMongoCollection<Asset> m_Assets;
+
+        /// <summary>
+        ///     摊销集合
+        /// </summary>
+        private readonly IMongoCollection<Amortization> m_Amortizations;
+
+        #endregion
 
         #region Voucher
 
@@ -381,20 +396,5 @@ namespace AccountingServer.DAL
         }
 
         #endregion
-
-        private static bool Upsert<T, TId>(IMongoCollection<T> collection, T entity, BaseSerializer<T, TId> idProvider)
-        {
-            if (idProvider.FillId(collection, entity))
-            {
-                collection.InsertOne(entity);
-                return true;
-            }
-
-            var res = collection.ReplaceOne(
-                Builders<T>.Filter.Eq("_id", idProvider.GetId(entity)),
-                entity,
-                new UpdateOptions { IsUpsert = true });
-            return res.ModifiedCount <= 1;
-        }
     }
 }

@@ -18,6 +18,8 @@ namespace AccountingServer.BLL.Util
     [Serializable]
     public class TitleInfo
     {
+        [XmlElement("subTitle")] public List<SubTitleInfo> SubTitles;
+
         [XmlAttribute("name")]
         public string Name { get; set; }
 
@@ -39,8 +41,6 @@ namespace AccountingServer.BLL.Util
         [XmlAttribute("dir")]
         [DefaultValue(0)]
         public int Direction { get; set; }
-
-        [XmlElement("subTitle")] public List<SubTitleInfo> SubTitles;
     }
 
     public class SubTitleInfo

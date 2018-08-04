@@ -54,16 +54,16 @@ namespace AccountingServer.Entities
         /// </summary>
         public const string IgnoranceMark = "reconciliation";
 
+        /// <summary>
+        ///     摊销额
+        /// </summary>
+        public double Amount { get; set; }
+
         /// <inheritdoc />
         public string VoucherID { get; set; }
 
         /// <inheritdoc />
         public DateTime? Date { get; set; }
-
-        /// <summary>
-        ///     摊销额
-        /// </summary>
-        public double Amount { get; set; }
 
         /// <inheritdoc />
         public double Value { get; set; }
@@ -82,27 +82,11 @@ namespace AccountingServer.Entities
         /// </summary>
         public const string IgnoranceMark = "reconciliation";
 
-        /// <inheritdoc />
-        public Guid? ID { get; set; }
-
         /// <summary>
         ///     编号的标准存储格式
         /// </summary>
         // ReSharper disable once UnusedMember.Global
         public string StringID { get => ID.ToString().ToUpperInvariant(); set => ID = Guid.Parse(value); }
-
-        /// <inheritdoc />
-        public string Name { get; set; }
-
-        /// <summary>
-        ///     总额
-        /// </summary>
-        public double? Value { get; set; }
-
-        /// <summary>
-        ///     开始日期
-        /// </summary>
-        public DateTime? Date { get; set; }
 
         /// <summary>
         ///     总日数
@@ -123,6 +107,22 @@ namespace AccountingServer.Entities
         ///     摊销计算表
         /// </summary>
         public List<AmortItem> Schedule { get; set; }
+
+        /// <inheritdoc />
+        public Guid? ID { get; set; }
+
+        /// <inheritdoc />
+        public string Name { get; set; }
+
+        /// <summary>
+        ///     总额
+        /// </summary>
+        public double? Value { get; set; }
+
+        /// <summary>
+        ///     开始日期
+        /// </summary>
+        public DateTime? Date { get; set; }
 
         /// <inheritdoc />
         public string Remark { get; set; }
