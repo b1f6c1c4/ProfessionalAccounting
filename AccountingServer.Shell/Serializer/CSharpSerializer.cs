@@ -83,6 +83,7 @@ namespace AccountingServer.Shell.Serializer
             var sb = new StringBuilder();
             sb.Append("        new VoucherDetail { ");
             sb.AppendLine($"Currency = {ProcessString(detail.Currency)},");
+            sb.Append("                            ");
             sb.Append($"Title = {detail.Title:0}, ");
             sb.Append(
                 detail.SubTitle.HasValue
@@ -104,7 +105,7 @@ namespace AccountingServer.Shell.Serializer
         public string PresentVoucher(Voucher voucher)
         {
             if (voucher == null)
-                return "new Voucher { }";
+                return "new Voucher {\n\n}";
 
             var sb = new StringBuilder();
             sb.Append("new Voucher {");
