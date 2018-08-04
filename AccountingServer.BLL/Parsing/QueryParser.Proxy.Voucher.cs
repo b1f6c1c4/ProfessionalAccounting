@@ -45,9 +45,6 @@ namespace AccountingServer.BLL.Parsing
             public IQueryCompunded<IDetailQueryAtom> DetailFilter => details();
 
             /// <inheritdoc />
-            public void Accept(IQueryVisitor<IVoucherQueryAtom> visitor) => visitor.Visit(this);
-
-            /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
@@ -70,9 +67,6 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IVoucherQueryAtom> Filter2 => throw new MemberAccessException("表达式错误");
-
-            /// <inheritdoc />
-            public void Accept(IQueryVisitor<IVoucherQueryAtom> visitor) => visitor.Visit(this);
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
@@ -127,9 +121,6 @@ namespace AccountingServer.BLL.Parsing
             public IQueryCompunded<IVoucherQueryAtom> Filter2 => vouchers1();
 
             /// <inheritdoc />
-            public void Accept(IQueryVisitor<IVoucherQueryAtom> visitor) => visitor.Visit(this);
-
-            /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
@@ -143,9 +134,6 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IVoucherQueryAtom> Filter2 => vouchers1();
-
-            /// <inheritdoc />
-            public void Accept(IQueryVisitor<IVoucherQueryAtom> visitor) => visitor.Visit(this);
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
@@ -162,9 +150,6 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IVoucherQueryAtom> Filter2 => null;
-
-            /// <inheritdoc />
-            public void Accept(IQueryVisitor<IVoucherQueryAtom> visitor) => visitor.Visit(this);
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);

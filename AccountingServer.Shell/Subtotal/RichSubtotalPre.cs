@@ -25,33 +25,52 @@ namespace AccountingServer.Shell.Subtotal
             VisitChildren(sub);
         }
 
-        public override void Visit(ISubtotalRoot sub)
+        public override Nothing Visit(ISubtotalRoot sub)
         {
             Sb.AppendLine($"{Idents}{Ts(sub.Fund)}");
             VisitChildren(sub);
+            return Nothing.AtAll;
         }
 
-        public override void Visit(ISubtotalDate sub) => ShowSubtotal(sub, sub.Date.AsDate(sub.Level));
+        public override Nothing Visit(ISubtotalDate sub)
+        {
+            ShowSubtotal(sub, sub.Date.AsDate(sub.Level));
+            return Nothing.AtAll;
+        }
 
-        public override void Visit(ISubtotalCurrency sub)
+        public override Nothing Visit(ISubtotalCurrency sub)
         {
             m_Currency = sub.Currency;
             ShowSubtotal(sub, $"@{sub.Currency}");
             m_Currency = null;
+            return Nothing.AtAll;
         }
 
-        public override void Visit(ISubtotalTitle sub)
+        public override Nothing Visit(ISubtotalTitle sub)
         {
             m_Title = sub.Title;
             ShowSubtotal(sub, $"{sub.Title.AsTitle()} {TitleManager.GetTitleName(sub.Title)}");
+            return Nothing.AtAll;
         }
 
-        public override void Visit(ISubtotalSubTitle sub) => ShowSubtotal(
-            sub,
-            $"{sub.SubTitle.AsSubTitle()} {TitleManager.GetTitleName(m_Title, sub.SubTitle)}");
+        public override Nothing Visit(ISubtotalSubTitle sub)
+        {
+            ShowSubtotal(
+                sub,
+                $"{sub.SubTitle.AsSubTitle()} {TitleManager.GetTitleName(m_Title, sub.SubTitle)}");
+            return Nothing.AtAll;
+        }
 
-        public override void Visit(ISubtotalContent sub) => ShowSubtotal(sub, sub.Content.Quotation('\''));
+        public override Nothing Visit(ISubtotalContent sub)
+        {
+            ShowSubtotal(sub, sub.Content.Quotation('\''));
+            return Nothing.AtAll;
+        }
 
-        public override void Visit(ISubtotalRemark sub) => ShowSubtotal(sub, sub.Remark.Quotation('"'));
+        public override Nothing Visit(ISubtotalRemark sub)
+        {
+            ShowSubtotal(sub, sub.Remark.Quotation('"'));
+            return Nothing.AtAll;
+        }
     }
 }

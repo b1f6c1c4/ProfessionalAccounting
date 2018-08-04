@@ -78,12 +78,6 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     二次分配
         /// </summary>
-        /// <param name="visitor">访问者</param>
-        void Accept(ISubtotalVisitor visitor);
-
-        /// <summary>
-        ///     二次分配
-        /// </summary>
         /// <typeparam name="T">返回值类型</typeparam>
         /// <param name="visitor">访问者</param>
         /// <returns>访问者返回值</returns>
@@ -122,20 +116,6 @@ namespace AccountingServer.Entities
     public interface ISubtotalRemark : ISubtotalResult
     {
         string Remark { get; }
-    }
-
-    /// <summary>
-    ///     分类汇总结果访问者
-    /// </summary>
-    public interface ISubtotalVisitor
-    {
-        void Visit(ISubtotalRoot sub);
-        void Visit(ISubtotalDate sub);
-        void Visit(ISubtotalCurrency sub);
-        void Visit(ISubtotalTitle sub);
-        void Visit(ISubtotalSubTitle sub);
-        void Visit(ISubtotalContent sub);
-        void Visit(ISubtotalRemark sub);
     }
 
     /// <summary>

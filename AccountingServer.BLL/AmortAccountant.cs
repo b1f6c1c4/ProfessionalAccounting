@@ -298,7 +298,6 @@ namespace AccountingServer.BLL
 
             public int Dir => 0;
 
-            public void Accept(IQueryVisitor<IDetailQueryAtom> visitor) => visitor.Visit(this);
             public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
@@ -322,7 +321,6 @@ namespace AccountingServer.BLL
 
             public IQueryCompunded<IDetailQueryAtom> DetailFilter { get; }
 
-            public void Accept(IQueryVisitor<IVoucherQueryAtom> visitor) => visitor.Visit(this);
             public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
         }
     }
