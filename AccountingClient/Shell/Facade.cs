@@ -69,9 +69,8 @@ namespace AccountingClient.Shell
             if (m_Exception != null)
                 throw m_Exception;
 
-            m_Client.DefaultRequestHeaders.Add(
-                "X-ClientDateTime",
-                DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffZZ"));
+            m_Client.DefaultRequestHeaders.Remove("X-ClientDateTime");
+            m_Client.DefaultRequestHeaders.Add("X-ClientDateTime", DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"));
 
             HttpResponseMessage res;
             switch (method)
@@ -142,13 +141,13 @@ namespace AccountingClient.Shell
         public string ExecuteAmortUpsert(string code) => Run("POST", "/amortUpsert", code);
 
         public bool ExecuteVoucherRemoval(string code) =>
-            Run("POST", "/voucherRemoval").Message.IsSuccessStatusCode;
+            Run("POST", "/voucherRemoval", code).Message.IsSuccessStatusCode;
 
         public bool ExecuteAssetRemoval(string code) =>
-            Run("POST", "/assetRemoval").Message.IsSuccessStatusCode;
+            Run("POST", "/assetRemoval", code).Message.IsSuccessStatusCode;
 
         public bool ExecuteAmortRemoval(string code) =>
-            Run("POST", "/amortRemoval").Message.IsSuccessStatusCode;
+            Run("POST", "/amortRemoval", code).Message.IsSuccessStatusCode;
 
         private struct QueryResult : IQueryResult
         {
