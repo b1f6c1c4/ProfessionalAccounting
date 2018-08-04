@@ -19,6 +19,10 @@ namespace AccountingServer
 
         private static HttpResponse Server_OnHttpRequest(HttpRequest request)
         {
+#if DEBUG
+            if (request.BaseUri.StartsWith("/api", System.StringComparison.Ordinal))
+                request.BaseUri = request.BaseUri.Substring(4);
+#endif
             if (request.Method == "GET")
             {
                 if (request.BaseUri == "/emptyVoucher")

@@ -44,8 +44,20 @@ namespace AccountingServer.Shell
         private Func<IQueryResult> Parse(string expr)
         {
             var isRaw = false;
-            StringSubtotalVisitor visitor;
-            if (ParsingF.Token(ref expr, false, t => t == "Rps") != null)
+            ISubtotalStringify visitor;
+            var serializer = m_Serializer;
+            if (ParsingF.Token(ref expr, false, t => t == "json") != null)
+            {
+                visitor = new JsonSubtotal();
+                serializer = new JsonSerializer();
+            }
+            else if (ParsingF.Token(ref expr, false, t => t == "json-raw") != null)
+            {
+                visitor = new JsonSubtotal();
+                serializer = new JsonSerializer();
+                isRaw = true;
+            }
+            else if (ParsingF.Token(ref expr, false, t => t == "Rps") != null)
                 visitor = new PreciseSubtotalPre();
             else if (ParsingF.Token(ref expr, false, t => t == "rps") != null)
                 visitor = new PreciseSubtotalPre(false);
@@ -68,7 +80,7 @@ namespace AccountingServer.Shell
 
             try
             {
-                return isRaw ? TryDetailQuery(expr) : TryVoucherQuery(expr);
+                return isRaw ? TryDetailQuery(expr, serializer) : TryVoucherQuery(expr, serializer);
             }
             catch (Exception)
             {
@@ -82,15 +94,16 @@ namespace AccountingServer.Shell
         ///     按记账凭证检索式解析
         /// </summary>
         /// <param name="expr">表达式</param>
+        /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        private Func<IQueryResult> TryVoucherQuery(string expr)
+        private Func<IQueryResult> TryVoucherQuery(string expr, IEntitySerializer serializer)
         {
             if (string.IsNullOrWhiteSpace(expr))
                 throw new ApplicationException("不允许执行空白检索式");
 
             var res = ParsingF.VoucherQuery(ref expr);
             ParsingF.Eof(expr);
-            return () => PresentVoucherQuery(res);
+            return () => PresentVoucherQuery(res, serializer);
         }
 
         /// <summary>
@@ -99,7 +112,7 @@ namespace AccountingServer.Shell
         /// <param name="expr">表达式</param>
         /// <param name="trav">呈现器</param>
         /// <returns>执行结果</returns>
-        private Func<IQueryResult> TryGroupedQuery(string expr, StringSubtotalVisitor trav)
+        private Func<IQueryResult> TryGroupedQuery(string expr, ISubtotalStringify trav)
         {
             var res = ParsingF.GroupedQuery(ref expr);
             ParsingF.Eof(expr);
@@ -110,12 +123,13 @@ namespace AccountingServer.Shell
         ///     执行记账凭证检索式并呈现记账凭证
         /// </summary>
         /// <param name="query">记账凭证检索式</param>
-        /// <returns>记账凭证的C#表达式</returns>
-        private IQueryResult PresentVoucherQuery(IQueryCompunded<IVoucherQueryAtom> query)
+        /// <param name="serializer">表示器</param>
+        /// <returns>记账凭证表达式</returns>
+        private IQueryResult PresentVoucherQuery(IQueryCompunded<IVoucherQueryAtom> query, IEntitySerializer serializer)
         {
             var sb = new StringBuilder();
             foreach (var voucher in m_Accountant.SelectVouchers(query))
-                sb.Append(m_Serializer.PresentVoucher(voucher).Wrap());
+                sb.Append(serializer.PresentVoucher(voucher).Wrap());
 
             return new EditableText(sb.ToString());
         }
@@ -124,24 +138,26 @@ namespace AccountingServer.Shell
         ///     按细目检索式解析
         /// </summary>
         /// <param name="expr">表达式</param>
+        /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        private Func<IQueryResult> TryDetailQuery(string expr)
+        private Func<IQueryResult> TryDetailQuery(string expr, IEntitySerializer serializer)
         {
             var res = ParsingF.DetailQuery(ref expr);
             ParsingF.Eof(expr);
-            return () => PresentDetailQuery(res);
+            return () => PresentDetailQuery(res, serializer);
         }
 
         /// <summary>
         ///     执行细目检索式并呈现结果
         /// </summary>
         /// <param name="query">细目检索式</param>
+        /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        private IQueryResult PresentDetailQuery(IVoucherDetailQuery query)
+        private IQueryResult PresentDetailQuery(IVoucherDetailQuery query, IEntitySerializer serializer)
         {
             var sb = new StringBuilder();
             foreach (var d in m_Accountant.SelectVoucherDetails(query))
-                sb.Append(m_Serializer.PresentVoucherDetail(d));
+                sb.Append(serializer.PresentVoucherDetail(d));
 
             return new EditableText(sb.ToString());
         }
@@ -152,7 +168,7 @@ namespace AccountingServer.Shell
         /// <param name="query">分类汇总检索式</param>
         /// <param name="trav">呈现器</param>
         /// <returns>执行结果</returns>
-        private IQueryResult PresentSubtotal(IGroupedQuery query, StringSubtotalVisitor trav)
+        private IQueryResult PresentSubtotal(IGroupedQuery query, ISubtotalStringify trav)
         {
             var result = m_Accountant.SelectVoucherDetailsGrouped(query);
             return new UnEditableText(trav.PresentSubtotal(result, query.Subtotal));
