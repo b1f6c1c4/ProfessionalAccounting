@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Serializer;
@@ -22,9 +21,9 @@ namespace AccountingServer.Shell
         /// <summary>
         ///     表示器
         /// </summary>
-        private readonly IEntitySerializer m_Serializer;
+        private readonly IEntitiesSerializer m_Serializer;
 
-        public AccountingShell(Accountant helper, IEntitySerializer serializer)
+        public AccountingShell(Accountant helper, IEntitiesSerializer serializer)
         {
             m_Accountant = helper;
             m_Serializer = serializer;
@@ -96,7 +95,7 @@ namespace AccountingServer.Shell
         /// <param name="expr">表达式</param>
         /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        private Func<IQueryResult> TryVoucherQuery(string expr, IEntitySerializer serializer)
+        private Func<IQueryResult> TryVoucherQuery(string expr, IEntitiesSerializer serializer)
         {
             if (string.IsNullOrWhiteSpace(expr))
                 throw new ApplicationException("不允许执行空白检索式");
@@ -125,14 +124,9 @@ namespace AccountingServer.Shell
         /// <param name="query">记账凭证检索式</param>
         /// <param name="serializer">表示器</param>
         /// <returns>记账凭证表达式</returns>
-        private IQueryResult PresentVoucherQuery(IQueryCompunded<IVoucherQueryAtom> query, IEntitySerializer serializer)
-        {
-            var sb = new StringBuilder();
-            foreach (var voucher in m_Accountant.SelectVouchers(query))
-                sb.Append(serializer.PresentVoucher(voucher).Wrap());
-
-            return new EditableText(sb.ToString());
-        }
+        private IQueryResult PresentVoucherQuery(IQueryCompunded<IVoucherQueryAtom> query,
+            IEntitiesSerializer serializer)
+            => new EditableText(serializer.PresentVouchers(m_Accountant.SelectVouchers(query)));
 
         /// <summary>
         ///     按细目检索式解析
@@ -140,7 +134,7 @@ namespace AccountingServer.Shell
         /// <param name="expr">表达式</param>
         /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        private Func<IQueryResult> TryDetailQuery(string expr, IEntitySerializer serializer)
+        private Func<IQueryResult> TryDetailQuery(string expr, IEntitiesSerializer serializer)
         {
             var res = ParsingF.DetailQuery(ref expr);
             ParsingF.Eof(expr);
@@ -153,14 +147,8 @@ namespace AccountingServer.Shell
         /// <param name="query">细目检索式</param>
         /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        private IQueryResult PresentDetailQuery(IVoucherDetailQuery query, IEntitySerializer serializer)
-        {
-            var sb = new StringBuilder();
-            foreach (var d in m_Accountant.SelectVoucherDetails(query))
-                sb.Append(serializer.PresentVoucherDetail(d));
-
-            return new EditableText(sb.ToString());
-        }
+        private IQueryResult PresentDetailQuery(IVoucherDetailQuery query, IEntitiesSerializer serializer)
+            => new EditableText(serializer.PresentVoucherDetails(m_Accountant.SelectVoucherDetails(query)));
 
         /// <summary>
         ///     执行分类汇总检索式并呈现结果

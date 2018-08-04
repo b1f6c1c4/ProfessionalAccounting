@@ -31,14 +31,15 @@ namespace AccountingServer.Shell
         /// <summary>
         ///     表示器
         /// </summary>
-        private readonly IEntitySerializer m_Serializer;
+        private readonly IEntitiesSerializer m_Serializer;
 
         public Facade()
         {
             m_Accountant = new Accountant();
-            m_Serializer = new AlternativeSerializer(
-                new DiscountSerializer(),
-                new AlternativeSerializer(new AbbrSerializer(), new CSharpSerializer()));
+            m_Serializer = new TrivialEntitiesSerializer(
+                new AlternativeSerializer(
+                    new DiscountSerializer(),
+                    new AlternativeSerializer(new AbbrSerializer(), new CSharpSerializer())));
             m_Composer =
                 new ShellComposer
                     {
