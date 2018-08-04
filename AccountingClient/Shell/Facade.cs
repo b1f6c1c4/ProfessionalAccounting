@@ -69,6 +69,8 @@ namespace AccountingClient.Shell
             if (m_Exception != null)
                 throw m_Exception;
 
+            m_Client.DefaultRequestHeaders.Add("X-ClientDateTime", DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffZZ"));
+
             HttpResponseMessage res;
             switch (method)
             {

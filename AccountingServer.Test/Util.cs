@@ -12,7 +12,7 @@ namespace AccountingServer.Test
     {
         public static DateTime? ToDateTime(this string b1S) => b1S == null
             ? (DateTime?)null
-            : DateTime.Parse(b1S).CastUtc();
+            : ClientDateTime.Parse(b1S);
     }
 
     public class VoucherEqualityComparer : IEqualityComparer<Voucher>

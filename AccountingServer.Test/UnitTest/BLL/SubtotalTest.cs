@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
-using AccountingServer.Entities.Util;
 using Xunit;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
@@ -23,8 +22,8 @@ namespace AccountingServer.Test.UnitTest.BLL
                     });
             ExchangeFactory.Instance = new MockExchange
                 {
-                    { new DateTime(2017, 1, 1).CastUtc(), "JPY", 456 },
-                    { new DateTime(2017, 1, 1).CastUtc(), "USD", 789 }
+                    { new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "JPY", 456 },
+                    { new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "USD", 789 }
                 };
         }
 
@@ -420,22 +419,22 @@ namespace AccountingServer.Test.UnitTest.BLL
                 {
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 01).CastUtc(),
+                            Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 8
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 02).CastUtc(),
+                            Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 1
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 03).CastUtc(),
+                            Date = new DateTime(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 4
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 04).CastUtc(),
+                            Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 2
                         }
                 };
@@ -467,22 +466,22 @@ namespace AccountingServer.Test.UnitTest.BLL
                 {
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 02).CastUtc(),
+                            Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 8
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 09).CastUtc(),
+                            Date = new DateTime(2017, 01, 09, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 1
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 16).CastUtc(),
+                            Date = new DateTime(2017, 01, 16, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 4
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 23).CastUtc(),
+                            Date = new DateTime(2017, 01, 23, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 2
                         }
                 };
@@ -514,22 +513,22 @@ namespace AccountingServer.Test.UnitTest.BLL
                 {
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 01).CastUtc(),
+                            Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 8
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 02, 01).CastUtc(),
+                            Date = new DateTime(2017, 02, 01, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 1
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 03, 01).CastUtc(),
+                            Date = new DateTime(2017, 03, 01, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 4
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 04, 01).CastUtc(),
+                            Date = new DateTime(2017, 04, 01, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 2
                         }
                 };
@@ -561,22 +560,22 @@ namespace AccountingServer.Test.UnitTest.BLL
                 {
                     new Balance
                         {
-                            Date = new DateTime(2014, 01, 01).CastUtc(),
+                            Date = new DateTime(2014, 01, 01, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 8
                         },
                     new Balance
                         {
-                            Date = new DateTime(2015, 01, 01).CastUtc(),
+                            Date = new DateTime(2015, 01, 01, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 1
                         },
                     new Balance
                         {
-                            Date = new DateTime(2016, 01, 01).CastUtc(),
+                            Date = new DateTime(2016, 01, 01, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 4
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 01).CastUtc(),
+                            Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 2
                         }
                 };
@@ -608,22 +607,22 @@ namespace AccountingServer.Test.UnitTest.BLL
                 {
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 01).CastUtc(),
+                            Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 8
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 02).CastUtc(),
+                            Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 1
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 04).CastUtc(),
+                            Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 4
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 05).CastUtc(),
+                            Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 2
                         }
                 };
@@ -648,22 +647,22 @@ namespace AccountingServer.Test.UnitTest.BLL
                     {
                         new Balance
                             {
-                                Date = new DateTime(2017, 01, 01).CastUtc(),
+                                Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
                                 Fund = 8
                             },
                         new Balance
                             {
-                                Date = new DateTime(2017, 01, 02).CastUtc(),
+                                Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
                                 Fund = 8 + 1
                             },
                         new Balance
                             {
-                                Date = new DateTime(2017, 01, 04).CastUtc(),
+                                Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
                                 Fund = 8 + 1 + 4
                             },
                         new Balance
                             {
-                                Date = new DateTime(2017, 01, 05).CastUtc(),
+                                Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
                                 Fund = 8 + 1 + 4 + 2
                             }
                     },
@@ -726,12 +725,12 @@ namespace AccountingServer.Test.UnitTest.BLL
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 02).CastUtc(),
+                            Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 2
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 04).CastUtc(),
+                            Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 4
                         }
                 };
@@ -756,15 +755,15 @@ namespace AccountingServer.Test.UnitTest.BLL
             if (incl[0] == '1')
                 lst0.Add(new Balance { Date = null, Fund = 1 });
             if (incl[1] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 01).CastUtc(), Fund = 1 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 1 });
             if (incl[2] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 02).CastUtc(), Fund = 1 + 2 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 });
             if (incl[3] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 03).CastUtc(), Fund = 1 + 2 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 });
             if (incl[4] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 04).CastUtc(), Fund = 1 + 2 + 4 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 + 4 });
             if (incl[5] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 05).CastUtc(), Fund = 1 + 2 + 4 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 + 4 });
             Assert.Equal(lst0, lst, new BalanceEqualityComparer());
         }
 
@@ -818,12 +817,12 @@ namespace AccountingServer.Test.UnitTest.BLL
                 {
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 02).CastUtc(),
+                            Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 2
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 04).CastUtc(),
+                            Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 4
                         }
                 };
@@ -848,15 +847,15 @@ namespace AccountingServer.Test.UnitTest.BLL
             if (incl[0] == '1')
                 lst0.Add(new Balance { Date = null, Fund = 0 });
             if (incl[1] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 01).CastUtc(), Fund = 0 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
             if (incl[2] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 02).CastUtc(), Fund = 2 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 2 });
             if (incl[3] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 03).CastUtc(), Fund = 2 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 2 });
             if (incl[4] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 04).CastUtc(), Fund = 2 + 4 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 2 + 4 });
             if (incl[5] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 05).CastUtc(), Fund = 2 + 4 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 2 + 4 });
             Assert.Equal(lst0, lst, new BalanceEqualityComparer());
         }
 
@@ -912,11 +911,11 @@ namespace AccountingServer.Test.UnitTest.BLL
             if (incl[0] == '1')
                 lst0.Add(new Balance { Date = null, Fund = 0 });
             if (incl[1] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 01).CastUtc(), Fund = 0 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
             if (incl[2] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 02).CastUtc(), Fund = 0 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
             if (incl[3] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 03).CastUtc(), Fund = 0 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
             Assert.Equal(lst0, lst, new BalanceEqualityComparer());
         }
 
@@ -1012,13 +1011,13 @@ namespace AccountingServer.Test.UnitTest.BLL
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 02).CastUtc(),
+                            Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
                             Currency = "JPY",
                             Fund = 2 / 2D / 456D
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 04).CastUtc(),
+                            Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
                             Currency = "JPY",
                             Fund = 4 / 2D / 456D
                         },
@@ -1030,13 +1029,13 @@ namespace AccountingServer.Test.UnitTest.BLL
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 02).CastUtc(),
+                            Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
                             Currency = "USD",
                             Fund = 2 / 2D / 789D
                         },
                     new Balance
                         {
-                            Date = new DateTime(2017, 01, 04).CastUtc(),
+                            Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
                             Currency = "USD",
                             Fund = 4 / 2D / 789D
                         }
@@ -1062,15 +1061,15 @@ namespace AccountingServer.Test.UnitTest.BLL
             if (incl[0] == '1')
                 lst0.Add(new Balance { Date = null, Fund = 1 });
             if (incl[1] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 01).CastUtc(), Fund = 1 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 1 });
             if (incl[2] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 02).CastUtc(), Fund = 1 + 2 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 });
             if (incl[3] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 03).CastUtc(), Fund = 1 + 2 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 });
             if (incl[4] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 04).CastUtc(), Fund = 1 + 2 + 4 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 + 4 });
             if (incl[5] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 05).CastUtc(), Fund = 1 + 2 + 4 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 + 4 });
             Assert.Equal(lst0, lst, new BalanceEqualityComparer());
         }
 
@@ -1126,11 +1125,11 @@ namespace AccountingServer.Test.UnitTest.BLL
             if (incl[0] == '1')
                 lst0.Add(new Balance { Date = null, Fund = 0 });
             if (incl[1] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 01).CastUtc(), Fund = 0 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
             if (incl[2] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 02).CastUtc(), Fund = 0 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
             if (incl[3] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 03).CastUtc(), Fund = 0 });
+                lst0.Add(new Balance { Date = new DateTime(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
             Assert.Equal(lst0, lst, new BalanceEqualityComparer());
         }
     }

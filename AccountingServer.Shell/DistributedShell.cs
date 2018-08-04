@@ -1,7 +1,6 @@
 ﻿using System;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
-using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
@@ -78,7 +77,7 @@ namespace AccountingServer.Shell
                             "li",
                             expr =>
                             {
-                                var dt = Parsing.UniqueTime(ref expr) ?? DateTime.Today.CastUtc();
+                                var dt = Parsing.UniqueTime(ref expr) ?? ClientDateTime.Today;
                                 var dist = Parsing.DistributedQuery(ref expr);
                                 Parsing.Eof(expr);
                                 return ExecuteList(dist, dt, true);
@@ -136,13 +135,13 @@ namespace AccountingServer.Shell
                             {
                                 var dist = Parsing.DistributedQuery(ref expr);
                                 Parsing.Eof(expr);
-                                return ExecuteCheck(dist, new DateFilter(null, DateTime.Today.CastUtc()));
+                                return ExecuteCheck(dist, new DateFilter(null, ClientDateTime.Today));
                             }),
                         new ShellComponent(
                             null,
                             expr =>
                             {
-                                var dt = Parsing.UniqueTime(ref expr) ?? DateTime.Today.CastUtc();
+                                var dt = Parsing.UniqueTime(ref expr) ?? ClientDateTime.Today;
                                 var dist = Parsing.DistributedQuery(ref expr);
                                 Parsing.Eof(expr);
                                 return ExecuteList(dist, dt, false);

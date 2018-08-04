@@ -58,6 +58,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj">
+      <Project>{7246deb7-bda2-49d8-9490-3ed074219106}</Project>
+      <Name>AccountingServer.Entities</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AccountingServer.Shell\AccountingServer.Shell.csproj">
       <Project>{0DDC759F-23DE-4443-A97C-4EDC1C40690C}</Project>
       <Name>AccountingServer.Shell</Name>

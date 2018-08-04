@@ -40,7 +40,7 @@ namespace AccountingServer.BLL
                 case AmortizeInterval.LastDayOfMonth:
                     return AccountantHelper.LastDayOfMonth(the.Year, the.Month);
                 case AmortizeInterval.LastDayOfYear:
-                    return new DateTime(the.Year + 1, 1, 1).AddDays(-1).CastUtc();
+                    return new DateTime(the.Year + 1, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddDays(-1);
                 default:
                     throw new ArgumentException("间隔类型未知", nameof(interval));
             }
@@ -71,7 +71,7 @@ namespace AccountingServer.BLL
                 case AmortizeInterval.SameDayOfYear:
                     return last.AddYears(1);
                 case AmortizeInterval.LastDayOfYear:
-                    return new DateTime(last.Year + 2, 1, 1).AddDays(-1).CastUtc();
+                    return new DateTime(last.Year + 2, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddDays(-1);
                 default:
                     throw new ArgumentException("间隔类型未知", nameof(interval));
             }

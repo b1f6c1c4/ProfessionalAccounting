@@ -154,16 +154,16 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                     if (day != dayF)
                         throw new ApplicationException("非整数日期");
 
-                    date = DateTime.Today.Day < day
-                        ? DateTime.Today.AddMonths(-1).AddDays(day - DateTime.Today.Day)
-                        : DateTime.Today.AddDays(day - DateTime.Today.Day);
+                    date = ClientDateTime.Today.Day < day
+                        ? ClientDateTime.Today.AddMonths(-1).AddDays(day - ClientDateTime.Today.Day)
+                        : ClientDateTime.Today.AddDays(day - ClientDateTime.Today.Day);
                 }
 
                 var from = ParsingF.DoubleF(ref expr);
                 var to = ParsingF.DoubleF(ref expr);
                 var voucher = new Voucher
                     {
-                        Date = date.Value.CastUtc(),
+                        Date = date.Value,
                         Details = new List<VoucherDetail>
                             {
                                 new VoucherDetail
