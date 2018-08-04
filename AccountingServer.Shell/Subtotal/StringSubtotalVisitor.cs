@@ -10,7 +10,7 @@ namespace AccountingServer.Shell.Subtotal
     /// <summary>
     ///     分类汇总结果处理器
     /// </summary>
-    internal abstract class StringSubtotalVisitor : ISubtotalVisitor
+    internal abstract class StringSubtotalVisitor : ISubtotalVisitor, ISubtotalStringify
     {
         protected int Depth;
 
@@ -27,12 +27,7 @@ namespace AccountingServer.Shell.Subtotal
         public abstract void Visit(ISubtotalContent sub);
         public abstract void Visit(ISubtotalRemark sub);
 
-        /// <summary>
-        ///     执行分类汇总
-        /// </summary>
-        /// <param name="raw">分类汇总结果</param>
-        /// <param name="par">参数</param>
-        /// <returns>分类汇总结果</returns>
+        /// <inheritdoc />
         public string PresentSubtotal(ISubtotalResult raw, ISubtotal par)
         {
             m_Par = par;
