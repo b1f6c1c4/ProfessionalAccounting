@@ -31,7 +31,7 @@ namespace AccountingClient
         /// </summary>
         /// <param name="position">搜索位置</param>
         /// <returns>是否成功</returns>
-        private bool PerformUpsert(int? position = null) => PerformUpsert(out int _, position);
+        private bool PerformUpsert(int? position = null) => PerformUpsert(out _, position);
 
         /// <summary>
         ///     更新或添加
@@ -119,7 +119,7 @@ namespace AccountingClient
         /// </summary>
         /// <param name="position">搜索位置</param>
         /// <returns>是否成功</returns>
-        private bool PerformRemoval(int? position = null) => PerformRemoval(out int _, position);
+        private bool PerformRemoval(int? position = null) => PerformRemoval(out _, position);
 
         /// <summary>
         ///     删除
