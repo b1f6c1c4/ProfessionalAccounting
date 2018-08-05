@@ -1,0 +1,27 @@
+import { fromJS } from 'immutable';
+
+import * as {{ constantCase name }} from './constants';
+
+const initialState = fromJS({
+{{#if wantSagas}}
+  isLoading: false,
+{{/if}}
+});
+
+function {{ camelCase name }}Reducer(state = initialState, action) {
+  switch (action.type) {
+    // Actions
+{{#if wantActions}}
+{{> actionReducer }}
+{{/if}}
+{{#if wantSagas}}
+    // Sagas
+{{> sagaReducer }}
+{{/if}}
+    // Default
+    default:
+      return state;
+  }
+}
+
+export default {{ camelCase name }}Reducer;

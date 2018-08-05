@@ -1,0 +1,20 @@
+export function {{ camelCase sagaName }}Request({{curly true}} {{ camelCase sagaParam }} {{curly false}}) {
+  return {
+    type: {{ constantCase name }}.{{ constantCase sagaName }}_REQUEST,
+    {{ camelCase sagaParam }},
+  };
+}
+
+export function {{ camelCase sagaName }}Success(result) {
+  return {
+    type: {{ constantCase name }}.{{ constantCase sagaName }}_SUCCESS,
+    result,
+  };
+}
+
+export function {{ camelCase sagaName }}Failure(error) {
+  return {
+    type: {{ constantCase name }}.{{ constantCase sagaName }}_FAILURE,
+    error,
+  };
+}

@@ -1,0 +1,5 @@
+query {{ properCase sagaName }}(${{ camelCase sagaParam }}: String!) {
+  data(input: {
+    {{ camelCase sagaParam }}: ${{ camelCase sagaParam }},
+  })
+}

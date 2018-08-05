@@ -1,0 +1,10 @@
+export function* handle{{ properCase sagaName }}Request({{curly true}} {{ camelCase sagaParam }} {{curly false}}) {
+  const cred = yield select((state) => state.getIn(['globalContainer', 'credential', 'token']));
+
+  try {
+    const result = yield call(api.query, gql.{{ properCase sagaName }}, {{curly true}} {{ camelCase sagaParam }} {{curly false}}, cred);
+    yield put({{ camelCase name }}Actions.{{ camelCase sagaName }}Success(result));
+  } catch (err) {
+    yield put({{ camelCase name }}Actions.{{ camelCase sagaName }}Failure(err));
+  }
+}

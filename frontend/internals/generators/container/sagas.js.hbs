@@ -1,0 +1,15 @@
+import { call, put, select, takeEvery } from 'redux-saga/effects';
+import * as api from 'utils/request';
+
+import * as {{ constantCase name }} from './constants';
+import * as {{ camelCase name }}Actions from './actions';
+import gql from './api.graphql';
+
+// Sagas
+{{> sagaSagas }}
+
+// Watcher
+/* eslint-disable func-names */
+export default function* watcher() {
+  yield takeEvery({{ constantCase name }}.{{ constantCase sagaName }}_REQUEST, handle{{ properCase sagaName }}Request);
+}

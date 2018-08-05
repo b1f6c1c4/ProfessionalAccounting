@@ -1,0 +1,8 @@
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+.chart-wrapper svg {
+  width: 100%;
+}
