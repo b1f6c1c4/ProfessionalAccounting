@@ -8,8 +8,8 @@ import {
   createMuiTheme,
   CssBaseline,
   MuiThemeProvider,
-} from 'material-ui';
-import { brown, indigo } from 'material-ui/colors';
+} from '@material-ui/core';
+import { brown, indigo } from '@material-ui/core/colors';
 import { Switch, Route } from 'react-router-dom';
 import NotFoundPage from 'components/NotFoundPage';
 import ErrorBoundary from 'containers/ErrorBoundary';

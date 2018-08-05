@@ -59,19 +59,13 @@ module.exports = ({
           }],
         },
         {
-          test: /\.json5$/,
-          loader: 'json5-loader',
-        },
-        {
           test: /\.css$/,
           include: /node_modules/,
-          exclude: /outdatedbrowser/,
           use: cssLoaderVender || ['style-loader', 'css-loader'],
         },
         {
           test: /\.scss$/,
           include: /node_modules/,
-          exclude: /outdatedbrowser/,
           use: [
             ...(cssLoaderVender || ['style-loader', 'css-loader']),
             'sass-loader',
@@ -112,11 +106,6 @@ module.exports = ({
             },
           },
         },
-        {
-          test: /\.graphql$/,
-          exclude: /node_modules/,
-          loader: 'graphql-tag/loader',
-        },
       ],
     },
     optimization: _.merge({
@@ -150,9 +139,8 @@ module.exports = ({
         'date-fns': 'date-fns/esm',
         history: 'history/es',
         lodash: 'lodash-es',
-        'material-ui': 'material-ui/es',
+        '@material-ui/core': '@material-ui/core/es',
         '@material-ui/icons': '@material-ui/icons/es',
-        'react-beautiful-dnd': 'react-beautiful-dnd/dist/react-beautiful-dnd.esm',
         'react-redux': 'react-redux/es',
         'react-router': 'react-router/es',
         'react-router-dom': 'react-router-dom/es',

@@ -10,7 +10,6 @@ const {
   AsyncCss,
   InlineCss,
   Js,
-  InlineJs,
 } = require('advanced-injection-plugin');
 
 const extractCss0 = new ExtractTextPlugin({
@@ -41,13 +40,6 @@ module.exports = require('./webpack.base')({
 
   // In production, we skip all hot-reloading stuff
   entry: {
-    mock: [
-      'file-loader?name=assets/[name].[hash:8].[ext]!fg-loadcss/dist/cssrelpreload.min.js',
-      'file-loader?name=assets/[name].[hash:8].[ext]!outdatedbrowser/outdatedbrowser/outdatedbrowser.min.css',
-    ],
-    index: [
-      'index/style.js',
-    ],
     app: [
       'root.js',
     ],
@@ -123,42 +115,6 @@ module.exports = require('./webpack.base')({
     new AdvancedInjectionPlugin({
       prefix: 'assets/',
       rules: [{
-        match: ['index.html', 'app.html'],
-        head: [
-          // outdatedbrowser.min.css
-          new AsyncCss(/^outdatedbrowser\..*\.css$/),
-        ],
-      }, {
-        match: 'index.html',
-        head: [
-          // index.vendor.css
-          new AsyncCss(/^index\.vendor\..*\.css$/),
-          // index.css
-          new InlineCss(/^index\.(?!vendor).*\.css$/),
-          // index.js
-          new Preload(/^index\..*\.js$/, { as: 'script' }),
-          // roboto-latin-400.woff2 roboto-latin-300.woff2
-          new Preload(/^roboto-latin-[34]00\..*\.woff2$/, { as: 'font' }),
-          // NotoSansSC-Regular-X.woff2 NotoSansSC-Light-X.woff2
-          new Preload(/^NotoSansSC-(Regular|Light)-X\..*\.woff2$/, { as: 'font' }),
-          // app.js
-          new Prefetch(/^app\..*\.js$/),
-          // app.css
-          new Prefetch(/^app\..*\.css$/),
-          // 0.chunk.js
-          new Prefetch(/^[0-9]+\..*\.chunk\.js$/, { as: 'script' }),
-          // LoginContainer.chunk.js
-          new Prefetch(/^LoginContainer.*\.chunk\.js$/),
-          // HomeContainer.chunk.js
-          new Prefetch(/^HomeContainer.*\.chunk\.js$/),
-          // NotoSansSC-Regular.woff2
-          new Prefetch(/^NotoSansSC-Regular\..*\.woff2$/),
-        ],
-        body: [
-          // index.js
-          new Js(/^index\..*\.js$/),
-        ],
-      }, {
         match: 'app.html',
         head: [
           // app.vendor.css
@@ -167,12 +123,6 @@ module.exports = require('./webpack.base')({
           new InlineCss(/^app\.(?!vendor).*\.css$/),
           // app.js common-app.chunk.js
           new Preload(/^(common-)?app\..*\.js$/, { as: 'script' }),
-          // roboto-latin-400.woff2 roboto-latin-300.woff2
-          new Preload(/^roboto-latin-[34]00\..*\.woff2$/, { as: 'font' }),
-          // NotoSansSC-Regular-X.woff2 NotoSansSC-Light-X.woff2
-          new Preload(/^NotoSansSC-(Regular|Light)-X\..*\.woff2$/, { as: 'font' }),
-          // NotoSansSC-Regular.woff2
-          new Prefetch(/^NotoSansSC-Regular\..*\.woff2$/),
           // *.chunk.js
           new Prefetch(/\.chunk\.js$/),
           // *.worker.js
@@ -181,12 +131,6 @@ module.exports = require('./webpack.base')({
         body: [
           // app.js
           new Js(/^app\..*\.js$/),
-        ],
-      }, {
-        match: ['index.html', 'app.html'],
-        head: [
-          // cssrelpreload.min.js
-          new InlineJs(/^cssrelpreload\..*\.js$/),
         ],
       }],
     }),
