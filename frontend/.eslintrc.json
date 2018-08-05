@@ -97,7 +97,9 @@
     "no-console": "warn",
     "no-continue": "off",
     "no-use-before-define": "error",
+    "operator-linebreak": "off",
     "prefer-template": "error",
+    "react/destructuring-assignment": "off",
     "react/forbid-prop-types": "off",
     "react/jsx-first-prop-new-line": [
       "error",

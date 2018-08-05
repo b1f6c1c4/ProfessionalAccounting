@@ -3,7 +3,7 @@
 const { exec } = require('shelljs');
 const fs = require('fs');
 const async = require('async');
-const sortImports = require('@b1f6c1c4/import-sort').default;
+const sortImports = require('import-sort').default;
 const parser = require('import-sort-parser-babylon');
 
 const listFiles = (t) => new Promise((resolve, reject) => {
@@ -118,10 +118,10 @@ const style = (file) => (styleApi) => {
     { separator: true },
 
     {
-      match: moduleNameIs('material-ui'),
+      match: moduleNameIs('@material-ui/core'),
       sortNamedMembers: name(proper),
     },
-    { match: moduleNameIs(/^material-ui\/colors/) },
+    { match: moduleNameIs(/^@material-ui\/core\/colors/) },
     {
       match: moduleNameIs('@material-ui/icons'),
       sortNamedMembers: name(proper),
