@@ -30,14 +30,6 @@ module.exports = require('./webpack.base')({
 
   // Add hot reloading in development
   entry: {
-    mock: [
-      'file-loader?name=assets/[name].[ext]!outdatedbrowser/outdatedbrowser/outdatedbrowser.min.css',
-      'file-loader?name=assets/[name].[ext]!outdatedbrowser/outdatedbrowser/outdatedbrowser.min.js',
-    ],
-    index: [
-      'webpack-hot-middleware/client?reload=true',
-      'index/style.js',
-    ],
     app: [
       'webpack-hot-middleware/client?reload=true',
       'root.js',
@@ -47,7 +39,7 @@ module.exports = require('./webpack.base')({
   inject: true,
 
   output: {
-    path: '/tmp/ansys-moe', // Imaginary path
+    path: '/tmp/accounting', // Imaginary path
     filename: 'assets/[name].js',
     chunkFilename: 'assets/[name].chunk.js',
     // [#6642](https://github.com/webpack/webpack/issues/6642)

@@ -26,7 +26,7 @@ module.exports = (app) => {
   app.get(`${publicPath}app/*`, (req, res) => {
     // Avoid `path.join` here because it will convert / to \ on Windows,
     // which is incompatible with memory-fs
-    fs.readFile('/tmp/ansys-moe/app.html', (err, file) => {
+    fs.readFile('/tmp/accounting/app.html', (err, file) => {
       if (err) {
         res.status(404).send();
       } else {

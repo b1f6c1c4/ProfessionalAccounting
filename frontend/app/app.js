@@ -9,18 +9,11 @@ import {
   CssBaseline,
   MuiThemeProvider,
 } from '@material-ui/core';
-import { brown, indigo } from '@material-ui/core/colors';
+import { lime, orange } from '@material-ui/core/colors';
 import { Switch, Route } from 'react-router-dom';
 import NotFoundPage from 'components/NotFoundPage';
 import ErrorBoundary from 'containers/ErrorBoundary';
 import GlobalContainer from 'containers/GlobalContainer';
-import SubscriptionContainer from 'containers/SubscriptionContainer';
-import HomeContainer from 'containers/HomeContainer/Loadable';
-import RunContainer from 'containers/RunContainer/Loadable';
-import UploadContainer from 'containers/UploadContainer/Loadable';
-import ViewCatContainer from 'containers/ViewCatContainer/Loadable';
-import ViewEvalContainer from 'containers/ViewEvalContainer/Loadable';
-import ViewProjContainer from 'containers/ViewProjContainer/Loadable';
 
 import createHistory from 'history/createBrowserHistory';
 import configureStore from 'utils/configureStore';
@@ -39,16 +32,16 @@ const theme = createMuiTheme({
   },
   palette: {
     primary: {
-      light: indigo[600],
-      main: indigo[800],
-      dark: indigo[900],
-      contrastText: '#fff',
+      light: lime[100],
+      main: lime[300],
+      dark: lime[500],
+      contrastText: '#000',
     },
     secondary: {
-      light: brown[600],
-      main: brown[800],
-      dark: brown[900],
-      contrastText: '#fff',
+      light: orange[200],
+      main: orange[400],
+      dark: orange[600],
+      contrastText: '#000',
     },
   },
 });
@@ -67,16 +60,9 @@ export const render = () => {
         <ConnectedRouter history={history}>
           <React.Fragment>
             <CssBaseline />
-            <SubscriptionContainer />
             <MuiThemeProvider theme={theme}>
               <GlobalContainer>
                 <ConnectedSwitch>
-                  <Route exact path="/app/" component={HomeContainer} />
-                  <Route exact path="/app/run" component={RunContainer} />
-                  <Route exact path="/app/upload" component={UploadContainer} />
-                  <Route exact path="/app/p/:proj" component={ViewProjContainer} />
-                  <Route exact path="/app/p/:proj/cat/:cHash" component={ViewCatContainer} />
-                  <Route exact path="/app/p/:proj/cat/:cHash/d/:dHash" component={ViewEvalContainer} />
                   <Route component={NotFoundPage} />
                 </ConnectedSwitch>
               </GlobalContainer>
