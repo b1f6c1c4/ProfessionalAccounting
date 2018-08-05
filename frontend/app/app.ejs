@@ -1,0 +1,22 @@
+    <%= require('raw-loader!index/header.html') %>
+
+    <title>Ansys-MOE 自动化设计系统</title>
+
+  </head>
+  <body>
+
+    <div id="app"></div>
+
+    <% if (htmlWebpackPlugin.options.inject) { %>
+      <script src="/dll/main.dll.js"></script>
+    <% } else { %>
+      <%= require('raw-loader!index/outdated.html') %>
+    <% } %>
+
+    <script type="application/javascript">
+      // Fix MS Edge ridiculous bug:
+      // [Bug](https://stackoverflow.com/questions/22754315/for-loop-for-htmlcollection-elements)
+      HTMLCollection.prototype[Symbol.iterator] = Array.prototype[Symbol.iterator];
+    </script>
+  </body>
+</html>

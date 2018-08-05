@@ -1,0 +1,76 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
+import { createStructuredSelector } from 'reselect';
+{{#if wantSagas}}
+import injectSaga from 'utils/injectSaga';
+{{/if}}
+
+{{#if wantMSelectors}}
+import * as {{ camelCase name }}Selectors from './selectors';
+{{/if}}
+{{#if wantReducer}}
+import * as {{ camelCase name }}Actions from './actions';
+{{/if}}
+{{#if wantSagas}}
+import sagas from './sagas';
+{{/if}}
+
+export class {{ properCase name }} extends React.PureComponent {
+  render() {
+    return (
+      <pre>{JSON.stringify(this.props, null, 2)}</pre>
+    );
+  }
+}
+
+{{ properCase name }}.propTypes = {
+{{#if wantSagas}}
+  isLoading: PropTypes.bool.isRequired,
+{{/if}}
+{{#if wantMSelectors}}
+  {{ camelCase mselectorName }}: PropTypes.string.isRequired,
+{{/if}}
+{{#if wantActions}}
+  on{{ properCase actionName }}Action: PropTypes.func.isRequired,
+{{/if}}
+{{#if wantSagas}}
+  on{{ properCase sagaName }}: PropTypes.func.isRequired,
+{{/if}}
+};
+
+{{#if wantReducer}}
+function mapDispatchToProps(dispatch) {
+  return {
+{{#if wantActions}}
+    on{{ properCase actionName }}Action: () => dispatch({{ camelCase name }}Actions.{{ camelCase actionName }}()),
+{{/if}}
+{{#if wantSagas}}
+    on{{ properCase sagaName }}: (param) => dispatch({{ camelCase name }}Actions.{{ camelCase sagaName }}Request(param)),
+{{/if}}
+  };
+}
+
+{{/if}}
+const mapStateToProps = createStructuredSelector({
+{{#if wantSagas}}
+  isLoading: (state) => state.getIn(['{{ camelCase name }}', 'isLoading']),
+{{/if}}
+{{#if wantMSelectors}}
+  {{ camelCase mselectorName }}: {{ camelCase name }}Selectors.{{ properCase mselectorName }}(),
+{{/if}}
+});
+
+export default compose(
+{{#if wantSagas}}
+  injectSaga({ key: '{{ camelCase name }}', saga: sagas }),
+{{/if}}
+{{#if wantReducer}}
+{{#if wantLoadable}}
+{{/if}}
+  connect(mapStateToProps, mapDispatchToProps),
+{{else}}
+  connect(mapStateToProps, null),
+{{/if}}
+)({{ properCase name }});

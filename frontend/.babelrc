@@ -1,0 +1,45 @@
+{
+  plugins: [
+    'lodash',
+  ],
+  presets: [
+    [
+      '@babel/env',
+      {
+        targets: {
+          browsers: [
+            'Chrome >= 62',
+            'Edge >= 15',
+            'Safari >= 11',
+            'iOS >= 11',
+          ],
+        },
+        modules: false,
+      },
+    ],
+    '@babel/preset-react',
+    [
+      '@babel/preset-stage-0',
+      {
+        decoratorsLegacy: true,
+      },
+    ],
+  ],
+  env: {
+    production: {
+      only: [
+        'app',
+      ],
+      plugins: [
+        'transform-react-remove-prop-types',
+        '@babel/plugin-transform-react-constant-elements',
+        '@babel/plugin-transform-react-inline-elements',
+      ],
+    },
+    test: {
+      plugins: [
+        '@babel/plugin-transform-modules-commonjs',
+      ],
+    },
+  },
+}

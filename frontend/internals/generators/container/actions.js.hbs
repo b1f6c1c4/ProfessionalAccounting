@@ -1,0 +1,11 @@
+import * as {{ constantCase name }} from './constants';
+
+// Actions
+{{#if wantActions}}
+{{> actionActions }}
+{{/if}}
+{{#if wantSagas}}
+
+// Sagas
+{{> sagaActions }}
+{{/if}}

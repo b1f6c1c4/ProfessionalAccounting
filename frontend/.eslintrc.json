@@ -1,0 +1,120 @@
+{
+  "parser": "babel-eslint",
+  "extends": "airbnb",
+  "env": {
+    "browser": true,
+    "node": true,
+    "jest": true,
+    "es6": true
+  },
+  "plugins": [
+    "redux-saga",
+    "react",
+    "jsx-a11y"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2017,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "rules": {
+    "object-curly-newline": "off",
+    "arrow-parens": [
+      "error",
+      "always"
+    ],
+    "arrow-body-style": [
+      "error",
+      "as-needed"
+    ],
+    "class-methods-use-this": "off",
+    "comma-dangle": [
+      "error",
+      {
+        "arrays": "always-multiline",
+        "objects": "always-multiline",
+        "imports": "always-multiline",
+        "exports": "always-multiline",
+        "functions": "always-multiline"
+      }
+    ],
+    "function-paren-newline": [
+      "error",
+      "consistent"
+    ],
+    "import/newline-after-import": "error",
+    "import/no-dynamic-require": "error",
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": true,
+        "optionalDependencies": true,
+        "peerDependencies": true
+      }
+    ],
+    "import/no-named-as-default": "off",
+    "import/no-unresolved": "error",
+    "import/no-webpack-loader-syntax": "error",
+    "import/prefer-default-export": "off",
+    "indent": [
+      "error",
+      2,
+      {
+        "SwitchCase": 1
+      }
+    ],
+    "jsx-a11y/anchor-is-valid": "off",
+    "jsx-a11y/aria-props": "error",
+    "jsx-a11y/heading-has-content": "warn",
+    "jsx-a11y/label-has-for": "error",
+    "jsx-a11y/click-events-have-key-events": "off",
+    "jsx-a11y/no-static-element-interactions": "off",
+    "jsx-a11y/mouse-events-have-key-events": "off",
+    "jsx-a11y/role-has-required-aria-props": "error",
+    "jsx-a11y/role-supports-aria-props": "error",
+    "max-len": [
+      "warn",
+      {
+        "code": 150,
+        "tabWidth": 2,
+        "ignoreComments": false,
+        "ignoreTrailingComments": false,
+        "ignoreUrls": true,
+        "ignoreStrings": true,
+        "ignoreTemplateLiterals": true,
+        "ignoreRegExpLiterals": true
+      }
+    ],
+    "newline-per-chained-call": [
+      "warn",
+      {
+        "ignoreChainWithDepth": 5
+      }
+    ],
+    "no-confusing-arrow": "off",
+    "no-console": "warn",
+    "no-continue": "off",
+    "no-use-before-define": "error",
+    "prefer-template": "error",
+    "react/forbid-prop-types": "off",
+    "react/jsx-first-prop-new-line": [
+      "error",
+      "multiline"
+    ],
+    "react/jsx-filename-extension": "off",
+    "react/require-default-props": "off",
+    "react/self-closing-comp": "off",
+    "redux-saga/no-yield-in-race": "error",
+    "redux-saga/yield-effects": "error",
+    "require-yield": "warn"
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "paths": ["app"]
+      }
+    }
+  }
+}

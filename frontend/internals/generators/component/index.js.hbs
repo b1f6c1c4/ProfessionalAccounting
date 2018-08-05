@@ -1,0 +1,31 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { compose } from 'redux';
+
+import {
+  withStyles,
+} from 'material-ui';
+
+// eslint-disable-next-line no-unused-vars
+const styles = (theme) => ({
+});
+
+class {{ properCase name }} extends React.PureComponent {
+  render() {
+    // eslint-disable-next-line no-unused-vars
+    const { classes } = this.props;
+
+    return (
+      <div>
+      </div>
+    );
+  }
+}
+
+{{ properCase name }}.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
+
+export default compose(
+  withStyles(styles),
+)({{ properCase name }});
