@@ -34,8 +34,6 @@ const make = (makeConfig, { progress, profile, docker }) => {
       return;
     }
 
-    shelljs.rm('-f', 'build/mock.*');
-
     if (profile) {
       const json = JSON.stringify(stats.toJson(), null, 2);
       fs.writeFileSync(path.join(__dirname, '../../stats.json'), json, 'utf-8');
@@ -46,7 +44,7 @@ const make = (makeConfig, { progress, profile, docker }) => {
     if (docker) {
       shelljs.cp('Dockerfile', 'build');
       shelljs.cp('.dockerignore', 'build');
-      shelljs.exec('docker build -t ansys-frontend build');
+      shelljs.exec('docker build -t accounting-frontend build');
     }
   });
 };

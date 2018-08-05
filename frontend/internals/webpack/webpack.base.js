@@ -18,18 +18,6 @@ module.exports = ({
   performance,
 }) => {
   const htmlPlugins = [
-    // Minify and optimize the index.html
-    new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: 'app/index/index.ejs',
-      minify,
-      inject,
-      chunksSortMode: 'manual',
-      chunks: [
-        'index',
-      ],
-    }),
-
     // Minify and optimize the app.html
     new HtmlWebpackPlugin({
       filename: 'app.html',
@@ -83,10 +71,6 @@ module.exports = ({
             ...(cssLoaderApp || ['style-loader', 'css-loader']),
             'sass-loader',
           ],
-        },
-        {
-          test: /\.(svg)$/,
-          loader: 'raw-loader',
         },
         {
           test: /\.(eot|otf|ttf|woff|woff2)$/,
