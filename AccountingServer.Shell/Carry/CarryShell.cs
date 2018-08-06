@@ -6,6 +6,7 @@ using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
+using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
@@ -27,7 +28,7 @@ namespace AccountingServer.Shell.Carry
             new ConfigManager<CarrySettings>("Carry.xml");
 
         /// <inheritdoc />
-        public IQueryResult Execute(string expr)
+        public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             expr = expr.Rest();
             switch (expr?.Initital())

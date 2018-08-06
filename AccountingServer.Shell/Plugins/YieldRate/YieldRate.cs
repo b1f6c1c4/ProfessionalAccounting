@@ -15,10 +15,10 @@ namespace AccountingServer.Shell.Plugins.YieldRate
     /// </summary>
     internal class YieldRate : PluginBase
     {
-        public YieldRate(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
+        public YieldRate(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
-        public override IQueryResult Execute(string expr)
+        public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             FacadeF.ParsingF.Eof(expr);
 

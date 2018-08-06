@@ -15,12 +15,10 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
     /// </summary>
     internal class AssetDisposition : PluginBase
     {
-        public AssetDisposition(Accountant accountant, IEntitySerializer serializer) : base(
-            accountant,
-            serializer) { }
+        public AssetDisposition(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
-        public override IQueryResult Execute(string expr)
+        public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             var voucherID = Parsing.Token(ref expr);
             var guids = new List<string>();
@@ -64,7 +62,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
                     asset.Schedule.RemoveRange(id, asset.Schedule.Count - id);
 
                 asset.Schedule.Add(new DispositionItem { Date = voucher.Date, VoucherID = voucher.ID });
-                sb.Append(Serializer.PresentAsset(asset));
+                sb.Append(serializer.PresentAsset(asset));
                 Accountant.Upsert(asset);
             }
 

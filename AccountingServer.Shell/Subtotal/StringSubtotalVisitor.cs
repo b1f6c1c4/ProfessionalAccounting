@@ -19,14 +19,6 @@ namespace AccountingServer.Shell.Subtotal
         private ISubtotal m_Par;
         protected StringBuilder Sb;
 
-        public abstract Nothing Visit(ISubtotalRoot sub);
-        public abstract Nothing Visit(ISubtotalDate sub);
-        public abstract Nothing Visit(ISubtotalCurrency sub);
-        public abstract Nothing Visit(ISubtotalTitle sub);
-        public abstract Nothing Visit(ISubtotalSubTitle sub);
-        public abstract Nothing Visit(ISubtotalContent sub);
-        public abstract Nothing Visit(ISubtotalRemark sub);
-
         /// <inheritdoc />
         public string PresentSubtotal(ISubtotalResult raw, ISubtotal par)
         {
@@ -37,6 +29,14 @@ namespace AccountingServer.Shell.Subtotal
             raw?.Accept(this);
             return Sb.ToString();
         }
+
+        public abstract Nothing Visit(ISubtotalRoot sub);
+        public abstract Nothing Visit(ISubtotalDate sub);
+        public abstract Nothing Visit(ISubtotalCurrency sub);
+        public abstract Nothing Visit(ISubtotalTitle sub);
+        public abstract Nothing Visit(ISubtotalSubTitle sub);
+        public abstract Nothing Visit(ISubtotalContent sub);
+        public abstract Nothing Visit(ISubtotalRemark sub);
 
         protected void VisitChildren(ISubtotalResult sub)
         {

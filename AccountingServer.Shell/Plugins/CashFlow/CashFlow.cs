@@ -16,13 +16,13 @@ namespace AccountingServer.Shell.Plugins.CashFlow
     /// </summary>
     internal class CashFlow : PluginBase
     {
-        public CashFlow(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
+        public CashFlow(Accountant accountant) : base(accountant) { }
 
         public static IConfigManager<CashTemplates> Templates { private get; set; } =
             new ConfigManager<CashTemplates>("Cash.xml");
 
         /// <inheritdoc />
-        public override IQueryResult Execute(string expr)
+        public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             var rst = new Dictionary<DateTime, double[]>();
 
@@ -73,7 +73,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
 
             if (account.Reimburse != null)
             {
-                var rb = new Composite.Composite(Accountant, Serializer);
+                var rb = new Composite.Composite(Accountant);
                 var tmp = Composite.Composite.GetTemplate(account.Reimburse);
                 var rng = Composite.Composite.DateRange(tmp.Day);
                 rb.DoInquiry(rng, tmp, out var rbVal);

@@ -17,13 +17,13 @@ namespace AccountingServer.Shell.Plugins.Composite
     /// </summary>
     internal class Composite : PluginBase
     {
-        public Composite(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
+        public Composite(Accountant accountant) : base(accountant) { }
 
         public static IConfigManager<CompositeTemplates> Templates { private get; set; } =
             new ConfigManager<CompositeTemplates>("Composite.xml");
 
         /// <inheritdoc />
-        public override IQueryResult Execute(string expr)
+        public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             Template temp = null;
             if (ParsingF.Token(ref expr, true, t => (temp = GetTemplate(t)) != null) == null)
@@ -38,7 +38,7 @@ namespace AccountingServer.Shell.Plugins.Composite
                 ParsingF.Eof(expr);
             }
 
-            return DoInquiry(the, temp, out var _);
+            return DoInquiry(the, temp, out _);
         }
 
         public static Template GetTemplate(string name) => Templates.Config.Templates.SingleOrDefault(

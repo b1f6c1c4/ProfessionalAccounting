@@ -16,13 +16,13 @@ namespace AccountingServer.Shell.Plugins.Utilities
     /// </summary>
     internal class Utilities : PluginBase
     {
-        public Utilities(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
+        public Utilities(Accountant accountant) : base(accountant) { }
 
         public static IConfigManager<UtilTemplates> Templates { private get; set; } =
             new ConfigManager<UtilTemplates>("Util.xml");
 
         /// <inheritdoc />
-        public override IQueryResult Execute(string expr)
+        public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             var count = 0;
             while (!string.IsNullOrWhiteSpace(expr))
@@ -67,9 +67,7 @@ namespace AccountingServer.Shell.Plugins.Utilities
                 template.TemplateType == UtilTemplateType.Fill)
             {
                 var valt = Parsing.Double(ref expr);
-                var val = valt.HasValue
-                    ? valt.Value
-                    : (template.Default ?? throw new ApplicationException($"常见记账凭证{template.Name}没有默认值"));
+                var val = valt ?? (template.Default ?? throw new ApplicationException($"常见记账凭证{template.Name}没有默认值"));
 
                 if (template.TemplateType == UtilTemplateType.Value)
                     num = val;

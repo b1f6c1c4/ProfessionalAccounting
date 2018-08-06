@@ -16,12 +16,10 @@ namespace AccountingServer.Shell.Plugins.BankBalance
     /// </summary>
     internal class AverageDailyBalance : PluginBase
     {
-        public AverageDailyBalance(Accountant accountant, IEntitySerializer serializer) : base(
-            accountant,
-            serializer) { }
+        public AverageDailyBalance(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
-        public override IQueryResult Execute(string expr)
+        public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             var content = Parsing.Token(ref expr);
             var avg = Parsing.DoubleF(ref expr);

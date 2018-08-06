@@ -1,5 +1,6 @@
 ﻿using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
@@ -10,7 +11,7 @@ namespace AccountingServer.Shell.Carry
     /// </summary>
     internal class ExchangeShell : IShellComponent
     {
-        public IQueryResult Execute(string expr)
+        public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             expr = expr.Rest();
             var rev = true;

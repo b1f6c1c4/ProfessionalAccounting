@@ -15,6 +15,19 @@ namespace AccountingServer.Shell.Subtotal
 
         private ISubtotal m_Par;
 
+        /// <summary>
+        ///     执行分类汇总
+        /// </summary>
+        /// <param name="raw">分类汇总结果</param>
+        /// <param name="par">参数</param>
+        /// <returns>分类汇总结果</returns>
+        public string PresentSubtotal(ISubtotalResult raw, ISubtotal par)
+        {
+            m_Par = par;
+            m_Depth = 0;
+            return (raw?.Accept(this)?.Value as JObject)?.ToString();
+        }
+
         JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalRoot sub)
             => new JProperty("", VisitChildren(sub));
 
@@ -35,19 +48,6 @@ namespace AccountingServer.Shell.Subtotal
 
         JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalRemark sub)
             => new JProperty(sub.Remark ?? "", VisitChildren(sub));
-
-        /// <summary>
-        ///     执行分类汇总
-        /// </summary>
-        /// <param name="raw">分类汇总结果</param>
-        /// <param name="par">参数</param>
-        /// <returns>分类汇总结果</returns>
-        public string PresentSubtotal(ISubtotalResult raw, ISubtotal par)
-        {
-            m_Par = par;
-            m_Depth = 0;
-            return (raw?.Accept(this)?.Value as JObject)?.ToString();
-        }
 
         private JObject VisitChildren(ISubtotalResult sub)
         {

@@ -24,22 +24,22 @@ namespace AccountingServer.Shell
     {
         private readonly Dictionary<string, PluginBase> m_Plugins;
 
-        public PluginShell(Accountant helper, IEntitySerializer serializer) => m_Plugins =
+        public PluginShell(Accountant helper) => m_Plugins =
             new Dictionary<string, PluginBase>
                 {
-                    ["adb"] = new AverageDailyBalance(helper, serializer),
-                    ["af"] = new AssetFactory(helper, serializer),
-                    ["ad"] = new AssetDisposition(helper, serializer),
-                    ["ir"] = new InterestRevenue(helper, serializer),
-                    ["cf"] = new CashFlow(helper, serializer),
-                    ["c"] = new Composite(helper, serializer),
-                    ["ccc"] = new CreditCardConvert(helper, serializer),
-                    ["u"] = new Utilities(helper, serializer),
-                    ["yr"] = new YieldRate(helper, serializer)
+                    ["adb"] = new AverageDailyBalance(helper),
+                    ["af"] = new AssetFactory(helper),
+                    ["ad"] = new AssetDisposition(helper),
+                    ["ir"] = new InterestRevenue(helper),
+                    ["cf"] = new CashFlow(helper),
+                    ["c"] = new Composite(helper),
+                    ["ccc"] = new CreditCardConvert(helper),
+                    ["u"] = new Utilities(helper),
+                    ["yr"] = new YieldRate(helper)
                 };
 
         /// <inheritdoc />
-        public IQueryResult Execute(string expr)
+        public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             var help = false;
             if (expr.StartsWith("?", StringComparison.Ordinal))
@@ -56,7 +56,7 @@ namespace AccountingServer.Shell
                 return plgName == "" ? new UnEditableText(ListPlugins()) : new UnEditableText(GetHelp(plgName));
             }
 
-            return GetPlugin(plgName).Execute(expr);
+            return GetPlugin(plgName).Execute(expr, serializer);
         }
 
         /// <inheritdoc />
