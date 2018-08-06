@@ -22,9 +22,6 @@ namespace AccountingServer.Test.UnitTest.Shell
                             }
                     });
 
-            AbbrSerializer.Abbrs =
-                new MockConfigManager<Abbreviations>(new Abbreviations { Abbrs = new List<Abbreviation>() });
-
             TitleManager.TitleInfos =
                 new MockConfigManager<TitleInfos>(new TitleInfos { Titles = new List<TitleInfo>() });
         }
@@ -35,6 +32,7 @@ namespace AccountingServer.Test.UnitTest.Shell
         {
             var serializer = GetSerializer();
 
+            Assert.NotNull(serializer.PresentVoucher(null));
             Assert.Throws<FormatException>(() => serializer.ParseVoucher(""));
             Assert.Throws<FormatException>(() => serializer.ParseVoucher("new Voucher {"));
         }
@@ -133,6 +131,30 @@ namespace AccountingServer.Test.UnitTest.Shell
 
     public class AbbrSerializerTest : SerializerTest
     {
+        public AbbrSerializerTest()
+            => AbbrSerializer.Abbrs =
+                new MockConfigManager<Abbreviations>(
+                    new Abbreviations
+                        {
+                            Abbrs = new List<Abbreviation>
+                                {
+                                    new Abbreviation
+                                        {
+                                            Abbr = "abbr1",
+                                            Title = 1234,
+                                            SubTitle = 04,
+                                            Content = "cnt",
+                                            Editable = false
+                                        },
+                                    new Abbreviation
+                                        {
+                                            Abbr = "abbr2",
+                                            Title = 1234,
+                                            Editable = true
+                                        }
+                                }
+                        });
+
         protected override IEntitySerializer GetSerializer() => new AbbrSerializer();
 
         [Theory]
@@ -140,6 +162,220 @@ namespace AccountingServer.Test.UnitTest.Shell
         public override void VoucherTest(string dt, VoucherType type) { base.VoucherTest(dt, type); }
 
         [Fact]
+        public void OtherTest()
+        {
+            var serializer = GetSerializer();
+
+            var voucher = serializer.ParseVoucher(@"new Voucher { abbr1 123 abbr2 ""gg"" 765 }");
+            Assert.Equal(
+                new Voucher
+                    {
+                        Date = ClientDateTime.Today,
+                        Details = new List<VoucherDetail>
+                            {
+                                new VoucherDetail
+                                    {
+                                        Currency = "CNY",
+                                        Title = 1234,
+                                        SubTitle = 04,
+                                        Content = "cnt",
+                                        Remark = null,
+                                        Fund = 123
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "CNY",
+                                        Title = 1234,
+                                        Content = "gg",
+                                        Fund = 765
+                                    }
+                            }
+                    },
+                voucher,
+                new VoucherEqualityComparer());
+        }
+
+        [Fact]
         public override void SimpleTest() { base.SimpleTest(); }
+    }
+
+    public class JsonSerializerTest : SerializerTest
+    {
+        protected override IEntitySerializer GetSerializer() => new JsonSerializer();
+
+        [Theory]
+        [ClassData(typeof(DataProvider))]
+        public override void VoucherTest(string dt, VoucherType type) { base.VoucherTest(dt, type); }
+
+        [Fact]
+        public override void SimpleTest() { base.SimpleTest(); }
+    }
+
+    public class DiscountSerializerTest
+    {
+        public DiscountSerializerTest()
+        {
+            BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
+                new BaseCurrencyInfos
+                    {
+                        Infos = new List<BaseCurrencyInfo>
+                            {
+                                new BaseCurrencyInfo { Date = null, Currency = "CNY" }
+                            }
+                    });
+
+            TitleManager.TitleInfos =
+                new MockConfigManager<TitleInfos>(new TitleInfos { Titles = new List<TitleInfo>() });
+
+            AbbrSerializer.Abbrs =
+                new MockConfigManager<Abbreviations>(
+                    new Abbreviations
+                        {
+                            Abbrs = new List<Abbreviation>
+                                {
+                                    new Abbreviation
+                                        {
+                                            Abbr = "aaa",
+                                            Title = 1001,
+                                            Editable = false
+                                        }
+                                }
+                        });
+        }
+
+        private static IEntitySerializer GetSerializer() => new DiscountSerializer();
+
+        [Fact]
+        public void SimpleTest()
+        {
+            var serializer = GetSerializer();
+
+            Assert.Throws<FormatException>(() => serializer.ParseVoucher(""));
+            Assert.Throws<NotImplementedException>(() => serializer.ParseVoucher("new Voucher {"));
+            Assert.Throws<NotImplementedException>(() => serializer.ParseVoucher("new Voucher { }"));
+            Assert.Throws<NotImplementedException>(() => serializer.ParseVoucherDetail("whatever"));
+        }
+
+        [Fact]
+        public void TaxTest()
+        {
+            var serializer = GetSerializer();
+
+            var voucher = serializer.ParseVoucher(
+                @"new Voucher {
+! 20180101 @usd
+T1001 + ! T1002 : 1000-50 950+50 ;
+! aaa + T100366 : 1000 ;
+t10
+t2
+
+@cny T1001 -2912
+}");
+            Assert.Equal(
+                new Voucher
+                    {
+                        Date = new DateTime(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                        Type = VoucherType.Ordinary,
+                        Details = new List<VoucherDetail>
+                            {
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 1001,
+                                        Fund = 1000 + 500 + 6
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 1002,
+                                        Fund = 950 + 4
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 1003,
+                                        SubTitle = 66,
+                                        Fund = 500 + 2
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 6603,
+                                        Fund = -50
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "CNY",
+                                        Title = 1001,
+                                        Fund = -2912
+                                    }
+                            }
+                    },
+                voucher,
+                new VoucherEqualityComparer());
+        }
+
+        [Fact]
+        public void TaxDiscountTest()
+        {
+            var serializer = GetSerializer();
+
+            var voucher = serializer.ParseVoucher(
+                @"new Voucher {
+! @usd
+T1001 + ! T1002 : 1000-50 950+50 ;
+! aaa + T100366 hei ha : 1000 ;
+t2
+d40
+t10
+d8
+
+@usd T1001 -29120
+}");
+            Assert.Equal(
+                new Voucher
+                {
+                    Date = ClientDateTime.Today,
+                    Type = VoucherType.Ordinary,
+                    Details = new List<VoucherDetail>
+                            {
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 1001,
+                                        Fund = 1000 + 500 + 6 - 8
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 1002,
+                                        Fund = 950 + 4 - 16
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 1003,
+                                        SubTitle = 66,
+                                        Content = "hei",
+                                        Remark = "ha",
+                                        Fund = 500 + 2
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 6603,
+                                        Fund = -50 - 16 - 8
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 1001,
+                                        Fund = -29120
+                                    }
+                            }
+                },
+                voucher,
+                new VoucherEqualityComparer());
+        }
     }
 }

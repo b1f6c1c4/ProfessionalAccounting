@@ -20,7 +20,7 @@ namespace AccountingClient.Shell
         private HttpClient m_Client;
         private Exception m_Exception;
         private WebRequestHandler m_Handler;
-        private string m_SerializerSpec = null;
+        private string m_SerializerSpec;
 
         public Facade()
         {

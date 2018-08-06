@@ -111,6 +111,8 @@ namespace AccountingServer.Test.UnitTest.Shell
         [InlineData(null, "\t", "", null)]
         [InlineData("", " ''t es", "t es", null)]
         [InlineData(null, "  s-im_ple test", "s-im_ple test", '"')]
+        [InlineData("haha", " 'haha'", "", null)]
+        [InlineData("haha", " 'haha'", "", '\'')]
         [InlineData("-im_ple te", "  s-im_ple test", "t", null)]
         [InlineData("s-im_ple", "  's-im_ple' test", " test", null)]
         [InlineData(null, "  si'm\"ple te\"s't", "si'm\"ple te\"s't", '\'')]
