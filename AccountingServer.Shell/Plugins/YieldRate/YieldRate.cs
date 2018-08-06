@@ -36,7 +36,7 @@ namespace AccountingServer.Shell.Plugins.YieldRate
                 sb.AppendLine(
                     $"{tpl.Group.Content}\t{GetRate(tpl.Group.Items.Cast<ISubtotalDate>().OrderBy(b => b.Date, new DateComparer()).ToList(), tpl.Value) * 360:P2}");
 
-            return new UnEditableText(sb.ToString());
+            return new PlainText(sb.ToString());
         }
 
         /// <summary>

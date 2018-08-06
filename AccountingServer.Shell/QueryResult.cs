@@ -11,17 +11,39 @@ namespace AccountingServer.Shell
         ///     是否要连续输入
         /// </summary>
         bool AutoReturn { get; }
+
+        /// <summary>
+        ///     是否需要刷新
+        /// </summary>
+        bool Dirty { get; }
     }
 
     /// <summary>
     ///     成功
     /// </summary>
-    internal class Succeed : IQueryResult
+    internal class PlainSucceed : IQueryResult
     {
         /// <inheritdoc />
         public bool AutoReturn => true;
 
+        /// <inheritdoc />
+        public bool Dirty => false;
+
         public override string ToString() => "OK";
+    }
+
+    /// <summary>
+    ///     脏成功
+    /// </summary>
+    internal class DirtySucceed : IQueryResult
+    {
+        /// <inheritdoc />
+        public bool AutoReturn => true;
+
+        /// <inheritdoc />
+        public bool Dirty => true;
+
+        public override string ToString() => "Done";
     }
 
     internal class NumberAffected : IQueryResult
@@ -39,6 +61,9 @@ namespace AccountingServer.Shell
 
         /// <inheritdoc />
         public bool AutoReturn => true;
+
+        /// <inheritdoc />
+        public bool Dirty => m_N != 0;
 
         public override string ToString() => m_N.ToString(CultureInfo.InvariantCulture);
     }
@@ -59,28 +84,37 @@ namespace AccountingServer.Shell
         protected Text(string text) => m_Text = text;
 
         /// <inheritdoc />
+        public abstract bool Dirty { get; }
+
+        /// <inheritdoc />
         public abstract bool AutoReturn { get; }
 
         public override string ToString() => m_Text;
     }
 
     /// <summary>
-    ///     可编辑文本
+    ///     普通文本
     /// </summary>
-    internal class EditableText : Text
+    internal class PlainText : Text
     {
-        public EditableText(string text) : base(text) { }
+        public PlainText(string text) : base(text) { }
+
+        /// <inheritdoc />
+        public override bool Dirty => false;
 
         /// <inheritdoc />
         public override bool AutoReturn => false;
     }
 
     /// <summary>
-    ///     不可编辑文本
+    ///     脏文本
     /// </summary>
-    internal class UnEditableText : Text
+    internal class DirtyText : Text
     {
-        public UnEditableText(string text) : base(text) { }
+        public DirtyText(string text) : base(text) { }
+
+        /// <inheritdoc />
+        public override bool Dirty => true;
 
         /// <inheritdoc />
         public override bool AutoReturn => true;

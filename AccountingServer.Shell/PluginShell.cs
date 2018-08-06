@@ -53,7 +53,7 @@ namespace AccountingServer.Shell
             if (help)
             {
                 Parsing.Eof(expr);
-                return plgName == "" ? new UnEditableText(ListPlugins()) : new UnEditableText(GetHelp(plgName));
+                return plgName == "" ? new PlainText(ListPlugins()) : new PlainText(GetHelp(plgName));
             }
 
             return GetPlugin(plgName).Execute(expr, serializer);

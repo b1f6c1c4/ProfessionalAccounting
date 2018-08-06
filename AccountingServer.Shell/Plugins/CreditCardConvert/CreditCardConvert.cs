@@ -114,14 +114,14 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                     sb.AppendLine();
             }
 
-            return new UnEditableText(sb.ToString());
+            return new PlainText(sb.ToString());
         }
 
         private IQueryResult Create(string content, ref string expr, IEntitiesSerializer serializer)
         {
             var currency = Parsing.Token(ref expr, false);
 
-            var sb = new StringBuilder();
+            var lst = new List<Voucher>();
             while (!string.IsNullOrWhiteSpace(expr))
             {
                 var date = Parsing.UniqueTime(ref expr);
@@ -174,10 +174,13 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                             }
                     };
                 Accountant.Upsert(voucher);
-                sb.Append(serializer.PresentVoucher(voucher).Wrap());
+                lst.Add(voucher);
             }
 
-            return new EditableText(sb.ToString());
+            if (lst.Any())
+                return new DirtyText(serializer.PresentVouchers(lst));
+
+            return new PlainSucceed();
         }
 
         private sealed class Trans

@@ -87,7 +87,7 @@ namespace AccountingServer.Shell.Plugins.BankBalance
                 }
             }
 
-            return new UnEditableText(sb.ToString());
+            return new PlainText(sb.ToString());
         }
     }
 }

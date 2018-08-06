@@ -66,7 +66,10 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
                 Accountant.Upsert(asset);
             }
 
-            return new EditableText(sb.ToString());
+            if (sb.Length > 0)
+                return new DirtyText(sb.ToString());
+
+            return new PlainSucceed();
         }
     }
 }

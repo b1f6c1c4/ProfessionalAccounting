@@ -122,7 +122,7 @@ namespace AccountingServer.Shell
                     throw new MissingManifestResourceException();
 
                 using (var reader = new StreamReader(stream))
-                    return new UnEditableText(reader.ReadToEnd());
+                    return new PlainText(reader.ReadToEnd());
             }
         }
 
@@ -140,7 +140,7 @@ namespace AccountingServer.Shell
                     sb.AppendLine($"{title.Id.AsTitle()}{subTitle.Id.AsSubTitle(),-4}{subTitle.Name}");
             }
 
-            return new UnEditableText(sb.ToString());
+            return new PlainText(sb.ToString());
         }
 
         #endregion

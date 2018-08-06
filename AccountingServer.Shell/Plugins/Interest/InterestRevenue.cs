@@ -78,7 +78,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                     ClientDateTime.Today);
             }
 
-            return new Succeed();
+            return new DirtySucceed();
         }
 
         /// <summary>

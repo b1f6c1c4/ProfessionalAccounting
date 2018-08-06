@@ -13,7 +13,7 @@ namespace AccountingServer
 
         private static void Main()
         {
-            var server = new HttpServer(IPAddress.Any, 3000);
+            var server = new HttpServer(IPAddress.Any, 30000);
             server.OnHttpRequest += Server_OnHttpRequest;
             server.Start();
         }
@@ -54,6 +54,7 @@ namespace AccountingServer
                         var response = GenerateHttpResponse(res.ToString(), "text/plain");
                         response.Header["X-Type"] = res.GetType().Name;
                         response.Header["X-AutoReturn"] = res.AutoReturn ? "true" : "false";
+                        response.Header["X-Dirty"] = res.Dirty ? "true" : "false";
                         return response;
                     }
 

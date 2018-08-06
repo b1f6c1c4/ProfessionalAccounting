@@ -58,7 +58,7 @@ namespace AccountingServer.Shell.Carry
             if (rng.NullOnly)
             {
                 Carry(null);
-                return new Succeed();
+                return new DirtySucceed();
             }
 
             if (!rng.StartDate.HasValue ||
@@ -76,7 +76,7 @@ namespace AccountingServer.Shell.Carry
             if (rng.Nullable)
                 Carry(null);
 
-            return new Succeed();
+            return new DirtySucceed();
         }
 
         /// <summary>

@@ -27,7 +27,7 @@ namespace AccountingServer.Shell.Carry
             Parsing.Eof(expr);
             var res = rev ? ExchangeFactory.Instance.To(date, curr) : ExchangeFactory.Instance.From(date, curr);
 
-            return new UnEditableText((res * val.Value).ToString("R"));
+            return new PlainText((res * val.Value).ToString("R"));
         }
 
         public bool IsExecutable(string expr) => expr.Initital() == "?e";

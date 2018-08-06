@@ -78,7 +78,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
             Accountant.Depreciate(asset);
             Accountant.Upsert(asset);
 
-            return new EditableText(serializer.PresentAsset(asset));
+            return new DirtyText(serializer.PresentAsset(asset));
         }
     }
 }
