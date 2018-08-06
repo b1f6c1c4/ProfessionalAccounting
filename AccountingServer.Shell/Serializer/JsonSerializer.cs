@@ -32,11 +32,11 @@ namespace AccountingServer.Shell.Serializer
             if (str.StartsWith(VoucherToken, StringComparison.OrdinalIgnoreCase))
                 str = str.Substring(VoucherToken.Length);
 
-            return ParseVoucher(JObject.Parse(str));
+            return ParseVoucher(ParseJson(str));
         }
 
         /// <inheritdoc />
-        public VoucherDetail ParseVoucherDetail(string str) => ParseVoucherDetail(JObject.Parse(str));
+        public VoucherDetail ParseVoucherDetail(string str) => ParseVoucherDetail(ParseJson(str));
 
         /// <inheritdoc />
         public string PresentAsset(Asset asset)
@@ -48,7 +48,7 @@ namespace AccountingServer.Shell.Serializer
             if (str.StartsWith(VoucherToken, StringComparison.OrdinalIgnoreCase))
                 str = str.Substring(VoucherToken.Length);
 
-            var obj = JObject.Parse(str);
+            var obj = ParseJson(str);
             var dateStr = obj["date"]?.Value<string>();
             DateTime? date = null;
             if (dateStr != null)
@@ -91,7 +91,7 @@ namespace AccountingServer.Shell.Serializer
             if (str.StartsWith(VoucherToken, StringComparison.OrdinalIgnoreCase))
                 str = str.Substring(VoucherToken.Length);
 
-            var obj = JObject.Parse(str);
+            var obj = ParseJson(str);
             var dateStr = obj["date"]?.Value<string>();
             DateTime? date = null;
             if (dateStr != null)
@@ -127,6 +127,18 @@ namespace AccountingServer.Shell.Serializer
 
         public string PresentAmorts(IEnumerable<Amortization> amorts)
             => new JArray(amorts.Select(PresentJson)).ToString(Formatting.Indented);
+
+        private static JObject ParseJson(string str)
+        {
+            try
+            {
+                return JObject.Parse(str);
+            }
+            catch (JsonReaderException e)
+            {
+                throw new FormatException("无法识别Json", e);
+            }
+        }
 
         private static Voucher ParseVoucher(JToken obj)
         {

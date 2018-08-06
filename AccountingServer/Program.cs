@@ -7,7 +7,7 @@ using static AccountingServer.Http.HttpUtil;
 
 namespace AccountingServer
 {
-    internal class Program
+    internal static class Program
     {
         private static readonly Facade Facade = new Facade();
 

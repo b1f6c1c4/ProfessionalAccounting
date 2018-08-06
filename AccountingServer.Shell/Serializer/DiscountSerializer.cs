@@ -98,9 +98,9 @@ namespace AccountingServer.Shell.Serializer
             var total = lst.Sum(it => it.Fund.Value);
             foreach (var item in lst)
             {
-                item.Fund += t / total * item.Fund;
                 // ReSharper disable once PossibleInvalidOperationException
                 item.DiscountFund += d / total * item.Fund.Value;
+                item.Fund += t / total * item.Fund;
             }
 
             foreach (var item in lst)
