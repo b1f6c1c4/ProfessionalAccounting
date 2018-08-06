@@ -20,6 +20,7 @@ namespace AccountingClient.Shell
         private HttpClient m_Client;
         private Exception m_Exception;
         private WebRequestHandler m_Handler;
+        private string m_SerializerSpec = null;
 
         public Facade()
         {
@@ -71,6 +72,8 @@ namespace AccountingClient.Shell
 
             m_Client.DefaultRequestHeaders.Remove("X-ClientDateTime");
             m_Client.DefaultRequestHeaders.Add("X-ClientDateTime", DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"));
+            m_Client.DefaultRequestHeaders.Remove("X-Serializer");
+            m_Client.DefaultRequestHeaders.Add("X-Serializer", m_SerializerSpec);
 
             HttpResponseMessage res;
             switch (method)
@@ -97,6 +100,13 @@ namespace AccountingClient.Shell
         {
             if (expr == "exit")
                 Environment.Exit(0);
+
+            if (expr.StartsWith("spec ", StringComparison.OrdinalIgnoreCase))
+            {
+                m_SerializerSpec = expr.Substring(5);
+
+                return new QueryResult { Result = "OK", AutoReturn = true };
+            }
 
             if (expr.StartsWith("use ", StringComparison.OrdinalIgnoreCase))
             {

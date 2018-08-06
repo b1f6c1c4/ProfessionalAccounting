@@ -14,12 +14,10 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
     /// </summary>
     internal class AssetFactory : PluginBase
     {
-        public AssetFactory(Accountant accountant, IEntitySerializer serializer) : base(
-            accountant,
-            serializer) { }
+        public AssetFactory(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
-        public override IQueryResult Execute(string expr)
+        public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             var voucherID = Parsing.Token(ref expr);
             Guid? guid = null;
@@ -80,7 +78,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
             Accountant.Depreciate(asset);
             Accountant.Upsert(asset);
 
-            return new EditableText(Serializer.PresentAsset(asset));
+            return new EditableText(serializer.PresentAsset(asset));
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using AccountingServer.Shell.Serializer;
 
 namespace AccountingServer.Shell
 {
@@ -14,8 +15,9 @@ namespace AccountingServer.Shell
         ///     执行表达式
         /// </summary>
         /// <param name="expr">表达式</param>
+        /// <param name="serializer">表示器代号</param>
         /// <returns>执行结果</returns>
-        IQueryResult Execute(string expr);
+        IQueryResult Execute(string expr, IEntitiesSerializer serializer);
 
         /// <summary>
         ///     粗略判断表达式是否可执行
@@ -33,21 +35,22 @@ namespace AccountingServer.Shell
         /// <summary>
         ///     操作
         /// </summary>
-        private readonly Func<string, IQueryResult> m_Action;
+        private readonly Func<string, IEntitiesSerializer, IQueryResult> m_Action;
 
         /// <summary>
         ///     首段字符串
         /// </summary>
         private readonly string m_Initial;
 
-        public ShellComponent(string initial, Func<string, IQueryResult> action)
+        public ShellComponent(string initial, Func<string, IEntitiesSerializer, IQueryResult> action)
         {
             m_Initial = initial;
             m_Action = action;
         }
 
         /// <inheritdoc />
-        public IQueryResult Execute(string expr) => m_Action(m_Initial == null ? expr : expr.Rest());
+        public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+            => m_Action(m_Initial == null ? expr : expr.Rest(), serializer);
 
         /// <inheritdoc />
         public bool IsExecutable(string expr) => m_Initial == null || expr.Initital() == m_Initial;
@@ -64,7 +67,8 @@ namespace AccountingServer.Shell
         public IEnumerator GetEnumerator() => m_Components.GetEnumerator();
 
         /// <inheritdoc />
-        public IQueryResult Execute(string expr) => FirstExecutable(expr).Execute(expr);
+        public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+            => FirstExecutable(expr).Execute(expr, serializer);
 
         /// <inheritdoc />
         public bool IsExecutable(string expr) => m_Components.Any(s => s.IsExecutable(expr));

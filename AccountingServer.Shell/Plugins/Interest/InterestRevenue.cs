@@ -16,10 +16,10 @@ namespace AccountingServer.Shell.Plugins.Interest
     /// </summary>
     internal class InterestRevenue : PluginBase
     {
-        public InterestRevenue(Accountant accountant, IEntitySerializer serializer) : base(accountant, serializer) { }
+        public InterestRevenue(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
-        public override IQueryResult Execute(string expr)
+        public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             var content = Parsing.Token(ref expr);
             var remark = Parsing.Token(ref expr);

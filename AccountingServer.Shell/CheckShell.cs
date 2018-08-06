@@ -21,25 +21,16 @@ namespace AccountingServer.Shell
         /// </summary>
         private readonly Accountant m_Accountant;
 
-        /// <summary>
-        ///     表示器
-        /// </summary>
-        private readonly IEntitySerializer m_Serializer;
-
-        public CheckShell(Accountant helper, IEntitySerializer serializer)
-        {
-            m_Accountant = helper;
-            m_Serializer = serializer;
-        }
+        public CheckShell(Accountant helper) => m_Accountant = helper;
 
         /// <inheritdoc />
-        public IQueryResult Execute(string expr)
+        public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             expr = expr.Rest();
             switch (expr)
             {
                 case "1":
-                    return BasicCheck();
+                    return BasicCheck(serializer);
                 case "2":
                     return AdvancedCheck();
                 case "3":
@@ -58,8 +49,9 @@ namespace AccountingServer.Shell
         /// <summary>
         ///     检查每张会计记账凭证借贷方是否相等
         /// </summary>
+        /// <param name="serializer">表示器</param>
         /// <returns>有误的会计记账凭证表达式</returns>
-        private IQueryResult BasicCheck()
+        private IQueryResult BasicCheck(IEntitiesSerializer serializer)
         {
             var sb = new StringBuilder();
             foreach (var voucher in m_Accountant.SelectVouchers(VoucherQueryUnconstrained.Instance))
@@ -81,7 +73,7 @@ namespace AccountingServer.Shell
                 }
 
                 if (flag)
-                    sb.Append(m_Serializer.PresentVoucher(voucher).Wrap());
+                    sb.Append(serializer.PresentVoucher(voucher).Wrap());
             }
 
             if (sb.Length > 0)

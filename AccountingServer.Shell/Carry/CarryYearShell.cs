@@ -4,6 +4,7 @@ using System.Linq;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
@@ -22,7 +23,7 @@ namespace AccountingServer.Shell.Carry
         public CarryYearShell(Accountant helper) => m_Accountant = helper;
 
         /// <inheritdoc />
-        public IQueryResult Execute(string expr)
+        public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             expr = expr.Rest();
             switch (expr?.Initital())

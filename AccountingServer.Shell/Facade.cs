@@ -16,8 +16,18 @@ namespace AccountingServer.Shell
     /// <summary>
     ///     表达式解释器
     /// </summary>
-    public class Facade : IShellComponent
+    public class Facade
     {
+        /// <summary>
+        ///     默认表示器
+        /// </summary>
+        private static readonly IEntitiesSerializer DefaultSerializer
+            = new TrivialEntitiesSerializer(
+                AlternativeSerializer.Compose(
+                    new DiscountSerializer(),
+                    new AbbrSerializer(),
+                    new CSharpSerializer()));
+
         /// <summary>
         ///     基本会计业务处理类
         /// </summary>
@@ -28,39 +38,63 @@ namespace AccountingServer.Shell
         /// </summary>
         private readonly ShellComposer m_Composer;
 
-        /// <summary>
-        ///     表示器
-        /// </summary>
-        private readonly IEntitiesSerializer m_Serializer;
-
         public Facade()
         {
             m_Accountant = new Accountant();
-            m_Serializer = new TrivialEntitiesSerializer(
-                new AlternativeSerializer(
-                    new DiscountSerializer(),
-                    new AlternativeSerializer(new AbbrSerializer(), new CSharpSerializer())));
             m_Composer =
                 new ShellComposer
                     {
-                        new CheckShell(m_Accountant, m_Serializer),
+                        new CheckShell(m_Accountant),
                         new CarryShell(m_Accountant),
                         new CarryYearShell(m_Accountant),
                         new ExchangeShell(),
-                        new AssetShell(m_Accountant, m_Serializer),
-                        new AmortizationShell(m_Accountant, m_Serializer),
-                        new PluginShell(m_Accountant, m_Serializer),
-                        new AccountingShell(m_Accountant, m_Serializer)
+                        new AssetShell(m_Accountant),
+                        new AmortizationShell(m_Accountant),
+                        new PluginShell(m_Accountant),
+                        new AccountingShell(m_Accountant)
                     };
         }
 
         /// <summary>
         ///     空记账凭证的表示
         /// </summary>
-        public string EmptyVoucher => m_Serializer.PresentVoucher(null).Wrap();
+        // ReSharper disable once MemberCanBeMadeStatic.Global
+        public string EmptyVoucher(string spec) => GetSerializer(spec).PresentVoucher(null).Wrap();
 
-        /// <inheritdoc />
-        public IQueryResult Execute(string expr)
+        /// <summary>
+        ///     从表示器代号寻找表示器
+        /// </summary>
+        /// <param name="spec">表示器代号</param>
+        /// <returns>表示器</returns>
+        private static IEntitiesSerializer GetSerializer(string spec)
+        {
+            if (string.IsNullOrWhiteSpace(spec))
+                return DefaultSerializer;
+
+            switch (spec)
+            {
+                case "abbr":
+                    return new TrivialEntitiesSerializer(new AbbrSerializer());
+                case "csharp":
+                    return new TrivialEntitiesSerializer(new CSharpSerializer());
+                case "discount":
+                    return new TrivialEntitiesSerializer(new DiscountSerializer());
+                case "expr":
+                    return new TrivialEntitiesSerializer(new ExprSerializer());
+                case "json":
+                    return new JsonSerializer();
+                default:
+                    throw new ArgumentException("表示器未知", nameof(spec));
+            }
+        }
+
+        /// <summary>
+        ///     执行表达式
+        /// </summary>
+        /// <param name="expr">表达式</param>
+        /// <param name="spec">表示器代号</param>
+        /// <returns>执行结果</returns>
+        public IQueryResult Execute(string expr, string spec)
         {
             switch (expr)
             {
@@ -70,11 +104,8 @@ namespace AccountingServer.Shell
                     return ListHelp();
             }
 
-            return m_Composer.Execute(expr);
+            return m_Composer.Execute(expr, GetSerializer(spec));
         }
-
-        /// <inheritdoc />
-        public bool IsExecutable(string expr) => throw new InvalidOperationException();
 
         #region Miscellaneous
 
@@ -119,13 +150,15 @@ namespace AccountingServer.Shell
         /// <summary>
         ///     更新或添加记账凭证
         /// </summary>
-        /// <param name="code">记账凭证的C#代码</param>
-        /// <returns>新记账凭证的C#代码</returns>
-        public string ExecuteVoucherUpsert(string code)
+        /// <param name="str">记账凭证的表达式</param>
+        /// <param name="spec">表示器代号</param>
+        /// <returns>新记账凭证的表达式</returns>
+        public string ExecuteVoucherUpsert(string str, string spec)
         {
+            var serializer = GetSerializer(spec);
             var lst = new List<VoucherDetail>();
 
-            var voucher = m_Serializer.ParseVoucher(code);
+            var voucher = serializer.ParseVoucher(str);
             foreach (var grp in voucher.Details.GroupBy(d => d.Currency ?? BaseCurrency.Now))
             {
                 var unc = grp.SingleOrDefault(d => !d.Fund.HasValue);
@@ -155,37 +188,41 @@ namespace AccountingServer.Shell
             if (!m_Accountant.Upsert(voucher))
                 throw new ApplicationException("更新或添加失败");
 
-            return m_Serializer.PresentVoucher(voucher).Wrap();
+            return serializer.PresentVoucher(voucher).Wrap();
         }
 
         /// <summary>
         ///     更新或添加资产
         /// </summary>
-        /// <param name="code">资产的C#代码</param>
-        /// <returns>新资产的C#代码</returns>
-        public string ExecuteAssetUpsert(string code)
+        /// <param name="str">资产表达式</param>
+        /// <param name="spec">表示器代号</param>
+        /// <returns>新资产表达式</returns>
+        public string ExecuteAssetUpsert(string str, string spec)
         {
-            var asset = m_Serializer.ParseAsset(code);
+            var serializer = GetSerializer(spec);
+            var asset = serializer.ParseAsset(str);
 
             if (!m_Accountant.Upsert(asset))
                 throw new ApplicationException("更新或添加失败");
 
-            return m_Serializer.PresentAsset(asset);
+            return serializer.PresentAsset(asset);
         }
 
         /// <summary>
         ///     更新或添加摊销
         /// </summary>
-        /// <param name="code">摊销的C#代码</param>
-        /// <returns>新摊销的C#代码</returns>
-        public string ExecuteAmortUpsert(string code)
+        /// <param name="str">摊销表达式</param>
+        /// <param name="spec">表示器代号</param>
+        /// <returns>新摊销表达式</returns>
+        public string ExecuteAmortUpsert(string str, string spec)
         {
-            var amort = m_Serializer.ParseAmort(code);
+            var serializer = GetSerializer(spec);
+            var amort = serializer.ParseAmort(str);
 
             if (!m_Accountant.Upsert(amort))
                 throw new ApplicationException("更新或添加失败");
 
-            return m_Serializer.PresentAmort(amort);
+            return serializer.PresentAmort(amort);
         }
 
         #endregion
@@ -195,11 +232,13 @@ namespace AccountingServer.Shell
         /// <summary>
         ///     删除记账凭证
         /// </summary>
-        /// <param name="code">记账凭证的C#代码</param>
+        /// <param name="str">记账凭证表达式</param>
+        /// <param name="spec">表示器代号</param>
         /// <returns>是否成功</returns>
-        public bool ExecuteVoucherRemoval(string code)
+        public bool ExecuteVoucherRemoval(string str, string spec)
         {
-            var voucher = m_Serializer.ParseVoucher(code);
+            var serializer = GetSerializer(spec);
+            var voucher = serializer.ParseVoucher(str);
 
             if (voucher.ID == null)
                 throw new ApplicationException("编号未知");
@@ -210,11 +249,13 @@ namespace AccountingServer.Shell
         /// <summary>
         ///     删除资产
         /// </summary>
-        /// <param name="code">资产的C#代码</param>
+        /// <param name="str">资产表达式</param>
+        /// <param name="spec">表示器代号</param>
         /// <returns>是否成功</returns>
-        public bool ExecuteAssetRemoval(string code)
+        public bool ExecuteAssetRemoval(string str, string spec)
         {
-            var asset = m_Serializer.ParseAsset(code);
+            var serializer = GetSerializer(spec);
+            var asset = serializer.ParseAsset(str);
 
             if (!asset.ID.HasValue)
                 throw new ApplicationException("编号未知");
@@ -225,11 +266,13 @@ namespace AccountingServer.Shell
         /// <summary>
         ///     删除摊销
         /// </summary>
-        /// <param name="code">摊销的C#代码</param>
+        /// <param name="str">摊销表达式</param>
+        /// <param name="spec">表示器代号</param>
         /// <returns>是否成功</returns>
-        public bool ExecuteAmortRemoval(string code)
+        public bool ExecuteAmortRemoval(string str, string spec)
         {
-            var amort = m_Serializer.ParseAmort(code);
+            var serializer = GetSerializer(spec);
+            var amort = serializer.ParseAmort(str);
 
             if (!amort.ID.HasValue)
                 throw new ApplicationException("编号未知");

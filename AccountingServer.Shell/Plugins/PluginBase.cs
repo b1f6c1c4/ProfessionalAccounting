@@ -15,23 +15,15 @@ namespace AccountingServer.Shell.Plugins
         /// </summary>
         protected readonly Accountant Accountant;
 
-        /// <summary>
-        ///     表示器
-        /// </summary>
-        protected readonly IEntitySerializer Serializer;
-
-        protected PluginBase(Accountant accountant, IEntitySerializer serializer)
-        {
-            Accountant = accountant;
-            Serializer = serializer;
-        }
+        protected PluginBase(Accountant accountant) => Accountant = accountant;
 
         /// <summary>
         ///     执行插件表达式
         /// </summary>
         /// <param name="expr">表达式</param>
+        /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        public abstract IQueryResult Execute(string expr);
+        public abstract IQueryResult Execute(string expr, IEntitiesSerializer serializer);
 
         /// <summary>
         ///     显示插件帮助

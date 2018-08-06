@@ -18,19 +18,10 @@ namespace AccountingServer.Shell
         /// </summary>
         private readonly Accountant m_Accountant;
 
-        /// <summary>
-        ///     表示器
-        /// </summary>
-        private readonly IEntitiesSerializer m_Serializer;
-
-        public AccountingShell(Accountant helper, IEntitiesSerializer serializer)
-        {
-            m_Accountant = helper;
-            m_Serializer = serializer;
-        }
+        public AccountingShell(Accountant helper) => m_Accountant = helper;
 
         /// <inheritdoc />
-        public IQueryResult Execute(string expr) => Parse(expr)();
+        public IQueryResult Execute(string expr, IEntitiesSerializer serializer) => Parse(expr)(serializer);
 
         /// <inheritdoc />
         public bool IsExecutable(string expr) => true;
@@ -40,20 +31,15 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="expr">表达式</param>
         /// <returns>解析结果</returns>
-        private Func<IQueryResult> Parse(string expr)
+        private Func<IEntitiesSerializer, IQueryResult> Parse(string expr)
         {
             var isRaw = false;
             ISubtotalStringify visitor;
-            var serializer = m_Serializer;
             if (ParsingF.Token(ref expr, false, t => t == "json") != null)
-            {
                 visitor = new JsonSubtotal();
-                serializer = new JsonSerializer();
-            }
             else if (ParsingF.Token(ref expr, false, t => t == "json-raw") != null)
             {
                 visitor = new JsonSubtotal();
-                serializer = new JsonSerializer();
                 isRaw = true;
             }
             else if (ParsingF.Token(ref expr, false, t => t == "Rps") != null)
@@ -79,7 +65,7 @@ namespace AccountingServer.Shell
 
             try
             {
-                return isRaw ? TryDetailQuery(expr, serializer) : TryVoucherQuery(expr, serializer);
+                return isRaw ? TryDetailQuery(expr) : TryVoucherQuery(expr);
             }
             catch (Exception)
             {
@@ -93,16 +79,15 @@ namespace AccountingServer.Shell
         ///     按记账凭证检索式解析
         /// </summary>
         /// <param name="expr">表达式</param>
-        /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        private Func<IQueryResult> TryVoucherQuery(string expr, IEntitiesSerializer serializer)
+        private Func<IEntitiesSerializer, IQueryResult> TryVoucherQuery(string expr)
         {
             if (string.IsNullOrWhiteSpace(expr))
                 throw new ApplicationException("不允许执行空白检索式");
 
             var res = ParsingF.VoucherQuery(ref expr);
             ParsingF.Eof(expr);
-            return () => PresentVoucherQuery(res, serializer);
+            return serializer => PresentVoucherQuery(res, serializer);
         }
 
         /// <summary>
@@ -111,11 +96,11 @@ namespace AccountingServer.Shell
         /// <param name="expr">表达式</param>
         /// <param name="trav">呈现器</param>
         /// <returns>执行结果</returns>
-        private Func<IQueryResult> TryGroupedQuery(string expr, ISubtotalStringify trav)
+        private Func<IEntitiesSerializer, IQueryResult> TryGroupedQuery(string expr, ISubtotalStringify trav)
         {
             var res = ParsingF.GroupedQuery(ref expr);
             ParsingF.Eof(expr);
-            return () => PresentSubtotal(res, trav);
+            return serializer => PresentSubtotal(res, trav);
         }
 
         /// <summary>
@@ -132,13 +117,12 @@ namespace AccountingServer.Shell
         ///     按细目检索式解析
         /// </summary>
         /// <param name="expr">表达式</param>
-        /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        private Func<IQueryResult> TryDetailQuery(string expr, IEntitiesSerializer serializer)
+        private Func<IEntitiesSerializer, IQueryResult> TryDetailQuery(string expr)
         {
             var res = ParsingF.DetailQuery(ref expr);
             ParsingF.Eof(expr);
-            return () => PresentDetailQuery(res, serializer);
+            return serializer => PresentDetailQuery(res, serializer);
         }
 
         /// <summary>

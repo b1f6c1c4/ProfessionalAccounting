@@ -18,16 +18,14 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
     /// </summary>
     internal class CreditCardConvert : PluginBase
     {
-        public CreditCardConvert(Accountant accountant, IEntitySerializer serializer) : base(
-            accountant,
-            serializer) { }
+        public CreditCardConvert(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
-        public override IQueryResult Execute(string expr)
+        public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             var content = Parsing.Token(ref expr);
 
-            return ParsingF.Optional(ref expr, "q") ? Query(content, ref expr) : Create(content, ref expr);
+            return ParsingF.Optional(ref expr, "q") ? Query(content, ref expr) : Create(content, ref expr, serializer);
         }
 
         private IQueryResult Query(string content, ref string expr)
@@ -119,7 +117,7 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
             return new UnEditableText(sb.ToString());
         }
 
-        private IQueryResult Create(string content, ref string expr)
+        private IQueryResult Create(string content, ref string expr, IEntitiesSerializer serializer)
         {
             var currency = Parsing.Token(ref expr, false);
 
@@ -176,7 +174,7 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                             }
                     };
                 Accountant.Upsert(voucher);
-                sb.Append(Serializer.PresentVoucher(voucher).Wrap());
+                sb.Append(serializer.PresentVoucher(voucher).Wrap());
             }
 
             return new EditableText(sb.ToString());
