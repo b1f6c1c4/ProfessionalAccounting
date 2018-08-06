@@ -86,7 +86,7 @@ namespace AccountingServer.Shell.Plugins.Composite
         {
             var visitor = new InquiriesVisitor(Accountant, rng);
             val = inq.Accept(visitor);
-            return new UnEditableText(visitor.Result);
+            return new PlainText(visitor.Result);
         }
 
         /// <summary>

@@ -111,7 +111,7 @@ namespace AccountingServer.Shell
         /// <returns>记账凭证表达式</returns>
         private IQueryResult PresentVoucherQuery(IQueryCompunded<IVoucherQueryAtom> query,
             IEntitiesSerializer serializer)
-            => new EditableText(serializer.PresentVouchers(m_Accountant.SelectVouchers(query)));
+            => new PlainText(serializer.PresentVouchers(m_Accountant.SelectVouchers(query)));
 
         /// <summary>
         ///     按细目检索式解析
@@ -132,7 +132,7 @@ namespace AccountingServer.Shell
         /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
         private IQueryResult PresentDetailQuery(IVoucherDetailQuery query, IEntitiesSerializer serializer)
-            => new EditableText(serializer.PresentVoucherDetails(m_Accountant.SelectVoucherDetails(query)));
+            => new PlainText(serializer.PresentVoucherDetails(m_Accountant.SelectVoucherDetails(query)));
 
         /// <summary>
         ///     执行分类汇总检索式并呈现结果
@@ -143,7 +143,7 @@ namespace AccountingServer.Shell
         private IQueryResult PresentSubtotal(IGroupedQuery query, ISubtotalStringify trav)
         {
             var result = m_Accountant.SelectVoucherDetailsGrouped(query);
-            return new UnEditableText(trav.PresentSubtotal(result, query.Subtotal));
+            return new PlainText(trav.PresentSubtotal(result, query.Subtotal));
         }
     }
 }

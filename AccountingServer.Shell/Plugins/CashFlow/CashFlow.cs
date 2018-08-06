@@ -62,7 +62,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                 sb.AppendLine($"\t{sum:R}");
             }
 
-            return new UnEditableText(sb.ToString());
+            return new PlainText(sb.ToString());
         }
 
         private IEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account)

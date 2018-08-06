@@ -13,6 +13,8 @@ namespace AccountingClient.Shell
     public interface IQueryResult
     {
         bool AutoReturn { get; }
+
+        bool Dirty { get; }
     }
 
     internal class Facade
@@ -140,7 +142,8 @@ namespace AccountingClient.Shell
             return new QueryResult
                 {
                     Result = res,
-                    AutoReturn = res.Message.Headers.GetValues("X-AutoReturn").Single() == "true"
+                    AutoReturn = res.Message.Headers.GetValues("X-AutoReturn").Single() == "true",
+                    Dirty = res.Message.Headers.GetValues("X-Dirty").Single() == "true"
                 };
         }
 
@@ -163,6 +166,7 @@ namespace AccountingClient.Shell
         {
             public string Result;
             public bool AutoReturn { get; set; }
+            public bool Dirty { get; set; }
             public override string ToString() => Result;
         }
 

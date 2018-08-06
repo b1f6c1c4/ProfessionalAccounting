@@ -29,16 +29,13 @@ namespace AccountingServer.Shell
             foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
                 sb.Append(ListAsset(a, serializer, dt, showSchedule));
 
-            if (showSchedule)
-                return new EditableText(sb.ToString());
-
-            return new UnEditableText(sb.ToString());
+            return new PlainText(sb.ToString());
         }
 
         /// <inheritdoc />
         protected override IQueryResult ExecuteQuery(IQueryCompunded<IDistributedQueryAtom> distQuery,
             IEntitiesSerializer serializer)
-            => new EditableText(serializer.PresentAssets(Sort(Accountant.SelectAssets(distQuery))));
+            => new PlainText(serializer.PresentAssets(Sort(Accountant.SelectAssets(distQuery))));
 
         /// <inheritdoc />
         protected override IQueryResult ExecuteRegister(IQueryCompunded<IDistributedQueryAtom> distQuery,
@@ -53,9 +50,9 @@ namespace AccountingServer.Shell
             }
 
             if (sb.Length > 0)
-                return new EditableText(sb.ToString());
+                return new DirtyText(sb.ToString());
 
-            return new Succeed();
+            return new PlainSucceed();
         }
 
         /// <inheritdoc />
@@ -86,7 +83,10 @@ namespace AccountingServer.Shell
                 Accountant.Upsert(a);
             }
 
-            return new EditableText(sb.ToString());
+            if (sb.Length > 0)
+                return new DirtyText(sb.ToString());
+
+            return new PlainSucceed();
         }
 
         /// <inheritdoc />
@@ -101,7 +101,7 @@ namespace AccountingServer.Shell
                 lst.Add(a);
             }
 
-            return new EditableText(serializer.PresentAssets(lst));
+            return new DirtyText(serializer.PresentAssets(lst));
         }
 
         /// <inheritdoc />
@@ -191,9 +191,9 @@ namespace AccountingServer.Shell
             }
 
             if (sb.Length > 0)
-                return new EditableText(sb.ToString());
+                return new DirtyText(sb.ToString());
 
-            return new Succeed();
+            return new PlainSucceed();
         }
 
         /// <summary>
@@ -223,9 +223,9 @@ namespace AccountingServer.Shell
             }
 
             if (sb.Length > 0)
-                return new EditableText(sb.ToString());
+                return new DirtyText(sb.ToString());
 
-            return new Succeed();
+            return new PlainSucceed();
         }
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace AccountingServer.Shell
         /// <param name="dt">计算账面价值的时间</param>
         /// <param name="showSchedule">是否显示折旧计算表</param>
         /// <returns>格式化的信息</returns>
-        private string ListAsset(Asset asset, IEntitiesSerializer serializer, DateTime? dt = null,
+        private string ListAsset(Asset asset, IEntitySerializer serializer, DateTime? dt = null,
             bool showSchedule = true)
         {
             var sb = new StringBuilder();

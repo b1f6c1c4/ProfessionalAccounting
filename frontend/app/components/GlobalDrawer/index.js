@@ -13,9 +13,10 @@ import {
   ListItemText,
 } from '@material-ui/core';
 import {
-  AddCircle,
-  CloudUpload,
   Home,
+  VideoLabel,
+  CreditCard,
+  MonetizationOn,
 } from '@material-ui/icons';
 import { Link } from 'react-router-dom';
 
@@ -45,12 +46,12 @@ class GlobalDrawer extends React.PureComponent {
 
   handleUpload = () => {
     this.props.onCloseDrawerAction();
-    this.props.onPush('/app/upload');
+    this.props.onPush('/app/cashflow');
   };
 
-  handleRun = () => {
+  handleConsole = () => {
     this.props.onCloseDrawerAction();
-    this.props.onPush('/app/run');
+    this.props.onPush('/app/console');
   };
 
   handleDownload = () => {
@@ -99,37 +100,52 @@ class GlobalDrawer extends React.PureComponent {
               className={classes.item}
               primary={(
                 <Link to="/app/">
-                  控制面板
+                  摘要
+                </Link>
+              )}
+            />
+          </ListItem>
+          <ListItem button onClick={this.handleBudget}>
+            <ListItemIcon>
+              <Link to="/app/budget">
+                <MonetizationOn />
+              </Link>
+            </ListItemIcon>
+            <ListItemText
+              className={classes.item}
+              primary={(
+                <Link to="/app/budget">
+                  预算
                 </Link>
               )}
             />
           </ListItem>
           <ListItem button onClick={this.handleUpload}>
             <ListItemIcon>
-              <Link to="/app/upload">
-                <CloudUpload />
+              <Link to="/app/cashflow">
+                <CreditCard />
               </Link>
             </ListItemIcon>
             <ListItemText
               className={classes.item}
               primary={(
-                <Link to="/app/upload">
-                  上传仿真文件
+                <Link to="/app/cashflow">
+                  现金流
                 </Link>
               )}
             />
           </ListItem>
-          <ListItem button onClick={this.handleRun}>
+          <ListItem button onClick={this.handleConsole}>
             <ListItemIcon>
-              <Link to="/app/run">
-                <AddCircle />
+              <Link to="/app/console">
+                <VideoLabel />
               </Link>
             </ListItemIcon>
             <ListItemText
               className={classes.item}
               primary={(
-                <Link to="/app/run">
-                  提交任务
+                <Link to="/app/console">
+                  控制台
                 </Link>
               )}
             />

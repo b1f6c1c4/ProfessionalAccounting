@@ -214,12 +214,16 @@ namespace AccountingClient
                     scintilla.AppendText(result);
                     var lng = scintilla.Text.Length;
                     scintilla.SelectionStart = lng;
-                    textBoxCommand.BackColor = Color.FromArgb(0, 200, 0);
+                    textBoxCommand.BackColor = res.Dirty
+                        ? Color.FromArgb(200, 220, 0)
+                        : Color.FromArgb(0, 200, 0);
                 }
                 else
                 {
                     scintilla.Text = result;
-                    textBoxCommand.BackColor = Color.FromArgb(75, 255, 75);
+                    textBoxCommand.BackColor = res.Dirty
+                        ? Color.FromArgb(250, 250, 0)
+                        : Color.FromArgb(75, 255, 75);
                 }
 
                 if (res.AutoReturn)

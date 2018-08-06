@@ -53,7 +53,7 @@ namespace AccountingServer.Shell.Carry
             if (rng.NullOnly)
             {
                 CarryYear(null);
-                return new Succeed();
+                return new DirtySucceed();
             }
 
             var ed = rng.EndDate ?? throw new ArgumentException("时间范围无后界", nameof(expr));
@@ -66,7 +66,7 @@ namespace AccountingServer.Shell.Carry
                 dt = dt.AddYears(1);
             }
 
-            return new Succeed();
+            return new DirtySucceed();
         }
 
         /// <summary>

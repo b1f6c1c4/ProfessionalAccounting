@@ -37,7 +37,7 @@ namespace AccountingServer.Shell
                     if (m_Accountant.RunVoucherQuery("A").Any(voucher => !m_Accountant.Upsert(voucher)))
                         throw new ApplicationException("未知错误");
 
-                    return new Succeed();
+                    return new PlainSucceed();
                 default:
                     throw new InvalidOperationException("表达式无效");
             }
@@ -51,7 +51,7 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="serializer">表示器</param>
         /// <returns>有误的会计记账凭证表达式</returns>
-        private IQueryResult BasicCheck(IEntitiesSerializer serializer)
+        private IQueryResult BasicCheck(IEntitySerializer serializer)
         {
             var sb = new StringBuilder();
             foreach (var voucher in m_Accountant.SelectVouchers(VoucherQueryUnconstrained.Instance))
@@ -77,9 +77,9 @@ namespace AccountingServer.Shell
             }
 
             if (sb.Length > 0)
-                return new EditableText(sb.ToString());
+                return new PlainText(sb.ToString());
 
-            return new Succeed();
+            return new PlainSucceed();
         }
 
         /// <summary>
@@ -130,9 +130,9 @@ namespace AccountingServer.Shell
             }
 
             if (sb.Length > 0)
-                return new EditableText(sb.ToString());
+                return new PlainText(sb.ToString());
 
-            return new Succeed();
+            return new PlainSucceed();
         }
 
         private static void DoCheck(int dir, ISubtotalResult res, string info, StringBuilder sb)
