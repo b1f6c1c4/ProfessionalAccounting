@@ -25,9 +25,9 @@ namespace AccountingServer.Shell
         /// <summary>
         ///     表示器
         /// </summary>
-        protected readonly IEntitySerializer Serializer;
+        protected readonly IEntitiesSerializer Serializer;
 
-        protected DistributedShell(Accountant helper, IEntitySerializer serializer)
+        protected DistributedShell(Accountant helper, IEntitiesSerializer serializer)
         {
             Accountant = helper;
             Serializer = serializer;

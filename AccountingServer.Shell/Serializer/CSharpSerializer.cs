@@ -158,10 +158,10 @@ namespace AccountingServer.Shell.Serializer
         public string PresentAsset(Asset asset)
         {
             if (asset == null)
-                return "@null@";
+                return "null";
 
             var sb = new StringBuilder();
-            sb.Append("@new Asset {");
+            sb.Append("new Asset {");
             sb.AppendLine($"  StringID = {ProcessString(asset.StringID)},");
             sb.AppendLine($"    Name = {ProcessString(asset.Name)},");
             sb.AppendLine(asset.Date.HasValue ? $"    Date = D(\"{asset.Date:yyyy-MM-dd}\")," : "    Date = null,");
@@ -194,19 +194,26 @@ namespace AccountingServer.Shell.Serializer
                 }
 
                 foreach (var item in asset.Schedule)
-                    if (item is AcquisationItem acq)
-                        Present(item, $"OrigValue = {acq.OrigValue},");
-                    else if (item is DepreciateItem dep)
-                        Present(item, $"Amount    = {dep.Amount},");
-                    else if (item is DevalueItem dev)
-                        Present(item, $"FairValue = {dev.FairValue},");
-                    else if (item is DispositionItem)
-                        Present(item, "");
+                    switch (item)
+                    {
+                        case AcquisationItem acq:
+                            Present(item, $"OrigValue = {acq.OrigValue},");
+                            break;
+                        case DepreciateItem dep:
+                            Present(item, $"Amount    = {dep.Amount},");
+                            break;
+                        case DevalueItem dev:
+                            Present(item, $"FairValue = {dev.FairValue},");
+                            break;
+                        case DispositionItem _:
+                            Present(item, "");
+                            break;
+                    }
 
-                sb.AppendLine("} }@");
+                sb.AppendLine("} }");
             }
             else
-                sb.AppendLine("}@");
+                sb.AppendLine("}");
 
             return sb.ToString();
         }
@@ -232,10 +239,10 @@ namespace AccountingServer.Shell.Serializer
         public string PresentAmort(Amortization amort)
         {
             if (amort == null)
-                return "@null@";
+                return "null";
 
             var sb = new StringBuilder();
-            sb.Append("@new Amortization {");
+            sb.Append("new Amortization {");
             sb.Append($"  StringID = {ProcessString(amort.StringID)},");
             sb.AppendLine();
             sb.Append($"    Name = {ProcessString(amort.Name)},");
@@ -280,12 +287,12 @@ namespace AccountingServer.Shell.Serializer
                     sb.AppendLine("},");
                 }
 
-                sb.AppendLine("} }@");
+                sb.AppendLine("} }");
             }
             else
             {
                 sb.AppendLine("    Schedule = null");
-                sb.AppendLine("}@");
+                sb.AppendLine("}");
             }
 
             return sb.ToString();

@@ -82,6 +82,20 @@ namespace AccountingServer.Shell.Serializer
         /// <param name="details">细目</param>
         /// <returns>表示</returns>
         string PresentVoucherDetails(IEnumerable<VoucherDetail> details);
+
+        /// <summary>
+        ///     将多个资产表示
+        /// </summary>
+        /// <param name="assets">资产</param>
+        /// <returns>表示</returns>
+        string PresentAssets(IEnumerable<Asset> assets);
+
+        /// <summary>
+        ///     将多个摊销表示
+        /// </summary>
+        /// <param name="amorts">摊销</param>
+        /// <returns>表示</returns>
+        string PresentAmorts(IEnumerable<Amortization> amorts);
     }
 
     internal static class SerializerHelper
@@ -106,7 +120,23 @@ namespace AccountingServer.Shell.Serializer
         {
             var sb = new StringBuilder();
             foreach (var detail in details)
-                sb.Append(m_Serializer.PresentVoucherDetail(detail).Wrap());
+                sb.Append(m_Serializer.PresentVoucherDetail(detail));
+            return sb.ToString();
+        }
+
+        public string PresentAssets(IEnumerable<Asset> assets)
+        {
+            var sb = new StringBuilder();
+            foreach (var asset in assets)
+                sb.Append(m_Serializer.PresentAsset(asset).Wrap());
+            return sb.ToString();
+        }
+
+        public string PresentAmorts(IEnumerable<Amortization> amorts)
+        {
+            var sb = new StringBuilder();
+            foreach (var amort in amorts)
+                sb.Append(m_Serializer.PresentAmort(amort).Wrap());
             return sb.ToString();
         }
 

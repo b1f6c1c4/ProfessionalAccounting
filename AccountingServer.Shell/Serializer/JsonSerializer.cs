@@ -12,25 +12,124 @@ namespace AccountingServer.Shell.Serializer
     /// </summary>
     public class JsonSerializer : IEntitiesSerializer
     {
-        private const string TheToken = "new Voucher";
+        private const string VoucherToken = "new Voucher";
+        private const string AssetToken = "new Asset";
+        private const string AmortToken = "new Amortization";
 
         /// <inheritdoc />
         public string PresentVoucher(Voucher voucher)
             => voucher == null
-                ? $"{TheToken}{{\n\n}}"
-                : TheToken + PresentVoucherJson(voucher).ToString(Formatting.Indented);
+                ? $"{VoucherToken}{{\n\n}}"
+                : VoucherToken + PresentJson(voucher).ToString(Formatting.Indented);
 
         /// <inheritdoc />
         public string PresentVoucherDetail(VoucherDetail detail)
-            => PresentVoucherDetailJson(detail).ToString(Formatting.Indented);
+            => PresentJson(detail).ToString(Formatting.Indented);
 
         /// <inheritdoc />
-        public Voucher ParseVoucher(string expr)
+        public Voucher ParseVoucher(string str)
         {
-            if (expr.StartsWith(TheToken, StringComparison.OrdinalIgnoreCase))
-                expr = expr.Substring(TheToken.Length);
+            if (str.StartsWith(VoucherToken, StringComparison.OrdinalIgnoreCase))
+                str = str.Substring(VoucherToken.Length);
 
-            var obj = JObject.Parse(expr);
+            return ParseVoucher(JObject.Parse(str));
+        }
+
+        /// <inheritdoc />
+        public VoucherDetail ParseVoucherDetail(string str) => ParseVoucherDetail(JObject.Parse(str));
+
+        /// <inheritdoc />
+        public string PresentAsset(Asset asset)
+            => asset == null ? "null" : AssetToken + PresentJson(asset).ToString(Formatting.Indented);
+
+        /// <inheritdoc />
+        public Asset ParseAsset(string str)
+        {
+            if (str.StartsWith(VoucherToken, StringComparison.OrdinalIgnoreCase))
+                str = str.Substring(VoucherToken.Length);
+
+            var obj = JObject.Parse(str);
+            var dateStr = obj["date"]?.Value<string>();
+            DateTime? date = null;
+            if (dateStr != null)
+                date = ClientDateTime.Parse(dateStr);
+            var schedule = obj["detail"];
+            var typeStr = obj["type"]?.Value<string>();
+            var method = DepreciationMethod.StraightLine;
+            if (typeStr != null)
+                Enum.TryParse(typeStr, out method);
+
+            return new Asset
+                {
+                    StringID = obj["id"]?.Value<string>(),
+                    Name = obj["name"]?.Value<string>(),
+                    Date = date,
+                    Currency = obj["currency"]?.Value<string>(),
+                    Value = obj["value"]?.Value<double>(),
+                    Salvge = obj["salvge"]?.Value<double>(),
+                    Life = obj["life"]?.Value<int>(),
+                    Title = obj["title"]?.Value<int>(),
+                    Method = method,
+                    DepreciationTitle = obj["depreciation"]?["title"]?.Value<int>(),
+                    DepreciationExpenseTitle = obj["depreciation"]?["expense"]?["title"]?.Value<int>(),
+                    DepreciationExpenseSubTitle = obj["depreciation"]?["expense"]?["subtitle"]?.Value<int>(),
+                    DevaluationTitle = obj["devaluation"]?["title"]?.Value<int>(),
+                    DevaluationExpenseTitle = obj["devaluation"]?["expense"]?["title"]?.Value<int>(),
+                    DevaluationExpenseSubTitle = obj["devaluation"]?["expense"]?["subtitle"]?.Value<int>(),
+                    Remark = obj["remark"]?.Value<string>(),
+                    Schedule = schedule == null ? new List<AssetItem>() : schedule.Select(ParseAssetItem).ToList()
+                };
+        }
+
+        /// <inheritdoc />
+        public string PresentAmort(Amortization amort)
+            => amort == null ? "null" : AmortToken + PresentJson(amort).ToString(Formatting.Indented);
+
+        /// <inheritdoc />
+        public Amortization ParseAmort(string str)
+        {
+            if (str.StartsWith(VoucherToken, StringComparison.OrdinalIgnoreCase))
+                str = str.Substring(VoucherToken.Length);
+
+            var obj = JObject.Parse(str);
+            var dateStr = obj["date"]?.Value<string>();
+            DateTime? date = null;
+            if (dateStr != null)
+                date = ClientDateTime.Parse(dateStr);
+            var schedule = obj["detail"];
+            var typeStr = obj["type"]?.Value<string>();
+            var interval = AmortizeInterval.EveryDay;
+            if (typeStr != null)
+                Enum.TryParse(typeStr, out interval);
+
+            return new Amortization
+                {
+                    StringID = obj["id"]?.Value<string>(),
+                    Name = obj["name"]?.Value<string>(),
+                    Date = date,
+                    Value = obj["value"]?.Value<double>(),
+                    TotalDays = obj["totalDays"]?.Value<int>(),
+                    Interval = interval,
+                    Template = ParseVoucher(obj["template"]),
+                    Remark = obj["remark"]?.Value<string>(),
+                    Schedule = schedule == null ? new List<AmortItem>() : schedule.Select(ParseAmortItem).ToList()
+                };
+        }
+
+        public string PresentVouchers(IEnumerable<Voucher> vouchers)
+            => new JArray(vouchers.Select(PresentJson)).ToString(Formatting.Indented);
+
+        public string PresentVoucherDetails(IEnumerable<VoucherDetail> details)
+            => new JArray(details.Select(PresentJson)).ToString(Formatting.Indented);
+
+        public string PresentAssets(IEnumerable<Asset> assets)
+            => new JArray(assets.Select(PresentJson)).ToString(Formatting.Indented);
+
+        public string PresentAmorts(IEnumerable<Amortization> amorts)
+            => new JArray(amorts.Select(PresentJson)).ToString(Formatting.Indented);
+
+        private static Voucher ParseVoucher(JToken obj)
+        {
             var dateStr = obj["date"]?.Value<string>();
             DateTime? date = null;
             if (dateStr != null)
@@ -51,31 +150,86 @@ namespace AccountingServer.Shell.Serializer
                 };
         }
 
-        /// <inheritdoc />
-        public VoucherDetail ParseVoucherDetail(string expr) => ParseVoucherDetail(JObject.Parse(expr));
+        private static AmortItem ParseAmortItem(JToken obj)
+        {
+            var dateStr = obj["date"]?.Value<string>();
+            DateTime? date = null;
+            if (dateStr != null)
+                date = ClientDateTime.Parse(dateStr);
 
-        public string PresentAsset(Asset asset) => throw new NotImplementedException();
-        public Asset ParseAsset(string str) => throw new NotImplementedException();
-        public string PresentAmort(Amortization amort) => throw new NotImplementedException();
-        public Amortization ParseAmort(string str) => throw new NotImplementedException();
+            return new AmortItem
+                {
+                    Date = date,
+                    VoucherID = obj["voucherId"]?.Value<string>(),
+                    Amount = obj["amount"].Value<double>(),
+                    Remark = obj["remark"]?.Value<string>(),
+                    Value = obj["value"]?.Value<double>() ?? 0
+                };
+        }
 
-        public string PresentVouchers(IEnumerable<Voucher> vouchers)
-            => new JArray(vouchers.Select(PresentVoucherJson)).ToString(Formatting.Indented);
+        private AssetItem ParseAssetItem(JToken obj)
+        {
+            var dateStr = obj["date"]?.Value<string>();
+            DateTime? date = null;
+            if (dateStr != null)
+                date = ClientDateTime.Parse(dateStr);
+            var voucherId = obj["voucherId"]?.Value<string>();
+            var value = obj["value"]?.Value<double>() ?? 0;
+            var remark = obj["remark"]?.Value<string>();
 
-        public string PresentVoucherDetails(IEnumerable<VoucherDetail> details)
-            => new JArray(details.Select(PresentVoucherDetailJson)).ToString(Formatting.Indented);
+            switch (obj["type"].Value<string>())
+            {
+                case "acquisation":
+                    return new AcquisationItem
+                        {
+                            Date = date,
+                            VoucherID = voucherId,
+                            Value = value,
+                            Remark = remark,
+                            OrigValue = obj["origValue"].Value<double>()
+                        };
+                case "depreciation":
+                    return new DepreciateItem
+                        {
+                            Date = date,
+                            VoucherID = voucherId,
+                            Value = value,
+                            Remark = remark,
+                            Amount = obj["amount"].Value<double>()
+                        };
+                case "devaluation":
+                    return new DevalueItem
+                        {
+                            Date = date,
+                            VoucherID = voucherId,
+                            Value = value,
+                            Remark = remark,
+                            FairValue = obj["fairValue"].Value<double>()
+                        };
+                case "disposition":
+                    return new DispositionItem
+                        {
+                            Date = date,
+                            VoucherID = voucherId,
+                            Value = value,
+                            Remark = remark
+                        };
+                default:
+                    throw new ArgumentException("类型未知", nameof(obj));
+            }
+        }
 
-        private static JObject PresentVoucherJson(Voucher voucher)
+        private static JObject PresentJson(Voucher voucher)
             => new JObject
                 {
                     { "id", voucher.ID },
-                    { "date", voucher.Date?.ToString("yyyyy-MM-dd") },
+                    { "date", voucher.Date?.ToString("yyyy-MM-dd") },
                     { "remark", voucher.Remark },
                     { "type", voucher.Type?.ToString() },
-                    { "detail", new JArray(voucher.Details.Select(PresentVoucherDetailJson)) }
+                    { "detail", new JArray(voucher.Details.Select(PresentJson)) }
                 };
 
-        private static JObject PresentVoucherDetailJson(VoucherDetail detail)
+        private static JObject PresentJson(VoucherDetail detail)
             => new JObject
                 {
                     { "currency", detail.Currency },
@@ -95,6 +249,104 @@ namespace AccountingServer.Shell.Serializer
                     Content = obj["content"]?.Value<string>(),
                     Remark = obj["remark"]?.Value<string>(),
                     Fund = obj["fund"]?.Value<double?>()
+                };
+
+        private static JObject PresentJson(Asset asset)
+            => new JObject
+                {
+                    { "id", asset.StringID },
+                    { "name", asset.Name },
+                    { "date", asset.Date?.ToString("yyyy-MM-dd") },
+                    { "currency", asset.Currency },
+                    { "value", asset.Value },
+                    { "salvge", asset.Salvge },
+                    { "life", asset.Life },
+                    { "title", asset.Title },
+                    { "method", asset.Method?.ToString() },
+                    {
+                        "depreciation", new JObject
+                            {
+                                { "title", asset.DepreciationTitle },
+                                {
+                                    "expense", new JObject
+                                        {
+                                            { "title", asset.DepreciationExpenseTitle },
+                                            { "subtitle", asset.DepreciationExpenseSubTitle }
+                                        }
+                                }
+                            }
+                    },
+                    {
+                        "devaluation", new JObject
+                            {
+                                { "title", asset.DevaluationTitle },
+                                {
+                                    "expense", new JObject
+                                        {
+                                            { "title", asset.DevaluationExpenseTitle },
+                                            { "subtitle", asset.DevaluationExpenseSubTitle }
+                                        }
+                                }
+                            }
+                    },
+                    { "remark", asset.Remark },
+                    { "schedule", new JArray(asset.Schedule.Select(PresentJson)) }
+                };
+
+        private static JObject PresentJson(AssetItem item)
+        {
+            var obj = new JObject
+                {
+                    { "date", item.Date?.ToString("yyyy-MM-dd") },
+                    { "voucherId", item.VoucherID },
+                    { "value", item.Value },
+                    { "remark", item.Remark }
+                };
+
+            switch (item)
+            {
+                case AcquisationItem acq:
+                    obj["origValue"] = acq.OrigValue;
+                    obj["type"] = "acquisation";
+                    break;
+                case DepreciateItem dep:
+                    obj["amount"] = dep.Amount;
+                    obj["type"] = "depreciate";
+                    break;
+                case DevalueItem dev:
+                    obj["fairValue"] = dev.Amount;
+                    obj["type"] = "devalue";
+                    break;
+                case DispositionItem _:
+                    obj["type"] = "disposition";
+                    break;
+            }
+
+            return obj;
+        }
+
+        private static JObject PresentJson(Amortization amort)
+            => new JObject
+                {
+                    { "id", amort.StringID },
+                    { "name", amort.Name },
+                    { "date", amort.Date?.ToString("yyyy-MM-dd") },
+                    { "value", amort.Value },
+                    { "totalDays", amort.TotalDays },
+                    { "interval", amort.Interval?.ToString() },
+                    { "template", PresentJson(amort.Template) },
+                    { "remark", amort.Remark },
+                    { "schedule", new JArray(amort.Schedule.Select(PresentJson)) }
+                };
+
+        private static JObject PresentJson(AmortItem item)
+            => new JObject
+                {
+                    { "date", item.Date?.ToString("yyyy-MM-dd") },
+                    { "voucherId", item.VoucherID },
+                    { "amount", item.Amount },
+                    { "value", item.Value },
+                    { "remark", item.Remark }
                 };
     }
 }

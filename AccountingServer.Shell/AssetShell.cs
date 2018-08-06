@@ -16,7 +16,7 @@ namespace AccountingServer.Shell
     /// </summary>
     internal class AssetShell : DistributedShell
     {
-        public AssetShell(Accountant helper, IEntitySerializer serializer) : base(helper, serializer) { }
+        public AssetShell(Accountant helper, IEntitiesSerializer serializer) : base(helper, serializer) { }
 
         /// <inheritdoc />
         protected override string Initial => "a";
@@ -37,13 +37,7 @@ namespace AccountingServer.Shell
 
         /// <inheritdoc />
         protected override IQueryResult ExecuteQuery(IQueryCompunded<IDistributedQueryAtom> distQuery)
-        {
-            var sb = new StringBuilder();
-            foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
-                sb.Append(Serializer.PresentAsset(a));
-
-            return new EditableText(sb.ToString());
-        }
+            => new EditableText(Serializer.PresentAssets(Sort(Accountant.SelectAssets(distQuery))));
 
         /// <inheritdoc />
         protected override IQueryResult ExecuteRegister(IQueryCompunded<IDistributedQueryAtom> distQuery,
@@ -53,9 +47,7 @@ namespace AccountingServer.Shell
             var sb = new StringBuilder();
             foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
             {
-                foreach (var voucher in Accountant.RegisterVouchers(a, rng, query))
-                    sb.Append(Serializer.PresentVoucher(voucher).Wrap());
-
+                sb.Append(Serializer.PresentVouchers(Accountant.RegisterVouchers(a, rng, query)));
                 Accountant.Upsert(a);
             }
 
@@ -99,15 +91,15 @@ namespace AccountingServer.Shell
         /// <inheritdoc />
         protected override IQueryResult ExecuteRecal(IQueryCompunded<IDistributedQueryAtom> distQuery)
         {
-            var sb = new StringBuilder();
+            var lst = new List<Asset>();
             foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
             {
                 Accountant.Depreciate(a);
-                sb.Append(Serializer.PresentAsset(a));
                 Accountant.Upsert(a);
+                lst.Add(a);
             }
 
-            return new EditableText(sb.ToString());
+            return new EditableText(Serializer.PresentAssets(lst));
         }
 
         /// <inheritdoc />
