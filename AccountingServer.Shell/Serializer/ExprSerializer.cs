@@ -145,11 +145,35 @@ namespace AccountingServer.Shell.Serializer
         /// <returns>是否解析成功</returns>
         private static bool TryParse(string s, out VoucherType typeT)
         {
-            if (Enum.TryParse(s, out typeT) && s == typeT.ToString())
-                return true;
-
-            typeT = VoucherType.General;
-            return false;
+            // Don't use Enum.TryParse here:
+            // Enum.TryParse("1001", out _) gives true
+            switch (s)
+            {
+                case "Ordinary":
+                    typeT = VoucherType.Ordinary;
+                    return true;
+                case "Carry":
+                    typeT = VoucherType.Carry;
+                    return true;
+                case "AnnualCarry":
+                    typeT = VoucherType.AnnualCarry;
+                    return true;
+                case "Depreciation":
+                    typeT = VoucherType.Depreciation;
+                    return true;
+                case "Devalue":
+                    typeT = VoucherType.Devalue;
+                    return true;
+                case "Amortization":
+                    typeT = VoucherType.Amortization;
+                    return true;
+                case "Uncertain":
+                    typeT = VoucherType.Uncertain;
+                    return true;
+                default:
+                    typeT = VoucherType.General;
+                    return false;
+            }
         }
 
         public VoucherDetail ParseVoucherDetail(ref string expr)
