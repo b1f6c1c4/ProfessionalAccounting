@@ -103,6 +103,14 @@ namespace AccountingClient.Shell
             if (expr == "exit")
                 Environment.Exit(0);
 
+            if (expr == "use local")
+            {
+                if (!TryConnect("http://localhost:30000/"))
+                    throw m_Exception;
+
+                return new QueryResult { Result = "OK", AutoReturn = true };
+            }
+
             if (expr.StartsWith("spec ", StringComparison.OrdinalIgnoreCase))
             {
                 m_SerializerSpec = expr.Substring(5);
