@@ -532,6 +532,72 @@ namespace AccountingServer.Test.UnitTest.BLL
         }
 
         [Fact]
+        public void TestAggrChangedEquivalent()
+        {
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`vDX[20170101]").Subtotal);
+
+            var bal = new[]
+                {
+                    new Balance
+                        {
+                            Currency = "JPY",
+                            Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
+                            Fund = 8
+                        },
+                    new Balance
+                        {
+                            Currency = "CNY",
+                            Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
+                            Fund = 1
+                        },
+                    new Balance
+                        {
+                            Currency = "USD",
+                            Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
+                            Fund = 4
+                        },
+                    new Balance
+                        {
+                            Currency = "CNY",
+                            Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
+                            Fund = 2
+                        }
+                };
+
+            var res = builder.Build(bal);
+            Assert.IsAssignableFrom<ISubtotalRoot>(res);
+            var resx = (ISubtotalRoot)res;
+
+            var lst = new List<Balance>();
+            foreach (var item in resx.Items)
+            {
+                Assert.IsAssignableFrom<ISubtotalDate>(item);
+                var resxx = (ISubtotalDate)item;
+                Assert.Null(resxx.Items);
+                Assert.Equal(SubtotalLevel.None, resxx.Level);
+                lst.Add(new Balance { Date = resxx.Date, Fund = resxx.Fund });
+            }
+
+            Assert.Equal(8 * 456 + 1 + 4 * 789 + 2, res.Fund);
+            Assert.Equal(
+                new[]
+                    {
+                        new Balance
+                            {
+                                Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
+                                Fund = 8 * 456 + 1
+                            },
+                        new Balance
+                            {
+                                Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
+                                Fund = 8 * 456 + 1 + 4 * 789 + 2
+                            }
+                    },
+                lst,
+                new BalanceEqualityComparer());
+        }
+
+        [Fact]
         public void TestContent()
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`c").Subtotal);
