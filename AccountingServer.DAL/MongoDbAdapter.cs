@@ -30,6 +30,17 @@ namespace AccountingServer.DAL
                 ["date"] = true
             };
 
+        private static readonly BsonDocument ProjectNothing = new BsonDocument
+            {
+                ["_id"] = false
+            };
+
+        private static readonly BsonDocument ProjectNothingButDate = new BsonDocument
+            {
+                ["_id"] = false,
+                ["date"] = true
+            };
+
         private static readonly BsonDocument ProjectDetail = new BsonDocument
             {
                 ["currency"] = "$detail.currency",
@@ -43,6 +54,10 @@ namespace AccountingServer.DAL
         private static readonly BsonDocument ProjectYear;
         private static readonly BsonDocument ProjectMonth;
         private static readonly BsonDocument ProjectWeek;
+
+        private static readonly BsonDocument ProjectNothingButYear;
+        private static readonly BsonDocument ProjectNothingButMonth;
+        private static readonly BsonDocument ProjectNothingButWeek;
 
         private static readonly BsonDocument FilterNonZero = new BsonDocument
             {
@@ -66,11 +81,11 @@ namespace AccountingServer.DAL
             BsonSerializer.RegisterSerializer(new AmortItemSerializer());
             BsonSerializer.RegisterSerializer(new BalanceSerializer());
 
-            BsonDocument MakeProject(BsonValue days)
+            BsonDocument MakeProject(BsonValue days, bool detail)
                 => new BsonDocument
                     {
                         ["_id"] = false,
-                        ["detail"] = true,
+                        ["detail"] = detail,
                         ["date"] = new BsonDocument
                             {
                                 ["$switch"] = new BsonDocument
@@ -114,49 +129,54 @@ namespace AccountingServer.DAL
                             }
                     };
 
-            ProjectYear = MakeProject(
-                new BsonDocument
-                    {
-                        ["$subtract"] = new BsonArray
-                            {
-                                new BsonDocument
-                                    {
-                                        ["$dayOfYear"] = "$date"
-                                    },
-                                1
-                            }
-                    });
-            ProjectMonth = MakeProject(
-                new BsonDocument
-                    {
-                        ["$subtract"] = new BsonArray
-                            {
-                                new BsonDocument
-                                    {
-                                        ["$dayOfMonth"] = "$date"
-                                    },
-                                1
-                            }
-                    });
-            ProjectWeek = MakeProject(
-                new BsonDocument
-                    {
-                        ["$mod"] = new BsonArray
-                            {
-                                new BsonDocument
-                                    {
-                                        ["$add"] = new BsonArray
-                                            {
-                                                new BsonDocument
-                                                    {
-                                                        ["$dayOfWeek"] = "$date"
-                                                    },
-                                                5
-                                            }
-                                    },
-                                7
-                            }
-                    });
+            var year = new BsonDocument
+                {
+                    ["$subtract"] = new BsonArray
+                        {
+                            new BsonDocument
+                                {
+                                    ["$dayOfYear"] = "$date"
+                                },
+                            1
+                        }
+                };
+            var month = new BsonDocument
+                {
+                    ["$subtract"] = new BsonArray
+                        {
+                            new BsonDocument
+                                {
+                                    ["$dayOfMonth"] = "$date"
+                                },
+                            1
+                        }
+                };
+            var week = new BsonDocument
+                {
+                    ["$mod"] = new BsonArray
+                        {
+                            new BsonDocument
+                                {
+                                    ["$add"] = new BsonArray
+                                        {
+                                            new BsonDocument
+                                                {
+                                                    ["$dayOfWeek"] = "$date"
+                                                },
+                                            5
+                                        }
+                                },
+                            7
+                        }
+                };
+
+            ProjectYear = MakeProject(year, true);
+            ProjectMonth = MakeProject(month, true);
+            ProjectWeek = MakeProject(week, true);
+
+            ProjectNothingButYear = MakeProject(year, false);
+            ProjectNothingButMonth = MakeProject(month, false);
+            ProjectNothingButWeek = MakeProject(week, false);
         }
 
         public MongoDbAdapter(string uri)
@@ -302,6 +322,33 @@ namespace AccountingServer.DAL
             if (query.Subtotal.AggrType != AggregationType.ChangedDay &&
                 query.Subtotal.GatherType == GatheringType.NonZero)
                 fluent = fluent.Match(FilterNonZero);
+            return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
+        }
+
+        /// <inheritdoc />
+        public IEnumerable<Balance> CountVouchersGrouped(IQueryCompunded<IVoucherQueryAtom> query, SubtotalLevel level)
+        {
+            var preF = query.Accept(new MongoDbNativeVoucher());
+
+            BsonDocument pprj;
+            if (!level.HasFlag(SubtotalLevel.Day))
+                pprj = ProjectNothing;
+            else if (!level.HasFlag(SubtotalLevel.Week))
+                pprj = ProjectNothingButDate;
+            else if (level.HasFlag(SubtotalLevel.Year))
+                pprj = ProjectNothingButYear;
+            else if (level.HasFlag(SubtotalLevel.Month))
+                pprj = ProjectNothingButMonth;
+            else // if (level.HasFlag(SubtotalLevel.Week))
+                pprj = ProjectNothingButWeek;
+
+            var grp = new BsonDocument
+                {
+                    ["_id"] = new BsonDocument { ["date"] = "$date" },
+                    ["count"] = new BsonDocument { ["$sum"] = 1 }
+                };
+
+            var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Group(grp);
             return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
         }
 

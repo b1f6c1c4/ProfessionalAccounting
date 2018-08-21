@@ -36,6 +36,9 @@ namespace AccountingServer.BLL
         public ISubtotalResult SelectVoucherDetailsGrouped(IGroupedQuery query)
             => m_Db.SelectVoucherDetailsGrouped(query);
 
+        public ISubtotalResult CountVouchersGrouped(IQueryCompunded<IVoucherQueryAtom> query, SubtotalLevel level)
+            => m_Db.CountVouchersGrouped(query, level);
+
         public bool DeleteVoucher(string id)
             => m_Db.DeleteVoucher(id);
 
@@ -116,5 +119,6 @@ namespace AccountingServer.BLL
             => DistributedAccountant.GetBookValueOn(dist, dt);
 
         #endregion
+
     }
 }
