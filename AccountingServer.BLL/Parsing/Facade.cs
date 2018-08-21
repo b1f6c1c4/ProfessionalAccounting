@@ -7,17 +7,12 @@ using Antlr4.Runtime;
 namespace AccountingServer.BLL.Parsing
 {
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
+    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public abstract class FacadeBase
     {
-        internal virtual T Parse<T>(ref string s, Func<QueryParser, T> func)
+        private static T Check<T>(ref string s, T res)
             where T : RuleContext
         {
-            var stream = new AntlrInputStream(s);
-            var lexer = new QueryLexer(stream);
-            var tokens = new CommonTokenStream(lexer);
-            var parser = new QueryParser(tokens) { ErrorHandler = new BailErrorStrategy() };
-            var res = func(parser);
-
             var t = res.GetText();
             var i = 0;
             var j = 0;
@@ -38,6 +33,26 @@ namespace AccountingServer.BLL.Parsing
 
             s = s.Substring(i);
             return res;
+        }
+
+        internal virtual T Parse<T>(ref string s, Func<QueryParser, T> func)
+            where T : RuleContext
+        {
+            var stream = new AntlrInputStream(s);
+            var lexer = new QueryLexer(stream);
+            var tokens = new CommonTokenStream(lexer);
+            var parser = new QueryParser(tokens) { ErrorHandler = new BailErrorStrategy() };
+            return Check(ref s, func(parser));
+        }
+
+        internal virtual T SubtotalParse<T>(ref string s, Func<SubtotalParser, T> func)
+            where T : RuleContext
+        {
+            var stream = new AntlrInputStream(s);
+            var lexer = new SubtotalLexer(stream);
+            var tokens = new CommonTokenStream(lexer);
+            var parser = new SubtotalParser(tokens) { ErrorHandler = new BailErrorStrategy() };
+            return Check(ref s, func(parser));
         }
 
         public ITitle Title(string s)
@@ -71,11 +86,25 @@ namespace AccountingServer.BLL.Parsing
         public IVoucherDetailQuery DetailQuery(ref string s)
             => Parse(ref s, p => p.voucherDetailQuery());
 
+        public ISubtotal Subtotal(string s)
+            => Subtotal(ref s);
+
+        public ISubtotal Subtotal(ref string s)
+            => SubtotalParse(ref s, p => p.subtotal());
+
         public IGroupedQuery GroupedQuery(string s)
             => GroupedQuery(ref s);
 
         public IGroupedQuery GroupedQuery(ref string s)
-            => Parse(ref s, p => p.groupedQuery());
+        {
+            var query = DetailQuery(ref s);
+            var subtotal = Subtotal(ref s);
+            return new GroupedQueryStub
+                {
+                    VoucherEmitQuery = query,
+                    Subtotal = subtotal
+                };
+        }
 
         public IQueryCompunded<IDistributedQueryAtom> DistributedQuery(string s)
             => DistributedQuery(ref s);
@@ -83,6 +112,13 @@ namespace AccountingServer.BLL.Parsing
         public IQueryCompunded<IDistributedQueryAtom> DistributedQuery(ref string s)
             => (IQueryCompunded<IDistributedQueryAtom>)Parse(ref s, p => p.distributedQ()) ??
                 DistributedQueryUnconstrained.Instance;
+
+        private sealed class GroupedQueryStub : IGroupedQuery
+        {
+            public IVoucherDetailQuery VoucherEmitQuery { get; set; }
+
+            public ISubtotal Subtotal { get; set; }
+        }
     }
 
     public sealed class FacadeF : FacadeBase
@@ -110,6 +146,21 @@ namespace AccountingServer.BLL.Parsing
             try
             {
                 return base.Parse(ref s, func);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        internal override T SubtotalParse<T>(ref string s, Func<SubtotalParser, T> func)
+        {
+            if (s == null)
+                return null;
+
+            try
+            {
+                return base.SubtotalParse(ref s, func);
             }
             catch (Exception)
             {

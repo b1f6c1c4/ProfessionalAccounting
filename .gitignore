@@ -26,3 +26,7 @@ ipch
 /AccountingServer.BLL/Parsing/QueryLexer.cs
 /AccountingServer.BLL/Parsing/QueryLexer.tokens
 /AccountingServer.BLL/Parsing/QueryParser.cs
+/AccountingServer.BLL/Parsing/Subtotal.tokens
+/AccountingServer.BLL/Parsing/SubtotalLexer.cs
+/AccountingServer.BLL/Parsing/SubtotalLexer.tokens
+/AccountingServer.BLL/Parsing/SubtotalParser.cs
