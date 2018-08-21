@@ -267,6 +267,53 @@ namespace AccountingServer.DAL
         }
 
         /// <inheritdoc />
+        public IEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query)
+        {
+            if (query.Subtotal.GatherType != GatheringType.Count)
+                throw new InvalidOperationException("记账凭证分类汇总只能计数");
+            if (query.Subtotal.EquivalentDate.HasValue)
+                throw new InvalidOperationException("记账凭证分类汇总不能等值");
+
+            var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
+            if (query.Subtotal.AggrType != AggregationType.None)
+                level |= SubtotalLevel.Day;
+
+            if (level.HasFlag(SubtotalLevel.Currency))
+                throw new InvalidOperationException("记账凭证不能按币种分类汇总");
+            if (level.HasFlag(SubtotalLevel.Title))
+                throw new InvalidOperationException("记账凭证不能按一级科目分类汇总");
+            if (level.HasFlag(SubtotalLevel.SubTitle))
+                throw new InvalidOperationException("记账凭证不能按二级科目分类汇总");
+            if (level.HasFlag(SubtotalLevel.Content))
+                throw new InvalidOperationException("记账凭证不能按内容分类汇总");
+            if (level.HasFlag(SubtotalLevel.Remark))
+                throw new InvalidOperationException("记账凭证不能按备注分类汇总");
+
+            var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher());
+
+            BsonDocument pprj;
+            if (!level.HasFlag(SubtotalLevel.Day))
+                pprj = ProjectNothing;
+            else if (!level.HasFlag(SubtotalLevel.Week))
+                pprj = ProjectNothingButDate;
+            else if (level.HasFlag(SubtotalLevel.Year))
+                pprj = ProjectNothingButYear;
+            else if (level.HasFlag(SubtotalLevel.Month))
+                pprj = ProjectNothingButMonth;
+            else // if (level.HasFlag(SubtotalLevel.Week))
+                pprj = ProjectNothingButWeek;
+
+            var grp = new BsonDocument
+                {
+                    ["_id"] = new BsonDocument { ["date"] = "$date" },
+                    ["count"] = new BsonDocument { ["$sum"] = 1 }
+                };
+
+            var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Group(grp);
+            return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
+        }
+
+        /// <inheritdoc />
         public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
             var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
@@ -322,33 +369,6 @@ namespace AccountingServer.DAL
             if (query.Subtotal.AggrType != AggregationType.ChangedDay &&
                 query.Subtotal.GatherType == GatheringType.NonZero)
                 fluent = fluent.Match(FilterNonZero);
-            return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
-        }
-
-        /// <inheritdoc />
-        public IEnumerable<Balance> CountVouchersGrouped(IQueryCompunded<IVoucherQueryAtom> query, SubtotalLevel level)
-        {
-            var preF = query.Accept(new MongoDbNativeVoucher());
-
-            BsonDocument pprj;
-            if (!level.HasFlag(SubtotalLevel.Day))
-                pprj = ProjectNothing;
-            else if (!level.HasFlag(SubtotalLevel.Week))
-                pprj = ProjectNothingButDate;
-            else if (level.HasFlag(SubtotalLevel.Year))
-                pprj = ProjectNothingButYear;
-            else if (level.HasFlag(SubtotalLevel.Month))
-                pprj = ProjectNothingButMonth;
-            else // if (level.HasFlag(SubtotalLevel.Week))
-                pprj = ProjectNothingButWeek;
-
-            var grp = new BsonDocument
-                {
-                    ["_id"] = new BsonDocument { ["date"] = "$date" },
-                    ["count"] = new BsonDocument { ["$sum"] = 1 }
-                };
-
-            var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Group(grp);
             return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
         }
 

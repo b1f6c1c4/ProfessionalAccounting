@@ -269,6 +269,22 @@ namespace AccountingServer.Entities
     }
 
     /// <summary>
+    ///     记账凭证分类汇总检索式
+    /// </summary>
+    public interface IVoucherGroupedQuery
+    {
+        /// <summary>
+        ///     记账凭证检索式
+        /// </summary>
+        IQueryCompunded<IVoucherQueryAtom> VoucherQuery { get; }
+
+        /// <summary>
+        ///     分类汇总参数
+        /// </summary>
+        ISubtotal Subtotal { get; }
+    }
+
+    /// <summary>
     ///     分期检索式
     /// </summary>
     public interface IDistributedQueryAtom : IQueryCompunded<IDistributedQueryAtom>
