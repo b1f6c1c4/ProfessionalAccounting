@@ -40,6 +40,14 @@ namespace AccountingServer.DAL
         IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query);
 
         /// <summary>
+        ///     按检索式计数记账凭证并汇总
+        /// </summary>
+        /// <param name="query">检索式</param>
+        /// <param name="level">汇总层次</param>
+        /// <returns>匹配检索式的记账凭证数量</returns>
+        IEnumerable<Balance> CountVouchersGrouped(IQueryCompunded<IVoucherQueryAtom> query, SubtotalLevel level);
+
+        /// <summary>
         ///     按编号删除记账凭证
         /// </summary>
         /// <param name="id">编号</param>
