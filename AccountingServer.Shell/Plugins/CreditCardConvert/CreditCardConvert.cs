@@ -120,6 +120,7 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
         private IQueryResult Create(string content, ref string expr, IEntitiesSerializer serializer)
         {
             var currency = Parsing.Token(ref expr, false);
+            var baseCurrency = Parsing.Token(ref expr, false);
 
             var lst = new List<Voucher>();
             while (!string.IsNullOrWhiteSpace(expr))
@@ -147,6 +148,7 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                             {
                                 new VoucherDetail
                                     {
+                                        Currency = baseCurrency,
                                         Title = 2241,
                                         SubTitle = 01,
                                         Content = content,
@@ -154,6 +156,7 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                                     },
                                 new VoucherDetail
                                     {
+                                        Currency = baseCurrency,
                                         Title = 3999,
                                         Fund = to
                                     },
