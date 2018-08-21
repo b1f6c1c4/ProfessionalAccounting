@@ -82,10 +82,10 @@ namespace AccountingServer.DAL
             BsonSerializer.RegisterSerializer(new BalanceSerializer());
 
             BsonDocument MakeProject(BsonValue days, bool detail)
-                => new BsonDocument
+            {
+                var proj = new BsonDocument
                     {
                         ["_id"] = false,
-                        ["detail"] = detail,
                         ["date"] = new BsonDocument
                             {
                                 ["$switch"] = new BsonDocument
@@ -128,6 +128,10 @@ namespace AccountingServer.DAL
                                     }
                             }
                     };
+                if (detail)
+                    proj["detail"] = true;
+                return proj;
+            }
 
             var year = new BsonDocument
                 {
@@ -269,7 +273,7 @@ namespace AccountingServer.DAL
         /// <inheritdoc />
         public IEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query)
         {
-            if (query.Subtotal.GatherType != GatheringType.Count)
+            if (query.Subtotal.GatherType != GatheringType.VoucherCount)
                 throw new InvalidOperationException("记账凭证分类汇总只能计数");
             if (query.Subtotal.EquivalentDate.HasValue)
                 throw new InvalidOperationException("记账凭证分类汇总不能等值");
@@ -303,9 +307,13 @@ namespace AccountingServer.DAL
             else // if (level.HasFlag(SubtotalLevel.Week))
                 pprj = ProjectNothingButWeek;
 
+            var prj = new BsonDocument();
+            if (level.HasFlag(SubtotalLevel.Day))
+                prj["date"] = "$date";
+
             var grp = new BsonDocument
                 {
-                    ["_id"] = new BsonDocument { ["date"] = "$date" },
+                    ["_id"] = prj,
                     ["count"] = new BsonDocument { ["$sum"] = 1 }
                 };
 

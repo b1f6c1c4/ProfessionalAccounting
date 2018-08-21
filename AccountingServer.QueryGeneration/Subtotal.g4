@@ -57,7 +57,7 @@ SumMark
 	;
 
 CountMark
-	:	'!'
+	:	'!' | '!!'
 	;
 
 SubtotalFields
