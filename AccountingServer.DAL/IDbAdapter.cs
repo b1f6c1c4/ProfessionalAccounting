@@ -33,19 +33,18 @@ namespace AccountingServer.DAL
         IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query);
 
         /// <summary>
+        ///     按检索式执行记账凭证分类汇总
+        /// </summary>
+        /// <param name="query">检索式</param>
+        /// <returns>匹配检索式的记账凭证数量</returns>
+        IEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query);
+
+        /// <summary>
         ///     按检索式执行分类汇总
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>分类汇总结果</returns>
         IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query);
-
-        /// <summary>
-        ///     按检索式计数记账凭证并汇总
-        /// </summary>
-        /// <param name="query">检索式</param>
-        /// <param name="level">汇总层次</param>
-        /// <returns>匹配检索式的记账凭证数量</returns>
-        IEnumerable<Balance> CountVouchersGrouped(IQueryCompunded<IVoucherQueryAtom> query, SubtotalLevel level);
 
         /// <summary>
         ///     按编号删除记账凭证

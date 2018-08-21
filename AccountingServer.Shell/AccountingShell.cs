@@ -34,7 +34,12 @@ namespace AccountingServer.Shell
         private Func<IEntitiesSerializer, IQueryResult> Parse(string expr)
         {
             var isRaw = false;
+            var isVoucher = false;
             ISubtotalStringify visitor;
+
+            if (ParsingF.Token(ref expr, false, t => t == "voucher") != null)
+                isVoucher = true;
+
             if (ParsingF.Token(ref expr, false, t => t == "json") != null)
                 visitor = new JsonSubtotal();
             else if (ParsingF.Token(ref expr, false, t => t == "json-raw") != null)
@@ -56,7 +61,7 @@ namespace AccountingServer.Shell
 
             try
             {
-                return TryGroupedQuery(expr, visitor);
+                return isVoucher ? TryVoucherGroupedQuery(expr, visitor) : TryGroupedQuery(expr, visitor);
             }
             catch (Exception)
             {
@@ -88,6 +93,19 @@ namespace AccountingServer.Shell
             var res = ParsingF.VoucherQuery(ref expr);
             ParsingF.Eof(expr);
             return serializer => PresentVoucherQuery(res, serializer);
+        }
+
+        /// <summary>
+        ///     按记账凭证分类汇总检索式解析
+        /// </summary>
+        /// <param name="expr">表达式</param>
+        /// <param name="trav">呈现器</param>
+        /// <returns>执行结果</returns>
+        private Func<IEntitiesSerializer, IQueryResult> TryVoucherGroupedQuery(string expr, ISubtotalStringify trav)
+        {
+            var res = ParsingF.VoucherGroupedQuery(ref expr);
+            ParsingF.Eof(expr);
+            return serializer => PresentSubtotal(res, trav);
         }
 
         /// <summary>
@@ -133,6 +151,18 @@ namespace AccountingServer.Shell
         /// <returns>执行结果</returns>
         private IQueryResult PresentDetailQuery(IVoucherDetailQuery query, IEntitiesSerializer serializer)
             => new PlainText(serializer.PresentVoucherDetails(m_Accountant.SelectVoucherDetails(query)));
+
+        /// <summary>
+        ///     执行记账凭证分类汇总检索式并呈现结果
+        /// </summary>
+        /// <param name="query">记账凭证分类汇总检索式</param>
+        /// <param name="trav">呈现器</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult PresentSubtotal(IVoucherGroupedQuery query, ISubtotalStringify trav)
+        {
+            var result = m_Accountant.SelectVouchersGrouped(query);
+            return new PlainText(trav.PresentSubtotal(result, query.Subtotal));
+        }
 
         /// <summary>
         ///     执行分类汇总检索式并呈现结果
