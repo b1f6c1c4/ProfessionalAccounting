@@ -15,6 +15,7 @@ namespace AccountingServer.Shell.Subtotal
         protected int Depth;
 
         protected GatheringType Ga;
+        protected string Cu;
 
         private ISubtotal m_Par;
         protected StringBuilder Sb;
@@ -24,6 +25,7 @@ namespace AccountingServer.Shell.Subtotal
         {
             m_Par = par;
             Ga = par.GatherType;
+            Cu = par.EquivalentCurrency;
             Sb = new StringBuilder();
             Depth = 0;
             raw?.Accept(this);

@@ -14,7 +14,7 @@ subtotalAggr
 	;
 
 subtotalEqui
-	:	EquiMark (SquareBra rangeDay SquareKet)?
+	:	EquiMark VoucherCurrency? (SquareBra rangeDay SquareKet)?
 	;
 
 rangeCore
@@ -86,6 +86,11 @@ RangeDeltaDay
 	;
 RangeDeltaWeek
 	:	','+
+	;
+
+VoucherCurrency
+	:	'@' [a-zA-Z]+
+	|	'@@'
 	;
 
 SquareBra
