@@ -5,7 +5,8 @@ grammar Subtotal;
  */
 
 subtotal
-	:	SubtotalMark SubtotalFields? subtotalAggr? subtotalEqui?
+	:	Mark=SumMark SubtotalFields? subtotalAggr? subtotalEqui?
+	|	Mark=CountMark SubtotalFields? subtotalAggr?
 	;
 
 subtotalAggr
@@ -51,9 +52,12 @@ rangeDay
  * Lexer Rules
  */
 
-SubtotalMark
+SumMark
 	:	'`' | '``'
-	|	'!'
+	;
+
+CountMark
+	:	'!'
 	;
 
 SubtotalFields
