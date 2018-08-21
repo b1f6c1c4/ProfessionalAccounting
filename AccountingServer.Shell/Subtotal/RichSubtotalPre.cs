@@ -17,7 +17,7 @@ namespace AccountingServer.Shell.Subtotal
 
         private string Ts(double f) => Ga == GatheringType.Count
             ? f.ToString("N0")
-            : f.AsCurrency(m_Currency);
+            : f.AsCurrency(Cu ?? m_Currency);
 
         private void ShowSubtotal(ISubtotalResult sub, string str)
         {

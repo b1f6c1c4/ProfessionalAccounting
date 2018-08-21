@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace AccountingServer.Entities
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
     public sealed class Nothing
     {
         public static Nothing AtAll => null;
@@ -239,6 +240,11 @@ namespace AccountingServer.Entities
         ///     日期累加的范围
         /// </summary>
         IDateRange EveryDayRange { get; }
+
+        /// <summary>
+        ///     币种等值币种
+        /// </summary>
+        string EquivalentCurrency { get; }
 
         /// <summary>
         ///     币种等值日期

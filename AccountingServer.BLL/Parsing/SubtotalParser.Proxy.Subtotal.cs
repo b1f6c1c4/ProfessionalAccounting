@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 
 namespace AccountingServer.BLL.Parsing
@@ -107,6 +108,27 @@ namespace AccountingServer.BLL.Parsing
                         return DateFilter.Unconstrained;
 
                     return subtotalAggr().rangeCore();
+                }
+            }
+
+            /// <inheritdoc />
+            public string EquivalentCurrency
+            {
+                get
+                {
+                    if (subtotalEqui() == null)
+                        return null;
+
+                    if (subtotalEqui().VoucherCurrency() != null)
+                    {
+                        var c = subtotalEqui().VoucherCurrency().GetText();
+                        if (!c.StartsWith("@", StringComparison.Ordinal))
+                            throw new MemberAccessException("表达式错误");
+
+                        return c == "@@" ? BaseCurrency.Now : c.Substring(1).ToUpperInvariant();
+                    }
+
+                    return BaseCurrency.Now;
                 }
             }
 

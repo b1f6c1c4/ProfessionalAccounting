@@ -779,7 +779,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [Fact]
         public void TestEquivalent()
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`vX[20170101]").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`vX@JPY[20170101]").Subtotal);
 
             var bal = new[]
                 {
@@ -808,7 +808,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             var res = builder.Build(bal);
             Assert.IsAssignableFrom<ISubtotalRoot>(res);
             Assert.Null(res.Items);
-            Assert.Equal(8 * 456 + 1 + 4 * 789 + 2, res.Fund);
+            Assert.Equal((8 * 456 + 1 + 4 * 789 + 2) / 456D, res.Fund);
         }
 
         [Fact]
