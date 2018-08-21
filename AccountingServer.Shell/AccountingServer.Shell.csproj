@@ -49,7 +49,6 @@
     <Compile Include="Plugins\AssetHelper\AssetDisposition.cs" />
     <Compile Include="Plugins\AssetHelper\AssetFactory.cs" />
     <Compile Include="Plugins\CreditCardConvert\CreditCardConvert.cs" />
-    <Compile Include="Plugins\VoucherCount\Counting.cs" />
     <Compile Include="Serializer\AlternativeSerializer.cs" />
     <Compile Include="Carry\ExchangeShell.cs" />
     <Compile Include="Plugins\BankBalance\AverageDailyBalance.cs" />
@@ -129,9 +128,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Plugins\AssetHelper\Resources\Document.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Plugins\VoucherCount\Resources\Document.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

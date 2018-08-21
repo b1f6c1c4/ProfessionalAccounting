@@ -92,20 +92,6 @@ namespace AccountingServer.BLL.Parsing
         public ISubtotal Subtotal(ref string s)
             => SubtotalParse(ref s, p => p.subtotal());
 
-        public IVoucherGroupedQuery VoucherGroupedQuery(string s)
-            => VoucherGroupedQuery(ref s);
-
-        public IVoucherGroupedQuery VoucherGroupedQuery(ref string s)
-        {
-            var query = VoucherQuery(ref s);
-            var subtotal = Subtotal(ref s);
-            return new VoucherGroupedQueryStub
-            {
-                    VoucherQuery = query,
-                    Subtotal = subtotal
-                };
-        }
-
         public IGroupedQuery GroupedQuery(string s)
             => GroupedQuery(ref s);
 
@@ -126,13 +112,6 @@ namespace AccountingServer.BLL.Parsing
         public IQueryCompunded<IDistributedQueryAtom> DistributedQuery(ref string s)
             => (IQueryCompunded<IDistributedQueryAtom>)Parse(ref s, p => p.distributedQ()) ??
                 DistributedQueryUnconstrained.Instance;
-
-        private sealed class VoucherGroupedQueryStub : IVoucherGroupedQuery
-        {
-            public IQueryCompunded<IVoucherQueryAtom> VoucherQuery { get; set; }
-
-            public ISubtotal Subtotal { get; set; }
-        }
 
         private sealed class GroupedQueryStub : IGroupedQuery
         {

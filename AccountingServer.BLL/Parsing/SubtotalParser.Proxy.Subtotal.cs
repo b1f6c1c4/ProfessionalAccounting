@@ -24,6 +24,8 @@ namespace AccountingServer.BLL.Parsing
                             return GatheringType.NonZero;
                         case "!":
                             return GatheringType.Count;
+                        case "!!":
+                            return GatheringType.VoucherCount;
                         default:
                             throw new MemberAccessException("表达式错误");
                     }

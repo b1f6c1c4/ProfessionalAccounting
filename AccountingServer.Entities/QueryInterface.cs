@@ -192,7 +192,12 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     计数
         /// </summary>
-        Count
+        Count,
+
+        /// <summary>
+        ///     记账凭证计数
+        /// </summary>
+        VoucherCount
     }
 
     /// <summary>

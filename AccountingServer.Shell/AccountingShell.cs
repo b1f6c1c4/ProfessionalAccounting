@@ -34,11 +34,7 @@ namespace AccountingServer.Shell
         private Func<IEntitiesSerializer, IQueryResult> Parse(string expr)
         {
             var isRaw = false;
-            var isVoucher = false;
             ISubtotalStringify visitor;
-
-            if (ParsingF.Token(ref expr, false, t => t == "voucher") != null)
-                isVoucher = true;
 
             if (ParsingF.Token(ref expr, false, t => t == "json") != null)
                 visitor = new JsonSubtotal();
@@ -61,7 +57,7 @@ namespace AccountingServer.Shell
 
             try
             {
-                return isVoucher ? TryVoucherGroupedQuery(expr, visitor) : TryGroupedQuery(expr, visitor);
+                return TryGroupedQuery(expr, visitor);
             }
             catch (Exception)
             {
@@ -96,19 +92,6 @@ namespace AccountingServer.Shell
         }
 
         /// <summary>
-        ///     按记账凭证分类汇总检索式解析
-        /// </summary>
-        /// <param name="expr">表达式</param>
-        /// <param name="trav">呈现器</param>
-        /// <returns>执行结果</returns>
-        private Func<IEntitiesSerializer, IQueryResult> TryVoucherGroupedQuery(string expr, ISubtotalStringify trav)
-        {
-            var res = ParsingF.VoucherGroupedQuery(ref expr);
-            ParsingF.Eof(expr);
-            return serializer => PresentSubtotal(res, trav);
-        }
-
-        /// <summary>
         ///     按分类汇总检索式解析
         /// </summary>
         /// <param name="expr">表达式</param>
@@ -118,7 +101,29 @@ namespace AccountingServer.Shell
         {
             var res = ParsingF.GroupedQuery(ref expr);
             ParsingF.Eof(expr);
+
+            if (res.Subtotal.GatherType == GatheringType.VoucherCount)
+            {
+                if (res.VoucherEmitQuery.DetailEmitFilter != null)
+                    throw new InvalidOperationException("记账凭证计数不能指定细目映射");
+
+                var stub = new VoucherGroupedQueryStub
+                    {
+                        VoucherQuery = res.VoucherEmitQuery.VoucherQuery,
+                        Subtotal = res.Subtotal
+                    };
+
+                return serializer => PresentSubtotal(stub, trav);
+            }
+
             return serializer => PresentSubtotal(res, trav);
+        }
+
+        private sealed class VoucherGroupedQueryStub : IVoucherGroupedQuery
+        {
+            public IQueryCompunded<IVoucherQueryAtom> VoucherQuery { get; set; }
+
+            public ISubtotal Subtotal { get; set; }
         }
 
         /// <summary>
