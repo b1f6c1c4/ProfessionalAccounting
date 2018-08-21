@@ -15,7 +15,7 @@ namespace AccountingServer.BLL.Parsing
             {
                 get
                 {
-                    var text = SubtotalMark().GetText();
+                    var text = Mark.Text;
                     switch (text)
                     {
                         case "``":
