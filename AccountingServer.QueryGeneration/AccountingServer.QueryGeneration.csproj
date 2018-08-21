@@ -38,7 +38,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SubtotalLexer.cs" />
     <Compile Include="QueryLexer.cs" />
+    <Compile Include="SubtotalParser.cs" />
     <Compile Include="QueryParser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -52,6 +54,12 @@
       <Visitor>False</Visitor>
     </Antlr4>
     <None Include="packages.config" />
+    <Antlr4 Include="Subtotal.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>AccountingServer.BLL.Parsing</CustomToolNamespace>
+      <Listener>False</Listener>
+      <Visitor>False</Visitor>
+    </Antlr4>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

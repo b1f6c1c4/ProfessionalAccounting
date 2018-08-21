@@ -52,6 +52,11 @@
     <Compile Include="DbSession.cs" />
     <Compile Include="AssetAccountant.cs" />
     <Compile Include="Accountant.cs" />
+    <Compile Include="Parsing\NullDateRangeHelper.cs" />
+    <Compile Include="Parsing\SubtotalParser.Proxy.Subtotal.cs" />
+    <Compile Include="Parsing\SubtotalLexer.cs" />
+    <Compile Include="Parsing\SubtotalParser.cs" />
+    <Compile Include="Parsing\SubtotalParser.Proxy.Range.cs" />
     <Compile Include="Util\BaseCurrency.cs" />
     <Compile Include="Util\Exchange.cs" />
     <Compile Include="Util\Subtotal.cs" />
@@ -97,6 +102,8 @@
     <None Include="packages.config" />
     <None Include="Parsing\Query.tokens" />
     <None Include="Parsing\QueryLexer.tokens" />
+    <None Include="Parsing\Subtotal.tokens" />
+    <None Include="Parsing\SubtotalLexer.tokens" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

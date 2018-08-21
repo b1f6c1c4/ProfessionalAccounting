@@ -3,7 +3,7 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.BLL.Parsing
 {
-    internal partial class QueryParser
+    internal partial class SubtotalParser
     {
         public partial class RangeDayContext : IDateRange
         {
@@ -104,35 +104,6 @@ namespace AccountingServer.BLL.Parsing
             }
         }
 
-        public partial class RangePointContext : IDateRange
-        {
-            /// <inheritdoc />
-            public DateFilter Range
-            {
-                get
-                {
-                    if (AllDate() != null)
-                        return DateFilter.Unconstrained;
-                    if (RangeNull() != null)
-                        return DateFilter.TheNullOnly;
-
-                    return rangeCertainPoint().Range;
-                }
-            }
-        }
-
-        public partial class UniqueTimeCoreContext
-        {
-            public static implicit operator DateTime?(UniqueTimeCoreContext context)
-            {
-                if (context == null ||
-                    context.RangeNull() != null)
-                    return null;
-
-                return context.Day;
-            }
-        }
-
         public partial class RangeCoreContext : IDateRange
         {
             /// <inheritdoc />
@@ -158,17 +129,6 @@ namespace AccountingServer.BLL.Parsing
                     return f;
                 }
             }
-        }
-
-        public partial class UniqueTimeContext
-        {
-            public static implicit operator DateTime?(UniqueTimeContext context) => context?.Core;
-        }
-
-        public partial class RangeContext : IDateRange
-        {
-            /// <inheritdoc />
-            public DateFilter Range => rangeCore().TheRange();
         }
     }
 }

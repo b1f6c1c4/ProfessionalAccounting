@@ -4,23 +4,6 @@ grammar Query;
  * Parser Rules
  */
 
-groupedQuery
-	:	voucherDetailQuery subtotal
-	;
-
-subtotal
-	:	Subtotal subtotalAggr? subtotalEqui?
-	;
-
-subtotalAggr
-	:	AggrMark AllDate?
-	|	AggrMark SquareBra rangeCore SquareKet
-	;
-
-subtotalEqui
-	:	EquiMark (SquareBra rangeDay SquareKet)?
-	;
-
 voucherDetailQuery
 	:	vouchers emit
 	|	voucherQuery
@@ -158,20 +141,6 @@ Floating
 	|	'=' '-'? '0' '.' [0-9]+
 	;
 
-Subtotal
-	:	SubtotalMark SubtotalFields
-	;
-
-fragment SubtotalMark
-	:	'`' | '``'
-	|	'!'
-	;
-
-fragment SubtotalFields
-	:	[tscrdwmyC]*
-	|	'v'
-	;
-
 Guid
 	:	H H H H H H H H '-' H H H H '-' H H H H '-' H H H H '-' H H H H H H H H H H H H
 	;
@@ -287,13 +256,6 @@ MatchAllMark
 	:	'A'
 	;
 
-AggrMark
-	:	'D'
-	;
-EquiMark
-	:	'X'
-	;
-
 EmitMark
 	:	':'
 	;
@@ -304,4 +266,8 @@ WS
 
 Token
 	:	~[ \n\r\t'"`!~@$%^*=:.,<>()[\]{}+-]+
+	;
+
+Evil
+	:	'`' | '!'
 	;

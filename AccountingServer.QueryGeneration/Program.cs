@@ -11,16 +11,18 @@ namespace AccountingServer.QueryGeneration
     {
         private static void Main(string[] args)
         {
+            var kind = "Query";
             var method = "lexer";
-            var vocabulary = QueryLexer.DefaultVocabulary;
             var inputStream = new StreamReader(Console.OpenStandardInput());
             while (true)
             {
-                Console.Write($"({method})> ");
+                Console.Write($"({kind}.{method})> ");
                 var line = inputStream.ReadLine();
                 if (line.StartsWith("use "))
                 {
-                    method = line.Substring(4).Trim();
+                    var desc = line.Substring(4).Trim().Split('.');
+                    kind = desc[0];
+                    method = desc[1];
                     continue;
                 }
 
@@ -29,7 +31,7 @@ namespace AccountingServer.QueryGeneration
                     return;
 
                 var input = new AntlrInputStream(line);
-                var lexer = new QueryLexer(input);
+                var lexer = (Lexer)Activator.CreateInstance(GetLexer(kind), input);
                 var tokens = new CommonTokenStream(lexer);
                 if (method == "lexer")
                 {
@@ -39,6 +41,7 @@ namespace AccountingServer.QueryGeneration
                         var t = tokens.Lt(++i);
                         if (t.Type == -1)
                             break;
+                        var vocabulary = lexer.Vocabulary;
                         Console.WriteLine(
                             $"#{t.Type}({vocabulary.GetDisplayName(t.Type)})({vocabulary.GetLiteralName(t.Type)})({vocabulary.GetSymbolicName(t.Type)}) {t.Text}");
                     }
@@ -46,14 +49,41 @@ namespace AccountingServer.QueryGeneration
                     continue;
                 }
 
-                var parser = new QueryParser(tokens);
+                var parser = (Parser)Activator.CreateInstance(GetParser(kind), tokens);
                 var tree = CallParser(parser, method);
                 Console.WriteLine(tree.ToStringTree(parser));
             }
         }
 
-        private static IParseTree CallParser(QueryParser parser, string name)
-            => (IParseTree)typeof(QueryParser)
+        private static Type GetLexer(string kind)
+        {
+            switch (kind)
+            {
+                case "Query":
+                    return typeof(QueryLexer);
+                case "Subtotal":
+                    return typeof(SubtotalLexer);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(kind));
+            }
+        }
+
+        private static Type GetParser(string kind)
+        {
+            switch (kind)
+            {
+                case "Query":
+                    return typeof(QueryParser);
+                case "Subtotal":
+                    return typeof(SubtotalParser);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(kind));
+            }
+        }
+
+        private static IParseTree CallParser(Parser parser, string name)
+            => (IParseTree)parser
+                .GetType()
                 .GetMethod(name, BindingFlags.Public | BindingFlags.Instance)
                 .Invoke(parser, new object[0]);
     }
