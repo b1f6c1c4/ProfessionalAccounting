@@ -55,6 +55,9 @@
     <Compile Include="Http\StreamHelper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".dockerignore">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
