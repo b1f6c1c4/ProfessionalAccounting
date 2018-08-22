@@ -8,6 +8,7 @@ namespace AccountingServer.BLL.Parsing
 {
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
     [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
+    [SuppressMessage("ReSharper", "MemberCanBeProtected.Global")]
     public abstract class FacadeBase
     {
         private static T Check<T>(ref string s, T res)
@@ -92,13 +93,41 @@ namespace AccountingServer.BLL.Parsing
         public ISubtotal Subtotal(ref string s)
             => SubtotalParse(ref s, p => p.subtotal());
 
+        public IVoucherGroupedQuery VoucherGroupedQuery(string s)
+            => VoucherGroupedQuery(ref s);
+
+        public virtual IVoucherGroupedQuery VoucherGroupedQuery(ref string s)
+        {
+            var raw = s;
+            var query = VoucherQuery(ref s);
+            var subtotal = Subtotal(ref s);
+            if (subtotal.GatherType != GatheringType.VoucherCount)
+            {
+                s = raw;
+                throw new FormatException();
+            }
+
+            return new VoucherGroupedQueryStub
+                {
+                    VoucherQuery = query,
+                    Subtotal = subtotal
+                };
+        }
+
         public IGroupedQuery GroupedQuery(string s)
             => GroupedQuery(ref s);
 
-        public IGroupedQuery GroupedQuery(ref string s)
+        public virtual IGroupedQuery GroupedQuery(ref string s)
         {
+            var raw = s;
             var query = DetailQuery(ref s);
             var subtotal = Subtotal(ref s);
+            if (subtotal.GatherType == GatheringType.VoucherCount)
+            {
+                s = raw;
+                throw new FormatException();
+            }
+
             return new GroupedQueryStub
                 {
                     VoucherEmitQuery = query,
@@ -112,6 +141,13 @@ namespace AccountingServer.BLL.Parsing
         public IQueryCompunded<IDistributedQueryAtom> DistributedQuery(ref string s)
             => (IQueryCompunded<IDistributedQueryAtom>)Parse(ref s, p => p.distributedQ()) ??
                 DistributedQueryUnconstrained.Instance;
+
+        private sealed class VoucherGroupedQueryStub : IVoucherGroupedQuery
+        {
+            public IQueryCompunded<IVoucherQueryAtom> VoucherQuery { get; set; }
+
+            public ISubtotal Subtotal { get; set; }
+        }
 
         private sealed class GroupedQueryStub : IGroupedQuery
         {
@@ -161,6 +197,30 @@ namespace AccountingServer.BLL.Parsing
             try
             {
                 return base.SubtotalParse(ref s, func);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public override IVoucherGroupedQuery VoucherGroupedQuery(ref string s)
+        {
+            try
+            {
+                return base.VoucherGroupedQuery(ref s);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public override IGroupedQuery GroupedQuery(ref string s)
+        {
+            try
+            {
+                return base.GroupedQuery(ref s);
             }
             catch (Exception)
             {
