@@ -120,7 +120,7 @@ namespace AccountingServer.Shell.Carry
             {
                 var oldb = grpS.Fund;
                 var newb = ExchangeFactory.Instance.From(dt, grpC.Currency)
-                    / ExchangeFactory.Instance.To(dt, to) * oldb;
+                    * ExchangeFactory.Instance.To(dt, to) * oldb;
                 m_Accountant.Upsert(
                     new Voucher
                         {
