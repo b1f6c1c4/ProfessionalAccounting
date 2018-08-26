@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Resources;
 using System.Runtime.Remoting;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
@@ -103,6 +105,19 @@ namespace AccountingClient.Shell
             if (expr == "exit")
                 Environment.Exit(0);
 
+            if (expr == "??")
+            {
+                const string resName = "AccountingClient.Resources.Document.txt";
+                using (var stream = typeof(Facade).Assembly.GetManifestResourceStream(resName))
+                {
+                    if (stream == null)
+                        throw new MissingManifestResourceException();
+
+                    using (var reader = new StreamReader(stream))
+                        return new QueryResult { Result = reader.ReadToEnd(), AutoReturn = true };
+                }
+            }
+
             if (expr == "use local")
             {
                 if (!TryConnect("http://localhost:30000/"))
@@ -114,6 +129,7 @@ namespace AccountingClient.Shell
             if (expr.StartsWith("spec ", StringComparison.OrdinalIgnoreCase))
             {
                 m_SerializerSpec = expr.Substring(5);
+                EmptyVoucher = Run("GET", "/emptyVoucher");
 
                 return new QueryResult { Result = "OK", AutoReturn = true };
             }
