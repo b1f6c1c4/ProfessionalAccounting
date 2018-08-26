@@ -44,6 +44,7 @@ namespace AccountingServer.BLL.Parsing
             lexer.RemoveErrorListeners();
             var tokens = new CommonTokenStream(lexer);
             var parser = new QueryParser(tokens) { ErrorHandler = new BailErrorStrategy() };
+            parser.RemoveErrorListeners();
             return Check(ref s, func(parser));
         }
 
@@ -55,6 +56,7 @@ namespace AccountingServer.BLL.Parsing
             lexer.RemoveErrorListeners();
             var tokens = new CommonTokenStream(lexer);
             var parser = new SubtotalParser(tokens) { ErrorHandler = new BailErrorStrategy() };
+            parser.RemoveErrorListeners();
             return Check(ref s, func(parser));
         }
 

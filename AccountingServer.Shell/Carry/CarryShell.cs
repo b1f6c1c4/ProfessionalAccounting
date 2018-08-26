@@ -55,10 +55,12 @@ namespace AccountingServer.Shell.Carry
             var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
             Parsing.Eof(expr);
 
+            var cnt = 0L;
+
             if (rng.NullOnly)
             {
-                Carry(null);
-                return new DirtySucceed();
+                cnt += Carry(null);
+                return new NumberAffected(cnt);
             }
 
             if (!rng.StartDate.HasValue ||
@@ -69,14 +71,14 @@ namespace AccountingServer.Shell.Carry
 
             while (dt <= rng.EndDate.Value)
             {
-                Carry(dt);
+                cnt += Carry(dt);
                 dt = dt.AddMonths(1);
             }
 
             if (rng.Nullable)
-                Carry(null);
+                cnt += Carry(null);
 
-            return new DirtySucceed();
+            return new NumberAffected(cnt);
         }
 
         /// <summary>
@@ -98,7 +100,8 @@ namespace AccountingServer.Shell.Carry
         ///     月末结转
         /// </summary>
         /// <param name="dt">月，若为<c>null</c>则表示对无日期进行结转</param>
-        private void Carry(DateTime? dt)
+        /// <returns>记账凭证数</returns>
+        private long Carry(DateTime? dt)
         {
             DateTime? ed;
             DateFilter rng;
@@ -118,8 +121,10 @@ namespace AccountingServer.Shell.Carry
             foreach (var target in targets)
                 PartialCarry(target, rng, false);
 
+            var cnt = 0L;
             if (ed.HasValue)
             {
+                var baseCur = BaseCurrency.At(ed);
                 var total =
                     m_Accountant.RunGroupedQuery($"T3999 [~{ed.AsDate()}]`C")
                         .Items.Cast<ISubtotalCurrency>().Select(
@@ -132,8 +137,12 @@ namespace AccountingServer.Shell.Carry
                                             .Where(d => d.Currency == bal.Currency && d.Title == 3999)
                                             .Sum(d => d.Fund.Value)
                                 })
-                        .Sum(bal => ExchangeFactory.Instance.From(ed.Value, bal.Currency) * bal.Fund);
+                        .Sum(
+                            bal => ExchangeFactory.Instance.From(ed.Value, bal.Currency)
+                                / ExchangeFactory.Instance.To(ed.Value, baseCur)
+                                * bal.Fund);
                 if (!total.IsZero())
+                {
                     m_Accountant.Upsert(
                         new Voucher
                             {
@@ -144,19 +153,21 @@ namespace AccountingServer.Shell.Carry
                                     {
                                         new VoucherDetail
                                             {
-                                                Currency = BaseCurrency.At(ed),
+                                                Currency = baseCur,
                                                 Title = 3999,
                                                 Fund = -total
                                             },
                                         new VoucherDetail
                                             {
-                                                Currency = BaseCurrency.At(ed),
+                                                Currency = baseCur,
                                                 Title = 6603,
                                                 SubTitle = 03,
                                                 Fund = total
                                             }
                                     }
                             });
+                    cnt++;
+                }
             }
 
             foreach (var target in targets)
@@ -175,8 +186,13 @@ namespace AccountingServer.Shell.Carry
                             });
 
                 if (target.Voucher.Details.Any())
+                {
                     m_Accountant.Upsert(target.Voucher);
+                    cnt++;
+                }
             }
+
+            return cnt;
         }
 
         /// <summary>

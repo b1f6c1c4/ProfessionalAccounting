@@ -50,10 +50,12 @@ namespace AccountingServer.Shell.Carry
             var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
             Parsing.Eof(expr);
 
+            var cnt = 0L;
+
             if (rng.NullOnly)
             {
-                CarryYear(null);
-                return new DirtySucceed();
+                cnt += CarryYear(null);
+                return new NumberAffected(cnt);
             }
 
             var ed = rng.EndDate ?? throw new ArgumentException("时间范围无后界", nameof(expr));
@@ -62,11 +64,11 @@ namespace AccountingServer.Shell.Carry
 
             while (dt <= ed)
             {
-                CarryYear(dt, !rng.StartDate.HasValue);
+                cnt += CarryYear(dt, !rng.StartDate.HasValue);
                 dt = dt.AddYears(1);
             }
 
-            return new DirtySucceed();
+            return new NumberAffected(cnt);
         }
 
         /// <summary>
@@ -89,7 +91,8 @@ namespace AccountingServer.Shell.Carry
         /// </summary>
         /// <param name="dt">年，若为<c>null</c>则表示对无日期进行结转</param>
         /// <param name="includeNull">是否计入无日期</param>
-        private void CarryYear(DateTime? dt, bool includeNull = false)
+        /// <returns>记账凭证数</returns>
+        private long CarryYear(DateTime? dt, bool includeNull = false)
         {
             DateTime? ed;
             DateFilter rng;
@@ -108,6 +111,7 @@ namespace AccountingServer.Shell.Carry
             var b00s = m_Accountant.RunGroupedQuery($"T410300 {rng.AsDateRange()}`C");
             var b01s = m_Accountant.RunGroupedQuery($"T410301 {rng.AsDateRange()}`C");
 
+            var cnt = 0L;
             foreach (var grpC in b00s.Items.Cast<ISubtotalCurrency>())
             {
                 var b00 = grpC.Fund;
@@ -123,6 +127,7 @@ namespace AccountingServer.Shell.Carry
                                         new VoucherDetail { Title = 4103, Currency = grpC.Currency, Fund = -b00 }
                                     }
                         });
+                cnt++;
             }
 
             foreach (var grpC in b01s.Items.Cast<ISubtotalCurrency>())
@@ -152,7 +157,10 @@ namespace AccountingServer.Shell.Carry
                                             }
                                     }
                         });
+                cnt++;
             }
+
+            return cnt;
         }
     }
 }
