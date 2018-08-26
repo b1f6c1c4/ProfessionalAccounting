@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Carry\BaseCurrencyShell.cs" />
     <Compile Include="Plugins\AssetHelper\AssetDisposition.cs" />
     <Compile Include="Plugins\AssetHelper\AssetFactory.cs" />
     <Compile Include="Plugins\CreditCardConvert\CreditCardConvert.cs" />

@@ -35,6 +35,8 @@ namespace AccountingServer.BLL.Util
         public static IConfigManager<BaseCurrencyInfos> BaseCurrencyInfos { private get; set; } =
             new ConfigManager<BaseCurrencyInfos>("BaseCurrency.xml");
 
+        public static IReadOnlyList<BaseCurrencyInfo> History => BaseCurrencyInfos.Config.Infos.AsReadOnly();
+
         public static string Now
             => BaseCurrencyInfos.Config.Infos.Last().Currency;
 
