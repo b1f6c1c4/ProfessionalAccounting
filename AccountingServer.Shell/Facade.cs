@@ -103,6 +103,9 @@ namespace AccountingServer.Shell
                     return ListTitles();
                 case "?":
                     return ListHelp();
+                case "reload":
+                    Environment.Exit(0);
+                    break;
             }
 
             return m_Composer.Execute(expr, GetSerializer(spec));
@@ -117,7 +120,7 @@ namespace AccountingServer.Shell
         private static IQueryResult ListHelp()
         {
             const string resName = "AccountingServer.Shell.Resources.Document.txt";
-            using (var stream = typeof(AccountingShell).Assembly.GetManifestResourceStream(resName))
+            using (var stream = typeof(Facade).Assembly.GetManifestResourceStream(resName))
             {
                 if (stream == null)
                     throw new MissingManifestResourceException();
