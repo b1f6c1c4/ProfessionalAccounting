@@ -164,15 +164,18 @@ namespace AccountingServer.Shell.Carry
 
             foreach (var target in targets)
             {
-                target.Voucher.Details.Add(
-                    new VoucherDetail
-                        {
-                            Currency = BaseCurrency.At(target.Voucher.Date),
-                            Title = 4103,
-                            SubTitle = target.IsSpecial ? 01 : (int?)null,
-                            Fund = target.Value
-                        });
-                m_Accountant.Upsert(target.Voucher);
+                if (!target.Value.IsZero())
+                    target.Voucher.Details.Add(
+                        new VoucherDetail
+                            {
+                                Currency = BaseCurrency.At(target.Voucher.Date),
+                                Title = 4103,
+                                SubTitle = target.IsSpecial ? 01 : (int?)null,
+                                Fund = target.Value
+                            });
+
+                if (target.Voucher.Details.Any())
+                    m_Accountant.Upsert(target.Voucher);
             }
         }
 
@@ -217,9 +220,11 @@ namespace AccountingServer.Shell.Carry
                     continue;
                 }
 
-                var cob = ExchangeFactory.Instance.From(
-                    ed ?? throw new InvalidOperationException("无穷长时间以前不存在汇率"),
-                    grpC.Currency) * b;
+                if (!ed.HasValue)
+                    throw new InvalidOperationException("无穷长时间以前不存在汇率");
+
+                var cob = ExchangeFactory.Instance.From(ed.Value, grpC.Currency) *
+                    ExchangeFactory.Instance.To(ed.Value, baseCur) * b;
 
                 voucher.Details.Add(
                     new VoucherDetail
@@ -254,7 +259,7 @@ namespace AccountingServer.Shell.Carry
                             Type = VoucherType.Carry,
                             Details = new List<VoucherDetail>()
                         },
-                    IsSpecial = true
+                    IsSpecial = false
                 };
             yield return new CarryTarget
                 {
