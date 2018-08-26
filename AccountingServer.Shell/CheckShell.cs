@@ -37,7 +37,7 @@ namespace AccountingServer.Shell
                     if (m_Accountant.RunVoucherQuery("A").Any(voucher => !m_Accountant.Upsert(voucher)))
                         throw new ApplicationException("未知错误");
 
-                    return new PlainSucceed();
+                    return new DirtySucceed();
                 default:
                     throw new InvalidOperationException("表达式无效");
             }
@@ -157,6 +157,9 @@ namespace AccountingServer.Shell
         {
             foreach (var d in res)
             {
+                if (d.Detail.Remark == "reconciliation")
+                    continue;
+
                 // ReSharper disable PossibleInvalidOperationException
                 sb.AppendLine(
                     $"{d.Voucher.ID} {d.Voucher.Date:yyyyMMdd} {info} {d.Detail.Content}:{d.Detail.Fund.Value:R}");
