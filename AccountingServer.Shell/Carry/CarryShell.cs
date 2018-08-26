@@ -139,7 +139,7 @@ namespace AccountingServer.Shell.Carry
                                 })
                         .Sum(
                             bal => ExchangeFactory.Instance.From(ed.Value, bal.Currency)
-                                / ExchangeFactory.Instance.To(ed.Value, baseCur)
+                                * ExchangeFactory.Instance.To(ed.Value, baseCur)
                                 * bal.Fund);
                 if (!total.IsZero())
                 {
@@ -239,8 +239,9 @@ namespace AccountingServer.Shell.Carry
                 if (!ed.HasValue)
                     throw new InvalidOperationException("无穷长时间以前不存在汇率");
 
-                var cob = ExchangeFactory.Instance.From(ed.Value, grpC.Currency) *
-                    ExchangeFactory.Instance.To(ed.Value, baseCur) * b;
+                var cob = ExchangeFactory.Instance.From(ed.Value, grpC.Currency)
+                    * ExchangeFactory.Instance.To(ed.Value, baseCur)
+                    * b;
 
                 voucher.Details.Add(
                     new VoucherDetail

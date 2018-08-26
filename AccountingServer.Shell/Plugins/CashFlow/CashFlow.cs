@@ -28,22 +28,22 @@ namespace AccountingServer.Shell.Plugins.CashFlow
 
             var n = Templates.Config.Accounts.Count;
             for (var i = 0; i < n; i++)
-                foreach (var item in GetItems(Templates.Config.Accounts[i]))
+                foreach (var (date, value) in GetItems(Templates.Config.Accounts[i]))
                 {
-                    if (!rst.ContainsKey(item.Date))
-                        rst.Add(item.Date, new double[n]);
+                    if (!rst.ContainsKey(date))
+                        rst.Add(date, new double[n]);
 
-                    rst[item.Date][i] += item.Value;
+                    rst[date][i] += value;
                 }
 
             var aggs = new double[n];
 
             var sb = new StringBuilder();
-            sb.Append("Date");
+            sb.Append("Date    ");
             for (var i = 0; i < n; i++)
-                sb.Append($"\t{Templates.Config.Accounts[i].Currency}\tSum");
+                sb.Append($" {Templates.Config.Accounts[i].Currency.PadRight(15)} Sum            ");
 
-            sb.AppendLine("\tAll");
+            sb.AppendLine(" All");
 
             foreach (var kvp in rst.OrderBy(kvp => kvp.Key))
             {
@@ -56,10 +56,11 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                     sum += aggs[i] * ExchangeFactory.Instance.From(
                         kvp.Key,
                         Templates.Config.Accounts[i].Currency);
-                    sb.Append($"\t{kvp.Value[i]:R}\t{aggs[i]:R}");
+                    sb.Append(kvp.Value[i].AsCurrency(Templates.Config.Accounts[i].Currency).PadLeft(15));
+                    sb.Append(aggs[i].AsCurrency(Templates.Config.Accounts[i].Currency).PadLeft(15));
                 }
 
-                sb.AppendLine($"\t{sum:R}");
+                sb.AppendLine(sum.AsCurrency(BaseCurrency.Now).PadLeft(15));
             }
 
             return new PlainText(sb.ToString());
@@ -67,7 +68,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
 
         private IEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account)
         {
-            var curr = string.IsNullOrEmpty(account.Currency) ? "@@" : $"@{account.Currency}";
+            var curr = $"@{account.Currency}";
             var init = Accountant.RunGroupedQuery($"{curr}*({account.QuickAsset}) [~.]``v").Fund;
             yield return (ClientDateTime.Today, init);
 
@@ -97,7 +98,8 @@ namespace AccountingServer.Shell.Plugins.CashFlow
 
                     case CreditCard cd:
                         foreach (var grpC in Accountant.RunGroupedQuery(
-                                $"({cd.Query})*(<+(-@@)) [{ClientDateTime.Today.AddMonths(-3).AsDate()}~]`Cd").Items
+                                $"{{{{({cd.Query})*(<+(-{curr}))}}+{{({cd.Query})+T3999+T6603 A}}}}*{{[{ClientDateTime.Today.AddMonths(-3).AsDate()}~]}}:{cd.Query}`Cd")
+                            .Items
                             .Cast<ISubtotalCurrency>())
                         foreach (var b in grpC.Items.Cast<ISubtotalDate>())
                         {
@@ -112,12 +114,15 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                             if (mo <= ClientDateTime.Today)
                                 continue;
 
-                            var ratio = ExchangeFactory.Instance.From(mo, grpC.Currency);
-                            yield return (mo, b.Fund * ratio);
+                            var cob = ExchangeFactory.Instance.From(mo, grpC.Currency)
+                                * ExchangeFactory.Instance.To(mo, account.Currency)
+                                * b.Fund;
+                            yield return (mo, cob);
                         }
 
                         foreach (var b in Accountant.RunGroupedQuery(
-                                $"({cd.Query})*(@@>) [{ClientDateTime.Today.AddMonths(-3).AsDate()}~]`d").Items
+                                $"{{({cd.Query})*({curr}>) [{ClientDateTime.Today.AddMonths(-3).AsDate()}~]}}-{{({cd.Query})+T3999+T6603 A}}:{cd.Query}`d")
+                            .Items
                             .Cast<ISubtotalDate>())
                         {
                             // ReSharper disable once PossibleInvalidOperationException

@@ -22,16 +22,22 @@ namespace AccountingServer.BLL.Util
         /// <summary>
         ///     买入汇率
         /// </summary>
+        /// <example>
+        ///     若<c>BaseCurrency.Now == "CNY"</c>，则<c>IExchange.From(dt, "USD") == 6.8</c>
+        /// </example>
         /// <param name="date">日期</param>
-        /// <param name="target">目标</param>
+        /// <param name="target">购汇币种</param>
         /// <returns>汇率</returns>
         double From(DateTime date, string target);
 
         /// <summary>
         ///     卖出汇率
         /// </summary>
+        /// <example>
+        ///     若<c>BaseCurrency.Now == "CNY"</c>，则<c>IExchange.From(dt, "USD") == 0.147</c>
+        /// </example>
         /// <param name="date">日期</param>
-        /// <param name="target">目标</param>
+        /// <param name="target">结汇币种</param>
         /// <returns>汇率</returns>
         double To(DateTime date, string target);
     }
