@@ -80,6 +80,10 @@ namespace AccountingServer.Shell.Subtotal
                     case SubtotalLevel.Year:
                         field = "date";
                         break;
+                    case SubtotalLevel.WeakWeek:
+                    case SubtotalLevel.WeakMonth:
+                    case SubtotalLevel.WeakYear:
+                        throw new NotImplementedException();
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

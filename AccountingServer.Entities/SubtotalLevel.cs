@@ -57,7 +57,22 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     按年分类
         /// </summary>
-        Year = 0b0010_0110_0000
+        Year = 0b0010_0110_0000,
+
+        /// <summary>
+        ///     按周分类但不汇总
+        /// </summary>
+        WeakWeek = 0b0100_0110_0000,
+
+        /// <summary>
+        ///     按月分类但不汇总
+        /// </summary>
+        WeakMonth = 0b0100_1110_0000,
+
+        /// <summary>
+        ///     按年分类但不汇总
+        /// </summary>
+        WeakYear = 0b0110_0110_0000
     }
 
     /// <summary>

@@ -61,7 +61,7 @@ CountMark
 	;
 
 SubtotalFields
-	:	[tscrdwmyC]+
+	:	[tscrdwWmMyYC]+
 	|	'v'
 	;
 

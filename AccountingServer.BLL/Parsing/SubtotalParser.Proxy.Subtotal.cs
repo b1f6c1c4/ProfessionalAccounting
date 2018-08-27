@@ -78,6 +78,12 @@ namespace AccountingServer.BLL.Parsing
                                         return SubtotalLevel.Month;
                                     case 'y':
                                         return SubtotalLevel.Year;
+                                    case 'W':
+                                        return SubtotalLevel.WeakWeek;
+                                    case 'M':
+                                        return SubtotalLevel.WeakMonth;
+                                    case 'Y':
+                                        return SubtotalLevel.WeakYear;
                                 }
 
                                 throw new MemberAccessException("表达式错误");
