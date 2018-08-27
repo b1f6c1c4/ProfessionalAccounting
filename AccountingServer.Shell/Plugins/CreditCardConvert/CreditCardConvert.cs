@@ -33,10 +33,13 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
             var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
 
             var trans = new List<Trans>();
+            var rebates = new List<Rebate>();
             var convs = new List<Conversion>();
-            foreach (var voucher in Accountant.RunVoucherQuery($"T2241 {content.Quotation('\'')} {rng.AsDateRange()}"))
+            foreach (var voucher in Accountant.RunVoucherQuery($"T224101 {content.Quotation('\'')} {rng.AsDateRange()}")
+            )
             {
-                var ds = voucher.Details.Where(d => d.Title == 2241 && d.Content == content).ToList();
+                var ds = voucher.Details.Where(d => d.Title == 2241 && d.SubTitle == 01 && d.Content == content)
+                    .ToList();
                 if (ds.Count > 2)
                     throw new ApplicationException("过多相关细目");
 
@@ -90,6 +93,43 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                                 }));
             }
 
+
+            foreach (var voucher in Accountant.RunVoucherQuery(
+                $"{{T224101 {content.Quotation('\'')}}}*{{T660300}}*{{T224101 {content.Quotation('\'')} +T3999+T660300 A {rng.AsDateRange()}}}")
+            )
+            {
+                // Assume proper ordering here
+                var d0 = voucher.Details.Single(d => d.Title == 2241);
+                var d1 = voucher.Details.Single(d => d.Title == 6603);
+                if (d0.Title != 2241 ||
+                    d0.SubTitle != 01 ||
+                    d0.Content != content)
+                    continue;
+                if (d1.Title != 6603 ||
+                    d1.SubTitle != null ||
+                    d1.Content != null)
+                    continue;
+                if (!d0.Fund.HasValue ||
+                    !d1.Fund.HasValue)
+                    continue;
+
+                rebates.Add(
+                    new Rebate
+                        {
+                            Date = voucher.Date,
+                            RawCurrency = d1.Currency,
+                            RawFund = d1.Fund.Value,
+                            TheConversion = new Conversion
+                                {
+                                    Date = voucher.Date,
+                                    OriginCurrency = d1.Currency,
+                                    OriginFund = d1.Fund.Value,
+                                    TargetCurrency = d0.Currency,
+                                    TargetFund = d0.Fund.Value
+                                }
+                        });
+            }
+
             foreach (var tran in trans)
             {
                 var conv = convs.FirstOrDefault(
@@ -103,7 +143,7 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
             }
 
             var sb = new StringBuilder();
-            foreach (var tran in trans.OrderByDescending(t => t.Date))
+            foreach (var tran in trans.Concat(rebates).OrderByDescending(t => t.Date))
             {
                 sb.Append(tran.Date.AsDate());
                 sb.Append($" @{tran.RawCurrency} {tran.RawFund.AsCurrency().CPadLeft(15)}");
@@ -166,14 +206,21 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                                         Title = 3999,
                                         Fund = -from
                                     },
-                                new VoucherDetail
-                                    {
-                                        Currency = currency,
-                                        Title = 2241,
-                                        SubTitle = 01,
-                                        Content = content,
-                                        Fund = from
-                                    }
+                                from >= 0
+                                    ? new VoucherDetail
+                                        {
+                                            Currency = currency,
+                                            Title = 2241,
+                                            SubTitle = 01,
+                                            Content = content,
+                                            Fund = from
+                                        }
+                                    : new VoucherDetail
+                                        {
+                                            Currency = currency,
+                                            Title = 6603,
+                                            Fund = from
+                                        }
                             }
                     };
                 Accountant.Upsert(voucher);
@@ -186,13 +233,15 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
             return new PlainSucceed();
         }
 
-        private sealed class Trans
+        private class Trans
         {
             public DateTime? Date;
             public string RawCurrency;
             public double RawFund;
             public Conversion TheConversion;
         }
+
+        private sealed class Rebate : Trans { }
 
         private sealed class Conversion
         {
