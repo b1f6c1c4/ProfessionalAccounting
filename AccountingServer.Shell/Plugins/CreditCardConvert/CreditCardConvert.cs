@@ -143,6 +143,17 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
             }
 
             var sb = new StringBuilder();
+            foreach (var conv in convs)
+            {
+                sb.Append(conv.Date.AsDate());
+                sb.Append($" @{conv.OriginCurrency} {conv.OriginFund.AsCurrency().CPadLeft(15)}");
+                sb.AppendLine(
+                    $" {conv.Date.AsDate()} @{conv.TargetCurrency} {conv.TargetFund.AsCurrency().CPadLeft(15)} !!!");
+            }
+
+            if (sb.Length != 0)
+                sb.AppendLine("===========================================================");
+
             foreach (var tran in trans.Concat(rebates).OrderByDescending(t => t.Date))
             {
                 sb.Append(tran.Date.AsDate());
