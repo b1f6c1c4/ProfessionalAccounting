@@ -61,7 +61,7 @@ CountMark
 	;
 
 SubtotalFields
-	:	[tscrdwWmMyYC]+
+	:	[tscrdwmyC]+
 	|	'v'
 	;
 
@@ -113,7 +113,7 @@ Tilde
 	;
 
 AggrMark
-	:	'D'
+	:	[DWMY]
 	;
 EquiMark
 	:	'X'

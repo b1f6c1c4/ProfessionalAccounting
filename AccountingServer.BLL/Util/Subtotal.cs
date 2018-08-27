@@ -126,15 +126,10 @@ namespace AccountingServer.BLL.Util
     /// </summary>
     public class SubtotalBuilder
     {
-        private readonly IReadOnlyList<SubtotalLevel> m_Levels;
         private readonly ISubtotal m_Par;
         private int m_Depth;
 
-        public SubtotalBuilder(ISubtotal par)
-        {
-            m_Par = par;
-            m_Levels = par.ActualLevels();
-        }
+        public SubtotalBuilder(ISubtotal par) => m_Par = par;
 
         /// <summary>
         ///     建造分类汇总结果
@@ -149,10 +144,10 @@ namespace AccountingServer.BLL.Util
 
         private ISubtotalResult Build(SubtotalResult sub, IEnumerable<Balance> raw)
         {
-            if (m_Levels.Count == m_Depth)
+            if (m_Par.Levels.Count == m_Depth)
                 return BuildAggrPhase(sub, raw);
 
-            var level = m_Levels[m_Depth];
+            var level = m_Par.Levels[m_Depth];
             m_Depth++;
             BuildChildren(sub, raw, level);
             m_Depth--;
@@ -212,12 +207,13 @@ namespace AccountingServer.BLL.Util
                 case AggregationType.ChangedDay:
                     sub.TheItems = raw.GroupBy(b => b.Date).OrderBy(grp => grp.Key)
                         .Select(
-                            grp => new SubtotalDate(grp.Key, SubtotalLevel.None)
+                            grp => new SubtotalDate(grp.Key, m_Par.AggrInterval)
                                 {
                                     Fund = sub.Fund += BuildEquiPhase(grp)
                                 }).Cast<ISubtotalResult>().ToList();
                     return sub;
                 case AggregationType.EveryDay:
+                    // TODO: should be every week / month / year
                     sub.TheItems = new List<ISubtotalResult>();
                     var last = m_Par.EveryDayRange.Range.StartDate?.AddDays(-1);
 
@@ -229,14 +225,14 @@ namespace AccountingServer.BLL.Util
                             {
                                 last = last.Value.AddDays(1);
                                 sub.TheItems.Add(
-                                    new SubtotalDate(last, SubtotalLevel.None)
+                                    new SubtotalDate(last, m_Par.AggrInterval)
                                         {
                                             Fund = last == curr ? fund : oldFund
                                         });
                             }
                         else
                             sub.TheItems.Add(
-                                new SubtotalDate(curr, SubtotalLevel.None)
+                                new SubtotalDate(curr, m_Par.AggrInterval)
                                     {
                                         Fund = fund
                                     });
@@ -256,7 +252,7 @@ namespace AccountingServer.BLL.Util
                             grp.Key != null &&
                             forcedNull)
                             sub.TheItems.Add(
-                                new SubtotalDate(null, SubtotalLevel.None)
+                                new SubtotalDate(null, m_Par.AggrInterval)
                                     {
                                         Fund = 0
                                     });
