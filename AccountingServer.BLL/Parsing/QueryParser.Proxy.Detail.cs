@@ -49,6 +49,21 @@ namespace AccountingServer.BLL.Parsing
         public partial class DetailQueryContext : IDetailQueryAtom
         {
             /// <inheritdoc />
+            public TitleKind? Kind
+            {
+                get
+                {
+                    if (TitleKind() != null)
+                    {
+                        var s = TitleKind().GetText();
+                        return (TitleKind?)Enum.Parse(typeof(TitleKind), s);
+                    }
+
+                    return null;
+                }
+            }
+
+            /// <inheritdoc />
             public VoucherDetail Filter
             {
                 get

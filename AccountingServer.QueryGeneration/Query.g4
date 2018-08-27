@@ -51,7 +51,7 @@ details0
 	;
 
 detailQuery
-	:	VoucherCurrency? title? token? DoubleQuotedString? Floating? Direction?
+	:	VoucherCurrency? TitleKind? title? token? DoubleQuotedString? Floating? Direction?
 	;
 
 title
@@ -178,6 +178,10 @@ RangeDeltaWeek
 
 VoucherType
 	:	'Ordinary' | 'G' | 'General' | 'Carry' | 'Amortization' | 'Depreciation' | 'Devalue' | 'AnnualCarry' | 'Uncertain'
+	;
+
+TitleKind
+	:	'Asset' | 'Liability' | 'Equity' | 'Income' | 'Expense'
 	;
 
 VoucherCurrency

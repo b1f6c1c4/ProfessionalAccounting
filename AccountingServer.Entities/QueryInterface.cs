@@ -46,6 +46,37 @@ namespace AccountingServer.Entities
     }
 
     /// <summary>
+    ///     科目类型
+    /// </summary>
+    public enum TitleKind
+    {
+        /// <summary>
+        ///     资产
+        /// </summary>
+        Asset,
+
+        /// <summary>
+        ///     负债
+        /// </summary>
+        Liability,
+
+        /// <summary>
+        ///     所有者权益
+        /// </summary>
+        Equity,
+
+        /// <summary>
+        ///     收入
+        /// </summary>
+        Income,
+
+        /// <summary>
+        ///     费用
+        /// </summary>
+        Expense,
+    }
+
+    /// <summary>
     ///     一般检索式
     /// </summary>
     /// <typeparam name="TAtom">原子检索式的类型</typeparam>
@@ -99,6 +130,11 @@ namespace AccountingServer.Entities
     /// </summary>
     public interface IDetailQueryAtom : IQueryCompunded<IDetailQueryAtom>
     {
+        /// <summary>
+        ///     科目类型
+        /// </summary>
+        TitleKind? Kind { get; }
+
         /// <summary>
         ///     细目过滤器
         /// </summary>
