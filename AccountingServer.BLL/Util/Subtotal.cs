@@ -126,10 +126,15 @@ namespace AccountingServer.BLL.Util
     /// </summary>
     public class SubtotalBuilder
     {
+        private readonly IReadOnlyList<SubtotalLevel> m_Levels;
         private readonly ISubtotal m_Par;
         private int m_Depth;
 
-        public SubtotalBuilder(ISubtotal par) => m_Par = par;
+        public SubtotalBuilder(ISubtotal par)
+        {
+            m_Par = par;
+            m_Levels = par.ActualLevels();
+        }
 
         /// <summary>
         ///     建造分类汇总结果
@@ -144,10 +149,13 @@ namespace AccountingServer.BLL.Util
 
         private ISubtotalResult Build(SubtotalResult sub, IEnumerable<Balance> raw)
         {
-            if (m_Par.Levels.Count == m_Depth)
+            if (m_Levels.Count == m_Depth)
                 return BuildAggrPhase(sub, raw);
 
-            BuildChildren(sub, raw);
+            var level = m_Levels[m_Depth];
+            m_Depth++;
+            BuildChildren(sub, raw, level);
+            m_Depth--;
             if (!sub.TheItems.Any() &&
                 !(sub is ISubtotalRoot))
                 return null;
@@ -156,13 +164,11 @@ namespace AccountingServer.BLL.Util
             return sub;
         }
 
-        private void BuildChildren(SubtotalResult sub, IEnumerable<Balance> raw)
+        private void BuildChildren(SubtotalResult sub, IEnumerable<Balance> raw, SubtotalLevel level)
         {
             List<ISubtotalResult> Invoke<T>(SubtotalResultFactory<T> f) =>
                 raw.GroupBy(f.Selector).Select(g => Build(f.Create(g), g)).Where(g => g != null).ToList();
 
-            var level = m_Par.Levels[m_Depth];
-            m_Depth++;
             switch (level)
             {
                 case SubtotalLevel.Title:
@@ -186,18 +192,9 @@ namespace AccountingServer.BLL.Util
                 case SubtotalLevel.Year:
                     sub.TheItems = Invoke(new SubtotalDateFactory(level));
                     break;
-                case SubtotalLevel.WeakWeek:
-                case SubtotalLevel.WeakMonth:
-                case SubtotalLevel.WeakYear:
-                    if (m_Par.Levels.Count == m_Depth)
-                        BuildAggrPhase(sub, raw);
-                    else
-                        BuildChildren(sub, raw);
-                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            m_Depth--;
         }
 
         private ISubtotalResult BuildAggrPhase(SubtotalResult sub, IEnumerable<Balance> raw)
