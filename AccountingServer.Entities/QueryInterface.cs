@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AccountingServer.Entities
 {
@@ -279,6 +278,11 @@ namespace AccountingServer.Entities
         AggregationType AggrType { get; }
 
         /// <summary>
+        ///     日期累加的间隔
+        /// </summary>
+        SubtotalLevel AggrInterval { get; }
+
+        /// <summary>
         ///     日期累加的范围
         /// </summary>
         IDateRange EveryDayRange { get; }
@@ -292,20 +296,6 @@ namespace AccountingServer.Entities
         ///     币种等值日期
         /// </summary>
         DateTime? EquivalentDate { get; }
-    }
-
-    /// <summary>
-    ///     分类汇总参数辅助处理
-    /// </summary>
-    public static class SubtotalHelper
-    {
-        /// <summary>
-        ///     实际汇总层次
-        /// </summary>
-        /// <param name="pars"></param>
-        /// <returns></returns>
-        public static IReadOnlyList<SubtotalLevel> ActualLevels(this ISubtotal pars)
-            => pars.Levels.Where(l => !l.HasFlag(SubtotalLevel.Weak)).ToList();
     }
 
     /// <summary>

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
@@ -14,7 +13,7 @@ namespace AccountingServer.Shell.Subtotal
     {
         private int m_Depth;
 
-        private IReadOnlyList<SubtotalLevel> m_Levels;
+        private ISubtotal m_Par;
 
         /// <summary>
         ///     执行分类汇总
@@ -24,7 +23,7 @@ namespace AccountingServer.Shell.Subtotal
         /// <returns>分类汇总结果</returns>
         public string PresentSubtotal(ISubtotalResult raw, ISubtotal par)
         {
-            m_Levels = par.ActualLevels();
+            m_Par = par;
             m_Depth = 0;
             return (raw?.Accept(this)?.Value as JObject)?.ToString();
         }
@@ -57,8 +56,8 @@ namespace AccountingServer.Shell.Subtotal
                 return obj;
 
             string field;
-            if (m_Depth < m_Levels.Count)
-                switch (m_Levels[m_Depth])
+            if (m_Depth < m_Par.Levels.Count)
+                switch (m_Par.Levels[m_Depth])
                 {
                     case SubtotalLevel.Title:
                         field = "title";

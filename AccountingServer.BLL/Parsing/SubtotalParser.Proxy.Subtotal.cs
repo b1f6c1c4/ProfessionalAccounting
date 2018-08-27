@@ -78,12 +78,6 @@ namespace AccountingServer.BLL.Parsing
                                         return SubtotalLevel.Month;
                                     case 'y':
                                         return SubtotalLevel.Year;
-                                    case 'W':
-                                        return SubtotalLevel.Weak | SubtotalLevel.Week;
-                                    case 'M':
-                                        return SubtotalLevel.Weak | SubtotalLevel.Month;
-                                    case 'Y':
-                                        return SubtotalLevel.Weak | SubtotalLevel.Year;
                                 }
 
                                 throw new MemberAccessException("表达式错误");
@@ -104,6 +98,30 @@ namespace AccountingServer.BLL.Parsing
                         return AggregationType.ChangedDay;
 
                     return AggregationType.EveryDay;
+                }
+            }
+
+            /// <inheritdoc />
+            public SubtotalLevel AggrInterval
+            {
+                get
+                {
+                    if (subtotalAggr() == null)
+                        return SubtotalLevel.None;
+
+                    switch (subtotalAggr().AggrMark().GetText())
+                    {
+                        case "D":
+                            return SubtotalLevel.Day;
+                        case "W":
+                            return SubtotalLevel.Week;
+                        case "M":
+                            return SubtotalLevel.Month;
+                        case "Y":
+                            return SubtotalLevel.Year;
+                        default:
+                            throw new MemberAccessException("表达式错误");
+                    }
                 }
             }
 

@@ -57,12 +57,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     按年分类
         /// </summary>
-        Year = 0b0010_0110_0000,
-
-        /// <summary>
-        ///     不汇总标记
-        /// </summary>
-        Weak = 0b0100_0000_0000
+        Year = 0b0010_0110_0000
     }
 
     /// <summary>

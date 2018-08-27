@@ -17,13 +17,13 @@ namespace AccountingServer.Shell.Subtotal
         protected GatheringType Ga;
         protected string Cu;
 
-        private IReadOnlyList<SubtotalLevel> m_Levels;
+        private ISubtotal m_Par;
         protected StringBuilder Sb;
 
         /// <inheritdoc />
         public string PresentSubtotal(ISubtotalResult raw, ISubtotal par)
         {
-            m_Levels = par.ActualLevels();
+            m_Par = par;
             Ga = par.GatherType;
             Cu = par.EquivalentCurrency;
             Sb = new StringBuilder();
@@ -46,8 +46,8 @@ namespace AccountingServer.Shell.Subtotal
                 return;
 
             IEnumerable<ISubtotalResult> items;
-            if (Depth < m_Levels.Count)
-                switch (m_Levels[Depth])
+            if (Depth < m_Par.Levels.Count)
+                switch (m_Par.Levels[Depth])
                 {
                     case SubtotalLevel.Title:
                         items = sub.Items.Cast<ISubtotalTitle>().OrderBy(s => s.Title);

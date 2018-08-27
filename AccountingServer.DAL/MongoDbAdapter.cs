@@ -326,7 +326,7 @@ namespace AccountingServer.DAL
         {
             var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
             if (query.Subtotal.AggrType != AggregationType.None)
-                level |= SubtotalLevel.Day;
+                level |= query.Subtotal.AggrInterval;
             if (query.Subtotal.EquivalentDate.HasValue)
                 level |= SubtotalLevel.Currency;
 
