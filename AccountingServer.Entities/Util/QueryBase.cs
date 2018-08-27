@@ -8,6 +8,8 @@ namespace AccountingServer.Entities.Util
         private DetailQueryUnconstrained() { }
         public static IDetailQueryAtom Instance { get; } = new DetailQueryUnconstrained();
 
+        public TitleKind? Kind => null;
+
         public VoucherDetail Filter { get; } = new VoucherDetail();
 
         public int Dir => 0;

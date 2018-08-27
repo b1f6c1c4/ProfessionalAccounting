@@ -103,6 +103,33 @@ namespace AccountingServer.DAL
                 p = "detail.";
 
             var lst = new List<FilterDefinition<T>>();
+            switch (query.Kind)
+            {
+                case TitleKind.Asset:
+                    lst.Add(Builders<T>.Filter.Gte(p + "title", 1000));
+                    lst.Add(Builders<T>.Filter.Lt(p + "title", 2000));
+                    break;
+                case TitleKind.Liability:
+                    lst.Add(Builders<T>.Filter.Gte(p + "title", 2000));
+                    lst.Add(Builders<T>.Filter.Lt(p + "title", 3000));
+                    break;
+                case TitleKind.Equity:
+                    lst.Add(Builders<T>.Filter.Gte(p + "title", 4000));
+                    lst.Add(Builders<T>.Filter.Lt(p + "title", 5000));
+                    break;
+                case TitleKind.Income:
+                    lst.Add(Builders<T>.Filter.Gte(p + "title", 6000));
+                    lst.Add(Builders<T>.Filter.Lt(p + "title", 6400));
+                    break;
+                case TitleKind.Expense:
+                    lst.Add(Builders<T>.Filter.Gte(p + "title", 6400));
+                    lst.Add(Builders<T>.Filter.Lt(p + "title", 7000));
+                    break;
+                case null:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
             if (query.Dir != 0)
                 lst.Add(
                     query.Dir > 0

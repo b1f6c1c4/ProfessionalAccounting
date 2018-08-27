@@ -294,6 +294,8 @@ namespace AccountingServer.BLL
         {
             public RegisteringDetailQuery(VoucherDetail filter) => Filter = filter;
 
+            public TitleKind? Kind => null;
+
             public VoucherDetail Filter { get; }
 
             public int Dir => 0;
