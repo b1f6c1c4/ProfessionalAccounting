@@ -118,10 +118,13 @@ namespace AccountingServer.BLL.Util
                 case SubtotalLevel.None:
                 case SubtotalLevel.Day:
                 case SubtotalLevel.Week:
+                case SubtotalLevel.WeakWeek:
                     return value.AsDate();
                 case SubtotalLevel.Month:
+                case SubtotalLevel.WeakMonth:
                     return $"{value.Value.Year:D4}{value.Value.Month:D2}";
                 case SubtotalLevel.Year:
+                case SubtotalLevel.WeakYear:
                     return $"{value.Value.Year:D4}";
                 default:
                     throw new ArgumentException("分类层次并非基于日期", nameof(level));

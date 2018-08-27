@@ -147,10 +147,7 @@ namespace AccountingServer.BLL.Util
             if (m_Par.Levels.Count == m_Depth)
                 return BuildAggrPhase(sub, raw);
 
-            var level = m_Par.Levels[m_Depth];
-            m_Depth++;
-            BuildChildren(sub, raw, level);
-            m_Depth--;
+            BuildChildren(sub, raw);
             if (!sub.TheItems.Any() &&
                 !(sub is ISubtotalRoot))
                 return null;
@@ -159,11 +156,13 @@ namespace AccountingServer.BLL.Util
             return sub;
         }
 
-        private void BuildChildren(SubtotalResult sub, IEnumerable<Balance> raw, SubtotalLevel level)
+        private void BuildChildren(SubtotalResult sub, IEnumerable<Balance> raw)
         {
             List<ISubtotalResult> Invoke<T>(SubtotalResultFactory<T> f) =>
                 raw.GroupBy(f.Selector).Select(g => Build(f.Create(g), g)).Where(g => g != null).ToList();
 
+            var level = m_Par.Levels[m_Depth];
+            m_Depth++;
             switch (level)
             {
                 case SubtotalLevel.Title:
@@ -187,9 +186,18 @@ namespace AccountingServer.BLL.Util
                 case SubtotalLevel.Year:
                     sub.TheItems = Invoke(new SubtotalDateFactory(level));
                     break;
+                case SubtotalLevel.WeakWeek:
+                case SubtotalLevel.WeakMonth:
+                case SubtotalLevel.WeakYear:
+                    if (m_Par.Levels.Count == m_Depth)
+                        BuildAggrPhase(sub, raw);
+                    else
+                        BuildChildren(sub, raw);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+            m_Depth--;
         }
 
         private ISubtotalResult BuildAggrPhase(SubtotalResult sub, IEnumerable<Balance> raw)
