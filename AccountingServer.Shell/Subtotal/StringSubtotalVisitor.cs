@@ -17,13 +17,13 @@ namespace AccountingServer.Shell.Subtotal
         protected GatheringType Ga;
         protected string Cu;
 
-        private ISubtotal m_Par;
+        private IReadOnlyList<SubtotalLevel> m_Levels;
         protected StringBuilder Sb;
 
         /// <inheritdoc />
         public string PresentSubtotal(ISubtotalResult raw, ISubtotal par)
         {
-            m_Par = par;
+            m_Levels = par.ActualLevels();
             Ga = par.GatherType;
             Cu = par.EquivalentCurrency;
             Sb = new StringBuilder();
@@ -45,45 +45,43 @@ namespace AccountingServer.Shell.Subtotal
             if (sub.Items == null)
                 return;
 
-            var items = Depth < m_Par.Levels.Count ? ResolveItems(sub) : sub.Items;
+            IEnumerable<ISubtotalResult> items;
+            if (Depth < m_Levels.Count)
+                switch (m_Levels[Depth])
+                {
+                    case SubtotalLevel.Title:
+                        items = sub.Items.Cast<ISubtotalTitle>().OrderBy(s => s.Title);
+                        break;
+                    case SubtotalLevel.SubTitle:
+                        items = sub.Items.Cast<ISubtotalSubTitle>().OrderBy(s => s.SubTitle);
+                        break;
+                    case SubtotalLevel.Content:
+                        items = sub.Items.Cast<ISubtotalContent>().OrderBy(s => s.Content);
+                        break;
+                    case SubtotalLevel.Remark:
+                        items = sub.Items.Cast<ISubtotalRemark>().OrderBy(s => s.Remark);
+                        break;
+                    case SubtotalLevel.Currency:
+                        items = sub.Items.Cast<ISubtotalCurrency>()
+                            .OrderBy(s => s.Currency == BaseCurrency.Now ? null : s.Currency);
+                        break;
+                    case SubtotalLevel.Day:
+                    case SubtotalLevel.Week:
+                    case SubtotalLevel.Month:
+                    case SubtotalLevel.Year:
+                        items = sub.Items.Cast<ISubtotalDate>().OrderBy(s => s.Date);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            else
+                items = sub.Items;
 
             Depth++;
             foreach (var item in items)
                 item.Accept(this);
 
             Depth--;
-        }
-
-        private IEnumerable<ISubtotalResult> ResolveItems(ISubtotalResult sub)
-        {
-            switch (m_Par.Levels[Depth])
-            {
-                case SubtotalLevel.Title:
-                    return sub.Items.Cast<ISubtotalTitle>().OrderBy(s => s.Title);
-                case SubtotalLevel.SubTitle:
-                    return sub.Items.Cast<ISubtotalSubTitle>().OrderBy(s => s.SubTitle);
-                case SubtotalLevel.Content:
-                    return sub.Items.Cast<ISubtotalContent>().OrderBy(s => s.Content);
-                case SubtotalLevel.Remark:
-                    return sub.Items.Cast<ISubtotalRemark>().OrderBy(s => s.Remark);
-                case SubtotalLevel.Currency:
-                    return sub.Items.Cast<ISubtotalCurrency>()
-                        .OrderBy(s => s.Currency == BaseCurrency.Now ? null : s.Currency);
-                case SubtotalLevel.Day:
-                case SubtotalLevel.Week:
-                case SubtotalLevel.Month:
-                case SubtotalLevel.Year:
-                    return sub.Items.Cast<ISubtotalDate>().OrderBy(s => s.Date);
-                case SubtotalLevel.WeakWeek:
-                case SubtotalLevel.WeakMonth:
-                case SubtotalLevel.WeakYear:
-                    Depth++;
-                    var items = Depth < m_Par.Levels.Count ? ResolveItems(sub) : sub.Items;
-                    Depth--;
-                    return items;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
         }
     }
 }
