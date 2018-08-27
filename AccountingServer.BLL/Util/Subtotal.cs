@@ -213,9 +213,10 @@ namespace AccountingServer.BLL.Util
                                 }).Cast<ISubtotalResult>().ToList();
                     return sub;
                 case AggregationType.EveryDay:
-                    // TODO: should be every week / month / year
                     sub.TheItems = new List<ISubtotalResult>();
-                    var last = m_Par.EveryDayRange.Range.StartDate?.AddDays(-1);
+                    var initial = Prev(m_Par.EveryDayRange.Range.StartDate);
+                    var ed = Next(Prev(m_Par.EveryDayRange.Range.EndDate));
+                    var last = initial;
 
                     void Append(DateTime? curr, double oldFund, double fund)
                     {
@@ -223,7 +224,7 @@ namespace AccountingServer.BLL.Util
                             curr.HasValue)
                             while (last < curr)
                             {
-                                last = last.Value.AddDays(1);
+                                last = Next(last.Value);
                                 sub.TheItems.Add(
                                     new SubtotalDate(last, m_Par.AggrInterval)
                                         {
@@ -261,7 +262,7 @@ namespace AccountingServer.BLL.Util
                         var tmp = sub.Fund;
                         sub.Fund += BuildEquiPhase(grp);
 
-                        if (DateHelper.CompareDate(grp.Key, m_Par.EveryDayRange.Range.EndDate) <= 0)
+                        if (DateHelper.CompareDate(grp.Key, ed) <= 0)
                             tmp0 = sub.Fund;
                         if (grp.Key.Within(m_Par.EveryDayRange.Range))
                             Append(grp.Key, tmp, sub.Fund);
@@ -269,19 +270,59 @@ namespace AccountingServer.BLL.Util
 
                     if (flag && forcedNull)
                         sub.TheItems.Add(
-                            new SubtotalDate(null, SubtotalLevel.None)
-                                {
-                                    Fund = 0
-                                });
-
-                    if (m_Par.EveryDayRange.Range.EndDate.HasValue &&
-                        DateHelper.CompareDate(last, m_Par.EveryDayRange.Range.EndDate) < 0)
-                        Append(m_Par.EveryDayRange.Range.EndDate, tmp0, tmp0);
-                    else if (m_Par.EveryDayRange.Range.StartDate.HasValue &&
-                        last == m_Par.EveryDayRange.Range.StartDate.Value.AddDays(-1))
-                        Append(m_Par.EveryDayRange.Range.StartDate, sub.Fund, sub.Fund);
+                            new SubtotalDate(null, SubtotalLevel.None) { Fund = 0 });
+                    if (ed.HasValue &&
+                        DateHelper.CompareDate(last, ed) < 0)
+                        Append(ed, tmp0, tmp0);
+                    else if (initial.HasValue &&
+                        last == initial)
+                        Append(Next(initial.Value), sub.Fund, sub.Fund);
 
                     return sub;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private DateTime? Prev(DateTime? date)
+        {
+            if (!date.HasValue)
+                return null;
+
+            var dt = date.Value;
+            switch (m_Par.AggrInterval)
+            {
+                case SubtotalLevel.Day:
+                    return dt.AddDays(-1);
+                case SubtotalLevel.Week:
+                    return dt.DayOfWeek == DayOfWeek.Sunday
+                        ? dt.AddDays(-13)
+                        : dt.AddDays(-6 - (int)dt.DayOfWeek);
+                case SubtotalLevel.Month:
+                    return new DateTime(dt.Year, dt.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-1);
+                case SubtotalLevel.Year:
+                    return new DateTime(dt.Year - 1, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private DateTime? Next(DateTime? date)
+        {
+            if (!date.HasValue)
+                return null;
+
+            var dt = date.Value;
+            switch (m_Par.AggrInterval)
+            {
+                case SubtotalLevel.Day:
+                    return dt.AddDays(1);
+                case SubtotalLevel.Week:
+                    return dt.AddDays(7);
+                case SubtotalLevel.Month:
+                    return dt.AddMonths(1);
+                case SubtotalLevel.Year:
+                    return dt.AddYears(1);
                 default:
                     throw new ArgumentOutOfRangeException();
             }
