@@ -68,7 +68,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     收入
         /// </summary>
-        Income,
+        Revenue,
 
         /// <summary>
         ///     费用

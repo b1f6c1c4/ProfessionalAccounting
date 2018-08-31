@@ -108,7 +108,7 @@ Uncertain					不准确记账凭证
 Asset						资产
 Liability					负债
 Equity						所有者权益
-Income						收入
+Revenue						收入
 Expense						费用
 
 会计科目过滤器：
