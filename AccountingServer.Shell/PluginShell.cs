@@ -31,6 +31,7 @@ namespace AccountingServer.Shell
                     ["af"] = new AssetFactory(helper),
                     ["ad"] = new AssetDisposition(helper),
                     ["ir"] = new InterestRevenue(helper),
+                    ["ie"] = new InterestExpense(helper),
                     ["cf"] = new CashFlow(helper),
                     ["c"] = new Composite(helper),
                     ["ccc"] = new CreditCardConvert(helper),
