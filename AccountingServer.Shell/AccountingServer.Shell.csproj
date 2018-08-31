@@ -50,6 +50,8 @@
     <Compile Include="Plugins\AssetHelper\AssetDisposition.cs" />
     <Compile Include="Plugins\AssetHelper\AssetFactory.cs" />
     <Compile Include="Plugins\CreditCardConvert\CreditCardConvert.cs" />
+    <Compile Include="Plugins\Interest\InterestBase.cs" />
+    <Compile Include="Plugins\Interest\InterestExpense.cs" />
     <Compile Include="Serializer\AlternativeSerializer.cs" />
     <Compile Include="Carry\ExchangeShell.cs" />
     <Compile Include="Plugins\BankBalance\AverageDailyBalance.cs" />
