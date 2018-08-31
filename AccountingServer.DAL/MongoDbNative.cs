@@ -117,7 +117,7 @@ namespace AccountingServer.DAL
                     lst.Add(Builders<T>.Filter.Gte(p + "title", 4000));
                     lst.Add(Builders<T>.Filter.Lt(p + "title", 5000));
                     break;
-                case TitleKind.Income:
+                case TitleKind.Revenue:
                     lst.Add(Builders<T>.Filter.Gte(p + "title", 6000));
                     lst.Add(Builders<T>.Filter.Lt(p + "title", 6400));
                     break;

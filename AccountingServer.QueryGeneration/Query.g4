@@ -181,7 +181,7 @@ VoucherType
 	;
 
 TitleKind
-	:	'Asset' | 'Liability' | 'Equity' | 'Income' | 'Expense'
+	:	'Asset' | 'Liability' | 'Equity' | 'Revenue' | 'Expense'
 	;
 
 VoucherCurrency
