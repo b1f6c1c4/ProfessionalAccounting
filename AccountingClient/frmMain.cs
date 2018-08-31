@@ -46,18 +46,11 @@ namespace AccountingClient
             scintilla.Styles[Style.Cpp.Operator].ForeColor = Color.Black;
             scintilla.Styles[Style.Cpp.Preprocessor].ForeColor = Color.Silver;
 
-            scintilla.SetKeywords(0, "@ @new new null");
+            scintilla.SetKeywords(0, "@ @new new null $ ¥");
             scintilla.SetKeywords(1, "D G");
             scintilla.SetKeywords(
                 3,
                 "List Voucher VoucherDetail Asset AssetItem AcquisationItem DepreciationMethod DepreciateItem DevalueItem DispositionItem AmortizeInterval AmortItem Amortization");
-
-            acMenu.TargetControlWrapper = new ScintillaWrapper(scintilla);
-            //var listView = ((AutocompleteListView)acMenu.ListView);
-            //listView.ItemHeight = (int)(listView.ItemHeight);
-            acMenu.SetAutocompleteItems(
-                "List Voucher VoucherDetail Asset AssetItem AcquisationItem DepreciationMethod DepreciateItem DevalueItem DispositionItem AmortizeInterval AmortItem Amortization"
-                    .Split(' '));
         }
 
         /// <summary>

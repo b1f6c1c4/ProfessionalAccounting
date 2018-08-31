@@ -31,12 +31,10 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.textBoxCommand = new System.Windows.Forms.TextBox();
             this.scintilla = new ScintillaNET.Scintilla();
-            this.acMenu = new AutocompleteMenuNS.AutocompleteMenu();
             this.SuspendLayout();
             // 
             // textBoxCommand
             // 
-            this.acMenu.SetAutocompleteMenu(this.textBoxCommand, null);
             this.textBoxCommand.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxCommand.Font = new System.Drawing.Font("Microsoft YaHei Mono", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBoxCommand.ImeMode = System.Windows.Forms.ImeMode.Off;
@@ -60,17 +58,6 @@
             this.scintilla.TabStop = false;
             this.scintilla.WrapMode = ScintillaNET.WrapMode.Char;
             // 
-            // acMenu
-            // 
-            this.acMenu.AllowsTabKey = true;
-            this.acMenu.AppearInterval = 50;
-            this.acMenu.Colors = ((AutocompleteMenuNS.Colors)(resources.GetObject("acMenu.Colors")));
-            this.acMenu.Font = new System.Drawing.Font("Microsoft YaHei Mono", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.acMenu.ImageList = null;
-            this.acMenu.Items = new string[0];
-            this.acMenu.LeftPadding = 36;
-            this.acMenu.TargetControlWrapper = null;
-            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -91,7 +78,6 @@
 
         private System.Windows.Forms.TextBox textBoxCommand;
         private ScintillaNET.Scintilla scintilla;
-        private AutocompleteMenuNS.AutocompleteMenu acMenu;
     }
 }
 
