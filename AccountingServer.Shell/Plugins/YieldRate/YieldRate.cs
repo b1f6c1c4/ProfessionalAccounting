@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
+using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
@@ -22,19 +23,22 @@ namespace AccountingServer.Shell.Plugins.YieldRate
         {
             FacadeF.ParsingF.Eof(expr);
 
-            var result = Accountant.RunGroupedQuery("{T1101}-{T110102+T610101+T611102 A}:T1101``cd");
-            var resx = Accountant.RunGroupedQuery("T1101``c");
+            var result = Accountant.RunGroupedQuery("T1101+T611102+T1501+T611106 G``cd");
+            var resx = Accountant.RunGroupedQuery("T1101+T1501``c");
             var sb = new StringBuilder();
             foreach (
-                var tpl in
+                var (grp, rte) in
                 result.Items.Cast<ISubtotalContent>()
                     .Join(
                         resx.Items.Cast<ISubtotalContent>(),
                         grp => grp.Content,
                         rsx => rsx.Content,
-                        (grp, bal) => (Group: grp, Value: bal.Fund)))
-                sb.AppendLine(
-                    $"{tpl.Group.Content}\t{GetRate(tpl.Group.Items.Cast<ISubtotalDate>().OrderBy(b => b.Date, new DateComparer()).ToList(), tpl.Value) * 360:P2}");
+                        (grp, bal) => (Group: grp,
+                            Rate: GetRate(
+                                grp.Items.Cast<ISubtotalDate>().OrderBy(b => b.Date, new DateComparer()).ToList(),
+                                bal.Fund)))
+                    .OrderByDescending(kvp => kvp.Rate))
+                sb.AppendLine($"{grp.Content.CPadRight(30)} {$"{rte * 360:P2}".PadLeft(7)}");
 
             return new PlainText(sb.ToString());
         }
