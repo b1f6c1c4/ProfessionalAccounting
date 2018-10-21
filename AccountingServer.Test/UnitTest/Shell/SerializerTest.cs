@@ -280,6 +280,12 @@ t2
                             {
                                 new VoucherDetail
                                     {
+                                        Currency = "CNY",
+                                        Title = 1001,
+                                        Fund = -2912
+                                    },
+                                new VoucherDetail
+                                    {
                                         Currency = "USD",
                                         Title = 1001,
                                         Fund = 1000 + 500 + 6
@@ -302,12 +308,6 @@ t2
                                         Currency = "USD",
                                         Title = 6603,
                                         Fund = -50
-                                    },
-                                new VoucherDetail
-                                    {
-                                        Currency = "CNY",
-                                        Title = 1001,
-                                        Fund = -2912
                                     }
                             }
                     },
@@ -343,6 +343,12 @@ d8
                                     {
                                         Currency = "USD",
                                         Title = 1001,
+                                        Fund = -29120
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 1001,
                                         Fund = 1000 + 500 + 6 - 8
                                     },
                                 new VoucherDetail
@@ -365,17 +371,179 @@ d8
                                         Currency = "USD",
                                         Title = 6603,
                                         Fund = -50 - 16 - 8
-                                    },
-                                new VoucherDetail
-                                    {
-                                        Currency = "USD",
-                                        Title = 1001,
-                                        Fund = -29120
                                     }
                             }
                 },
                 voucher,
                 new VoucherEqualityComparer());
+        }
+
+        [Fact]
+        public void TaxDiscountNullTest()
+        {
+            var serializer = GetSerializer();
+
+            var voucher = serializer.ParseVoucher(
+                @"new Voucher {
+! @usd
+T1001 + ! T1002 : 1000-50 950+50 ;
+! aaa + T100366 hei ha : 1000 ;
+t2
+t10
+dnull
+
+@usd T1001 -2864
+}");
+            Assert.Equal(
+                new Voucher
+                {
+                    Date = ClientDateTime.Today,
+                    Type = VoucherType.Ordinary,
+                    Details = new List<VoucherDetail>
+                            {
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 1001,
+                                        Fund = -2864
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 1001,
+                                        Fund = 1000 + 500 + 6 - 8
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 1002,
+                                        Fund = 950 + 4 - 16
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 1003,
+                                        SubTitle = 66,
+                                        Content = "hei",
+                                        Remark = "ha",
+                                        Fund = 500 + 2
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 6603,
+                                        Fund = -50 - 16 - 8
+                                    }
+                            }
+                },
+                voucher,
+                new VoucherEqualityComparer());
+        }
+
+        [Fact]
+        public void TaxNullDiscountTest()
+        {
+            var serializer = GetSerializer();
+
+            var voucher = serializer.ParseVoucher(
+                @"new Voucher {
+! @usd
+T1001 + ! T1002 : 1000-50 950+50 ;
+! aaa + T100366 hei ha : 1000 ;
+d48
+tnull
+
+@usd T1001 -2864
+}");
+            Assert.Equal(
+                new Voucher
+                {
+                    Date = ClientDateTime.Today,
+                    Type = VoucherType.Ordinary,
+                    Details = new List<VoucherDetail>
+                            {
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 1001,
+                                        Fund = -2864
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 1001,
+                                        Fund = 1000 + 500 + 6 - 8
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 1002,
+                                        Fund = 950 + 4 - 16
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 1003,
+                                        SubTitle = 66,
+                                        Content = "hei",
+                                        Remark = "ha",
+                                        Fund = 500 + 2
+                                    },
+                                new VoucherDetail
+                                    {
+                                        Currency = "USD",
+                                        Title = 6603,
+                                        Fund = -50 - 16 - 8
+                                    }
+                            }
+                },
+                voucher,
+                new VoucherEqualityComparer());
+        }
+
+        [Fact]
+        public void ManyNullTest()
+        {
+            var serializer = GetSerializer();
+
+            Assert.Throws<ApplicationException>(
+                () => serializer.ParseVoucher(
+                    @"new Voucher {
+! @usd
+aaa : 1 ;
+tnull
+dnull
+
+@usd T1001 null
+}"));
+            Assert.Throws<ApplicationException>(
+                () => serializer.ParseVoucher(
+                    @"new Voucher {
+! @usd
+aaa : 1 ;
+tnull
+dnull
+
+@usd T1001 -1
+}"));
+            Assert.Throws<ApplicationException>(
+                () => serializer.ParseVoucher(
+                    @"new Voucher {
+! @usd
+aaa : 1 ;
+dnull
+
+@usd T1001 null
+}"));
+            Assert.Throws<ApplicationException>(
+                () => serializer.ParseVoucher(
+                    @"new Voucher {
+! @usd
+aaa : 1 ;
+tnull
+
+@usd T1001 null
+}"));
         }
     }
 }

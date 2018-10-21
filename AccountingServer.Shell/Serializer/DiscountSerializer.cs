@@ -77,9 +77,9 @@ namespace AccountingServer.Shell.Serializer
             while ((ds = ParseItem(currency, ref expr))?.Any() == true)
                 lst.AddRange(ds);
 
-            var d = 0D;
-            var t = 0D;
-            var reg = new Regex(@"(?<dt>[dt])(?<num>[0-9]+(?:\.[0-9]{1,2})?)");
+            var d = (double?)0D;
+            var t = (double?)0D;
+            var reg = new Regex(@"(?<dt>[dt])(?<num>[0-9]+(?:\.[0-9]{1,2})?|null)");
             while (true)
             {
                 var res = Parsing.Token(ref expr, false, reg.IsMatch);
@@ -87,21 +87,46 @@ namespace AccountingServer.Shell.Serializer
                     break;
 
                 var m = reg.Match(res);
-                var num = Convert.ToDouble(m.Groups["num"].Value);
+                var num = m.Groups["num"].Value == "null" ? (double?)null : Convert.ToDouble(m.Groups["num"].Value);
                 if (m.Groups["dt"].Value == "d")
                     d += num;
                 else // if (m.Groups["dt"].Value == "t")
                     t += num;
             }
 
-            // ReSharper disable once PossibleInvalidOperationException
+            if (!d.HasValue && !t.HasValue)
+                throw new ApplicationException("不定项过多");
+
+            var resLst = new List<VoucherDetail>();
+            VoucherDetail vd;
+            var exprS = new AbbrSerializer();
+            while ((vd = exprS.ParseVoucherDetail(ref expr)) != null)
+                resLst.Add(vd);
+
+            // Don't use Enumerable.Sum, it ignores null values
+            var actualVals = resLst.Aggregate((double?)0D, (s, dd) => s + dd.Fund);
+
+            if (!d.HasValue || !t.HasValue)
+            {
+                if (!actualVals.HasValue)
+                    throw new ApplicationException("不定项过多");
+
+                var sum = lst.Sum(item => item.Fund - item.DiscountFund);
+                if (!d.HasValue)
+                    d = sum + t + actualVals;
+                else // if (!t.HasValue)
+                    t = -(sum - d + actualVals);
+            }
+
+
+            // ReSharper disable PossibleInvalidOperationException
             var total = lst.Sum(it => it.Fund.Value);
             foreach (var item in lst)
             {
-                // ReSharper disable once PossibleInvalidOperationException
-                item.DiscountFund += d / total * item.Fund.Value;
-                item.Fund += t / total * item.Fund;
+                item.DiscountFund += d.Value / total * item.Fund.Value;
+                item.Fund += t.Value / total * item.Fund;
             }
+            // ReSharper restore PossibleInvalidOperationException
 
             foreach (var item in lst)
             {
@@ -114,7 +139,6 @@ namespace AccountingServer.Shell.Serializer
 
             var totalD = lst.Sum(it => it.DiscountFund);
 
-            var resLst = new List<VoucherDetail>();
             foreach (var grp in lst.GroupBy(
                 it => new VoucherDetail
                     {
@@ -139,11 +163,6 @@ namespace AccountingServer.Shell.Serializer
                             Title = 6603,
                             Fund = -totalD
                         });
-
-            VoucherDetail vd;
-            var exprS = new AbbrSerializer();
-            while ((vd = exprS.ParseVoucherDetail(ref expr)) != null)
-                resLst.Add(vd);
 
             return new Voucher
                 {
