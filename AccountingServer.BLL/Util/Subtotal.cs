@@ -270,7 +270,7 @@ namespace AccountingServer.BLL.Util
 
                     if (flag && forcedNull)
                         sub.TheItems.Add(
-                            new SubtotalDate(null, SubtotalLevel.None) { Fund = 0 });
+                            new SubtotalDate(null, m_Par.AggrInterval) { Fund = 0 });
                     if (ed.HasValue &&
                         DateHelper.CompareDate(last, ed) < 0)
                         Append(ed, tmp0, tmp0);
