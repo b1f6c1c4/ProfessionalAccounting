@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using AccountingServer.BLL.Util;
@@ -12,10 +13,10 @@ namespace AccountingServer.Shell.Subtotal
     /// </summary>
     internal abstract class StringSubtotalVisitor : ISubtotalVisitor<Nothing>, ISubtotalStringify
     {
+        protected string Cu;
         protected int Depth;
 
         protected GatheringType Ga;
-        protected string Cu;
 
         private ISubtotal m_Par;
         protected StringBuilder Sb;
@@ -47,6 +48,8 @@ namespace AccountingServer.Shell.Subtotal
 
             IEnumerable<ISubtotalResult> items;
             if (Depth < m_Par.Levels.Count)
+            {
+                var comparer = CultureInfo.GetCultureInfo("zh-CN").CompareInfo.GetStringComparer(CompareOptions.StringSort);
                 switch (m_Par.Levels[Depth])
                 {
                     case SubtotalLevel.Title:
@@ -56,10 +59,10 @@ namespace AccountingServer.Shell.Subtotal
                         items = sub.Items.Cast<ISubtotalSubTitle>().OrderBy(s => s.SubTitle);
                         break;
                     case SubtotalLevel.Content:
-                        items = sub.Items.Cast<ISubtotalContent>().OrderBy(s => s.Content);
+                        items = sub.Items.Cast<ISubtotalContent>().OrderBy(s => s.Content, comparer);
                         break;
                     case SubtotalLevel.Remark:
-                        items = sub.Items.Cast<ISubtotalRemark>().OrderBy(s => s.Remark);
+                        items = sub.Items.Cast<ISubtotalRemark>().OrderBy(s => s.Remark, comparer);
                         break;
                     case SubtotalLevel.Currency:
                         items = sub.Items.Cast<ISubtotalCurrency>()
@@ -74,6 +77,7 @@ namespace AccountingServer.Shell.Subtotal
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+            }
             else
                 items = sub.Items;
 
