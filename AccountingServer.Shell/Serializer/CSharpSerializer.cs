@@ -210,10 +210,10 @@ namespace AccountingServer.Shell.Serializer
                             break;
                     }
 
-                sb.AppendLine("} }");
+                sb.Append("} }");
             }
             else
-                sb.AppendLine("}");
+                sb.Append("}");
 
             return sb.ToString();
         }
@@ -287,12 +287,12 @@ namespace AccountingServer.Shell.Serializer
                     sb.AppendLine("},");
                 }
 
-                sb.AppendLine("} }");
+                sb.Append("} }");
             }
             else
             {
                 sb.AppendLine("    Schedule = null");
-                sb.AppendLine("}");
+                sb.Append("}");
             }
 
             return sb.ToString();
