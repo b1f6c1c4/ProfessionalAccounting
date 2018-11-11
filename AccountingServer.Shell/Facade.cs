@@ -104,6 +104,8 @@ namespace AccountingServer.Shell
                 case "?":
                     return ListHelp();
                 case "reload":
+                    return new NumberAffected(MetaConfigManager.ReloadAll());
+                case "die":
                     Environment.Exit(0);
                     break;
             }
