@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
@@ -8,6 +9,7 @@ using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Subtotal;
 using AccountingServer.Shell.Util;
+using static AccountingServer.BLL.Parsing.Facade;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.Shell.Plugins.Composite
@@ -29,6 +31,11 @@ namespace AccountingServer.Shell.Plugins.Composite
             if (ParsingF.Token(ref expr, true, t => (temp = GetTemplate(t)) != null) == null)
                 throw new ArgumentException("找不到模板", nameof(expr));
 
+            var regex = new Regex(@"^[A-Za-z]{3}$");
+            var currency =
+                Parsing.Token(ref expr, false, regex.IsMatch)?.ToUpperInvariant()
+                ?? BaseCurrency.Now;
+
             DateFilter the;
             if (string.IsNullOrWhiteSpace(expr))
                 the = DateRange(temp.Day);
@@ -38,7 +45,7 @@ namespace AccountingServer.Shell.Plugins.Composite
                 ParsingF.Eof(expr);
             }
 
-            return DoInquiry(the, temp, out _);
+            return DoInquiry(the, temp, out _, currency);
         }
 
         public static Template GetTemplate(string name) => Templates.Config.Templates.SingleOrDefault(
@@ -81,10 +88,11 @@ namespace AccountingServer.Shell.Plugins.Composite
         /// <param name="rng">日期过滤器</param>
         /// <param name="inq">查询</param>
         /// <param name="val">金额</param>
+        /// <param name="baseCurrency"></param>
         /// <returns>执行结果</returns>
-        public IQueryResult DoInquiry(DateFilter rng, BaseInquiry inq, out double val)
+        public IQueryResult DoInquiry(DateFilter rng, BaseInquiry inq, out double val, string baseCurrency)
         {
-            var visitor = new InquiriesVisitor(Accountant, rng);
+            var visitor = new InquiriesVisitor(Accountant, rng, baseCurrency);
             val = inq.Accept(visitor);
             return new PlainText(visitor.Result);
         }
@@ -108,14 +116,16 @@ namespace AccountingServer.Shell.Plugins.Composite
     internal class InquiriesVisitor : IInquiryVisitor<double>
     {
         private readonly Accountant m_Accountant;
+        private readonly string m_BaseCurrency;
         private readonly DateFilter m_Rng;
         private readonly StringBuilder m_Sb = new StringBuilder();
 
         private string m_Path = "";
 
-        public InquiriesVisitor(Accountant accountant, DateFilter rng)
+        public InquiriesVisitor(Accountant accountant, DateFilter rng, string baseCurrency)
         {
             m_Accountant = accountant;
+            m_BaseCurrency = baseCurrency;
             m_Rng = rng;
         }
 
@@ -145,9 +155,8 @@ namespace AccountingServer.Shell.Plugins.Composite
                 {
                     var curr = grp.Currency;
                     // ReSharper disable once PossibleInvalidOperationException
-                    var ratio = curr == BaseCurrency.Now
-                        ? 1
-                        : ExchangeFactory.Instance.From(m_Rng.EndDate.Value, curr);
+                    var ratio = ExchangeFactory.Instance.From(m_Rng.EndDate.Value, curr)
+                        * ExchangeFactory.Instance.To(m_Rng.EndDate.Value, m_BaseCurrency);
 
                     var theFmt = new CurrencyDecorator(fmt, curr, ratio);
 
