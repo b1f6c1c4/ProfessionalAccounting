@@ -77,7 +77,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                 var rb = new Composite.Composite(Accountant);
                 var tmp = Composite.Composite.GetTemplate(account.Reimburse);
                 var rng = Composite.Composite.DateRange(tmp.Day);
-                rb.DoInquiry(rng, tmp, out var rbVal);
+                rb.DoInquiry(rng, tmp, out var rbVal, BaseCurrency.Now);
                 // ReSharper disable once PossibleInvalidOperationException
                 var rbF = rng.EndDate.Value;
                 yield return (rbF, rbVal);
