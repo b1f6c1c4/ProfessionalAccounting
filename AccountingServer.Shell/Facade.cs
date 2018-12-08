@@ -211,7 +211,7 @@ namespace AccountingServer.Shell
             if (!m_Accountant.Upsert(asset))
                 throw new ApplicationException("更新或添加失败");
 
-            return serializer.PresentAsset(asset);
+            return serializer.PresentAsset(asset).Wrap();
         }
 
         /// <summary>
@@ -228,7 +228,7 @@ namespace AccountingServer.Shell
             if (!m_Accountant.Upsert(amort))
                 throw new ApplicationException("更新或添加失败");
 
-            return serializer.PresentAmort(amort);
+            return serializer.PresentAmort(amort).Wrap();
         }
 
         #endregion
