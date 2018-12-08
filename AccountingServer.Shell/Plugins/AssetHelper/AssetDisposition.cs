@@ -62,7 +62,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
                     asset.Schedule.RemoveRange(id, asset.Schedule.Count - id);
 
                 asset.Schedule.Add(new DispositionItem { Date = voucher.Date, VoucherID = voucher.ID });
-                sb.Append(serializer.PresentAsset(asset));
+                sb.Append(serializer.PresentAsset(asset).Wrap());
                 Accountant.Upsert(asset);
             }
 
