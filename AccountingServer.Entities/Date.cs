@@ -55,6 +55,26 @@ namespace AccountingServer.Entities
 
         /// <inheritdoc />
         public DateFilter Range => this;
+
+        /// <summary>
+        ///     是否包含弱检索式
+        /// </summary>
+        /// <returns>若包含则为<c>true</c>，否则为<c>false</c></returns>
+        public bool IsDangerous()
+        {
+            if (NullOnly)
+                return true;
+            if (Nullable)
+                return true;
+            if (!StartDate.HasValue)
+                return true;
+            if (!EndDate.HasValue)
+                return true;
+            if (EndDate.Value - StartDate.Value > new TimeSpan(20, 0, 0, 0))
+                return true;
+
+            return false;
+        }
     }
 
     /// <summary>

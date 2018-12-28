@@ -14,6 +14,8 @@ namespace AccountingServer.Entities.Util
 
         public int Dir => 0;
 
+        public bool IsDangerous() => true;
+
         public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
     }
 
@@ -30,6 +32,8 @@ namespace AccountingServer.Entities.Util
 
         public IQueryCompunded<IDetailQueryAtom> DetailFilter => DetailQueryUnconstrained.Instance;
 
+        public bool IsDangerous() => true;
+
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
     }
 
@@ -39,6 +43,8 @@ namespace AccountingServer.Entities.Util
         public static IDistributedQueryAtom Instance { get; } = new DistributedQueryUnconstrained();
 
         public IDistributed Filter { get; } = new TheFilter();
+
+        public bool IsDangerous() => true;
 
         public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
 

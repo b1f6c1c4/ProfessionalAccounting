@@ -47,6 +47,7 @@
     <Compile Include="SubtotalLevel.cs" />
     <Compile Include="Date.cs" />
     <Compile Include="Util\MatchHelper.cs" />
+    <Compile Include="Util\SecurityHelper.cs" />
     <Compile Include="Voucher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

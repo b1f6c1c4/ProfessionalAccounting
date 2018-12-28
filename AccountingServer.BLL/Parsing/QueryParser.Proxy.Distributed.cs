@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using static AccountingServer.Entities.Util.SecurityHelper;
 
 namespace AccountingServer.BLL.Parsing
 {
@@ -24,6 +25,9 @@ namespace AccountingServer.BLL.Parsing
                     return filter;
                 }
             }
+
+            /// <inheritdoc />
+            public bool IsDangerous() => Filter.IsDangerous();
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
@@ -103,6 +107,9 @@ namespace AccountingServer.BLL.Parsing
             public IQueryCompunded<IDistributedQueryAtom> Filter2 => distributedQ1();
 
             /// <inheritdoc />
+            public bool IsDangerous() => (Filter1?.IsDangerous() ?? false) || (Filter2?.IsDangerous() ?? false);
+
+            /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
@@ -116,6 +123,9 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IDistributedQueryAtom> Filter2 => distributedQ1();
+
+            /// <inheritdoc />
+            public bool IsDangerous() => (Filter1?.IsDangerous() ?? false) || (Filter2?.IsDangerous() ?? false);
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
@@ -132,6 +142,9 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IDistributedQueryAtom> Filter2 => null;
+
+            /// <inheritdoc />
+            public bool IsDangerous() => (Filter1?.IsDangerous() ?? false) || (Filter2?.IsDangerous() ?? false);
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
