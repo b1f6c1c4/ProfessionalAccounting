@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Linq;
+using System.Security;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Subtotal;
 using AccountingServer.Shell.Util;
-using static AccountingServer.Entities.Util.MatchHelper;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.Shell
@@ -35,37 +36,40 @@ namespace AccountingServer.Shell
         /// <returns>解析结果</returns>
         private Func<IEntitiesSerializer, IQueryResult> Parse(string expr)
         {
-            ExprType type;
+            var type = ExprType.None;
             ISubtotalStringify visitor;
+
+            if (ParsingF.Token(ref expr, false, t => t == "unsafe") != null)
+                type |= ExprType.Unsafe;
 
             if (ParsingF.Token(ref expr, false, t => t == "json") != null)
             {
-                type = ExprType.GroupedQueries | ExprType.DetailQuery | ExprType.VoucherQuery;
+                type |= ExprType.GroupedQueries | ExprType.DetailQuery | ExprType.VoucherQuery;
                 visitor = new JsonSubtotal();
             }
             else if (ParsingF.Token(ref expr, false, t => t == "Rps") != null)
             {
-                type = ExprType.GroupedQueries;
+                type |= ExprType.GroupedQueries;
                 visitor = new PreciseSubtotalPre();
             }
             else if (ParsingF.Token(ref expr, false, t => t == "rps") != null)
             {
-                type = ExprType.GroupedQueries;
+                type |= ExprType.GroupedQueries;
                 visitor = new PreciseSubtotalPre(false);
             }
             else if (ParsingF.Token(ref expr, false, t => t == "raw") != null)
             {
-                type = ExprType.GroupedQueries | ExprType.DetailQuery;
+                type |= ExprType.GroupedQueries | ExprType.DetailQuery;
                 visitor = new RawSubtotal();
             }
             else if (ParsingF.Token(ref expr, false, t => t == "sraw") != null)
             {
-                type = ExprType.GroupedQueries | ExprType.DetailRQuery;
+                type |= ExprType.GroupedQueries | ExprType.DetailRQuery;
                 visitor = new RawSubtotal(true);
             }
             else
             {
-                type = ExprType.GroupedQueries | ExprType.VoucherQuery;
+                type |= ExprType.GroupedQueries | ExprType.VoucherQuery;
                 visitor = new RichSubtotalPre();
             }
 
@@ -92,11 +96,11 @@ namespace AccountingServer.Shell
             switch (type & ExprType.NonGroupedQueries)
             {
                 case ExprType.VoucherQuery:
-                    return TryVoucherQuery(expr);
+                    return TryVoucherQuery(expr, !type.HasFlag(ExprType.Unsafe));
                 case ExprType.DetailQuery:
-                    return TryDetailQuery(expr);
+                    return TryDetailQuery(expr, !type.HasFlag(ExprType.Unsafe));
                 case ExprType.DetailRQuery:
-                    return TryDetailRQuery(expr);
+                    return TryDetailRQuery(expr, !type.HasFlag(ExprType.Unsafe));
                 default:
                     throw new InvalidOperationException("表达式无效");
             }
@@ -106,14 +110,15 @@ namespace AccountingServer.Shell
         ///     按记账凭证检索式解析
         /// </summary>
         /// <param name="expr">表达式</param>
+        /// <param name="safe">仅限强检索式</param>
         /// <returns>执行结果</returns>
-        private Func<IEntitiesSerializer, IQueryResult> TryVoucherQuery(string expr)
+        private Func<IEntitiesSerializer, IQueryResult> TryVoucherQuery(string expr, bool safe)
         {
-            if (string.IsNullOrWhiteSpace(expr))
-                throw new ApplicationException("不允许执行空白检索式");
-
             var res = ParsingF.VoucherQuery(ref expr);
             ParsingF.Eof(expr);
+            if (res.IsDangerous() && safe)
+                throw new SecurityException("检测到弱检索式");
+
             return serializer => PresentVoucherQuery(res, serializer);
         }
 
@@ -157,11 +162,15 @@ namespace AccountingServer.Shell
         ///     按细目检索式解析
         /// </summary>
         /// <param name="expr">表达式</param>
+        /// <param name="safe">仅限强检索式</param>
         /// <returns>执行结果</returns>
-        private Func<IEntitiesSerializer, IQueryResult> TryDetailQuery(string expr)
+        private Func<IEntitiesSerializer, IQueryResult> TryDetailQuery(string expr, bool safe)
         {
             var res = ParsingF.DetailQuery(ref expr);
             ParsingF.Eof(expr);
+            if (res.IsDangerous() && safe)
+                throw new SecurityException("检测到弱检索式");
+
             return serializer => PresentDetailQuery(res, serializer);
         }
 
@@ -178,11 +187,15 @@ namespace AccountingServer.Shell
         ///     按带记账凭证的细目检索式解析
         /// </summary>
         /// <param name="expr">表达式</param>
+        /// <param name="safe">仅限强检索式</param>
         /// <returns>执行结果</returns>
-        private Func<IEntitiesSerializer, IQueryResult> TryDetailRQuery(string expr)
+        private Func<IEntitiesSerializer, IQueryResult> TryDetailRQuery(string expr, bool safe)
         {
             var res = ParsingF.DetailQuery(ref expr);
             ParsingF.Eof(expr);
+            if (res.IsDangerous() && safe)
+                throw new SecurityException("检测到弱检索式");
+
             return serializer => PresentDetailRQuery(res, serializer);
         }
 
@@ -243,13 +256,15 @@ namespace AccountingServer.Shell
         [Flags]
         private enum ExprType
         {
+            None = 0x00000000,
             GroupedQueries = 0x00000011,
             GroupedQuery = 0x00000001,
             VoucherGroupedQuery = 0x00000010,
             NonGroupedQueries = 0x00011100,
             DetailQuery = 0x00000100,
             DetailRQuery = 0x00001000,
-            VoucherQuery = 0x00010000
+            VoucherQuery = 0x00010000,
+            Unsafe = 0x10000000
         }
     }
 }

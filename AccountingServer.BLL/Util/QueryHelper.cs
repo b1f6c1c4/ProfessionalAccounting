@@ -17,6 +17,8 @@ namespace AccountingServer.BLL.Util
 
         public IQueryCompunded<TAtom> Filter2 { get; }
 
+        public bool IsDangerous() => (Filter1?.IsDangerous() ?? false) || (Filter2?.IsDangerous() ?? false);
+
         public T Accept<T>(IQueryVisitor<TAtom, T> visitor) => visitor.Visit(this);
     }
 }

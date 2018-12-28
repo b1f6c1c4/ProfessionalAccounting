@@ -1,6 +1,7 @@
 ﻿using System;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 
 namespace AccountingServer.BLL.Parsing
 {
@@ -43,6 +44,10 @@ namespace AccountingServer.BLL.Parsing
             public IQueryCompunded<IDetailQueryAtom> DetailFilter => details();
 
             /// <inheritdoc />
+            public bool IsDangerous()
+                => VoucherFilter.IsDangerous() && Range.IsDangerous() && DetailFilter.IsDangerous();
+
+            /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
@@ -65,6 +70,9 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IVoucherQueryAtom> Filter2 => throw new MemberAccessException("表达式错误");
+
+            /// <inheritdoc />
+            public bool IsDangerous() => Filter1.IsDangerous();
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
@@ -119,6 +127,9 @@ namespace AccountingServer.BLL.Parsing
             public IQueryCompunded<IVoucherQueryAtom> Filter2 => vouchers1();
 
             /// <inheritdoc />
+            public bool IsDangerous() => (Filter1?.IsDangerous() ?? false) || (Filter2?.IsDangerous() ?? false);
+
+            /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
@@ -132,6 +143,9 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IVoucherQueryAtom> Filter2 => vouchers1();
+
+            /// <inheritdoc />
+            public bool IsDangerous() => (Filter1?.IsDangerous() ?? false) || (Filter2?.IsDangerous() ?? false);
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
@@ -148,6 +162,9 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IVoucherQueryAtom> Filter2 => null;
+
+            /// <inheritdoc />
+            public bool IsDangerous() => Filter1.IsDangerous();
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);

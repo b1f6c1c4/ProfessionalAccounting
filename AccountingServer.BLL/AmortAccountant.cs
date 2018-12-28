@@ -300,6 +300,8 @@ namespace AccountingServer.BLL
 
             public int Dir => 0;
 
+            public bool IsDangerous() => Filter.IsDangerous();
+
             public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
@@ -322,6 +324,8 @@ namespace AccountingServer.BLL
             public DateFilter Range => DateFilter.Unconstrained;
 
             public IQueryCompunded<IDetailQueryAtom> DetailFilter { get; }
+
+            public bool IsDangerous() => VoucherFilter.IsDangerous() && DetailFilter.IsDangerous();
 
             public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
         }

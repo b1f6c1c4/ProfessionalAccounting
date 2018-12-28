@@ -1,6 +1,7 @@
 ﻿using System;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 
 namespace AccountingServer.BLL.Parsing
 {
@@ -116,6 +117,9 @@ namespace AccountingServer.BLL.Parsing
             }
 
             /// <inheritdoc />
+            public bool IsDangerous() => Filter.IsDangerous();
+
+            /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
@@ -168,6 +172,9 @@ namespace AccountingServer.BLL.Parsing
             public IQueryCompunded<IDetailQueryAtom> Filter2 => details1();
 
             /// <inheritdoc />
+            public bool IsDangerous() => (Filter1?.IsDangerous() ?? false) || (Filter2?.IsDangerous() ?? false);
+
+            /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
         }
 
@@ -181,6 +188,9 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IDetailQueryAtom> Filter2 => details1();
+
+            /// <inheritdoc />
+            public bool IsDangerous() => (Filter1?.IsDangerous() ?? false) || (Filter2?.IsDangerous() ?? false);
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
@@ -197,6 +207,9 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public IQueryCompunded<IDetailQueryAtom> Filter2 => null;
+
+            /// <inheritdoc />
+            public bool IsDangerous() => (Filter1?.IsDangerous() ?? false) || (Filter2?.IsDangerous() ?? false);
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
