@@ -27,6 +27,10 @@ namespace AccountingServer.Shell.Serializer
             => PresentJson(detail).ToString(Formatting.Indented);
 
         /// <inheritdoc />
+        public string PresentVoucherDetail(VoucherDetailR detail)
+            => PresentVoucherDetail((VoucherDetail)detail);
+
+        /// <inheritdoc />
         public Voucher ParseVoucher(string str)
         {
             if (str.StartsWith(VoucherToken, StringComparison.OrdinalIgnoreCase))
@@ -121,6 +125,9 @@ namespace AccountingServer.Shell.Serializer
 
         public string PresentVoucherDetails(IEnumerable<VoucherDetail> details)
             => new JArray(details.Select(PresentJson)).ToString(Formatting.Indented);
+
+        public string PresentVoucherDetails(IEnumerable<VoucherDetailR> details)
+            => PresentVoucherDetails(details.Cast<VoucherDetail>());
 
         public string PresentAssets(IEnumerable<Asset> assets)
             => new JArray(assets.Select(PresentJson)).ToString(Formatting.Indented);

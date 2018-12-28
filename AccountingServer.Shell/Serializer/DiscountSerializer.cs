@@ -23,6 +23,9 @@ namespace AccountingServer.Shell.Serializer
         public string PresentVoucherDetail(VoucherDetail detail) => throw new NotImplementedException();
 
         /// <inheritdoc />
+        public string PresentVoucherDetail(VoucherDetailR detail) => throw new NotImplementedException();
+
+        /// <inheritdoc />
         public Voucher ParseVoucher(string expr)
         {
             if (!expr.StartsWith(TheToken, StringComparison.Ordinal))

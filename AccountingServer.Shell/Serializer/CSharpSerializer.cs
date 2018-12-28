@@ -102,6 +102,10 @@ namespace AccountingServer.Shell.Serializer
         }
 
         /// <inheritdoc />
+        public string PresentVoucherDetail(VoucherDetailR detail)
+            => PresentVoucherDetail((VoucherDetail)detail);
+
+        /// <inheritdoc />
         public string PresentVoucher(Voucher voucher)
         {
             if (voucher == null)

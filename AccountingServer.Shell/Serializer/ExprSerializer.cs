@@ -67,6 +67,10 @@ namespace AccountingServer.Shell.Serializer
         }
 
         /// <inheritdoc />
+        public string PresentVoucherDetail(VoucherDetailR detail)
+            => $"{detail.Voucher.Date.AsDate()} {PresentVoucherDetail((VoucherDetail)detail)}";
+
+        /// <inheritdoc />
         public Voucher ParseVoucher(string expr)
         {
             if (!expr.StartsWith(TheToken, StringComparison.Ordinal))

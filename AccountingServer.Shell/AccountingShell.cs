@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
+using static AccountingServer.Entities.Util.MatchHelper;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Subtotal;
 using AccountingServer.Shell.Util;
@@ -34,6 +36,7 @@ namespace AccountingServer.Shell
         private Func<IEntitiesSerializer, IQueryResult> Parse(string expr)
         {
             var isRaw = false;
+            var isSRaw = false;
             ISubtotalStringify visitor;
 
             if (ParsingF.Token(ref expr, false, t => t == "json") != null)
@@ -51,6 +54,11 @@ namespace AccountingServer.Shell
             {
                 visitor = new RawSubtotal();
                 isRaw = true;
+            }
+            else if (ParsingF.Token(ref expr, false, t => t == "sraw") != null)
+            {
+                visitor = new RawSubtotal();
+                isSRaw = true;
             }
             else
                 visitor = new RichSubtotalPre();
@@ -75,7 +83,7 @@ namespace AccountingServer.Shell
 
             try
             {
-                return isRaw ? TryDetailQuery(expr) : TryVoucherQuery(expr);
+                return isRaw ? TryDetailQuery(expr) : isSRaw ? TryDetailRQuery(expr) : TryVoucherQuery(expr);
             }
             catch (Exception)
             {
@@ -156,6 +164,44 @@ namespace AccountingServer.Shell
         /// <returns>执行结果</returns>
         private IQueryResult PresentDetailQuery(IVoucherDetailQuery query, IEntitiesSerializer serializer)
             => new PlainText(serializer.PresentVoucherDetails(m_Accountant.SelectVoucherDetails(query)));
+
+        /// <summary>
+        ///     按带记账凭证的细目检索式解析
+        /// </summary>
+        /// <param name="expr">表达式</param>
+        /// <returns>执行结果</returns>
+        private Func<IEntitiesSerializer, IQueryResult> TryDetailRQuery(string expr)
+        {
+            var res = ParsingF.DetailQuery(ref expr);
+            ParsingF.Eof(expr);
+            return serializer => PresentDetailRQuery(res, serializer);
+        }
+
+        /// <summary>
+        ///     执行带记账凭证的细目检索式并呈现结果
+        /// </summary>
+        /// <param name="query">细目检索式</param>
+        /// <param name="serializer">表示器</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult PresentDetailRQuery(IVoucherDetailQuery query, IEntitiesSerializer serializer)
+        {
+            var res = m_Accountant.SelectVouchers(query.VoucherQuery);
+            if (query.DetailEmitFilter != null)
+                return new PlainText(
+                    serializer.PresentVoucherDetails(
+                        res.SelectMany(
+                            v => v.Details.Where(d => d.IsMatch(query.DetailEmitFilter.DetailFilter))
+                                .Select(d => new VoucherDetailR(v, d)))));
+
+            if (!(query.VoucherQuery is IVoucherQueryAtom dQuery))
+                throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query));
+
+            return new PlainText(
+                serializer.PresentVoucherDetails(
+                    res.SelectMany(
+                        v => v.Details.Where(d => d.IsMatch(dQuery.DetailFilter))
+                            .Select(d => new VoucherDetailR(v, d)))));
+        }
 
         /// <summary>
         ///     执行记账凭证分类汇总检索式并呈现结果

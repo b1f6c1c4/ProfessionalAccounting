@@ -131,4 +131,26 @@ namespace AccountingServer.Entities
         /// </summary>
         public string Remark { get; set; }
     }
+
+    /// <summary>
+    ///     带有指针的细目
+    /// </summary>
+    public class VoucherDetailR : VoucherDetail
+    {
+        public VoucherDetailR(Voucher v, VoucherDetail d)
+        {
+            Voucher = v;
+            Currency = d.Currency;
+            Title = d.Title;
+            SubTitle = d.SubTitle;
+            Content = d.Content;
+            Fund = d.Fund;
+            Remark = d.Remark;
+        }
+
+        /// <summary>
+        ///     所属记账凭证
+        /// </summary>
+        public Voucher Voucher { get; set; }
+    }
 }
