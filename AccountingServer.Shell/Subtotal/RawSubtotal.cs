@@ -1,5 +1,4 @@
-﻿using AccountingServer.BLL.Util;
-using AccountingServer.Entities;
+﻿using AccountingServer.Entities;
 using AccountingServer.Shell.Serializer;
 
 namespace AccountingServer.Shell.Subtotal
@@ -10,7 +9,7 @@ namespace AccountingServer.Shell.Subtotal
     internal class RawSubtotal : StringSubtotalVisitor
     {
         private static readonly IEntitySerializer Serializer = new ExprSerializer();
-        private readonly VoucherDetail m_Path = new VoucherDetail();
+        private readonly VoucherDetailR m_Path = new VoucherDetailR(new Voucher(), new VoucherDetail());
 
         private void ShowSubtotal(ISubtotalResult sub)
         {
@@ -31,7 +30,7 @@ namespace AccountingServer.Shell.Subtotal
 
         public override Nothing Visit(ISubtotalDate sub)
         {
-            Sb.AppendLine(sub.Date.AsDate());
+            m_Path.Voucher.Date = sub.Date;
             ShowSubtotal(sub);
             return Nothing.AtAll;
         }

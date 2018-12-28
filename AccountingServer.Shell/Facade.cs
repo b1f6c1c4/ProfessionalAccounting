@@ -72,7 +72,7 @@ namespace AccountingServer.Shell
             if (string.IsNullOrWhiteSpace(spec))
                 return DefaultSerializer;
 
-            switch (spec)
+            switch (spec.Initital())
             {
                 case "abbr":
                     return new TrivialEntitiesSerializer(new AbbrSerializer());
@@ -84,6 +84,8 @@ namespace AccountingServer.Shell
                     return new TrivialEntitiesSerializer(new ExprSerializer());
                 case "json":
                     return new JsonSerializer();
+                case "csv":
+                    return new CsvSerializer(spec.Rest());
                 default:
                     throw new ArgumentException("表示器未知", nameof(spec));
             }

@@ -32,6 +32,13 @@ namespace AccountingServer.Shell.Serializer
         string PresentVoucherDetail(VoucherDetail detail);
 
         /// <summary>
+        ///     将带记账凭证的细目表示
+        /// </summary>
+        /// <param name="detail">细目</param>
+        /// <returns>表示</returns>
+        string PresentVoucherDetail(VoucherDetailR detail);
+
+        /// <summary>
         ///     从表示中取得记账凭证细目
         /// </summary>
         /// <param name="str">表达</param>
@@ -84,6 +91,13 @@ namespace AccountingServer.Shell.Serializer
         string PresentVoucherDetails(IEnumerable<VoucherDetail> details);
 
         /// <summary>
+        ///     将多个带记账凭证的细目表示
+        /// </summary>
+        /// <param name="details">细目</param>
+        /// <returns>表示</returns>
+        string PresentVoucherDetails(IEnumerable<VoucherDetailR> details);
+
+        /// <summary>
         ///     将多个资产表示
         /// </summary>
         /// <param name="assets">资产</param>
@@ -124,6 +138,14 @@ namespace AccountingServer.Shell.Serializer
             return sb.ToString();
         }
 
+        public string PresentVoucherDetails(IEnumerable<VoucherDetailR> details)
+        {
+            var sb = new StringBuilder();
+            foreach (var detail in details)
+                sb.Append(m_Serializer.PresentVoucherDetail(detail));
+            return sb.ToString();
+        }
+
         public string PresentAssets(IEnumerable<Asset> assets)
         {
             var sb = new StringBuilder();
@@ -143,6 +165,7 @@ namespace AccountingServer.Shell.Serializer
         public string PresentVoucher(Voucher voucher) => m_Serializer.PresentVoucher(voucher);
         public Voucher ParseVoucher(string str) => m_Serializer.ParseVoucher(str);
         public string PresentVoucherDetail(VoucherDetail detail) => m_Serializer.PresentVoucherDetail(detail);
+        public string PresentVoucherDetail(VoucherDetailR detail) => m_Serializer.PresentVoucherDetail(detail);
         public VoucherDetail ParseVoucherDetail(string str) => m_Serializer.ParseVoucherDetail(str);
         public string PresentAsset(Asset asset) => m_Serializer.PresentAsset(asset);
         public Asset ParseAsset(string str) => m_Serializer.ParseAsset(str);
