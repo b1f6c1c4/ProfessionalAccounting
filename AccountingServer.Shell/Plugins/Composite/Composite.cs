@@ -45,7 +45,7 @@ namespace AccountingServer.Shell.Plugins.Composite
                 ParsingF.Eof(expr);
             }
 
-            return DoInquiry(the, temp, out _, currency);
+            return DoInquiry(the, temp, out _, currency, serializer);
         }
 
         public static Template GetTemplate(string name) => Templates.Config.Templates.SingleOrDefault(
@@ -89,10 +89,12 @@ namespace AccountingServer.Shell.Plugins.Composite
         /// <param name="inq">查询</param>
         /// <param name="val">金额</param>
         /// <param name="baseCurrency"></param>
+        /// <param name="serializer"></param>
         /// <returns>执行结果</returns>
-        public IQueryResult DoInquiry(DateFilter rng, BaseInquiry inq, out double val, string baseCurrency)
+        public IQueryResult DoInquiry(DateFilter rng, BaseInquiry inq, out double val, string baseCurrency,
+            IEntitiesSerializer serializer)
         {
-            var visitor = new InquiriesVisitor(Accountant, rng, baseCurrency);
+            var visitor = new InquiriesVisitor(Accountant, rng, baseCurrency, serializer);
             val = inq.Accept(visitor);
             return new PlainText(visitor.Result);
         }
@@ -118,14 +120,16 @@ namespace AccountingServer.Shell.Plugins.Composite
         private readonly Accountant m_Accountant;
         private readonly string m_BaseCurrency;
         private readonly DateFilter m_Rng;
+        private readonly IEntitiesSerializer m_Serializer;
         private readonly StringBuilder m_Sb = new StringBuilder();
 
         private string m_Path = "";
 
-        public InquiriesVisitor(Accountant accountant, DateFilter rng, string baseCurrency)
+        public InquiriesVisitor(Accountant accountant, DateFilter rng, string baseCurrency, IEntitiesSerializer serializer)
         {
             m_Accountant = accountant;
             m_BaseCurrency = baseCurrency;
+            m_Serializer = serializer;
             m_Rng = rng;
         }
 
@@ -164,7 +168,7 @@ namespace AccountingServer.Shell.Plugins.Composite
 
                     m_Sb.Append(
                         new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), theFmt, inq.HideContent)
-                            .PresentSubtotal(grp, query.Subtotal));
+                            .PresentSubtotal(grp, query.Subtotal, m_Serializer));
                 }
             else
             {
@@ -172,7 +176,7 @@ namespace AccountingServer.Shell.Plugins.Composite
 
                 m_Sb.Append(
                     new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), fmt, inq.HideContent)
-                        .PresentSubtotal(gq, query.Subtotal));
+                        .PresentSubtotal(gq, query.Subtotal, m_Serializer));
             }
 
             return val;

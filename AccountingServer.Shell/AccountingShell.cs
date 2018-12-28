@@ -2,10 +2,10 @@
 using System.Linq;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
-using static AccountingServer.Entities.Util.MatchHelper;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Subtotal;
 using AccountingServer.Shell.Util;
+using static AccountingServer.Entities.Util.MatchHelper;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.Shell
@@ -35,62 +35,71 @@ namespace AccountingServer.Shell
         /// <returns>解析结果</returns>
         private Func<IEntitiesSerializer, IQueryResult> Parse(string expr)
         {
-            var isRaw = false;
-            var isSRaw = false;
+            ExprType type;
             ISubtotalStringify visitor;
 
             if (ParsingF.Token(ref expr, false, t => t == "json") != null)
-                visitor = new JsonSubtotal();
-            else if (ParsingF.Token(ref expr, false, t => t == "json-raw") != null)
             {
+                type = ExprType.GroupedQueries | ExprType.DetailQuery | ExprType.VoucherQuery;
                 visitor = new JsonSubtotal();
-                isRaw = true;
             }
             else if (ParsingF.Token(ref expr, false, t => t == "Rps") != null)
+            {
+                type = ExprType.GroupedQueries;
                 visitor = new PreciseSubtotalPre();
+            }
             else if (ParsingF.Token(ref expr, false, t => t == "rps") != null)
+            {
+                type = ExprType.GroupedQueries;
                 visitor = new PreciseSubtotalPre(false);
+            }
             else if (ParsingF.Token(ref expr, false, t => t == "raw") != null)
             {
+                type = ExprType.GroupedQueries | ExprType.DetailQuery;
                 visitor = new RawSubtotal();
-                isRaw = true;
             }
             else if (ParsingF.Token(ref expr, false, t => t == "sraw") != null)
             {
-                visitor = new RawSubtotal();
-                isSRaw = true;
+                type = ExprType.GroupedQueries | ExprType.DetailRQuery;
+                visitor = new RawSubtotal(true);
             }
             else
+            {
+                type = ExprType.GroupedQueries | ExprType.VoucherQuery;
                 visitor = new RichSubtotalPre();
-
-            try
-            {
-                return TryGroupedQuery(expr, visitor);
-            }
-            catch (Exception)
-            {
-                // ignored
             }
 
-            try
-            {
-                return TryVoucherGroupedQuery(expr, visitor);
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
+            if (type.HasFlag(ExprType.GroupedQuery))
+                try
+                {
+                    return TryGroupedQuery(expr, visitor);
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
 
-            try
-            {
-                return isRaw ? TryDetailQuery(expr) : isSRaw ? TryDetailRQuery(expr) : TryVoucherQuery(expr);
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
+            if (type.HasFlag(ExprType.VoucherGroupedQuery))
+                try
+                {
+                    return TryVoucherGroupedQuery(expr, visitor);
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
 
-            throw new InvalidOperationException("表达式无效");
+            switch (type & ExprType.NonGroupedQueries)
+            {
+                case ExprType.VoucherQuery:
+                    return TryVoucherQuery(expr);
+                case ExprType.DetailQuery:
+                    return TryDetailQuery(expr);
+                case ExprType.DetailRQuery:
+                    return TryDetailRQuery(expr);
+                default:
+                    throw new InvalidOperationException("表达式无效");
+            }
         }
 
         /// <summary>
@@ -118,7 +127,7 @@ namespace AccountingServer.Shell
         {
             var res = ParsingF.GroupedQuery(ref expr);
             ParsingF.Eof(expr);
-            return serializer => PresentSubtotal(res, trav);
+            return serializer => PresentSubtotal(res, trav, serializer);
         }
 
         /// <summary>
@@ -131,7 +140,7 @@ namespace AccountingServer.Shell
         {
             var res = ParsingF.VoucherGroupedQuery(ref expr);
             ParsingF.Eof(expr);
-            return serializer => PresentSubtotal(res, trav);
+            return serializer => PresentSubtotal(res, trav, serializer);
         }
 
         /// <summary>
@@ -208,11 +217,13 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="query">记账凭证分类汇总检索式</param>
         /// <param name="trav">呈现器</param>
+        /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        private IQueryResult PresentSubtotal(IVoucherGroupedQuery query, ISubtotalStringify trav)
+        private IQueryResult PresentSubtotal(IVoucherGroupedQuery query, ISubtotalStringify trav,
+            IEntitiesSerializer serializer)
         {
             var result = m_Accountant.SelectVouchersGrouped(query);
-            return new PlainText(trav.PresentSubtotal(result, query.Subtotal));
+            return new PlainText(trav.PresentSubtotal(result, query.Subtotal, serializer));
         }
 
         /// <summary>
@@ -220,11 +231,25 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="query">分类汇总检索式</param>
         /// <param name="trav">呈现器</param>
+        /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        private IQueryResult PresentSubtotal(IGroupedQuery query, ISubtotalStringify trav)
+        private IQueryResult PresentSubtotal(IGroupedQuery query, ISubtotalStringify trav,
+            IEntitiesSerializer serializer)
         {
             var result = m_Accountant.SelectVoucherDetailsGrouped(query);
-            return new PlainText(trav.PresentSubtotal(result, query.Subtotal));
+            return new PlainText(trav.PresentSubtotal(result, query.Subtotal, serializer));
+        }
+
+        [Flags]
+        private enum ExprType
+        {
+            GroupedQueries = 0x00000011,
+            GroupedQuery = 0x00000001,
+            VoucherGroupedQuery = 0x00000010,
+            NonGroupedQueries = 0x00011100,
+            DetailQuery = 0x00000100,
+            DetailRQuery = 0x00001000,
+            VoucherQuery = 0x00010000
         }
     }
 }
