@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace AccountingServer.Entities
@@ -59,6 +60,18 @@ namespace AccountingServer.Entities
     [Serializable]
     public class Voucher
     {
+        public Voucher() { }
+
+        public Voucher(Voucher v)
+        {
+            ID = v.ID;
+            Date = v.Date;
+            Remark = v.Remark;
+            Type = v.Type;
+            if (v.Details != null)
+                Details = v.Details.Select(d => new VoucherDetail(d)).ToList();
+        }
+
         /// <summary>
         ///     编号
         /// </summary>
@@ -100,6 +113,18 @@ namespace AccountingServer.Entities
         /// </summary>
         public const double Tolerance = 1e-8;
 
+        public VoucherDetail() { }
+
+        public VoucherDetail(VoucherDetail d)
+        {
+            Currency = d.Currency;
+            Title = d.Title;
+            SubTitle = d.SubTitle;
+            Content = d.Content;
+            Fund = d.Fund;
+            Remark = d.Remark;
+        }
+
         /// <summary>
         ///     币种
         /// </summary>
@@ -137,16 +162,9 @@ namespace AccountingServer.Entities
     /// </summary>
     public class VoucherDetailR : VoucherDetail
     {
-        public VoucherDetailR(Voucher v, VoucherDetail d)
-        {
-            Voucher = v;
-            Currency = d.Currency;
-            Title = d.Title;
-            SubTitle = d.SubTitle;
-            Content = d.Content;
-            Fund = d.Fund;
-            Remark = d.Remark;
-        }
+        public VoucherDetailR(Voucher v, VoucherDetail d) : base(d) => Voucher = v;
+
+        public VoucherDetailR(VoucherDetailR d) : this(new Voucher(d.Voucher), d) { }
 
         /// <summary>
         ///     所属记账凭证

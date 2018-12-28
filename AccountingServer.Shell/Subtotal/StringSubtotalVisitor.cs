@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using AccountingServer.Shell.Serializer;
 
 namespace AccountingServer.Shell.Subtotal
 {
@@ -15,6 +16,7 @@ namespace AccountingServer.Shell.Subtotal
     {
         protected string Cu;
         protected int Depth;
+        protected IEntitiesSerializer Serializer;
 
         protected GatheringType Ga;
 
@@ -22,17 +24,22 @@ namespace AccountingServer.Shell.Subtotal
         protected StringBuilder Sb;
 
         /// <inheritdoc />
-        public string PresentSubtotal(ISubtotalResult raw, ISubtotal par)
+        public string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer)
         {
             m_Par = par;
             Ga = par.GatherType;
             Cu = par.EquivalentCurrency;
+            Serializer = serializer;
             Sb = new StringBuilder();
             Depth = 0;
+            Pre();
             raw?.Accept(this);
+            Post();
             return Sb.ToString();
         }
 
+        protected virtual void Pre() { }
+        protected virtual void Post() { }
         public abstract Nothing Visit(ISubtotalRoot sub);
         public abstract Nothing Visit(ISubtotalDate sub);
         public abstract Nothing Visit(ISubtotalCurrency sub);

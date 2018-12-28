@@ -1,4 +1,5 @@
 ﻿using AccountingServer.Entities;
+using AccountingServer.Shell.Serializer;
 
 namespace AccountingServer.Shell.Subtotal
 {
@@ -12,7 +13,8 @@ namespace AccountingServer.Shell.Subtotal
         /// </summary>
         /// <param name="raw">分类汇总结果</param>
         /// <param name="par">参数</param>
+        /// <param name="serializer">表示器</param>
         /// <returns>分类汇总结果</returns>
-        string PresentSubtotal(ISubtotalResult raw, ISubtotal par);
+        string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer);
     }
 }

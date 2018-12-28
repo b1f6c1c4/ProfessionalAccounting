@@ -2,6 +2,7 @@
 using System.Linq;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using AccountingServer.Shell.Serializer;
 using Newtonsoft.Json.Linq;
 
 namespace AccountingServer.Shell.Subtotal
@@ -15,13 +16,8 @@ namespace AccountingServer.Shell.Subtotal
 
         private ISubtotal m_Par;
 
-        /// <summary>
-        ///     执行分类汇总
-        /// </summary>
-        /// <param name="raw">分类汇总结果</param>
-        /// <param name="par">参数</param>
-        /// <returns>分类汇总结果</returns>
-        public string PresentSubtotal(ISubtotalResult raw, ISubtotal par)
+        /// <inheritdoc />
+        public string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer)
         {
             m_Par = par;
             m_Depth = 0;

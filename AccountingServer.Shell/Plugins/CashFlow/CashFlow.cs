@@ -28,7 +28,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
 
             var n = Templates.Config.Accounts.Count;
             for (var i = 0; i < n; i++)
-                foreach (var (date, value) in GetItems(Templates.Config.Accounts[i]))
+                foreach (var (date, value) in GetItems(Templates.Config.Accounts[i], serializer))
                 {
                     if (!rst.ContainsKey(date))
                         rst.Add(date, new double[n]);
@@ -66,7 +66,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
             return new PlainText(sb.ToString());
         }
 
-        private IEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account)
+        private IEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account, IEntitiesSerializer serializer)
         {
             var curr = $"@{account.Currency}";
             var init = Accountant.RunGroupedQuery($"{curr}*({account.QuickAsset}) [~.]``v").Fund;
@@ -77,7 +77,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                 var rb = new Composite.Composite(Accountant);
                 var tmp = Composite.Composite.GetTemplate(account.Reimburse);
                 var rng = Composite.Composite.DateRange(tmp.Day);
-                rb.DoInquiry(rng, tmp, out var rbVal, BaseCurrency.Now);
+                rb.DoInquiry(rng, tmp, out var rbVal, BaseCurrency.Now, serializer);
                 // ReSharper disable once PossibleInvalidOperationException
                 var rbF = rng.EndDate.Value;
                 yield return (rbF, rbVal);
