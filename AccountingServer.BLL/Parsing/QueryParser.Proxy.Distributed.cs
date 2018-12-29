@@ -12,22 +12,19 @@ namespace AccountingServer.BLL.Parsing
         public partial class DistributedQAtomContext : IDistributedQueryAtom
         {
             /// <inheritdoc />
-            public IDistributed Filter // TODO
-            {
-                get
-                {
-                    var filter = new MyDistributedFilter
-                        {
-                            ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : (Guid?)null,
-                            Name = DollarQuotedString()?.GetText().Dequotation(),
-                            Remark = PercentQuotedString()?.GetText().Dequotation()
-                        };
-                    return filter;
-                }
-            }
+            public IDistributed Filter
+                => new MyDistributedFilter
+                    {
+                        ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : (Guid?)null,
+                        Name = RegexString()?.GetText().Dequotation().Replace(@"\/", "/"),
+                        Remark = PercentQuotedString()?.GetText().Dequotation()
+                    };
 
             /// <inheritdoc />
-            public bool IsDangerous() => Filter.IsDangerous();
+            public DateFilter Range => rangeCore()?.Range ?? DateFilter.Unconstrained;
+
+            /// <inheritdoc />
+            public bool IsDangerous() => Filter.IsDangerous() && Range.IsDangerous(true);
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
@@ -107,7 +104,24 @@ namespace AccountingServer.BLL.Parsing
             public IQueryCompunded<IDistributedQueryAtom> Filter2 => distributedQ1();
 
             /// <inheritdoc />
-            public bool IsDangerous() => (Filter1?.IsDangerous() ?? false) || (Filter2?.IsDangerous() ?? false);
+            public bool IsDangerous()
+            {
+                switch (Operator)
+                {
+                    case OperatorType.None:
+                        return Filter1.IsDangerous();
+                    case OperatorType.Identity:
+                        return Filter1.IsDangerous();
+                    case OperatorType.Complement:
+                        return true;
+                    case OperatorType.Union:
+                        return Filter1.IsDangerous() || Filter2.IsDangerous();
+                    case OperatorType.Substract:
+                        return Filter1.IsDangerous();
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
@@ -125,7 +139,7 @@ namespace AccountingServer.BLL.Parsing
             public IQueryCompunded<IDistributedQueryAtom> Filter2 => distributedQ1();
 
             /// <inheritdoc />
-            public bool IsDangerous() => (Filter1?.IsDangerous() ?? false) || (Filter2?.IsDangerous() ?? false);
+            public bool IsDangerous() => Filter1.IsDangerous() && (Filter2?.IsDangerous() ?? true);
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
@@ -144,7 +158,7 @@ namespace AccountingServer.BLL.Parsing
             public IQueryCompunded<IDistributedQueryAtom> Filter2 => null;
 
             /// <inheritdoc />
-            public bool IsDangerous() => (Filter1?.IsDangerous() ?? false) || (Filter2?.IsDangerous() ?? false);
+            public bool IsDangerous() => Filter1.IsDangerous();
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);

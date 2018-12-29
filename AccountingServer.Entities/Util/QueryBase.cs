@@ -44,6 +44,8 @@ namespace AccountingServer.Entities.Util
 
         public IDistributed Filter { get; } = new TheFilter();
 
+        public DateFilter Range => DateFilter.Unconstrained;
+
         public bool IsDangerous() => true;
 
         public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);

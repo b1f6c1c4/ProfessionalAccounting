@@ -59,8 +59,9 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     是否包含弱检索式
         /// </summary>
+        /// <param name="loose">允许大范围</param>
         /// <returns>若包含则为<c>true</c>，否则为<c>false</c></returns>
-        public bool IsDangerous()
+        public bool IsDangerous(bool loose = false)
         {
             if (NullOnly)
                 return true;
@@ -70,6 +71,8 @@ namespace AccountingServer.Entities
                 return true;
             if (!EndDate.HasValue)
                 return true;
+            if (loose)
+                return false;
             if (EndDate.Value - StartDate.Value >= new TimeSpan(20 - 1, 0, 0, 0))
                 return true;
 

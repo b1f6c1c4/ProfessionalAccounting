@@ -345,5 +345,10 @@ namespace AccountingServer.Entities
         ///     分期过滤器
         /// </summary>
         IDistributed Filter { get; }
+
+        /// <summary>
+        ///     日期过滤器
+        /// </summary>
+        DateFilter Range { get; }
     }
 }

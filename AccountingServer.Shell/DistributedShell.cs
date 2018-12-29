@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Serializer;
@@ -63,25 +64,37 @@ namespace AccountingServer.Shell
                             "all",
                             (expr, serializer) =>
                             {
+                                var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
                                 var dist = Parsing.DistributedQuery(ref expr);
                                 Parsing.Eof(expr);
+                                if (dist.IsDangerous() && safe)
+                                    throw new SecurityException("检测到弱检索式");
+
                                 return ExecuteList(dist, null, false, serializer);
                             }),
                         new ShellComponent(
                             "li",
                             (expr, serializer) =>
                             {
+                                var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
                                 var dt = Parsing.UniqueTime(ref expr) ?? ClientDateTime.Today;
                                 var dist = Parsing.DistributedQuery(ref expr);
                                 Parsing.Eof(expr);
+                                if (dist.IsDangerous() && safe)
+                                    throw new SecurityException("检测到弱检索式");
+
                                 return ExecuteList(dist, dt, true, serializer);
                             }),
                         new ShellComponent(
                             "q",
                             (expr, serializer) =>
                             {
+                                var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
                                 var dist = Parsing.DistributedQuery(ref expr);
                                 Parsing.Eof(expr);
+                                if (dist.IsDangerous() && safe)
+                                    throw new SecurityException("检测到弱检索式");
+
                                 return ExecuteQuery(dist, serializer);
                             }),
                         new ShellComponent(

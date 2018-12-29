@@ -1,4 +1,5 @@
 ﻿using AccountingServer.Entities.Util;
+using AccountingServer.Shell.Util;
 using Xunit;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
@@ -23,7 +24,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         [InlineData(true, "[null]")]
         [InlineData(true, "[.~~.]")]
         [InlineData(false, "[.~.]")]
-        [InlineData(false, "^hhh^ []")]
+        [InlineData(false, "[] ^hhh^")]
         [InlineData(true, "{}")]
         [InlineData(true, "+{}")]
         [InlineData(false, "+{.}")]
@@ -43,7 +44,9 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         [InlineData(false, "{=114}*{=514}")]
         public void VoucherQueryTest(bool dangerous, string expr)
         {
-            Assert.Equal(dangerous, ParsingF.VoucherQuery(expr).IsDangerous());
+            var query = ParsingF.VoucherQuery(ref expr);
+            ParsingF.Eof(expr);
+            Assert.Equal(dangerous, query.IsDangerous());
         }
 
         [Theory]
@@ -85,14 +88,40 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         [InlineData(false, "{.}:=114514")]
         public void DetailQueryTest(bool dangerous, string expr)
         {
-            Assert.Equal(dangerous, ParsingF.DetailQuery(expr).IsDangerous());
+            var query = ParsingF.DetailQuery(ref expr);
+            ParsingF.Eof(expr);
+            Assert.Equal(dangerous, query.IsDangerous());
         }
 
         [Theory]
-        [InlineData(true, "")] // TODO
+        [InlineData(true, "")]
+        [InlineData(false, "417011B7-854B-41B8-9EEA-FF104976A022")]
+        [InlineData(false, "/hhh/")]
+        [InlineData(false, "[[.]]")]
+        [InlineData(true, "[[.~]]")]
+        [InlineData(false, "417011B7-854B-41B8-9EEA-FF104976A022 [[~null]]")]
+        [InlineData(true, "{}")]
+        [InlineData(true, "+{}")]
+        [InlineData(false, "+{[[.]]}")]
+        [InlineData(true, "-{}")]
+        [InlineData(true, "-{[[.]]}")]
+        [InlineData(true, "{}+{}")]
+        [InlineData(true, "{}-{}")]
+        [InlineData(true, "{}*{}")]
+        [InlineData(true, "{/114/}+{}")]
+        [InlineData(false, "{/114/}-{}")]
+        [InlineData(false, "{/114/}*{}")]
+        [InlineData(true, "{}+{/114/}")]
+        [InlineData(true, "{}-{/114/}")]
+        [InlineData(false, "{}*{/114/}")]
+        [InlineData(false, "{/114/}+{/114/}")]
+        [InlineData(false, "{/114/}-{/114/}")]
+        [InlineData(false, "{/114/}*{/114/}")]
         public void DistributedQueryTest(bool dangerous, string expr)
         {
-            Assert.Equal(dangerous, ParsingF.DistributedQuery(expr).IsDangerous());
+            var query = ParsingF.DistributedQuery(ref expr);
+            ParsingF.Eof(expr);
+            Assert.Equal(dangerous, query.IsDangerous());
         }
 
         [Fact]

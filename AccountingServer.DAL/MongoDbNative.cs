@@ -64,30 +64,30 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="rng">日期过滤器</param>
         /// <returns>Native表示</returns>
-        protected static FilterDefinition<Voucher> GetNativeFilter(DateFilter rng)
+        protected static FilterDefinition<T> GetNativeFilter(DateFilter rng)
         {
             if (rng == null)
-                return Builders<Voucher>.Filter.Empty;
+                return Builders<T>.Filter.Empty;
 
             if (rng.NullOnly)
-                return Builders<Voucher>.Filter.Exists("date", false);
+                return Builders<T>.Filter.Exists("date", false);
 
-            var lst = new List<FilterDefinition<Voucher>>();
+            var lst = new List<FilterDefinition<T>>();
 
             if (rng.StartDate.HasValue)
-                lst.Add(Builders<Voucher>.Filter.Gte("date", rng.StartDate));
+                lst.Add(Builders<T>.Filter.Gte("date", rng.StartDate));
             if (rng.EndDate.HasValue)
-                lst.Add(Builders<Voucher>.Filter.Lte("date", rng.EndDate));
+                lst.Add(Builders<T>.Filter.Lte("date", rng.EndDate));
 
             if (lst.Count == 0)
                 return rng.Nullable
-                    ? Builders<Voucher>.Filter.Empty
-                    : Builders<Voucher>.Filter.Exists("date");
+                    ? Builders<T>.Filter.Empty
+                    : Builders<T>.Filter.Exists("date");
 
             var gather = And(lst);
             return rng.Nullable
-                ? Builders<Voucher>.Filter.Exists("date", false) | gather
-                : Builders<Voucher>.Filter.Exists("date") & gather;
+                ? Builders<T>.Filter.Exists("date", false) | gather
+                : Builders<T>.Filter.Exists("date") & gather;
         }
     }
 
@@ -257,12 +257,14 @@ namespace AccountingServer.DAL
                 lst.Add(
                     query.Filter.Name == string.Empty
                         ? Builders<T>.Filter.Exists("name", false)
-                        : Builders<T>.Filter.Eq("name", query.Filter.Name));
+                        : Builders<T>.Filter.Regex("name", query.Filter.Name));
             if (query.Filter.Remark != null)
                 lst.Add(
                     query.Filter.Remark == string.Empty
                         ? Builders<T>.Filter.Exists("remark", false)
                         : Builders<T>.Filter.Eq("remark", query.Filter.Remark));
+
+            lst.Add(GetNativeFilter(query.Range));
 
             return And(lst);
         }
