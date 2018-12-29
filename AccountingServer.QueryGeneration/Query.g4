@@ -121,11 +121,11 @@ distributedQ1
 
 distributedQ0
 	:	distributedQAtom
-	|	RoundBra distributedQ RoundKet
+	|	CurlyBra distributedQ CurlyKet
 	;
 
 distributedQAtom
-	:	Guid? DollarQuotedString? PercentQuotedString? (SquareBra SquareBra rangeCore SquareKet SquareKet)?
+	:	Guid? RegexString? PercentQuotedString? (SquareBra SquareBra rangeCore SquareKet SquareKet)?
 	;
 
 token
@@ -197,8 +197,8 @@ PercentQuotedString
 	:	'%' ('%%'|~('%'))* '%'
 	;
 
-DollarQuotedString
-	:	'$' ('$$'|~('$'))* '$'
+RegexString
+	:	'/' ('\\'.|~('/'|'\\'))* '/'
 	;
 
 DoubleQuotedString
