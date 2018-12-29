@@ -44,7 +44,7 @@ namespace AccountingServer.Shell
 
             if (ParsingF.Token(ref expr, false, t => t == "json") != null)
             {
-                type |= ExprType.GroupedQueries | ExprType.DetailQuery | ExprType.VoucherQuery;
+                type |= ExprType.GroupedQueries;
                 visitor = new JsonSubtotal();
             }
             else if (ParsingF.Token(ref expr, false, t => t == "Rps") != null)

@@ -8,6 +8,7 @@ using System.Runtime.Remoting;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.RegularExpressions;
 using AccountingClient.Properties;
 
 namespace AccountingClient.Shell
@@ -69,7 +70,7 @@ namespace AccountingClient.Shell
             }
         }
 
-        private HttpResult Run(string method, string url, string body = null)
+        private HttpResult Run(string method, string url, string body = null, string spec = null)
         {
             if (m_Exception != null)
                 throw m_Exception;
@@ -77,7 +78,7 @@ namespace AccountingClient.Shell
             m_Client.DefaultRequestHeaders.Remove("X-ClientDateTime");
             m_Client.DefaultRequestHeaders.Add("X-ClientDateTime", DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"));
             m_Client.DefaultRequestHeaders.Remove("X-Serializer");
-            m_Client.DefaultRequestHeaders.Add("X-Serializer", m_SerializerSpec);
+            m_Client.DefaultRequestHeaders.Add("X-Serializer", spec ?? m_SerializerSpec);
 
             HttpResponseMessage res;
             switch (method)
@@ -162,7 +163,16 @@ namespace AccountingClient.Shell
                 return new QueryResult { Result = "OK", AutoReturn = true };
             }
 
-            var res = Run("POST", "/execute", expr);
+            var regex = new Regex(@"^(?<spec>[a-z](?:[^-]|-[^-]|---)+)--(?<expr>.*)$");
+            var m = regex.Match(expr);
+            string spec = null;
+            if (m.Success)
+            {
+                spec = m.Groups["spec"].Value;
+                expr = m.Groups["expr"].Value;
+            }
+
+            var res = Run("POST", "/execute", expr, spec);
             return new QueryResult
                 {
                     Result = res,
