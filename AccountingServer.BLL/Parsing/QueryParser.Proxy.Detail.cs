@@ -172,7 +172,24 @@ namespace AccountingServer.BLL.Parsing
             public IQueryCompunded<IDetailQueryAtom> Filter2 => details1();
 
             /// <inheritdoc />
-            public bool IsDangerous() => (Filter1?.IsDangerous() ?? false) || (Filter2?.IsDangerous() ?? false);
+            public bool IsDangerous()
+            {
+                switch (Operator)
+                {
+                    case OperatorType.None:
+                        return Filter1.IsDangerous();
+                    case OperatorType.Identity:
+                        return Filter1.IsDangerous();
+                    case OperatorType.Complement:
+                        return true;
+                    case OperatorType.Union:
+                        return Filter1.IsDangerous() || Filter2.IsDangerous();
+                    case OperatorType.Substract:
+                        return Filter1.IsDangerous();
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
@@ -190,7 +207,7 @@ namespace AccountingServer.BLL.Parsing
             public IQueryCompunded<IDetailQueryAtom> Filter2 => details1();
 
             /// <inheritdoc />
-            public bool IsDangerous() => (Filter1?.IsDangerous() ?? false) || (Filter2?.IsDangerous() ?? false);
+            public bool IsDangerous() => Filter1.IsDangerous() && (Filter2?.IsDangerous() ?? true);
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
@@ -209,7 +226,7 @@ namespace AccountingServer.BLL.Parsing
             public IQueryCompunded<IDetailQueryAtom> Filter2 => null;
 
             /// <inheritdoc />
-            public bool IsDangerous() => (Filter1?.IsDangerous() ?? false) || (Filter2?.IsDangerous() ?? false);
+            public bool IsDangerous() => Filter1.IsDangerous();
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
