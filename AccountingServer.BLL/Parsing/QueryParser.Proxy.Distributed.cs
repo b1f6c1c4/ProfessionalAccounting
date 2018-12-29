@@ -12,7 +12,7 @@ namespace AccountingServer.BLL.Parsing
         public partial class DistributedQAtomContext : IDistributedQueryAtom
         {
             /// <inheritdoc />
-            public IDistributed Filter
+            public IDistributed Filter // TODO
             {
                 get
                 {

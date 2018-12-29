@@ -70,7 +70,7 @@ namespace AccountingServer.Entities
                 return true;
             if (!EndDate.HasValue)
                 return true;
-            if (EndDate.Value - StartDate.Value > new TimeSpan(20, 0, 0, 0))
+            if (EndDate.Value - StartDate.Value >= new TimeSpan(20 - 1, 0, 0, 0))
                 return true;
 
             return false;
