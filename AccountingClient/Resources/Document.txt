@@ -6,3 +6,4 @@ use local					连接本地调试
 [always ]use URI			连接
 always use cert CERT		选择客户端证书
 exit						退出客户端
+SPEC -- ...					临时选择序列化器
