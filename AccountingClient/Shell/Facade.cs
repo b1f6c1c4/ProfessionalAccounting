@@ -9,6 +9,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using AccountingClient.Properties;
 
 namespace AccountingClient.Shell
@@ -27,11 +28,9 @@ namespace AccountingClient.Shell
         private WebRequestHandler m_Handler;
         private string m_SerializerSpec;
 
-        public Facade()
-        {
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            TryConnect();
-        }
+        public Facade() => ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+        public async Task<bool> Init() => await TryConnect();
 
         public string EmptyVoucher { get; private set; }
 
@@ -49,7 +48,7 @@ namespace AccountingClient.Shell
             }
         }
 
-        private bool TryConnect(string uri = null)
+        private async Task<bool> TryConnect(string uri = null)
         {
             m_Exception = null;
 
@@ -60,7 +59,7 @@ namespace AccountingClient.Shell
                 if (certificate != null)
                     m_Handler.ClientCertificates.AddRange(certificate);
                 m_Client = new HttpClient(m_Handler) { BaseAddress = new Uri(uri ?? Settings.Default.Server) };
-                EmptyVoucher = Run("GET", "/emptyVoucher");
+                EmptyVoucher = await Run("GET", "/emptyVoucher");
                 return true;
             }
             catch (Exception e)
@@ -70,7 +69,7 @@ namespace AccountingClient.Shell
             }
         }
 
-        private HttpResult Run(string method, string url, string body = null, string spec = null)
+        private async Task<HttpResult> Run(string method, string url, string body = null, string spec = null)
         {
             if (m_Exception != null)
                 throw m_Exception;
@@ -84,24 +83,24 @@ namespace AccountingClient.Shell
             switch (method)
             {
                 case "GET":
-                    res = m_Client.GetAsync("/api" + url).Result;
+                    res = await m_Client.GetAsync("/api" + url);
                     break;
                 case "POST":
                     var content = new StringContent(body, Encoding.UTF8, "text/plain");
-                    res = m_Client.PostAsync("/api" + url, content).Result;
+                    res = await m_Client.PostAsync("/api" + url, content);
                     break;
                 default:
                     throw new InvalidOperationException();
             }
 
-            var txt = res.Content.ReadAsStringAsync().Result;
+            var txt = await res.Content.ReadAsStringAsync();
             if (!res.IsSuccessStatusCode)
                 throw new RemotingException(txt);
 
             return new HttpResult { Message = res, Result = txt };
         }
 
-        public IQueryResult Execute(string expr)
+        public async Task<IQueryResult> Execute(string expr)
         {
             if (expr == "exit")
                 Environment.Exit(0);
@@ -121,7 +120,7 @@ namespace AccountingClient.Shell
 
             if (expr == "use local")
             {
-                if (!TryConnect("http://localhost:30000/"))
+                if (!await TryConnect("http://localhost:30000/"))
                     throw m_Exception;
 
                 return new QueryResult { Result = "OK", AutoReturn = true };
@@ -130,14 +129,14 @@ namespace AccountingClient.Shell
             if (expr.StartsWith("spec ", StringComparison.OrdinalIgnoreCase))
             {
                 m_SerializerSpec = expr.Substring(5);
-                EmptyVoucher = Run("GET", "/emptyVoucher");
+                EmptyVoucher = await Run("GET", "/emptyVoucher");
 
                 return new QueryResult { Result = "OK", AutoReturn = true };
             }
 
             if (expr.StartsWith("use ", StringComparison.OrdinalIgnoreCase))
             {
-                if (!TryConnect(expr.Substring(4)))
+                if (!await TryConnect(expr.Substring(4)))
                     throw m_Exception;
 
                 return new QueryResult { Result = "OK", AutoReturn = true };
@@ -147,7 +146,7 @@ namespace AccountingClient.Shell
             {
                 Settings.Default.Cert = expr.Substring(16);
                 Settings.Default.Save();
-                if (!TryConnect())
+                if (!await TryConnect())
                     throw m_Exception;
 
                 return new QueryResult { Result = "OK", AutoReturn = true };
@@ -157,7 +156,7 @@ namespace AccountingClient.Shell
             {
                 Settings.Default.Server = expr.Substring(11);
                 Settings.Default.Save();
-                if (!TryConnect())
+                if (!await TryConnect())
                     throw m_Exception;
 
                 return new QueryResult { Result = "OK", AutoReturn = true };
@@ -172,7 +171,7 @@ namespace AccountingClient.Shell
                 expr = m.Groups["expr"].Value;
             }
 
-            var res = Run("POST", "/execute", expr, spec);
+            var res = await Run("POST", "/execute", expr, spec);
             return new QueryResult
                 {
                     Result = res,
@@ -181,20 +180,20 @@ namespace AccountingClient.Shell
                 };
         }
 
-        public string ExecuteVoucherUpsert(string code) => Run("POST", "/voucherUpsert", code);
+        public async Task<string> ExecuteVoucherUpsert(string code) => await Run("POST", "/voucherUpsert", code);
 
-        public string ExecuteAssetUpsert(string code) => Run("POST", "/assetUpsert", code);
+        public async Task<string> ExecuteAssetUpsert(string code) => await Run("POST", "/assetUpsert", code);
 
-        public string ExecuteAmortUpsert(string code) => Run("POST", "/amortUpsert", code);
+        public async Task<string> ExecuteAmortUpsert(string code) => await Run("POST", "/amortUpsert", code);
 
-        public bool ExecuteVoucherRemoval(string code) =>
-            Run("POST", "/voucherRemoval", code).Message.IsSuccessStatusCode;
+        public async Task<bool> ExecuteVoucherRemoval(string code) =>
+            (await Run("POST", "/voucherRemoval", code)).Message.IsSuccessStatusCode;
 
-        public bool ExecuteAssetRemoval(string code) =>
-            Run("POST", "/assetRemoval", code).Message.IsSuccessStatusCode;
+        public async Task<bool> ExecuteAssetRemoval(string code) =>
+            (await Run("POST", "/assetRemoval", code)).Message.IsSuccessStatusCode;
 
-        public bool ExecuteAmortRemoval(string code) =>
-            Run("POST", "/amortRemoval", code).Message.IsSuccessStatusCode;
+        public async Task<bool> ExecuteAmortRemoval(string code) =>
+            (await Run("POST", "/amortRemoval", code)).Message.IsSuccessStatusCode;
 
         private struct QueryResult : IQueryResult
         {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace AccountingServer.Http
 {
@@ -11,36 +11,17 @@ namespace AccountingServer.Http
 
         private readonly TcpListener m_Listener;
 
-        private readonly Thread m_ListenerThread;
-
-        public HttpServer(IPAddress ip, int port)
-        {
-            m_Listener = new TcpListener(ip, port);
-            m_ListenerThread = new Thread(MainProcess)
-                {
-                    IsBackground = true,
-                    Name = "HttpServer"
-                };
-        }
+        public HttpServer(IPAddress ip, int port) => m_Listener = new TcpListener(ip, port);
 
         public event OnHttpRequestEventHandler OnHttpRequest;
 
-        public void Fork() => m_ListenerThread.Start();
-
         public void Start()
-        {
-            Fork();
-            m_ListenerThread.Join();
-        }
-
-        private void MainProcess()
         {
             m_Listener.Start();
             while (true)
             {
                 var tcp = m_Listener.AcceptTcpClient();
-                var thr = new Thread(o => Process((TcpClient)o));
-                thr.Start(tcp);
+                Task.Run(() => Process(tcp));
             }
 
             // ReSharper disable once FunctionNeverReturns
@@ -58,6 +39,7 @@ namespace AccountingServer.Http
                         var request = RequestParser.Parse(stream);
                         if (OnHttpRequest == null)
                             throw new HttpException(501);
+
                         response = OnHttpRequest(request);
                     }
                     catch (HttpException e)

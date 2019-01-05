@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using ScintillaNET;
 
@@ -8,6 +9,8 @@ namespace AccountingClient
     // ReSharper disable once InconsistentNaming
     internal partial class frmMain : Form
     {
+        private bool m_Pending;
+
         public frmMain()
         {
             InitializeComponent();
@@ -17,7 +20,8 @@ namespace AccountingClient
             Height = 860;
 
             SetupScintilla();
-            PrepareAccounting();
+            Pending();
+            PrepareAccounting().ContinueWith(Done).ContinueWith(FocusTextBoxCommand);
         }
 
         /// <summary>
@@ -96,8 +100,14 @@ namespace AccountingClient
         /// <summary>
         ///     准备输入表达式
         /// </summary>
-        private void FocusTextBoxCommand()
+        private void FocusTextBoxCommand(Task t = null)
         {
+            if (textBoxCommand.InvokeRequired)
+            {
+                textBoxCommand.Invoke(new SimpleDelegate(FocusTextBoxCommand), t);
+                return;
+            }
+
             textBoxCommand.Focus();
             textBoxCommand.SelectionStart = 0;
             textBoxCommand.SelectionLength = textBoxCommand.TextLength;
@@ -147,24 +157,54 @@ namespace AccountingClient
                     scintilla.SelectionStart = scintilla.TextLength;
                     scintilla.ScrollCaret();
                     return true;
+                case Keys.Enter when string.IsNullOrWhiteSpace(textBoxCommand.Text):
+                    var line = scintilla.CurrentLine;
+                    scintilla.InsertText(scintilla.Lines[line].Position, m_Shell.EmptyVoucher);
+                    scintilla.Focus();
+                    scintilla.SelectionStart = scintilla.Lines[line + 1].Position;
+                    scintilla.SelectionEnd = scintilla.SelectionStart;
+                    scintilla.ScrollCaret();
+                    return true;
+                case Keys.Enter when Pending():
+                    return false;
                 case Keys.Enter:
-                    if (string.IsNullOrWhiteSpace(textBoxCommand.Text))
-                    {
-                        var line = scintilla.CurrentLine;
-                        scintilla.InsertText(scintilla.Lines[line].Position, m_Shell.EmptyVoucher);
-                        scintilla.Focus();
-                        scintilla.SelectionStart = scintilla.Lines[line + 1].Position;
-                        scintilla.SelectionEnd = scintilla.SelectionStart;
-                        scintilla.ScrollCaret();
-                        return true;
-                    }
-
-                    return ExecuteCommand(false);
+                    ExecuteCommand(false).ContinueWith(Done);
+                    return true;
+                case Keys.Enter | Keys.Shift when Pending():
+                    return false;
                 case Keys.Enter | Keys.Shift:
-                    return ExecuteCommand(true);
+                    ExecuteCommand(true).ContinueWith(Done);
+                    return true;
             }
 
             return false;
+        }
+
+        private bool Pending()
+        {
+            if (m_Pending)
+                return true;
+
+            m_Pending = true;
+            textBoxCommand.BackColor = DefaultBackColor;
+            textBoxCommand.Enabled = false;
+            Text = @"Accounting Server (Pending)";
+            return false;
+        }
+
+        private void Done(Task t)
+        {
+            if (textBoxCommand.InvokeRequired)
+            {
+                textBoxCommand.Invoke(new SimpleDelegate(Done), t);
+                return;
+            }
+
+            m_Pending = false;
+            if (textBoxCommand.BackColor == DefaultBackColor)
+                textBoxCommand.BackColor = Color.White;
+            textBoxCommand.Enabled = true;
+            Text = @"Accounting Server";
         }
 
         private bool scintilla_Key(Keys keyData)
@@ -174,19 +214,31 @@ namespace AccountingClient
                 case Keys.Escape:
                     FocusTextBoxCommand();
                     return true;
+                case Keys.Enter | Keys.Alt when Pending():
+                    return false;
                 case Keys.Enter | Keys.Alt:
-                    return PerformUpsert();
-                case Keys.Delete | Keys.Alt:
-                    return PerformRemoval();
-                case Keys.Enter | Keys.Shift | Keys.Control | Keys.Alt:
-                    PerformUpserts();
+                    PerformUpsert().ContinueWith(Done);
                     return true;
+                case Keys.Delete | Keys.Alt when Pending():
+                    return false;
+                case Keys.Delete | Keys.Alt:
+                    PerformRemoval().ContinueWith(Done);
+                    return true;
+                case Keys.Enter | Keys.Shift | Keys.Control | Keys.Alt when Pending():
+                    return false;
+                case Keys.Enter | Keys.Shift | Keys.Control | Keys.Alt:
+                    PerformUpserts().ContinueWith(Done);
+                    return true;
+                case Keys.Delete | Keys.Shift | Keys.Control | Keys.Alt when Pending():
+                    return false;
                 case Keys.Delete | Keys.Shift | Keys.Control | Keys.Alt:
-                    PerformRemovals();
+                    PerformRemovals().ContinueWith(Done);
                     return true;
                 default:
                     return false;
             }
         }
+
+        private delegate void SimpleDelegate(Task t);
     }
 }
