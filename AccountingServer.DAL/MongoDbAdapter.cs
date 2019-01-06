@@ -280,7 +280,7 @@ namespace AccountingServer.DAL
 
             var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
             if (query.Subtotal.AggrType != AggregationType.None)
-                level |= SubtotalLevel.Day;
+                level |= query.Subtotal.AggrInterval;
 
             if (level.HasFlag(SubtotalLevel.Currency))
                 throw new InvalidOperationException("记账凭证不能按币种分类汇总");
