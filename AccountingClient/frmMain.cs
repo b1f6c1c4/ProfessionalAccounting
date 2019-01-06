@@ -21,7 +21,7 @@ namespace AccountingClient
 
             SetupScintilla();
             Pending();
-            PrepareAccounting().ContinueWith(Done).ContinueWith(FocusTextBoxCommand);
+            PrepareAccounting().ContinueWith(Done);
         }
 
         /// <summary>
@@ -187,7 +187,6 @@ namespace AccountingClient
 
             m_Pending = true;
             textBoxCommand.BackColor = DefaultBackColor;
-            textBoxCommand.Enabled = false;
             Text = @"Accounting Server (Pending)";
             return false;
         }
@@ -203,7 +202,6 @@ namespace AccountingClient
             m_Pending = false;
             if (textBoxCommand.BackColor == DefaultBackColor)
                 textBoxCommand.BackColor = Color.White;
-            textBoxCommand.Enabled = true;
             Text = @"Accounting Server";
         }
 
