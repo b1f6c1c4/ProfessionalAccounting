@@ -31,7 +31,7 @@ namespace AccountingServer
             if (request.Method == "GET")
             {
                 if (request.BaseUri == "/emptyVoucher")
-                    return GenerateHttpResponse(Facade.EmptyVoucher(spec), "text/plain");
+                    return GenerateHttpResponse(Facade.EmptyVoucher(spec), "text/plain; charset=utf-8");
 
                 return new HttpResponse { ResponseCode = 404 };
             }
@@ -51,7 +51,7 @@ namespace AccountingServer
                     {
                         var expr = request.ReadToEnd();
                         var res = Facade.Execute(expr, spec);
-                        var response = GenerateHttpResponse(res.ToString(), "text/plain");
+                        var response = GenerateHttpResponse(res.ToString(), "text/plain; charset=utf-8");
                         response.Header["X-Type"] = res.GetType().Name;
                         response.Header["X-AutoReturn"] = res.AutoReturn ? "true" : "false";
                         response.Header["X-Dirty"] = res.Dirty ? "true" : "false";
@@ -62,7 +62,7 @@ namespace AccountingServer
                     {
                         var code = request.ReadToEnd();
                         var res = Facade.ExecuteVoucherUpsert(code, spec);
-                        return GenerateHttpResponse(res, "text/plain");
+                        return GenerateHttpResponse(res, "text/plain; charset=utf-8");
                     }
                 case "/voucherRemoval":
                     {
@@ -75,7 +75,7 @@ namespace AccountingServer
                     {
                         var code = request.ReadToEnd();
                         var res = Facade.ExecuteAssetUpsert(code, spec);
-                        return GenerateHttpResponse(res, "text/plain");
+                        return GenerateHttpResponse(res, "text/plain; charset=utf-8");
                     }
                 case "/assertRemoval":
                     {
@@ -88,7 +88,7 @@ namespace AccountingServer
                     {
                         var code = request.ReadToEnd();
                         var res = Facade.ExecuteAmortUpsert(code, spec);
-                        return GenerateHttpResponse(res, "text/plain");
+                        return GenerateHttpResponse(res, "text/plain; charset=utf-8");
                     }
                 case "/amortRemoval":
                     {

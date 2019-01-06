@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -27,6 +28,14 @@ namespace AccountingServer.Http
             // ReSharper disable once FunctionNeverReturns
         }
 
+        private HttpResponse Process(HttpRequest request)
+        {
+            if (OnHttpRequest == null)
+                throw new HttpException(501);
+
+            return OnHttpRequest(request);
+        }
+
         private void Process(TcpClient tcp)
         {
             try
@@ -37,10 +46,22 @@ namespace AccountingServer.Http
                     try
                     {
                         var request = RequestParser.Parse(stream);
-                        if (OnHttpRequest == null)
-                            throw new HttpException(501);
-
-                        response = OnHttpRequest(request);
+#if DEBUG
+                        if (request.Method == "OPTIONS")
+                            response = new HttpResponse
+                                {
+                                    Header = new Dictionary<string, string>
+                                        {
+                                            { "Access-Control-Allow-Origin", "*" },
+                                            { "Access-Control-Allow-Methods", "*" },
+                                            { "Access-Control-Allow-Headers", "*" },
+                                            { "Access-Control-Max-Time", "86400" }
+                                        },
+                                    ResponseCode = 200
+                                };
+                        else
+#endif
+                            response = Process(request);
                     }
                     catch (HttpException e)
                     {
@@ -48,9 +69,16 @@ namespace AccountingServer.Http
                     }
                     catch (Exception e)
                     {
-                        response = HttpUtil.GenerateHttpResponse(e.ToString(), "text/plain");
+                        response = HttpUtil.GenerateHttpResponse(e.ToString(), "text/plain; charset=utf-8");
                         response.ResponseCode = 500;
                     }
+
+#if DEBUG
+                    if (response.Header == null)
+                        response.Header = new Dictionary<string, string>();
+                    if (!response.Header.ContainsKey("Access-Control-Allow-Origin"))
+                        response.Header["Access-Control-Allow-Origin"] = "*";
+#endif
 
                     using (response)
                         ResponseWriter.Write(stream, response);
