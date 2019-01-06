@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using AccountingServer.Entities;
 using AccountingServer.Http;
@@ -21,12 +22,23 @@ namespace AccountingServer
         private static HttpResponse Server_OnHttpRequest(HttpRequest request)
         {
 #if DEBUG
+            if (request.BaseUri == "/")
+            {
+                if (request.Method != "GET")
+                    return new HttpResponse { ResponseCode = 405 };
+
+                var fn = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../frontend/index.html");
+                return !File.Exists(fn)
+                    ? new HttpResponse { ResponseCode = 404 }
+                    : GenerateHttpResponse(File.OpenRead(fn), "text/html");
+            }
+
             if (request.BaseUri.StartsWith("/api", StringComparison.Ordinal))
                 request.BaseUri = request.BaseUri.Substring(4);
 #endif
             string spec = null;
-            if (request.Header.ContainsKey("X-Serializer"))
-                spec = request.Header["X-Serializer"];
+            if (request.Header.ContainsKey("x-serializer"))
+                spec = request.Header["x-serializer"];
 
             if (request.Method == "GET")
             {
@@ -39,8 +51,8 @@ namespace AccountingServer
             if (request.Method != "POST")
                 return new HttpResponse { ResponseCode = 405 };
 
-            if (!request.Header.ContainsKey("X-ClientDateTime") ||
-                !ClientDateTime.TryParse(request.Header["X-ClientDateTime"], out var timestamp))
+            if (!request.Header.ContainsKey("x-clientdatetime") ||
+                !ClientDateTime.TryParse(request.Header["x-clientdatetime"], out var timestamp))
                 return new HttpResponse { ResponseCode = 400 };
 
             ClientDateTime.Set(timestamp);

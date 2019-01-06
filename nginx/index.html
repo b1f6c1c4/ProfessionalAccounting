@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="ie=edge" http-equiv="x-ua-compatible">
+    <meta name="description" content="专业记账系统">
+
+    <title>专业记账系统</title>
+
+    <style>
+      html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-size: 100%;
+        font: inherit;
+        vertical-align: baseline;
+      }
+      /* HTML5 display-role reset for older browsers */
+      article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+        display: block;
+      }
+      body {
+        line-height: 1;
+      }
+      ol, ul {
+        list-style: none;
+      }
+      blockquote, q {
+        quotes: none;
+      }
+      blockquote:before, blockquote:after, q:before, q:after {
+        content: '';
+        content: none;
+      }
+      table {
+        border-collapse: collapse;
+        border-spacing: 0;
+      }
+
+      body {
+        font-family: Consolas;
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      #cmd-cont {
+        width: 100%;
+      }
+      input {
+        font-family: Consolas;
+        width: 100%;
+      }
+      #res-cont {
+        overflow: scroll;
+        flex-grow: 1;
+      }
+    </style>
+  </head>
+  <body>
+
+  <div id="cmd-cont">
+    <form id="frm">
+      <input id="cmd" name="cmd" type="text">
+    </form>
+  </div>
+  <article id="res-cont">
+    <pre id='res'></pre>
+  </article>
+
+  <script>
+    document.getElementById('frm').onsubmit = (e) => {
+      e.preventDefault();
+      const cmd = document.getElementById('cmd').value;
+      if (cmd === '??') {
+        document.getElementById('res').innerText = `客户端帮助文档
+
+??							客户端帮助文档
+SPEC -- ...					临时选择序列化器
+`;
+        return;
+      }
+
+      const m = cmd.match(/^([a-z](?:[^-]|-[^-]|---)+)--(.*)$/);
+      const expr = m ? m[2] : cmd;
+      const spec = m ? m[1] : null;
+
+      const xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function () {
+        if (this.readyState === 4) {
+          document.getElementById('res').innerText = this.responseText;
+        }
+      };
+      xhr.open('POST', '/api/execute', true);
+      const d = new Date();
+      const ld = new Date(+d - 1000*60*d.getTimezoneOffset());
+      const ldt = ld.toISOString().replace(/Z$/, '');
+      xhr.setRequestHeader('X-ClientDateTime', ldt);
+      if (spec !== null)
+        xhr.setRequestHeader('X-Serializer', spec);
+      xhr.send(expr);
+    }
+  </script>
+</body>
+</html>
