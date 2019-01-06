@@ -186,13 +186,13 @@ namespace AccountingClient
         ///     执行表达式
         /// </summary>
         /// <returns></returns>
-        private async Task<bool> ExecuteCommand(bool append)
+        private async Task ExecuteCommand(bool append)
         {
             try
             {
                 var res = await m_Shell.Execute(textBoxCommand.Text);
                 if (res == null)
-                    return true;
+                    return;
 
                 var result = res.ToString();
 
@@ -217,7 +217,6 @@ namespace AccountingClient
 
                 if (res.AutoReturn)
                     FocusTextBoxCommand();
-                return true;
             }
             catch (Exception exception)
             {
@@ -231,7 +230,7 @@ namespace AccountingClient
                     scintilla.Text = exception.ToString();
 
                 textBoxCommand.BackColor = Color.FromArgb(255, 70, 70);
-                return false;
+                FocusTextBoxCommand();
             }
         }
     }
