@@ -116,7 +116,7 @@ namespace AccountingServer.Http
                 sb.Append((char)ch);
             }
 
-            return sb.ToString();
+            return sb.ToString().ToLowerInvariant();
         }
 
         private static string ParseUri(Stream stream)

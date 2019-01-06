@@ -10,10 +10,10 @@ namespace AccountingServer.Http
     {
         public static string ReadToEnd(this HttpRequest request, int maxLength = 1048576)
         {
-            if (!request.Header.ContainsKey("Content-Length"))
+            if (!request.Header.ContainsKey("content-length"))
                 return null;
 
-            var len = Convert.ToInt32(request.Header["Content-Length"]);
+            var len = Convert.ToInt32(request.Header["content-length"]);
             if (len > maxLength)
                 throw new HttpException(413);
 
