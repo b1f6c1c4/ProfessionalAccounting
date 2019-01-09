@@ -27,7 +27,7 @@ namespace AccountingServer
                 if (request.Method != "GET")
                     return new HttpResponse { ResponseCode = 405 };
 
-                var fn = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../frontend/index.html");
+                var fn = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../nginx/index.html");
                 return !File.Exists(fn)
                     ? new HttpResponse { ResponseCode = 404 }
                     : GenerateHttpResponse(File.OpenRead(fn), "text/html");

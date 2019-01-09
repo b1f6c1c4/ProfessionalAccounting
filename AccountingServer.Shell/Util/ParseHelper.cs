@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.BLL.Util;
@@ -55,12 +56,19 @@ namespace AccountingServer.Shell.Util
         public static void TrimStartComment(this FacadeBase facade, ref string expr)
         {
             expr = expr.TrimStart();
+            var regex = new Regex(@"[^\r\n]*(\r\n|\n|\n\r)");
             while (expr.Length > 2 &&
                 expr[0] == '/' &&
                 expr[1] == '/')
             {
-                var index = expr.IndexOf(Environment.NewLine, 2, StringComparison.Ordinal);
-                expr = expr.Substring(index + Environment.NewLine.Length);
+                var m = regex.Match(expr);
+                if (!m.Success)
+                {
+                    expr = string.Empty;
+                    return;
+                }
+
+                expr = expr.Substring(m.Length);
                 expr = expr.TrimStart();
             }
         }
