@@ -13,6 +13,18 @@ namespace AccountingServer.Test.UnitTest.Shell
         [InlineData("abc\r\ne//rt", "\t  ///aer\r\nabc\r\ne//rt")]
         [InlineData("abc\r\ne//rt", "\t ///aer\t\r\n//'-*\"\r\nabc\r\ne//rt")]
         [InlineData("abc\r\ne//rt", " \t///aer\t\n\r\r\n//'-*\"\n\r\r\nabc\r\ne//rt")]
+        [InlineData("", "\t // \n ")]
+        [InlineData("simple test", "\t // \n simple test")]
+        [InlineData("/ //aer\nabc\ne//rt", "\t  / //aer\nabc\ne//rt")]
+        [InlineData("abc\ne//rt", "\t  ///aer\nabc\ne//rt")]
+        [InlineData("abc\ne//rt", "\t ///aer\t\n//'-*\"\nabc\ne//rt")]
+        [InlineData("abc\ne//rt", " \t///aer\t\n\n//'-*\"\n\nabc\ne//rt")]
+        [InlineData("", "\t // \n\r ")]
+        [InlineData("simple test", "\t // \n\r simple test")]
+        [InlineData("/ //aer\n\rabc\n\re//rt", "\t  / //aer\n\rabc\n\re//rt")]
+        [InlineData("abc\n\re//rt", "\t  ///aer\n\rabc\n\re//rt")]
+        [InlineData("abc\n\re//rt", "\t ///aer\t\n\r//'-*\"\n\rabc\n\re//rt")]
+        [InlineData("abc\n\re//rt", " \t///aer\t\n\r\n\r//'-*\"\n\r\n\rabc\n\re//rt")]
         public void TrimStartCommentTest(string expected, string expr)
         {
             ParseHelper.TrimStartComment(null, ref expr);

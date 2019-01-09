@@ -12,20 +12,63 @@
   <body>
 
   <div id="cmd-cont">
-    <form id="frm">
-      <input id="cmd" name="cmd" type="text">
+    <form id="frm-cmd">
+      <input id="cmd" name="cmd" type="text" autofocus>
     </form>
   </div>
   <article id="res-cont">
     <pre id='res'></pre>
   </article>
+  <div id="edit-cont">
+    <form id="frm-edit">
+      <textarea id="editor" rows="10" cols="30"></textarea>
+      <div class="ops">
+        <button id="edit" type="button">编辑</button>
+        <button type="submit">保存</button>
+        <button id="new" type="button">新建</button>
+        <button id="remove" type="button">删除</button>
+        <button type="reset">清空</button>
+      </div>
+    </form>
+  </div>
+  <pre id='err'></pre>
 
   <script>
-    document.getElementById('frm').onsubmit = (e) => {
-      e.preventDefault();
+    const editor = document.getElementById('editor');
+    const res = document.getElementById('res');
+    const err = document.getElementById('err');
+
+    const xhr = (method, url, spec, payload) => new Promise((resolve, reject) => {
+      err.innerText = '';
+      const xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function () {
+        if (this.readyState === 4) {
+          if (this.status === 200 || this.status === 204) {
+            resolve(this.responseText);
+          } else {
+            reject('HTTP ' + this.status + '\n' + this.responseText);
+          }
+        }
+      };
+      xhr.open(method, url, true);
+      const d = new Date();
+      const ld = new Date(+d - 1000*60*d.getTimezoneOffset());
+      const ldt = ld.toISOString().replace(/Z$/, '');
+      xhr.setRequestHeader('X-ClientDateTime', ldt);
+      if (spec)
+        xhr.setRequestHeader('X-Serializer', spec);
+      xhr.send(payload);
+    });
+
+    document.getElementById('frm-cmd').onsubmit = (ev) => {
+      ev.preventDefault();
       const cmd = document.getElementById('cmd').value;
+      if (!cmd) {
+        res.innerText = '';
+        return;
+      }
       if (cmd === '??') {
-        document.getElementById('res').innerText = `客户端帮助文档
+        res.innerText = `客户端帮助文档
 
 ??							客户端帮助文档
 SPEC -- ...					临时选择序列化器
@@ -37,21 +80,67 @@ SPEC -- ...					临时选择序列化器
       const expr = m ? m[2] : cmd;
       const spec = m ? m[1] : null;
 
-      const xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function () {
-        if (this.readyState === 4) {
-          document.getElementById('res').innerText = this.responseText;
-        }
-      };
-      xhr.open('POST', '/api/execute', true);
-      const d = new Date();
-      const ld = new Date(+d - 1000*60*d.getTimezoneOffset());
-      const ldt = ld.toISOString().replace(/Z$/, '');
-      xhr.setRequestHeader('X-ClientDateTime', ldt);
-      if (spec !== null)
-        xhr.setRequestHeader('X-Serializer', spec);
-      xhr.send(expr);
-    }
+      xhr('POST', '/api/execute', spec, expr).then((t) => {
+        res.innerText = t;
+      }).catch((e) => {
+        err.innerText = e;
+      });
+    };
+
+    document.getElementById('edit').onclick = (ev) => {
+      ev.preventDefault();
+      err.innerText = '';
+      const tmp = editor.value;
+      editor.value = res.innerText;
+      if (tmp && tmp.startsWith('@'))
+        res.innerText = tmp;
+      else
+        res.innerText = '';
+      editor.focus();
+    };
+
+    document.getElementById('new').onclick = (ev) => {
+      ev.preventDefault();
+      xhr('GET', '/api/emptyVoucher').then((t) => {
+        editor.value = t;
+        editor.focus();
+      }).catch((e) => {
+        err.innerText = e;
+      });
+    };
+
+    const trimVoucher = () => {
+      let str = editor.value;
+      str = str.trim(' ');
+      str = str.substr(1, str.length - 2);
+      return str;
+    };
+
+    document.getElementById('frm-edit').onsubmit = (ev) => {
+      ev.preventDefault();
+      xhr('POST', '/api/voucherUpsert', null, trimVoucher()).then((t) => {
+        const tmp = res.innerText;
+        res.innerText = t;
+        if (tmp && tmp.startsWith('@'))
+          editor.value = tmp;
+      }).catch((e) => {
+        err.innerText = e;
+      });
+    };
+
+    document.getElementById('remove').onclick = (ev) => {
+      ev.preventDefault();
+      xhr('POST', '/api/voucherRemoval', null, trimVoucher()).then(() => {
+        const tmp = res.innerText;
+        res.innerText = editor.value.trim() + ' (deleted)';
+        if (tmp && tmp.startsWith('@'))
+          editor.value = tmp;
+        else
+          editor.value = '';
+      }).catch((e) => {
+        err.innerText = e;
+      });
+    };
   </script>
 </body>
 </html>
