@@ -187,7 +187,7 @@ namespace AccountingServer.Shell.Serializer
                             sb.Append(d.Content.Quotation('\''));
                             break;
                         case ColumnSpec.Remark:
-                            sb.Append(d.Content.Quotation('"'));
+                            sb.Append(d.Remark.Quotation('"'));
                             break;
                         case ColumnSpec.Fund:
                             sb.Append($"{d.Fund:R}");
