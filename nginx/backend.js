@@ -9,8 +9,7 @@ const xhr = (method, url, spec, payload) => new Promise((resolve, reject) => {
       }
     }
   };
-  const dbg = window.ACCOUNTING_BACKEND;
-  xhr.open(method, dbg + url, true);
+  xhr.open(method, url, true);
   const d = new Date();
   const ld = new Date(+d - 1000*60*d.getTimezoneOffset());
   const ldt = ld.toISOString().replace(/Z$/, '');
