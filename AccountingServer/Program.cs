@@ -22,16 +22,12 @@ namespace AccountingServer
         private static HttpResponse Server_OnHttpRequest(HttpRequest request)
         {
 #if DEBUG
-            if (request.BaseUri == "/")
-            {
-                if (request.Method != "GET")
-                    return new HttpResponse { ResponseCode = 405 };
-
-                var fn = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../nginx/index.html");
-                return !File.Exists(fn)
-                    ? new HttpResponse { ResponseCode = 404 }
-                    : GenerateHttpResponse(File.OpenRead(fn), "text/html");
-            }
+            var fn = Path.Combine(
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../nginx/"),
+                (request.BaseUri == "/" ? "/index.html" : request.BaseUri).TrimStart('/'));
+            if (request.Method == "GET")
+                if (File.Exists(fn))
+                    return GenerateHttpResponse(File.OpenRead(fn), "text/html");
 
             if (request.BaseUri.StartsWith("/api", StringComparison.Ordinal))
                 request.BaseUri = request.BaseUri.Substring(4);
