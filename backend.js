@@ -40,15 +40,15 @@ SPEC -- ...					临时选择序列化器
 
 const sanitize = (raw) => {
   let str = raw;
-  str = str.trim(' ');
+  str = str.trim();
   str = str.substr(1, str.length - 2);
-  if (str.startsWith('Voucher')) {
+  if (str.startsWith('new Voucher')) {
     return 'Voucher';
   }
-  if (str.startsWith('Asset')) {
+  if (str.startsWith('new Asset')) {
     return 'Asset';
   }
-  if (str.startsWith('Amortization')) {
+  if (str.startsWith('new Amortization')) {
     return 'Amortization';
   }
   return undefined;

@@ -45,19 +45,71 @@ const freeze = (f) => {
   cmdLine.setReadOnly(f);
 };
 
+const prepareObject = () => {
+  let row = editor.selection.getCursor().row;
+  while (!editor.session.doc.getLine(row).match(/^@new [A-Z][a-z]+ \{/)) {
+    if (row) {
+      row--;
+    } else {
+      return undefined;
+    }
+  }
+  const st = row;
+  while (!editor.session.doc.getLine(row).match(/\}@$/)) {
+    if (row < editor.session.doc.getLength()) {
+      row++;
+    } else {
+      return undefined;
+    }
+  }
+  const ed = row;
+  const obj = editor.session.doc.getLines(st, ed).join('\n');
+  const rng = new ace.Range(st, 0, ed + 1, 0);
+  return { rng, obj };
+};
+
+const indicateResult = (res, rng) => {
+  freeze(false);
+  editor.session.doc.replace(rng, res.endsWith('\n') ? res : res + '\n');
+};
+
+const indicateError = (err, { end }) => {
+  freeze(false);
+  console.error(err);
+  editor.session.doc.insert(end, err.endsWith('\n') ? err : err + '\n');
+};
+
 editor.setTheme("ace/theme/chrome");
 editor.session.setMode('ace/mode/accounting');
 editor.setOption('showLineNumbers', false);
 editor.renderer.setShowGutter(true);
+editor.commands.removeCommands(['removetolineend', 'removewordright']);
 editor.commands.addCommand({
   name: 'upsert',
   bindKey: 'Alt-Enter',
-  exec: () => console.log('upsert'), // TODO
+  exec: () => {
+    ({ rng, obj } = prepareObject());
+    freeze(true);
+    upsert(obj).then((res) => {
+      indicateResult(res, rng);
+    }).catch((err) => {
+      indicateError(err, rng);
+    });
+  },
   readOnly: false,
-}, {
+});
+editor.commands.addCommand({
   name: 'remove',
   bindKey: 'Alt-Delete',
-  exec: () => console.log('remove'), // TODO
+  exec: () => {
+    ({ rng, obj } = prepareObject());
+    freeze(true);
+    remove(obj).then((res) => {
+      indicateResult(`/*${obj}*/`, rng);
+    }).catch((err) => {
+      indicateError(err, rng);
+    });
+  },
   readOnly: false,
 });
 editor.commands.bindKeys({
@@ -77,7 +129,7 @@ cmdLine.commands.bindKeys({
     execute(command).then((res) => {
       finalize(res, true, true);
     }).catch((err) => {
-      finalize(res, false, true);
+      finalize(err, false, true);
     });
     e.editor.focus();
   },
@@ -87,7 +139,7 @@ cmdLine.commands.bindKeys({
     execute(command).then((res) => {
       finalize(res, true, command === '');
     }).catch((err) => {
-      finalize(res, false, command === '');
+      finalize(err, false, command === '');
     });
     e.editor.focus();
   },
