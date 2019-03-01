@@ -43,29 +43,29 @@ const sanitize = (raw) => {
   str = str.trim();
   str = str.substr(1, str.length - 2);
   if (str.startsWith('new Voucher')) {
-    return 'Voucher';
+    return { str, type: 'voucher' };
   }
   if (str.startsWith('new Asset')) {
-    return 'Asset';
+    return { str, type: 'asset' };
   }
   if (str.startsWith('new Amortization')) {
-    return 'Amortization';
+    return { str, type: 'amortization' };
   }
-  return undefined;
+  return { str };
 };
 
 const upsert = (raw) => {
-  const type = sanitize(raw);
+  const { str, type } = sanitize(raw);
   if (!type) {
     return Promise.reject('Type not found');
   }
-  return xhr('POST', `/api/${type}Upsert`, null, raw);
+  return xhr('POST', `/api/${type}Upsert`, null, str);
 };
 
 const remove = (raw) => {
-  const type = sanitize(raw);
+  const { str, type } = sanitize(raw);
   if (!type) {
     return Promise.reject('Type not found');
   }
-  return xhr('POST', `/api/${type}Remove`, null, raw);
+  return xhr('POST', `/api/${type}Removal`, null, str);
 };
