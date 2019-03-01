@@ -83,23 +83,23 @@ const indicateError = (err, { end }) => {
 };
 
 const doUpsert = () => {
-    ({ rng, obj } = prepareObject());
-    freeze(true);
-    upsert(obj).then((res) => {
-      indicateResult(res, rng);
-    }).catch((err) => {
-      indicateError(err, rng);
-    });
+  const { rng, obj } = prepareObject();
+  freeze(true);
+  upsert(obj).then((res) => {
+    indicateResult(res, rng);
+  }).catch((err) => {
+    indicateError(err, rng);
+  });
 };
 
 const doRemove = () => {
-    ({ rng, obj } = prepareObject());
-    freeze(true);
-    remove(obj).then((res) => {
-      indicateResult(`/*${obj}*/`, rng);
-    }).catch((err) => {
-      indicateError(err, rng);
-    });
+  const { rng, obj } = prepareObject();
+  freeze(true);
+  remove(obj).then((res) => {
+    indicateResult(`/*${obj}*/`, rng);
+  }).catch((err) => {
+    indicateError(err, rng);
+  });
 };
 
 editor.setTheme("ace/theme/chrome");

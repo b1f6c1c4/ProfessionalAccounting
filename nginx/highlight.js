@@ -5,8 +5,8 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
   const AccountingHighlightRules = function() {
     this.$rules = {
       start: [{
-        token: 'keyword.control',
-        regex: /^@new (?:Voucher|Asset|Amortization) \{/,
+        token: ['markup.bold', 'keyword.control'],
+        regex: /^(\/\*)?(@new (?:Voucher|Asset|Amortization) \{)/,
         next: 'obj',
       }, {
         token: 'constant.numeric.date',
@@ -36,8 +36,8 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         defaultToken : 'text',
       }],
       obj: [{
-        token: 'keyword.control',
-        regex: /\}@/,
+        token: ['keyword.control', 'markup.bold'],
+        regex: /(\}@)(\*\/)?/,
         next: 'start',
       }, {
         token: ['entity.name.function', 'keyword.operator', 'constant.numeric.date', 'keyword.operator'],
