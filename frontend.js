@@ -29,6 +29,14 @@ const cmdLine = singleLineEditor(document.getElementById('cmdLine'));
 cmdLine.editor = editor;
 editor.cmdLine = cmdLine;
 
+const freeze = (f) => {
+  editor.setReadOnly(f);
+  cmdLine.setReadOnly(f);
+  document.getElementById('create').disabled = f;
+  document.getElementById('upsert').disabled = f;
+  document.getElementById('remove').disabled = f;
+};
+
 const finalize = (answer, success, insert) => {
   if (!insert) {
     editor.setValue('');
@@ -38,11 +46,6 @@ const finalize = (answer, success, insert) => {
   if (!success) {
     console.error(err);
   }
-};
-
-const freeze = (f) => {
-  editor.setReadOnly(f);
-  cmdLine.setReadOnly(f);
 };
 
 const prepareObject = () => {
@@ -79,6 +82,26 @@ const indicateError = (err, { end }) => {
   editor.session.doc.insert(end, err.endsWith('\n') ? err : err + '\n');
 };
 
+const doUpsert = () => {
+    ({ rng, obj } = prepareObject());
+    freeze(true);
+    upsert(obj).then((res) => {
+      indicateResult(res, rng);
+    }).catch((err) => {
+      indicateError(err, rng);
+    });
+};
+
+const doRemove = () => {
+    ({ rng, obj } = prepareObject());
+    freeze(true);
+    remove(obj).then((res) => {
+      indicateResult(`/*${obj}*/`, rng);
+    }).catch((err) => {
+      indicateError(err, rng);
+    });
+};
+
 editor.setTheme("ace/theme/chrome");
 editor.session.setMode('ace/mode/accounting');
 editor.setOption('showLineNumbers', false);
@@ -87,29 +110,13 @@ editor.commands.removeCommands(['removetolineend', 'removewordright']);
 editor.commands.addCommand({
   name: 'upsert',
   bindKey: 'Alt-Enter',
-  exec: () => {
-    ({ rng, obj } = prepareObject());
-    freeze(true);
-    upsert(obj).then((res) => {
-      indicateResult(res, rng);
-    }).catch((err) => {
-      indicateError(err, rng);
-    });
-  },
+  exec: doUpsert,
   readOnly: false,
 });
 editor.commands.addCommand({
   name: 'remove',
   bindKey: 'Alt-Delete',
-  exec: () => {
-    ({ rng, obj } = prepareObject());
-    freeze(true);
-    remove(obj).then((res) => {
-      indicateResult(`/*${obj}*/`, rng);
-    }).catch((err) => {
-      indicateError(err, rng);
-    });
-  },
+  exec: doRemove,
   readOnly: false,
 });
 editor.commands.bindKeys({
@@ -146,3 +153,16 @@ cmdLine.commands.bindKeys({
 });
 cmdLine.commands.removeCommands(['find', 'gotoline', 'findall', 'replace', 'replaceall']);
 cmdLine.focus();
+
+document.getElementById('create').onclick = () => {
+  freeze(true);
+  execute('').then((res) => {
+    finalize(res, true, true);
+  }).catch((err) => {
+    finalize(err, false, true);
+  });
+  editor.focus();
+};
+
+document.getElementById('upsert').onclick = doUpsert;
+document.getElementById('remove').onclick = doRemove;
