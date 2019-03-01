@@ -45,7 +45,10 @@ const freeze = (f) => {
   cmdLine.setReadOnly(f);
 };
 
-editor.renderer.setShowGutter(false);
+editor.setTheme("ace/theme/chrome");
+editor.session.setMode('ace/mode/accounting');
+editor.setOption('showLineNumbers', false);
+editor.renderer.setShowGutter(true);
 editor.commands.addCommand({
   name: 'upsert',
   bindKey: 'Alt-Enter',
