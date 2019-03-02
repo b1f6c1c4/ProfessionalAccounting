@@ -38,13 +38,25 @@ const freeze = (f) => {
 };
 
 const finalize = (answer, success, insert) => {
-  if (!insert) {
+  if (insert) {
+    editor.selection.setSelectionRange({
+      start: { row: editor.selection.getCursor().row, column: 0 },
+      end: { row: editor.selection.getCursor().row, column: 0 },
+    }, false);
+  } else {
     editor.setValue('');
   }
+  const original = editor.selection.getCursor();
   editor.insert(answer);
+  editor.selection.setSelectionRange({
+    start: original,
+    end: original,
+  }, false);
   freeze(false);
-  if (!success) {
-    console.error(err);
+  if (success) {
+    cmdLine.selectAll();
+  } else {
+    console.error(answer);
   }
 };
 
@@ -82,6 +94,21 @@ const indicateError = (err, { end }) => {
   editor.session.doc.insert(end, err.endsWith('\n') ? err : err + '\n');
 };
 
+const doCreate = () => {
+  freeze(true);
+  execute('').then((res) => {
+    finalize(res, true, true);
+    editor.renderer.scrollCursorIntoView();
+    editor.selection.setSelectionRange({
+      start: { row: editor.selection.getCursor().row + 1, column: 0 },
+      end: { row: editor.selection.getCursor().row + 1, column: 0 },
+    }, false);
+  }).catch((err) => {
+    finalize(err, false, true);
+  });
+  editor.focus();
+};
+
 const doUpsert = () => {
   const { rng, obj } = prepareObject();
   freeze(true);
@@ -106,63 +133,59 @@ editor.setTheme("ace/theme/chrome");
 editor.session.setMode('ace/mode/accounting');
 editor.setOption('showLineNumbers', false);
 editor.renderer.setShowGutter(true);
-editor.commands.removeCommands(['removetolineend', 'removewordright']);
-editor.commands.addCommand({
+editor.commands.addCommands([{
   name: 'upsert',
   bindKey: 'Alt-Enter',
   exec: doUpsert,
   readOnly: false,
-});
-editor.commands.addCommand({
+}, {
   name: 'remove',
   bindKey: 'Alt-Delete',
   exec: doRemove,
   readOnly: false,
-});
+}]);
 editor.commands.bindKeys({
-  'Esc': (e) => { e.cmdLine.focus(); },
+  'Tab': () => { cmdLine.focus(); },
 });
-editor.showCommandLine = (val) => {
-  cmdLine.focus();
-  if (typeof val == 'string')
-    editor.cmdLine.setValue(val, 1);
-};
 
 cmdLine.commands.bindKeys({
-  'Tab': (e) => { e.editor.focus(); },
-  'Shift+Return': (e) => {
-    const command = e.getValue();
+  'Tab': () => { editor.focus(); },
+  'Shift+Return': () => {
+    const command = cmdLine.getValue();
+    if (command === '') {
+      doCreate();
+      return;
+    }
     freeze(true);
     execute(command).then((res) => {
       finalize(res, true, true);
+      editor.focus();
+      editor.renderer.scrollCursorIntoView();
     }).catch((err) => {
       finalize(err, false, true);
+      editor.renderer.scrollCursorIntoView();
     });
-    e.editor.focus();
   },
-  'Return': (e) => {
-    const command = e.getValue();
+  'Return': () => {
+    const command = cmdLine.getValue();
+    if (command === '') {
+      doCreate();
+      return;
+    }
     freeze(true);
     execute(command).then((res) => {
-      finalize(res, true, command === '');
+      finalize(res, true, false);
+      editor.focus();
+      editor.renderer.scrollCursorIntoView();
     }).catch((err) => {
-      finalize(err, false, command === '');
+      finalize(err, false, false);
+      editor.renderer.scrollCursorIntoView();
     });
-    e.editor.focus();
   },
 });
 cmdLine.commands.removeCommands(['find', 'gotoline', 'findall', 'replace', 'replaceall']);
 cmdLine.focus();
 
-document.getElementById('create').onclick = () => {
-  freeze(true);
-  execute('').then((res) => {
-    finalize(res, true, true);
-  }).catch((err) => {
-    finalize(err, false, true);
-  });
-  editor.focus();
-};
-
+document.getElementById('create').onclick = doCreate;
 document.getElementById('upsert').onclick = doUpsert;
 document.getElementById('remove').onclick = doRemove;
