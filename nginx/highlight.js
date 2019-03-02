@@ -14,24 +14,33 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         token: 'string.double',
         regex: /"(?:[^"]|"")*"/,
       }, {
+        token: 'text',
+        regex: /[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}/,
+      }, {
         token: ['markup.bold', 'keyword.control'],
         regex: /^(\/\*)?(@new (?:Voucher|Asset|Amortization) \{)/,
         next: 'obj',
       }, {
         token: 'variable.parameter.currency',
-        regex: /(?:@|\b)[A-Z][A-Z][A-Z]\b/,
+        regex: /@[A-Z][A-Z][A-Z]\b/,
       }, {
-        token: 'constant.numeric.date',
-        regex: /(?:(?![.,]).|^)[1-2][0-9][0-9][0-9][0-1][0-9][0-3][0-9](?![.,])/,
-      }, {
-        token: 'markup.list.numbered.title',
-        regex: /\b(?:(?![.,]).|^)[12346][0-9][0-9][0-9](?![.,])\b/,
-      }, {
-        token: 'markup.list.numbered.subtitle',
-        regex: /\b(?:(?![.,]).|^)[0-9][0-9](?![.,])\b/,
+        token: 'variable.parameter.currency',
+        regex: /\b[A-Z][A-Z][A-Z](?=\s|$)/,
       }, {
         token: 'markup.bold.numeric',
-        regex: /(?:(?!\w).|^)[$¥€]?[-+]?(?:\.[0-9]+|[0-9,]+\.?[0-9]*)(?:[eE][+-]?[0-9]+)?\b/,
+        regex: /[$¥€][-+]?(?:\.[0-9]+|[0-9,]+\.?[0-9]*)(?:[eE][+-]?[0-9]+)?\b/,
+      }, {
+        token: 'constant.numeric.date',
+        regex: /\b[1-2][0-9][0-9][0-9][0-1][0-9][0-3][0-9](?![-.,])/,
+      }, {
+        token: 'markup.list.numbered.title',
+        regex: /\b[12346][0-9][0-9][0-9](?:[0-9][0-9])?(?![-.,])\b/,
+      }, {
+        token: 'markup.list.numbered.subtitle',
+        regex: /\b[0-9][0-9](?![-.,])\b/,
+      }, {
+        token: 'markup.bold.numeric',
+        regex: /\b-?(?:\.[0-9]+|[0-9]+(?:,[0-9]{3})*\.?[0-9]*)(?:[eE][+-]?[0-9]+)?(?=\s|\b|$)/,
       }, {
         defaultToken : 'text',
       }],
@@ -46,7 +55,7 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         regex: /'(?:[^']|'')*'/,
       }, {
         token: 'string.double',
-        regex: /"(?:[^"]|"")*"/,
+        regex: /@?"(?:[^"]|"")*"/,
       }, {
         token: 'string.quoted',
         regex: /%(?:[^%]|%%)*"/,
