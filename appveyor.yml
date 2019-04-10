@@ -1,0 +1,39 @@
+image:
+  - Visual Studio 2017
+
+environment:
+  DOCKER_USERNAME: b1f6c1c4
+  DOCKER_PASSWORD:
+    secure: OoQDRsCepo+DniKf6E5WGQ==
+
+services:
+  - mongodb
+
+install:
+  - ps: choco install sed
+  - ps: docker version
+  - nuget restore AccountingServer.sln
+
+before_build:
+  - docker-switch-linux
+
+build_script:
+  - msbuild /p:Configuration=Gen AccountingServer.QueryGeneration/AccountingServer.QueryGeneration.csproj /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - ps: ./DeployParser.ps1
+  - msbuild /p:Configuration=Release AccountingServer.Entities\AccountingServer.Entities.csproj /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - msbuild /p:Configuration=Release AccountingServer.DAL\AccountingServer.DAL.csproj /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - msbuild /p:Configuration=Release AccountingServer.BLL\AccountingServer.BLL.csproj /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - msbuild /p:Configuration=Release AccountingServer.Shell\AccountingServer.Shell.csproj /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - msbuild /p:Configuration=Release AccountingServer\AccountingServer.csproj /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - msbuild /p:Configuration=Release AccountingServer.Test\AccountingServer.Test.csproj /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+
+after_build:
+  - ps: docker build -t b1f6c1c4/accounting-frontend:latest ./nginx
+  - ps: docker build -t b1f6c1c4/accounting-backend:latest ./AccountingServer/bin/Release
+
+test_script:
+  - xunit.console.clr4 .\AccountingServer.Test\bin\Release\AccountingServer.Test.dll /appveyor
+
+deploy_script:
+  - ps: docker login -u="$env:DOCKER_USER" -p="$env:DOCKER_PASS"
+  - ps: docker push b1f6c1c4/accounting-frontend accounting-backend

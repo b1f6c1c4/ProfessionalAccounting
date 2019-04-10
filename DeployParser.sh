@@ -1,5 +1,7 @@
 #!/bin/sh
 
+sh -euo pipefail
+
 cp AccountingServer.QueryGeneration/obj/Gen/Query* AccountingServer.BLL/Parsing/
 cp AccountingServer.QueryGeneration/obj/Gen/Subtotal* AccountingServer.BLL/Parsing/
 
