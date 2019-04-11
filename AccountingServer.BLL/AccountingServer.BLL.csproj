@@ -98,7 +98,6 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="Parsing\Query.tokens" />
     <None Include="Parsing\QueryLexer.tokens" />
