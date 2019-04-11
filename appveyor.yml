@@ -20,21 +20,24 @@ clone_depth: 1
 
 environment:
   BUILD_DIR: /data/accounting-build
-  SSH_HOST:
-    secure: TE34vNZQ2n5JJ3N8F538PwzmBgJWiLzrYzLywtTdxFw=
   PRIVATE_KEY_PASSWORD:
-    secure: duodF+XCTCjfkVZJtb2GQnVYS31itvrExBtEV5L4iNo=
-  SSH_HOST_FINGERPRINT:
-    secure: BgZQEU9cvGqvxXvOLd9gt2/JzDVkjLvm1lquCWTyGdms3nkYRO2D9BndIzNNVvQHjEX8FvuAgojdBsZ6bOuvtw1i8TfiCtN4eOg5q9rDsrtLSf2/04nIpXq5L5A2iJqUZ4MVbclJxtV4OJ4SrSz0NBzitGVxpNBZ7x/XNhbaqFPGidtLtWaUp89NGzGbf8X4ksv7GU3ELRocpq7VLE6XYvfdoq1Itx4JK23XzLBmEv0=
+    secure: P4dfTh3tMeCUoNqkI6sL4lLPpYiC6Fnt3SOD/0Jq600=
+  DOCKER_HOST:
+    secure: 7Q8pmbTRGhC5XfAK+0tWopI12mMdS4ceKOGiebJZxws=
+  DOCKER_CERT_PATH: c:\projects\accounting\certs
+  DOCKER_TLS_VERIFY: YES
+  DOCKER_MACHINE_NAME: accounting
+  DOCKER_USER: b1f6c1c4
+  DOCKER_PASS:
+    secure: OoQDRsCepo+DniKf6E5WGQ==
 
 services:
   - mongodb
 
 install:
-  - ps: choco install --no-progress sed
+  - choco install --no-progress sed
   - nuget restore AccountingServer.sln
-  - ps: curl -Uri https://raw.githubusercontent.com/rangercej/ssh-agent-powershell/master/ssh-agent.ps1 -OutFile ./ssh-agent.ps1
-  - ps: . ./ssh-agent.ps1
+  - openssl rsa -in ./certs/key.pem -out ./certs/key.pem -passin env:PRIVATE_KEY_PASSWORD
 
 assembly_info:
   patch: true
@@ -44,34 +47,34 @@ assembly_info:
   assembly_informational_version: "{version}"
 
 build_script:
-  - msbuild /p:Configuration=Gen AccountingServer.QueryGeneration/AccountingServer.QueryGeneration.csproj /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - msbuild /p:Configuration=Gen     /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer.QueryGeneration/AccountingServer.QueryGeneration.csproj
   - ps: ./DeployParser.ps1
-  - msbuild /p:Configuration=Release AccountingServer.Entities\AccountingServer.Entities.csproj /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - msbuild /p:Configuration=Release AccountingServer.DAL\AccountingServer.DAL.csproj /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - msbuild /p:Configuration=Release AccountingServer.BLL\AccountingServer.BLL.csproj /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - msbuild /p:Configuration=Release AccountingServer.Shell\AccountingServer.Shell.csproj /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - msbuild /p:Configuration=Release AccountingServer\AccountingServer.csproj /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - msbuild /p:Configuration=Release AccountingServer.Test\AccountingServer.Test.csproj /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer.Entities\AccountingServer.Entities.csproj
+  - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer.DAL\AccountingServer.DAL.csproj
+  - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer.BLL\AccountingServer.BLL.csproj
+  - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer.Shell\AccountingServer.Shell.csproj
+  - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer\AccountingServer.csproj
+  - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer.Test\AccountingServer.Test.csproj
 
 test:
   assemblies:
     only:
       - AccountingServer.Test\bin\Release\AccountingServer.Test.dll
 
+artifacts:
+  - path: 'AccountingServer.BLL\Parsing'
+    name: Parsing
+    type: zip
+  - path: 'AccountingServer\bin\Release'
+    name: AccountingServer
+    type: zip
+
 before_deploy:
-  - ps: Add-Content ~/.ssh/known_hosts "$env:SSH_HOST_FINGERPRINT"
-  - ps: Start-SshAgent
-  - ps: echo "$env:PRIVATE_KEY_PASSWORD" | ssh-add ./private_key.pem 2>&1; echo "Success"
-  - ps: ssh "$env:SSH_HOST" docker version 2>&1; echo "Success"
-  - ps: ssh "$env:SSH_HOST" rm -rf "$env:BUILD_DIR"
-  - ps: ssh "$env:SSH_HOST" mkdir -p "$env:BUILD_DIR"
-  - ps: scp -r ./nginx ./AccountingServer/bin/Release "$($env:SSH_HOST):$($env:BUILD_DIR)" 2>&1; echo "Success"
+  - docker version
 
 deploy_script:
-  - ps: ssh "$env:SSH_HOST" docker build -t b1f6c1c4/accounting-frontend:latest "$($env:BUILD_DIR)/nginx" 2>&1; echo "Success"
-  - ps: ssh "$env:SSH_HOST" docker build -t b1f6c1c4/accounting-backend:latest "$($env:BUILD_DIR)/Release" 2>&1; echo "Success"
-  - ps: docker login -u="$env:DOCKER_USER" -p="$env:DOCKER_PASS"
-  - ps: docker push b1f6c1c4/accounting-frontend accounting-backend
-
-after_deploy:
-  - ps: ssh "$env:SSH_HOST" rm -rf "$env:BUILD_DIR"
+  - docker build -t b1f6c1c4/accounting-frontend:latest ./nginx
+  - docker build -t b1f6c1c4/accounting-backend:latest ./AccountingServer/bin/Release
+  - docker login -u %DOCKER_USER% -p %DOCKER_PASS%
+  - docker push b1f6c1c4/accounting-frontend
+  - docker push b1f6c1c4/accounting-backend
