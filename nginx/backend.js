@@ -49,7 +49,7 @@ const sanitize = (raw) => {
     return { str, type: 'asset' };
   }
   if (str.startsWith('new Amortization')) {
-    return { str, type: 'amortization' };
+    return { str, type: 'amort' };
   }
   return { str };
 };
