@@ -85,7 +85,7 @@ namespace AccountingServer
                         var res = Facade.ExecuteAssetUpsert(code, spec);
                         return GenerateHttpResponse(res, "text/plain; charset=utf-8");
                     }
-                case "/assertRemoval":
+                case "/assetRemoval":
                     {
                         var code = request.ReadToEnd();
                         var res = Facade.ExecuteAssetRemoval(code, spec);
