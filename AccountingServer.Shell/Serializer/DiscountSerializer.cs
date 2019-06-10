@@ -244,7 +244,7 @@ namespace AccountingServer.Shell.Serializer
             var resLst = new List<Item>();
 
             var reg = new Regex(
-                @"(?<num>[0-9]+(?:\.[0-9]+)?)(?:(?<plus>\+[0-9]+(?:\.[0-9]+)?)|(?<minus>-[0-9]+(?:\.[0-9]+)?))?");
+                @"(?<num>[0-9]+(?:\.[0-9]+)?)(?:(?<equals>=[0-9]+(?:\.[0-9]+)?)|(?<plus>(?:\+[0-9]+(?:\.[0-9]+)?)+)|(?<minus>(?:-[0-9]+(?:\.[0-9]+)?)+))?");
             while (true)
             {
                 var res = Parsing.Token(ref expr, false, reg.IsMatch);
@@ -254,13 +254,21 @@ namespace AccountingServer.Shell.Serializer
                 var m = reg.Match(res);
                 var fund0 = Convert.ToDouble(m.Groups["num"].Value);
                 var fundd = 0D;
-                if (m.Groups["plus"].Success)
+                if (m.Groups["equals"].Success)
+                    fundd = fund0 - Convert.ToDouble(m.Groups["equals"].Value.Substring(1));
+                else if (m.Groups["plus"].Success)
                 {
-                    fundd = Convert.ToDouble(m.Groups["plus"].Value);
+                    var sreg = new Regex(@"\+[0-9]+(?:\.[0-9]+)?");
+                    foreach (Match sm in sreg.Matches(m.Groups["plus"].Value))
+                        fundd += Convert.ToDouble(sm.Value);
                     fund0 += fundd;
                 }
                 else if (m.Groups["minus"].Success)
-                    fundd = -Convert.ToDouble(m.Groups["minus"].Value);
+                {
+                    var sreg = new Regex(@"-[0-9]+(?:\.[0-9]+)?");
+                    foreach (Match sm in sreg.Matches(m.Groups["minus"].Value))
+                        fundd -= Convert.ToDouble(sm.Value);
+                }
 
                 resLst.AddRange(
                     lst.Select(

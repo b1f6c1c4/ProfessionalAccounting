@@ -323,7 +323,7 @@ t2
             var voucher = serializer.ParseVoucher(
                 @"new Voucher {
 ! @usd
-T1001 + ! T1002 : 1000-50 950+50 ;
+T1001 + ! T1002 : 1000-0.1-49.9 950+50 ;
 ! aaa + T100366 hei ha : 1000 ;
 t2
 d40
@@ -386,7 +386,7 @@ d8
             var voucher = serializer.ParseVoucher(
                 @"new Voucher {
 ! @usd
-T1001 + ! T1002 : 1000-50 950+50 ;
+T1001 + ! T1002 : 1000-50 950+5+45 ;
 ! aaa + T100366 hei ha : 1000 ;
 t2
 t10
@@ -448,8 +448,8 @@ dnull
             var voucher = serializer.ParseVoucher(
                 @"new Voucher {
 ! @usd
-T1001 + ! T1002 : 1000-50 950+50 ;
-! aaa + T100366 hei ha : 1000 ;
+T1001 + ! T1002 : 1000=950 950+50 ;
+! aaa + T100366 hei ha : 1000=1000 ;
 d48
 tnull
 
