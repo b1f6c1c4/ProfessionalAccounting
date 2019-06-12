@@ -10,7 +10,11 @@ namespace AccountingServer.Entities.Util
     /// </summary>
     public interface IConfigManager
     {
-        void Reload();
+        /// <summary>
+        ///     读取配置文件
+        /// </summary>
+        /// <param name="throws">允许抛出异常</param>
+        void Reload(bool throws);
     }
 
     /// <summary>
@@ -35,7 +39,8 @@ namespace AccountingServer.Entities.Util
         public static long ReloadAll()
         {
             foreach (var manager in ConfigManagers)
-                manager.Reload();
+                manager.Reload(true);
+
             return ConfigManagers.Count;
         }
     }
@@ -80,7 +85,7 @@ namespace AccountingServer.Entities.Util
         public ConfigManager(string filename)
         {
             m_FileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.d", filename);
-            Reload();
+            Reload(false);
             MetaConfigManager.Register(this);
         }
 
@@ -96,10 +101,8 @@ namespace AccountingServer.Entities.Util
             }
         }
 
-        /// <summary>
-        ///     读取配置文件；若发生错误，保存在<c>m_Exception</c>中
-        /// </summary>
-        public void Reload()
+        /// <inheritdoc />
+        public void Reload(bool throws)
         {
             try
             {
@@ -109,6 +112,9 @@ namespace AccountingServer.Entities.Util
             }
             catch (Exception e)
             {
+                if (throws)
+                    throw;
+
                 m_Exception = e;
             }
         }
