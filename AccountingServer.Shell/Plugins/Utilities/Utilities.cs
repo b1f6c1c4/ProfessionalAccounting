@@ -99,9 +99,9 @@ namespace AccountingServer.Shell.Plugins.Utilities
                                     Currency = d.Currency,
                                     Title = d.Title,
                                     SubTitle = d.SubTitle,
-                                    Content = d.Content,
+                                    Content = d.Content == "G()" ? Guid.NewGuid().ToString().ToUpperInvariant() : d.Content,
                                     Fund = num * d.Fund,
-                                    Remark = d.Remark
+                                    Remark = d.Remark == "G()" ? Guid.NewGuid().ToString().ToUpperInvariant() : d.Remark
                                 })
                     .ToList();
             var voucher = new Voucher
