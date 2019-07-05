@@ -19,10 +19,10 @@ namespace AccountingServer.Shell.Plugins.Interest
         protected InterestBase(Accountant accountant) : base(accountant) { }
 
         /// <summary>
-        ///     主科目
+        ///     主过滤器
         /// </summary>
         /// <returns>科目编号</returns>
-        protected abstract int MajorTitle();
+        protected abstract string MajorFilter();
 
         /// <summary>
         ///     主科目借贷方向
@@ -45,7 +45,7 @@ namespace AccountingServer.Shell.Plugins.Interest
             var endDate = !all ? Parsing.UniqueTime(ref expr) : null;
             Parsing.Eof(expr);
 
-            var loans = Accountant.RunGroupedQuery($"T{MajorTitle().AsTitle()}-\"\" ``rcC").Items
+            var loans = Accountant.RunGroupedQuery($"({MajorFilter()})-\"\" ``rtcC").Items
                 .Cast<ISubtotalRemark>()
                 .ToList();
             var rmkObj =
@@ -53,13 +53,17 @@ namespace AccountingServer.Shell.Plugins.Interest
                     b =>
                         b.Remark?.StartsWith(remark, StringComparison.InvariantCultureIgnoreCase) == true &&
                         !b.Remark.EndsWith("-利息", StringComparison.Ordinal));
-            var cntObj = rmkObj.Items.Cast<ISubtotalContent>().Single();
+            var titleObj = rmkObj.Items.Cast<ISubtotalTitle>().Single();
+            var cntObj = titleObj.Items.Cast<ISubtotalContent>().Single();
+            // ReSharper disable once PossibleInvalidOperationException
+            var title = titleObj.Title.Value;
             var content = cntObj.Content;
             var rmk = rmkObj.Remark;
             var currency = cntObj.Items.Cast<ISubtotalCurrency>().Single().Currency;
             var info = new LoanInfo
                 {
                     Currency = currency,
+                    Title = title,
                     Content = content,
                     Remark = rmk,
                     Rate = rate
@@ -328,6 +332,11 @@ namespace AccountingServer.Shell.Plugins.Interest
             public string Currency { private get; set; }
 
             /// <summary>
+            ///     科目
+            /// </summary>
+            public int Title { private get; set; }
+
+            /// <summary>
             ///     借款人
             /// </summary>
             public string Content { private get; set; }
@@ -343,19 +352,19 @@ namespace AccountingServer.Shell.Plugins.Interest
             public double Rate { get; set; }
 
             public string QueryMajor(InterestBase my) =>
-                $"(@{Currency} T{my.MajorTitle().AsTitle()} {Content.Quotation('\'')})*({Remark.Quotation('"')}+{(Remark + "-利息").Quotation('"')})";
+                $"(@{Currency} T{Title.AsTitle()} {Content.Quotation('\'')})*({Remark.Quotation('"')}+{(Remark + "-利息").Quotation('"')})";
 
             public string QueryCapital(InterestBase my) =>
-                $"@{Currency} T{my.MajorTitle().AsTitle()} {Content.Quotation('\'')} {Remark.Quotation('"')}";
+                $"@{Currency} T{Title.AsTitle()} {Content.Quotation('\'')} {Remark.Quotation('"')}";
 
             public string QueryInterest(InterestBase my) =>
-                $"@{Currency} T{my.MajorTitle().AsTitle()} {Content.Quotation('\'')} {(Remark + "-利息").Quotation('"')}";
+                $"@{Currency} T{Title.AsTitle()} {Content.Quotation('\'')} {(Remark + "-利息").Quotation('"')}";
 
             public VoucherDetail AsCapital(InterestBase my, double? fund = null)
                 => new VoucherDetail
                     {
                         Currency = Currency,
-                        Title = my.MajorTitle(),
+                        Title = Title,
                         Content = Content,
                         Remark = Remark,
                         Fund = fund
@@ -365,7 +374,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                 => new VoucherDetail
                     {
                         Currency = Currency,
-                        Title = my.MajorTitle(),
+                        Title = Title,
                         Content = Content,
                         Remark = Remark + "-利息",
                         Fund = fund
