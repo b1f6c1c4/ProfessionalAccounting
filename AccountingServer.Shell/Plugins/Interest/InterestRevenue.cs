@@ -10,7 +10,7 @@ namespace AccountingServer.Shell.Plugins.Interest
         public InterestRevenue(Accountant accountant) : base(accountant) { }
 
         /// <inheritdoc />
-        protected override int MajorTitle() => 1221;
+        protected override string MajorFilter() => "T1122+T1123+T1221";
 
         /// <inheritdoc />
         protected override int Dir() => +1;
