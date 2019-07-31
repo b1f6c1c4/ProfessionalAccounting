@@ -129,6 +129,21 @@ const doRemove = () => {
   });
 };
 
+const doUpload = () => {
+  const command = cmdLine.getValue();
+  const text = editor.getValue();
+  const combined = command + '\n' + text;
+  freeze(true);
+  execute(combined).then((res) => {
+    finalize(res, true, false);
+    editor.focus();
+    editor.renderer.scrollCursorIntoView();
+  }).catch((err) => {
+    finalize(err, false, false);
+    editor.renderer.scrollCursorIntoView();
+  });
+};
+
 editor.setTheme("ace/theme/chrome");
 editor.session.setMode('ace/mode/accounting');
 editor.setOption('showLineNumbers', false);
@@ -142,6 +157,11 @@ editor.commands.addCommands([{
   name: 'remove',
   bindKey: 'Alt-Delete',
   exec: doRemove,
+  readOnly: false,
+}, {
+  name: 'upload',
+  bindKey: 'Ctrl-Alt-Enter',
+  exec: doUpload,
   readOnly: false,
 }]);
 editor.commands.bindKeys({
