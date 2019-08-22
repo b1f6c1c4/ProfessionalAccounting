@@ -38,7 +38,7 @@ namespace AccountingServer.Shell.Serializer
             var v = GetVoucher(ref expr);
             Parsing.TrimStartComment(ref expr);
             if (Parsing.Token(ref expr, false) != "}")
-                throw new FormatException("格式错误");
+                throw new FormatException("格式错误" + expr);
 
             Parsing.Eof(expr);
             return v;

@@ -31,7 +31,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                             {
                                 new VoucherDetail
                                     {
-                                        User = "b2",
+                                        User = "b1",
                                         Currency = "JPY",
                                         Title = 1234,
                                         SubTitle = 56,
@@ -41,7 +41,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "b2",
+                                        User = "b1",
                                         Currency = "JPY",
                                         Title = 6541,
                                         SubTitle = 98,
@@ -81,7 +81,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "b1&b2",
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 1234,
                                         SubTitle = 56,
@@ -91,13 +91,20 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "b2",
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 6541,
                                         SubTitle = 98,
                                         Content = "cnt2",
                                         Fund = -66.66,
                                         Remark = "rmk2"
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "b1&b2",
+                                        Currency = "EUR",
+                                        Title = 2333,
+                                        Fund = 114514
                                     }
                             }
                     });
@@ -110,7 +117,8 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         [Theory]
         [InlineData(6, "")]
         [InlineData(0, "-{} :")]
-        [InlineData(0, ": -")]
+        [InlineData(0, ": ()-")]
+        [InlineData(1, ": -")]
         [InlineData(2, "%xrmk1%")]
         [InlineData(1, "\"rmk2\" %xrmk1%")]
         [InlineData(2, "\"rmk2\" %xrmk1% :")]
@@ -143,10 +151,15 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         }
 
         [Theory]
-        [InlineData("b0 xx", null, "``U")]
-        [InlineData("b2", -66.66, "``U")]
-        [InlineData("b1", -78.53, "\"rmk2\"``U")]
-        [InlineData("b3", null, "%xrmk1% : \"rmk1\"``U")]
+        [InlineData("b2", null, "``U")]
+        [InlineData("b1", 0, "``U")]
+        [InlineData("b1&b2", null, "``U")]
+        [InlineData("b2", null, "U``U")]
+        [InlineData("b1", 0, "U``U")]
+        [InlineData("b1&b2", 114514, "U``U")]
+        [InlineData("b2", null, "Ub1&b2``U")]
+        [InlineData("b1", null, "Ub1&b2``U")]
+        [InlineData("b1&b2", 114514, "Ub1&b2``U")]
         public void RunTestUser(string user, double? value, string query)
         {
             Assert.Equal(
