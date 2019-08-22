@@ -24,6 +24,8 @@ namespace AccountingServer.Test.UnitTest.Shell
 
             TitleManager.TitleInfos =
                 new MockConfigManager<TitleInfos>(new TitleInfos { Titles = new List<TitleInfo>() });
+
+            ClientUser.Set("b1");
         }
 
         protected abstract IEntitySerializer GetSerializer();
@@ -50,6 +52,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                         {
                             new VoucherDetail
                                 {
+                                    User = "b1",
                                     Currency = "JPY",
                                     Title = 1001,
                                     Content = "%@!@#$%^&*(\nas\rdf\\",
@@ -57,6 +60,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                                 },
                             new VoucherDetail
                                 {
+                                    User = "b1",
                                     Currency = "USD",
                                     Title = 1002,
                                     SubTitle = 12,
@@ -65,6 +69,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                                 },
                             new VoucherDetail
                                 {
+                                    User = "b1",
                                     Currency = "EUR",
                                     Title = 5555,
                                     Fund = -5,
@@ -175,6 +180,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                             {
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "CNY",
                                         Title = 1234,
                                         SubTitle = 04,
@@ -184,6 +190,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                                     },
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "CNY",
                                         Title = 1234,
                                         Content = "gg",
@@ -241,6 +248,8 @@ namespace AccountingServer.Test.UnitTest.Shell
                                         }
                                 }
                         });
+
+            ClientUser.Set("b1");
         }
 
         private static IEntitySerializer GetSerializer() => new DiscountSerializer();
@@ -280,24 +289,28 @@ t2
                             {
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "CNY",
                                         Title = 1001,
                                         Fund = -2912
                                     },
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 1001,
                                         Fund = 1000 + 500 + 6
                                     },
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 1002,
                                         Fund = 950 + 4
                                     },
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 1003,
                                         SubTitle = 66,
@@ -305,6 +318,7 @@ t2
                                     },
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 6603,
                                         Fund = -50
@@ -341,24 +355,28 @@ d8
                             {
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 1001,
                                         Fund = -29120
                                     },
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 1001,
                                         Fund = 1000 + 500 + 6 - 8
                                     },
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 1002,
                                         Fund = 950 + 4 - 16
                                     },
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 1003,
                                         SubTitle = 66,
@@ -368,6 +386,7 @@ d8
                                     },
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 6603,
                                         Fund = -50 - 16 - 8
@@ -403,24 +422,28 @@ dnull
                             {
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 1001,
                                         Fund = -2864
                                     },
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 1001,
                                         Fund = 1000 + 500 + 6 - 8
                                     },
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 1002,
                                         Fund = 950 + 4 - 16
                                     },
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 1003,
                                         SubTitle = 66,
@@ -430,6 +453,7 @@ dnull
                                     },
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 6603,
                                         Fund = -50 - 16 - 8
@@ -464,24 +488,28 @@ tnull
                             {
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 1001,
                                         Fund = -2864
                                     },
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 1001,
                                         Fund = 1000 + 500 + 6 - 8
                                     },
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 1002,
                                         Fund = 950 + 4 - 16
                                     },
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 1003,
                                         SubTitle = 66,
@@ -491,6 +519,7 @@ tnull
                                     },
                                 new VoucherDetail
                                     {
+                                        User = "b1",
                                         Currency = "USD",
                                         Title = 6603,
                                         Fund = -50 - 16 - 8
