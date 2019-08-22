@@ -248,6 +248,7 @@ namespace AccountingServer.Shell
 
             sb.AppendLine(
                 $"{asset.StringID} {asset.Name.CPadRight(35)}{asset.Date:yyyyMMdd}" +
+                asset.User.AsUser().CPadLeft(6) +
                 asset.Value.AsCurrency(asset.Currency).CPadLeft(13) +
                 (dt.HasValue ? bookValue.AsCurrency(asset.Currency).CPadLeft(13) : "-".CPadLeft(13)) +
                 asset.Salvge.AsCurrency(asset.Currency).CPadLeft(13) +

@@ -68,6 +68,7 @@ namespace AccountingServer.Shell.Serializer
                     StringID = obj["id"]?.Value<string>(),
                     Name = obj["name"]?.Value<string>(),
                     Date = date,
+                    User = obj["user"]?.Value<string>(),
                     Currency = obj["currency"]?.Value<string>(),
                     Value = obj["value"]?.Value<double>(),
                     Salvge = obj["salvge"]?.Value<double>(),
@@ -251,6 +252,7 @@ namespace AccountingServer.Shell.Serializer
         private static JObject PresentJson(VoucherDetail detail)
             => new JObject
                 {
+                    { "user", detail.User },
                     { "currency", detail.Currency },
                     { "title", detail.Title },
                     { "subtitle", detail.SubTitle },
@@ -262,6 +264,7 @@ namespace AccountingServer.Shell.Serializer
         private static VoucherDetail ParseVoucherDetail(JToken obj)
             => new VoucherDetail
                 {
+                    User = obj["user"]?.Value<string>(),
                     Currency = obj["currency"]?.Value<string>(),
                     Title = obj["title"]?.Value<int?>(),
                     SubTitle = obj["subtitle"]?.Value<int?>(),
@@ -276,6 +279,7 @@ namespace AccountingServer.Shell.Serializer
                     { "id", asset.StringID },
                     { "name", asset.Name },
                     { "date", asset.Date?.ToString("yyyy-MM-dd") },
+                    { "user", asset.User },
                     { "currency", asset.Currency },
                     { "value", asset.Value },
                     { "salvge", asset.Salvge },

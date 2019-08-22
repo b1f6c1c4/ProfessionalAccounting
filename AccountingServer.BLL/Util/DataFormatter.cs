@@ -29,6 +29,8 @@ namespace AccountingServer.BLL.Util
     /// </summary>
     public static class DataFormatter
     {
+        private static readonly Regex Reg = new Regex(@"^[A-Za-z0-9_]+(\+[A-Za-z0-9_]+)*$");
+
         /// <summary>
         ///     记账本位币信息文档
         /// </summary>
@@ -48,6 +50,23 @@ namespace AccountingServer.BLL.Util
                 : CurrencySymbols.Config.Symbols.SingleOrDefault(cs => cs.Currency == curr)?.Symbol ?? curr + " ";
             var s = $"{sym}{value:N4}";
             return s.TrimEnd('0').CPadRight(s.Length);
+        }
+
+        /// <summary>
+        ///     格式化用户
+        /// </summary>
+        /// <param name="value">金额</param>
+        /// <param name="curr">币种</param>
+        /// <returns>格式化后的金额</returns>
+        public static string AsUser(this string value)
+        {
+            if (value == null)
+                return string.Empty;
+
+            if (Reg.IsMatch(value))
+                return value;
+
+            return value.Quotation('\'');
         }
 
         /// <summary>

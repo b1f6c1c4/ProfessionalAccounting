@@ -40,6 +40,11 @@ namespace AccountingServer.Entities
         Currency = 0b0000_0001_0000,
 
         /// <summary>
+        ///     按用户分类
+        /// </summary>
+        User = 0b1000_0000_0000,
+
+        /// <summary>
         ///     按日期分类
         /// </summary>
         Day = 0b0000_0010_0000,
@@ -93,6 +98,11 @@ namespace AccountingServer.Entities
         DateTime? Date { get; }
     }
 
+    public interface ISubtotalUser : ISubtotalResult
+    {
+        string User { get; }
+    }
+
     public interface ISubtotalCurrency : ISubtotalResult
     {
         string Currency { get; }
@@ -126,6 +136,7 @@ namespace AccountingServer.Entities
     {
         T Visit(ISubtotalRoot sub);
         T Visit(ISubtotalDate sub);
+        T Visit(ISubtotalUser sub);
         T Visit(ISubtotalCurrency sub);
         T Visit(ISubtotalTitle sub);
         T Visit(ISubtotalSubTitle sub);

@@ -117,6 +117,12 @@ namespace AccountingServer.Entities
         public string StringID { get => ID.ToString().ToUpperInvariant(); set => ID = Guid.Parse(value); }
 
         /// <summary>
+        ///     用户
+        /// </summary>
+        [XmlAttribute("user")]
+        public string User { get; set; }
+
+        /// <summary>
         ///     币种
         /// </summary>
         public string Currency { get; set; }

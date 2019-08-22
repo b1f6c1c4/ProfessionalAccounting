@@ -117,6 +117,7 @@ namespace AccountingServer.Entities
 
         public VoucherDetail(VoucherDetail d)
         {
+            User = d.User;
             Currency = d.Currency;
             Title = d.Title;
             SubTitle = d.SubTitle;
@@ -124,6 +125,12 @@ namespace AccountingServer.Entities
             Fund = d.Fund;
             Remark = d.Remark;
         }
+
+        /// <summary>
+        ///     用户
+        /// </summary>
+        [XmlAttribute("user")]
+        public string User { get; set; }
 
         /// <summary>
         ///     币种

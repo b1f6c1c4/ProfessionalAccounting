@@ -42,6 +42,7 @@ namespace AccountingServer.Shell.Subtotal
         protected virtual void Post() { }
         public abstract Nothing Visit(ISubtotalRoot sub);
         public abstract Nothing Visit(ISubtotalDate sub);
+        public abstract Nothing Visit(ISubtotalUser sub);
         public abstract Nothing Visit(ISubtotalCurrency sub);
         public abstract Nothing Visit(ISubtotalTitle sub);
         public abstract Nothing Visit(ISubtotalSubTitle sub);
@@ -70,6 +71,9 @@ namespace AccountingServer.Shell.Subtotal
                         break;
                     case SubtotalLevel.Remark:
                         items = sub.Items.Cast<ISubtotalRemark>().OrderBy(s => s.Remark, comparer);
+                        break;
+                    case SubtotalLevel.User:
+                        items = sub.Items.Cast<ISubtotalUser>().OrderBy(s => s.User, comparer);
                         break;
                     case SubtotalLevel.Currency:
                         items = sub.Items.Cast<ISubtotalCurrency>()

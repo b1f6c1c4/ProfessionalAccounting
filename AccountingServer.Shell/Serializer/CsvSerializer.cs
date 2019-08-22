@@ -29,6 +29,7 @@ namespace AccountingServer.Shell.Serializer
             {
                 m_Specs.Add(ColumnSpec.VoucherID);
                 m_Specs.Add(ColumnSpec.VoucherDate);
+                m_Specs.Add(ColumnSpec.User);
                 m_Specs.Add(ColumnSpec.Currency);
                 m_Specs.Add(ColumnSpec.Title);
                 m_Specs.Add(ColumnSpec.TitleComment);
@@ -61,6 +62,10 @@ namespace AccountingServer.Shell.Serializer
                         break;
                     case "type":
                         m_Specs.Add(ColumnSpec.VoucherType);
+                        break;
+                    case "U":
+                    case "user":
+                        m_Specs.Add(ColumnSpec.User);
                         break;
                     case "C":
                     case "currency":
@@ -168,6 +173,9 @@ namespace AccountingServer.Shell.Serializer
                         case ColumnSpec.VoucherType:
                             sb.Append(d.Voucher.Type);
                             break;
+                        case ColumnSpec.User:
+                            sb.Append(d.User);
+                            break;
                         case ColumnSpec.Currency:
                             sb.Append(d.Currency);
                             break;
@@ -210,6 +218,7 @@ namespace AccountingServer.Shell.Serializer
             VoucherID = 0x1001,
             VoucherDate = 0x1002,
             VoucherType = 0x1003,
+            User = 0xc,
             Currency = 0x4,
             Title = 0x5,
             TitleComment = 0x6,

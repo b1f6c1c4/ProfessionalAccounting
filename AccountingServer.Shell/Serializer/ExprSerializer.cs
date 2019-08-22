@@ -54,6 +54,8 @@ namespace AccountingServer.Shell.Serializer
                 detail.SubTitle.HasValue
                     ? $"// {t}-{TitleManager.GetTitleName(detail.Title, detail.SubTitle)}"
                     : $"// {t}");
+            if (detail.User != "b1") // TODO: ClientUser
+                sb.Append($"U{detail.User.AsUser()} ");
             if (detail.Currency != BaseCurrency.Now)
                 sb.Append($"@{detail.Currency} ");
             sb.Append($"T{detail.Title.AsTitle()}{detail.SubTitle.AsSubTitle()} ");
@@ -185,6 +187,11 @@ namespace AccountingServer.Shell.Serializer
             var lst = new List<string>();
 
             Parsing.TrimStartComment(ref expr);
+            var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal))?.Substring(1);
+            if (user == null)
+                user = "b1"; // TODO: ClientUser
+            else if (user.StartsWith("'", StringComparison.Ordinal))
+                user = user.Dequotation();
             var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))
                     ?.Substring(1)
                     .ToUpperInvariant()
@@ -225,6 +232,7 @@ namespace AccountingServer.Shell.Serializer
 
             return new VoucherDetail
                 {
+                    User = user,
                     Currency = currency,
                     Title = title.Title,
                     SubTitle = title.SubTitle,

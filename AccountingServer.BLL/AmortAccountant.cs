@@ -222,6 +222,7 @@ namespace AccountingServer.BLL
             var lst = template.Details.Select(
                     detail => new VoucherDetail
                         {
+                            User = detail.User,
                             Currency = detail.Currency,
                             Title = detail.Title,
                             SubTitle = detail.SubTitle,

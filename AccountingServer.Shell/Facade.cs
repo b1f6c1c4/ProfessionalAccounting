@@ -167,7 +167,12 @@ namespace AccountingServer.Shell
             var lst = new List<VoucherDetail>();
 
             var voucher = serializer.ParseVoucher(str);
-            foreach (var grp in voucher.Details.GroupBy(d => d.Currency ?? BaseCurrency.Now))
+            foreach (var grp in voucher.Details
+                .GroupBy(d => new
+                    {
+                        User = d.User, // TODO: ClientUser
+                        Currency = d.Currency ?? BaseCurrency.Now
+                    }))
             {
                 var unc = grp.SingleOrDefault(d => !d.Fund.HasValue);
                 var sum = grp.Sum(d => d.Fund ?? 0D);
@@ -183,7 +188,8 @@ namespace AccountingServer.Shell
                     lst?.Add(
                         new VoucherDetail
                             {
-                                Currency = grp.Key,
+                                User = grp.Key.User,
+                                Currency = grp.Key.Currency,
                                 Title = 3999,
                                 Fund = -sum
                             });

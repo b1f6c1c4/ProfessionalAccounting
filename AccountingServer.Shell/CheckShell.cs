@@ -57,8 +57,9 @@ namespace AccountingServer.Shell
             foreach (var voucher in m_Accountant.SelectVouchers(VoucherQueryUnconstrained.Instance))
             {
                 var flag = false;
-                // ReSharper disable once PossibleInvalidOperationException
-                var grps = voucher.Details.GroupBy(d => d.Currency, d => d.Fund.Value);
+                var grps = voucher.Details
+                    // ReSharper disable once PossibleInvalidOperationException
+                    .GroupBy(d => new { User = d.User, Currency = d.Currency }, d => d.Fund.Value);
                 foreach (var grp in grps)
                 {
                     var val = grp.Sum();
@@ -68,8 +69,8 @@ namespace AccountingServer.Shell
                     flag = true;
                     sb.AppendLine(
                         val > 0
-                            ? $"/* @{grp.Key}: Debit - Credit = {val:R} */"
-                            : $"/* @{grp.Key}: Credit - Debit = {-val:R} */");
+                            ? $"/* U{grp.Key.User.AsUser()} @{grp.Key.Currency}: Debit - Credit = {val:R} */"
+                            : $"/* U{grp.Key.User.AsUser()} @{grp.Key.Currency}: Credit - Debit = {-val:R} */");
                 }
 
                 if (flag)
