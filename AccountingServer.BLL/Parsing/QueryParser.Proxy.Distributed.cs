@@ -16,7 +16,7 @@ namespace AccountingServer.BLL.Parsing
                 => new MyDistributedFilter
                     {
                         ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : (Guid?)null,
-                        User = UserSpec()?.GetText().ParseUserSpec(),
+                        User = (UserSpec()?.GetText()).ParseUserSpec(),
                         Name = RegexString()?.GetText().Dequotation().Replace(@"\/", "/"),
                         Remark = PercentQuotedString()?.GetText().Dequotation()
                     };

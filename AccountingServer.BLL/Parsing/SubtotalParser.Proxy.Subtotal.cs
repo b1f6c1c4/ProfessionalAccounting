@@ -147,7 +147,7 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public string EquivalentCurrency =>
-                subtotalEqui().VoucherCurrency()?.GetText().ParseCurrency();
+                subtotalEqui().VoucherCurrency()?.GetText().ParseCurrency() ?? BaseCurrency.Now;
 
             /// <inheritdoc />
             public DateTime? EquivalentDate
