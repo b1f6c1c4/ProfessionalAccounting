@@ -185,7 +185,7 @@ TitleKind
 	;
 
 UserSpec
-    :   'U' [A-Za-z0-9_]+ ('+' [A-Za-z0-9_]+)*
+    :   'U' [A-Za-z0-9_]+ ('&' [A-Za-z0-9_]+)*
     |   'U' SingleQuotedString
     |   'U'
     ;

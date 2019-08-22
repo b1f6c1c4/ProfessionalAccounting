@@ -29,7 +29,7 @@ namespace AccountingServer.BLL.Util
     /// </summary>
     public static class DataFormatter
     {
-        private static readonly Regex Reg = new Regex(@"^[A-Za-z0-9_]+(\+[A-Za-z0-9_]+)*$");
+        private static readonly Regex Reg = new Regex(@"^[A-Za-z0-9_]+(&[A-Za-z0-9_]+)*$");
 
         /// <summary>
         ///     记账本位币信息文档

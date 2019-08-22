@@ -12,6 +12,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var rhs = new VoucherDetail
                 {
+                    User = "b1",
                     Currency = "USD",
                     Title = 1234,
                     SubTitle = 06,
@@ -26,6 +27,36 @@ namespace AccountingServer.Test.UnitTest.BLL
                 DbSession.TheComparison(
                     new VoucherDetail
                         {
+                            User = "b0",
+                            Currency = "USD",
+                            Title = 1235,
+                            SubTitle = 07,
+                            Content = "abd",
+                            Remark = "deg",
+                            Fund = 123.46
+                        },
+                    rhs));
+            Assert.Equal(
+                +1,
+                DbSession.TheComparison(
+                    new VoucherDetail
+                        {
+                            User = "b2",
+                            Currency = "USD",
+                            Title = 1233,
+                            SubTitle = 05,
+                            Content = "abb",
+                            Remark = "dee",
+                            Fund = 123.44
+                        },
+                    rhs));
+
+            Assert.Equal(
+                -1,
+                DbSession.TheComparison(
+                    new VoucherDetail
+                        {
+                            User = "b1",
                             Currency = "USC",
                             Title = 1235,
                             SubTitle = 07,
@@ -39,6 +70,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 DbSession.TheComparison(
                     new VoucherDetail
                         {
+                            User = "b1",
                             Currency = "USE",
                             Title = 1233,
                             SubTitle = 05,
@@ -53,6 +85,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 DbSession.TheComparison(
                     new VoucherDetail
                         {
+                            User = "b1",
                             Currency = "USD",
                             Title = 1233,
                             SubTitle = 07,
@@ -66,6 +99,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 DbSession.TheComparison(
                     new VoucherDetail
                         {
+                            User = "b1",
                             Currency = "USD",
                             Title = 1235,
                             SubTitle = 05,
@@ -80,6 +114,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 DbSession.TheComparison(
                     new VoucherDetail
                         {
+                            User = "b1",
                             Currency = "USD",
                             Title = 1234,
                             SubTitle = 05,
@@ -93,6 +128,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 DbSession.TheComparison(
                     new VoucherDetail
                         {
+                            User = "b1",
                             Currency = "USD",
                             Title = 1234,
                             SubTitle = 07,
@@ -107,6 +143,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 DbSession.TheComparison(
                     new VoucherDetail
                         {
+                            User = "b1",
                             Currency = "USD",
                             Title = 1234,
                             SubTitle = 06,
@@ -120,6 +157,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 DbSession.TheComparison(
                     new VoucherDetail
                         {
+                            User = "b1",
                             Currency = "USD",
                             Title = 1234,
                             SubTitle = 06,
@@ -134,6 +172,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 DbSession.TheComparison(
                     new VoucherDetail
                         {
+                            User = "b1",
                             Currency = "USD",
                             Title = 1234,
                             SubTitle = 06,
@@ -147,6 +186,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 DbSession.TheComparison(
                     new VoucherDetail
                         {
+                            User = "b1",
                             Currency = "USD",
                             Title = 1234,
                             SubTitle = 06,
@@ -161,6 +201,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 DbSession.TheComparison(
                     new VoucherDetail
                         {
+                            User = "b1",
                             Currency = "USD",
                             Title = 1234,
                             SubTitle = 06,
@@ -174,6 +215,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 DbSession.TheComparison(
                     new VoucherDetail
                         {
+                            User = "b1",
                             Currency = "USD",
                             Title = 1234,
                             SubTitle = 06,
@@ -191,16 +233,21 @@ namespace AccountingServer.Test.UnitTest.BLL
                 {
                     Details = new List<VoucherDetail>
                         {
-                            new VoucherDetail { Currency = "jPy" },
-                            new VoucherDetail { Currency = "Cny" }
+                            new VoucherDetail { User = "b1", Currency = "jPy" },
+                            new VoucherDetail { User = "b2", Currency = "cnY" },
+                            new VoucherDetail { User = "b1", Currency = "Cny" }
                         }
                 };
 
             DbSession.Regularize(voucher);
 
-            Assert.Equal(2, voucher.Details.Count);
+            Assert.Equal(3, voucher.Details.Count);
+            Assert.Equal("b1", voucher.Details[0].User);
             Assert.Equal("CNY", voucher.Details[0].Currency);
+            Assert.Equal("b1", voucher.Details[1].User);
             Assert.Equal("JPY", voucher.Details[1].Currency);
+            Assert.Equal("b2", voucher.Details[2].User);
+            Assert.Equal("CNY", voucher.Details[2].Currency);
 
             voucher.Details = null;
             DbSession.Regularize(voucher);

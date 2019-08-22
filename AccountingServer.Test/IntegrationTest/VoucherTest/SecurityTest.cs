@@ -57,6 +57,8 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         [InlineData(false, "'xx'")]
         [InlineData(true, "\"\"")]
         [InlineData(false, "\"xx\"")]
+        [InlineData(true, "Ub1")]
+        [InlineData(true, "U'b0 a'")]
         [InlineData(true, "@USD")]
         [InlineData(true, "Asset")]
         [InlineData(true, "T1234")]
