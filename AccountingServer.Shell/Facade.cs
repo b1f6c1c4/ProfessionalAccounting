@@ -175,7 +175,7 @@ namespace AccountingServer.Shell
 
                 foreach (var grpU in grpC.GroupBy(d => d.User))
                 {
-                    var sum = grpU.Sum(d => d.Fund);
+                    var sum = grpU.Sum(d => d.Fund.Value);
                     if (sum.IsZero())
                         continue;
 
