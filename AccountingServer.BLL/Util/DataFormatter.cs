@@ -39,6 +39,54 @@ namespace AccountingServer.BLL.Util
             new ConfigManager<CurrencySymbols>("Symbol.xml");
 
         /// <summary>
+        ///     格式化用户
+        /// </summary>
+        /// <param name="value">用户</param>
+        /// <returns>格式化后的用户</returns>
+        public static string AsUser(this string value)
+        {
+            if (value == null)
+                return string.Empty;
+
+            if (Reg.IsMatch(value))
+                return value;
+
+            return value.Quotation('\'');
+        }
+
+        /// <summary>
+        ///     解析用户
+        /// </summary>
+        /// <param name="spec">格式化后的用户</param>
+        /// <returns>用户</returns>
+        public static string ParseUserSpec(this string value)
+        {
+            if (value == null)
+                return ClientUser.Name;
+            if (value == "U")
+                return null;
+            if (value.StartsWith("U'", StringComparison.Ordinal))
+                return value.Substring(1).Dequotation();
+            return value.Substring(1);
+        }
+
+        /// <summary>
+        ///     解析金额
+        /// </summary>
+        /// <param name="value">格式化后的金额</param>
+        /// <returns>金额</returns>
+        public static string ParseCurrency(this string value)
+        {
+            if (value == null)
+                return null;
+            if (!value.StartsWith("@", StringComparison.Ordinal))
+                throw new MemberAccessException("表达式错误");
+            if (value == "@@")
+                return BaseCurrency.Now;
+            return value.Substring(1).ToUpperInvariant();
+        }
+
+        /// <summary>
         ///     格式化金额，用空格代替末尾的零
         /// </summary>
         /// <param name="value">金额</param>
@@ -51,23 +99,6 @@ namespace AccountingServer.BLL.Util
                 : CurrencySymbols.Config.Symbols.SingleOrDefault(cs => cs.Currency == curr)?.Symbol ?? curr + " ";
             var s = $"{sym}{value:N4}";
             return s.TrimEnd('0').CPadRight(s.Length);
-        }
-
-        /// <summary>
-        ///     格式化用户
-        /// </summary>
-        /// <param name="value">金额</param>
-        /// <param name="curr">币种</param>
-        /// <returns>格式化后的金额</returns>
-        public static string AsUser(this string value)
-        {
-            if (value == null)
-                return string.Empty;
-
-            if (Reg.IsMatch(value))
-                return value;
-
-            return value.Quotation('\'');
         }
 
         /// <summary>

@@ -146,25 +146,8 @@ namespace AccountingServer.BLL.Parsing
             }
 
             /// <inheritdoc />
-            public string EquivalentCurrency
-            {
-                get
-                {
-                    if (subtotalEqui() == null)
-                        return null;
-
-                    if (subtotalEqui().VoucherCurrency() != null)
-                    {
-                        var c = subtotalEqui().VoucherCurrency().GetText();
-                        if (!c.StartsWith("@", StringComparison.Ordinal))
-                            throw new MemberAccessException("表达式错误");
-
-                        return c == "@@" ? BaseCurrency.Now : c.Substring(1).ToUpperInvariant();
-                    }
-
-                    return BaseCurrency.Now;
-                }
-            }
+            public string EquivalentCurrency =>
+                subtotalEqui().VoucherCurrency()?.GetText().ParseCurrency();
 
             /// <inheritdoc />
             public DateTime? EquivalentDate

@@ -176,7 +176,7 @@ namespace AccountingServer.Shell
                 foreach (var grpU in grpC.GroupBy(d => d.User))
                 {
                     var sum = grpU.Sum(d => d.Fund);
-                    if (sum == 0)
+                    if (sum.IsZero())
                         continue;
 
                     lst.Add(
@@ -190,8 +190,7 @@ namespace AccountingServer.Shell
                 }
             }
 
-            if (lst != null &&
-                lst.Count >= 2)
+            if (lst.Count >= 2)
                 voucher.Details.AddRange(lst);
 
             if (!m_Accountant.Upsert(voucher))

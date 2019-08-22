@@ -72,32 +72,13 @@ namespace AccountingServer.BLL.Parsing
                     var t = title();
                     var filter = new VoucherDetail
                         {
-                            User = ClientUser.Name,
+                            User = UserSpec()?.GetText().ParseUserSpec(),
+                            Currency = VoucherCurrency()?.GetText().ParseCurrency(),
                             Title = t?.Title,
                             SubTitle = t?.SubTitle,
                             Content = token()?.GetPureText(),
                             Remark = DoubleQuotedString()?.GetText().Dequotation()
                         };
-
-                    if (UserSpec() != null)
-                    {
-                        var u = UserSpec().GetText();
-                        if (u == "U")
-                            filter.User = null;
-                        else if (u.StartsWith("U\'", StringComparison.Ordinal))
-                            filter.User = u.Substring(1).Dequotation();
-                        else
-                            filter.User = u.Substring(1);
-                    }
-
-                    if (VoucherCurrency() != null)
-                    {
-                        var c = VoucherCurrency().GetText();
-                        if (!c.StartsWith("@", StringComparison.Ordinal))
-                            throw new MemberAccessException("表达式错误");
-
-                        filter.Currency = c == "@@" ? BaseCurrency.Now : c.Substring(1).ToUpperInvariant();
-                    }
 
                     if (Floating() != null)
                     {
