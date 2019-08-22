@@ -22,6 +22,7 @@ namespace AccountingServer.DAL.Serializer
             var amort = new Amortization
                 {
                     ID = bsonReader.ReadGuid("_id", ref read),
+                    User = bsonReader.ReadString("user", ref read),
                     Name = bsonReader.ReadString("name", ref read),
                     Value = bsonReader.ReadDouble("value", ref read),
                     Date = bsonReader.ReadDateTime("date", ref read),
@@ -63,6 +64,7 @@ namespace AccountingServer.DAL.Serializer
         {
             bsonWriter.WriteStartDocument();
             bsonWriter.Write("_id", amort.ID);
+            bsonWriter.Write("user", amort.User);
             bsonWriter.Write("name", amort.Name);
             bsonWriter.Write("value", amort.Value);
             bsonWriter.Write("date", amort.Date);

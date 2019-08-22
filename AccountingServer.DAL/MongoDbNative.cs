@@ -255,6 +255,8 @@ namespace AccountingServer.DAL
             var lst = new List<FilterDefinition<T>>();
             if (query.Filter.ID.HasValue)
                 lst.Add(Builders<T>.Filter.Eq("_id", query.Filter.ID.Value));
+            if (query.Filter.User != null)
+                lst.Add(Builders<T>.Filter.Eq("user", query.Filter.User));
             if (query.Filter.Name != null)
                 lst.Add(
                     query.Filter.Name == string.Empty

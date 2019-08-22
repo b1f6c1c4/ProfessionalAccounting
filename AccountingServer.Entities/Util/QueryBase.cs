@@ -54,6 +54,8 @@ namespace AccountingServer.Entities.Util
         {
             public Guid? ID => null;
 
+			public string User => null;
+
             public string Name => null;
 
             public DateTime? Date => null;

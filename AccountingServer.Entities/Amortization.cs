@@ -112,6 +112,9 @@ namespace AccountingServer.Entities
         public Guid? ID { get; set; }
 
         /// <inheritdoc />
+        public string User { get; set; }
+
+        /// <inheritdoc />
         public string Name { get; set; }
 
         /// <summary>

@@ -168,9 +168,10 @@ namespace AccountingServer.Shell.Serializer
             var sb = new StringBuilder();
             sb.Append("new Asset {");
             sb.AppendLine($"  StringID = {ProcessString(asset.StringID)},");
+            sb.AppendLine($"  User = {ProcessString(asset.User)}, ");
             sb.AppendLine($"    Name = {ProcessString(asset.Name)},");
             sb.AppendLine(asset.Date.HasValue ? $"    Date = D(\"{asset.Date:yyyy-MM-dd}\")," : "    Date = null,");
-            sb.AppendLine($"    User = {asset.User}, Currency = {ProcessString(asset.Currency)},");
+            sb.AppendLine($"    Currency = {ProcessString(asset.Currency)},");
             sb.AppendLine($"    Value = {asset.Value}, Salvge = {asset.Salvge}, Life = {asset.Life},");
             sb.AppendLine($"    Title = {asset.Title}, Method = DepreciationMethod.{asset.Method},");
             sb.AppendLine(
@@ -248,10 +249,9 @@ namespace AccountingServer.Shell.Serializer
 
             var sb = new StringBuilder();
             sb.Append("new Amortization {");
-            sb.Append($"  StringID = {ProcessString(amort.StringID)},");
-            sb.AppendLine();
-            sb.Append($"    Name = {ProcessString(amort.Name)},");
-            sb.AppendLine();
+            sb.AppendLine($"  StringID = {ProcessString(amort.StringID)},");
+            sb.AppendLine($"  User = {ProcessString(amort.User)}, ");
+            sb.AppendLine($"    Name = {ProcessString(amort.Name)},");
             if (amort.Date.HasValue)
             {
                 sb.Append($"    Date = D(\"{amort.Date:yyyy-MM-dd}\"),");
@@ -260,18 +260,13 @@ namespace AccountingServer.Shell.Serializer
             else
                 sb.AppendLine("    Date = null,");
 
-            sb.Append($"    Value = {amort.Value}, ");
-            sb.AppendLine();
-            sb.Append($"    TotalDays = {amort.TotalDays}, Interval = AmortizeInterval.{amort.Interval},");
-            sb.AppendLine();
+            sb.AppendLine($"    Value = {amort.Value}, ");
+            sb.AppendLine($"    TotalDays = {amort.TotalDays}, Interval = AmortizeInterval.{amort.Interval},");
             sb.Append("Template = ");
             sb.Append(PresentVoucher(amort.Template));
             sb.AppendLine(",");
             if (amort.Remark != null)
-            {
-                sb.Append($"    Remark = {ProcessString(amort.Remark)},");
-                sb.AppendLine();
-            }
+                sb.AppendLine($"    Remark = {ProcessString(amort.Remark)},");
 
             if (amort.Schedule != null)
             {

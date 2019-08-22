@@ -73,11 +73,18 @@ namespace AccountingServer.Test.UnitTest.Entities
             Assert.Equal(expected, MatchHelper.IsMatch(new Voucher { Type = value }, new Voucher { Type = filter }));
         }
 
-        [Fact]
-        public void DetailMatchTestUser()
+        [Theory]
+        [InlineData(true, "b1", null)]
+        [InlineData(true, "b2", null)]
+        [InlineData(false, "b1", "")]
+        [InlineData(false, "b2", "")]
+        [InlineData(false, "b1", "b2")]
+        [InlineData(true, "b2", "b2")]
+        public void DetailMatchTestUser(bool expected, string value, string filter)
         {
-            StringMatchTest(
-                (v, f) => MatchHelper.IsMatch(new VoucherDetail { User = v }, new VoucherDetail { User = f }));
+            Assert.Equal(
+                expected,
+                MatchHelper.IsMatch(new VoucherDetail { User = value }, new VoucherDetail { User = filter }));
         }
 
         [Theory]
