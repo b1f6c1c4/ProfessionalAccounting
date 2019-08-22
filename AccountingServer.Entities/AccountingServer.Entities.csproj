@@ -46,6 +46,7 @@
     <Compile Include="QueryInterface.cs" />
     <Compile Include="SubtotalLevel.cs" />
     <Compile Include="Date.cs" />
+    <Compile Include="User.cs" />
     <Compile Include="Util\MatchHelper.cs" />
     <Compile Include="Util\SecurityHelper.cs" />
     <Compile Include="Voucher.cs" />

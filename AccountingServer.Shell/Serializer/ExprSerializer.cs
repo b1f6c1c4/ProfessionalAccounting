@@ -54,7 +54,7 @@ namespace AccountingServer.Shell.Serializer
                 detail.SubTitle.HasValue
                     ? $"// {t}-{TitleManager.GetTitleName(detail.Title, detail.SubTitle)}"
                     : $"// {t}");
-            if (detail.User != "b1") // TODO: ClientUser
+            if (detail.User != ClientUser.Name)
                 sb.Append($"U{detail.User.AsUser()} ");
             if (detail.Currency != BaseCurrency.Now)
                 sb.Append($"@{detail.Currency} ");
@@ -189,7 +189,7 @@ namespace AccountingServer.Shell.Serializer
             Parsing.TrimStartComment(ref expr);
             var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal))?.Substring(1);
             if (user == null)
-                user = "b1"; // TODO: ClientUser
+                user = ClientUser.Name;
             else if (user.StartsWith("'", StringComparison.Ordinal))
                 user = user.Dequotation();
             var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))

@@ -170,7 +170,7 @@ namespace AccountingServer.Shell
             foreach (var grp in voucher.Details
                 .GroupBy(d => new
                     {
-                        User = d.User, // TODO: ClientUser
+                        User = d.User ?? ClientUser.Name,
                         Currency = d.Currency ?? BaseCurrency.Now
                     }))
             {

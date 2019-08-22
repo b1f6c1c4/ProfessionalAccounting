@@ -110,7 +110,7 @@ namespace AccountingServer.BLL
             foreach (var d in entity.Details)
             {
                 if (d.User == null)
-                    d.User = "b1"; // TODO: ClientUser
+                    d.User = ClientUser.Name;
                 d.Currency = d.Currency.ToUpperInvariant();
             }
 

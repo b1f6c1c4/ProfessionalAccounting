@@ -82,7 +82,7 @@ namespace AccountingServer.BLL.Parsing
                     {
                         var u = UserSpec().GetText();
                         if (u == "U")
-                            filter.User = "b1"; // TODO: ClientUser
+                            filter.User = ClientUser.Name;
                         else if (u.StartsWith("U\'", StringComparison.Ordinal))
                             filter.User = u.Substring(1).Dequotation();
                         else
