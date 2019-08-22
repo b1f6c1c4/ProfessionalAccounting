@@ -145,6 +145,7 @@ namespace AccountingServer.Shell.Serializer
             foreach (var grp in lst.GroupBy(
                 it => new VoucherDetail
                     {
+                        User = it.User,
                         Currency = it.Currency,
                         Title = it.Title,
                         SubTitle = it.SubTitle,
@@ -162,6 +163,7 @@ namespace AccountingServer.Shell.Serializer
                 resLst.Add(
                     new VoucherDetail
                         {
+                            User = "b1", // TODO: ClientUser
                             Currency = currency,
                             Title = 6603,
                             Fund = -totalD
@@ -180,6 +182,11 @@ namespace AccountingServer.Shell.Serializer
             var lst = new List<string>();
 
             Parsing.TrimStartComment(ref expr);
+            var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal))?.Substring(1);
+            if (user == null)
+                user = "b1"; // TODO: ClientUser
+            else if (user.StartsWith("'", StringComparison.Ordinal))
+                user = user.Dequotation();
             var title = Parsing.Title(ref expr);
             if (title == null)
                 if (!AlternativeTitle(ref expr, lst, ref title))
@@ -216,6 +223,7 @@ namespace AccountingServer.Shell.Serializer
 
             return new VoucherDetail
                 {
+                    User = user,
                     Currency = currency,
                     Title = title.Title,
                     SubTitle = title.SubTitle,

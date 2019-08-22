@@ -38,6 +38,11 @@ namespace AccountingServer.Entities
         public string Currency { get; set; }
 
         /// <summary>
+        ///     用户
+        /// </summary>
+        public string User { get; set; }
+
+        /// <summary>
         ///     余额
         /// </summary>
         public double Fund { get; set; }

@@ -110,7 +110,7 @@ namespace AccountingServer.BLL
 
             foreach (
                 var voucher in
-                Db.SelectVouchers(ParsingF.VoucherQuery($"T{asset.Title.AsTitle()} {asset.StringID.Quotation('\'')}"))
+                Db.SelectVouchers(ParsingF.VoucherQuery($"U{asset.User.AsUser()} T{asset.Title.AsTitle()} {asset.StringID.Quotation('\'')}"))
                     .Where(v => v.IsMatch(query)))
             {
                 if (voucher.Remark == Asset.IgnoranceMark)
@@ -159,7 +159,7 @@ namespace AccountingServer.BLL
             foreach (
                 var voucher in
                 Db.SelectVouchers(
-                    ParsingF.VoucherQuery($"T{asset.DepreciationTitle.AsTitle()} {asset.StringID.Quotation('\'')}")))
+                    ParsingF.VoucherQuery($"U{asset.User.AsUser()} T{asset.DepreciationTitle.AsTitle()} {asset.StringID.Quotation('\'')}")))
             {
                 if (voucher.Remark == Asset.IgnoranceMark)
                     continue;
@@ -182,7 +182,7 @@ namespace AccountingServer.BLL
             foreach (
                 var voucher in
                 Db.SelectVouchers(
-                    ParsingF.VoucherQuery($"T{asset.DevaluationTitle.AsTitle()} {asset.StringID.Quotation('\'')}")))
+                    ParsingF.VoucherQuery($"U{asset.User.AsUser()} T{asset.DevaluationTitle.AsTitle()} {asset.StringID.Quotation('\'')}")))
             {
                 if (voucher.Remark == Asset.IgnoranceMark)
                     continue;
@@ -248,6 +248,7 @@ namespace AccountingServer.BLL
                     VoucherType.Ordinary,
                     new VoucherDetail
                         {
+                            User = asset.User,
                             Currency = asset.Currency,
                             Title = asset.Title,
                             Content = asset.StringID,
@@ -262,6 +263,7 @@ namespace AccountingServer.BLL
                     VoucherType.Depreciation,
                     new VoucherDetail
                         {
+                            User = asset.User,
                             Currency = asset.Currency,
                             Title = asset.DepreciationExpenseTitle,
                             SubTitle = asset.DepreciationExpenseSubTitle,
@@ -270,6 +272,7 @@ namespace AccountingServer.BLL
                         },
                     new VoucherDetail
                         {
+                            User = asset.User,
                             Currency = asset.Currency,
                             Title = asset.DepreciationTitle,
                             Content = asset.StringID,
@@ -284,6 +287,7 @@ namespace AccountingServer.BLL
                     VoucherType.Devalue,
                     new VoucherDetail
                         {
+                            User = asset.User,
                             Currency = asset.Currency,
                             Title = asset.DevaluationExpenseTitle,
                             SubTitle = asset.DevaluationExpenseSubTitle,
@@ -292,6 +296,7 @@ namespace AccountingServer.BLL
                         },
                     new VoucherDetail
                         {
+                            User = asset.User,
                             Currency = asset.Currency,
                             Title = asset.DevaluationTitle,
                             Content = asset.StringID,
@@ -319,6 +324,7 @@ namespace AccountingServer.BLL
                     VoucherType.Ordinary,
                     new VoucherDetail
                         {
+                            User = asset.User,
                             Currency = asset.Currency,
                             Title = asset.Title,
                             Content = asset.StringID,
@@ -326,6 +332,7 @@ namespace AccountingServer.BLL
                         },
                     new VoucherDetail
                         {
+                            User = asset.User,
                             Currency = asset.Currency,
                             Title = asset.DepreciationTitle,
                             Content = asset.StringID,
@@ -333,6 +340,7 @@ namespace AccountingServer.BLL
                         },
                     new VoucherDetail
                         {
+                            User = asset.User,
                             Currency = asset.Currency,
                             Title = asset.DevaluationTitle,
                             Content = asset.StringID,
@@ -340,6 +348,7 @@ namespace AccountingServer.BLL
                         },
                     new VoucherDetail
                         {
+                            User = asset.User,
                             Currency = asset.Currency,
                             Title = DefaultDispositionTitle,
                             Content = asset.StringID,

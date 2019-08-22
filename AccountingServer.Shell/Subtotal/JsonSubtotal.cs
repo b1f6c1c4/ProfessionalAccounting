@@ -30,6 +30,9 @@ namespace AccountingServer.Shell.Subtotal
         JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalDate sub)
             => new JProperty(sub.Date.AsDate(sub.Level), VisitChildren(sub));
 
+        JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalUser sub)
+            => new JProperty(sub.User, VisitChildren(sub));
+
         JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalCurrency sub)
             => new JProperty(sub.Currency, VisitChildren(sub));
 
@@ -66,6 +69,9 @@ namespace AccountingServer.Shell.Subtotal
                         break;
                     case SubtotalLevel.Remark:
                         field = "remark";
+                        break;
+                    case SubtotalLevel.User:
+                        field = "user";
                         break;
                     case SubtotalLevel.Currency:
                         field = "currency";

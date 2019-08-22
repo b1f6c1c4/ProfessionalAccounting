@@ -55,6 +55,15 @@ namespace AccountingServer.Shell.Subtotal
             return Nothing.AtAll;
         }
 
+        public override Nothing Visit(ISubtotalUser sub)
+        {
+            var prev = m_Path;
+            m_Path = Merge(m_Path, $"U{sub.User.AsUser()}");
+            ShowSubtotal(sub);
+            m_Path = prev;
+            return Nothing.AtAll;
+        }
+
         public override Nothing Visit(ISubtotalCurrency sub)
         {
             var prev = m_Path;

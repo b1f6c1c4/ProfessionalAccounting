@@ -135,6 +135,8 @@ namespace AccountingServer.DAL
                     query.Dir > 0
                         ? Builders<T>.Filter.Gt(p + "fund", -VoucherDetail.Tolerance)
                         : Builders<T>.Filter.Lt(p + "fund", +VoucherDetail.Tolerance));
+            if (query.Filter?.User != null)
+                lst.Add(Builders<T>.Filter.Eq(p + "user", query.Filter?.User));
             if (query.Filter?.Currency != null)
                 lst.Add(Builders<T>.Filter.Eq(p + "currency", query.Filter?.Currency));
             if (query.Filter?.Title != null)
@@ -263,6 +265,8 @@ namespace AccountingServer.DAL
                     query.Filter.Remark == string.Empty
                         ? Builders<T>.Filter.Exists("remark", false)
                         : Builders<T>.Filter.Eq("remark", query.Filter.Remark));
+            if (query.Filter.User != null)
+                lst.Add(Builders<T>.Filter.Eq("user", query.Filter.User));
 
             lst.Add(GetNativeFilter(query.Range));
 

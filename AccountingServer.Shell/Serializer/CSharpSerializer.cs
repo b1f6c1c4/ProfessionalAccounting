@@ -82,6 +82,7 @@ namespace AccountingServer.Shell.Serializer
 
             var sb = new StringBuilder();
             sb.Append("        new VoucherDetail { ");
+            sb.Append($"User = {ProcessString(detail.User)}, ");
             sb.AppendLine($"Currency = {ProcessString(detail.Currency)},");
             sb.Append("                            ");
             sb.Append($"Title = {detail.Title:0}, ");
@@ -169,7 +170,7 @@ namespace AccountingServer.Shell.Serializer
             sb.AppendLine($"  StringID = {ProcessString(asset.StringID)},");
             sb.AppendLine($"    Name = {ProcessString(asset.Name)},");
             sb.AppendLine(asset.Date.HasValue ? $"    Date = D(\"{asset.Date:yyyy-MM-dd}\")," : "    Date = null,");
-            sb.AppendLine($"    Currency = {ProcessString(asset.Currency)},");
+            sb.AppendLine($"    User = {asset.User}, Currency = {ProcessString(asset.Currency)},");
             sb.AppendLine($"    Value = {asset.Value}, Salvge = {asset.Salvge}, Life = {asset.Life},");
             sb.AppendLine($"    Title = {asset.Title}, Method = DepreciationMethod.{asset.Method},");
             sb.AppendLine(

@@ -43,6 +43,7 @@ namespace AccountingServer.DAL
 
         private static readonly BsonDocument ProjectDetail = new BsonDocument
             {
+                ["user"] = "$detail.user",
                 ["currency"] = "$detail.currency",
                 ["title"] = "$detail.title",
                 ["subtitle"] = "$detail.subtitle",
@@ -282,6 +283,8 @@ namespace AccountingServer.DAL
             if (query.Subtotal.AggrType != AggregationType.None)
                 level |= query.Subtotal.AggrInterval;
 
+            if (level.HasFlag(SubtotalLevel.User))
+                throw new InvalidOperationException("记账凭证不能按用户分类汇总");
             if (level.HasFlag(SubtotalLevel.Currency))
                 throw new InvalidOperationException("记账凭证不能按币种分类汇总");
             if (level.HasFlag(SubtotalLevel.Title))
@@ -348,6 +351,8 @@ namespace AccountingServer.DAL
             var prj = new BsonDocument();
             if (level.HasFlag(SubtotalLevel.Day))
                 prj["date"] = "$date";
+            if (level.HasFlag(SubtotalLevel.User))
+                prj["user"] = "$detail.user";
             if (level.HasFlag(SubtotalLevel.Currency))
                 prj["currency"] = "$detail.currency";
             if (level.HasFlag(SubtotalLevel.Title))
