@@ -108,7 +108,11 @@ namespace AccountingServer.BLL
                 entity.Details = new List<VoucherDetail>();
 
             foreach (var d in entity.Details)
+            {
+                if (d.User == null)
+                    d.User = "b1"; // TODO: ClientUser
                 d.Currency = d.Currency.ToUpperInvariant();
+            }
 
             entity.Details.Sort(TheComparison);
         }
