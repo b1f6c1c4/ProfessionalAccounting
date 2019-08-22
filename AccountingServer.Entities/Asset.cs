@@ -117,11 +117,6 @@ namespace AccountingServer.Entities
         public string StringID { get => ID.ToString().ToUpperInvariant(); set => ID = Guid.Parse(value); }
 
         /// <summary>
-        ///     用户
-        /// </summary>
-        public string User { get; set; }
-
-        /// <summary>
         ///     币种
         /// </summary>
         public string Currency { get; set; }
@@ -183,6 +178,9 @@ namespace AccountingServer.Entities
 
         /// <inheritdoc />
         public Guid? ID { get; set; }
+
+        /// <inheritdoc />
+        public string User { get; set; }
 
         /// <inheritdoc />
         public string Name { get; set; }

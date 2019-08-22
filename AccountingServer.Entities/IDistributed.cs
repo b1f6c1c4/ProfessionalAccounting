@@ -14,6 +14,11 @@ namespace AccountingServer.Entities
         Guid? ID { get; }
 
         /// <summary>
+        ///     用户
+        /// </summary>
+        string User { get; }
+
+        /// <summary>
         ///     名称
         /// </summary>
         string Name { get; }

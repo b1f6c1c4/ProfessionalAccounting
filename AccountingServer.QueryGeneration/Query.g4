@@ -125,7 +125,7 @@ distributedQ0
 	;
 
 distributedQAtom
-	:	Guid? RegexString? PercentQuotedString? (SquareBra SquareBra rangeCore SquareKet SquareKet)?
+	:	UserSpec? Guid? RegexString? PercentQuotedString? (SquareBra SquareBra rangeCore SquareKet SquareKet)?
 	;
 
 token
