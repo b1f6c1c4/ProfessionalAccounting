@@ -51,7 +51,7 @@ details0
 	;
 
 detailQuery
-	:	VoucherCurrency? TitleKind? title? token? DoubleQuotedString? Floating? Direction?
+	:	UserSpec? VoucherCurrency? TitleKind? title? token? DoubleQuotedString? Floating? Direction?
 	;
 
 title
@@ -183,6 +183,12 @@ VoucherType
 TitleKind
 	:	'Asset' | 'Liability' | 'Equity' | 'Revenue' | 'Expense'
 	;
+
+UserSpec
+    :   'U' [A-Za-z0-9_]+ ('+' [A-Za-z0-9_]+)*
+    |   'U' SingleQuotedString
+    |   'U'
+    ;
 
 VoucherCurrency
 	:	'@' [a-zA-Z]+

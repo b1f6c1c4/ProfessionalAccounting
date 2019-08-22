@@ -119,7 +119,6 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     用户
         /// </summary>
-        [XmlAttribute("user")]
         public string User { get; set; }
 
         /// <summary>

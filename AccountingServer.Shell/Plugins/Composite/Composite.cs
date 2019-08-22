@@ -270,6 +270,13 @@ namespace AccountingServer.Shell.Plugins.Composite
             return Nothing.AtAll;
         }
 
+        public override Nothing Visit(ISubtotalUser sub)
+        {
+            Depth++; // Hack
+            ShowSubtotal(sub);
+            return Nothing.AtAll;
+        }
+
         public override Nothing Visit(ISubtotalCurrency sub)
         {
             Depth++; // Hack

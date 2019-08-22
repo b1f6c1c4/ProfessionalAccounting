@@ -51,6 +51,20 @@ namespace AccountingServer.BLL.Util
         public override SubtotalResult Create(IGrouping<DateTime?, Balance> grp) => new SubtotalDate(grp.Key, m_Level);
     }
 
+    internal class SubtotalUser : SubtotalResult, ISubtotalUser
+    {
+        public SubtotalUser(string user) => User = user;
+        public string User { get; }
+
+        public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
+    }
+
+    internal class SubtotalUserFactory : SubtotalResultFactory<string>
+    {
+        public override string Selector(Balance b) => b.User;
+        public override SubtotalResult Create(IGrouping<string, Balance> grp) => new SubtotalUser(grp.Key);
+    }
+
     internal class SubtotalCurrency : SubtotalResult, ISubtotalCurrency
     {
         public SubtotalCurrency(string currency) => Currency = currency;
@@ -177,6 +191,9 @@ namespace AccountingServer.BLL.Util
                     break;
                 case SubtotalLevel.Remark:
                     sub.TheItems = Invoke(new SubtotalRemarkFactory());
+                    break;
+                case SubtotalLevel.User:
+                    sub.TheItems = Invoke(new SubtotalUserFactory());
                     break;
                 case SubtotalLevel.Currency:
                     sub.TheItems = Invoke(new SubtotalCurrencyFactory());

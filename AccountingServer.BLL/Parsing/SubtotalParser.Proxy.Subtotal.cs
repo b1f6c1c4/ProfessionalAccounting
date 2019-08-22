@@ -70,6 +70,8 @@ namespace AccountingServer.BLL.Parsing
                                         return SubtotalLevel.Remark;
                                     case 'C':
                                         return SubtotalLevel.Currency;
+                                    case 'U':
+                                        return SubtotalLevel.User;
                                     case 'd':
                                         return SubtotalLevel.Day;
                                     case 'w':

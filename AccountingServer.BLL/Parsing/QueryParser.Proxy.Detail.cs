@@ -78,6 +78,17 @@ namespace AccountingServer.BLL.Parsing
                             Remark = DoubleQuotedString()?.GetText().Dequotation()
                         };
 
+                    if (UserSpec() != null)
+                    {
+                        var u = UserSpec().GetText();
+                        if (u == "U")
+                            filter.User = "b1"; // TODO: ClientUser
+                        else if (u.StartsWith("U\'", StringComparison.Ordinal))
+                            filter.User = u.Substring(1).Dequotation();
+                        else
+                            filter.User = u.Substring(1);
+                    }
+
                     if (VoucherCurrency() != null)
                     {
                         var c = VoucherCurrency().GetText();
