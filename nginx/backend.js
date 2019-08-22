@@ -1,7 +1,7 @@
-let user = window.localStorage.getItem('user') || 'anonymous';
+let theUser = window.localStorage.getItem('user') || 'anonymous';
 
 const login = (u) => {
-  window.user = u;
+  theUser = u;
   document.getElementById('user').innerText = u;
   window.localStorage.setItem('user', u);
 };
@@ -21,7 +21,7 @@ const xhr = (method, url, spec, payload) => new Promise((resolve, reject) => {
   const d = new Date();
   const ld = new Date(+d - 1000*60*d.getTimezoneOffset());
   const ldt = ld.toISOString().replace(/Z$/, '');
-  xhr.setRequestHeader('X-User', window.user);
+  xhr.setRequestHeader('X-User', theUser);
   xhr.setRequestHeader('X-ClientDateTime', ldt);
   if (spec)
     xhr.setRequestHeader('X-Serializer', spec);
@@ -44,7 +44,7 @@ SPEC -- ...                 临时选择序列化器
   const mx = cmd.match(/^(?:login|user) (.*)$/);
   if (mx) {
     login(mx[1]);
-    return Promise.resolve(`Login as ${window.user}`);
+    return Promise.resolve(`Login as ${theUser}`);
   }
 
   const m = cmd.match(/^([a-z](?:[^-]|-[^-]|---)+)--(.*)$/);
