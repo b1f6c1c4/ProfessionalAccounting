@@ -18,6 +18,8 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
             m_Adapter = Facade.Create("mongodb://localhost/accounting-test");
 
             m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+
+            ClientUser.Set("b1");
         }
 
         public void Dispose() { m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance); }

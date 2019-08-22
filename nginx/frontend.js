@@ -119,6 +119,29 @@ const doUpsert = () => {
   });
 };
 
+const doUpsertAll = async () => {
+  let rid = 0;
+  while (true) {
+    editor.selection.setSelectionRange({
+      start: { row: rid, column: 0 },
+      end: { row: rid, column: 0 },
+    }, false);
+    const { rng, obj } = prepareObject();
+    if (rng.start.row <= rid) {
+      break;
+    }
+    rid = rng.end.row;
+    try {
+      freeze(true);
+      const res = await upsert(obj);
+      indicateResult(res, rng);
+    } catch (err) {
+      indicateError(err, rng);
+      break;
+    }
+  }
+};
+
 const doRemove = () => {
   const { rng, obj } = prepareObject();
   freeze(true);
@@ -127,6 +150,29 @@ const doRemove = () => {
   }).catch((err) => {
     indicateError(err, rng);
   });
+};
+
+const doRemoveAll = async () => {
+  let rid = 0;
+  while (true) {
+    editor.selection.setSelectionRange({
+      start: { row: rid, column: 0 },
+      end: { row: rid, column: 0 },
+    }, false);
+    const { rng, obj } = prepareObject();
+    if (rng.start.row <= rid) {
+      break;
+    }
+    rid = rng.end.row;
+    try {
+      freeze(true);
+      const res = await remove(obj);
+      indicateResult(res, rng);
+    } catch (err) {
+      indicateError(err, rng);
+      break;
+    }
+  }
 };
 
 const doUpload = () => {
@@ -162,6 +208,16 @@ editor.commands.addCommands([{
   name: 'upload',
   bindKey: 'Ctrl-Alt-Enter',
   exec: doUpload,
+  readOnly: false,
+}, {
+  name: 'upsertAll',
+  bindKey: 'Ctrl-Alt-Shift-Enter',
+  exec: doUpsertAll,
+  readOnly: false,
+}, {
+  name: 'removeAll',
+  bindKey: 'Ctrl-Alt-Shift-Delete',
+  exec: doRemoveAll,
   readOnly: false,
 }]);
 editor.commands.bindKeys({

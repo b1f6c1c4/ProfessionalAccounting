@@ -72,6 +72,7 @@ namespace AccountingServer.BLL.Parsing
                     var t = title();
                     var filter = new VoucherDetail
                         {
+                            User = ClientUser.Name,
                             Title = t?.Title,
                             SubTitle = t?.SubTitle,
                             Content = token()?.GetPureText(),
@@ -82,7 +83,7 @@ namespace AccountingServer.BLL.Parsing
                     {
                         var u = UserSpec().GetText();
                         if (u == "U")
-                            filter.User = ClientUser.Name;
+                            filter.User = null;
                         else if (u.StartsWith("U\'", StringComparison.Ordinal))
                             filter.User = u.Substring(1).Dequotation();
                         else
