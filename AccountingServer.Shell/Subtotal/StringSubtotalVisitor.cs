@@ -73,7 +73,8 @@ namespace AccountingServer.Shell.Subtotal
                         items = sub.Items.Cast<ISubtotalRemark>().OrderBy(s => s.Remark, comparer);
                         break;
                     case SubtotalLevel.User:
-                        items = sub.Items.Cast<ISubtotalUser>().OrderBy(s => s.User, comparer);
+                        items = sub.Items.Cast<ISubtotalUser>()
+                            .OrderBy(s => s.User == ClientUser.Name ? null : s.User);
                         break;
                     case SubtotalLevel.Currency:
                         items = sub.Items.Cast<ISubtotalCurrency>()

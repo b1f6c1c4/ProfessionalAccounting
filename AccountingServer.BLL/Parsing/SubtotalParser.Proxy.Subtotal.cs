@@ -42,14 +42,19 @@ namespace AccountingServer.BLL.Parsing
                         if (subtotalEqui() == null)
                             return new[]
                                 {
-                                    SubtotalLevel.User, SubtotalLevel.Currency, SubtotalLevel.Title,
-                                    SubtotalLevel.SubTitle, SubtotalLevel.Content
+                                    SubtotalLevel.Currency,
+                                    SubtotalLevel.Title,
+                                    SubtotalLevel.SubTitle,
+                                    SubtotalLevel.User,
+                                    SubtotalLevel.Content
                                 };
                         else
                             return new[]
                                 {
-                                    SubtotalLevel.User, SubtotalLevel.Title,
-                                    SubtotalLevel.SubTitle, SubtotalLevel.Content
+                                    SubtotalLevel.Title,
+                                    SubtotalLevel.SubTitle,
+                                    SubtotalLevel.User,
+                                    SubtotalLevel.Content
                                 };
 
                     if (text == "v")

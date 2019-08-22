@@ -40,9 +40,7 @@ namespace AccountingServer.Shell.Subtotal
 
         public override Nothing Visit(ISubtotalUser sub)
         {
-            m_Currency = sub.User;
             ShowSubtotal(sub, $"U{sub.User.AsUser()}");
-            m_Currency = null;
             return Nothing.AtAll;
         }
 

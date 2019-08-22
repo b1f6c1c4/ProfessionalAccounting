@@ -167,32 +167,27 @@ namespace AccountingServer.Shell
             var lst = new List<VoucherDetail>();
 
             var voucher = serializer.ParseVoucher(str);
-            foreach (var grp in voucher.Details
-                .GroupBy(d => new
-                    {
-                        User = d.User ?? ClientUser.Name,
-                        Currency = d.Currency ?? BaseCurrency.Now
-                    }))
+            foreach (var grpC in voucher.Details.GroupBy(d => d.Currency ?? BaseCurrency.Now))
             {
-                var unc = grp.SingleOrDefault(d => !d.Fund.HasValue);
-                var sum = grp.Sum(d => d.Fund ?? 0D);
+                var unc = grpC.SingleOrDefault(d => !d.Fund.HasValue);
                 if (unc != null)
-                {
-                    lst = null;
-                    unc.Fund = -sum;
-                    continue;
-                }
+                    unc.Fund = -grpC.Sum(d => d.Fund ?? 0D);
 
-                // ReSharper disable once PossibleInvalidOperationException
-                if (!sum.IsZero())
-                    lst?.Add(
+                foreach (var grpU in grpC.GroupBy(d => d.User))
+                {
+                    var sum = grpU.Sum(d => d.Fund);
+                    if (sum == 0)
+                        continue;
+
+                    lst.Add(
                         new VoucherDetail
                             {
-                                User = grp.Key.User,
-                                Currency = grp.Key.Currency,
+                                User = grpU.Key,
+                                Currency = grpC.Key,
                                 Title = 3999,
                                 Fund = -sum
                             });
+                }
             }
 
             if (lst != null &&
