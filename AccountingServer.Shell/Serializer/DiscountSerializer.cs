@@ -163,7 +163,7 @@ namespace AccountingServer.Shell.Serializer
                 resLst.Add(
                     new VoucherDetail
                         {
-                            User = "b1", // TODO: ClientUser
+                            User = ClientUser.Name, // TODO: multi-user discount?
                             Currency = currency,
                             Title = 6603,
                             Fund = -totalD
@@ -184,7 +184,7 @@ namespace AccountingServer.Shell.Serializer
             Parsing.TrimStartComment(ref expr);
             var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal))?.Substring(1);
             if (user == null)
-                user = "b1"; // TODO: ClientUser
+                user = ClientUser.Name;
             else if (user.StartsWith("'", StringComparison.Ordinal))
                 user = user.Dequotation();
             var title = Parsing.Title(ref expr);

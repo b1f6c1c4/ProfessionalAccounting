@@ -59,7 +59,7 @@ namespace AccountingServer
                 !ClientDateTime.TryParse(request.Header["x-clientdatetime"], out var timestamp))
                 return new HttpResponse { ResponseCode = 400 };
 
-            // TODO: ClientUser
+            ClientUser.Set(user);
             ClientDateTime.Set(timestamp);
 
             switch (request.BaseUri)
