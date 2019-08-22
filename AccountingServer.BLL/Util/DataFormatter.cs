@@ -55,13 +55,13 @@ namespace AccountingServer.BLL.Util
         }
 
         /// <summary>
-        ///     解析用户
+        ///     解析用户过滤器
         /// </summary>
         /// <param name="spec">格式化后的用户</param>
-        /// <returns>用户</returns>
+        /// <returns>用户过滤器</returns>
         public static string ParseUserSpec(this string value)
         {
-            if (value == null)
+            if (string.IsNullOrEmpty(value))
                 return ClientUser.Name;
             if (value == "U")
                 return null;
