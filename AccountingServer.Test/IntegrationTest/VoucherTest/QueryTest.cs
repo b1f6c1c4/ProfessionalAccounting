@@ -51,7 +51,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                 },
                             new VoucherDetail
                                 {
-                                    User = "b1&b2",
+                                    User = "b1",
                                     Currency = "USD",
                                     Title = 2345,
                                     Content = "cont3",
@@ -59,13 +59,21 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                 },
                             new VoucherDetail
                                 {
-                                    User = "b2",
+                                    User = "b1",
                                     Currency = "USD",
                                     Title = 3456,
                                     SubTitle = 05,
                                     Content = "cont4",
                                     Remark = "remk4",
                                     Fund = 77.66
+                                },
+                            new VoucherDetail
+                                {
+                                    User = "b1&b2",
+                                    Currency = "EUR",
+                                    Title = 1111,
+                                    SubTitle = 22,
+                                    Fund = 114514
                                 }
                         }
                 };
@@ -85,21 +93,30 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                     new object[] { true, "{^59278b516c2f021e80f51912^}-{null}*{Devalue}" },
                     new object[] { true, "-{%rrr%}+{20170101}" },
                     new object[] { false, "{^59278b516c2f021e80f51911^}+{G}*{%asdf%}" },
-                    new object[] { true, "Ub1@JPY T100105'cont1'>" },
+                    new object[] { true, "@JPY T100105'cont1'>" },
                     new object[] { true, "@JPY T123400\"remk2\"=-123.45" },
-                    new object[] { true, "Ub1&b2@USD T2345'cont3'<" },
+                    new object[] { true, "@USD T2345'cont3'<" },
                     new object[] { true, "@USD T3456'cont4'\"remk4\"=77.66" },
                     new object[] { true, "{(T1234+T345605)*(''+'cont3')}-{Depreciation}-{Carry}" },
                     new object[] { false, "T1002+'  '''+\" rmk\"+=77.66001" },
-                    new object[] { true, "(@USD+Ub1)*(=-123.45+>)+T2345 A" },
-                    new object[] { false, "(@USD+@JPY)*=-123.45+T2345 A" },
-                    new object[] { true, "{T1001+(T1234+(T2345)+T3456) A}-{AnnualCarry}" },
-                    new object[] { true, "+(T1001+(T1234+T2345))+T3456 A" },
-                    new object[] { true, "{((<+>)*())+=1*=2 A}-{Ordinary}" },
-                    new object[] { true, "Ub1+Ub1&b2+Ub2-=1*=2 A" },
+                    new object[] { true, "(@USD+@JPY)*(=-123.45+>)+T2345+Ub1&b2@EUR A" },
+                    new object[] { false, "(@USD+@JPY)*=-123.45+T2345+Ub1&b2@EUR A" },
+                    new object[] { true, "{T1001+(T1234+(T2345)+T3456)+Ub1&b2@EUR A}-{AnnualCarry}" },
+                    new object[] { true, "+(T1001+(T1234+T2345))+T3456+Ub1&b2@EUR A" },
+                    new object[] { true, "{((<+>)*())+=1*=2+Ub1&b2@EUR A}-{Ordinary}" },
+                    new object[] { true, "U-=1*=2 A" },
+                    new object[] { true, "-=1*=2 A" },
                     new object[] { true, "{T1001 null Uncertain}*{T2345 G}-{T3456 A}" },
                     new object[] { false, "{20170101~20180101}+{~~20160101}" },
-                    new object[] { true, "{20170101~~20180101}*{~20160101}" }
+                    new object[] { true, "{20170101~~20180101}*{~20160101}" },
+                    new object[] { true, "U-" },
+                    new object[] { true, "-" },
+                    new object[] { false, "U- A" },
+                    new object[] { false, "- A" },
+                    new object[] { true, "U@EUR" },
+                    new object[] { true, "U'b1&b2'" },
+                    new object[] { true, "Ub1+Ub1&b2 A" },
+                    new object[] { true, "U A" }
                 };
 
             public IEnumerator<object[]> GetEnumerator() => Data.GetEnumerator();
