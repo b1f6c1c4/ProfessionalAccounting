@@ -27,12 +27,28 @@
         flex-direction: column;
         align-items: stretch;
       }
-      #cmdLine {
+      #wrapper {
+        display: flex;
+        flex-direction: row;
         border-bottom: gray 1.5px solid;
+      }
+      #user {
+        font-size: 11px;
+        line-height: 13px;
+        padding: 0 3px;
+        background-color: #ddd;
+        font-family: monospace;
+      }
+      #cmdLine {
+        flex-grow: 1;
         font-size: 14px;
         line-height: 16px;
       }
       @media only screen and (max-width: 600px) {
+        #user {
+          font-size: 15px;
+          line-height: 17px;
+        }
         #cmdLine {
           font-size: 18px;
           line-height: 20px;
@@ -69,7 +85,10 @@
   </head>
   <body>
 
-    <div id="cmdLine"></div>
+    <div id="wrapper">
+      <div id="user">anonymous</div>
+      <div id="cmdLine"></div>
+    </div>
     <div id="editor"></div>
     <div id="tools">
       <button id="create">Create</button>

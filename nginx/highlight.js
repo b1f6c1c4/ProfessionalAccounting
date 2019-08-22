@@ -21,6 +21,9 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         regex: /^(\/\*)?(@new (?:Voucher|Asset|Amortization) \{)/,
         next: 'obj',
       }, {
+        token: 'variable.parameter.user',
+        regex: /\bU[A-Za-z0-9_]+(&[A-Za-z0-9_]+)*\b/,
+      }, {
         token: 'variable.parameter.currency',
         regex: /@[A-Z][A-Z][A-Z]\b/,
       }, {
@@ -84,6 +87,9 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
       }, {
         token: 'support.class',
         regex: /\b(?:Voucher|Asset|Amortization|VoucherDetail|List|AcquisationItem|DepreciateItem|DevalueItem|DisposeItem|AmortItem)\b/,
+      }, {
+        token: 'variable.parameter.user',
+        regex: /\bU[A-Za-z0-9_]+(&[A-Za-z0-9_]+)*\b/,
       }, {
         token: 'variable.parameter.currency',
         regex: /@[a-zA-Z][a-zA-Z][a-zA-Z]\b/,

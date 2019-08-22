@@ -32,6 +32,14 @@ namespace AccountingServer
             if (request.BaseUri.StartsWith("/api", StringComparison.Ordinal))
                 request.BaseUri = request.BaseUri.Substring(4);
 #endif
+            string user;
+            if (request.Header.ContainsKey("x-user"))
+                user = request.Header["x-user"];
+            else
+                return new HttpResponse { ResponseCode = 400 };
+            if (user == "anonymous")
+                return new HttpResponse { ResponseCode = 401 };
+
             string spec = null;
             if (request.Header.ContainsKey("x-serializer"))
                 spec = request.Header["x-serializer"];
@@ -51,6 +59,7 @@ namespace AccountingServer
                 !ClientDateTime.TryParse(request.Header["x-clientdatetime"], out var timestamp))
                 return new HttpResponse { ResponseCode = 400 };
 
+            // TODO: ClientUser
             ClientDateTime.Set(timestamp);
 
             switch (request.BaseUri)
