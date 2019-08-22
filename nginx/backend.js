@@ -1,12 +1,10 @@
 let user = window.localStorage.getItem('user') || 'anonymous';
 
 const login = (u) => {
-  user = u;
-  document.getElementById('user').innerText = user;
-  window.localStorage.setItem('user', user);
+  window.user = u;
+  document.getElementById('user').innerText = u;
+  window.localStorage.setItem('user', u);
 };
-
-login(user);
 
 const xhr = (method, url, spec, payload) => new Promise((resolve, reject) => {
   const xhr = new XMLHttpRequest();
@@ -23,7 +21,7 @@ const xhr = (method, url, spec, payload) => new Promise((resolve, reject) => {
   const d = new Date();
   const ld = new Date(+d - 1000*60*d.getTimezoneOffset());
   const ldt = ld.toISOString().replace(/Z$/, '');
-  xhr.setRequestHeader('X-User', user);
+  xhr.setRequestHeader('X-User', window.user);
   xhr.setRequestHeader('X-ClientDateTime', ldt);
   if (spec)
     xhr.setRequestHeader('X-Serializer', spec);
@@ -38,15 +36,15 @@ const execute = (cmd) => {
     return Promise.resolve(`客户端帮助文档
 
 ??                          客户端帮助文档
-user ...                    选择用户
+login|user ...              选择用户
 SPEC -- ...                 临时选择序列化器
 `);
   }
 
-  const mx = cmd.match(/^user (.*)$/);
+  const mx = cmd.match(/^(login|user) (.*)$/);
   if (mx) {
     login(mx[1]);
-    return Promise.resolve(`Login as ${user}`);
+    return Promise.resolve(`Login as ${window.user}`);
   }
 
   const m = cmd.match(/^([a-z](?:[^-]|-[^-]|---)+)--(.*)$/);

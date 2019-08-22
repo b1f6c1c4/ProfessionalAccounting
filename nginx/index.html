@@ -86,7 +86,10 @@
   <body>
 
     <div id="wrapper">
-      <div id="user">anonymous</div>
+      <div id="user"></div>
+      <script>
+        document.getElementById('user').innerText = window.localStorage.getItem('user') || 'anonymous';
+      </script>
       <div id="cmdLine"></div>
     </div>
     <div id="editor"></div>

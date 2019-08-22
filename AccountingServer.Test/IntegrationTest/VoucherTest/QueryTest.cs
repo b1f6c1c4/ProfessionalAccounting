@@ -13,6 +13,11 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
 {
     public abstract class QueryTestBase
     {
+        protected QueryTestBase()
+        {
+            ClientUser.Set("b1");
+        }
+
         protected virtual void PrepareVoucher(Voucher voucher) { }
         protected abstract bool RunQuery(IQueryCompunded<IVoucherQueryAtom> query);
         protected virtual void ResetVouchers() { }
