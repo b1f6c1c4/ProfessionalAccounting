@@ -173,7 +173,7 @@ namespace AccountingServer.Shell
                 if (unc != null)
                     unc.Fund = -grpC.Sum(d => d.Fund ?? 0D);
 
-                foreach (var grpU in grpC.GroupBy(d => d.User))
+                foreach (var grpU in grpC.GroupBy(d => d.User ?? ClientUser.Name))
                 {
                     var sum = grpU.Sum(d => d.Fund.Value);
                     if (sum.IsZero())

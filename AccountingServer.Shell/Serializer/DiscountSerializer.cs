@@ -182,11 +182,7 @@ namespace AccountingServer.Shell.Serializer
             var lst = new List<string>();
 
             Parsing.TrimStartComment(ref expr);
-            var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal))?.Substring(1);
-            if (user == null)
-                user = ClientUser.Name;
-            else if (user.StartsWith("'", StringComparison.Ordinal))
-                user = user.Dequotation();
+            var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal)).ParseUserSpec();
             var title = Parsing.Title(ref expr);
             if (title == null)
                 if (!AlternativeTitle(ref expr, lst, ref title))
@@ -282,6 +278,7 @@ namespace AccountingServer.Shell.Serializer
                     lst.Select(
                         d => new Item
                             {
+                                User = d.Detail.User,
                                 Currency = d.Detail.Currency,
                                 Title = d.Detail.Title,
                                 SubTitle = d.Detail.SubTitle,
