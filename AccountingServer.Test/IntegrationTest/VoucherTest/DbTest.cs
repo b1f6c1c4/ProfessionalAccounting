@@ -41,6 +41,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                         {
                             new VoucherDetail
                                 {
+                                    User = "b1",
                                     Currency = "CNY",
                                     Title = 1001,
                                     Content = "asdf",
@@ -48,6 +49,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                 },
                             new VoucherDetail
                                 {
+                                    User = "b2",
                                     Currency = "USD",
                                     Title = 1002,
                                     SubTitle = 12,

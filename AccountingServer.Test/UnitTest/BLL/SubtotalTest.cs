@@ -664,6 +664,73 @@ namespace AccountingServer.Test.UnitTest.BLL
         }
 
         [Fact]
+        public void TestUser()
+        {
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`U").Subtotal);
+
+            var bal = new[]
+                {
+                    new Balance
+                        {
+                            User = "JPY",
+                            Fund = 8
+                        },
+                    new Balance
+                        {
+                            User = "CNY",
+                            Fund = 1
+                        },
+                    new Balance
+                        {
+                            User = "USD",
+                            Fund = 4
+                        },
+                    new Balance
+                        {
+                            User = "CNY",
+                            Fund = 2
+                        }
+                };
+
+            var res = builder.Build(bal);
+            Assert.IsAssignableFrom<ISubtotalRoot>(res);
+            var resx = (ISubtotalRoot)res;
+
+            var lst = new List<Balance>();
+            foreach (var item in resx.Items)
+            {
+                Assert.IsAssignableFrom<ISubtotalUser>(item);
+                var resxx = (ISubtotalUser)item;
+                Assert.Null(resxx.Items);
+                lst.Add(new Balance { User = resxx.User, Fund = resxx.Fund });
+            }
+
+            Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
+            Assert.Equal(
+                new List<Balance>
+                    {
+                        new Balance
+                            {
+                                User = "JPY",
+                                Fund = 8
+                            },
+                        new Balance
+                            {
+                                User = "CNY",
+                                Fund = 3
+                            },
+                        new Balance
+                            {
+                                User = "USD",
+                                Fund = 4
+                            }
+                    },
+                lst,
+                new BalanceEqualityComparer());
+        }
+
+
+        [Fact]
         public void TestCurrency()
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`C").Subtotal);

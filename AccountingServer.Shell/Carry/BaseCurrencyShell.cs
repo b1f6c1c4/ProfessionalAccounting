@@ -81,7 +81,7 @@ namespace AccountingServer.Shell.Carry
                 if (!info.Date.Within(rng))
                     continue;
 
-                cnt += ConvertEquity(info.Date.Value, info.Currency);
+                cnt += ConvertEquity("b1", info.Date.Value, info.Currency); // TODO: ClientUser
             }
 
             return new NumberAffected(cnt);
@@ -105,12 +105,13 @@ namespace AccountingServer.Shell.Carry
         /// <summary>
         ///     所有者权益币种转换
         /// </summary>
+        /// <param name="user">用户</param>
         /// <param name="dt">日期</param>
         /// <param name="to">目标币种</param>
         /// <returns>记账凭证数</returns>
-        private long ConvertEquity(DateTime dt, string to)
+        private long ConvertEquity(string user, DateTime dt, string to)
         {
-            var rst = m_Accountant.RunGroupedQuery($"T4101+T4103-@{to} [~{dt.AsDate()}]`Cts");
+            var rst = m_Accountant.RunGroupedQuery($"U{user.AsUser()}*(T4101+T4103-@{to}) [~{dt.AsDate()}]`Cts");
 
             var cnt = 0L;
 

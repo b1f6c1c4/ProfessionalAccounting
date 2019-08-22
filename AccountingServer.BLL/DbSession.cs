@@ -38,6 +38,10 @@ namespace AccountingServer.BLL
             // ReSharper disable once JoinDeclarationAndInitializer
             int res;
 
+            res = string.Compare(lhs.User, rhs.User, StringComparison.Ordinal);
+            if (res != 0)
+                return res;
+
             res = string.Compare(lhs.Currency, rhs.Currency, StringComparison.Ordinal);
             if (res != 0)
                 return res;
