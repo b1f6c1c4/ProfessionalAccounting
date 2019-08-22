@@ -72,7 +72,7 @@ namespace AccountingServer.BLL.Parsing
                     var t = title();
                     var filter = new VoucherDetail
                         {
-                            User = UserSpec()?.GetText().ParseUserSpec(),
+                            User = (UserSpec()?.GetText()).ParseUserSpec(),
                             Currency = VoucherCurrency()?.GetText().ParseCurrency(),
                             Title = t?.Title,
                             SubTitle = t?.SubTitle,
