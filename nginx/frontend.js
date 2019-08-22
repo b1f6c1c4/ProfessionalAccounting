@@ -127,7 +127,7 @@ const doUpsertAll = async () => {
       end: { row: rid, column: 0 },
     }, false);
     const { rng, obj } = prepareObject();
-    if (rng.start.row <= rid) {
+    if (rng.end.row <= rid) {
       break;
     }
     rid = rng.end.row;
@@ -160,7 +160,7 @@ const doRemoveAll = async () => {
       end: { row: rid, column: 0 },
     }, false);
     const { rng, obj } = prepareObject();
-    if (rng.start.row <= rid) {
+    if (rng.end.row <= rid) {
       break;
     }
     rid = rng.end.row;

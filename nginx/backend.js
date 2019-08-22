@@ -41,7 +41,7 @@ SPEC -- ...                 临时选择序列化器
 `);
   }
 
-  const mx = cmd.match(/^(login|user) (.*)$/);
+  const mx = cmd.match(/^(?:login|user) (.*)$/);
   if (mx) {
     login(mx[1]);
     return Promise.resolve(`Login as ${window.user}`);
