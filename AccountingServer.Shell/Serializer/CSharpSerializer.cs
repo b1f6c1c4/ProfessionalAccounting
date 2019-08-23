@@ -168,7 +168,7 @@ namespace AccountingServer.Shell.Serializer
             var sb = new StringBuilder();
             sb.Append("new Asset {");
             sb.AppendLine($"  StringID = {ProcessString(asset.StringID)},");
-            sb.AppendLine($"  User = {ProcessString(asset.User)}, ");
+            sb.AppendLine($"    User = {ProcessString(asset.User)}, ");
             sb.AppendLine($"    Name = {ProcessString(asset.Name)},");
             sb.AppendLine(asset.Date.HasValue ? $"    Date = D(\"{asset.Date:yyyy-MM-dd}\")," : "    Date = null,");
             sb.AppendLine($"    Currency = {ProcessString(asset.Currency)},");

@@ -243,6 +243,7 @@ namespace AccountingServer.Shell
 
             sb.AppendLine(
                 $"{amort.StringID} {amort.Name.CPadRight(35)}{amort.Date:yyyyMMdd}" +
+                $"U{amort.User.AsUser().CPadRight(5)} " +
                 $"{amort.Value.AsCurrency().CPadLeft(13)}{(dt.HasValue ? bookValue.AsCurrency().CPadLeft(13) : "-".CPadLeft(13))}" +
                 $"{(amort.TotalDays?.ToString(CultureInfo.InvariantCulture) ?? "-").CPadLeft(4)}{amort.Interval.ToString().CPadLeft(20)}");
             if (showSchedule && amort.Schedule != null)
