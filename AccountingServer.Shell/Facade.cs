@@ -164,34 +164,48 @@ namespace AccountingServer.Shell
         public string ExecuteVoucherUpsert(string str, string spec)
         {
             var serializer = GetSerializer(spec);
-            var lst = new List<VoucherDetail>();
 
             var voucher = serializer.ParseVoucher(str);
-            foreach (var grpC in voucher.Details.GroupBy(d => d.Currency ?? BaseCurrency.Now))
+            var grpCs = voucher.Details.GroupBy(d => d.Currency ?? BaseCurrency.Now);
+            var grpUs = voucher.Details.GroupBy(d => d.User ?? ClientUser.Name);
+            foreach (var grpC in grpCs)
             {
                 var unc = grpC.SingleOrDefault(d => !d.Fund.HasValue);
                 if (unc != null)
                     unc.Fund = -grpC.Sum(d => d.Fund ?? 0D);
-
-                foreach (var grpU in grpC.GroupBy(d => d.User ?? ClientUser.Name))
+            }
+            if (grpCs.Count() == 1 && grpUs.Count() > 1)
+                foreach (var grpU in grpUs)
                 {
                     var sum = grpU.Sum(d => d.Fund.Value);
                     if (sum.IsZero())
                         continue;
 
-                    lst.Add(
+                    voucher.Details.Add(
                         new VoucherDetail
                             {
                                 User = grpU.Key,
+                                Currency = grpCs.First().Key,
+                                Title = 3998,
+                                Fund = -sum
+                            });
+                }
+            else if (grpCs.Count() > 1 && grpUs.Count() == 1)
+                foreach (var grpC in grpCs)
+                {
+                    var sum = grpC.Sum(d => d.Fund.Value);
+                    if (sum.IsZero())
+                        continue;
+
+                    voucher.Details.Add(
+                        new VoucherDetail
+                            {
+                                User = grpUs.First().Key,
                                 Currency = grpC.Key,
                                 Title = 3999,
                                 Fund = -sum
                             });
                 }
-            }
-
-            if (lst.Count >= 2)
-                voucher.Details.AddRange(lst);
 
             if (!m_Accountant.Upsert(voucher))
                 throw new ApplicationException("更新或添加失败");
