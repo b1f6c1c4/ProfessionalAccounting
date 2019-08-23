@@ -117,9 +117,21 @@ namespace AccountingServer.Shell.Carry
                 rng = DateFilter.TheNullOnly;
             }
 
-            var targets = GetTargets(ed).ToList();
-            foreach (var target in targets)
-                PartialCarry(target, rng, false);
+            var tasks = CarrySettings.Config.UserSettings
+                .Single(us => us.User == ClientUser.Name).Targets
+                .Select(t => new CarryTask
+                    {
+                        Target = t,
+                        Value = 0D,
+                        Voucher = new Voucher
+                            {
+                                Date = ed,
+                                Type = VoucherType.Carry,
+                                Details = new List<VoucherDetail>()
+                            },
+                    }).ToList();
+            foreach (var task in tasks)
+                PartialCarry(task, rng, false);
 
             var cnt = 0L;
             if (ed.HasValue)
@@ -133,7 +145,7 @@ namespace AccountingServer.Shell.Carry
                                     Currency = bal.Currency,
                                     Fund = bal.Fund +
                                         // ReSharper disable once PossibleInvalidOperationException
-                                        targets.SelectMany(t => t.Voucher.Details)
+                                        tasks.SelectMany(t => t.Voucher.Details)
                                             .Where(d => d.Currency == bal.Currency && d.Title == 3999)
                                             .Sum(d => d.Fund.Value)
                                 })
@@ -170,24 +182,24 @@ namespace AccountingServer.Shell.Carry
                 }
             }
 
-            foreach (var target in targets)
-                PartialCarry(target, rng, true);
+            foreach (var task in tasks)
+                PartialCarry(task, rng, true);
 
-            foreach (var target in targets)
+            foreach (var task in tasks)
             {
-                if (!target.Value.IsZero())
-                    target.Voucher.Details.Add(
+                if (!task.Value.IsZero())
+                    task.Voucher.Details.Add(
                         new VoucherDetail
                             {
-                                Currency = BaseCurrency.At(target.Voucher.Date),
+                                Currency = BaseCurrency.At(task.Voucher.Date),
                                 Title = 4103,
-                                SubTitle = target.IsSpecial ? 01 : (int?)null,
-                                Fund = target.Value
+                                SubTitle = task.Target.IsSpecial ? 01 : (int?)null,
+                                Fund = task.Value
                             });
 
-                if (target.Voucher.Details.Any())
+                if (task.Voucher.Details.Any())
                 {
-                    m_Accountant.Upsert(target.Voucher);
+                    m_Accountant.Upsert(task.Voucher);
                     cnt++;
                 }
             }
@@ -198,15 +210,16 @@ namespace AccountingServer.Shell.Carry
         /// <summary>
         ///     按目标月末结转
         /// </summary>
-        /// <param name="target">目标</param>
+        /// <param name="task">任务</param>
         /// <param name="rng">范围</param>
         /// <param name="baseCurrency">是否为基准</param>
         /// <returns>结转记账凭证</returns>
-        private void PartialCarry(CarryTarget target, DateFilter rng, bool baseCurrency)
+        private void PartialCarry(CarryTask task, DateFilter rng, bool baseCurrency)
         {
             var total = 0D;
             var ed = rng.NullOnly ? null : rng.EndDate;
-            var voucher = target.Voucher;
+            var target = task.Target;
+            var voucher = task.Voucher;
             var baseCur = BaseCurrency.At(ed);
             var res =
                 m_Accountant.RunGroupedQuery(
@@ -261,47 +274,7 @@ namespace AccountingServer.Shell.Carry
                 total += cob;
             }
 
-            target.Value += total;
-        }
-
-        private static IEnumerable<CarryTarget> GetTargets(DateTime? ed)
-        {
-            yield return new CarryTarget
-                {
-                    Query = CarrySettings.Config.ExpensesQuery,
-                    Value = 0D,
-                    Voucher = new Voucher
-                        {
-                            Date = ed,
-                            Type = VoucherType.Carry,
-                            Details = new List<VoucherDetail>()
-                        },
-                    IsSpecial = false
-                };
-            yield return new CarryTarget
-                {
-                    Query = CarrySettings.Config.Revenue1Query,
-                    Value = 0D,
-                    Voucher = new Voucher
-                        {
-                            Date = ed,
-                            Type = VoucherType.Carry,
-                            Details = new List<VoucherDetail>()
-                        },
-                    IsSpecial = false
-                };
-            yield return new CarryTarget
-                {
-                    Query = CarrySettings.Config.Revenue2Query,
-                    Value = 0D,
-                    Voucher = new Voucher
-                        {
-                            Date = ed,
-                            Type = VoucherType.Carry,
-                            Details = new List<VoucherDetail>()
-                        },
-                    IsSpecial = true
-                };
+            task.Value += total;
         }
     }
 
@@ -309,21 +282,35 @@ namespace AccountingServer.Shell.Carry
     [XmlRoot("CarrySettings")]
     public class CarrySettings
     {
-        [XmlElement("Expenses")] public string ExpensesQuery;
-
-        [XmlElement("Revenue1")] public string Revenue1Query;
-
-        [XmlElement("Revenue2")] public string Revenue2Query;
+        [XmlElement("User")] public List<UserCarrySettings> UserSettings;
     }
 
-    internal class CarryTarget
+    [Serializable]
+    public class UserCarrySettings
     {
-        public Voucher Voucher { get; set; }
+        [XmlElement("Target")]
+        public List<CarryTarget> Targets;
 
+        [XmlAttribute("name")]
+        public string User { get; set; }
+    }
+
+    [Serializable]
+    public class CarryTarget
+    {
+        [XmlText]
         public string Query { get; set; }
+
+        [XmlAttribute("special")]
+        public bool IsSpecial { get; set; }
+    }
+
+    internal class CarryTask
+    {
+        public CarryTarget Target { get; set; }
 
         public double Value { get; set; }
 
-        public bool IsSpecial { get; set; }
+        public Voucher Voucher { get; set; }
     }
 }

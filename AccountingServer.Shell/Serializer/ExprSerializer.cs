@@ -209,6 +209,8 @@ namespace AccountingServer.Shell.Serializer
                 Parsing.TrimStartComment(ref expr);
                 if (Parsing.Optional(ref expr, "null"))
                     break;
+                if (Parsing.Optional(ref expr, "/"))
+                    break;
 
                 if (lst.Count > 2)
                     throw new ArgumentException("语法错误", nameof(expr));
