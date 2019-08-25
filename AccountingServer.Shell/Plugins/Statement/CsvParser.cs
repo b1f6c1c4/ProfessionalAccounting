@@ -17,20 +17,60 @@ namespace AccountingServer.Shell.Plugins.Statement
     {
         public List<BankItem> Items;
 
+        private readonly int m_Dir;
+
+        public CsvParser(bool reversed)
+        {
+            m_Dir = reversed ? -1 : +1;
+        }
+
+        private static string Next(ref string expr)
+        {
+            if (expr[0] == '"')
+            {
+                var tmp = ParsingF.Quoted(ref expr);
+                if (string.IsNullOrWhiteSpace(expr))
+                {
+                    expr = null;
+                    return tmp;
+                }
+                if (expr[0] == ',')
+                {
+                    expr = expr.Substring(1);
+                    return tmp;
+                }
+
+                throw new ApplicationException("Csv格式错误");
+            }
+
+            var id = expr.IndexOf(',');
+            if (id < 0)
+            {
+                var tmp = expr;
+                expr = null;
+                return tmp;
+            }
+
+            var f = expr.Substring(0, id);
+            expr = expr.Substring(id + 1);
+            return f;
+        }
+
         public void Parse(string expr)
         {
-            var header = ParsingF.Line(ref expr).Split(',');
+            var header = ParsingF.Line(ref expr);
 
             var dateId = -1;
             var fundId = -1;
 
-            var dateReg = new Regex(@"^transaction\s+date$", RegexOptions.IgnoreCase);
+            var dateReg = new Regex(@"^trans(?:\.|action)\s+date$", RegexOptions.IgnoreCase);
             var fundReg = new Regex(@"^(?:amount|fund|value)$", RegexOptions.IgnoreCase);
-            for (var i = 0; i < header.Length; i++)
+            for (var i = 0; !string.IsNullOrWhiteSpace(header); i++)
             {
-                if (dateReg.IsMatch(header[i]))
+                var f = Next(ref header);
+                if (dateReg.IsMatch(f))
                     dateId = i;
-                else if (fundReg.IsMatch(header[i]))
+                else if (fundReg.IsMatch(f))
                     fundId = i;
             }
 
@@ -43,13 +83,17 @@ namespace AccountingServer.Shell.Plugins.Statement
             while (!string.IsNullOrWhiteSpace(expr))
             {
                 var l = ParsingF.Line(ref expr);
-                var sp = l.Split(',');
-                Items.Add(new BankItem
-                    {
-                        Date = ClientDateTime.Parse(sp[dateId]),
-                        Fund = Convert.ToDouble(sp[fundId]),
-                        Raw = l
-                    });
+                var item = new BankItem { Raw = l };
+                for (var i = 0; !string.IsNullOrWhiteSpace(l); i++)
+                {
+                    var f = Next(ref l);
+                    if (i == dateId)
+                        item.Date = ClientDateTime.Parse(f);
+                    else if (i == fundId)
+                        item.Fund = m_Dir * Convert.ToDouble(f);
+                }
+
+                Items.Add(item);
             }
         }
     }
