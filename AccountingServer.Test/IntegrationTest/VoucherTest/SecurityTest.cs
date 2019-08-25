@@ -1,4 +1,5 @@
-﻿using AccountingServer.Entities.Util;
+﻿using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Util;
 using Xunit;
 using static AccountingServer.BLL.Parsing.FacadeF;
@@ -8,6 +9,11 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
     [Collection("SecurityTestCollection")]
     public class SecurityTest
     {
+        public SecurityTest()
+        {
+            ClientUser.Set("b1");
+        }
+
         [Theory]
         [InlineData(true, "")]
         [InlineData(false, "^hhh^")]
