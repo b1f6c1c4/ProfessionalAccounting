@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using AccountingServer.Entities;
+using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
@@ -24,11 +26,11 @@ namespace AccountingServer.Shell.Plugins.Statement
 
             var dateReg = new Regex(@"^transaction\s+date$", RegexOptions.IgnoreCase);
             var fundReg = new Regex(@"^(?:amount|fund|value)$", RegexOptions.IgnoreCase);
-            for (var i = 0; i < sp.Length; i++)
+            for (var i = 0; i < header.Length; i++)
             {
-                if (header[i].IsMatch(dateReg))
+                if (dateReg.IsMatch(header[i]))
                     dateId = i;
-                else if (header[i].IsMatch(fundReg))
+                else if (fundReg.IsMatch(header[i]))
                     fundId = i;
             }
 
@@ -37,7 +39,8 @@ namespace AccountingServer.Shell.Plugins.Statement
             if (fundId < 0)
                 throw new ApplicationException("找不到金额字段");
 
-            while (expr != null)
+            Items = new List<BankItem>();
+            while (!string.IsNullOrWhiteSpace(expr))
             {
                 var l = ParsingF.Line(ref expr);
                 var sp = l.Split(',');
