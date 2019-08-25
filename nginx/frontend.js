@@ -190,6 +190,23 @@ const doUpload = () => {
   });
 };
 
+const doExecuteFactory = (app) => () => {
+  const command = cmdLine.getValue();
+  if (command === '') {
+    doCreate();
+    return;
+  }
+  freeze(true);
+  execute(command).then((res) => {
+    finalize(res, true, app);
+    editor.focus();
+    editor.renderer.scrollCursorIntoView();
+  }).catch((err) => {
+    finalize(err, false, app);
+    editor.renderer.scrollCursorIntoView();
+  });
+};
+
 editor.setTheme("ace/theme/chrome");
 editor.session.setMode('ace/mode/accounting');
 editor.setOption('showLineNumbers', false);
@@ -206,17 +223,17 @@ editor.commands.addCommands([{
   readOnly: false,
 }, {
   name: 'upload',
-  bindKey: 'Ctrl-Alt-Enter',
+  bindKey: 'Ctrl+Alt+Enter',
   exec: doUpload,
   readOnly: false,
 }, {
   name: 'upsertAll',
-  bindKey: 'Ctrl-Alt-Shift-Enter',
+  bindKey: 'Ctrl+Alt+Shift+Enter',
   exec: doUpsertAll,
   readOnly: false,
 }, {
   name: 'removeAll',
-  bindKey: 'Ctrl-Alt-Shift-Delete',
+  bindKey: 'Ctrl+Alt+Shift+Delete',
   exec: doRemoveAll,
   readOnly: false,
 }]);
@@ -226,38 +243,9 @@ editor.commands.bindKeys({
 
 cmdLine.commands.bindKeys({
   'Tab': () => { editor.focus(); },
-  'Shift+Return': () => {
-    const command = cmdLine.getValue();
-    if (command === '') {
-      doCreate();
-      return;
-    }
-    freeze(true);
-    execute(command).then((res) => {
-      finalize(res, true, true);
-      editor.focus();
-      editor.renderer.scrollCursorIntoView();
-    }).catch((err) => {
-      finalize(err, false, true);
-      editor.renderer.scrollCursorIntoView();
-    });
-  },
-  'Return': () => {
-    const command = cmdLine.getValue();
-    if (command === '') {
-      doCreate();
-      return;
-    }
-    freeze(true);
-    execute(command).then((res) => {
-      finalize(res, true, false);
-      editor.focus();
-      editor.renderer.scrollCursorIntoView();
-    }).catch((err) => {
-      finalize(err, false, false);
-      editor.renderer.scrollCursorIntoView();
-    });
-  },
+  'Ctrl+Alt+Enter': doUpload,
+  'Shift+Enter': doExecuteFactory(true),
+  'Enter': doExecuteFactory(false),
 });
 cmdLine.commands.removeCommands(['find', 'gotoline', 'findall', 'replace', 'replaceall']);
 cmdLine.focus();

@@ -37,7 +37,7 @@ namespace AccountingServer.Shell.Plugins.Statement
         {
             var csv = expr;
             expr = ParsingF.Line(ref csv);
-            var parsed = new CsvParser();
+            var parsed = new CsvParser(ParsingF.Optional(ref expr, "-"));
 
             var sb = new StringBuilder();
             if (ParsingF.Optional(ref expr, "mark"))

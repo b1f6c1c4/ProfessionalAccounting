@@ -3,21 +3,23 @@ Statement帮助文档
 对账插件Statement
 别名：stmt
 
-stmt [auto] 记账凭证细目过滤器 as <marker>
+"-"表示金额相反
+
+stmt [-] [auto] 记账凭证细目过滤器 as <marker>
 上传内容为CSV格式的账单，具体列信息自动识别
 1) stmt unmark 记账凭证过滤器 : (细目映射过滤器)*"marker"
 2) stmt mark 记账凭证过滤器 : (细目映射过滤器)*""
 3) stmt check 记账凭证过滤器 : (细目映射过滤器)*"marker"
 
-stmt mark 记账凭证细目过滤器 as <marker>
+stmt [-] mark 记账凭证细目过滤器 as <marker>
 上传内容为CSV格式的账单，具体列信息自动识别
 账单逐条寻找满足记账凭证细目过滤器的，加上备注
 在账单里/没有对应的细目的，会被列出
 
-stmt ummark 记账凭证细目过滤器
+stmt [-] ummark 记账凭证细目过滤器
 删掉所有备注
 
-stmt check 记账凭证细目过滤器
+stmt [-] check 记账凭证细目过滤器
 上传内容为CSV格式的账单，具体列信息自动识别
 满足记账凭证细目过滤器/不在账单里的，会被列出
 在账单里/没有对应的细目的，会被列出
