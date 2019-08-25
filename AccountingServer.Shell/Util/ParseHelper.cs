@@ -74,6 +74,27 @@ namespace AccountingServer.Shell.Util
         }
 
         /// <summary>
+        ///     匹配行
+        /// </summary>
+        /// <param name="facade">占位符</param>
+        /// <param name="expr">表达式</param>
+        /// <returns>字符串</returns>
+        public static string Line(this FacadeBase facade, ref string expr)
+        {
+            var id = expr.IndexOf('\n');
+            if (id < 0)
+            {
+                var tmp = expr;
+                expr = null;
+                return tmp;
+            }
+
+            var line = expr.Substring(0, id);
+            expr = expr.Substring(id + 1);
+            return line;
+        }
+
+        /// <summary>
         ///     匹配带括号和连续字符串
         /// </summary>
         /// <param name="facade">占位符</param>
