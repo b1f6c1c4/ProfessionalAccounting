@@ -61,6 +61,8 @@
     <Compile Include="Plugins\Interest\InterestRevenue.cs" />
     <Compile Include="Plugins\Composite\Composite.cs" />
     <Compile Include="Plugins\Composite\Inquiry.cs" />
+    <Compile Include="Plugins\Statement\CsvParser.cs" />
+    <Compile Include="Plugins\Statement\Statement.cs" />
     <Compile Include="Plugins\Utilities\Utilities.cs" />
     <Compile Include="Plugins\Utilities\UtilTemplate.cs" />
     <Compile Include="Plugins\YieldRate\YieldRate.cs" />
@@ -125,6 +127,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Plugins\CashFlow\Resources\Document.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Plugins\Statement\Resources\Document.txt" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Plugins\CreditCardConvert\Resources\Document.txt" />
