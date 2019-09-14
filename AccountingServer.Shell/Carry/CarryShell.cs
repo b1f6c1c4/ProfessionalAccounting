@@ -137,22 +137,21 @@ namespace AccountingServer.Shell.Carry
             if (ed.HasValue)
             {
                 var baseCur = BaseCurrency.At(ed);
-                var total =
+                var totalG =
                     m_Accountant.RunGroupedQuery($"T3999 [~{ed.AsDate()}]`C")
-                        .Items.Cast<ISubtotalCurrency>().Select(
-                            bal => new Balance
-                                {
-                                    Currency = bal.Currency,
-                                    Fund = bal.Fund +
-                                        // ReSharper disable once PossibleInvalidOperationException
-                                        tasks.SelectMany(t => t.Voucher.Details)
-                                            .Where(d => d.Currency == bal.Currency && d.Title == 3999)
-                                            .Sum(d => d.Fund.Value)
-                                })
-                        .Sum(
+                        .Items.Cast<ISubtotalCurrency>().Sum(
                             bal => ExchangeFactory.Instance.From(ed.Value, bal.Currency)
                                 * ExchangeFactory.Instance.To(ed.Value, baseCur)
                                 * bal.Fund);
+                // ReSharper disable once PossibleInvalidOperationException
+                var totalC =
+                    tasks.SelectMany(t => t.Voucher.Details)
+                        .Where(d => d.Title == 3999).Sum(
+                            d => ExchangeFactory.Instance.From(ed.Value, d.Currency)
+                                * ExchangeFactory.Instance.To(ed.Value, baseCur)
+                                * d.Fund.Value);
+
+                var total = totalG + totalC;
                 if (!total.IsZero())
                 {
                     m_Accountant.Upsert(
