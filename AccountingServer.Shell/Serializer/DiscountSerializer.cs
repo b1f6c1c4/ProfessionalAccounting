@@ -140,8 +140,6 @@ namespace AccountingServer.Shell.Serializer
                 item.DiscountFund = 0D;
             }
 
-            var totalD = lst.Sum(it => it.DiscountFund);
-
             foreach (var grp in lst.GroupBy(
                 it => new VoucherDetail
                     {
@@ -159,14 +157,18 @@ namespace AccountingServer.Shell.Serializer
                 resLst.Add(grp.Key);
             }
 
-            if (!totalD.IsZero())
+            var totalDs = new Dictionary<string, double>();
+            foreach (var it in lst)
+                totalDs[it.User] += it.DiscountFund;
+
+            foreach (var kvp in totalDs)
                 resLst.Add(
                     new VoucherDetail
                         {
-                            User = ClientUser.Name, // TODO: multi-user discount?
+                            User = kvp.Key,
                             Currency = currency,
                             Title = 6603,
-                            Fund = -totalD
+                            Fund = -kvp.Value
                         });
 
             return new Voucher

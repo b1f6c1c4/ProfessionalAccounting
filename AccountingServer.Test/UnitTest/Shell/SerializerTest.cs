@@ -574,5 +574,79 @@ tnull
 @usd T1001 null
 }"));
         }
+
+        [Fact]
+        public void MultUserDiscountTest()
+        {
+            var serializer = GetSerializer();
+
+            var voucher = serializer.ParseVoucher(
+                @"new Voucher {
+! @usd
+Upn T1001 + ! T1002 : 1000-50 950+50 ;
+! Upn aaa + T100366 hei ha : 1000 ;
+t12
+d48
+
+@usd T1001 -29120
+}");
+            Assert.Equal(
+                new Voucher
+                {
+                    Date = ClientDateTime.Today,
+                    Type = VoucherType.Ordinary,
+                    Details = new List<VoucherDetail>
+                            {
+                                new VoucherDetail
+                                    {
+                                        User = "b1",
+                                        Currency = "USD",
+                                        Title = 1001,
+                                        Fund = -29120
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "pn",
+                                        Currency = "USD",
+                                        Title = 1001,
+                                        Fund = 1000 + 500 + 6 - 8
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "b1",
+                                        Currency = "USD",
+                                        Title = 1002,
+                                        Fund = 950 + 4 - 16
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "b1",
+                                        Currency = "USD",
+                                        Title = 1003,
+                                        SubTitle = 66,
+                                        Content = "hei",
+                                        Remark = "ha",
+                                        Fund = 500 + 2
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "b1",
+                                        Currency = "USD",
+                                        Title = 6603,
+                                        Fund = -8
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "pn",
+                                        Currency = "USD",
+                                        Title = 6603,
+                                        Fund = -50 - 16
+                                    }
+                            }
+                },
+                voucher,
+                new VoucherEqualityComparer());
+        }
+
     }
 }
