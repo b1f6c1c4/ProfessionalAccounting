@@ -50,6 +50,8 @@ namespace AccountingServer.Test
             if (x == null ||
                 y == null)
                 return false;
+            if (x.User != y.User)
+                return false;
             if (x.Currency != y.Currency)
                 return false;
             if (x.Title != y.Title)
@@ -80,6 +82,8 @@ namespace AccountingServer.Test
                 return true;
             if (x == null ||
                 y == null)
+                return false;
+            if (x.User != y.User)
                 return false;
             if (x.Currency != y.Currency)
                 return false;
