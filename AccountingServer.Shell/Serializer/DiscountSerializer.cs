@@ -159,17 +159,21 @@ namespace AccountingServer.Shell.Serializer
 
             var totalDs = new Dictionary<string, double>();
             foreach (var it in lst)
-                totalDs[it.User] += it.DiscountFund;
+                if (totalDs.ContainsKey(it.User))
+                    totalDs[it.User] += it.DiscountFund;
+                else
+                    totalDs[it.User] = it.DiscountFund;
 
             foreach (var kvp in totalDs)
-                resLst.Add(
-                    new VoucherDetail
-                        {
-                            User = kvp.Key,
-                            Currency = currency,
-                            Title = 6603,
-                            Fund = -kvp.Value
-                        });
+                if (!kvp.Value.IsZero())
+                    resLst.Add(
+                        new VoucherDetail
+                            {
+                                User = kvp.Key,
+                                Currency = currency,
+                                Title = 6603,
+                                Fund = -kvp.Value
+                            });
 
             return new Voucher
                 {
@@ -316,6 +320,8 @@ namespace AccountingServer.Shell.Serializer
                     return true;
                 if (x == null ||
                     y == null)
+                    return false;
+                if (x.User != y.User)
                     return false;
                 if (x.Currency != y.Currency)
                     return false;
