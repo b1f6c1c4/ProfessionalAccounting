@@ -630,17 +630,17 @@ d48
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 6603,
-                                        Fund = -8
-                                    },
-                                new VoucherDetail
-                                    {
                                         User = "pn",
                                         Currency = "USD",
                                         Title = 6603,
                                         Fund = -50 - 16
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "b1",
+                                        Currency = "USD",
+                                        Title = 6603,
+                                        Fund = -8
                                     }
                             }
                 },
