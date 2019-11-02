@@ -24,16 +24,19 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         /// <inheritdoc />
         public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
-            var rst = new Dictionary<DateTime, double[]>();
+            var rst = new Dictionary<DateTime, double[,]>();
 
             var n = Templates.Config.Accounts.Count;
             for (var i = 0; i < n; i++)
                 foreach (var (date, value) in GetItems(Templates.Config.Accounts[i], serializer))
                 {
                     if (!rst.ContainsKey(date))
-                        rst.Add(date, new double[n]);
+                        rst.Add(date, new double[n, 2]);
 
-                    rst[date][i] += value;
+                    if (value >= 0)
+                        rst[date][i, 0] += value;
+                    else
+                        rst[date][i, 1] += value;
                 }
 
             var aggs = new double[n];
@@ -41,7 +44,12 @@ namespace AccountingServer.Shell.Plugins.CashFlow
             var sb = new StringBuilder();
             sb.Append("Date    ");
             for (var i = 0; i < n; i++)
-                sb.Append($" {Templates.Config.Accounts[i].Currency.PadRight(15)} Sum            ");
+            {
+                var c = Templates.Config.Accounts[i].Currency;
+                sb.Append($" {$"++ {c} ++".PadRight(15)}");
+                sb.Append($" {$"-- {c} --".PadRight(15)}");
+                sb.Append($" {$"@@ {c} @@".PadRight(15)}");
+            }
 
             sb.AppendLine(" All");
 
@@ -52,11 +60,22 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                 var sum = 0D;
                 for (var i = 0; i < n; i++)
                 {
-                    aggs[i] += kvp.Value[i];
+                    aggs[i] += kvp.Value[i, 0] + kvp.Value[i, 1];
+
                     sum += aggs[i] * ExchangeFactory.Instance.From(
                         kvp.Key,
                         Templates.Config.Accounts[i].Currency);
-                    sb.Append(kvp.Value[i].AsCurrency(Templates.Config.Accounts[i].Currency).PadLeft(15));
+
+                    if (!kvp.Value[i, 0].IsZero())
+                        sb.Append(kvp.Value[i, 0].AsCurrency(Templates.Config.Accounts[i].Currency).PadLeft(15));
+                    else
+                        sb.Append("".PadLeft(15));
+
+                    if (!kvp.Value[i, 1].IsZero())
+                        sb.Append(kvp.Value[i, 1].AsCurrency(Templates.Config.Accounts[i].Currency).PadLeft(15));
+                    else
+                        sb.Append("".PadLeft(15));
+
                     sb.Append(aggs[i].AsCurrency(Templates.Config.Accounts[i].Currency).PadLeft(15));
                 }
 
