@@ -183,8 +183,8 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                     case SimpleCreditCard cc:
                         var rng = $"[{ClientDateTime.Today.AddMonths(-3).AsDate()}~]";
                         var mv = $"{{({cc.Query})+T3999+T6603 A {rng}}}";
-                        foreach (var grpC in Accountant.RunGroupedQuery(
-                                $"{{({cc.Query})*(<+(-{curr})) {rng}}}+{mv}:{cc.Query}`Cd")
+                        var mos = new Dictionary<DateTime, double>();
+                        foreach (var grpC in Accountant.RunGroupedQuery( $"{{({cc.Query})*(<+(-{curr})) {rng}}}+{mv}:{cc.Query}`Cd")
                             .Items
                             .Cast<ISubtotalCurrency>())
                         foreach (var b in grpC.Items.Cast<ISubtotalDate>())
@@ -193,20 +193,35 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                             var cob = ExchangeFactory.Instance.From(mo, grpC.Currency)
                                 * ExchangeFactory.Instance.To(mo, account.Currency)
                                 * b.Fund;
-                            yield return (mo, cob);
+                            if (mos.ContainsKey(mo))
+                                mos[mo] += cob;
+                            else
+                                mos[mo] = cob;
                         }
 
-                        foreach (var b in Accountant.RunGroupedQuery(
-                                $"{{({cc.Query})*({curr}>) {rng}}}-{mv}:{cc.Query}`d")
+                        foreach (var b in Accountant.RunGroupedQuery($"{{({cc.Query})*({curr}>) {rng}}}-{mv}:{cc.Query}`d")
                             .Items
                             .Cast<ISubtotalDate>())
-                            yield return (NextDate(cc.RepaymentDay, b.Date.Value, true), b.Fund);
+                        {
+                            var mo = NextDate(cc.RepaymentDay, b.Date.Value, true);
+                            if (mos.ContainsKey(mo))
+                                mos[mo] += b.Fund;
+                            else
+                                mos[mo] = b.Fund;
+                        }
 
                         for (var d = ClientDateTime.Today; d <= until; d = NextDate(cc.BillDay, d))
-                            yield return (
-                                    NextDate(cc.RepaymentDay, NextDate(cc.BillDay, d), true),
-                                    -(NextDate(cc.BillDay, d) - d).TotalDays * cc.MonthlyFee / (365.2425 / 12)
-                                );
+                        {
+                            var mo = NextDate(cc.RepaymentDay, NextDate(cc.BillDay, d), true);
+                            var cob = -(NextDate(cc.BillDay, d) - d).TotalDays * cc.MonthlyFee / (365.2425 / 12);
+                            if (mos.ContainsKey(mo))
+                                mos[mo] += cob;
+                            else
+                                mos[mo] = cob;
+                        }
+
+                        foreach (var kvp in mos)
+                            yield return (kvp.Key, kvp.Value);
 
                         break;
 
