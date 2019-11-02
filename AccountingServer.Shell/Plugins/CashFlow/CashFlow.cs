@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +8,7 @@ using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
+using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Shell.Plugins.CashFlow
 {
@@ -24,12 +25,19 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         /// <inheritdoc />
         public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
+            var extraMonths = (int)(Parsing.Double(ref expr) ?? 6);
+            Parsing.Eof(expr);
+
             var rst = new Dictionary<DateTime, double[,]>();
 
             var n = Templates.Config.Accounts.Count;
+            var until = ClientDateTime.Today.AddMonths(extraMonths);
             for (var i = 0; i < n; i++)
-                foreach (var (date, value) in GetItems(Templates.Config.Accounts[i], serializer))
+                foreach (var (date, value) in GetItems(Templates.Config.Accounts[i], serializer, until))
                 {
+                    if (date > until)
+                        continue;
+
                     if (!rst.ContainsKey(date))
                         rst.Add(date, new double[n, 2]);
 
@@ -89,10 +97,10 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         {
             var d = reference ?? ClientDateTime.Today;
             var v = new DateTime(d.Year, d.Month, day, 0, 0, 0, DateTimeKind.Utc);
-            return  d.Day >= day ? v.AddMonths(1) : v;
+            return d.Day >= day ? v.AddMonths(1) : v;
         }
 
-        private IEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account, IEntitiesSerializer serializer)
+        private IEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account, IEntitiesSerializer serializer, DateTime until)
         {
             var curr = $"@{account.Currency}";
             var init = Accountant.RunGroupedQuery($"{curr}*({account.QuickAsset}) [~.]``v").Fund;
@@ -123,12 +131,9 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         break;
 
                     case MonthlyItem mn:
-                        var mnmo = NextDate(mn.Day);
-                        for (var i = 0; i < 6; i++)
-                        {
-                            yield return (mnmo, mn.Fund);
-                            mnmo = mnmo.AddMonths(1);
-                        }
+                        for (var d = NextDate(mn.Day); d <= until; d = d.AddMonths(1))
+                            yield return (d, mn.Fund);
+
                         break;
 
                     case SimpleCreditCard cc:
@@ -172,6 +177,14 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                             yield return (mo, b.Fund);
                         }
 
+                        for (var d = ClientDateTime.Today; d <= until; d = NextDate(cc.BillDay, d))
+                        {
+                            yield return (
+                                    NextDate(cc.RepaymentDay, NextDate(cc.BillDay, d)),
+                                    (NextDate(cc.BillDay, d) - d).TotalDays * cc.MonthlyFee / (365.2425 / 12)
+                                );
+                        }
+
                         break;
 
                     case ComplexCreditCard cc:
@@ -179,18 +192,27 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         var pmt = Accountant.RunGroupedQuery($"({cc.Query})*({curr} \"\" >)``v").Fund;
                         var nxt = -Accountant.RunGroupedQuery($"({cc.Query})*({curr} \"\" <)``v").Fund;
                         if (pmt < stmt)
-                            yield return (NextDate(cc.RepaymentDay), pmt - stmt);
-                        else
-                            nxt -= pmt - stmt;
-
-                        if (cc.MaximumUtility >= 0 && cc.MaximumUtility < nxt)
                         {
-                            yield return (NextDate(cc.BillDay), cc.MaximumUtility - nxt);
-                            nxt = cc.MaximumUtility;
+                            if (NextDate(cc.BillDay, NextDate(cc.RepaymentDay)) == NextDate(cc.BillDay))
+                                yield return (NextDate(cc.RepaymentDay), pmt - stmt);
+                            else
+                                nxt += stmt - pmt; // Not paid in full
                         }
+                        else
+                            nxt -= pmt - stmt; // Paid too much
 
-                        if (!nxt.IsZero())
-                            yield return (NextDate(cc.RepaymentDay).AddMonths(1), -nxt);
+                        for (var d = ClientDateTime.Today; d <= until; d = NextDate(cc.BillDay, d))
+                        {
+                            nxt += (NextDate(cc.BillDay, d) - d).TotalDays * cc.MonthlyFee / (365.2425 / 12);
+                            if (cc.MaximumUtility >= 0 && cc.MaximumUtility < nxt)
+                            {
+                                yield return (NextDate(cc.BillDay, d), cc.MaximumUtility - nxt);
+                                nxt = cc.MaximumUtility;
+                            }
+
+                            yield return (NextDate(cc.RepaymentDay, d).AddMonths(1), -nxt);
+                            nxt = 0;
+                        }
 
                         break;
 
