@@ -18,7 +18,8 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         [XmlArrayItem("OnceItem", typeof(OnceItem))]
         [XmlArrayItem("OnceQueryItem", typeof(OnceQueryItem))]
         [XmlArrayItem("MonthlyItem", typeof(MonthlyItem))]
-        [XmlArrayItem("CreditCard", typeof(CreditCard))]
+        [XmlArrayItem("SimpleCreditCard", typeof(SimpleCreditCard))]
+        [XmlArrayItem("ComplexCreditCard", typeof(ComplexCreditCard))]
         public List<CashFlowItem> Items;
 
         [XmlAttribute("currency")]
@@ -65,15 +66,31 @@ namespace AccountingServer.Shell.Plugins.CashFlow
     }
 
     [Serializable]
-    public class CreditCard : CashFlowItem
+    public class SimpleCreditCard : CashFlowItem
     {
+        [XmlAttribute("bill")]
+        public int BillDay { get; set; }
+
         [XmlAttribute("repay")]
         public int RepaymentDay { get; set; }
 
         [XmlText]
         public string Query { get; set; }
+    }
 
+    [Serializable]
+    public class ComplexCreditCard : CashFlowItem
+    {
         [XmlAttribute("bill")]
         public int BillDay { get; set; }
+
+        [XmlAttribute("repay")]
+        public int RepaymentDay { get; set; }
+
+        [XmlAttribute("utility")]
+        public int? MaximumUtility { get; set; }
+
+        [XmlText]
+        public string Query { get; set; }
     }
 }

@@ -97,18 +97,17 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         break;
 
                     case MonthlyItem mn:
-                        var d = new DateTime(ClientDateTime.Today.Year, ClientDateTime.Today.Month, mn.Day, 0, 0, 0, DateTimeKind.Utc)
-                            .AddMonth(ClientDateTime.Today.Day >= mn.Day ? 1 : 0);
+                        var mnmo = NextDate(mn.Day);
                         for (var i = 0; i < 6; i++)
                         {
-                            yield return d;
-                            d = d.AddMonth(1);
+                            yield return mnmo;
+                            mnmo = mnmo.AddMonths(1);
                         }
                         break;
 
-                    case CreditCard cd:
+                    case SimpleCreditCard cc:
                         foreach (var grpC in Accountant.RunGroupedQuery(
-                                $"{{{{({cd.Query})*(<+(-{curr}))}}+{{({cd.Query})+T3999+T6603 A}}}}*{{[{ClientDateTime.Today.AddMonths(-3).AsDate()}~]}}:{cd.Query}`Cd")
+                                $"{{{{({cc.Query})*(<+(-{curr}))}}+{{({cc.Query})+T3999+T6603 A}}}}*{{[{ClientDateTime.Today.AddMonths(-3).AsDate()}~]}}:{cc.Query}`Cd")
                             .Items
                             .Cast<ISubtotalCurrency>())
                         foreach (var b in grpC.Items.Cast<ISubtotalDate>())
@@ -116,11 +115,11 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                             // ReSharper disable once PossibleInvalidOperationException
                             var d = b.Date.Value;
                             var mo = new DateTime(d.Year, d.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-                            if (d.Day >= cd.BillDay)
+                            if (d.Day >= cc.BillDay)
                                 mo = mo.AddMonths(1);
-                            if (cd.RepaymentDay <= cd.BillDay)
+                            if (cc.RepaymentDay <= cc.BillDay)
                                 mo = mo.AddMonths(1);
-                            mo = mo.AddDays(cd.RepaymentDay - 1);
+                            mo = mo.AddDays(cc.RepaymentDay - 1);
                             if (mo <= ClientDateTime.Today)
                                 continue;
 
@@ -131,16 +130,16 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         }
 
                         foreach (var b in Accountant.RunGroupedQuery(
-                                $"{{({cd.Query})*({curr}>) [{ClientDateTime.Today.AddMonths(-3).AsDate()}~]}}-{{({cd.Query})+T3999+T6603 A}}:{cd.Query}`d")
+                                $"{{({cc.Query})*({curr}>) [{ClientDateTime.Today.AddMonths(-3).AsDate()}~]}}-{{({cc.Query})+T3999+T6603 A}}:{cc.Query}`d")
                             .Items
                             .Cast<ISubtotalDate>())
                         {
                             // ReSharper disable once PossibleInvalidOperationException
                             var d = b.Date.Value;
                             var mo = new DateTime(d.Year, d.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-                            if (d.Day > cd.RepaymentDay)
+                            if (d.Day > cc.RepaymentDay)
                                 mo = mo.AddMonths(1);
-                            mo = mo.AddDays(cd.RepaymentDay - 1);
+                            mo = mo.AddDays(cc.RepaymentDay - 1);
                             if (mo <= ClientDateTime.Today)
                                 continue;
 
@@ -148,6 +147,9 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         }
 
                         break;
+
+                    case ComplexCreditCard cc:
+                        throw new NotImplementedException(); // FIXME
 
                     default:
                         throw new InvalidOperationException();
