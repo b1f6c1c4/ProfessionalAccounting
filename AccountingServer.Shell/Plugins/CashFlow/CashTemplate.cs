@@ -15,8 +15,9 @@ namespace AccountingServer.Shell.Plugins.CashFlow
     public class CashAccount
     {
         [XmlArray("Items")]
-        [XmlArrayItem("FixedItem", typeof(FixedItem))]
-        [XmlArrayItem("SimpleItem", typeof(SimpleItem))]
+        [XmlArrayItem("OnceItem", typeof(OnceItem))]
+        [XmlArrayItem("OnceQueryItem", typeof(OnceQueryItem))]
+        [XmlArrayItem("MonthlyItem", typeof(MonthlyItem))]
         [XmlArrayItem("CreditCard", typeof(CreditCard))]
         public List<CashFlowItem> Items;
 
@@ -34,23 +35,33 @@ namespace AccountingServer.Shell.Plugins.CashFlow
     public abstract class CashFlowItem { }
 
     [Serializable]
-    public class FixedItem : CashFlowItem
+    public class OnceItem : CashFlowItem
     {
-        [XmlAttribute("day")]
-        public DateTime Day { get; set; }
+        [XmlAttribute("date")]
+        public DateTime Date { get; set; }
 
         [XmlAttribute("fund")]
         public double Fund { get; set; }
     }
 
     [Serializable]
-    public class SimpleItem : CashFlowItem
+    public class OnceQueryItem : CashFlowItem
     {
-        [XmlAttribute("day")]
-        public DateTime Day { get; set; }
+        [XmlAttribute("date")]
+        public DateTime Date { get; set; }
 
         [XmlText]
         public string Query { get; set; }
+    }
+
+    [Serializable]
+    public class MonthlyItem : CashFlowItem
+    {
+        [XmlAttribute("day")]
+        public int Day { get; set; }
+
+        [XmlAttribute("fund")]
+        public double Fund { get; set; }
     }
 
     [Serializable]

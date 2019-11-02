@@ -86,14 +86,24 @@ namespace AccountingServer.Shell.Plugins.CashFlow
             foreach (var debt in account.Items)
                 switch (debt)
                 {
-                    case FixedItem fi:
-                        yield return (fi.Day, fi.Fund);
+                    case OnceItem oi:
+                        yield return (oi.Date, oi.Fund);
 
                         break;
 
-                    case SimpleItem sd:
-                        yield return (sd.Day, Accountant.RunGroupedQuery($"{curr}*({sd.Query})``v").Fund);
+                    case OnceQueryItem oqi:
+                        yield return (oqi.Date, Accountant.RunGroupedQuery($"{curr}*({oqi.Query})``v").Fund);
 
+                        break;
+
+                    case MonthlyItem mn:
+                        var d = new DateTime(ClientDateTime.Today.Year, ClientDateTime.Today.Month, mn.Day, 0, 0, 0, DateTimeKind.Utc)
+                            .AddMonth(ClientDateTime.Today.Day >= mn.Day ? 1 : 0);
+                        for (var i = 0; i < 6; i++)
+                        {
+                            yield return d;
+                            d = d.AddMonth(1);
+                        }
                         break;
 
                     case CreditCard cd:
