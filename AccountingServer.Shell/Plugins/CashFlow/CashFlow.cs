@@ -35,6 +35,8 @@ namespace AccountingServer.Shell.Plugins.CashFlow
             for (var i = 0; i < n; i++)
                 foreach (var (date, value) in GetItems(Templates.Config.Accounts[i], serializer, until))
                 {
+                    if (date <= ClientDateTime.Today)
+                        continue;
                     if (date > until)
                         continue;
 
@@ -54,9 +56,9 @@ namespace AccountingServer.Shell.Plugins.CashFlow
             for (var i = 0; i < n; i++)
             {
                 var c = Templates.Config.Accounts[i].Currency;
-                sb.Append($" {$"++ {c} ++".PadRight(15)}");
-                sb.Append($" {$"-- {c} --".PadRight(15)}");
-                sb.Append($" {$"@@ {c} @@".PadRight(15)}");
+                sb.Append($" {$"++++ {c} ++++".PadLeft(15)}");
+                sb.Append($" {$"---- {c} ----".PadLeft(15)}");
+                sb.Append($" {$"@@@@ {c} @@@@".PadLeft(15)}");
             }
 
             sb.AppendLine(" All");
@@ -74,12 +76,12 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         kvp.Key,
                         Templates.Config.Accounts[i].Currency);
 
-                    if (!kvp.Value[i, 0].IsZero())
+                    if (kvp.Key != ClientDateTime.Today && !kvp.Value[i, 0].IsZero())
                         sb.Append(kvp.Value[i, 0].AsCurrency(Templates.Config.Accounts[i].Currency).PadLeft(15));
                     else
                         sb.Append("".PadLeft(15));
 
-                    if (!kvp.Value[i, 1].IsZero())
+                    if (kvp.Key != ClientDateTime.Today && !kvp.Value[i, 1].IsZero())
                         sb.Append(kvp.Value[i, 1].AsCurrency(Templates.Config.Accounts[i].Currency).PadLeft(15));
                     else
                         sb.Append("".PadLeft(15));
@@ -96,8 +98,11 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         private DateTime NextDate(int day, DateTime? reference = null)
         {
             var d = reference ?? ClientDateTime.Today;
-            var v = new DateTime(d.Year, d.Month, day, 0, 0, 0, DateTimeKind.Utc);
-            return d.Day >= day ? v.AddMonths(1) : v;
+            var v = new DateTime(d.Year, d.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+            if (d.Day >= day)
+                v = v.AddMonths(1);
+
+            return v.AddDays(day - 1);
         }
 
         private IEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account, IEntitiesSerializer serializer, DateTime until)
@@ -143,17 +148,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                             .Cast<ISubtotalCurrency>())
                         foreach (var b in grpC.Items.Cast<ISubtotalDate>())
                         {
-                            // ReSharper disable once PossibleInvalidOperationException
-                            var d = b.Date.Value;
-                            var mo = new DateTime(d.Year, d.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-                            if (d.Day >= cc.BillDay)
-                                mo = mo.AddMonths(1);
-                            if (cc.RepaymentDay <= cc.BillDay)
-                                mo = mo.AddMonths(1);
-                            mo = mo.AddDays(cc.RepaymentDay - 1);
-                            if (mo <= ClientDateTime.Today)
-                                continue;
-
+                            var mo = NextDate(cc.RepaymentDay, NextDate(cc.BillDay, b.Date.Value));
                             var cob = ExchangeFactory.Instance.From(mo, grpC.Currency)
                                 * ExchangeFactory.Instance.To(mo, account.Currency)
                                 * b.Fund;
@@ -164,26 +159,13 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                                 $"{{({cc.Query})*({curr}>) [{ClientDateTime.Today.AddMonths(-3).AsDate()}~]}}-{{({cc.Query})+T3999+T6603 A}}:{cc.Query}`d")
                             .Items
                             .Cast<ISubtotalDate>())
-                        {
-                            // ReSharper disable once PossibleInvalidOperationException
-                            var d = b.Date.Value;
-                            var mo = new DateTime(d.Year, d.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-                            if (d.Day > cc.RepaymentDay)
-                                mo = mo.AddMonths(1);
-                            mo = mo.AddDays(cc.RepaymentDay - 1);
-                            if (mo <= ClientDateTime.Today)
-                                continue;
-
-                            yield return (mo, b.Fund);
-                        }
+                            yield return (NextDate(cc.RepaymentDay, b.Date.Value), b.Fund);
 
                         for (var d = ClientDateTime.Today; d <= until; d = NextDate(cc.BillDay, d))
-                        {
                             yield return (
                                     NextDate(cc.RepaymentDay, NextDate(cc.BillDay, d)),
                                     (NextDate(cc.BillDay, d) - d).TotalDays * cc.MonthlyFee / (365.2425 / 12)
                                 );
-                        }
 
                         break;
 
