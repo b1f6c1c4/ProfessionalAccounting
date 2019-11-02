@@ -76,6 +76,9 @@ namespace AccountingServer.Shell.Plugins.CashFlow
 
         [XmlText]
         public string Query { get; set; }
+
+        [XmlAttribute("monthly")]
+        public double MonthlyFee { get; set; }
     }
 
     [Serializable]
@@ -92,5 +95,8 @@ namespace AccountingServer.Shell.Plugins.CashFlow
 
         [XmlText]
         public string Query { get; set; }
+
+        [XmlAttribute("monthly")]
+        public double MonthlyFee { get; set; }
     }
 }
