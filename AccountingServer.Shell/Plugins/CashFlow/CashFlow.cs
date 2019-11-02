@@ -13,7 +13,7 @@ using static AccountingServer.BLL.Parsing.Facade;
 namespace AccountingServer.Shell.Plugins.CashFlow
 {
     /// <summary>
-    ///     自动计算利息收入和还款
+    ///     自动计算现金流
     /// </summary>
     internal class CashFlow : PluginBase
     {
@@ -28,16 +28,24 @@ namespace AccountingServer.Shell.Plugins.CashFlow
             var extraMonths = (int)(Parsing.Double(ref expr) ?? 6);
             Parsing.Eof(expr);
 
-            var rst = new Dictionary<DateTime, double[,]>();
-
             var n = Templates.Config.Accounts.Count;
             var until = ClientDateTime.Today.AddMonths(extraMonths);
+
+            var aggs = new double[n];
+            var rst = new Dictionary<DateTime, double[,]>();
+
             for (var i = 0; i < n; i++)
-                foreach (var (date, value) in GetItems(Templates.Config.Accounts[i], serializer, until))
+            {
+                var account = Templates.Config.Accounts[i];
+                aggs[i] = Accountant.RunGroupedQuery($"@{account.Currency}*({account.QuickAsset}) [~.]``v").Fund;
+
+                foreach (var (date, value) in GetItems(account, serializer, until))
                 {
                     if (date <= ClientDateTime.Today)
                         continue;
                     if (date > until)
+                        continue;
+                    if (value.IsZero())
                         continue;
 
                     if (!rst.ContainsKey(date))
@@ -48,20 +56,37 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                     else
                         rst[date][i, 1] += value;
                 }
-
-            var aggs = new double[n];
+            }
 
             var sb = new StringBuilder();
             sb.Append("Date    ");
             for (var i = 0; i < n; i++)
             {
                 var c = Templates.Config.Accounts[i].Currency;
-                sb.Append($" {$"++++ {c} ++++".PadLeft(15)}");
-                sb.Append($" {$"---- {c} ----".PadLeft(15)}");
-                sb.Append($" {$"@@@@ {c} @@@@".PadLeft(15)}");
+                sb.Append($"++++ {c} ++++".PadLeft(15));
+                sb.Append($"---- {c} ----".PadLeft(15));
+                sb.Append($"#### {c} ####".PadLeft(15));
             }
 
-            sb.AppendLine(" All");
+            sb.AppendLine("@@@@ All @@@@".PadLeft(15));
+
+            {
+                sb.Append("Today   ");
+
+                var sum = 0D;
+                for (var i = 0; i < n; i++)
+                {
+                    sum += aggs[i] * ExchangeFactory.Instance.From(
+                        ClientDateTime.Today,
+                        Templates.Config.Accounts[i].Currency);
+
+                    sb.Append("".PadLeft(15));
+                    sb.Append("".PadLeft(15));
+                    sb.Append(aggs[i].AsCurrency(Templates.Config.Accounts[i].Currency).PadLeft(15));
+                }
+
+                sb.AppendLine(sum.AsCurrency(BaseCurrency.Now).PadLeft(15));
+            }
 
             foreach (var kvp in rst.OrderBy(kvp => kvp.Key))
             {
@@ -76,12 +101,12 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         kvp.Key,
                         Templates.Config.Accounts[i].Currency);
 
-                    if (kvp.Key != ClientDateTime.Today && !kvp.Value[i, 0].IsZero())
+                    if (!kvp.Value[i, 0].IsZero())
                         sb.Append(kvp.Value[i, 0].AsCurrency(Templates.Config.Accounts[i].Currency).PadLeft(15));
                     else
                         sb.Append("".PadLeft(15));
 
-                    if (kvp.Key != ClientDateTime.Today && !kvp.Value[i, 1].IsZero())
+                    if (!kvp.Value[i, 1].IsZero())
                         sb.Append(kvp.Value[i, 1].AsCurrency(Templates.Config.Accounts[i].Currency).PadLeft(15));
                     else
                         sb.Append("".PadLeft(15));
@@ -95,12 +120,24 @@ namespace AccountingServer.Shell.Plugins.CashFlow
             return new PlainText(sb.ToString());
         }
 
-        private DateTime NextDate(int day, DateTime? reference = null)
+        private DateTime NextDate(int day, DateTime? reference = null, bool inclusive = false)
         {
             var d = reference ?? ClientDateTime.Today;
             var v = new DateTime(d.Year, d.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-            if (d.Day >= day)
-                v = v.AddMonths(1);
+            if (!inclusive)
+            {
+                if (d.Day >= day)
+                    v = v.AddMonths(1);
+            }
+            else
+            {
+                if (d.Day > day)
+                    v = v.AddMonths(1);
+            }
+
+            var last = v.AddMonths(1).AddDays(-1);
+            if (last.Day < day)
+                return last;
 
             return v.AddDays(day - 1);
         }
@@ -108,8 +145,6 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         private IEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account, IEntitiesSerializer serializer, DateTime until)
         {
             var curr = $"@{account.Currency}";
-            var init = Accountant.RunGroupedQuery($"{curr}*({account.QuickAsset}) [~.]``v").Fund;
-            yield return (ClientDateTime.Today, init);
 
             if (account.Reimburse != null)
             {
@@ -142,13 +177,15 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         break;
 
                     case SimpleCreditCard cc:
+                        var rng = $"[{ClientDateTime.Today.AddMonths(-3).AsDate()}~]";
+                        var mv = $"{{({cc.Query})+T3999+T6603 A {rng}}}";
                         foreach (var grpC in Accountant.RunGroupedQuery(
-                                $"{{{{({cc.Query})*(<+(-{curr}))}}+{{({cc.Query})+T3999+T6603 A}}}}*{{[{ClientDateTime.Today.AddMonths(-3).AsDate()}~]}}:{cc.Query}`Cd")
+                                $"{{({cc.Query})*(<+(-{curr})) {rng}}}+{mv}:{cc.Query}`Cd")
                             .Items
                             .Cast<ISubtotalCurrency>())
                         foreach (var b in grpC.Items.Cast<ISubtotalDate>())
                         {
-                            var mo = NextDate(cc.RepaymentDay, NextDate(cc.BillDay, b.Date.Value));
+                            var mo = NextDate(cc.RepaymentDay, NextDate(cc.BillDay, b.Date.Value), true);
                             var cob = ExchangeFactory.Instance.From(mo, grpC.Currency)
                                 * ExchangeFactory.Instance.To(mo, account.Currency)
                                 * b.Fund;
@@ -156,15 +193,15 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         }
 
                         foreach (var b in Accountant.RunGroupedQuery(
-                                $"{{({cc.Query})*({curr}>) [{ClientDateTime.Today.AddMonths(-3).AsDate()}~]}}-{{({cc.Query})+T3999+T6603 A}}:{cc.Query}`d")
+                                $"{{({cc.Query})*({curr}>) {rng}}}-{mv}:{cc.Query}`d")
                             .Items
                             .Cast<ISubtotalDate>())
-                            yield return (NextDate(cc.RepaymentDay, b.Date.Value), b.Fund);
+                            yield return (NextDate(cc.RepaymentDay, b.Date.Value, true), b.Fund);
 
                         for (var d = ClientDateTime.Today; d <= until; d = NextDate(cc.BillDay, d))
                             yield return (
-                                    NextDate(cc.RepaymentDay, NextDate(cc.BillDay, d)),
-                                    (NextDate(cc.BillDay, d) - d).TotalDays * cc.MonthlyFee / (365.2425 / 12)
+                                    NextDate(cc.RepaymentDay, NextDate(cc.BillDay, d), true),
+                                    -(NextDate(cc.BillDay, d) - d).TotalDays * cc.MonthlyFee / (365.2425 / 12)
                                 );
 
                         break;
