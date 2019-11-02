@@ -26,6 +26,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             var extraMonths = (int)(Parsing.Double(ref expr) ?? 6);
+            var prefix = Parsing.Token(ref expr);
             Parsing.Eof(expr);
 
             var n = Templates.Config.Accounts.Count;
@@ -59,6 +60,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
             }
 
             var sb = new StringBuilder();
+            sb.Append(prefix);
             sb.Append("Date    ");
             for (var i = 0; i < n; i++)
             {
@@ -71,6 +73,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
             sb.AppendLine("@@@@ All @@@@".PadLeft(15));
 
             {
+                sb.Append(prefix);
                 sb.Append("Today   ");
 
                 var sum = 0D;
@@ -90,6 +93,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
 
             foreach (var kvp in rst.OrderBy(kvp => kvp.Key))
             {
+                sb.Append(prefix);
                 sb.Append($"{kvp.Key.AsDate()}");
 
                 var sum = 0D;
