@@ -66,6 +66,13 @@ namespace AccountingServer.Shell.Plugins.CashFlow
             return new PlainText(sb.ToString());
         }
 
+        private DateTime NextDate(int day, DateTime? reference = null)
+        {
+            var d = reference ?? ClientDateTime.Today;
+            var v = new DateTime(d.Year, d.Month, day, 0, 0, 0, DateTimeKind.Utc);
+            return  d.Day >= day ? v.AddMonths(1) : v;
+        }
+
         private IEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account, IEntitiesSerializer serializer)
         {
             var curr = $"@{account.Currency}";
@@ -100,7 +107,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         var mnmo = NextDate(mn.Day);
                         for (var i = 0; i < 6; i++)
                         {
-                            yield return mnmo;
+                            yield return (mnmo, mn.Fund);
                             mnmo = mnmo.AddMonths(1);
                         }
                         break;
@@ -149,7 +156,24 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         break;
 
                     case ComplexCreditCard cc:
-                        throw new NotImplementedException(); // FIXME
+                        var stmt = -Accountant.RunGroupedQuery($"({cc.Query})*({curr})-\"\"``v").Fund;
+                        var pmt = Accountant.RunGroupedQuery($"({cc.Query})*({curr} \"\" >)``v").Fund;
+                        var nxt = -Accountant.RunGroupedQuery($"({cc.Query})*({curr} \"\" <)``v").Fund;
+                        if (pmt < stmt)
+                            yield return (NextDate(cc.RepaymentDay), pmt - stmt);
+                        else
+                            nxt -= pmt - stmt;
+
+                        if (cc.MaximumUtility >= 0 && cc.MaximumUtility < nxt)
+                        {
+                            yield return (NextDate(cc.BillDay), cc.MaximumUtility - nxt);
+                            nxt = cc.MaximumUtility;
+                        }
+
+                        if (!nxt.IsZero())
+                            yield return (NextDate(cc.RepaymentDay).AddMonths(1), -nxt);
+
+                        break;
 
                     default:
                         throw new InvalidOperationException();

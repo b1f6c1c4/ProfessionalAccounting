@@ -88,7 +88,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         public int RepaymentDay { get; set; }
 
         [XmlAttribute("utility")]
-        public int? MaximumUtility { get; set; }
+        public int MaximumUtility { get; set; } = -1;
 
         [XmlText]
         public string Query { get; set; }
