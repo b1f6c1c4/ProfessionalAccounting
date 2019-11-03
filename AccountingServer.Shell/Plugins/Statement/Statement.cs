@@ -46,6 +46,9 @@ namespace AccountingServer.Shell.Plugins.Statement
                 ParsingF.Optional(ref expr, "as");
                 var marker = ParsingF.Token(ref expr);
                 ParsingF.Eof(expr);
+                if (string.IsNullOrWhiteSpace(marker))
+                    throw new FormatException("格式错误");
+
                 parsed.Parse(csv);
                 sb.AppendLine($"{parsed.Items.Count} parsed");
                 RunMark(filt, parsed, marker, sb);
@@ -71,6 +74,9 @@ namespace AccountingServer.Shell.Plugins.Statement
                 ParsingF.Optional(ref expr, "as");
                 var marker = ParsingF.Token(ref expr);
                 ParsingF.Eof(expr);
+                if (string.IsNullOrWhiteSpace(marker))
+                    throw new FormatException("格式错误");
+
                 parsed.Parse(csv);
                 sb.AppendLine($"{parsed.Items.Count} parsed");
                 var markerFilt = new StmtVoucherDetailQuery(
@@ -106,7 +112,9 @@ namespace AccountingServer.Shell.Plugins.Statement
                 {
                     var resx = date
                         ? res.Where(v => v.Date == b.Date)
-                        : res.OrderBy(v => Math.Abs((v.Date.Value - b.Date).TotalDays));
+                        : res.OrderBy(v => v.Date.HasValue
+                            ? Math.Abs((v.Date.Value - b.Date).TotalDays)
+                            : double.PositiveInfinity);
                     var voucher = resx
                         .Where(v => v.Details.Any(d => (d.Fund.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter)))
                         .FirstOrDefault();
