@@ -89,9 +89,16 @@ namespace AccountingServer.Shell.Plugins.Statement
                     new IntersectQueries<IDetailQueryAtom>(
                         filt.DetailEmitFilter.DetailFilter,
                         new StmtDetailQuery("")));
+                var nmFilt = new StmtVoucherDetailQuery(
+                    filt.VoucherQuery,
+                    new IntersectQueries<IDetailQueryAtom>(
+                        filt.DetailEmitFilter.DetailFilter,
+                        new UnionQueries<IDetailQueryAtom>(
+                             new StmtDetailQuery(""),
+                             new StmtDetailQuery(marker))));
                 RunUnmark(markerFilt, sb);
                 RunMark(nullFilt, parsed, marker, sb);
-                RunCheck(markerFilt, parsed, sb);
+                RunCheck(nmFilt, parsed, sb);
             }
 
             return new PlainText(sb.ToString());

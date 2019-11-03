@@ -9,7 +9,7 @@ stmt [-] [auto] 记账凭证细目过滤器 as <marker>
 上传内容为CSV格式的账单，具体列信息自动识别
 1) stmt unmark 记账凭证过滤器 : (细目映射过滤器)*"marker"
 2) stmt mark 记账凭证过滤器 : (细目映射过滤器)*""
-3) stmt check 记账凭证过滤器 : (细目映射过滤器)*"marker"
+3) stmt check 记账凭证过滤器 : (细目映射过滤器)*(""+"marker")
 
 stmt [-] mark 记账凭证细目过滤器 as <marker>
 上传内容为CSV格式的账单，具体列信息自动识别
