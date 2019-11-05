@@ -11,21 +11,38 @@ const freeze = (f) => {
   document.getElementById('remove').disabled = f;
 };
 
+const getRow = (pos) => {
+  let st = pos;
+  while (st) {
+    st--;
+    if (editor.value[st] == '\n') {
+      st++;
+      break;
+    }
+  }
+
+  let ed = pos;
+  while (ed < editor.value.length) {
+    if (editor.value[ed] == '\n') {
+      ed--;
+      break;
+    }
+    ed++;
+  }
+
+  return { st, ed };
+};
+
 const finalize = (answer, success, insert) => {
   if (insert) {
-    // editor.setSelectionRange({
-    //   start: { row: editor.selection.getCursor().row, column: 0 },
-    //   end: { row: editor.selection.getCursor().row, column: 0 },
-    // }, false);
+    const pos = getRow(editor.selectionStart);
+    editor.selectionStart = pos;
+    editor.selectionEnd = pos;
   } else {
     editor.value = '';
   }
-  // const original = editor.selection.getCursor();
-  // editor.insert(answer);
-  // editor.setSelectionRange({
-  //   start: original,
-  //   end: original,
-  // }, false);
+  editor.setRangeText(answer);
+  autosize.update(editor);
   freeze(false);
   if (success) {
     cmdLine.setSelectionRange(0, cmdLine.value.length);
@@ -35,37 +52,44 @@ const finalize = (answer, success, insert) => {
 };
 
 const prepareObject = () => {
-  // let row = editor.selection.getCursor().row;
-  // while (!editor.session.doc.getLine(row).match(/^@new [A-Z][a-z]+ \{/)) {
-  //   if (row) {
-  //     row--;
-  //   } else {
-  //     return undefined;
-  //   }
-  // }
-  // const st = row;
-  // while (!editor.session.doc.getLine(row).match(/\}@$/)) {
-  //   if (row < editor.session.doc.getLength()) {
-  //     row++;
-  //   } else {
-  //     return undefined;
-  //   }
-  // }
-  // const ed = row;
-  // const obj = editor.session.doc.getLines(st, ed).join('\n');
-  // const rng = new ace.Range(st, 0, ed + 1, 0);
-  // return { rng, obj };
+  let { st: sst, ed: sed } = getRow(editor.selectionStart);
+  while (!editor.value.substring(sst, sed + 1).match(/^@new [A-Z][a-z]+ \{/)) {
+    if (sst) {
+      ({ st: sst, ed: sed } = getRow(sst - 1));
+    } else {
+      return undefined;
+    }
+  }
+
+  let { st: est, ed: eed } = getRow(sed + 1);
+  while (!editor.value.substring(est, eed + 1).match(/\}@$/)) {
+    if (eed < editor.value.length) {
+      ({ st: est, ed: eed } = getRow(eed + 2));
+    } else {
+      return undefined;
+    }
+  }
+
+  const obj = editor.value.substring(sst, eed + 1);
+  const rng = { st: sst, ed: eed + 1 };
+  return { rng, obj };
 };
 
-const indicateResult = (res, rng) => {
+const indicateResult = (res, { st, ed }) => {
   freeze(false);
-  // editor.replace(rng, res.endsWith('\n') ? res : res + '\n');
+  editor.setRangeText(res.endsWith('\n') ? res : res + '\n', st, ed + 1);
+  autosize.update(editor);
+  editor.selectionStart = st;
+  editor.selectionEnd = st;
 };
 
-const indicateError = (err, { end }) => {
+const indicateError = (err, { st, ed }) => {
   freeze(false);
   console.error(err);
-  // editor.session.doc.insert(end, err.endsWith('\n') ? err : err + '\n');
+  editor.setRangeText(err.endsWith('\n') ? err : err + '\n', ed + 1, ed + 1);
+  autosize.update(editor);
+  editor.selectionStart = st;
+  editor.selectionEnd = st;
 };
 
 const doCreate = () => {
@@ -74,10 +98,6 @@ const doCreate = () => {
   execute('').then((res) => {
     finalize(res, true, true);
     // editor.renderer.scrollCursorIntoView();
-    // editor.selection.setSelectionRange({
-    //   start: { row: editor.selection.getCursor().row + 1, column: 0 },
-    //   end: { row: editor.selection.getCursor().row + 1, column: 0 },
-    // }, false);
   }).catch((err) => {
     finalize(err, false, true);
   });
@@ -97,17 +117,15 @@ const doUpsert = () => {
 
 const doUpsertAll = async () => {
   console.log('doUpsertAll');
-  let rid = 0;
+  let st = 0;
   while (true) {
-    // editor.selection.setSelectionRange({
-    //   start: { row: rid, column: 0 },
-    //   end: { row: rid, column: 0 },
-    // }, false);
+    editor.selectionStart = st;
+    editor.selectionEnd = st;
     const { rng, obj } = prepareObject();
-    // if (rng.end.row <= rid) {
-    //   break;
-    // }
-    // rid = rng.end.row;
+    if (rng.ed <= st) {
+      break;
+    }
+    st = rng.ed + 1;
     try {
       freeze(true);
       const res = await upsert(obj);
@@ -132,17 +150,15 @@ const doRemove = () => {
 
 const doRemoveAll = async () => {
   console.log('doRemoveAll');
-  let rid = 0;
+  let st = 0;
   while (true) {
-    // editor.selection.setSelectionRange({
-    //   start: { row: rid, column: 0 },
-    //   end: { row: rid, column: 0 },
-    // }, false);
+    editor.selectionStart = st;
+    editor.selectionEnd = st;
     const { rng, obj } = prepareObject();
-    // if (rng.end.row <= rid) {
-    //   break;
-    // }
-    // rid = rng.end.row;
+    if (rng.ed <= st) {
+      break;
+    }
+    st = rng.ed + 1;
     try {
       freeze(true);
       const res = await remove(obj);
@@ -201,7 +217,6 @@ editor.onkeydown = (e) => {
       doUpsertAll();
     }
   } else if (e.keyCode == 46) {
-    e.preventDefault();
     if (!e.ctrlKey && e.altKey && !e.shiftKey) {
       e.preventDefault();
       doRemove();
