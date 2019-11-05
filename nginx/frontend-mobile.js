@@ -252,3 +252,4 @@ cmdLine.focus();
 document.getElementById('create').onclick = doCreate;
 document.getElementById('upsert').onclick = doUpsert;
 document.getElementById('remove').onclick = doRemove;
+document.getElementById('upload').onclick = doUpload;
