@@ -32,9 +32,6 @@ editor.cmdLine = cmdLine;
 const freeze = (f) => {
   editor.setReadOnly(f);
   cmdLine.setReadOnly(f);
-  document.getElementById('create').disabled = f;
-  document.getElementById('upsert').disabled = f;
-  document.getElementById('remove').disabled = f;
 };
 
 const finalize = (answer, success, insert) => {
@@ -249,7 +246,3 @@ cmdLine.commands.bindKeys({
 });
 cmdLine.commands.removeCommands(['find', 'gotoline', 'findall', 'replace', 'replaceall']);
 cmdLine.focus();
-
-document.getElementById('create').onclick = doCreate;
-document.getElementById('upsert').onclick = doUpsert;
-document.getElementById('remove').onclick = doRemove;
