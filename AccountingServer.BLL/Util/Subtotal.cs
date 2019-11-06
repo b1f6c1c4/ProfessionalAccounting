@@ -142,8 +142,13 @@ namespace AccountingServer.BLL.Util
     {
         private readonly ISubtotal m_Par;
         private int m_Depth;
+        private IExchange m_Exchange;
 
-        public SubtotalBuilder(ISubtotal par) => m_Par = par;
+        public SubtotalBuilder(ISubtotal par, IExchange ex)
+        {
+            m_Par = par;
+            m_Exchange = ex;
+        }
 
         /// <summary>
         ///     建造分类汇总结果
@@ -348,8 +353,8 @@ namespace AccountingServer.BLL.Util
         private double BuildEquiPhase(IEnumerable<Balance> raw) => m_Par.EquivalentDate.HasValue
             ? raw.Sum(
                 b => b.Fund
-                    * ExchangeFactory.Instance.From(m_Par.EquivalentDate.Value, b.Currency)
-                    * ExchangeFactory.Instance.To(m_Par.EquivalentDate.Value, m_Par.EquivalentCurrency))
+                    * m_Exchange.From(m_Par.EquivalentDate.Value, b.Currency)
+                    * m_Exchange.To(m_Par.EquivalentDate.Value, m_Par.EquivalentCurrency))
             : raw.Sum(b => b.Fund);
     }
 }

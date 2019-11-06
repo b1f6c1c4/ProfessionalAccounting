@@ -1,3 +1,4 @@
+using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Serializer;
@@ -11,6 +12,13 @@ namespace AccountingServer.Shell.Carry
     /// </summary>
     internal class ExchangeShell : IShellComponent
     {
+        /// <summary>
+        ///     基本会计业务处理类
+        /// </summary>
+        private readonly Accountant m_Accountant;
+
+        public ExchangeShell(Accountant helper) => m_Accountant = helper;
+
         public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             expr = expr.Rest();
@@ -25,7 +33,7 @@ namespace AccountingServer.Shell.Carry
 
             var date = Parsing.UniqueTime(ref expr) ?? ClientDateTime.Today;
             Parsing.Eof(expr);
-            var res = rev ? ExchangeFactory.Instance.To(date, curr) : ExchangeFactory.Instance.From(date, curr);
+            var res = rev ? m_Accountant.To(date, curr) : m_Accountant.From(date, curr);
 
             return new PlainText((res * val.Value).ToString("R"));
         }

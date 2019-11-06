@@ -140,15 +140,15 @@ namespace AccountingServer.Shell.Carry
                 var totalG =
                     m_Accountant.RunGroupedQuery($"T3999 [~{ed.AsDate()}]`C")
                         .Items.Cast<ISubtotalCurrency>().Sum(
-                            bal => ExchangeFactory.Instance.From(ed.Value, bal.Currency)
-                                * ExchangeFactory.Instance.To(ed.Value, baseCur)
+                            bal => m_Accountant.From(ed.Value, bal.Currency)
+                                * m_Accountant.To(ed.Value, baseCur)
                                 * bal.Fund);
                 // ReSharper disable once PossibleInvalidOperationException
                 var totalC =
                     tasks.SelectMany(t => t.Voucher.Details)
                         .Where(d => d.Title == 3999).Sum(
-                            d => ExchangeFactory.Instance.From(ed.Value, d.Currency)
-                                * ExchangeFactory.Instance.To(ed.Value, baseCur)
+                            d => m_Accountant.From(ed.Value, d.Currency)
+                                * m_Accountant.To(ed.Value, baseCur)
                                 * d.Fund.Value);
 
                 var total = totalG + totalC;
@@ -251,8 +251,8 @@ namespace AccountingServer.Shell.Carry
                 if (!ed.HasValue)
                     throw new InvalidOperationException("无穷长时间以前不存在汇率");
 
-                var cob = ExchangeFactory.Instance.From(ed.Value, grpC.Currency)
-                    * ExchangeFactory.Instance.To(ed.Value, baseCur)
+                var cob = m_Accountant.From(ed.Value, grpC.Currency)
+                    * m_Accountant.To(ed.Value, baseCur)
                     * b;
 
                 voucher.Details.Add(

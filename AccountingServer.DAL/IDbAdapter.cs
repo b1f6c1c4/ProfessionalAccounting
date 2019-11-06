@@ -149,5 +149,23 @@ namespace AccountingServer.DAL
         bool Upsert(Amortization entity);
 
         #endregion
+
+        #region ExchangeRecord
+
+        /// <summary>
+        ///     查找汇率
+        /// </summary>
+        /// <param name="record">过滤器</param>
+        /// <returns>汇率，如果没有则为<c>null</c></returns>
+        ExchangeRecord SelectExchangeRecord(ExchangeRecord record);
+
+        /// <summary>
+        ///     添加或替换/// </summary>
+        /// <param name="record">汇率</param>
+        /// <returns>是否成功</returns>
+        bool Upsert(ExchangeRecord record);
+
+        #endregion
+
     }
 }

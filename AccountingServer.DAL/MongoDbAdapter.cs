@@ -81,6 +81,7 @@ namespace AccountingServer.DAL
             BsonSerializer.RegisterSerializer(new AmortizationSerializer());
             BsonSerializer.RegisterSerializer(new AmortItemSerializer());
             BsonSerializer.RegisterSerializer(new BalanceSerializer());
+            BsonSerializer.RegisterSerializer(new ExchangeSerializer());
 
             BsonDocument MakeProject(BsonValue days, bool detail)
             {
@@ -194,6 +195,7 @@ namespace AccountingServer.DAL
             m_Vouchers = m_Db.GetCollection<Voucher>("voucher");
             m_Assets = m_Db.GetCollection<Asset>("asset");
             m_Amortizations = m_Db.GetCollection<Amortization>("amortization");
+            m_Records = m_Db.GetCollection<ExchangeRecord>("exchangeRecord");
         }
 
         private static bool Upsert<T, TId>(IMongoCollection<T> collection, T entity, BaseSerializer<T, TId> idProvider)
@@ -237,6 +239,11 @@ namespace AccountingServer.DAL
         ///     摊销集合
         /// </summary>
         private readonly IMongoCollection<Amortization> m_Amortizations;
+
+        /// <summary>
+        ///     汇率集合
+        /// </summary>
+        private readonly IMongoCollection<ExchangeRecord> m_Records;
 
         #endregion
 
@@ -473,6 +480,33 @@ namespace AccountingServer.DAL
         {
             var res = m_Amortizations.DeleteMany(filter.Accept(new MongoDbNativeDistributed<Amortization>()));
             return res.DeletedCount;
+        }
+
+        #endregion
+
+        #region ExchangeRecord
+
+        /// <inheritdoc />
+        public ExchangeRecord SelectExchangeRecord(ExchangeRecord record) =>
+            m_Records.FindSync(
+                Builders<ExchangeRecord>.Filter.Eq("_id.date", record.Date) &
+                Builders<ExchangeRecord>.Filter.Eq("_id.from", record.From) &
+                Builders<ExchangeRecord>.Filter.Eq("_id.to", record.To)
+            ).SingleOrDefault();
+
+        /// <inheritdoc />
+        public bool Upsert(ExchangeRecord record)
+        {
+            try
+            {
+                m_Records.InsertOne(record);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
         }
 
         #endregion

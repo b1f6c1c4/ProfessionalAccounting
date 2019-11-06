@@ -79,7 +79,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                 var sum = 0D;
                 for (var i = 0; i < n; i++)
                 {
-                    sum += aggs[i] * ExchangeFactory.Instance.From(
+                    sum += aggs[i] * Accountant.From(
                         ClientDateTime.Today,
                         Templates.Config.Accounts[i].Currency);
 
@@ -101,7 +101,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                 {
                     aggs[i] += kvp.Value[i, 0] + kvp.Value[i, 1];
 
-                    sum += aggs[i] * ExchangeFactory.Instance.From(
+                    sum += aggs[i] * Accountant.From(
                         kvp.Key,
                         Templates.Config.Accounts[i].Currency);
 
@@ -190,8 +190,8 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         foreach (var b in grpC.Items.Cast<ISubtotalDate>())
                         {
                             var mo = NextDate(cc.RepaymentDay, NextDate(cc.BillDay, b.Date.Value), true);
-                            var cob = ExchangeFactory.Instance.From(mo, grpC.Currency)
-                                * ExchangeFactory.Instance.To(mo, account.Currency)
+                            var cob = Accountant.From(mo, grpC.Currency)
+                                * Accountant.To(mo, account.Currency)
                                 * b.Fund;
                             if (mos.ContainsKey(mo))
                                 mos[mo] += cob;

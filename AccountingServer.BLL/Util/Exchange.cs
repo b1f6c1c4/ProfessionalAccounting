@@ -11,7 +11,7 @@ namespace AccountingServer.BLL.Util
 {
     public static class ExchangeFactory
     {
-        public static IExchange Instance { get; set; } = new ExchangeCache(new FixerIoExchange());
+        public static IExchange Instance { get; set; } = new FixerIoExchange();
     }
 
     /// <summary>
@@ -40,39 +40,6 @@ namespace AccountingServer.BLL.Util
         /// <param name="target">结汇币种</param>
         /// <returns>汇率</returns>
         double To(DateTime date, string target);
-    }
-
-    /// <summary>
-    ///     汇率缓存
-    /// </summary>
-    internal sealed class ExchangeCache : IExchange
-    {
-        /// <summary>
-        ///     内部汇率查询
-        /// </summary>
-        private readonly IExchange m_Exchange;
-
-        /// <summary>
-        ///     买入缓存
-        /// </summary>
-        private readonly ConcurrentDictionary<(string, DateTime), double> m_FromCache =
-            new ConcurrentDictionary<(string, DateTime), double>();
-
-        /// <summary>
-        ///     卖出缓存
-        /// </summary>
-        private readonly ConcurrentDictionary<(string, DateTime), double> m_ToCache =
-            new ConcurrentDictionary<(string, DateTime), double>();
-
-        public ExchangeCache(IExchange exchange) => m_Exchange = exchange;
-
-        /// <inheritdoc />
-        public double From(DateTime date, string target)
-            => m_FromCache.GetOrAdd((target, date), _ => m_Exchange.From(date, target));
-
-        /// <inheritdoc />
-        public double To(DateTime date, string target)
-            => m_ToCache.GetOrAdd((target, date), _ => m_Exchange.To(date, target));
     }
 
     [Serializable]
@@ -112,8 +79,9 @@ namespace AccountingServer.BLL.Util
                 return 1;
 
             var endpoint = date > DateTime.UtcNow ? "latest" : date.ToString("yyyy-MM-dd");
-            var req = WebRequest.CreateHttp(
-                $"http://data.fixer.io/api/{endpoint}?access_key={ExchangeInfo.Config.AccessKey}&symbols={from},{to}");
+            var url = $"http://data.fixer.io/api/{endpoint}?access_key={ExchangeInfo.Config.AccessKey}&symbols={from},{to}";
+            Console.WriteLine($"AccountingServer.BLL.FixerIoExchange.Invoke(): {endpoint}: {from}/{to}");
+            var req = WebRequest.CreateHttp(url);
             req.KeepAlive = true;
             var res = req.GetResponse();
             using (var stream = res.GetResponseStream())
