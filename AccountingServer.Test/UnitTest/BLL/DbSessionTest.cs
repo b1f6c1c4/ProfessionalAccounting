@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using Xunit;

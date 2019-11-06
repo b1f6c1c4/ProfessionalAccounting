@@ -1,4 +1,4 @@
-﻿namespace AccountingServer.Entities.Util
+namespace AccountingServer.Entities.Util
 {
     public static class SecurityHelper
     {

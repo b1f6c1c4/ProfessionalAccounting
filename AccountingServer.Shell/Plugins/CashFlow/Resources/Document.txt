@@ -1,4 +1,4 @@
-﻿CashFlow帮助文档
+CashFlow帮助文档
 
 现金流插件CashFlow
 别名：cf

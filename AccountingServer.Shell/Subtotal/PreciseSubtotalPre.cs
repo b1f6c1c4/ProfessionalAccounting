@@ -1,4 +1,4 @@
-﻿using AccountingServer.BLL.Util;
+using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 
 namespace AccountingServer.Shell.Subtotal

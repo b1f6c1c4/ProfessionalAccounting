@@ -1,4 +1,4 @@
-﻿using AccountingServer.Entities;
+using AccountingServer.Entities;
 
 namespace AccountingServer.BLL.Util
 {

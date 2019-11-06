@@ -1,4 +1,4 @@
-﻿using AccountingServer.Entities;
+using AccountingServer.Entities;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization.IdGenerators;

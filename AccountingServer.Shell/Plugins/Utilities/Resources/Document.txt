@@ -1,4 +1,4 @@
-﻿Utilities帮助文档
+Utilities帮助文档
 
 常见记账凭证自动填写插件Utilities
 每个参数独立作用，格式为：

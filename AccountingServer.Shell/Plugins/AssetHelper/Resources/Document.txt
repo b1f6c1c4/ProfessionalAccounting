@@ -1,4 +1,4 @@
-﻿AssetHelper帮助文档
+AssetHelper帮助文档
 
 资产插件AssetFactory
 别名：af

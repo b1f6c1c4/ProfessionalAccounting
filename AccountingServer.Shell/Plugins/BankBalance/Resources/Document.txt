@@ -1,4 +1,4 @@
-﻿BankBalance帮助文档
+BankBalance帮助文档
 
 日均余额插件AverageDailyBalance
 别名：adb

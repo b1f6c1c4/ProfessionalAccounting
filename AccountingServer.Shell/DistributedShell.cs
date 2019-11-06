@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Security;
 using AccountingServer.BLL;
 using AccountingServer.Entities;

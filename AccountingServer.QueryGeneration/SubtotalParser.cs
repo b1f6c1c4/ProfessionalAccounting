@@ -1,4 +1,4 @@
-﻿namespace AccountingServer.BLL.Parsing
+namespace AccountingServer.BLL.Parsing
 {
     public partial class SubtotalParser { }
 }
