@@ -1,8 +1,9 @@
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Threading;
 using System.Xml.Serialization;
 using AccountingServer.Entities.Util;
 using Newtonsoft.Json.Linq;
@@ -67,23 +68,49 @@ namespace AccountingServer.BLL.Util
         public double To(DateTime date, string target) => Invoke(date, BaseCurrency.Now, target);
 
         /// <summary>
+        ///     缓存
+        /// </summary>
+        private readonly Dictionary<string, (DateTime, double)> m_Cache =
+            new Dictionary<string, (DateTime, double)>();
+
+        private readonly ReaderWriterLockSlim m_Lock = new ReaderWriterLockSlim();
+
+        /// <summary>
         ///     调用查询接口
         /// </summary>
         /// <param name="date">日期</param>
         /// <param name="from">基准</param>
         /// <param name="to">目标</param>
         /// <returns>汇率</returns>
-        private static double Invoke(DateTime date, string from, string to)
+        private double Invoke(DateTime date, string from, string to)
         {
             if (from == to)
                 return 1;
 
             var endpoint = date > DateTime.UtcNow ? "latest" : date.ToString("yyyy-MM-dd");
+            var token = $"{endpoint}#{from}#{to}";
+
+            m_Lock.EnterReadLock();
+            try
+            {
+                if (m_Cache.ContainsKey(token))
+                {
+                    var (d, v) = m_Cache[token];
+                    if ((DateTime.UtcNow - d).TotalHours < 12)
+                        return v;
+                }
+            }
+            finally
+            {
+                m_Lock.ExitReadLock();
+            }
+
             var url = $"http://data.fixer.io/api/{endpoint}?access_key={ExchangeInfo.Config.AccessKey}&symbols={from},{to}";
             Console.WriteLine($"AccountingServer.BLL.FixerIoExchange.Invoke(): {endpoint}: {from}/{to}");
             var req = WebRequest.CreateHttp(url);
             req.KeepAlive = true;
             var res = req.GetResponse();
+            double rate;
             using (var stream = res.GetResponseStream())
             {
                 if (stream == null)
@@ -91,8 +118,20 @@ namespace AccountingServer.BLL.Util
 
                 var reader = new StreamReader(stream);
                 var json = JObject.Parse(reader.ReadToEnd());
-                return json["rates"][to].Value<double>() / json["rates"][from].Value<double>();
+                rate = json["rates"][to].Value<double>() / json["rates"][from].Value<double>();
             }
+
+            m_Lock.EnterWriteLock();
+            try
+            {
+                m_Cache[token] = (DateTime.UtcNow, rate);
+            }
+            finally
+            {
+                m_Lock.ExitWriteLock();
+            }
+
+            return rate;
         }
     }
 }
