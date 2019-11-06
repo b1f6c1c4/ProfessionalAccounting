@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using Xunit;

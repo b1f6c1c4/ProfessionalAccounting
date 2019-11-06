@@ -1,4 +1,4 @@
-﻿using AccountingServer.BLL;
+using AccountingServer.BLL;
 
 namespace AccountingServer.Shell.Plugins.Interest
 {

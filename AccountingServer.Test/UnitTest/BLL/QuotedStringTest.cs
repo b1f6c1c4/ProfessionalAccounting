@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using AccountingServer.BLL.Util;
 using Xunit;
 

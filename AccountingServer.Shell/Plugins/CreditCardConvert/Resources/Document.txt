@@ -1,4 +1,4 @@
-﻿CreditCardConvert帮助文档
+CreditCardConvert帮助文档
 
 信用卡自动购汇插件CreditCardConvert
 别名：ccc

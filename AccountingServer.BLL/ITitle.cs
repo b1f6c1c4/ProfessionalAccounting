@@ -1,4 +1,4 @@
-﻿namespace AccountingServer.BLL
+namespace AccountingServer.BLL
 {
     /// <summary>
     ///     会计科目

@@ -1,4 +1,4 @@
-﻿using AccountingServer.Entities;
+using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 
 namespace AccountingServer.DAL.Serializer

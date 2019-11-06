@@ -1,4 +1,4 @@
-﻿using AccountingServer.Entities;
+using AccountingServer.Entities;
 using AccountingServer.Shell.Serializer;
 
 namespace AccountingServer.Shell.Subtotal

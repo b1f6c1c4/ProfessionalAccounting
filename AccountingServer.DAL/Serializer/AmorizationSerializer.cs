@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 using MongoDB.Driver;
