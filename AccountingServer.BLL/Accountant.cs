@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 
 namespace AccountingServer.BLL
@@ -8,7 +9,7 @@ namespace AccountingServer.BLL
     /// <summary>
     ///     基本会计业务处理类
     /// </summary>
-    public class Accountant
+    public class Accountant : IExchange
     {
         private readonly AmortAccountant m_AmortAccountant;
 
@@ -120,5 +121,12 @@ namespace AccountingServer.BLL
 
         #endregion
 
+        #region Exchange
+
+        public double From(DateTime date, string target) => m_Db.From(date, target);
+
+        public double To(DateTime date, string target) => m_Db.To(date, target);
+
+        #endregion
     }
 }

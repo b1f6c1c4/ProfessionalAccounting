@@ -7,7 +7,7 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.BLL
 {
-    public class DbSession
+    public class DbSession : IExchange
     {
         public DbSession() => Db = Facade.Create();
 
@@ -78,14 +78,14 @@ namespace AccountingServer.BLL
         public ISubtotalResult SelectVouchersGrouped(IVoucherGroupedQuery query)
         {
             var res = Db.SelectVouchersGrouped(query);
-            var conv = new SubtotalBuilder(query.Subtotal);
+            var conv = new SubtotalBuilder(query.Subtotal, this);
             return conv.Build(res);
         }
 
         public ISubtotalResult SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
             var res = Db.SelectVoucherDetailsGrouped(query);
-            var conv = new SubtotalBuilder(query.Subtotal);
+            var conv = new SubtotalBuilder(query.Subtotal, this);
             return conv.Build(res);
         }
 
@@ -150,5 +150,52 @@ namespace AccountingServer.BLL
 
             return Db.Upsert(entity);
         }
+
+        public double From(DateTime date, string target)
+        {
+            var record = new ExchangeRecord
+                {
+                    Date = date,
+                    From = target,
+                    To = BaseCurrency.Now
+                };
+
+            if (record.From == record.To)
+                return 1;
+
+            var res = Db.SelectExchangeRecord(record);
+            if (res != null)
+                return res.Value;
+
+            record.Value = ExchangeFactory.Instance.From(date, target);
+            if (record.Date <= DateTime.UtcNow.AddDays(-1))
+                Db.Upsert(record);
+
+            return record.Value;
+        }
+
+        public double To(DateTime date, string target)
+        {
+            var record = new ExchangeRecord
+                {
+                    Date = date,
+                    From = BaseCurrency.Now,
+                    To = target
+                };
+
+            if (record.From == record.To)
+                return 1;
+
+            var res = Db.SelectExchangeRecord(record);
+            if (res != null)
+                return res.Value;
+
+            record.Value = ExchangeFactory.Instance.To(date, target);
+            if (record.Date <= DateTime.UtcNow.AddDays(-1))
+                Db.Upsert(record);
+
+            return record.Value;
+        }
+
     }
 }

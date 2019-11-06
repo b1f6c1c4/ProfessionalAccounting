@@ -159,8 +159,8 @@ namespace AccountingServer.Shell.Plugins.Composite
                 {
                     var curr = grp.Currency;
                     // ReSharper disable once PossibleInvalidOperationException
-                    var ratio = ExchangeFactory.Instance.From(m_Rng.EndDate.Value, curr)
-                        * ExchangeFactory.Instance.To(m_Rng.EndDate.Value, m_BaseCurrency);
+                    var ratio = m_Accountant.From(m_Rng.EndDate.Value, curr)
+                        * m_Accountant.To(m_Rng.EndDate.Value, m_BaseCurrency);
 
                     var theFmt = new CurrencyDecorator(fmt, curr, ratio);
 

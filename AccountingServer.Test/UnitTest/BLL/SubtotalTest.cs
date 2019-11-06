@@ -20,12 +20,13 @@ namespace AccountingServer.Test.UnitTest.BLL
                                 new BaseCurrencyInfo { Date = null, Currency = "CNY" }
                             }
                     });
-            ExchangeFactory.Instance = new MockExchange
-                {
-                    { new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "JPY", 456 },
-                    { new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "USD", 789 }
-                };
         }
+
+        private IExchange m_Exchange = new MockExchange
+            {
+                { new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "JPY", 456 },
+                { new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "USD", 789 }
+            };
 
         [Theory]
         [InlineData("", "101110")]
@@ -71,7 +72,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [InlineData("20170102~20170105", "001111")]
         public void TestAggrEvery(string rng, string incl)
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]").Subtotal, m_Exchange);
 
             var bal = new[]
                 {
@@ -170,7 +171,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [InlineData("20170102~20170105", "001111")]
         public void TestAggrEveryNoNull(string rng, string incl)
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]").Subtotal, m_Exchange);
 
             var bal = new[]
                 {
@@ -246,7 +247,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [InlineData("20170102~20170103", "0011")]
         public void TestAggrEveryNull(string rng, string incl)
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]").Subtotal, m_Exchange);
 
             var bal = new Balance[] { };
 
@@ -323,7 +324,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [InlineData("20170102~20170105", "001111")]
         public void TestAggrEveryEqui(string rng, string incl)
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]X[20170101]").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]X[20170101]").Subtotal, m_Exchange);
 
             var bal = new[]
                 {
@@ -427,7 +428,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [InlineData("20170102~20170103", "0011")]
         public void TestAggrEveryNullEqui(string rng, string incl)
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]X[20170101]").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]X[20170101]").Subtotal, m_Exchange);
 
             var bal = new Balance[] { };
 
@@ -462,7 +463,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [Fact]
         public void TestAggrChanged()
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`vD").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`vD").Subtotal, m_Exchange);
 
             var bal = new[]
                 {
@@ -534,7 +535,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [Fact]
         public void TestAggrChangedEquivalent()
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`vDX[20170101]").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`vDX[20170101]").Subtotal, m_Exchange);
 
             var bal = new[]
                 {
@@ -600,7 +601,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [Fact]
         public void TestContent()
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`c").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`c").Subtotal, m_Exchange);
 
             var bal = new[]
                 {
@@ -666,7 +667,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [Fact]
         public void TestUser()
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`U").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`U").Subtotal, m_Exchange);
 
             var bal = new[]
                 {
@@ -733,7 +734,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [Fact]
         public void TestCurrency()
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`C").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`C").Subtotal, m_Exchange);
 
             var bal = new[]
                 {
@@ -799,7 +800,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [Fact]
         public void TestDay()
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`d").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`d").Subtotal, m_Exchange);
 
             var bal = new[]
                 {
@@ -846,7 +847,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [Fact]
         public void TestEquivalent()
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`vX@JPY[20170101]").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`vX@JPY[20170101]").Subtotal, m_Exchange);
 
             var bal = new[]
                 {
@@ -881,7 +882,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [Fact]
         public void TestMonth()
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`m").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`m").Subtotal, m_Exchange);
 
             var bal = new[]
                 {
@@ -928,7 +929,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [Fact]
         public void TestRemark()
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`r").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`r").Subtotal, m_Exchange);
 
             var bal = new[]
                 {
@@ -994,7 +995,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [Fact]
         public void TestTitle()
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`t").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`t").Subtotal, m_Exchange);
 
             var bal = new[]
                 {
@@ -1060,7 +1061,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [Fact]
         public void TestTitleSubTitle()
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`ts").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`ts").Subtotal, m_Exchange);
 
             var bal = new[]
                 {
@@ -1179,7 +1180,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [Fact]
         public void TestWeek()
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`w").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`w").Subtotal, m_Exchange);
 
             var bal = new[]
                 {
@@ -1226,7 +1227,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         [Fact]
         public void TestYear()
         {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`y").Subtotal);
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`y").Subtotal, m_Exchange);
 
             var bal = new[]
                 {

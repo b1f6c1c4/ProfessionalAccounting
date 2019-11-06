@@ -119,8 +119,8 @@ namespace AccountingServer.Shell.Carry
             foreach (var grpS in grpT.Items.Cast<ISubtotalSubTitle>())
             {
                 var oldb = grpS.Fund;
-                var newb = ExchangeFactory.Instance.From(dt, grpC.Currency)
-                    * ExchangeFactory.Instance.To(dt, to) * oldb;
+                var newb = m_Accountant.From(dt, grpC.Currency)
+                    * m_Accountant.To(dt, to) * oldb;
                 m_Accountant.Upsert(
                     new Voucher
                         {
