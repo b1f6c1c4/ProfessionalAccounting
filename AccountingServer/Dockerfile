@@ -1,4 +1,4 @@
-FROM mono
+FROM mono:6.0
 
 WORKDIR /opt/accounting
 COPY . .
