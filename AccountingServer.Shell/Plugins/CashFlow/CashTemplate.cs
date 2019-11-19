@@ -61,6 +61,12 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         [XmlAttribute("day")]
         public int Day { get; set; }
 
+        [XmlAttribute("since")]
+        public DateTime Since { get; set; }
+
+        [XmlAttribute("till")]
+        public DateTime Till { get; set; }
+
         [XmlAttribute("fund")]
         public double Fund { get; set; }
     }

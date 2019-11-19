@@ -176,7 +176,14 @@ namespace AccountingServer.Shell.Plugins.CashFlow
 
                     case MonthlyItem mn:
                         for (var d = NextDate(mn.Day); d <= until; d = d.AddMonths(1))
+                        {
+                            if (mn.Since != default(DateTime) && d < mn.Since)
+                                continue;
+                            if (mn.Till != default(DateTime) && d > mn.Till)
+                                continue;
+
                             yield return (d, mn.Fund);
+                        }
 
                         break;
 
