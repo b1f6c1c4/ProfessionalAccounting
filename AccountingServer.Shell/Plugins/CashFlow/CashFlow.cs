@@ -128,22 +128,23 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         {
             var d = reference ?? ClientDateTime.Today;
             var v = new DateTime(d.Year, d.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+            var last = v.AddMonths(1).AddDays(-1).Day;
+            var targ = day <= last ? day : last;
             if (!inclusive)
             {
-                if (d.Day >= day)
+                if (d.Day >= targ)
                     v = v.AddMonths(1);
             }
             else
             {
-                if (d.Day > day)
+                if (d.Day > targ)
                     v = v.AddMonths(1);
             }
 
-            var last = v.AddMonths(1).AddDays(-1);
-            if (last.Day < day)
-                return last;
+            last = v.AddMonths(1).AddDays(-1).Day;
+            targ = day <= last ? day : last;
 
-            return v.AddDays(day - 1);
+            return v.AddDays(targ - 1);
         }
 
         private IEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account, IEntitiesSerializer serializer, DateTime until)
@@ -175,7 +176,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         break;
 
                     case MonthlyItem mn:
-                        for (var d = NextDate(mn.Day); d <= until; d = d.AddMonths(1))
+                        for (var d = NextDate(mn.Day); d <= until; d = NextDate(mn.Day, d))
                         {
                             if (mn.Since != default(DateTime) && d < mn.Since)
                                 continue;
