@@ -75,7 +75,20 @@ namespace AccountingServer.Shell.Plugins.Statement
             }
 
             if (dateId < 0)
-                throw new ApplicationException("找不到日期字段");
+            {
+                var dateReg2 = new Regex(@"^date$", RegexOptions.IgnoreCase);
+                for (var i = 0; !string.IsNullOrWhiteSpace(header); i++)
+                {
+                    var f = Next(ref header);
+                    if (i == fundId)
+                        continue;
+                    if (dateReg2.IsMatch(f))
+                        dateId = i;
+                }
+
+                if (dateId < 0)
+                    throw new ApplicationException("找不到日期字段");
+            }
             if (fundId < 0)
                 throw new ApplicationException("找不到金额字段");
 
