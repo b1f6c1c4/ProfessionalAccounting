@@ -22,6 +22,9 @@ namespace AccountingServer.Shell.Plugins.CashFlow
         [XmlArrayItem("ComplexCreditCard", typeof(ComplexCreditCard))]
         public List<CashFlowItem> Items;
 
+        [XmlAttribute("user")]
+        public string User { get; set; }
+
         [XmlAttribute("currency")]
         public string Currency { get; set; }
 
