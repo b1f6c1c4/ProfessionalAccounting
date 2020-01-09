@@ -58,7 +58,8 @@ namespace AccountingServer.Shell.Plugins.Statement
 
         public void Parse(string expr)
         {
-            var header = ParsingF.Line(ref expr);
+            var headerB = ParsingF.Line(ref expr);
+            var header = headerB;
 
             var dateId = -1;
             var fundId = -1;
@@ -76,6 +77,7 @@ namespace AccountingServer.Shell.Plugins.Statement
 
             if (dateId < 0)
             {
+                header = headerB;
                 var dateReg2 = new Regex(@"^date$", RegexOptions.IgnoreCase);
                 for (var i = 0; !string.IsNullOrWhiteSpace(header); i++)
                 {
