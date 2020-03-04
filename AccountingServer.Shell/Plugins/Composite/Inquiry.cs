@@ -16,7 +16,8 @@ namespace AccountingServer.Shell.Plugins.Composite
     public interface IInquiryVisitor<out T>
     {
         T Visit(InquiriesHub inq);
-        T Visit(Inquiry inq);
+        T Visit(SimpleInquiry inq);
+        T Visit(ComplexInquiry inq);
     }
 
     [Serializable]
@@ -40,18 +41,16 @@ namespace AccountingServer.Shell.Plugins.Composite
     [Serializable]
     public class InquiriesHub : BaseInquiry
     {
-        [XmlElement("InquiriesHub", typeof(InquiriesHub))] [XmlElement("Inquiry", typeof(Inquiry))]
+        [XmlElement("InquiriesHub", typeof(InquiriesHub))]
+        [XmlElement("Inquiry", typeof(SimpleInquiry))]
+        [XmlElement("ComplexInquiry", typeof(ComplexInquiry))]
         public List<BaseInquiry> Inquiries;
 
         public override T Accept<T>(IInquiryVisitor<T> visitor) => visitor.Visit(this);
     }
 
-    [Serializable]
-    public class Inquiry : BaseInquiry
+    public abstract class Inquiry : BaseInquiry
     {
-        [XmlText]
-        public string Query { get; set; }
-
         [XmlAttribute("ext")]
         public bool IsLeftExtended { get; set; }
 
@@ -78,6 +77,25 @@ namespace AccountingServer.Shell.Plugins.Composite
 
         [XmlAttribute("byRemark")]
         public bool ByRemark { get; set; }
+    }
+
+    [Serializable]
+    public class SimpleInquiry : Inquiry
+    {
+        [XmlText]
+        public string Query { get; set; }
+
+        public override T Accept<T>(IInquiryVisitor<T> visitor) => visitor.Visit(this);
+    }
+
+    [Serializable]
+    public class ComplexInquiry : Inquiry
+    {
+        [XmlElement("voucher")]
+        public string VoucherQuery { get; set; }
+
+        [XmlElement("emit")]
+        public string Emit { get; set; }
 
         public override T Accept<T>(IInquiryVisitor<T> visitor) => visitor.Visit(this);
     }

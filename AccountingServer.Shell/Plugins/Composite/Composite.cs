@@ -144,15 +144,22 @@ namespace AccountingServer.Shell.Plugins.Composite
             return res;
         }
 
-        public double Visit(Inquiry inq)
+        public double Visit(SimpleInquiry inq)
+            => VisitImpl(inq, (o) => $"{inq.Query} {o}");
+
+        public double Visit(ComplexInquiry inq)
+            => VisitImpl(inq, (o) => $"{{{inq.VoucherQuery}}}*{{U A {o}}} : {inq.Emit}");
+
+        private double VisitImpl(Inquiry inq, Func<string, string> gen)
         {
             var val = 0D;
             IFundFormatter fmt = new BaseFundFormatter();
             if (!double.IsNaN(inq.Ratio))
                 fmt = new RatioDecorator(fmt, inq.Ratio);
 
+            var o = $"[{(inq.IsLeftExtended ? "" : m_Rng.StartDate.AsDate())}~{m_Rng.EndDate.AsDate()}] {(inq.General ? "G" : "")}";
             var query = ParsingF.GroupedQuery(
-                $"{inq.Query} [{(inq.IsLeftExtended ? "" : m_Rng.StartDate.AsDate())}~{m_Rng.EndDate.AsDate()}] {(inq.General ? "G" : "")} `{(inq.ByCurrency ? "C" : "")}{(inq.ByTitle ? "t" : "")}{(inq.BySubTitle ? "s" : "")}{(inq.ByContent ? "c" : "")}{(inq.ByRemark ? "r" : "")}{(inq.ByCurrency || inq.ByTitle || inq.BySubTitle || inq.ByContent || inq.ByRemark ? "" : "v")}{(!inq.ByCurrency ? "X" : "")}");
+                $"{gen(o)}`{(inq.ByCurrency ? "C" : "")}{(inq.ByTitle ? "t" : "")}{(inq.BySubTitle ? "s" : "")}{(inq.ByContent ? "c" : "")}{(inq.ByRemark ? "r" : "")}{(inq.ByCurrency || inq.ByTitle || inq.BySubTitle || inq.ByContent || inq.ByRemark ? "" : "v")}{(!inq.ByCurrency ? "X" : "")}");
             var gq = m_Accountant.SelectVoucherDetailsGrouped(query);
             if (inq.ByCurrency)
                 foreach (var grp in gq.Items.Cast<ISubtotalCurrency>())
