@@ -149,8 +149,7 @@ namespace AccountingServer.Shell.Plugins.Interest
             {
                 var key = grp.Key ?? throw new ApplicationException("无法处理无穷长时间以前的利息收入");
 
-                if (!lastSettlement.HasValue)
-                    lastSettlement = key;
+                lastSettlement ??= key;
 
                 // Settle Interest
                 interestIntegral += SettleInterest(

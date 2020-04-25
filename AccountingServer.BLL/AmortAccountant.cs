@@ -39,30 +39,19 @@ namespace AccountingServer.BLL
         /// <param name="the">日期</param>
         /// <returns>这次摊销日期</returns>
         private static DateTime ThisAmortizationDate(AmortizeInterval interval, DateTime the)
-        {
-            switch (interval)
-            {
-                case AmortizeInterval.EveryDay:
-                case AmortizeInterval.SameDayOfWeek:
-                    return the;
-                case AmortizeInterval.SameDayOfYear:
-                    if (the.Month == 2 &&
-                        the.Day == 29)
-                        return the.AddDays(1);
-
-                    return the;
-                case AmortizeInterval.SameDayOfMonth:
-                    return the.Day > 28 ? the.AddDays(1 - the.Day).AddMonths(1) : the;
-                case AmortizeInterval.LastDayOfWeek:
-                    return the.DayOfWeek == DayOfWeek.Sunday ? the : the.AddDays(7 - (int)the.DayOfWeek);
-                case AmortizeInterval.LastDayOfMonth:
-                    return AccountantHelper.LastDayOfMonth(the.Year, the.Month);
-                case AmortizeInterval.LastDayOfYear:
-                    return new DateTime(the.Year + 1, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddDays(-1);
-                default:
-                    throw new ArgumentException("间隔类型未知", nameof(interval));
-            }
-        }
+            => interval switch
+                {
+                    AmortizeInterval.EveryDay => the,
+                    AmortizeInterval.SameDayOfWeek => the,
+                    AmortizeInterval.SameDayOfYear => the.Month == 2 && the.Day == 29 ? the.AddDays(1) : the,
+                    AmortizeInterval.SameDayOfMonth => the.Day > 28 ? the.AddDays(1 - the.Day).AddMonths(1) : the,
+                    AmortizeInterval.LastDayOfWeek =>
+                    the.DayOfWeek == DayOfWeek.Sunday ? the : the.AddDays(7 - (int)the.DayOfWeek),
+                    AmortizeInterval.LastDayOfMonth => AccountantHelper.LastDayOfMonth(the.Year, the.Month),
+                    AmortizeInterval.LastDayOfYear => new DateTime(the.Year + 1, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                        .AddDays(-1),
+                    _ => throw new ArgumentException("间隔类型未知", nameof(interval)),
+                };
 
         /// <summary>
         ///     获取下一个摊销日期
@@ -71,29 +60,20 @@ namespace AccountingServer.BLL
         /// <param name="last">上一次摊销日期</param>
         /// <returns>下一个摊销日期</returns>
         private static DateTime NextAmortizationDate(AmortizeInterval interval, DateTime last)
-        {
-            switch (interval)
-            {
-                case AmortizeInterval.EveryDay:
-                    return last.AddDays(1);
-                case AmortizeInterval.SameDayOfWeek:
-                    return last.AddDays(7);
-                case AmortizeInterval.LastDayOfWeek:
-                    return last.DayOfWeek == DayOfWeek.Sunday
+            => interval switch
+                {
+                    AmortizeInterval.EveryDay => last.AddDays(1),
+                    AmortizeInterval.SameDayOfWeek => last.AddDays(7),
+                    AmortizeInterval.LastDayOfWeek => last.DayOfWeek == DayOfWeek.Sunday
                         ? last.AddDays(7)
-                        : last.AddDays(14 - (int)last.DayOfWeek);
-                case AmortizeInterval.SameDayOfMonth:
-                    return last.AddMonths(1);
-                case AmortizeInterval.LastDayOfMonth:
-                    return AccountantHelper.LastDayOfMonth(last.Year, last.Month + 1);
-                case AmortizeInterval.SameDayOfYear:
-                    return last.AddYears(1);
-                case AmortizeInterval.LastDayOfYear:
-                    return new DateTime(last.Year + 2, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddDays(-1);
-                default:
-                    throw new ArgumentException("间隔类型未知", nameof(interval));
-            }
-        }
+                        : last.AddDays(14 - (int)last.DayOfWeek),
+                    AmortizeInterval.SameDayOfMonth => last.AddMonths(1),
+                    AmortizeInterval.LastDayOfMonth => AccountantHelper.LastDayOfMonth(last.Year, last.Month + 1),
+                    AmortizeInterval.SameDayOfYear => last.AddYears(1),
+                    AmortizeInterval.LastDayOfYear => new DateTime(last.Year + 2, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                        .AddDays(-1),
+                    _ => throw new ArgumentException("间隔类型未知", nameof(interval)),
+                };
 
         /// <summary>
         ///     调整摊销计算表

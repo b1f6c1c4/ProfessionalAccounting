@@ -16,6 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using AccountingServer.Entities;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
@@ -40,30 +41,16 @@ namespace AccountingServer.DAL.Serializer
                     Date = bsonReader.ReadDateTime("date", ref read),
                     Type = VoucherType.Ordinary,
                 };
-            switch (bsonReader.ReadString("special", ref read))
-            {
-                case "amorz":
-                    voucher.Type = VoucherType.Amortization;
-                    break;
-                case "acarry":
-                    voucher.Type = VoucherType.AnnualCarry;
-                    break;
-                case "carry":
-                    voucher.Type = VoucherType.Carry;
-                    break;
-                case "dep":
-                    voucher.Type = VoucherType.Depreciation;
-                    break;
-                case "dev":
-                    voucher.Type = VoucherType.Devalue;
-                    break;
-                case "unc":
-                    voucher.Type = VoucherType.Uncertain;
-                    break;
-                default:
-                    voucher.Type = VoucherType.Ordinary;
-                    break;
-            }
+            voucher.Type = bsonReader.ReadString("special", ref read) switch
+                {
+                    "amorz" => VoucherType.Amortization,
+                    "acarry" => VoucherType.AnnualCarry,
+                    "carry" => VoucherType.Carry,
+                    "dep" => VoucherType.Depreciation,
+                    "dev" => VoucherType.Devalue,
+                    "unc" => VoucherType.Uncertain,
+                    _ => VoucherType.Ordinary,
+                };
 
             voucher.Details = bsonReader.ReadArray("detail", ref read, new VoucherDetailSerializer().Deserialize);
             voucher.Remark = bsonReader.ReadString("remark", ref read);
@@ -77,28 +64,17 @@ namespace AccountingServer.DAL.Serializer
             bsonWriter.WriteStartDocument();
             bsonWriter.WriteObjectId("_id", voucher.ID);
             bsonWriter.Write("date", voucher.Date);
-            if (voucher.Type != VoucherType.Ordinary)
-                switch (voucher.Type)
-                {
-                    case VoucherType.Amortization:
-                        bsonWriter.Write("special", "amorz");
-                        break;
-                    case VoucherType.AnnualCarry:
-                        bsonWriter.Write("special", "acarry");
-                        break;
-                    case VoucherType.Carry:
-                        bsonWriter.Write("special", "carry");
-                        break;
-                    case VoucherType.Depreciation:
-                        bsonWriter.Write("special", "dep");
-                        break;
-                    case VoucherType.Devalue:
-                        bsonWriter.Write("special", "dev");
-                        break;
-                    case VoucherType.Uncertain:
-                        bsonWriter.Write("special", "unc");
-                        break;
-                }
+            if (voucher.Type != null && voucher.Type != VoucherType.Ordinary)
+                bsonWriter.Write("special", voucher.Type switch
+                    {
+                        VoucherType.Amortization => "amorz",
+                        VoucherType.AnnualCarry => "acarry",
+                        VoucherType.Carry => "carry",
+                        VoucherType.Depreciation => "dep",
+                        VoucherType.Devalue => "dev",
+                        VoucherType.Uncertain => "unc",
+                        _ => throw new InvalidOperationException(),
+                    });
 
             if (voucher.Details != null)
             {

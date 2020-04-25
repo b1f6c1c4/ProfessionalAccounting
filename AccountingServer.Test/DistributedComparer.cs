@@ -59,47 +59,16 @@ namespace AccountingServer.Test
 
     public class AssetItemEqualityComparer : DistributedItemEqualityComparer, IEqualityComparer<AssetItem>
     {
-        public bool Equals(AssetItem x, AssetItem y)
-        {
-            if (!base.Equals(x, y))
-                return false;
-
-            if (x?.GetType() != y?.GetType())
-                return false;
-
-            // TODO: In C#8.0, use switch ((x, y))
-            switch (x)
-            {
-                case AcquisitionItem acqX:
-                    var acqY = y as AcquisitionItem;
-                    if (!(acqX.OrigValue - acqY.OrigValue).IsZero())
-                        return false;
-
-                    return true;
-
-                case DepreciateItem depX:
-                    var depY = y as DepreciateItem;
-                    if (!(depX.Amount - depY.Amount).IsZero())
-                        return false;
-
-                    return true;
-
-                case DevalueItem devX:
-                    var devY = y as DevalueItem;
-                    if (!(devX.FairValue - devY.FairValue).IsZero())
-                        return false;
-                    if (!(devX.Amount - devY.Amount).IsZero())
-                        return false;
-
-                    return true;
-
-                case DispositionItem _:
-                    return true;
-
-                default:
-                    throw new InvalidOperationException();
-            }
-        }
+        public bool Equals(AssetItem x0, AssetItem y0)
+            => base.Equals(x0, y0) && (x0, y0) switch
+                {
+                    (AcquisitionItem x, AcquisitionItem y) => (x.OrigValue - y.OrigValue).IsZero(),
+                    (DepreciateItem x, DepreciateItem y) => (x.Amount - y.Amount).IsZero(),
+                    (DevalueItem x, DevalueItem y)
+                    => (x.FairValue - y.FairValue).IsZero() && (x.Amount - y.Amount).IsZero(),
+                    (DispositionItem _, DispositionItem _) => true,
+                    _ => throw new InvalidOperationException(),
+                };
 
         public int GetHashCode(AssetItem obj) => base.GetHashCode(obj);
     }

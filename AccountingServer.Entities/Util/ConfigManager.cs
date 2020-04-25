@@ -125,8 +125,8 @@ namespace AccountingServer.Entities.Util
             try
             {
                 var ser = new XmlSerializer(typeof(T));
-                using (var stream = new StreamReader(m_FileName))
-                    m_Config = (T)ser.Deserialize(stream);
+                using var stream = new StreamReader(m_FileName);
+                m_Config = (T)ser.Deserialize(stream);
             }
             catch (Exception e)
             {

@@ -111,17 +111,13 @@ namespace AccountingServer.Shell
                     // ignored
                 }
 
-            switch (type & ExprType.NonGroupedQueries)
-            {
-                case ExprType.VoucherQuery:
-                    return TryVoucherQuery(expr, !type.HasFlag(ExprType.Unsafe));
-                case ExprType.DetailQuery:
-                    return TryDetailQuery(expr, !type.HasFlag(ExprType.Unsafe));
-                case ExprType.DetailRQuery:
-                    return TryDetailRQuery(expr, !type.HasFlag(ExprType.Unsafe));
-                default:
-                    throw new InvalidOperationException("表达式无效");
-            }
+            return (type & ExprType.NonGroupedQueries) switch
+                {
+                    ExprType.VoucherQuery => TryVoucherQuery(expr, !type.HasFlag(ExprType.Unsafe)),
+                    ExprType.DetailQuery => TryDetailQuery(expr, !type.HasFlag(ExprType.Unsafe)),
+                    ExprType.DetailRQuery => TryDetailRQuery(expr, !type.HasFlag(ExprType.Unsafe)),
+                    _ => throw new InvalidOperationException("表达式无效"),
+                };
         }
 
         /// <summary>

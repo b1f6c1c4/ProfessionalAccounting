@@ -297,38 +297,34 @@ namespace AccountingServer.Shell
         /// <param name="assetItem">折旧计算表条目</param>
         /// <returns>格式化的信息</returns>
         private static string ListAssetItem(IDistributedItem assetItem)
-        {
-            if (assetItem is AcquisitionItem acq)
-                return string.Format(
-                    "   {0:yyyMMdd} ACQ:{1} ={3} ({2})",
-                    assetItem.Date,
-                    acq.OrigValue.AsCurrency().CPadLeft(13),
-                    assetItem.VoucherID,
-                    assetItem.Value.AsCurrency().CPadLeft(13));
-            if (assetItem is DepreciateItem dep)
-                return string.Format(
-                    "   {0:yyyMMdd} DEP:{1} ={3} ({2})",
-                    assetItem.Date,
-                    dep.Amount.AsCurrency().CPadLeft(13),
-                    assetItem.VoucherID,
-                    assetItem.Value.AsCurrency().CPadLeft(13));
-            if (assetItem is DevalueItem dev)
-                return string.Format(
-                    "   {0:yyyMMdd} DEV:{1} ={3} ({2})",
-                    assetItem.Date,
-                    dev.Amount.AsCurrency().CPadLeft(13),
-                    assetItem.VoucherID,
-                    assetItem.Value.AsCurrency().CPadLeft(13));
-            if (assetItem is DispositionItem)
-                return string.Format(
-                    "   {0:yyyMMdd} DSP:{1} ={3} ({2})",
-                    assetItem.Date,
-                    "ALL".CPadLeft(13),
-                    assetItem.VoucherID,
-                    assetItem.Value.AsCurrency().CPadLeft(13));
-
-            return null;
-        }
+            => assetItem switch
+                {
+                    AcquisitionItem acq => string.Format(
+                        "   {0:yyyMMdd} ACQ:{1} ={3} ({2})",
+                        assetItem.Date,
+                        acq.OrigValue.AsCurrency().CPadLeft(13),
+                        assetItem.VoucherID,
+                        assetItem.Value.AsCurrency().CPadLeft(13)),
+                    DepreciateItem dep => string.Format(
+                        "   {0:yyyMMdd} DEP:{1} ={3} ({2})",
+                        assetItem.Date,
+                        dep.Amount.AsCurrency().CPadLeft(13),
+                        assetItem.VoucherID,
+                        assetItem.Value.AsCurrency().CPadLeft(13)),
+                    DevalueItem dev => string.Format(
+                        "   {0:yyyMMdd} DEV:{1} ={3} ({2})",
+                        assetItem.Date,
+                        dev.Amount.AsCurrency().CPadLeft(13),
+                        assetItem.VoucherID,
+                        assetItem.Value.AsCurrency().CPadLeft(13)),
+                    DispositionItem _ => string.Format(
+                        "   {0:yyyMMdd} DSP:{1} ={3} ({2})",
+                        assetItem.Date,
+                        "ALL".CPadLeft(13),
+                        assetItem.VoucherID,
+                        assetItem.Value.AsCurrency().CPadLeft(13)),
+                    _ => null,
+                };
 
         /// <summary>
         ///     对资产进行排序

@@ -27,14 +27,14 @@ namespace AccountingServer.Http
 
         internal static void Write(this Stream stream, string str, Encoding encoding = null)
         {
-            encoding = encoding ?? Encoding.UTF8;
+            encoding ??= Encoding.UTF8;
             var data = encoding.GetBytes(str);
             stream.Write(data, 0, data.Length);
         }
 
         internal static void WriteLine(this Stream stream, string str = null, Encoding encoding = null)
         {
-            encoding = encoding ?? Encoding.UTF8;
+            encoding ??= Encoding.UTF8;
             var data = encoding.GetBytes(str ?? "");
             stream.Write(data, 0, data.Length);
 

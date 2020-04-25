@@ -218,21 +218,14 @@ namespace AccountingServer.Shell.Serializer
                 }
 
                 foreach (var item in asset.Schedule)
-                    switch (item)
-                    {
-                        case AcquisitionItem acq:
-                            Present(item, $"OrigValue = {acq.OrigValue},");
-                            break;
-                        case DepreciateItem dep:
-                            Present(item, $"Amount    = {dep.Amount},");
-                            break;
-                        case DevalueItem dev:
-                            Present(item, $"FairValue = {dev.FairValue}, Amount = {dev.Amount},");
-                            break;
-                        case DispositionItem _:
-                            Present(item, "");
-                            break;
-                    }
+                    Present(item, item switch
+                        {
+                            AcquisitionItem acq => $"OrigValue = {acq.OrigValue},",
+                            DepreciateItem dep => $"Amount    = {dep.Amount},",
+                            DevalueItem dev => $"FairValue = {dev.FairValue}, Amount = {dev.Amount},",
+                            DispositionItem _ => "",
+                            _ => throw new InvalidOperationException(),
+                        });
 
                 sb.Append("} }");
             }

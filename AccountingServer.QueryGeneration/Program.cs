@@ -74,30 +74,20 @@ namespace AccountingServer.QueryGeneration
         }
 
         private static Type GetLexer(string kind)
-        {
-            switch (kind)
-            {
-                case "Query":
-                    return typeof(QueryLexer);
-                case "Subtotal":
-                    return typeof(SubtotalLexer);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(kind));
-            }
-        }
+            => kind switch
+                {
+                    "Query" => typeof(QueryLexer),
+                    "Subtotal" => typeof(SubtotalLexer),
+                    _ => throw new ArgumentOutOfRangeException(nameof(kind)),
+                };
 
         private static Type GetParser(string kind)
-        {
-            switch (kind)
-            {
-                case "Query":
-                    return typeof(QueryParser);
-                case "Subtotal":
-                    return typeof(SubtotalParser);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(kind));
-            }
-        }
+            => kind switch
+                {
+                    "Query" => typeof(QueryParser),
+                    "Subtotal" => typeof(SubtotalParser),
+                    _ => throw new ArgumentOutOfRangeException(nameof(kind)),
+                };
 
         private static IParseTree CallParser(Parser parser, string name)
             => (IParseTree)parser

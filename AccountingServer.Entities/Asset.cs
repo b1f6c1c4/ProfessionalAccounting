@@ -230,19 +230,16 @@ namespace AccountingServer.Entities
             if (res != 0)
                 return res;
 
-            int GetType(AssetItem t)
-            {
-                if (t is DepreciateItem)
-                    return 1;
-                if (t is DevalueItem)
-                    return 2;
-                if (t is AcquisitionItem)
-                    return 3;
-                if (t is DispositionItem)
-                    return 3; // 不对资产的取得和处置加以区分
-
-                throw new ArgumentException("计算表条目类型未知");
-            }
+            static int GetType(AssetItem t)
+                => t switch
+                    {
+                        DepreciateItem _ => 1,
+                        DevalueItem _ => 2,
+                        // 不对资产的取得和处置加以区分
+                        AcquisitionItem _ => 3,
+                        DispositionItem _ => 3,
+                        _ => throw new ArgumentException("计算表条目类型未知"),
+                    };
 
             return GetType(x).CompareTo(GetType(y));
         }

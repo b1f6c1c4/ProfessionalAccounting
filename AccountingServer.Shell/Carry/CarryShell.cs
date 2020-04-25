@@ -49,15 +49,12 @@ namespace AccountingServer.Shell.Carry
         public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             expr = expr.Rest();
-            switch (expr?.Initial())
-            {
-                case "ap":
-                    return DoCarry(expr.Rest());
-                case "rst":
-                    return ResetCarry(expr.Rest());
-                default:
-                    throw new InvalidOperationException("表达式无效");
-            }
+            return expr?.Initial() switch
+                {
+                    "ap" => DoCarry(expr.Rest()),
+                    "rst" => ResetCarry(expr.Rest()),
+                    _ => throw new InvalidOperationException("表达式无效"),
+                };
         }
 
         /// <inheritdoc />

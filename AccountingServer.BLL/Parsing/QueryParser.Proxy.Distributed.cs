@@ -81,69 +81,41 @@ namespace AccountingServer.BLL.Parsing
         {
             /// <inheritdoc />
             public OperatorType Operator
-            {
-                get
-                {
-                    if (Op == null)
-                        return OperatorType.None;
-
-                    if (distributedQ() == null)
-                        switch (Op.Text)
-                        {
-                            case "+":
-                                return OperatorType.Identity;
-                            case "-":
-                                return OperatorType.Complement;
-                            default:
-                                throw new MemberAccessException("表达式错误");
-                        }
-
-                    switch (Op.Text)
+                => Op switch
                     {
-                        case "+":
-                            return OperatorType.Union;
-                        case "-":
-                            return OperatorType.Subtract;
-                        default:
-                            throw new MemberAccessException("表达式错误");
-                    }
-                }
-            }
+                        null => OperatorType.None,
+                        { Text: var x } when distributedQ() == null => x switch
+                            {
+                                "+" => OperatorType.Identity,
+                                "-" => OperatorType.Complement,
+                                _ => throw new MemberAccessException("表达式错误"),
+                            },
+                        { Text: var x } => x switch
+                            {
+                                "+" => OperatorType.Union,
+                                "-" => OperatorType.Subtract,
+                                _ => throw new MemberAccessException("表达式错误"),
+                            },
+                    };
 
             /// <inheritdoc />
             public IQueryCompounded<IDistributedQueryAtom> Filter1
-            {
-                get
-                {
-                    if (distributedQ() != null)
-                        return distributedQ();
-
-                    return distributedQ1();
-                }
-            }
+                => (IQueryCompounded<IDistributedQueryAtom>)distributedQ() ?? distributedQ1();
 
             /// <inheritdoc />
             public IQueryCompounded<IDistributedQueryAtom> Filter2 => distributedQ1();
 
             /// <inheritdoc />
             public bool IsDangerous()
-            {
-                switch (Operator)
-                {
-                    case OperatorType.None:
-                        return Filter1.IsDangerous();
-                    case OperatorType.Identity:
-                        return Filter1.IsDangerous();
-                    case OperatorType.Complement:
-                        return true;
-                    case OperatorType.Union:
-                        return Filter1.IsDangerous() || Filter2.IsDangerous();
-                    case OperatorType.Subtract:
-                        return Filter1.IsDangerous();
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
+                => Operator switch
+                    {
+                        OperatorType.None => Filter1.IsDangerous(),
+                        OperatorType.Identity => Filter1.IsDangerous(),
+                        OperatorType.Complement => true,
+                        OperatorType.Union => Filter1.IsDangerous() || Filter2.IsDangerous(),
+                        OperatorType.Subtract => Filter1.IsDangerous(),
+                        _ => throw new ArgumentOutOfRangeException(),
+                    };
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);

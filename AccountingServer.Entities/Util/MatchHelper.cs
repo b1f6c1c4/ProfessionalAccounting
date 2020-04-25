@@ -185,24 +185,16 @@ namespace AccountingServer.Entities.Util
             public bool Visit(TAtom query) => m_AtomPredictor(query);
 
             public bool Visit(IQueryAry<TAtom> query)
-            {
-                switch (query.Operator)
-                {
-                    case OperatorType.None:
-                    case OperatorType.Identity:
-                        return query.Filter1.Accept(this);
-                    case OperatorType.Complement:
-                        return !query.Filter1.Accept(this);
-                    case OperatorType.Union:
-                        return query.Filter1.Accept(this) || query.Filter2.Accept(this);
-                    case OperatorType.Intersect:
-                        return query.Filter1.Accept(this) && query.Filter2.Accept(this);
-                    case OperatorType.Subtract:
-                        return query.Filter1.Accept(this) && !query.Filter2.Accept(this);
-                    default:
-                        throw new ArgumentException("运算类型未知", nameof(query));
-                }
-            }
+                => query.Operator switch
+                    {
+                        OperatorType.None => query.Filter1.Accept(this),
+                        OperatorType.Identity => query.Filter1.Accept(this),
+                        OperatorType.Complement => !query.Filter1.Accept(this),
+                        OperatorType.Union => query.Filter1.Accept(this) || query.Filter2.Accept(this),
+                        OperatorType.Intersect => query.Filter1.Accept(this) && query.Filter2.Accept(this),
+                        OperatorType.Subtract => query.Filter1.Accept(this) && !query.Filter2.Accept(this),
+                        _ => throw new ArgumentException("运算类型未知", nameof(query)),
+                    };
         }
     }
 }

@@ -72,39 +72,22 @@ namespace AccountingServer.Shell.Subtotal
             if (sub.Items == null)
                 return obj;
 
-            string field;
-            if (m_Depth < m_Par.Levels.Count)
-                switch (m_Par.Levels[m_Depth] & SubtotalLevel.Subtotal)
-                {
-                    case SubtotalLevel.Title:
-                        field = "title";
-                        break;
-                    case SubtotalLevel.SubTitle:
-                        field = "subtitle";
-                        break;
-                    case SubtotalLevel.Content:
-                        field = "content";
-                        break;
-                    case SubtotalLevel.Remark:
-                        field = "remark";
-                        break;
-                    case SubtotalLevel.User:
-                        field = "user";
-                        break;
-                    case SubtotalLevel.Currency:
-                        field = "currency";
-                        break;
-                    case SubtotalLevel.Day:
-                    case SubtotalLevel.Week:
-                    case SubtotalLevel.Month:
-                    case SubtotalLevel.Year:
-                        field = "date";
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            else
-                field = "aggr";
+            var field = m_Depth < m_Par.Levels.Count
+                ? (m_Par.Levels[m_Depth] & SubtotalLevel.Subtotal) switch
+                    {
+                        SubtotalLevel.Title => "title",
+                        SubtotalLevel.SubTitle => "subtitle",
+                        SubtotalLevel.Content => "content",
+                        SubtotalLevel.Remark => "remark",
+                        SubtotalLevel.User => "user",
+                        SubtotalLevel.Currency => "currency",
+                        SubtotalLevel.Day => "date",
+                        SubtotalLevel.Week => "date",
+                        SubtotalLevel.Month => "date",
+                        SubtotalLevel.Year => "date",
+                        _ => throw new ArgumentOutOfRangeException(),
+                    }
+                : "aggr";
 
             m_Depth++;
             obj[field] = new JObject(sub.Items.Select(it => it.Accept(this)));

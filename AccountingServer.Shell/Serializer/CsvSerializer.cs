@@ -179,48 +179,22 @@ namespace AccountingServer.Shell.Serializer
                     if (i > 0)
                         sb.Append(m_Sep);
 
-                    var s = spec[i];
-                    switch (s)
-                    {
-                        case ColumnSpec.VoucherID:
-                            sb.Append(d.Voucher.ID);
-                            break;
-                        case ColumnSpec.VoucherDate:
-                            sb.Append(d.Voucher.Date.AsDate());
-                            break;
-                        case ColumnSpec.VoucherType:
-                            sb.Append(d.Voucher.Type);
-                            break;
-                        case ColumnSpec.User:
-                            sb.Append(d.User);
-                            break;
-                        case ColumnSpec.Currency:
-                            sb.Append(d.Currency);
-                            break;
-                        case ColumnSpec.Title:
-                            sb.Append(d.Title.AsTitle());
-                            break;
-                        case ColumnSpec.TitleComment:
-                            sb.Append(TitleManager.GetTitleName(d.Title));
-                            break;
-                        case ColumnSpec.SubTitle:
-                            sb.Append(d.SubTitle.AsSubTitle());
-                            break;
-                        case ColumnSpec.SubTitleComment:
-                            sb.Append(TitleManager.GetTitleName(d.Title, d.SubTitle));
-                            break;
-                        case ColumnSpec.Content:
-                            sb.Append(d.Content.Quotation('\''));
-                            break;
-                        case ColumnSpec.Remark:
-                            sb.Append(d.Remark.Quotation('"'));
-                            break;
-                        case ColumnSpec.Fund:
-                            sb.Append($"{d.Fund:R}");
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
+                    sb.Append(spec[i] switch
+                        {
+                            ColumnSpec.VoucherID => d.Voucher.ID,
+                            ColumnSpec.VoucherDate => d.Voucher.Date.AsDate(),
+                            ColumnSpec.VoucherType => d.Voucher.Type,
+                            ColumnSpec.User => d.User,
+                            ColumnSpec.Currency => d.Currency,
+                            ColumnSpec.Title => d.Title.AsTitle(),
+                            ColumnSpec.TitleComment => TitleManager.GetTitleName(d.Title),
+                            ColumnSpec.SubTitle => d.SubTitle.AsSubTitle(),
+                            ColumnSpec.SubTitleComment => TitleManager.GetTitleName(d.Title, d.SubTitle),
+                            ColumnSpec.Content => d.Content.Quotation('\''),
+                            ColumnSpec.Remark => d.Remark.Quotation('"'),
+                            ColumnSpec.Fund => $"{d.Fund:R}",
+                            _ => throw new ArgumentOutOfRangeException(),
+                        });
                 }
 
                 sb.AppendLine();

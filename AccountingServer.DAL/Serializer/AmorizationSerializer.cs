@@ -46,30 +46,17 @@ namespace AccountingServer.DAL.Serializer
                     Date = bsonReader.ReadDateTime("date", ref read),
                     TotalDays = bsonReader.ReadInt32("tday", ref read),
                 };
-            switch (bsonReader.ReadString("interval", ref read))
-            {
-                case "d":
-                    amort.Interval = AmortizeInterval.EveryDay;
-                    break;
-                case "w":
-                    amort.Interval = AmortizeInterval.SameDayOfWeek;
-                    break;
-                case "W":
-                    amort.Interval = AmortizeInterval.LastDayOfWeek;
-                    break;
-                case "m":
-                    amort.Interval = AmortizeInterval.SameDayOfMonth;
-                    break;
-                case "M":
-                    amort.Interval = AmortizeInterval.LastDayOfMonth;
-                    break;
-                case "y":
-                    amort.Interval = AmortizeInterval.SameDayOfYear;
-                    break;
-                case "Y":
-                    amort.Interval = AmortizeInterval.LastDayOfYear;
-                    break;
-            }
+            amort.Interval = bsonReader.ReadString("interval", ref read) switch
+                {
+                    "d" => AmortizeInterval.EveryDay,
+                    "w" => AmortizeInterval.SameDayOfWeek,
+                    "W" => AmortizeInterval.LastDayOfWeek,
+                    "m" => AmortizeInterval.SameDayOfMonth,
+                    "M" => AmortizeInterval.LastDayOfMonth,
+                    "y" => AmortizeInterval.SameDayOfYear,
+                    "Y" => AmortizeInterval.LastDayOfYear,
+                    _ => amort.Interval,
+                };
 
             amort.Template = bsonReader.ReadDocument("template", ref read, VoucherSerializer.Deserialize);
             amort.Schedule = bsonReader.ReadArray("schedule", ref read, ItemSerializer.Deserialize);
@@ -87,30 +74,17 @@ namespace AccountingServer.DAL.Serializer
             bsonWriter.Write("value", amort.Value);
             bsonWriter.Write("date", amort.Date);
             bsonWriter.Write("tday", amort.TotalDays);
-            switch (amort.Interval)
-            {
-                case AmortizeInterval.EveryDay:
-                    bsonWriter.Write("interval", "d");
-                    break;
-                case AmortizeInterval.SameDayOfWeek:
-                    bsonWriter.Write("interval", "w");
-                    break;
-                case AmortizeInterval.LastDayOfWeek:
-                    bsonWriter.Write("interval", "W");
-                    break;
-                case AmortizeInterval.SameDayOfMonth:
-                    bsonWriter.Write("interval", "m");
-                    break;
-                case AmortizeInterval.LastDayOfMonth:
-                    bsonWriter.Write("interval", "M");
-                    break;
-                case AmortizeInterval.SameDayOfYear:
-                    bsonWriter.Write("interval", "y");
-                    break;
-                case AmortizeInterval.LastDayOfYear:
-                    bsonWriter.Write("interval", "Y");
-                    break;
-            }
+            bsonWriter.Write("interval", amort.Interval switch
+                {
+                    AmortizeInterval.EveryDay => "d",
+                    AmortizeInterval.SameDayOfWeek => "w",
+                    AmortizeInterval.LastDayOfWeek => "W",
+                    AmortizeInterval.SameDayOfMonth => "m",
+                    AmortizeInterval.LastDayOfMonth => "M",
+                    AmortizeInterval.SameDayOfYear => "y",
+                    AmortizeInterval.LastDayOfYear => "Y",
+                    _ => throw new InvalidOperationException(),
+                });
 
             if (amort.Template != null)
             {

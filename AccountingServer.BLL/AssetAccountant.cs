@@ -141,9 +141,9 @@ namespace AccountingServer.BLL
                     var lst = asset.Schedule.Where(item => item.Date.Within(rng))
                         .Where(
                             item =>
-                                item is AcquisitionItem &&
-                                (!voucher.Date.HasValue || item.Date == voucher.Date) &&
-                                (((AcquisitionItem)item).OrigValue - value).IsZero())
+                                item is AcquisitionItem acq &&
+                                (!voucher.Date.HasValue || acq.Date == voucher.Date) &&
+                                (acq.OrigValue - value).IsZero())
                         .ToList();
 
                     if (lst.Count == 1)

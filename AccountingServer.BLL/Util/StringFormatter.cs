@@ -36,8 +36,7 @@ namespace AccountingServer.BLL.Util
         /// <returns>格式化的字符串</returns>
         public static string CPadRight(this string s, int length, char chr = ' ')
         {
-            if (s == null)
-                s = string.Empty;
+            s ??= string.Empty;
 
             if (length - s.Length - Reg.Matches(s).Count < 0)
                 length = s.Length + Reg.Matches(s).Count;
@@ -55,8 +54,7 @@ namespace AccountingServer.BLL.Util
         /// <returns>格式化的字符串</returns>
         public static string CPadLeft(this string s, int length, char chr = ' ')
         {
-            if (s == null)
-                s = string.Empty;
+            s ??= string.Empty;
 
             if (length - s.Length - Reg.Matches(s).Count < 0)
                 length = s.Length + Reg.Matches(s).Count;

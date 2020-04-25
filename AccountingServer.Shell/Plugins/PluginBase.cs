@@ -51,14 +51,12 @@ namespace AccountingServer.Shell.Plugins
         {
             var type = GetType();
             var resName = $"{type.Namespace}.Resources.Document.txt";
-            using (var stream = type.Assembly.GetManifestResourceStream(resName))
-            {
-                if (stream == null)
-                    throw new MissingManifestResourceException();
+            using var stream = type.Assembly.GetManifestResourceStream(resName);
+            if (stream == null)
+                throw new MissingManifestResourceException();
 
-                using (var reader = new StreamReader(stream))
-                    return reader.ReadToEnd();
-            }
+            using var reader = new StreamReader(stream);
+            return reader.ReadToEnd();
         }
     }
 }
