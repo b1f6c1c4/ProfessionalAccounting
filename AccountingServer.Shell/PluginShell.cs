@@ -38,7 +38,7 @@ namespace AccountingServer.Shell
                     ["ccc"] = new CreditCardConvert(helper),
                     ["stmt"] = new Statement(helper),
                     ["u"] = new Utilities(helper),
-                    ["yr"] = new YieldRate(helper)
+                    ["yr"] = new YieldRate(helper),
                 };
 
         /// <inheritdoc />

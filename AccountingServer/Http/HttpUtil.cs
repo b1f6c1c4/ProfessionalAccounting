@@ -43,9 +43,9 @@ namespace AccountingServer.Http
                         new Dictionary<string, string>
                             {
                                 { "Content-Type", contentType },
-                                { "Content-Length", stream.Length.ToString(CultureInfo.InvariantCulture) }
+                                { "Content-Length", stream.Length.ToString(CultureInfo.InvariantCulture) },
                             },
-                    ResponseStream = stream
+                    ResponseStream = stream,
                 };
         }
     }

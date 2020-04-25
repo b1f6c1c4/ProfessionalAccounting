@@ -124,8 +124,8 @@ namespace AccountingServer.Shell.Carry
                                 new List<VoucherDetail>
                                     {
                                         new VoucherDetail { Title = 4101, Currency = grpC.Currency, Fund = b00 },
-                                        new VoucherDetail { Title = 4103, Currency = grpC.Currency, Fund = -b00 }
-                                    }
+                                        new VoucherDetail { Title = 4103, Currency = grpC.Currency, Fund = -b00 },
+                                    },
                         });
                 cnt++;
             }
@@ -143,19 +143,13 @@ namespace AccountingServer.Shell.Carry
                                     {
                                         new VoucherDetail
                                             {
-                                                Title = 4101,
-                                                SubTitle = 01,
-                                                Currency = grpC.Currency,
-                                                Fund = b01
+                                                Title = 4101, SubTitle = 01, Currency = grpC.Currency, Fund = b01,
                                             },
                                         new VoucherDetail
                                             {
-                                                Title = 4103,
-                                                SubTitle = 01,
-                                                Currency = grpC.Currency,
-                                                Fund = -b01
-                                            }
-                                    }
+                                                Title = 4103, SubTitle = 01, Currency = grpC.Currency, Fund = -b01,
+                                            },
+                                    },
                         });
                 cnt++;
             }

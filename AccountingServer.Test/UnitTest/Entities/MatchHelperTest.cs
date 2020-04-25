@@ -168,7 +168,7 @@ namespace AccountingServer.Test.UnitTest.Entities
                     ID = "abc",
                     Date = new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                     Type = VoucherType.Ordinary,
-                    Remark = "abc"
+                    Remark = "abc",
                 };
 
             Assert.False(
@@ -178,7 +178,7 @@ namespace AccountingServer.Test.UnitTest.Entities
                             ID = "abc0",
                             Date = new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                             Type = VoucherType.Ordinary,
-                            Remark = "abc"
+                            Remark = "abc",
                         },
                     filter));
             Assert.False(
@@ -188,7 +188,7 @@ namespace AccountingServer.Test.UnitTest.Entities
                             ID = "abc",
                             Date = new DateTime(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                             Type = VoucherType.Ordinary,
-                            Remark = "abc"
+                            Remark = "abc",
                         },
                     filter));
             Assert.False(
@@ -198,7 +198,7 @@ namespace AccountingServer.Test.UnitTest.Entities
                             ID = "abc",
                             Date = new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                             Type = VoucherType.Carry,
-                            Remark = "abc"
+                            Remark = "abc",
                         },
                     filter));
             Assert.False(
@@ -208,7 +208,7 @@ namespace AccountingServer.Test.UnitTest.Entities
                             ID = "abc",
                             Date = new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                             Type = VoucherType.Ordinary,
-                            Remark = "abc0"
+                            Remark = "abc0",
                         },
                     filter));
             Assert.True(
@@ -218,7 +218,7 @@ namespace AccountingServer.Test.UnitTest.Entities
                             ID = "abc",
                             Date = new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                             Type = VoucherType.Ordinary,
-                            Remark = "abc"
+                            Remark = "abc",
                         },
                     filter));
         }

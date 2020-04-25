@@ -37,7 +37,7 @@ namespace AccountingServer.DAL.Serializer
                                             Title = bR.ReadInt32("title", ref read),
                                             SubTitle = bR.ReadInt32("subtitle", ref read),
                                             Content = bR.ReadString("content", ref read),
-                                            Remark = bR.ReadString("remark", ref read)
+                                            Remark = bR.ReadString("remark", ref read),
                                         };
                                 bR.ReadEndDocument();
                                 return bal;

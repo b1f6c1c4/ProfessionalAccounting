@@ -18,7 +18,7 @@ namespace AccountingServer.BLL.Parsing
                         ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : (Guid?)null,
                         User = (UserSpec()?.GetText()).ParseUserSpec(),
                         Name = RegexString()?.GetText().Dequotation().Replace(@"\/", "/"),
-                        Remark = PercentQuotedString()?.GetText().Dequotation()
+                        Remark = PercentQuotedString()?.GetText().Dequotation(),
                     };
 
             /// <inheritdoc />

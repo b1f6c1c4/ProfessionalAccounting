@@ -66,7 +66,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                     Title = title,
                     Content = content,
                     Remark = rmk,
-                    Rate = rate
+                    Rate = rate,
                 };
 
             if (!all && !endDate.HasValue ||
@@ -355,7 +355,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                         Title = Title,
                         Content = Content,
                         Remark = Remark,
-                        Fund = fund
+                        Fund = fund,
                     };
 
             public VoucherDetail AsInterest(InterestBase my, double? fund = null)
@@ -365,7 +365,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                         Title = Title,
                         Content = Content,
                         Remark = Remark + "-利息",
-                        Fund = fund
+                        Fund = fund,
                     };
 
             public VoucherDetail AsMinor(InterestBase my, double? fund = null)
@@ -375,7 +375,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                         Title = 6603,
                         SubTitle = my.MinorSubTitle(),
                         Content = "贷款利息",
-                        Fund = fund
+                        Fund = fund,
                     };
         }
     }

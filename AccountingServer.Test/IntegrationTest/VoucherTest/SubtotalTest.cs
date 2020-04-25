@@ -37,7 +37,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                         SubTitle = 56,
                                         Content = "cnt1",
                                         Fund = 123.45,
-                                        Remark = "rmk1"
+                                        Remark = "rmk1",
                                     },
                                 new VoucherDetail
                                     {
@@ -47,9 +47,9 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                         SubTitle = 98,
                                         Content = "cnt1",
                                         Fund = -123.45,
-                                        Remark = "rmk2"
-                                    }
-                            }
+                                        Remark = "rmk2",
+                                    },
+                            },
                     });
 
             m_Adapter.Upsert(
@@ -67,7 +67,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                         SubTitle = 56,
                                         Content = "cnt1",
                                         Fund = 78.53,
-                                        Remark = "rmk1"
+                                        Remark = "rmk1",
                                     },
                                 new VoucherDetail
                                     {
@@ -77,7 +77,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                         SubTitle = 98,
                                         Content = "cnt1",
                                         Fund = -78.53,
-                                        Remark = "rmk2"
+                                        Remark = "rmk2",
                                     },
                                 new VoucherDetail
                                     {
@@ -87,7 +87,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                         SubTitle = 56,
                                         Content = "cnt2",
                                         Fund = 66.66,
-                                        Remark = "rmk1"
+                                        Remark = "rmk1",
                                     },
                                 new VoucherDetail
                                     {
@@ -97,13 +97,13 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                         SubTitle = 98,
                                         Content = "cnt2",
                                         Fund = -66.66,
-                                        Remark = "rmk2"
+                                        Remark = "rmk2",
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "b1&b2", Currency = "EUR", Title = 2333, Fund = 114514
-                                    }
-                            }
+                                        User = "b1&b2", Currency = "EUR", Title = 2333, Fund = 114514,
+                                    },
+                            },
                     });
 
             ClientUser.Set("b1");

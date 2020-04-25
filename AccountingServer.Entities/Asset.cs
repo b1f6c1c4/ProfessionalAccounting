@@ -64,7 +64,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     双倍余额递减法
         /// </summary>
-        DoubleDeclineMethod
+        DoubleDeclineMethod,
     }
 
     /// <summary>

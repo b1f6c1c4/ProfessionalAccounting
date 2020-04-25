@@ -51,7 +51,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     不准确记账凭证
         /// </summary>
-        Uncertain
+        Uncertain,
     }
 
     /// <summary>

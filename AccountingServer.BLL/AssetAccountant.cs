@@ -253,7 +253,7 @@ namespace AccountingServer.BLL
                             Currency = asset.Currency,
                             Title = asset.Title,
                             Content = asset.StringID,
-                            Fund = acq.OrigValue
+                            Fund = acq.OrigValue,
                         });
 
             if (item is DepreciateItem dep)
@@ -269,7 +269,7 @@ namespace AccountingServer.BLL
                             Title = asset.DepreciationExpenseTitle,
                             SubTitle = asset.DepreciationExpenseSubTitle,
                             Content = asset.StringID,
-                            Fund = dep.Amount
+                            Fund = dep.Amount,
                         },
                     new VoucherDetail
                         {
@@ -277,7 +277,7 @@ namespace AccountingServer.BLL
                             Currency = asset.Currency,
                             Title = asset.DepreciationTitle,
                             Content = asset.StringID,
-                            Fund = -dep.Amount
+                            Fund = -dep.Amount,
                         });
 
             if (item is DevalueItem dev)
@@ -293,7 +293,7 @@ namespace AccountingServer.BLL
                             Title = asset.DevaluationExpenseTitle,
                             SubTitle = asset.DevaluationExpenseSubTitle,
                             Content = asset.StringID,
-                            Fund = dev.Amount
+                            Fund = dev.Amount,
                         },
                     new VoucherDetail
                         {
@@ -301,7 +301,7 @@ namespace AccountingServer.BLL
                             Currency = asset.Currency,
                             Title = asset.DevaluationTitle,
                             Content = asset.StringID,
-                            Fund = -dev.Amount
+                            Fund = -dev.Amount,
                         });
 
             if (item is DispositionItem)
@@ -329,7 +329,7 @@ namespace AccountingServer.BLL
                             Currency = asset.Currency,
                             Title = asset.Title,
                             Content = asset.StringID,
-                            Fund = -asset.Value
+                            Fund = -asset.Value,
                         },
                     new VoucherDetail
                         {
@@ -337,7 +337,7 @@ namespace AccountingServer.BLL
                             Currency = asset.Currency,
                             Title = asset.DepreciationTitle,
                             Content = asset.StringID,
-                            Fund = totalDep
+                            Fund = totalDep,
                         },
                     new VoucherDetail
                         {
@@ -345,7 +345,7 @@ namespace AccountingServer.BLL
                             Currency = asset.Currency,
                             Title = asset.DevaluationTitle,
                             Content = asset.StringID,
-                            Fund = totalDev
+                            Fund = totalDev,
                         },
                     new VoucherDetail
                         {
@@ -354,7 +354,7 @@ namespace AccountingServer.BLL
                             Title = DefaultDispositionTitle,
                             Content = asset.StringID,
                             Fund = bookValue,
-                            Remark = Asset.IgnoranceMark // 不用于检索，只用于添加
+                            Remark = Asset.IgnoranceMark, // 不用于检索，只用于添加
                         }
                 );
             }
@@ -378,7 +378,7 @@ namespace AccountingServer.BLL
                     Date = isCollapsed ? null : item.Date,
                     Type = voucherType,
                     Remark = "automatically generated",
-                    Details = details.ToList()
+                    Details = details.ToList(),
                 };
             var res = Db.Upsert(voucher);
             item.VoucherID = voucher.ID;
@@ -516,7 +516,7 @@ namespace AccountingServer.BLL
                                     {
                                         Date = dt,
                                         Amount = amount / (monthes + 1),
-                                        Value = items[i - 1].Value - amount / (monthes + 1)
+                                        Value = items[i - 1].Value - amount / (monthes + 1),
                                     });
 
                             dt = AccountantHelper.LastDayOfMonth(dt.Year, dt.Month + 1);
@@ -570,7 +570,7 @@ namespace AccountingServer.BLL
                                 items.Add(
                                     new DepreciateItem
                                         {
-                                            Date = AccountantHelper.LastDayOfMonth(yr, mon), Amount = a / (12 - mo)
+                                            Date = AccountantHelper.LastDayOfMonth(yr, mon), Amount = a / (12 - mo),
                                         });
                         }
 
@@ -580,7 +580,7 @@ namespace AccountingServer.BLL
                                 new DepreciateItem
                                     {
                                         Date = AccountantHelper.LastDayOfMonth(yr + year, mon),
-                                        Amount = amount * (nstar - year + 1) / zstar / 12
+                                        Amount = amount * (nstar - year + 1) / zstar / 12,
                                     });
                         // if (mo > 0)
                         {
@@ -589,7 +589,7 @@ namespace AccountingServer.BLL
                                     new DepreciateItem
                                         {
                                             Date = AccountantHelper.LastDayOfMonth(yr + n, mon),
-                                            Amount = amount * (nstar - (n + 1) + 2) / zstar / 12
+                                            Amount = amount * (nstar - (n + 1) + 2) / zstar / 12,
                                         });
                         }
                     }

@@ -264,7 +264,7 @@ namespace AccountingServer.Shell
             DetailQuery = 0x00000100,
             DetailRQuery = 0x00001000,
             VoucherQuery = 0x00010000,
-            Unsafe = 0x10000000
+            Unsafe = 0x10000000,
         }
     }
 }

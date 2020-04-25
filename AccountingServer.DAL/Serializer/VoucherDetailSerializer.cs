@@ -21,7 +21,7 @@ namespace AccountingServer.DAL.Serializer
                     SubTitle = bsonReader.ReadInt32("subtitle", ref read),
                     Content = bsonReader.ReadString("content", ref read),
                     Fund = bsonReader.ReadDouble("fund", ref read),
-                    Remark = bsonReader.ReadString("remark", ref read)
+                    Remark = bsonReader.ReadString("remark", ref read),
                 };
             bsonReader.ReadEndDocument();
 

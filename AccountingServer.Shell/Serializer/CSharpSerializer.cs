@@ -37,7 +37,7 @@ namespace AccountingServer.Shell.Serializer
                 {
                     GenerateExecutable = false,
                     GenerateInMemory = true,
-                    ReferencedAssemblies = { "AccountingServer.Entities.dll" }
+                    ReferencedAssemblies = { "AccountingServer.Entities.dll" },
                 };
             var sb = new StringBuilder();
             sb.AppendLine("using System;");

@@ -226,7 +226,7 @@ namespace AccountingServer.Shell.Serializer
             SubTitleComment = 0x8,
             Content = 0x9,
             Remark = 0xa,
-            Fund = 0xb
+            Fund = 0xb,
         }
     }
 }

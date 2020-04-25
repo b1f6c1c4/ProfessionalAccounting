@@ -148,7 +148,7 @@ namespace AccountingServer.Shell.Serializer
                         Title = it.Title,
                         SubTitle = it.SubTitle,
                         Content = it.Content,
-                        Remark = it.Remark
+                        Remark = it.Remark,
                     },
                 new DetailEqualityComparer()))
             {
@@ -219,7 +219,7 @@ namespace AccountingServer.Shell.Serializer
                     Title = title.Title,
                     SubTitle = title.SubTitle,
                     Content = string.IsNullOrEmpty(content) ? null : content,
-                    Remark = string.IsNullOrEmpty(remark) ? null : remark
+                    Remark = string.IsNullOrEmpty(remark) ? null : remark,
                 };
         }
 
@@ -281,7 +281,7 @@ namespace AccountingServer.Shell.Serializer
                                 Fund = fund0 / lst.Count,
                                 DiscountFund = fundd / lst.Count,
                                 Remark = d.Detail.Remark,
-                                UseActualFund = d.Actual
+                                UseActualFund = d.Actual,
                             }));
             }
 

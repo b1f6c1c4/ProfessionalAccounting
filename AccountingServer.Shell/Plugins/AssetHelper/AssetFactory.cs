@@ -68,9 +68,9 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
                                     Date = voucher.Date,
                                     VoucherID = voucher.ID,
                                     // ReSharper disable once PossibleInvalidOperationException
-                                    OrigValue = detail.Fund.Value
-                                }
-                        }
+                                    OrigValue = detail.Fund.Value,
+                                },
+                        },
                 };
 
             Accountant.Upsert(asset);

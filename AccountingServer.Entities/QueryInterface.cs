@@ -42,7 +42,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     为两者交集
         /// </summary>
-        Intersect
+        Intersect,
     }
 
     /// <summary>
@@ -73,7 +73,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     费用
         /// </summary>
-        Expense
+        Expense,
     }
 
     /// <summary>
@@ -239,7 +239,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     记账凭证计数
         /// </summary>
-        VoucherCount
+        VoucherCount,
     }
 
     /// <summary>
@@ -260,7 +260,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     每日累加
         /// </summary>
-        EveryDay
+        EveryDay,
     }
 
     /// <summary>

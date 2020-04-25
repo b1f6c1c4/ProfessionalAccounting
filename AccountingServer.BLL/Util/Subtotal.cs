@@ -231,7 +231,7 @@ namespace AccountingServer.BLL.Util
                         .Select(
                             grp => new SubtotalDate(grp.Key, m_Par.AggrInterval)
                                 {
-                                    Fund = sub.Fund += BuildEquiPhase(grp)
+                                    Fund = sub.Fund += BuildEquiPhase(grp),
                                 }).Cast<ISubtotalResult>().ToList();
                     return sub;
                 case AggregationType.EveryDay:
@@ -250,7 +250,7 @@ namespace AccountingServer.BLL.Util
                                 sub.TheItems.Add(
                                     new SubtotalDate(last, m_Par.AggrInterval)
                                         {
-                                            Fund = last == curr ? fund : oldFund
+                                            Fund = last == curr ? fund : oldFund,
                                         });
                             }
                         else

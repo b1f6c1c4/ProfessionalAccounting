@@ -18,7 +18,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     SubTitle = 06,
                     Content = "abc",
                     Remark = "def",
-                    Fund = 123.45
+                    Fund = 123.45,
                 };
 
             Assert.Equal(0, DbSession.TheComparison(rhs, rhs));
@@ -33,7 +33,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                             SubTitle = 07,
                             Content = "abd",
                             Remark = "deg",
-                            Fund = 123.46
+                            Fund = 123.46,
                         },
                     rhs));
             Assert.Equal(
@@ -47,7 +47,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                             SubTitle = 05,
                             Content = "abb",
                             Remark = "dee",
-                            Fund = 123.44
+                            Fund = 123.44,
                         },
                     rhs));
 
@@ -62,7 +62,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                             SubTitle = 07,
                             Content = "abd",
                             Remark = "deg",
-                            Fund = 123.46
+                            Fund = 123.46,
                         },
                     rhs));
             Assert.Equal(
@@ -76,7 +76,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                             SubTitle = 05,
                             Content = "abb",
                             Remark = "dee",
-                            Fund = 123.44
+                            Fund = 123.44,
                         },
                     rhs));
 
@@ -91,7 +91,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                             SubTitle = 07,
                             Content = "abd",
                             Remark = "deg",
-                            Fund = 123.46
+                            Fund = 123.46,
                         },
                     rhs));
             Assert.Equal(
@@ -105,7 +105,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                             SubTitle = 05,
                             Content = "abb",
                             Remark = "dee",
-                            Fund = 123.44
+                            Fund = 123.44,
                         },
                     rhs));
 
@@ -120,7 +120,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                             SubTitle = 05,
                             Content = "abd",
                             Remark = "deg",
-                            Fund = 123.46
+                            Fund = 123.46,
                         },
                     rhs));
             Assert.Equal(
@@ -134,7 +134,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                             SubTitle = 07,
                             Content = "abb",
                             Remark = "dee",
-                            Fund = 123.44
+                            Fund = 123.44,
                         },
                     rhs));
 
@@ -149,7 +149,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                             SubTitle = 06,
                             Content = "abb",
                             Remark = "deg",
-                            Fund = 123.46
+                            Fund = 123.46,
                         },
                     rhs));
             Assert.Equal(
@@ -163,7 +163,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                             SubTitle = 06,
                             Content = "abd",
                             Remark = "dee",
-                            Fund = 123.44
+                            Fund = 123.44,
                         },
                     rhs));
 
@@ -178,7 +178,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                             SubTitle = 06,
                             Content = "abc",
                             Remark = "dee",
-                            Fund = 123.46
+                            Fund = 123.46,
                         },
                     rhs));
             Assert.Equal(
@@ -192,7 +192,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                             SubTitle = 06,
                             Content = "abc",
                             Remark = "deg",
-                            Fund = 123.44
+                            Fund = 123.44,
                         },
                     rhs));
 
@@ -207,7 +207,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                             SubTitle = 06,
                             Content = "abc",
                             Remark = "def",
-                            Fund = 123.44
+                            Fund = 123.44,
                         },
                     rhs));
             Assert.Equal(
@@ -221,7 +221,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                             SubTitle = 06,
                             Content = "abc",
                             Remark = "def",
-                            Fund = 123.46
+                            Fund = 123.46,
                         },
                     rhs));
         }
@@ -235,8 +235,8 @@ namespace AccountingServer.Test.UnitTest.BLL
                         {
                             new VoucherDetail { User = "b1", Currency = "jPy" },
                             new VoucherDetail { User = "b2", Currency = "cnY" },
-                            new VoucherDetail { User = "b1", Currency = "Cny" }
-                        }
+                            new VoucherDetail { User = "b1", Currency = "Cny" },
+                        },
                 };
 
             DbSession.Regularize(voucher);

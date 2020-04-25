@@ -62,7 +62,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     按年分类
         /// </summary>
-        Year = 0b0010_0110_0000
+        Year = 0b0010_0110_0000,
     }
 
     /// <summary>

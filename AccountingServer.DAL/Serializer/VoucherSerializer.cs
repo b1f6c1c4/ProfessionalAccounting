@@ -20,7 +20,7 @@ namespace AccountingServer.DAL.Serializer
                 {
                     ID = bsonReader.ReadObjectId("_id", ref read),
                     Date = bsonReader.ReadDateTime("date", ref read),
-                    Type = VoucherType.Ordinary
+                    Type = VoucherType.Ordinary,
                 };
             switch (bsonReader.ReadString("special", ref read))
             {
