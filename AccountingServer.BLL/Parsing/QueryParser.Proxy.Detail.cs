@@ -60,18 +60,11 @@ namespace AccountingServer.BLL.Parsing
         {
             /// <inheritdoc />
             public TitleKind? Kind
-            {
-                get
-                {
-                    if (TitleKind() != null)
+                => TitleKind() switch
                     {
-                        var s = TitleKind().GetText();
-                        return (TitleKind?)Enum.Parse(typeof(TitleKind), s);
-                    }
-
-                    return null;
-                }
-            }
+                        null => null,
+                        var x => (TitleKind?)Enum.Parse(typeof(TitleKind), x.GetText()),
+                    };
 
             /// <inheritdoc />
             public VoucherDetail Filter
@@ -101,22 +94,13 @@ namespace AccountingServer.BLL.Parsing
 
             /// <inheritdoc />
             public int Dir
-            {
-                get
-                {
-                    switch (Direction()?.GetText())
+                => Direction()?.GetText() switch
                     {
-                        case null:
-                            return 0;
-                        case ">":
-                            return 1;
-                        case "<":
-                            return -1;
-                        default:
-                            throw new MemberAccessException("表达式错误");
-                    }
-                }
-            }
+                        null => 0,
+                        ">" => 1,
+                        "<" => -1,
+                        _ => throw new MemberAccessException("表达式错误"),
+                    };
 
             /// <inheritdoc />
             public bool IsDangerous() => Filter.IsDangerous();
@@ -129,69 +113,41 @@ namespace AccountingServer.BLL.Parsing
         {
             /// <inheritdoc />
             public OperatorType Operator
-            {
-                get
-                {
-                    if (Op == null)
-                        return OperatorType.None;
-
-                    if (details() == null)
-                        switch (Op.Text)
-                        {
-                            case "+":
-                                return OperatorType.Identity;
-                            case "-":
-                                return OperatorType.Complement;
-                            default:
-                                throw new MemberAccessException("表达式错误");
-                        }
-
-                    switch (Op.Text)
+                => Op switch
                     {
-                        case "+":
-                            return OperatorType.Union;
-                        case "-":
-                            return OperatorType.Subtract;
-                        default:
-                            throw new MemberAccessException("表达式错误");
-                    }
-                }
-            }
+                        null => OperatorType.None,
+                        { Text: var x } when details() == null => x switch
+                            {
+                                "+" => OperatorType.Identity,
+                                "-" => OperatorType.Complement,
+                                _ => throw new MemberAccessException("表达式错误"),
+                            },
+                        { Text: var x } => x switch
+                            {
+                                "+" => OperatorType.Union,
+                                "-" => OperatorType.Subtract,
+                                _ => throw new MemberAccessException("表达式错误"),
+                            },
+                    };
 
             /// <inheritdoc />
             public IQueryCompounded<IDetailQueryAtom> Filter1
-            {
-                get
-                {
-                    if (details() != null)
-                        return details();
-
-                    return details1();
-                }
-            }
+                => (IQueryCompounded<IDetailQueryAtom>)details() ?? details1();
 
             /// <inheritdoc />
             public IQueryCompounded<IDetailQueryAtom> Filter2 => details1();
 
             /// <inheritdoc />
             public bool IsDangerous()
-            {
-                switch (Operator)
-                {
-                    case OperatorType.None:
-                        return Filter1.IsDangerous();
-                    case OperatorType.Identity:
-                        return Filter1.IsDangerous();
-                    case OperatorType.Complement:
-                        return true;
-                    case OperatorType.Union:
-                        return Filter1.IsDangerous() || Filter2.IsDangerous();
-                    case OperatorType.Subtract:
-                        return Filter1.IsDangerous();
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
+                => Operator switch
+                    {
+                        OperatorType.None => Filter1.IsDangerous(),
+                        OperatorType.Identity => Filter1.IsDangerous(),
+                        OperatorType.Complement => true,
+                        OperatorType.Union => Filter1.IsDangerous() || Filter2.IsDangerous(),
+                        OperatorType.Subtract => Filter1.IsDangerous(),
+                        _ => throw new ArgumentOutOfRangeException(),
+                    };
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);

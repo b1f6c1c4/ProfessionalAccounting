@@ -78,37 +78,22 @@ namespace AccountingServer.Shell.Subtotal
             {
                 var comparer = CultureInfo.GetCultureInfo("zh-CN").CompareInfo
                     .GetStringComparer(CompareOptions.StringSort);
-                switch (m_Par.Levels[Depth] & SubtotalLevel.Subtotal)
-                {
-                    case SubtotalLevel.Title:
-                        items = sub.Items.Cast<ISubtotalTitle>().OrderBy(s => s.Title);
-                        break;
-                    case SubtotalLevel.SubTitle:
-                        items = sub.Items.Cast<ISubtotalSubTitle>().OrderBy(s => s.SubTitle);
-                        break;
-                    case SubtotalLevel.Content:
-                        items = sub.Items.Cast<ISubtotalContent>().OrderBy(s => s.Content, comparer);
-                        break;
-                    case SubtotalLevel.Remark:
-                        items = sub.Items.Cast<ISubtotalRemark>().OrderBy(s => s.Remark, comparer);
-                        break;
-                    case SubtotalLevel.User:
-                        items = sub.Items.Cast<ISubtotalUser>()
-                            .OrderBy(s => s.User == ClientUser.Name ? null : s.User);
-                        break;
-                    case SubtotalLevel.Currency:
-                        items = sub.Items.Cast<ISubtotalCurrency>()
-                            .OrderBy(s => s.Currency == BaseCurrency.Now ? null : s.Currency);
-                        break;
-                    case SubtotalLevel.Day:
-                    case SubtotalLevel.Week:
-                    case SubtotalLevel.Month:
-                    case SubtotalLevel.Year:
-                        items = sub.Items.Cast<ISubtotalDate>().OrderBy(s => s.Date);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                items = (m_Par.Levels[Depth] & SubtotalLevel.Subtotal) switch
+                    {
+                        SubtotalLevel.Title => sub.Items.Cast<ISubtotalTitle>().OrderBy(s => s.Title),
+                        SubtotalLevel.SubTitle => sub.Items.Cast<ISubtotalSubTitle>().OrderBy(s => s.SubTitle),
+                        SubtotalLevel.Content => sub.Items.Cast<ISubtotalContent>().OrderBy(s => s.Content, comparer),
+                        SubtotalLevel.Remark => sub.Items.Cast<ISubtotalRemark>().OrderBy(s => s.Remark, comparer),
+                        SubtotalLevel.User => sub.Items.Cast<ISubtotalUser>()
+                            .OrderBy(s => s.User == ClientUser.Name ? null : s.User),
+                        SubtotalLevel.Currency => sub.Items.Cast<ISubtotalCurrency>()
+                            .OrderBy(s => s.Currency == BaseCurrency.Now ? null : s.Currency),
+                        SubtotalLevel.Day => sub.Items.Cast<ISubtotalDate>().OrderBy(s => s.Date),
+                        SubtotalLevel.Week => sub.Items.Cast<ISubtotalDate>().OrderBy(s => s.Date),
+                        SubtotalLevel.Month => sub.Items.Cast<ISubtotalDate>().OrderBy(s => s.Date),
+                        SubtotalLevel.Year => sub.Items.Cast<ISubtotalDate>().OrderBy(s => s.Date),
+                        _ => throw new ArgumentOutOfRangeException(),
+                    };
             }
             else
                 items = sub.Items;

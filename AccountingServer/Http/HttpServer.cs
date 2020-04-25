@@ -92,8 +92,7 @@ namespace AccountingServer.Http
                     }
 
 #if DEBUG
-                    if (response.Header == null)
-                        response.Header = new Dictionary<string, string>();
+                    response.Header ??= new Dictionary<string, string>();
                     if (!response.Header.ContainsKey("Access-Control-Allow-Origin"))
                         response.Header["Access-Control-Allow-Origin"] = "*";
 #endif

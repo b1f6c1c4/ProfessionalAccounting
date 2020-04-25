@@ -204,35 +204,20 @@ namespace AccountingServer.BLL.Util
                 raw.GroupBy(f.Selector).Select(g => Build(f.Create(g), g)).Where(g => g != null).ToList();
 
             m_Flags = level & SubtotalLevel.Flags;
-            switch (level & SubtotalLevel.Subtotal)
-            {
-                case SubtotalLevel.Title:
-                    sub.TheItems = Invoke(new SubtotalTitleFactory());
-                    break;
-                case SubtotalLevel.SubTitle:
-                    sub.TheItems = Invoke(new SubtotalSubTitleFactory());
-                    break;
-                case SubtotalLevel.Content:
-                    sub.TheItems = Invoke(new SubtotalContentFactory());
-                    break;
-                case SubtotalLevel.Remark:
-                    sub.TheItems = Invoke(new SubtotalRemarkFactory());
-                    break;
-                case SubtotalLevel.User:
-                    sub.TheItems = Invoke(new SubtotalUserFactory());
-                    break;
-                case SubtotalLevel.Currency:
-                    sub.TheItems = Invoke(new SubtotalCurrencyFactory());
-                    break;
-                case SubtotalLevel.Day:
-                case SubtotalLevel.Week:
-                case SubtotalLevel.Month:
-                case SubtotalLevel.Year:
-                    sub.TheItems = Invoke(new SubtotalDateFactory(level));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            sub.TheItems = (level & SubtotalLevel.Subtotal) switch
+                {
+                    SubtotalLevel.Title => Invoke(new SubtotalTitleFactory()),
+                    SubtotalLevel.SubTitle => Invoke(new SubtotalSubTitleFactory()),
+                    SubtotalLevel.Content => Invoke(new SubtotalContentFactory()),
+                    SubtotalLevel.Remark => Invoke(new SubtotalRemarkFactory()),
+                    SubtotalLevel.User => Invoke(new SubtotalUserFactory()),
+                    SubtotalLevel.Currency => Invoke(new SubtotalCurrencyFactory()),
+                    SubtotalLevel.Day => Invoke(new SubtotalDateFactory(level)),
+                    SubtotalLevel.Week => Invoke(new SubtotalDateFactory(level)),
+                    SubtotalLevel.Month => Invoke(new SubtotalDateFactory(level)),
+                    SubtotalLevel.Year => Invoke(new SubtotalDateFactory(level)),
+                    _ => throw new ArgumentOutOfRangeException(),
+                };
         }
 
         private ISubtotalResult BuildAggrPhase(SubtotalResult sub, IEnumerable<Balance> raw)
@@ -327,21 +312,17 @@ namespace AccountingServer.BLL.Util
                 return null;
 
             var dt = date.Value;
-            switch (m_Par.AggrInterval)
-            {
-                case SubtotalLevel.Day:
-                    return dt.AddDays(-1);
-                case SubtotalLevel.Week:
-                    return dt.DayOfWeek == DayOfWeek.Sunday
+            return m_Par.AggrInterval switch
+                {
+                    SubtotalLevel.Day => dt.AddDays(-1),
+                    SubtotalLevel.Week => dt.DayOfWeek == DayOfWeek.Sunday
                         ? dt.AddDays(-13)
-                        : dt.AddDays(-6 - (int)dt.DayOfWeek);
-                case SubtotalLevel.Month:
-                    return new DateTime(dt.Year, dt.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-1);
-                case SubtotalLevel.Year:
-                    return new DateTime(dt.Year - 1, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                        : dt.AddDays(-6 - (int)dt.DayOfWeek),
+                    SubtotalLevel.Month =>
+                    new DateTime(dt.Year, dt.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-1),
+                    SubtotalLevel.Year => new DateTime(dt.Year - 1, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    _ => throw new ArgumentOutOfRangeException(),
+                };
         }
 
         private DateTime? Next(DateTime? date)
@@ -350,19 +331,14 @@ namespace AccountingServer.BLL.Util
                 return null;
 
             var dt = date.Value;
-            switch (m_Par.AggrInterval)
-            {
-                case SubtotalLevel.Day:
-                    return dt.AddDays(1);
-                case SubtotalLevel.Week:
-                    return dt.AddDays(7);
-                case SubtotalLevel.Month:
-                    return dt.AddMonths(1);
-                case SubtotalLevel.Year:
-                    return dt.AddYears(1);
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            return m_Par.AggrInterval switch
+                {
+                    SubtotalLevel.Day => dt.AddDays(1),
+                    SubtotalLevel.Week => dt.AddDays(7),
+                    SubtotalLevel.Month => dt.AddMonths(1),
+                    SubtotalLevel.Year => dt.AddYears(1),
+                    _ => throw new ArgumentOutOfRangeException(),
+                };
         }
 
         private double BuildEquiPhase(IEnumerable<Balance> raw) => m_Par.EquivalentDate.HasValue

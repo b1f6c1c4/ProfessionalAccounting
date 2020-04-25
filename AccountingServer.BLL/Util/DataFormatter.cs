@@ -178,24 +178,17 @@ namespace AccountingServer.BLL.Util
         /// <param name="level">分类层次</param>
         /// <returns>格式化后的日期</returns>
         public static string AsDate(this DateTime? value, SubtotalLevel level)
-        {
-            if (!value.HasValue)
-                return "[null]";
-
-            switch (level & SubtotalLevel.Subtotal)
-            {
-                case SubtotalLevel.None:
-                case SubtotalLevel.Day:
-                case SubtotalLevel.Week:
-                    return value.AsDate();
-                case SubtotalLevel.Month:
-                    return $"{value.Value.Year:D4}{value.Value.Month:D2}";
-                case SubtotalLevel.Year:
-                    return $"{value.Value.Year:D4}";
-                default:
-                    throw new ArgumentException("分类层次并非基于日期", nameof(level));
-            }
-        }
+            => !value.HasValue
+                ? "[null]"
+                : (level & SubtotalLevel.Subtotal) switch
+                    {
+                        SubtotalLevel.None => value.AsDate(),
+                        SubtotalLevel.Day => value.AsDate(),
+                        SubtotalLevel.Week => value.AsDate(),
+                        SubtotalLevel.Month => $"{value.Value.Year:D4}{value.Value.Month:D2}",
+                        SubtotalLevel.Year => $"{value.Value.Year:D4}",
+                        _ => throw new ArgumentException("分类层次并非基于日期", nameof(level)),
+                    };
 
         /// <summary>
         ///     格式化日期过滤器

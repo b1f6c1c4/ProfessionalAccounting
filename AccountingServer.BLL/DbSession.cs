@@ -158,13 +158,11 @@ namespace AccountingServer.BLL
 
         public static void Regularize(Voucher entity)
         {
-            if (entity.Details == null)
-                entity.Details = new List<VoucherDetail>();
+            entity.Details ??= new List<VoucherDetail>();
 
             foreach (var d in entity.Details)
             {
-                if (d.User == null)
-                    d.User = ClientUser.Name;
+                d.User ??= ClientUser.Name;
                 d.Currency = d.Currency.ToUpperInvariant();
             }
 

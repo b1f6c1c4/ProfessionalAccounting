@@ -51,22 +51,14 @@ namespace AccountingServer.DAL.Serializer
                     DevaluationTitle = bsonReader.ReadInt32("devtitle", ref read),
                     DepreciationExpenseTitle = bsonReader.ReadInt32("exptitle", ref read),
                     DevaluationExpenseTitle = bsonReader.ReadInt32("exvtitle", ref read),
+                    Method = bsonReader.ReadString("method", ref read) switch
+                        {
+                            "sl" => DepreciationMethod.StraightLine,
+                            "sy" => DepreciationMethod.SumOfTheYear,
+                            "dd" => DepreciationMethod.DoubleDeclineMethod,
+                            _ => DepreciationMethod.None,
+                        },
                 };
-            switch (bsonReader.ReadString("method", ref read))
-            {
-                case "sl":
-                    asset.Method = DepreciationMethod.StraightLine;
-                    break;
-                case "sy":
-                    asset.Method = DepreciationMethod.SumOfTheYear;
-                    break;
-                case "dd":
-                    asset.Method = DepreciationMethod.DoubleDeclineMethod;
-                    break;
-                default:
-                    asset.Method = DepreciationMethod.None;
-                    break;
-            }
 
             if (asset.DepreciationExpenseTitle > 100)
             {
@@ -110,18 +102,14 @@ namespace AccountingServer.DAL.Serializer
                 asset.DevaluationExpenseSubTitle.HasValue
                     ? asset.DevaluationExpenseTitle * 100 + asset.DevaluationExpenseSubTitle
                     : asset.DevaluationExpenseTitle);
-            switch (asset.Method)
-            {
-                case DepreciationMethod.StraightLine:
-                    bsonWriter.Write("method", "sl");
-                    break;
-                case DepreciationMethod.SumOfTheYear:
-                    bsonWriter.Write("method", "sy");
-                    break;
-                case DepreciationMethod.DoubleDeclineMethod:
-                    bsonWriter.Write("method", "dd");
-                    break;
-            }
+            if (asset.Method != DepreciationMethod.None)
+                bsonWriter.Write("method", asset.Method switch
+                    {
+                        DepreciationMethod.StraightLine => ("sl"),
+                        DepreciationMethod.SumOfTheYear => ("sy"),
+                        DepreciationMethod.DoubleDeclineMethod => ("dd"),
+                        _ => throw new InvalidOperationException(),
+                    });
 
             if (asset.Schedule != null)
             {

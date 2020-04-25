@@ -99,62 +99,40 @@ namespace AccountingServer.BLL.Parsing
                         return OperatorType.None;
 
                     if (vouchers2() == null)
-                        switch (Op.Text)
-                        {
-                            case "+":
-                                return OperatorType.Identity;
-                            case "-":
-                                return OperatorType.Complement;
-                            default:
-                                throw new MemberAccessException("表达式错误");
-                        }
+                        return Op.Text switch
+                            {
+                                "+" => OperatorType.Identity,
+                                "-" => OperatorType.Complement,
+                                _ => throw new MemberAccessException("表达式错误"),
+                            };
 
-                    switch (Op.Text)
-                    {
-                        case "+":
-                            return OperatorType.Union;
-                        case "-":
-                            return OperatorType.Subtract;
-                        default:
-                            throw new MemberAccessException("表达式错误");
-                    }
+                    return Op.Text switch
+                        {
+                            "+" => OperatorType.Union,
+                            "-" => OperatorType.Subtract,
+                            _ => throw new MemberAccessException("表达式错误"),
+                        };
                 }
             }
 
             /// <inheritdoc />
             public IQueryCompounded<IVoucherQueryAtom> Filter1
-            {
-                get
-                {
-                    if (vouchers2() != null)
-                        return vouchers2();
-
-                    return vouchers1();
-                }
-            }
+                => (IQueryCompounded<IVoucherQueryAtom>)vouchers2() ?? vouchers1();
 
             /// <inheritdoc />
             public IQueryCompounded<IVoucherQueryAtom> Filter2 => vouchers1();
 
             /// <inheritdoc />
             public bool IsDangerous()
-            {
-                switch (Operator)
-                {
-                    case OperatorType.None:
-                        return Filter1.IsDangerous();
-                    case OperatorType.Identity:
-                        return Filter1.IsDangerous();
-                    case OperatorType.Complement:
-                        return true;
-                    case OperatorType.Union:
-                        return Filter1.IsDangerous() || Filter2.IsDangerous();
-                    case OperatorType.Subtract:
-                        return Filter1.IsDangerous();
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
+                => Operator switch
+                    {
+                        OperatorType.None => Filter1.IsDangerous(),
+                        OperatorType.Identity => Filter1.IsDangerous(),
+                        OperatorType.Complement => true,
+                        OperatorType.Union => Filter1.IsDangerous() || Filter2.IsDangerous(),
+                        OperatorType.Subtract => Filter1.IsDangerous(),
+                        _ => throw new ArgumentOutOfRangeException(),
+                    };
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);

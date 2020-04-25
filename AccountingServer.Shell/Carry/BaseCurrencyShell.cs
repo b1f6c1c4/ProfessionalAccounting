@@ -45,17 +45,13 @@ namespace AccountingServer.Shell.Carry
         public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             expr = expr.Rest();
-            switch (expr?.Initial())
-            {
-                case "lst":
-                    return ListHistory(expr.Rest());
-                case "ap":
-                    return DoConversion(expr.Rest());
-                case "rst":
-                    return ResetConversion(expr.Rest());
-                default:
-                    throw new InvalidOperationException("表达式无效");
-            }
+            return expr?.Initial() switch
+                {
+                    "lst" => ListHistory(expr.Rest()),
+                    "ap" => DoConversion(expr.Rest()),
+                    "rst" => ResetConversion(expr.Rest()),
+                    _ => throw new InvalidOperationException("表达式无效"),
+                };
         }
 
         /// <inheritdoc />

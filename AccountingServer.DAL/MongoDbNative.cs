@@ -53,37 +53,24 @@ namespace AccountingServer.DAL
         public abstract FilterDefinition<T> Visit(TAtom query);
 
         public FilterDefinition<T> Visit(IQueryAry<TAtom> query)
-        {
-            switch (query.Operator)
-            {
-                case OperatorType.None:
-                case OperatorType.Identity:
-                    return query.Filter1.Accept(this);
-                case OperatorType.Complement:
-                    return !query.Filter1.Accept(this);
-                case OperatorType.Union:
-                    return query.Filter1.Accept(this) | query.Filter2.Accept(this);
-                case OperatorType.Intersect:
-                    return query.Filter1.Accept(this) & query.Filter2.Accept(this);
-                case OperatorType.Subtract:
-                    return query.Filter1.Accept(this) & !query.Filter2.Accept(this);
-                default:
-                    throw new ArgumentException("运算类型未知", nameof(query));
-            }
-        }
+            => query.Operator switch
+                {
+                    OperatorType.None => query.Filter1.Accept(this),
+                    OperatorType.Identity => query.Filter1.Accept(this),
+                    OperatorType.Complement => !query.Filter1.Accept(this),
+                    OperatorType.Union => query.Filter1.Accept(this) | query.Filter2.Accept(this),
+                    OperatorType.Intersect => query.Filter1.Accept(this) & query.Filter2.Accept(this),
+                    OperatorType.Subtract => query.Filter1.Accept(this) & !query.Filter2.Accept(this),
+                    _ => throw new ArgumentException("运算类型未知", nameof(query)),
+                };
 
         protected static FilterDefinition<TX> And<TX>(IReadOnlyCollection<FilterDefinition<TX>> lst)
-        {
-            switch (lst.Count)
-            {
-                case 0:
-                    return Builders<TX>.Filter.Empty;
-                case 1:
-                    return lst.First();
-                default:
-                    return Builders<TX>.Filter.And(lst);
-            }
-        }
+            => lst.Count switch
+                {
+                    0 => Builders<TX>.Filter.Empty,
+                    1 => lst.First(),
+                    _ => Builders<TX>.Filter.And(lst),
+                };
 
         /// <summary>
         ///     日期过滤器的Native表示
@@ -169,20 +156,23 @@ namespace AccountingServer.DAL
             if (query.Filter?.Title != null)
                 lst.Add(Builders<T>.Filter.Eq(p + "title", query.Filter.Title.Value));
             if (query.Filter?.SubTitle != null)
-                lst.Add(
-                    query.Filter.SubTitle == 00
-                        ? Builders<T>.Filter.Exists(p + "subtitle", false)
-                        : Builders<T>.Filter.Eq(p + "subtitle", query.Filter.SubTitle.Value));
+                lst.Add(query.Filter.SubTitle switch
+                    {
+                        00 => Builders<T>.Filter.Exists(p + "subtitle", false),
+                        var x => Builders<T>.Filter.Eq(p + "subtitle", x.Value),
+                    });
             if (query.Filter?.Content != null)
-                lst.Add(
-                    query.Filter.Content == string.Empty
-                        ? Builders<T>.Filter.Exists(p + "content", false)
-                        : Builders<T>.Filter.Eq(p + "content", query.Filter.Content));
+                lst.Add(query.Filter.Content switch
+                    {
+                        "" => Builders<T>.Filter.Exists(p + "content", false),
+                        var x => Builders<T>.Filter.Eq(p + "content", x),
+                    });
             if (query.Filter?.Remark != null)
-                lst.Add(
-                    query.Filter.Remark == string.Empty
-                        ? Builders<T>.Filter.Exists(p + "remark", false)
-                        : Builders<T>.Filter.Eq(p + "remark", query.Filter.Remark));
+                lst.Add(query.Filter.Remark switch
+                    {
+                        "" => Builders<T>.Filter.Exists(p + "remark", false),
+                        var x => Builders<T>.Filter.Eq(p + "remark", x),
+                    });
             if (query.Filter?.Fund != null)
                 lst.Add(
                     Builders<T>.Filter.Gte(p + "fund", query.Filter.Fund.Value - VoucherDetail.Tolerance) &
@@ -217,39 +207,26 @@ namespace AccountingServer.DAL
             if (vfilter.Date != null)
                 lst.Add(Builders<Voucher>.Filter.Eq("date", vfilter.Date));
             if (vfilter.Type != null)
-                switch (vfilter.Type)
-                {
-                    case VoucherType.Ordinary:
-                        lst.Add(Builders<Voucher>.Filter.Exists("special", false));
-                        break;
-                    case VoucherType.General:
-                        lst.Add(Builders<Voucher>.Filter.Nin("special", new[] { "acarry", "carry" }));
-                        break;
-                    case VoucherType.Amortization:
-                        lst.Add(Builders<Voucher>.Filter.Eq("special", "amorz"));
-                        break;
-                    case VoucherType.AnnualCarry:
-                        lst.Add(Builders<Voucher>.Filter.Eq("special", "acarry"));
-                        break;
-                    case VoucherType.Carry:
-                        lst.Add(Builders<Voucher>.Filter.Eq("special", "carry"));
-                        break;
-                    case VoucherType.Depreciation:
-                        lst.Add(Builders<Voucher>.Filter.Eq("special", "dep"));
-                        break;
-                    case VoucherType.Devalue:
-                        lst.Add(Builders<Voucher>.Filter.Eq("special", "dev"));
-                        break;
-                    case VoucherType.Uncertain:
-                        lst.Add(Builders<Voucher>.Filter.Eq("special", "unc"));
-                        break;
-                }
+                lst.Add(vfilter.Type switch
+                    {
+                        VoucherType.Ordinary => Builders<Voucher>.Filter.Exists("special", false),
+                        VoucherType.General =>
+                        Builders<Voucher>.Filter.Nin("special", new[] { "acarry", "carry" }),
+                        VoucherType.Amortization => Builders<Voucher>.Filter.Eq("special", "amorz"),
+                        VoucherType.AnnualCarry => Builders<Voucher>.Filter.Eq("special", "acarry"),
+                        VoucherType.Carry => Builders<Voucher>.Filter.Eq("special", "carry"),
+                        VoucherType.Depreciation => Builders<Voucher>.Filter.Eq("special", "dep"),
+                        VoucherType.Devalue => Builders<Voucher>.Filter.Eq("special", "dev"),
+                        VoucherType.Uncertain => Builders<Voucher>.Filter.Eq("special", "unc"),
+                        _ => throw new InvalidOperationException(),
+                    });
 
             if (vfilter.Remark != null)
-                lst.Add(
-                    vfilter.Remark == string.Empty
-                        ? Builders<Voucher>.Filter.Exists("remark", false)
-                        : Builders<Voucher>.Filter.Eq("remark", vfilter.Remark));
+                lst.Add(vfilter.Remark switch
+                    {
+                        "" => Builders<Voucher>.Filter.Exists("remark", false),
+                        var x => Builders<Voucher>.Filter.Eq("remark", x),
+                    });
 
             return And(lst);
         }
@@ -284,15 +261,17 @@ namespace AccountingServer.DAL
             if (query.Filter.User != null)
                 lst.Add(Builders<T>.Filter.Eq("user", query.Filter.User));
             if (query.Filter.Name != null)
-                lst.Add(
-                    query.Filter.Name == string.Empty
-                        ? Builders<T>.Filter.Exists("name", false)
-                        : Builders<T>.Filter.Regex("name", query.Filter.Name));
+                lst.Add(query.Filter.Name switch
+                    {
+                        "" => Builders<T>.Filter.Exists("name", false),
+                        var x => Builders<T>.Filter.Regex("name", x),
+                    });
             if (query.Filter.Remark != null)
-                lst.Add(
-                    query.Filter.Remark == string.Empty
-                        ? Builders<T>.Filter.Exists("remark", false)
-                        : Builders<T>.Filter.Eq("remark", query.Filter.Remark));
+                lst.Add(query.Filter.Remark switch
+                    {
+                        "" => Builders<T>.Filter.Exists("remark", false),
+                        var x => Builders<T>.Filter.Eq("remark", x),
+                    });
             if (query.Filter.User != null)
                 lst.Add(Builders<T>.Filter.Eq("user", query.Filter.User));
 

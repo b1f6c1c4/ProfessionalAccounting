@@ -142,13 +142,13 @@ namespace AccountingServer.BLL.Parsing
         public partial class UniqueTimeCoreContext
         {
             public static implicit operator DateTime?(UniqueTimeCoreContext context)
-            {
-                if (context == null ||
-                    context.RangeNull() != null)
-                    return null;
-
-                return context.Day;
-            }
+                => context switch
+                    {
+                        // ReSharper disable once RedundantCast
+                        null => (DateTime?)null,
+                        var x when x.RangeNull() != null => null,
+                        { Day: var x } => x,
+                    };
         }
 
         public partial class RangeCoreContext : IDateRange

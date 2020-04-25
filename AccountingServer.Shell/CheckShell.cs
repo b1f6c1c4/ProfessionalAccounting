@@ -43,23 +43,15 @@ namespace AccountingServer.Shell
 
         /// <inheritdoc />
         public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
-        {
-            expr = expr.Rest();
-            switch (expr)
-            {
-                case "1":
-                    return BasicCheck(serializer);
-                case "2":
-                    return AdvancedCheck();
-                case "3":
-                    if (m_Accountant.RunVoucherQuery("A").Any(voucher => !m_Accountant.Upsert(voucher)))
-                        throw new ApplicationException("未知错误");
-
-                    return new DirtySucceed();
-                default:
-                    throw new InvalidOperationException("表达式无效");
-            }
-        }
+            => expr.Rest() switch
+                {
+                    "1" => BasicCheck(serializer),
+                    "2" => AdvancedCheck(),
+                    "3" => m_Accountant.RunVoucherQuery("A").Any(voucher => !m_Accountant.Upsert(voucher))
+                        ? throw new ApplicationException("未知错误")
+                        : new DirtySucceed(),
+                    _ => throw new InvalidOperationException("表达式无效"),
+                };
 
         /// <inheritdoc />
         public bool IsExecutable(string expr) => expr.Initial() == "chk";

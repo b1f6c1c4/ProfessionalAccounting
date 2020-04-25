@@ -89,23 +89,16 @@ namespace AccountingServer.Shell
             if (string.IsNullOrWhiteSpace(spec))
                 return DefaultSerializer;
 
-            switch (spec.Initial())
-            {
-                case "abbr":
-                    return new TrivialEntitiesSerializer(new AbbrSerializer());
-                case "csharp":
-                    return new TrivialEntitiesSerializer(new CSharpSerializer());
-                case "discount":
-                    return new TrivialEntitiesSerializer(new DiscountSerializer());
-                case "expr":
-                    return new TrivialEntitiesSerializer(new ExprSerializer());
-                case "json":
-                    return new JsonSerializer();
-                case "csv":
-                    return new CsvSerializer(spec.Rest());
-                default:
-                    throw new ArgumentException("表示器未知", nameof(spec));
-            }
+            return spec.Initial() switch
+                {
+                    "abbr" => new TrivialEntitiesSerializer(new AbbrSerializer()),
+                    "csharp" => new TrivialEntitiesSerializer(new CSharpSerializer()),
+                    "discount" => new TrivialEntitiesSerializer(new DiscountSerializer()),
+                    "expr" => new TrivialEntitiesSerializer(new ExprSerializer()),
+                    "json" => new JsonSerializer(),
+                    "csv" => new CsvSerializer(spec.Rest()),
+                    _ => throw new ArgumentException("表示器未知", nameof(spec)),
+                };
         }
 
         /// <summary>
@@ -141,14 +134,12 @@ namespace AccountingServer.Shell
         private static IQueryResult ListHelp()
         {
             const string resName = "AccountingServer.Shell.Resources.Document.txt";
-            using (var stream = typeof(Facade).Assembly.GetManifestResourceStream(resName))
-            {
-                if (stream == null)
-                    throw new MissingManifestResourceException();
+            using var stream = typeof(Facade).Assembly.GetManifestResourceStream(resName);
+            if (stream == null)
+                throw new MissingManifestResourceException();
 
-                using (var reader = new StreamReader(stream))
-                    return new PlainText(reader.ReadToEnd());
-            }
+            using var reader = new StreamReader(stream);
+            return new PlainText(reader.ReadToEnd());
         }
 
         /// <summary>

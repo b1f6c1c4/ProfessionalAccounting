@@ -68,21 +68,14 @@ namespace AccountingServer.Http
         }
 
         private static string Parse(Stream stream, ParsingState st)
-        {
-            switch (st)
-            {
-                case ParsingState.Method:
-                    return ParseMethod(stream);
-                case ParsingState.Uri:
-                    return ParseUri(stream);
-                case ParsingState.HeaderKey:
-                    return ParseHeaderKey(stream);
-                case ParsingState.HeaderValue:
-                    return ParseHeaderValue(stream);
-                default:
-                    throw new ApplicationException();
-            }
-        }
+            => st switch
+                {
+                    ParsingState.Method => ParseMethod(stream),
+                    ParsingState.Uri => ParseUri(stream),
+                    ParsingState.HeaderKey => ParseHeaderKey(stream),
+                    ParsingState.HeaderValue => ParseHeaderValue(stream),
+                    _ => throw new ApplicationException(),
+                };
 
         private static string ParseHeaderValue(Stream stream)
         {

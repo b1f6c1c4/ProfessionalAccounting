@@ -218,28 +218,25 @@ namespace AccountingServer.Shell.Serializer
             var value = obj["value"]?.Value<double?>() ?? 0;
             var remark = obj["remark"]?.Value<string>();
 
-            switch (obj["type"]?.Value<string>())
-            {
-                case "acquisition":
-                    return new AcquisitionItem
+            return obj["type"]?.Value<string>() switch
+                {
+                    "acquisition" => new AcquisitionItem
                         {
                             Date = date,
                             VoucherID = voucherId,
                             Value = value,
                             Remark = remark,
                             OrigValue = obj["origValue"].Value<double>(),
-                        };
-                case "depreciate":
-                    return new DepreciateItem
+                        },
+                    "depreciate" => new DepreciateItem
                         {
                             Date = date,
                             VoucherID = voucherId,
                             Value = value,
                             Remark = remark,
                             Amount = obj["amount"].Value<double>(),
-                        };
-                case "devalue":
-                    return new DevalueItem
+                        },
+                    "devalue" => new DevalueItem
                         {
                             Date = date,
                             VoucherID = voucherId,
@@ -247,12 +244,13 @@ namespace AccountingServer.Shell.Serializer
                             Remark = remark,
                             FairValue = obj["fairValue"].Value<double>(),
                             Amount = obj["amount"].Value<double>(),
-                        };
-                case "disposition":
-                    return new DispositionItem { Date = date, VoucherID = voucherId, Value = value, Remark = remark };
-                default:
-                    throw new ArgumentException("类型未知", nameof(obj));
-            }
+                        },
+                    "disposition" => new DispositionItem
+                        {
+                            Date = date, VoucherID = voucherId, Value = value, Remark = remark,
+                        },
+                    _ => throw new ArgumentException("类型未知", nameof(obj)),
+                };
         }
 
         private static JObject PresentJson(Voucher voucher)
