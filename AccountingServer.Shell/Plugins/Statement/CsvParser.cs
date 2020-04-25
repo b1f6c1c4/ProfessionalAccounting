@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Util;
-using static AccountingServer.BLL.Parsing.Facade;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.Shell.Plugins.Statement
@@ -15,9 +12,8 @@ namespace AccountingServer.Shell.Plugins.Statement
     /// </summary>
     internal class CsvParser
     {
-        public List<BankItem> Items;
-
         private readonly int m_Dir;
+        public List<BankItem> Items;
 
         public CsvParser(bool reversed)
         {
@@ -34,6 +30,7 @@ namespace AccountingServer.Shell.Plugins.Statement
                     expr = null;
                     return tmp;
                 }
+
                 if (expr[0] == ',')
                 {
                     expr = expr.Substring(1);
@@ -91,6 +88,7 @@ namespace AccountingServer.Shell.Plugins.Statement
                 if (dateId < 0)
                     throw new ApplicationException("找不到日期字段");
             }
+
             if (fundId < 0)
                 throw new ApplicationException("找不到金额字段");
 

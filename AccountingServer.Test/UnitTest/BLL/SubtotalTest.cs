@@ -22,7 +22,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     });
         }
 
-        private IExchange m_Exchange = new MockExchange
+        private readonly IExchange m_Exchange = new MockExchange
             {
                 { new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "JPY", 456 },
                 { new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "USD", 789 }
@@ -76,21 +76,9 @@ namespace AccountingServer.Test.UnitTest.BLL
 
             var bal = new[]
                 {
-                    new Balance
-                        {
-                            Date = null,
-                            Fund = 1
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 2
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 4
-                        }
+                    new Balance { Date = null, Fund = 1 },
+                    new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
+                    new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 }
                 };
 
             var res = builder.Build(bal);
@@ -175,16 +163,8 @@ namespace AccountingServer.Test.UnitTest.BLL
 
             var bal = new[]
                 {
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 2
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 4
-                        }
+                    new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
+                    new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 }
                 };
 
             var res = builder.Build(bal);
@@ -328,12 +308,7 @@ namespace AccountingServer.Test.UnitTest.BLL
 
             var bal = new[]
                 {
-                    new Balance
-                        {
-                            Date = null,
-                            Currency = "JPY",
-                            Fund = 1 / 2D / 456D
-                        },
+                    new Balance { Date = null, Currency = "JPY", Fund = 1 / 2D / 456D },
                     new Balance
                         {
                             Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
@@ -346,12 +321,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                             Currency = "JPY",
                             Fund = 4 / 2D / 456D
                         },
-                    new Balance
-                        {
-                            Date = null,
-                            Currency = "USD",
-                            Fund = 1 / 2D / 789D
-                        },
+                    new Balance { Date = null, Currency = "USD", Fund = 1 / 2D / 789D },
                     new Balance
                         {
                             Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
@@ -467,26 +437,10 @@ namespace AccountingServer.Test.UnitTest.BLL
 
             var bal = new[]
                 {
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 8
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 1
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 4
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 2
-                        }
+                    new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
+                    new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
+                    new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
+                    new Balance { Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 2 }
                 };
 
             var res = builder.Build(bal);
@@ -507,20 +461,11 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 new[]
                     {
+                        new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
+                        new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 8 + 1 },
                         new Balance
                             {
-                                Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
-                                Fund = 8
-                            },
-                        new Balance
-                            {
-                                Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
-                                Fund = 8 + 1
-                            },
-                        new Balance
-                            {
-                                Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
-                                Fund = 8 + 1 + 4
+                                Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 8 + 1 + 4
                             },
                         new Balance
                             {
@@ -585,8 +530,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     {
                         new Balance
                             {
-                                Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
-                                Fund = 8 * 456 + 1
+                                Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 * 456 + 1
                             },
                         new Balance
                             {
@@ -605,26 +549,10 @@ namespace AccountingServer.Test.UnitTest.BLL
 
             var bal = new[]
                 {
-                    new Balance
-                        {
-                            Content = "JPY",
-                            Fund = 8
-                        },
-                    new Balance
-                        {
-                            Content = "CNY",
-                            Fund = 1
-                        },
-                    new Balance
-                        {
-                            Content = "USD",
-                            Fund = 4
-                        },
-                    new Balance
-                        {
-                            Content = "CNY",
-                            Fund = 2
-                        }
+                    new Balance { Content = "JPY", Fund = 8 },
+                    new Balance { Content = "CNY", Fund = 1 },
+                    new Balance { Content = "USD", Fund = 4 },
+                    new Balance { Content = "CNY", Fund = 2 }
                 };
 
             var res = builder.Build(bal);
@@ -644,87 +572,9 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 new List<Balance>
                     {
-                        new Balance
-                            {
-                                Content = "JPY",
-                                Fund = 8
-                            },
-                        new Balance
-                            {
-                                Content = "CNY",
-                                Fund = 3
-                            },
-                        new Balance
-                            {
-                                Content = "USD",
-                                Fund = 4
-                            }
-                    },
-                lst,
-                new BalanceEqualityComparer());
-        }
-
-        [Fact]
-        public void TestUser()
-        {
-            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`U").Subtotal, m_Exchange);
-
-            var bal = new[]
-                {
-                    new Balance
-                        {
-                            User = "JPY",
-                            Fund = 8
-                        },
-                    new Balance
-                        {
-                            User = "CNY",
-                            Fund = 1
-                        },
-                    new Balance
-                        {
-                            User = "USD",
-                            Fund = 4
-                        },
-                    new Balance
-                        {
-                            User = "CNY",
-                            Fund = 2
-                        }
-                };
-
-            var res = builder.Build(bal);
-            Assert.IsAssignableFrom<ISubtotalRoot>(res);
-            var resx = (ISubtotalRoot)res;
-
-            var lst = new List<Balance>();
-            foreach (var item in resx.Items)
-            {
-                Assert.IsAssignableFrom<ISubtotalUser>(item);
-                var resxx = (ISubtotalUser)item;
-                Assert.Null(resxx.Items);
-                lst.Add(new Balance { User = resxx.User, Fund = resxx.Fund });
-            }
-
-            Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
-            Assert.Equal(
-                new List<Balance>
-                    {
-                        new Balance
-                            {
-                                User = "JPY",
-                                Fund = 8
-                            },
-                        new Balance
-                            {
-                                User = "CNY",
-                                Fund = 3
-                            },
-                        new Balance
-                            {
-                                User = "USD",
-                                Fund = 4
-                            }
+                        new Balance { Content = "JPY", Fund = 8 },
+                        new Balance { Content = "CNY", Fund = 3 },
+                        new Balance { Content = "USD", Fund = 4 }
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -738,26 +588,10 @@ namespace AccountingServer.Test.UnitTest.BLL
 
             var bal = new[]
                 {
-                    new Balance
-                        {
-                            Currency = "JPY",
-                            Fund = 8
-                        },
-                    new Balance
-                        {
-                            Currency = "CNY",
-                            Fund = 1
-                        },
-                    new Balance
-                        {
-                            Currency = "USD",
-                            Fund = 4
-                        },
-                    new Balance
-                        {
-                            Currency = "CNY",
-                            Fund = 2
-                        }
+                    new Balance { Currency = "JPY", Fund = 8 },
+                    new Balance { Currency = "CNY", Fund = 1 },
+                    new Balance { Currency = "USD", Fund = 4 },
+                    new Balance { Currency = "CNY", Fund = 2 }
                 };
 
             var res = builder.Build(bal);
@@ -777,21 +611,9 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 new List<Balance>
                     {
-                        new Balance
-                            {
-                                Currency = "JPY",
-                                Fund = 8
-                            },
-                        new Balance
-                            {
-                                Currency = "CNY",
-                                Fund = 3
-                            },
-                        new Balance
-                            {
-                                Currency = "USD",
-                                Fund = 4
-                            }
+                        new Balance { Currency = "JPY", Fund = 8 },
+                        new Balance { Currency = "CNY", Fund = 3 },
+                        new Balance { Currency = "USD", Fund = 4 }
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -804,26 +626,10 @@ namespace AccountingServer.Test.UnitTest.BLL
 
             var bal = new[]
                 {
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 8
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 1
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 4
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 2
-                        }
+                    new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
+                    new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
+                    new Balance { Date = new DateTime(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
+                    new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 2 }
                 };
 
             var res = builder.Build(bal);
@@ -851,26 +657,10 @@ namespace AccountingServer.Test.UnitTest.BLL
 
             var bal = new[]
                 {
-                    new Balance
-                        {
-                            Currency = "JPY",
-                            Fund = 8
-                        },
-                    new Balance
-                        {
-                            Currency = "CNY",
-                            Fund = 1
-                        },
-                    new Balance
-                        {
-                            Currency = "USD",
-                            Fund = 4
-                        },
-                    new Balance
-                        {
-                            Currency = "CNY",
-                            Fund = 2
-                        }
+                    new Balance { Currency = "JPY", Fund = 8 },
+                    new Balance { Currency = "CNY", Fund = 1 },
+                    new Balance { Currency = "USD", Fund = 4 },
+                    new Balance { Currency = "CNY", Fund = 2 }
                 };
 
             var res = builder.Build(bal);
@@ -886,26 +676,10 @@ namespace AccountingServer.Test.UnitTest.BLL
 
             var bal = new[]
                 {
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 8
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 02, 01, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 1
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 03, 01, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 4
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 04, 01, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 2
-                        }
+                    new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
+                    new Balance { Date = new DateTime(2017, 02, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
+                    new Balance { Date = new DateTime(2017, 03, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
+                    new Balance { Date = new DateTime(2017, 04, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 2 }
                 };
 
             var res = builder.Build(bal);
@@ -933,26 +707,10 @@ namespace AccountingServer.Test.UnitTest.BLL
 
             var bal = new[]
                 {
-                    new Balance
-                        {
-                            Remark = "JPY",
-                            Fund = 8
-                        },
-                    new Balance
-                        {
-                            Remark = "CNY",
-                            Fund = 1
-                        },
-                    new Balance
-                        {
-                            Remark = "USD",
-                            Fund = 4
-                        },
-                    new Balance
-                        {
-                            Remark = "CNY",
-                            Fund = 2
-                        }
+                    new Balance { Remark = "JPY", Fund = 8 },
+                    new Balance { Remark = "CNY", Fund = 1 },
+                    new Balance { Remark = "USD", Fund = 4 },
+                    new Balance { Remark = "CNY", Fund = 2 }
                 };
 
             var res = builder.Build(bal);
@@ -972,21 +730,9 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 new List<Balance>
                     {
-                        new Balance
-                            {
-                                Remark = "JPY",
-                                Fund = 8
-                            },
-                        new Balance
-                            {
-                                Remark = "CNY",
-                                Fund = 3
-                            },
-                        new Balance
-                            {
-                                Remark = "USD",
-                                Fund = 4
-                            }
+                        new Balance { Remark = "JPY", Fund = 8 },
+                        new Balance { Remark = "CNY", Fund = 3 },
+                        new Balance { Remark = "USD", Fund = 4 }
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -999,26 +745,10 @@ namespace AccountingServer.Test.UnitTest.BLL
 
             var bal = new[]
                 {
-                    new Balance
-                        {
-                            Title = 4567,
-                            Fund = 8
-                        },
-                    new Balance
-                        {
-                            Title = 1234,
-                            Fund = 1
-                        },
-                    new Balance
-                        {
-                            Title = 6543,
-                            Fund = 4
-                        },
-                    new Balance
-                        {
-                            Title = 1234,
-                            Fund = 2
-                        }
+                    new Balance { Title = 4567, Fund = 8 },
+                    new Balance { Title = 1234, Fund = 1 },
+                    new Balance { Title = 6543, Fund = 4 },
+                    new Balance { Title = 1234, Fund = 2 }
                 };
 
             var res = builder.Build(bal);
@@ -1038,21 +768,9 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 new List<Balance>
                     {
-                        new Balance
-                            {
-                                Title = 4567,
-                                Fund = 8
-                            },
-                        new Balance
-                            {
-                                Title = 1234,
-                                Fund = 3
-                            },
-                        new Balance
-                            {
-                                Title = 6543,
-                                Fund = 4
-                            }
+                        new Balance { Title = 4567, Fund = 8 },
+                        new Balance { Title = 1234, Fund = 3 },
+                        new Balance { Title = 6543, Fund = 4 }
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -1065,50 +783,14 @@ namespace AccountingServer.Test.UnitTest.BLL
 
             var bal = new[]
                 {
-                    new Balance
-                        {
-                            Title = 4567,
-                            Fund = 8
-                        },
-                    new Balance
-                        {
-                            Title = 1234,
-                            Fund = 1
-                        },
-                    new Balance
-                        {
-                            Title = 6543,
-                            Fund = 4
-                        },
-                    new Balance
-                        {
-                            Title = 1234,
-                            Fund = 2
-                        },
-                    new Balance
-                        {
-                            Title = 4567,
-                            SubTitle = 01,
-                            Fund = 128
-                        },
-                    new Balance
-                        {
-                            Title = 1234,
-                            SubTitle = 02,
-                            Fund = 16
-                        },
-                    new Balance
-                        {
-                            Title = 6543,
-                            SubTitle = 01,
-                            Fund = 64
-                        },
-                    new Balance
-                        {
-                            Title = 1234,
-                            SubTitle = 08,
-                            Fund = 32
-                        }
+                    new Balance { Title = 4567, Fund = 8 },
+                    new Balance { Title = 1234, Fund = 1 },
+                    new Balance { Title = 6543, Fund = 4 },
+                    new Balance { Title = 1234, Fund = 2 },
+                    new Balance { Title = 4567, SubTitle = 01, Fund = 128 },
+                    new Balance { Title = 1234, SubTitle = 02, Fund = 16 },
+                    new Balance { Title = 6543, SubTitle = 01, Fund = 64 },
+                    new Balance { Title = 1234, SubTitle = 08, Fund = 32 }
                 };
 
             var res = builder.Build(bal);
@@ -1133,45 +815,51 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 new List<Balance>
                     {
-                        new Balance
-                            {
-                                Title = 4567,
-                                Fund = 8
-                            },
-                        new Balance
-                            {
-                                Title = 4567,
-                                SubTitle = 01,
-                                Fund = 128
-                            },
-                        new Balance
-                            {
-                                Title = 1234,
-                                Fund = 3
-                            },
-                        new Balance
-                            {
-                                Title = 1234,
-                                SubTitle = 02,
-                                Fund = 16
-                            },
-                        new Balance
-                            {
-                                Title = 1234,
-                                SubTitle = 08,
-                                Fund = 32
-                            },
-                        new Balance
-                            {
-                                Title = 6543,
-                                Fund = 4
-                            },
-                        new Balance
-                            {
-                                Title = 6543,
-                                SubTitle = 01,
-                                Fund = 64
-                            }
+                        new Balance { Title = 4567, Fund = 8 },
+                        new Balance { Title = 4567, SubTitle = 01, Fund = 128 },
+                        new Balance { Title = 1234, Fund = 3 },
+                        new Balance { Title = 1234, SubTitle = 02, Fund = 16 },
+                        new Balance { Title = 1234, SubTitle = 08, Fund = 32 },
+                        new Balance { Title = 6543, Fund = 4 },
+                        new Balance { Title = 6543, SubTitle = 01, Fund = 64 }
+                    },
+                lst,
+                new BalanceEqualityComparer());
+        }
+
+        [Fact]
+        public void TestUser()
+        {
+            var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`U").Subtotal, m_Exchange);
+
+            var bal = new[]
+                {
+                    new Balance { User = "JPY", Fund = 8 },
+                    new Balance { User = "CNY", Fund = 1 },
+                    new Balance { User = "USD", Fund = 4 },
+                    new Balance { User = "CNY", Fund = 2 }
+                };
+
+            var res = builder.Build(bal);
+            Assert.IsAssignableFrom<ISubtotalRoot>(res);
+            var resx = (ISubtotalRoot)res;
+
+            var lst = new List<Balance>();
+            foreach (var item in resx.Items)
+            {
+                Assert.IsAssignableFrom<ISubtotalUser>(item);
+                var resxx = (ISubtotalUser)item;
+                Assert.Null(resxx.Items);
+                lst.Add(new Balance { User = resxx.User, Fund = resxx.Fund });
+            }
+
+            Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
+            Assert.Equal(
+                new List<Balance>
+                    {
+                        new Balance { User = "JPY", Fund = 8 },
+                        new Balance { User = "CNY", Fund = 3 },
+                        new Balance { User = "USD", Fund = 4 }
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -1184,26 +872,10 @@ namespace AccountingServer.Test.UnitTest.BLL
 
             var bal = new[]
                 {
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 8
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 09, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 1
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 16, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 4
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 23, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 2
-                        }
+                    new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
+                    new Balance { Date = new DateTime(2017, 01, 09, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
+                    new Balance { Date = new DateTime(2017, 01, 16, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
+                    new Balance { Date = new DateTime(2017, 01, 23, 0, 0, 0, DateTimeKind.Utc), Fund = 2 }
                 };
 
             var res = builder.Build(bal);
@@ -1231,26 +903,10 @@ namespace AccountingServer.Test.UnitTest.BLL
 
             var bal = new[]
                 {
-                    new Balance
-                        {
-                            Date = new DateTime(2014, 01, 01, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 8
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2015, 01, 01, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 1
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2016, 01, 01, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 4
-                        },
-                    new Balance
-                        {
-                            Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 2
-                        }
+                    new Balance { Date = new DateTime(2014, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
+                    new Balance { Date = new DateTime(2015, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
+                    new Balance { Date = new DateTime(2016, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
+                    new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 2 }
                 };
 
             var res = builder.Build(bal);

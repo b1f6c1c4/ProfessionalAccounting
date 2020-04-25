@@ -144,18 +144,8 @@ namespace AccountingServer.Shell.Carry
                                                 Currency = to,
                                                 Fund = newb
                                             },
-                                        new VoucherDetail
-                                            {
-                                                Title = 3999,
-                                                Currency = grpC.Currency,
-                                                Fund = oldb
-                                            },
-                                        new VoucherDetail
-                                            {
-                                                Title = 3999,
-                                                Currency = to,
-                                                Fund = -newb
-                                            }
+                                        new VoucherDetail { Title = 3999, Currency = grpC.Currency, Fund = oldb },
+                                        new VoucherDetail { Title = 3999, Currency = to, Fund = -newb }
                                     }
                         });
                 cnt++;

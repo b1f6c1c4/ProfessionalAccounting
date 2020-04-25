@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Resources;
@@ -174,6 +173,7 @@ namespace AccountingServer.Shell
                 if (unc != null)
                     unc.Fund = -grpC.Sum(d => d.Fund ?? 0D);
             }
+
             if (grpCs.Count() == 1 && grpUs.Count() > 1)
                 foreach (var grpU in grpUs)
                 {
@@ -182,13 +182,7 @@ namespace AccountingServer.Shell
                         continue;
 
                     voucher.Details.Add(
-                        new VoucherDetail
-                            {
-                                User = grpU.Key,
-                                Currency = grpCs.First().Key,
-                                Title = 3998,
-                                Fund = -sum
-                            });
+                        new VoucherDetail { User = grpU.Key, Currency = grpCs.First().Key, Title = 3998, Fund = -sum });
                 }
             else if (grpCs.Count() > 1 && grpUs.Count() == 1)
                 foreach (var grpC in grpCs)
@@ -198,13 +192,7 @@ namespace AccountingServer.Shell
                         continue;
 
                     voucher.Details.Add(
-                        new VoucherDetail
-                            {
-                                User = grpUs.First().Key,
-                                Currency = grpC.Key,
-                                Title = 3999,
-                                Fund = -sum
-                            });
+                        new VoucherDetail { User = grpUs.First().Key, Currency = grpC.Key, Title = 3999, Fund = -sum });
                 }
 
             if (!m_Accountant.Upsert(voucher))

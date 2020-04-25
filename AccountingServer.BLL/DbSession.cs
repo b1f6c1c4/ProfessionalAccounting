@@ -16,6 +16,42 @@ namespace AccountingServer.BLL
         /// </summary>
         public IDbAdapter Db { private get; set; }
 
+        public double From(DateTime date, string target)
+        {
+            var record = new ExchangeRecord { Date = date, From = target, To = BaseCurrency.Now };
+
+            if (record.From == record.To)
+                return 1;
+
+            var res = Db.SelectExchangeRecord(record);
+            if (res != null)
+                return res.Value;
+
+            record.Value = ExchangeFactory.Instance.From(date, target);
+            if (record.Date <= DateTime.UtcNow.AddDays(-1))
+                Db.Upsert(record);
+
+            return record.Value;
+        }
+
+        public double To(DateTime date, string target)
+        {
+            var record = new ExchangeRecord { Date = date, From = BaseCurrency.Now, To = target };
+
+            if (record.From == record.To)
+                return 1;
+
+            var res = Db.SelectExchangeRecord(record);
+            if (res != null)
+                return res.Value;
+
+            record.Value = ExchangeFactory.Instance.To(date, target);
+            if (record.Date <= DateTime.UtcNow.AddDays(-1))
+                Db.Upsert(record);
+
+            return record.Value;
+        }
+
         private static int Compare<T>(T? lhs, T? rhs)
             where T : struct, IComparable<T>
         {
@@ -150,52 +186,5 @@ namespace AccountingServer.BLL
 
             return Db.Upsert(entity);
         }
-
-        public double From(DateTime date, string target)
-        {
-            var record = new ExchangeRecord
-                {
-                    Date = date,
-                    From = target,
-                    To = BaseCurrency.Now
-                };
-
-            if (record.From == record.To)
-                return 1;
-
-            var res = Db.SelectExchangeRecord(record);
-            if (res != null)
-                return res.Value;
-
-            record.Value = ExchangeFactory.Instance.From(date, target);
-            if (record.Date <= DateTime.UtcNow.AddDays(-1))
-                Db.Upsert(record);
-
-            return record.Value;
-        }
-
-        public double To(DateTime date, string target)
-        {
-            var record = new ExchangeRecord
-                {
-                    Date = date,
-                    From = BaseCurrency.Now,
-                    To = target
-                };
-
-            if (record.From == record.To)
-                return 1;
-
-            var res = Db.SelectExchangeRecord(record);
-            if (res != null)
-                return res.Value;
-
-            record.Value = ExchangeFactory.Instance.To(date, target);
-            if (record.Date <= DateTime.UtcNow.AddDays(-1))
-                Db.Upsert(record);
-
-            return record.Value;
-        }
-
     }
 }

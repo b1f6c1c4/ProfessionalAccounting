@@ -17,28 +17,18 @@ namespace AccountingServer.DAL
     [SuppressMessage("ReSharper", "PrivateFieldCanBeConvertedToLocalVariable")]
     internal class MongoDbAdapter : IDbAdapter
     {
-        private static readonly BsonDocument ProjectDetails = new BsonDocument
-            {
-                ["_id"] = false,
-                ["detail"] = true
-            };
+        private static readonly BsonDocument ProjectDetails = new BsonDocument { ["_id"] = false, ["detail"] = true };
 
         private static readonly BsonDocument ProjectDate = new BsonDocument
             {
-                ["_id"] = false,
-                ["detail"] = true,
-                ["date"] = true
+                ["_id"] = false, ["detail"] = true, ["date"] = true
             };
 
-        private static readonly BsonDocument ProjectNothing = new BsonDocument
-            {
-                ["_id"] = false
-            };
+        private static readonly BsonDocument ProjectNothing = new BsonDocument { ["_id"] = false };
 
         private static readonly BsonDocument ProjectNothingButDate = new BsonDocument
             {
-                ["_id"] = false,
-                ["date"] = true
+                ["_id"] = false, ["date"] = true
             };
 
         private static readonly BsonDocument ProjectDetail = new BsonDocument
@@ -66,8 +56,7 @@ namespace AccountingServer.DAL
                     {
                         ["$not"] = new BsonDocument
                             {
-                                ["$gt"] = -VoucherDetail.Tolerance,
-                                ["$lt"] = +VoucherDetail.Tolerance
+                                ["$gt"] = -VoucherDetail.Tolerance, ["$lt"] = +VoucherDetail.Tolerance
                             }
                     }
             };
@@ -119,11 +108,7 @@ namespace AccountingServer.DAL
                                                             new BsonDocument
                                                                 {
                                                                     ["$multiply"] =
-                                                                        new BsonArray
-                                                                            {
-                                                                                days,
-                                                                                24 * 60 * 60 * 1000
-                                                                            }
+                                                                        new BsonArray { days, 24 * 60 * 60 * 1000 }
                                                                 }
                                                         }
                                             }
@@ -137,25 +122,11 @@ namespace AccountingServer.DAL
 
             var year = new BsonDocument
                 {
-                    ["$subtract"] = new BsonArray
-                        {
-                            new BsonDocument
-                                {
-                                    ["$dayOfYear"] = "$date"
-                                },
-                            1
-                        }
+                    ["$subtract"] = new BsonArray { new BsonDocument { ["$dayOfYear"] = "$date" }, 1 }
                 };
             var month = new BsonDocument
                 {
-                    ["$subtract"] = new BsonArray
-                        {
-                            new BsonDocument
-                                {
-                                    ["$dayOfMonth"] = "$date"
-                                },
-                            1
-                        }
+                    ["$subtract"] = new BsonArray { new BsonDocument { ["$dayOfMonth"] = "$date" }, 1 }
                 };
             var week = new BsonDocument
                 {
@@ -165,11 +136,7 @@ namespace AccountingServer.DAL
                                 {
                                     ["$add"] = new BsonArray
                                         {
-                                            new BsonDocument
-                                                {
-                                                    ["$dayOfWeek"] = "$date"
-                                                },
-                                            5
+                                            new BsonDocument { ["$dayOfWeek"] = "$date" }, 5
                                         }
                                 },
                             7
@@ -263,9 +230,9 @@ namespace AccountingServer.DAL
             var visitor = new MongoDbNativeDetailUnwinded();
             return query.DetailEmitFilter != null
                 ? query.DetailEmitFilter.DetailFilter.Accept(visitor)
-                : (query.VoucherQuery is IVoucherQueryAtom dQuery
+                : query.VoucherQuery is IVoucherQueryAtom dQuery
                     ? dQuery.DetailFilter.Accept(visitor)
-                    : throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query)));
+                    : throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query));
         }
 
         /// <inheritdoc />
@@ -321,11 +288,7 @@ namespace AccountingServer.DAL
             if (level.HasFlag(SubtotalLevel.Day))
                 prj["date"] = "$date";
 
-            var grp = new BsonDocument
-                {
-                    ["_id"] = prj,
-                    ["count"] = new BsonDocument { ["$sum"] = 1 }
-                };
+            var grp = new BsonDocument { ["_id"] = prj, ["count"] = new BsonDocument { ["$sum"] = 1 } };
 
             var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Group(grp);
             return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
@@ -373,17 +336,9 @@ namespace AccountingServer.DAL
 
             BsonDocument grp;
             if (query.Subtotal.GatherType == GatheringType.Count)
-                grp = new BsonDocument
-                    {
-                        ["_id"] = prj,
-                        ["count"] = new BsonDocument { ["$sum"] = 1 }
-                    };
+                grp = new BsonDocument { ["_id"] = prj, ["count"] = new BsonDocument { ["$sum"] = 1 } };
             else
-                grp = new BsonDocument
-                    {
-                        ["_id"] = prj,
-                        ["total"] = new BsonDocument { ["$sum"] = "$detail.fund" }
-                    };
+                grp = new BsonDocument { ["_id"] = prj, ["total"] = new BsonDocument { ["$sum"] = "$detail.fund" } };
 
             var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Unwind("detail").Match(chk).Group(grp);
             if (query.Subtotal.AggrType != AggregationType.ChangedDay &&

@@ -108,10 +108,12 @@ namespace AccountingServer.Test.UnitTest.Shell
 
         [Theory]
         [ClassData(typeof(DataProvider))]
-        public override void VoucherTest(string dt, VoucherType type) { base.VoucherTest(dt, type); }
+        public override void VoucherTest(string dt, VoucherType type)
+            => base.VoucherTest(dt, type);
 
         [Fact]
-        public override void SimpleTest() { base.SimpleTest(); }
+        public override void SimpleTest()
+            => base.SimpleTest();
     }
 
     public class ExprSerializerTest : SerializerTest
@@ -120,7 +122,8 @@ namespace AccountingServer.Test.UnitTest.Shell
 
         [Theory]
         [ClassData(typeof(DataProvider))]
-        public override void VoucherTest(string dt, VoucherType type) { base.VoucherTest(dt, type); }
+        public override void VoucherTest(string dt, VoucherType type)
+            => base.VoucherTest(dt, type);
 
         [Fact]
         public void OtherTest()
@@ -131,7 +134,8 @@ namespace AccountingServer.Test.UnitTest.Shell
         }
 
         [Fact]
-        public override void SimpleTest() { base.SimpleTest(); }
+        public override void SimpleTest()
+            => base.SimpleTest();
     }
 
     public class AbbrSerializerTest : SerializerTest
@@ -151,12 +155,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                                             Content = "cnt",
                                             Editable = false
                                         },
-                                    new Abbreviation
-                                        {
-                                            Abbr = "abbr2",
-                                            Title = 1234,
-                                            Editable = true
-                                        }
+                                    new Abbreviation { Abbr = "abbr2", Title = 1234, Editable = true }
                                 }
                         });
 
@@ -164,7 +163,8 @@ namespace AccountingServer.Test.UnitTest.Shell
 
         [Theory]
         [ClassData(typeof(DataProvider))]
-        public override void VoucherTest(string dt, VoucherType type) { base.VoucherTest(dt, type); }
+        public override void VoucherTest(string dt, VoucherType type)
+            => base.VoucherTest(dt, type);
 
         [Fact]
         public void OtherTest()
@@ -203,7 +203,8 @@ namespace AccountingServer.Test.UnitTest.Shell
         }
 
         [Fact]
-        public override void SimpleTest() { base.SimpleTest(); }
+        public override void SimpleTest()
+            => base.SimpleTest();
     }
 
     public class JsonSerializerTest : SerializerTest
@@ -212,10 +213,12 @@ namespace AccountingServer.Test.UnitTest.Shell
 
         [Theory]
         [ClassData(typeof(DataProvider))]
-        public override void VoucherTest(string dt, VoucherType type) { base.VoucherTest(dt, type); }
+        public override void VoucherTest(string dt, VoucherType type)
+            => base.VoucherTest(dt, type);
 
         [Fact]
-        public override void SimpleTest() { base.SimpleTest(); }
+        public override void SimpleTest()
+            => base.SimpleTest();
     }
 
     public class DiscountSerializerTest
@@ -240,12 +243,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                         {
                             Abbrs = new List<Abbreviation>
                                 {
-                                    new Abbreviation
-                                        {
-                                            Abbr = "aaa",
-                                            Title = 1001,
-                                            Editable = false
-                                        }
+                                    new Abbreviation { Abbr = "aaa", Title = 1001, Editable = false }
                                 }
                         });
 
@@ -253,282 +251,6 @@ namespace AccountingServer.Test.UnitTest.Shell
         }
 
         private static IEntitySerializer GetSerializer() => new DiscountSerializer();
-
-        [Fact]
-        public void SimpleTest()
-        {
-            var serializer = GetSerializer();
-
-            Assert.Throws<FormatException>(() => serializer.ParseVoucher(""));
-            Assert.Throws<NotImplementedException>(() => serializer.ParseVoucher("new Voucher {"));
-            Assert.Throws<NotImplementedException>(() => serializer.ParseVoucher("new Voucher { }"));
-            Assert.Throws<NotImplementedException>(() => serializer.ParseVoucherDetail("whatever"));
-        }
-
-        [Fact]
-        public void TaxTest()
-        {
-            var serializer = GetSerializer();
-
-            var voucher = serializer.ParseVoucher(
-                @"new Voucher {
-! 20180101 @usd
-T1001 + ! T1002 : 1000-50 950+50 ;
-! aaa + T100366 : 1000 ;
-t10
-t2
-
-@cny T1001 -2912
-}");
-            Assert.Equal(
-                new Voucher
-                    {
-                        Date = new DateTime(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                        Type = VoucherType.Ordinary,
-                        Details = new List<VoucherDetail>
-                            {
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "CNY",
-                                        Title = 1001,
-                                        Fund = -2912
-                                    },
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1001,
-                                        Fund = 1000 + 500 + 6
-                                    },
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1002,
-                                        Fund = 950 + 4
-                                    },
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1003,
-                                        SubTitle = 66,
-                                        Fund = 500 + 2
-                                    },
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 6603,
-                                        Fund = -50
-                                    }
-                            }
-                    },
-                voucher,
-                new VoucherEqualityComparer());
-        }
-
-        [Fact]
-        public void TaxDiscountTest()
-        {
-            var serializer = GetSerializer();
-
-            var voucher = serializer.ParseVoucher(
-                @"new Voucher {
-! @usd
-T1001 + ! T1002 : 1000-0.1-49.9 950+50 ;
-! aaa + T100366 hei ha : 1000 ;
-t2
-d40
-t10
-d8
-
-@usd T1001 -29120
-}");
-            Assert.Equal(
-                new Voucher
-                {
-                    Date = ClientDateTime.Today,
-                    Type = VoucherType.Ordinary,
-                    Details = new List<VoucherDetail>
-                            {
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1001,
-                                        Fund = -29120
-                                    },
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1001,
-                                        Fund = 1000 + 500 + 6 - 8
-                                    },
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1002,
-                                        Fund = 950 + 4 - 16
-                                    },
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1003,
-                                        SubTitle = 66,
-                                        Content = "hei",
-                                        Remark = "ha",
-                                        Fund = 500 + 2
-                                    },
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 6603,
-                                        Fund = -50 - 16 - 8
-                                    }
-                            }
-                },
-                voucher,
-                new VoucherEqualityComparer());
-        }
-
-        [Fact]
-        public void TaxDiscountNullTest()
-        {
-            var serializer = GetSerializer();
-
-            var voucher = serializer.ParseVoucher(
-                @"new Voucher {
-! @usd
-T1001 + ! T1002 : 1000-50 950+5+45 ;
-! aaa + T100366 hei ha : 1000 ;
-t2
-t10
-dnull
-
-@usd T1001 -2864
-}");
-            Assert.Equal(
-                new Voucher
-                {
-                    Date = ClientDateTime.Today,
-                    Type = VoucherType.Ordinary,
-                    Details = new List<VoucherDetail>
-                            {
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1001,
-                                        Fund = -2864
-                                    },
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1001,
-                                        Fund = 1000 + 500 + 6 - 8
-                                    },
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1002,
-                                        Fund = 950 + 4 - 16
-                                    },
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1003,
-                                        SubTitle = 66,
-                                        Content = "hei",
-                                        Remark = "ha",
-                                        Fund = 500 + 2
-                                    },
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 6603,
-                                        Fund = -50 - 16 - 8
-                                    }
-                            }
-                },
-                voucher,
-                new VoucherEqualityComparer());
-        }
-
-        [Fact]
-        public void TaxNullDiscountTest()
-        {
-            var serializer = GetSerializer();
-
-            var voucher = serializer.ParseVoucher(
-                @"new Voucher {
-! @usd
-T1001 + ! T1002 : 1000=950 950+50 ;
-! aaa + T100366 hei ha : 1000=1000 ;
-d48
-tnull
-
-@usd T1001 -2864
-}");
-            Assert.Equal(
-                new Voucher
-                {
-                    Date = ClientDateTime.Today,
-                    Type = VoucherType.Ordinary,
-                    Details = new List<VoucherDetail>
-                            {
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1001,
-                                        Fund = -2864
-                                    },
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1001,
-                                        Fund = 1000 + 500 + 6 - 8
-                                    },
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1002,
-                                        Fund = 950 + 4 - 16
-                                    },
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1003,
-                                        SubTitle = 66,
-                                        Content = "hei",
-                                        Remark = "ha",
-                                        Fund = 500 + 2
-                                    },
-                                new VoucherDetail
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 6603,
-                                        Fund = -50 - 16 - 8
-                                    }
-                            }
-                },
-                voucher,
-                new VoucherEqualityComparer());
-        }
 
         [Fact]
         public void ManyNullTest()
@@ -592,17 +314,14 @@ d48
 }");
             Assert.Equal(
                 new Voucher
-                {
-                    Date = ClientDateTime.Today,
-                    Type = VoucherType.Ordinary,
-                    Details = new List<VoucherDetail>
+                    {
+                        Date = ClientDateTime.Today,
+                        Type = VoucherType.Ordinary,
+                        Details = new List<VoucherDetail>
                             {
                                 new VoucherDetail
                                     {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1001,
-                                        Fund = -29120
+                                        User = "b1", Currency = "USD", Title = 1001, Fund = -29120
                                     },
                                 new VoucherDetail
                                     {
@@ -613,10 +332,7 @@ d48
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1002,
-                                        Fund = 950 + 4 - 16
+                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16
                                     },
                                 new VoucherDetail
                                     {
@@ -630,23 +346,238 @@ d48
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "pn",
+                                        User = "pn", Currency = "USD", Title = 6603, Fund = -50 - 16
+                                    },
+                                new VoucherDetail { User = "b1", Currency = "USD", Title = 6603, Fund = -8 }
+                            }
+                    },
+                voucher,
+                new VoucherEqualityComparer());
+        }
+
+        [Fact]
+        public void SimpleTest()
+        {
+            var serializer = GetSerializer();
+
+            Assert.Throws<FormatException>(() => serializer.ParseVoucher(""));
+            Assert.Throws<NotImplementedException>(() => serializer.ParseVoucher("new Voucher {"));
+            Assert.Throws<NotImplementedException>(() => serializer.ParseVoucher("new Voucher { }"));
+            Assert.Throws<NotImplementedException>(() => serializer.ParseVoucherDetail("whatever"));
+        }
+
+        [Fact]
+        public void TaxDiscountNullTest()
+        {
+            var serializer = GetSerializer();
+
+            var voucher = serializer.ParseVoucher(
+                @"new Voucher {
+! @usd
+T1001 + ! T1002 : 1000-50 950+5+45 ;
+! aaa + T100366 hei ha : 1000 ;
+t2
+t10
+dnull
+
+@usd T1001 -2864
+}");
+            Assert.Equal(
+                new Voucher
+                    {
+                        Date = ClientDateTime.Today,
+                        Type = VoucherType.Ordinary,
+                        Details = new List<VoucherDetail>
+                            {
+                                new VoucherDetail { User = "b1", Currency = "USD", Title = 1001, Fund = -2864 },
+                                new VoucherDetail
+                                    {
+                                        User = "b1",
                                         Currency = "USD",
-                                        Title = 6603,
-                                        Fund = -50 - 16
+                                        Title = 1001,
+                                        Fund = 1000 + 500 + 6 - 8
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16
                                     },
                                 new VoucherDetail
                                     {
                                         User = "b1",
                                         Currency = "USD",
-                                        Title = 6603,
-                                        Fund = -8
+                                        Title = 1003,
+                                        SubTitle = 66,
+                                        Content = "hei",
+                                        Remark = "ha",
+                                        Fund = 500 + 2
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8
                                     }
                             }
-                },
+                    },
                 voucher,
                 new VoucherEqualityComparer());
         }
 
+        [Fact]
+        public void TaxDiscountTest()
+        {
+            var serializer = GetSerializer();
+
+            var voucher = serializer.ParseVoucher(
+                @"new Voucher {
+! @usd
+T1001 + ! T1002 : 1000-0.1-49.9 950+50 ;
+! aaa + T100366 hei ha : 1000 ;
+t2
+d40
+t10
+d8
+
+@usd T1001 -29120
+}");
+            Assert.Equal(
+                new Voucher
+                    {
+                        Date = ClientDateTime.Today,
+                        Type = VoucherType.Ordinary,
+                        Details = new List<VoucherDetail>
+                            {
+                                new VoucherDetail
+                                    {
+                                        User = "b1", Currency = "USD", Title = 1001, Fund = -29120
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "b1",
+                                        Currency = "USD",
+                                        Title = 1001,
+                                        Fund = 1000 + 500 + 6 - 8
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "b1",
+                                        Currency = "USD",
+                                        Title = 1003,
+                                        SubTitle = 66,
+                                        Content = "hei",
+                                        Remark = "ha",
+                                        Fund = 500 + 2
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8
+                                    }
+                            }
+                    },
+                voucher,
+                new VoucherEqualityComparer());
+        }
+
+        [Fact]
+        public void TaxNullDiscountTest()
+        {
+            var serializer = GetSerializer();
+
+            var voucher = serializer.ParseVoucher(
+                @"new Voucher {
+! @usd
+T1001 + ! T1002 : 1000=950 950+50 ;
+! aaa + T100366 hei ha : 1000=1000 ;
+d48
+tnull
+
+@usd T1001 -2864
+}");
+            Assert.Equal(
+                new Voucher
+                    {
+                        Date = ClientDateTime.Today,
+                        Type = VoucherType.Ordinary,
+                        Details = new List<VoucherDetail>
+                            {
+                                new VoucherDetail { User = "b1", Currency = "USD", Title = 1001, Fund = -2864 },
+                                new VoucherDetail
+                                    {
+                                        User = "b1",
+                                        Currency = "USD",
+                                        Title = 1001,
+                                        Fund = 1000 + 500 + 6 - 8
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "b1",
+                                        Currency = "USD",
+                                        Title = 1003,
+                                        SubTitle = 66,
+                                        Content = "hei",
+                                        Remark = "ha",
+                                        Fund = 500 + 2
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8
+                                    }
+                            }
+                    },
+                voucher,
+                new VoucherEqualityComparer());
+        }
+
+        [Fact]
+        public void TaxTest()
+        {
+            var serializer = GetSerializer();
+
+            var voucher = serializer.ParseVoucher(
+                @"new Voucher {
+! 20180101 @usd
+T1001 + ! T1002 : 1000-50 950+50 ;
+! aaa + T100366 : 1000 ;
+t10
+t2
+
+@cny T1001 -2912
+}");
+            Assert.Equal(
+                new Voucher
+                    {
+                        Date = new DateTime(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                        Type = VoucherType.Ordinary,
+                        Details = new List<VoucherDetail>
+                            {
+                                new VoucherDetail { User = "b1", Currency = "CNY", Title = 1001, Fund = -2912 },
+                                new VoucherDetail
+                                    {
+                                        User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4
+                                    },
+                                new VoucherDetail
+                                    {
+                                        User = "b1",
+                                        Currency = "USD",
+                                        Title = 1003,
+                                        SubTitle = 66,
+                                        Fund = 500 + 2
+                                    },
+                                new VoucherDetail { User = "b1", Currency = "USD", Title = 6603, Fund = -50 }
+                            }
+                    },
+                voucher,
+                new VoucherEqualityComparer());
+        }
     }
 }

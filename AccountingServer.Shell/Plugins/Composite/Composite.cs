@@ -120,12 +120,13 @@ namespace AccountingServer.Shell.Plugins.Composite
         private readonly Accountant m_Accountant;
         private readonly string m_BaseCurrency;
         private readonly DateFilter m_Rng;
-        private readonly IEntitiesSerializer m_Serializer;
         private readonly StringBuilder m_Sb = new StringBuilder();
+        private readonly IEntitiesSerializer m_Serializer;
 
         private string m_Path = "";
 
-        public InquiriesVisitor(Accountant accountant, DateFilter rng, string baseCurrency, IEntitiesSerializer serializer)
+        public InquiriesVisitor(Accountant accountant, DateFilter rng, string baseCurrency,
+            IEntitiesSerializer serializer)
         {
             m_Accountant = accountant;
             m_BaseCurrency = baseCurrency;
@@ -145,10 +146,10 @@ namespace AccountingServer.Shell.Plugins.Composite
         }
 
         public double Visit(SimpleInquiry inq)
-            => VisitImpl(inq, (o) => $"{inq.Query} {o}");
+            => VisitImpl(inq, o => $"{inq.Query} {o}");
 
         public double Visit(ComplexInquiry inq)
-            => VisitImpl(inq, (o) => $"{{{inq.VoucherQuery}}}*{{U A {o}}} : {inq.Emit}");
+            => VisitImpl(inq, o => $"{{{inq.VoucherQuery}}}*{{U A {o}}} : {inq.Emit}");
 
         private double VisitImpl(Inquiry inq, Func<string, string> gen)
         {
@@ -157,7 +158,8 @@ namespace AccountingServer.Shell.Plugins.Composite
             if (!double.IsNaN(inq.Ratio))
                 fmt = new RatioDecorator(fmt, inq.Ratio);
 
-            var o = $"[{(inq.IsLeftExtended ? "" : m_Rng.StartDate.AsDate())}~{m_Rng.EndDate.AsDate()}] {(inq.General ? "G" : "")}";
+            var o =
+                $"[{(inq.IsLeftExtended ? "" : m_Rng.StartDate.AsDate())}~{m_Rng.EndDate.AsDate()}] {(inq.General ? "G" : "")}";
             var query = ParsingF.GroupedQuery(
                 $"{gen(o)}`{(inq.ByCurrency ? "C" : "")}{(inq.ByTitle ? "t" : "")}{(inq.BySubTitle ? "s" : "")}{(inq.ByContent ? "c" : "")}{(inq.ByRemark ? "r" : "")}{(inq.ByCurrency || inq.ByTitle || inq.BySubTitle || inq.ByContent || inq.ByRemark ? "" : "v")}{(!inq.ByCurrency ? "X" : "")}");
             var gq = m_Accountant.SelectVoucherDetailsGrouped(query);

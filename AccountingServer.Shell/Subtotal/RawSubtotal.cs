@@ -8,9 +8,9 @@ namespace AccountingServer.Shell.Subtotal
     /// </summary>
     internal class RawSubtotal : StringSubtotalVisitor
     {
+        private readonly VoucherDetailR m_Path = new VoucherDetailR(new Voucher(), new VoucherDetail());
         private readonly bool m_Separate;
         private List<VoucherDetailR> m_History;
-        private readonly VoucherDetailR m_Path = new VoucherDetailR(new Voucher(), new VoucherDetail());
 
         public RawSubtotal(bool separate = false) => m_Separate = separate;
 

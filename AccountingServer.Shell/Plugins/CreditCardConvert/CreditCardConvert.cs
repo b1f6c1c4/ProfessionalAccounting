@@ -85,12 +85,7 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                     // ReSharper disable once PossibleInvalidOperationException
                     ds.Where(d => d.Fund.Value < 0)
                         .Select(
-                            d => new Trans
-                                {
-                                    Date = voucher.Date,
-                                    RawCurrency = d.Currency,
-                                    RawFund = -d.Fund.Value
-                                }));
+                            d => new Trans { Date = voucher.Date, RawCurrency = d.Currency, RawFund = -d.Fund.Value }));
             }
 
 
@@ -205,18 +200,8 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                                         Content = content,
                                         Fund = -to
                                     },
-                                new VoucherDetail
-                                    {
-                                        Currency = baseCurrency,
-                                        Title = 3999,
-                                        Fund = to
-                                    },
-                                new VoucherDetail
-                                    {
-                                        Currency = currency,
-                                        Title = 3999,
-                                        Fund = -from
-                                    },
+                                new VoucherDetail { Currency = baseCurrency, Title = 3999, Fund = to },
+                                new VoucherDetail { Currency = currency, Title = 3999, Fund = -from },
                                 from >= 0
                                     ? new VoucherDetail
                                         {
@@ -226,12 +211,7 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                                             Content = content,
                                             Fund = from
                                         }
-                                    : new VoucherDetail
-                                        {
-                                            Currency = currency,
-                                            Title = 6603,
-                                            Fund = from
-                                        }
+                                    : new VoucherDetail { Currency = currency, Title = 6603, Fund = from }
                             }
                     };
                 Accountant.Upsert(voucher);

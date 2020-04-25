@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 
 namespace AccountingServer.Entities
 {
@@ -30,4 +29,3 @@ namespace AccountingServer.Entities
         public double Value { get; set; }
     }
 }
-

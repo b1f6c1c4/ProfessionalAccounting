@@ -29,7 +29,8 @@ namespace AccountingServer.Shell.Plugins.CashFlow
             var prefix = Parsing.Token(ref expr);
             Parsing.Eof(expr);
 
-            var accts = Templates.Config.Accounts.Where(a => string.IsNullOrWhiteSpace(a.User) || ClientUser.Name == a.User).ToList();
+            var accts = Templates.Config.Accounts
+                .Where(a => string.IsNullOrWhiteSpace(a.User) || ClientUser.Name == a.User).ToList();
             var n = accts.Count;
             var until = ClientDateTime.Today.AddMonths(extraMonths);
 
@@ -38,7 +39,9 @@ namespace AccountingServer.Shell.Plugins.CashFlow
 
             for (var i = 0; i < n; i++)
             {
-                aggs[i] = Accountant.RunGroupedQuery($"U{accts[i].User.AsUser()} @{accts[i].Currency}*({accts[i].QuickAsset}) [~.]``v").Fund;
+                aggs[i] = Accountant
+                    .RunGroupedQuery($"U{accts[i].User.AsUser()} @{accts[i].Currency}*({accts[i].QuickAsset}) [~.]``v")
+                    .Fund;
 
                 foreach (var (date, value) in GetItems(accts[i], serializer, until))
                 {
@@ -147,7 +150,8 @@ namespace AccountingServer.Shell.Plugins.CashFlow
             return v.AddDays(targ - 1);
         }
 
-        private IEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account, IEntitiesSerializer serializer, DateTime until)
+        private IEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account, IEntitiesSerializer serializer,
+            DateTime until)
         {
             var user = $"U{account.User.AsUser()}";
             var curr = $"@{account.Currency}";
@@ -193,7 +197,8 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         var rng = $"[{ClientDateTime.Today.AddMonths(-3).AsDate()}~]";
                         var mv = $"{{({user}*{cc.Query})+{user} T3999+{user} T6603 A {rng}}}";
                         var mos = new Dictionary<DateTime, double>();
-                        foreach (var grpC in Accountant.RunGroupedQuery($"{{{user}*({cc.Query})*({user} <+(-{user} {curr})) {rng}}}+{mv}:{user}*({cc.Query})`Cd")
+                        foreach (var grpC in Accountant.RunGroupedQuery(
+                                $"{{{user}*({cc.Query})*({user} <+(-{user} {curr})) {rng}}}+{mv}:{user}*({cc.Query})`Cd")
                             .Items
                             .Cast<ISubtotalCurrency>())
                         foreach (var b in grpC.Items.Cast<ISubtotalDate>())
@@ -208,7 +213,9 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                                 mos[mo] = cob;
                         }
 
-                        foreach (var b in Accountant.RunGroupedQuery($"{{{user}*({cc.Query})*({user} {curr}>) {rng}}}-{mv}:{user}*({cc.Query})`d")
+                        foreach (var b in Accountant
+                            .RunGroupedQuery(
+                                $"{{{user}*({cc.Query})*({user} {curr}>) {rng}}}-{mv}:{user}*({cc.Query})`d")
                             .Items
                             .Cast<ISubtotalDate>())
                         {

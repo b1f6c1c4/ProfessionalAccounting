@@ -35,9 +35,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(false, "", "test")]
         [InlineData(true, "test", "test")]
         public void VoucherMatchTestID(bool expected, string value, string filter)
-        {
-            Assert.Equal(expected, MatchHelper.IsMatch(new Voucher { ID = value }, new Voucher { ID = filter }));
-        }
+            => Assert.Equal(expected, MatchHelper.IsMatch(new Voucher { ID = value }, new Voucher { ID = filter }));
 
         [Theory]
         [InlineData(true, null, null)]
@@ -69,9 +67,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(false, VoucherType.Carry, VoucherType.General)]
         [InlineData(false, VoucherType.AnnualCarry, VoucherType.General)]
         public void VoucherMatchTestType(bool expected, VoucherType? value, VoucherType? filter)
-        {
-            Assert.Equal(expected, MatchHelper.IsMatch(new Voucher { Type = value }, new Voucher { Type = filter }));
-        }
+            => Assert.Equal(expected, MatchHelper.IsMatch(new Voucher { Type = value }, new Voucher { Type = filter }));
 
         [Theory]
         [InlineData(true, "b1", null)]
@@ -81,11 +77,9 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(false, "b1", "b2")]
         [InlineData(true, "b2", "b2")]
         public void DetailMatchTestUser(bool expected, string value, string filter)
-        {
-            Assert.Equal(
+            => Assert.Equal(
                 expected,
                 MatchHelper.IsMatch(new VoucherDetail { User = value }, new VoucherDetail { User = filter }));
-        }
 
         [Theory]
         [InlineData(true, null, null)]
@@ -98,22 +92,18 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(false, "", "USD")]
         [InlineData(true, "USD", "USD")]
         public void DetailMatchTestCurrency(bool expected, string value, string filter)
-        {
-            Assert.Equal(
+            => Assert.Equal(
                 expected,
                 MatchHelper.IsMatch(new VoucherDetail { Currency = value }, new VoucherDetail { Currency = filter }));
-        }
 
         [Theory]
         [InlineData(true, 1001, null)]
         [InlineData(false, 1000, 1001)]
         [InlineData(true, 1001, 1001)]
         public void DetailMatchTestTitle(bool expected, int? value, int? filter)
-        {
-            Assert.Equal(
+            => Assert.Equal(
                 expected,
                 MatchHelper.IsMatch(new VoucherDetail { Title = value }, new VoucherDetail { Title = filter }));
-        }
 
         [Theory]
         [InlineData(true, null, null)]
@@ -125,11 +115,9 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(false, 01, 99)]
         [InlineData(true, 99, 99)]
         public void DetailMatchTestSubTitle(bool expected, int? value, int? filter)
-        {
-            Assert.Equal(
+            => Assert.Equal(
                 expected,
                 MatchHelper.IsMatch(new VoucherDetail { SubTitle = value }, new VoucherDetail { SubTitle = filter }));
-        }
 
         [Theory]
         [InlineData(true, null, null)]
@@ -138,11 +126,9 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(false, 123.45 + 2 * VoucherDetail.Tolerance, 123.45)]
         [InlineData(true, 123.45 + 0.5 * VoucherDetail.Tolerance, 123.45)]
         public void DetailMatchTestFund(bool expected, double? value, double? filter)
-        {
-            Assert.Equal(
+            => Assert.Equal(
                 expected,
                 MatchHelper.IsMatch(new VoucherDetail { Fund = value }, new VoucherDetail { Fund = filter }));
-        }
 
         [Theory]
         [InlineData(true, null, 0)]
@@ -154,32 +140,25 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(false, +2 * VoucherDetail.Tolerance, -1)]
         [InlineData(true, +0.5 * VoucherDetail.Tolerance, -1)]
         public void DetailMatchTestDir(bool expected, double? value, int dir)
-        {
-            Assert.Equal(expected, MatchHelper.IsMatch(new VoucherDetail { Fund = value }, new VoucherDetail(), dir));
-        }
+            => Assert.Equal(expected,
+                MatchHelper.IsMatch(new VoucherDetail { Fund = value }, new VoucherDetail(), dir));
 
         [Fact]
         public void DetailMatchTestContent()
-        {
-            StringMatchTest(
+            => StringMatchTest(
                 (v, f) => MatchHelper.IsMatch(new VoucherDetail { Content = v }, new VoucherDetail { Content = f }));
-        }
 
         [Fact]
         public void DetailMatchTestNull()
-        {
-            Assert.True(
+            => Assert.True(
                 MatchHelper.IsMatch(
                     new VoucherDetail { Content = "cnt", Fund = 10, Remark = "rmk" },
                     (VoucherDetail)null));
-        }
 
         [Fact]
         public void DetailMatchTestRemark()
-        {
-            StringMatchTest(
+            => StringMatchTest(
                 (v, f) => MatchHelper.IsMatch(new VoucherDetail { Remark = v }, new VoucherDetail { Remark = f }));
-        }
 
         [Fact]
         public void VoucherMatchTest()
@@ -246,14 +225,10 @@ namespace AccountingServer.Test.UnitTest.Entities
 
         [Fact]
         public void VoucherMatchTestNull()
-        {
-            Assert.True(MatchHelper.IsMatch(new Voucher { ID = "id", Remark = "rmk" }, (Voucher)null));
-        }
+            => Assert.True(MatchHelper.IsMatch(new Voucher { ID = "id", Remark = "rmk" }, (Voucher)null));
 
         [Fact]
         public void VoucherMatchTestRemark()
-        {
-            StringMatchTest((v, f) => MatchHelper.IsMatch(new Voucher { Remark = v }, new Voucher { Remark = f }));
-        }
+            => StringMatchTest((v, f) => MatchHelper.IsMatch(new Voucher { Remark = v }, new Voucher { Remark = f }));
     }
 }

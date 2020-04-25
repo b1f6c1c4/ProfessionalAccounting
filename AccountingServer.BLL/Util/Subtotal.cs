@@ -140,9 +140,9 @@ namespace AccountingServer.BLL.Util
     /// </summary>
     public class SubtotalBuilder
     {
+        private readonly IExchange m_Exchange;
         private readonly ISubtotal m_Par;
         private int m_Depth;
-        private IExchange m_Exchange;
 
         public SubtotalBuilder(ISubtotal par, IExchange ex)
         {
@@ -255,10 +255,7 @@ namespace AccountingServer.BLL.Util
                             }
                         else
                             sub.TheItems.Add(
-                                new SubtotalDate(curr, m_Par.AggrInterval)
-                                    {
-                                        Fund = fund
-                                    });
+                                new SubtotalDate(curr, m_Par.AggrInterval) { Fund = fund });
 
                         if (DateHelper.CompareDate(last, curr) < 0)
                             last = curr;
@@ -275,10 +272,7 @@ namespace AccountingServer.BLL.Util
                             grp.Key != null &&
                             forcedNull)
                             sub.TheItems.Add(
-                                new SubtotalDate(null, m_Par.AggrInterval)
-                                    {
-                                        Fund = 0
-                                    });
+                                new SubtotalDate(null, m_Par.AggrInterval) { Fund = 0 });
                         flag = false;
 
                         var tmp = sub.Fund;
