@@ -78,11 +78,11 @@ namespace AccountingServer.BLL.Parsing
         public DateFilter Range(ref string s)
             => Parse(ref s, p => p.range())?.Range;
 
-        public IQueryCompunded<IVoucherQueryAtom> VoucherQuery(string s)
+        public IQueryCompounded<IVoucherQueryAtom> VoucherQuery(string s)
             => VoucherQuery(ref s);
 
-        public IQueryCompunded<IVoucherQueryAtom> VoucherQuery(ref string s)
-            => (IQueryCompunded<IVoucherQueryAtom>)Parse(ref s, p => p.vouchers()) ??
+        public IQueryCompounded<IVoucherQueryAtom> VoucherQuery(ref string s)
+            => (IQueryCompounded<IVoucherQueryAtom>)Parse(ref s, p => p.vouchers()) ??
                 VoucherQueryUnconstrained.Instance;
 
         public IVoucherDetailQuery DetailQuery(string s)
@@ -131,16 +131,16 @@ namespace AccountingServer.BLL.Parsing
             return new GroupedQueryStub { VoucherEmitQuery = query, Subtotal = subtotal };
         }
 
-        public IQueryCompunded<IDistributedQueryAtom> DistributedQuery(string s)
+        public IQueryCompounded<IDistributedQueryAtom> DistributedQuery(string s)
             => DistributedQuery(ref s);
 
-        public IQueryCompunded<IDistributedQueryAtom> DistributedQuery(ref string s)
-            => (IQueryCompunded<IDistributedQueryAtom>)Parse(ref s, p => p.distributedQ()) ??
+        public IQueryCompounded<IDistributedQueryAtom> DistributedQuery(ref string s)
+            => (IQueryCompounded<IDistributedQueryAtom>)Parse(ref s, p => p.distributedQ()) ??
                 DistributedQueryUnconstrained.Instance;
 
         private sealed class VoucherGroupedQueryStub : IVoucherGroupedQuery
         {
-            public IQueryCompunded<IVoucherQueryAtom> VoucherQuery { get; set; }
+            public IQueryCompounded<IVoucherQueryAtom> VoucherQuery { get; set; }
 
             public ISubtotal Subtotal { get; set; }
         }

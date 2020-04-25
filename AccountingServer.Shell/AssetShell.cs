@@ -22,7 +22,7 @@ namespace AccountingServer.Shell
         protected override string Initial => "a";
 
         /// <inheritdoc />
-        protected override IQueryResult ExecuteList(IQueryCompunded<IDistributedQueryAtom> distQuery, DateTime? dt,
+        protected override IQueryResult ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery, DateTime? dt,
             bool showSchedule, IEntitiesSerializer serializer)
         {
             var sb = new StringBuilder();
@@ -33,14 +33,14 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        protected override IQueryResult ExecuteQuery(IQueryCompunded<IDistributedQueryAtom> distQuery,
+        protected override IQueryResult ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
             IEntitiesSerializer serializer)
             => new PlainText(serializer.PresentAssets(Sort(Accountant.SelectAssets(distQuery))));
 
         /// <inheritdoc />
-        protected override IQueryResult ExecuteRegister(IQueryCompunded<IDistributedQueryAtom> distQuery,
+        protected override IQueryResult ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
             DateFilter rng,
-            IQueryCompunded<IVoucherQueryAtom> query, IEntitiesSerializer serializer)
+            IQueryCompounded<IVoucherQueryAtom> query, IEntitiesSerializer serializer)
         {
             var sb = new StringBuilder();
             foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
@@ -56,9 +56,9 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        protected override IQueryResult ExecuteUnregister(IQueryCompunded<IDistributedQueryAtom> distQuery,
+        protected override IQueryResult ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery,
             DateFilter rng,
-            IQueryCompunded<IVoucherQueryAtom> query, IEntitiesSerializer serializer)
+            IQueryCompounded<IVoucherQueryAtom> query, IEntitiesSerializer serializer)
         {
             var sb = new StringBuilder();
             foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
@@ -90,7 +90,7 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        protected override IQueryResult ExecuteRecal(IQueryCompunded<IDistributedQueryAtom> distQuery,
+        protected override IQueryResult ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery,
             IEntitiesSerializer serializer)
         {
             var lst = new List<Asset>();
@@ -105,7 +105,7 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        protected override IQueryResult ExecuteResetSoft(IQueryCompunded<IDistributedQueryAtom> distQuery,
+        protected override IQueryResult ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery,
             DateFilter rng)
         {
             var cnt = 0L;
@@ -132,7 +132,7 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        protected override IQueryResult ExcuteResetMixed(IQueryCompunded<IDistributedQueryAtom> distQuery,
+        protected override IQueryResult ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery,
             DateFilter rng)
         {
             var cnt = 0L;
@@ -167,8 +167,8 @@ namespace AccountingServer.Shell
             return new NumberAffected(cnt);
         }
 
-        protected override IQueryResult ExecuteResetHard(IQueryCompunded<IDistributedQueryAtom> distQuery,
-            IQueryCompunded<IVoucherQueryAtom> query) => new NumberAffected(
+        protected override IQueryResult ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery,
+            IQueryCompounded<IVoucherQueryAtom> query) => new NumberAffected(
             Accountant.SelectAssets(distQuery)
                 .Sum(
                     a => Accountant.DeleteVouchers(
@@ -178,7 +178,7 @@ namespace AccountingServer.Shell
                                 $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}")))));
 
         /// <inheritdoc />
-        protected override IQueryResult ExecuteApply(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
+        protected override IQueryResult ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
             bool isCollapsed)
         {
             var sb = new StringBuilder();
@@ -203,7 +203,7 @@ namespace AccountingServer.Shell
         /// <param name="rng">日期过滤器</param>
         /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        protected override IQueryResult ExecuteCheck(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
+        protected override IQueryResult ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
             IEntitiesSerializer serializer)
         {
             var sb = new StringBuilder();
@@ -251,7 +251,7 @@ namespace AccountingServer.Shell
                 $"U{asset.User.AsUser().CPadRight(5)} " +
                 asset.Value.AsCurrency(asset.Currency).CPadLeft(13) +
                 (dt.HasValue ? bookValue.AsCurrency(asset.Currency).CPadLeft(13) : "-".CPadLeft(13)) +
-                asset.Salvge.AsCurrency(asset.Currency).CPadLeft(13) +
+                asset.Salvage.AsCurrency(asset.Currency).CPadLeft(13) +
                 asset.Title.AsTitle().CPadLeft(5) +
                 asset.DepreciationTitle.AsTitle().CPadLeft(5) +
                 asset.DevaluationTitle.AsTitle().CPadLeft(5) +
@@ -280,7 +280,7 @@ namespace AccountingServer.Shell
         /// <returns>格式化的信息</returns>
         private static string ListAssetItem(IDistributedItem assetItem)
         {
-            if (assetItem is AcquisationItem acq)
+            if (assetItem is AcquisitionItem acq)
                 return string.Format(
                     "   {0:yyyMMdd} ACQ:{1} ={3} ({2})",
                     assetItem.Date,

@@ -26,7 +26,7 @@ namespace AccountingServer.Shell
         protected DistributedShell(Accountant helper)
         {
             Accountant = helper;
-            var resetComopser =
+            var resetComposer =
                 new ShellComposer
                     {
                         new ShellComponent(
@@ -45,7 +45,7 @@ namespace AccountingServer.Shell
                                     var dist = Parsing.DistributedQuery(ref expr);
                                     var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
                                     Parsing.Eof(expr);
-                                    return ExcuteResetMixed(dist, rng);
+                                    return ExecuteResetMixed(dist, rng);
                                 }),
                         new ShellComponent(
                             "hard",
@@ -125,7 +125,7 @@ namespace AccountingServer.Shell
                                     Parsing.Eof(expr);
                                     return ExecuteRecal(dist, serializer);
                                 }),
-                        new ShellComponent("rst", (expr, serializer) => resetComopser.Execute(expr, serializer)),
+                        new ShellComponent("rst", (expr, serializer) => resetComposer.Execute(expr, serializer)),
                         new ShellComponent(
                             "ap",
                             (expr, serializer) =>
@@ -166,7 +166,7 @@ namespace AccountingServer.Shell
             => m_Composer.Execute(expr.Rest(), serializer);
 
         /// <inheritdoc />
-        public bool IsExecutable(string expr) => expr.Initital() == Initial;
+        public bool IsExecutable(string expr) => expr.Initial() == Initial;
 
         /// <summary>
         ///     执行列表表达式
@@ -176,7 +176,7 @@ namespace AccountingServer.Shell
         /// <param name="showSchedule">是否显示折旧计算表</param>
         /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        protected abstract IQueryResult ExecuteList(IQueryCompunded<IDistributedQueryAtom> distQuery, DateTime? dt,
+        protected abstract IQueryResult ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery, DateTime? dt,
             bool showSchedule, IEntitiesSerializer serializer);
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace AccountingServer.Shell
         /// <param name="distQuery">分期检索式</param>
         /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        protected abstract IQueryResult ExecuteQuery(IQueryCompunded<IDistributedQueryAtom> distQuery,
+        protected abstract IQueryResult ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
             IEntitiesSerializer serializer);
 
         /// <summary>
@@ -196,9 +196,9 @@ namespace AccountingServer.Shell
         /// <param name="query">记账凭证检索式</param>
         /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        protected abstract IQueryResult ExecuteRegister(IQueryCompunded<IDistributedQueryAtom> distQuery,
+        protected abstract IQueryResult ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
             DateFilter rng,
-            IQueryCompunded<IVoucherQueryAtom> query, IEntitiesSerializer serializer);
+            IQueryCompounded<IVoucherQueryAtom> query, IEntitiesSerializer serializer);
 
         /// <summary>
         ///     执行解除注册表达式
@@ -208,8 +208,8 @@ namespace AccountingServer.Shell
         /// <param name="query">记账凭证检索式</param>
         /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        protected abstract IQueryResult ExecuteUnregister(IQueryCompunded<IDistributedQueryAtom> distQuery,
-            DateFilter rng, IQueryCompunded<IVoucherQueryAtom> query, IEntitiesSerializer serializer);
+        protected abstract IQueryResult ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery,
+            DateFilter rng, IQueryCompounded<IVoucherQueryAtom> query, IEntitiesSerializer serializer);
 
         /// <summary>
         ///     执行重新计算表达式
@@ -217,7 +217,7 @@ namespace AccountingServer.Shell
         /// <param name="distQuery">分期检索式</param>
         /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        protected abstract IQueryResult ExecuteRecal(IQueryCompunded<IDistributedQueryAtom> distQuery,
+        protected abstract IQueryResult ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery,
             IEntitiesSerializer serializer);
 
         /// <summary>
@@ -226,7 +226,7 @@ namespace AccountingServer.Shell
         /// <param name="distQuery">分期检索式</param>
         /// <param name="rng">日期过滤器</param>
         /// <returns>执行结果</returns>
-        protected abstract IQueryResult ExecuteResetSoft(IQueryCompunded<IDistributedQueryAtom> distQuery,
+        protected abstract IQueryResult ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery,
             DateFilter rng);
 
         /// <summary>
@@ -235,7 +235,7 @@ namespace AccountingServer.Shell
         /// <param name="distQuery">分期检索式</param>
         /// <param name="rng">日期过滤器</param>
         /// <returns>执行结果</returns>
-        protected abstract IQueryResult ExcuteResetMixed(IQueryCompunded<IDistributedQueryAtom> distQuery,
+        protected abstract IQueryResult ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery,
             DateFilter rng);
 
         /// <summary>
@@ -244,8 +244,8 @@ namespace AccountingServer.Shell
         /// <param name="distQuery">分期检索式</param>
         /// <param name="query">记账凭证检索式</param>
         /// <returns>执行结果</returns>
-        protected abstract IQueryResult ExecuteResetHard(IQueryCompunded<IDistributedQueryAtom> distQuery,
-            IQueryCompunded<IVoucherQueryAtom> query);
+        protected abstract IQueryResult ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery,
+            IQueryCompounded<IVoucherQueryAtom> query);
 
         /// <summary>
         ///     执行应用表达式
@@ -254,7 +254,7 @@ namespace AccountingServer.Shell
         /// <param name="rng">日期过滤器</param>
         /// <param name="isCollapsed">是否压缩</param>
         /// <returns>执行结果</returns>
-        protected abstract IQueryResult ExecuteApply(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
+        protected abstract IQueryResult ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
             bool isCollapsed);
 
         /// <summary>
@@ -264,7 +264,7 @@ namespace AccountingServer.Shell
         /// <param name="rng">日期过滤器</param>
         /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        protected abstract IQueryResult ExecuteCheck(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
+        protected abstract IQueryResult ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
             IEntitiesSerializer serializer);
     }
 }

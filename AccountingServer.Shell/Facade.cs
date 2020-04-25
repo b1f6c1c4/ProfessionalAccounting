@@ -71,7 +71,7 @@ namespace AccountingServer.Shell
             if (string.IsNullOrWhiteSpace(spec))
                 return DefaultSerializer;
 
-            switch (spec.Initital())
+            switch (spec.Initial())
             {
                 case "abbr":
                     return new TrivialEntitiesSerializer(new AbbrSerializer());

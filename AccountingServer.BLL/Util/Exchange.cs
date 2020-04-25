@@ -114,10 +114,7 @@ namespace AccountingServer.BLL.Util
             double rate;
             using (var stream = res.GetResponseStream())
             {
-                if (stream == null)
-                    throw new NetworkInformationException();
-
-                var reader = new StreamReader(stream);
+                var reader = new StreamReader(stream ?? throw new NetworkInformationException());
                 var json = JObject.Parse(reader.ReadToEnd());
                 rate = json["rates"][to].Value<double>() / json["rates"][from].Value<double>();
             }

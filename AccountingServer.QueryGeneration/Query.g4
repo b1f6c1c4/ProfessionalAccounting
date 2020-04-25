@@ -19,8 +19,8 @@ vouchers
 	;
 
 vouchers2
-	:	vouchers2 Op=(Union | Substract) vouchers1
-	|	Op=(Union | Substract)? vouchers1
+	:	vouchers2 Op=(Union | Subtract) vouchers1
+	|	Op=(Union | Subtract)? vouchers1
 	;
 
 vouchers1
@@ -37,8 +37,8 @@ voucherQuery
 	;
 
 details
-	:	details Op=(Union | Substract) details1
-	|	Op=(Union | Substract)? details1
+	:	details Op=(Union | Subtract) details1
+	|	Op=(Union | Subtract)? details1
 	;
 
 details1
@@ -111,8 +111,8 @@ rangeDay
 	;
 
 distributedQ
-	:	distributedQ Op=(Union | Substract) distributedQ1
-	|	Op=(Union | Substract)? distributedQ1
+	:	distributedQ Op=(Union | Subtract) distributedQ1
+	|	Op=(Union | Subtract)? distributedQ1
 	;
 
 distributedQ1
@@ -239,7 +239,7 @@ Intersect
 Union
 	:	'+'
 	;
-Substract
+Subtract
 	:	'-'
 	;
 RoundBra

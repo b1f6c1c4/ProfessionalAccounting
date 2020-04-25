@@ -26,7 +26,7 @@ namespace AccountingServer.Shell.Carry
         public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             expr = expr.Rest();
-            switch (expr?.Initital())
+            switch (expr?.Initial())
             {
                 case "ap":
                     return DoCarry(expr.Rest());
@@ -38,7 +38,7 @@ namespace AccountingServer.Shell.Carry
         }
 
         /// <inheritdoc />
-        public bool IsExecutable(string expr) => expr.Initital() == "caa";
+        public bool IsExecutable(string expr) => expr.Initial() == "caa";
 
         /// <summary>
         ///     执行摊销
@@ -108,11 +108,11 @@ namespace AccountingServer.Shell.Carry
                 rng = DateFilter.TheNullOnly;
             }
 
-            var b00s = m_Accountant.RunGroupedQuery($"T410300 {rng.AsDateRange()}`C");
-            var b01s = m_Accountant.RunGroupedQuery($"T410301 {rng.AsDateRange()}`C");
+            var b00S = m_Accountant.RunGroupedQuery($"T410300 {rng.AsDateRange()}`C");
+            var b01S = m_Accountant.RunGroupedQuery($"T410301 {rng.AsDateRange()}`C");
 
             var cnt = 0L;
-            foreach (var grpC in b00s.Items.Cast<ISubtotalCurrency>())
+            foreach (var grpC in b00S.Items.Cast<ISubtotalCurrency>())
             {
                 var b00 = grpC.Fund;
                 m_Accountant.Upsert(
@@ -130,7 +130,7 @@ namespace AccountingServer.Shell.Carry
                 cnt++;
             }
 
-            foreach (var grpC in b01s.Items.Cast<ISubtotalCurrency>())
+            foreach (var grpC in b01S.Items.Cast<ISubtotalCurrency>())
             {
                 var b01 = grpC.Fund;
                 m_Accountant.Upsert(

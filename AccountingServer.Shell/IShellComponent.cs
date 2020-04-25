@@ -53,7 +53,7 @@ namespace AccountingServer.Shell
             => m_Action(m_Initial == null ? expr : expr.Rest(), serializer);
 
         /// <inheritdoc />
-        public bool IsExecutable(string expr) => m_Initial == null || expr.Initital() == m_Initial;
+        public bool IsExecutable(string expr) => m_Initial == null || expr.Initial() == m_Initial;
     }
 
     /// <summary>
@@ -91,7 +91,7 @@ namespace AccountingServer.Shell
         /// </summary>
         /// <param name="str">原字符串</param>
         /// <returns>首段</returns>
-        public static string Initital(this string str)
+        public static string Initial(this string str)
         {
             if (str == null)
                 return null;

@@ -124,7 +124,7 @@ namespace AccountingServer.Entities.Util
             return true;
         }
 
-        public static bool IsMatch(this VoucherDetail voucherDetail, IQueryCompunded<IDetailQueryAtom> query)
+        public static bool IsMatch(this VoucherDetail voucherDetail, IQueryCompounded<IDetailQueryAtom> query)
             => IsMatch(query, q => IsMatch(voucherDetail, q.Filter, q.Dir));
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace AccountingServer.Entities.Util
         }
 
         [SuppressMessage("ReSharper", "UnusedMember.Global")]
-        public static bool IsMatch(this Voucher voucher, IQueryCompunded<IVoucherQueryAtom> query)
+        public static bool IsMatch(this Voucher voucher, IQueryCompounded<IVoucherQueryAtom> query)
             => IsMatch(query, q => IsMatch(voucher, q));
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace AccountingServer.Entities.Util
         /// <param name="query">检索式</param>
         /// <param name="atomPredictor">原子检索式成立条件</param>
         /// <returns>是否成立</returns>
-        public static bool IsMatch<TAtom>(IQueryCompunded<TAtom> query, Func<TAtom, bool> atomPredictor)
+        public static bool IsMatch<TAtom>(IQueryCompounded<TAtom> query, Func<TAtom, bool> atomPredictor)
             where TAtom : class => query?.Accept(new MatchHelperVisitor<TAtom>(atomPredictor)) ?? true;
 
         private sealed class MatchHelperVisitor<TAtom> : IQueryVisitor<TAtom, bool> where TAtom : class
@@ -179,7 +179,7 @@ namespace AccountingServer.Entities.Util
                         return query.Filter1.Accept(this) || query.Filter2.Accept(this);
                     case OperatorType.Intersect:
                         return query.Filter1.Accept(this) && query.Filter2.Accept(this);
-                    case OperatorType.Substract:
+                    case OperatorType.Subtract:
                         return query.Filter1.Accept(this) && !query.Filter2.Accept(this);
                     default:
                         throw new ArgumentException("运算类型未知", nameof(query));

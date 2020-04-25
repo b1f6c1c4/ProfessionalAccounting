@@ -221,7 +221,7 @@ namespace AccountingServer.DAL
             m_Vouchers.FindSync(GetNQuery<Voucher>(id)).FirstOrDefault();
 
         /// <inheritdoc />
-        public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query) =>
+        public IEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query) =>
             m_Vouchers.Find(query.Accept(new MongoDbNativeVoucher())).Sort(Builders<Voucher>.Sort.Ascending("date"))
                 .ToEnumerable();
 
@@ -355,7 +355,7 @@ namespace AccountingServer.DAL
         }
 
         /// <inheritdoc />
-        public long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query)
+        public long DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         {
             var res = m_Vouchers.DeleteMany(query.Accept(new MongoDbNativeVoucher()));
             return res.DeletedCount;
@@ -372,7 +372,7 @@ namespace AccountingServer.DAL
         public Asset SelectAsset(Guid id) => m_Assets.FindSync(GetNQuery<Asset>(id)).FirstOrDefault();
 
         /// <inheritdoc />
-        public IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter) =>
+        public IEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter) =>
             m_Assets.FindSync(filter.Accept(new MongoDbNativeDistributed<Asset>()))
                 .ToEnumerable();
 
@@ -394,7 +394,7 @@ namespace AccountingServer.DAL
         }
 
         /// <inheritdoc />
-        public long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter)
+        public long DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
         {
             var res = m_Assets.DeleteMany(filter.Accept(new MongoDbNativeDistributed<Asset>()));
             return res.DeletedCount;
@@ -409,7 +409,7 @@ namespace AccountingServer.DAL
             m_Amortizations.FindSync(GetNQuery<Amortization>(id)).FirstOrDefault();
 
         /// <inheritdoc />
-        public IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter) =>
+        public IEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter) =>
             m_Amortizations.FindSync(filter.Accept(new MongoDbNativeDistributed<Amortization>()))
                 .ToEnumerable();
 
@@ -431,7 +431,7 @@ namespace AccountingServer.DAL
         }
 
         /// <inheritdoc />
-        public long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
+        public long DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
         {
             var res = m_Amortizations.DeleteMany(filter.Accept(new MongoDbNativeDistributed<Amortization>()));
             return res.DeletedCount;

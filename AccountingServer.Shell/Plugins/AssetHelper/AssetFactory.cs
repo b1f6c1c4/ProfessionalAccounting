@@ -51,7 +51,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
                     User = detail.User,
                     Currency = detail.Currency,
                     Value = detail.Fund,
-                    Salvge = life == 0 ? detail.Fund : isFixed ? detail.Fund * 0.05 : 0,
+                    Salvage = life == 0 ? detail.Fund : isFixed ? detail.Fund * 0.05 : 0,
                     Life = life,
                     Title = detail.Title,
                     Method = life == 0 ? DepreciationMethod.None : DepreciationMethod.StraightLine,
@@ -63,7 +63,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
                     DevaluationExpenseSubTitle = isFixed ? 5 : 6,
                     Schedule = new List<AssetItem>
                         {
-                            new AcquisationItem
+                            new AcquisitionItem
                                 {
                                     Date = voucher.Date,
                                     VoucherID = voucher.ID,

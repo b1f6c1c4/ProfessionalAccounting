@@ -46,10 +46,10 @@ namespace AccountingServer.BLL
             lst.Sort(new AssetItemComparer());
 
             if (lst.Count == 0 ||
-                !(lst[0] is AcquisationItem acq0))
+                !(lst[0] is AcquisitionItem acq0))
                 lst.Insert(
                     0,
-                    new AcquisationItem { Date = asset.Date, OrigValue = asset.Value.Value });
+                    new AcquisitionItem { Date = asset.Date, OrigValue = asset.Value.Value });
             else if (lst[0].Remark != AssetItem.IgnoranceMark)
             {
                 acq0.Date = asset.Date;
@@ -60,31 +60,29 @@ namespace AccountingServer.BLL
             for (var i = 0; i < lst.Count; i++)
             {
                 var item = lst[i];
-                if (item is AcquisationItem acq)
+                switch (item)
                 {
-                    bookValue += acq.OrigValue;
-                    item.Value = bookValue;
-                }
-                else if (item is DepreciateItem dep)
-                {
-                    bookValue -= dep.Amount;
-                    item.Value = bookValue;
-                }
-                else if (item is DevalueItem dev)
-                {
-                    if (bookValue <= dev.FairValue &&
-                        item.Remark != AssetItem.IgnoranceMark)
-                    {
+                    case AcquisitionItem acq:
+                        bookValue += acq.OrigValue;
+                        item.Value = bookValue;
+                        break;
+                    case DepreciateItem dep:
+                        bookValue -= dep.Amount;
+                        item.Value = bookValue;
+                        break;
+                    case DevalueItem dev when bookValue <= dev.FairValue &&
+                        item.Remark != AssetItem.IgnoranceMark:
                         lst.RemoveAt(i--);
                         continue;
-                    }
-
-                    dev.Amount = bookValue - dev.FairValue;
-                    bookValue = dev.FairValue;
-                    item.Value = dev.FairValue;
+                    case DevalueItem dev:
+                        dev.Amount = bookValue - dev.FairValue;
+                        bookValue = dev.FairValue;
+                        item.Value = dev.FairValue;
+                        break;
+                    case DispositionItem _:
+                        bookValue = 0;
+                        break;
                 }
-                else if (item is DispositionItem)
-                    bookValue = 0;
             }
 
             asset.Schedule = lst;
@@ -99,7 +97,7 @@ namespace AccountingServer.BLL
         /// <param name="query">检索式</param>
         /// <returns>未注册的记账凭证</returns>
         public IEnumerable<Voucher> RegisterVouchers(Asset asset, DateFilter rng,
-            IQueryCompunded<IVoucherQueryAtom> query)
+            IQueryCompounded<IVoucherQueryAtom> query)
         {
             if (asset.Remark == Asset.IgnoranceMark)
                 yield break;
@@ -125,9 +123,9 @@ namespace AccountingServer.BLL
                     var lst = asset.Schedule.Where(item => item.Date.Within(rng))
                         .Where(
                             item =>
-                                item is AcquisationItem &&
+                                item is AcquisitionItem &&
                                 (!voucher.Date.HasValue || item.Date == voucher.Date) &&
-                                (((AcquisationItem)item).OrigValue - value).IsZero())
+                                (((AcquisitionItem)item).OrigValue - value).IsZero())
                         .ToList();
 
                     if (lst.Count == 1)
@@ -241,7 +239,7 @@ namespace AccountingServer.BLL
         private bool UpdateItem(Asset asset, AssetItem item, double bookValue, bool isCollapsed = false,
             bool editOnly = false)
         {
-            if (item is AcquisationItem acq)
+            if (item is AcquisitionItem acq)
                 return UpdateVoucher(
                     item,
                     isCollapsed,
@@ -422,8 +420,8 @@ namespace AccountingServer.BLL
                 if (d.Remark == Asset.IgnoranceMark)
                     continue;
 
-                UpdateDetail(d, voucher, out var sucess, out var mo, editOnly);
-                if (!sucess)
+                UpdateDetail(d, voucher, out var success, out var mo, editOnly);
+                if (!success)
                     return false;
 
                 modified |= mo;
@@ -442,7 +440,7 @@ namespace AccountingServer.BLL
         {
             if (!asset.Date.HasValue ||
                 !asset.Value.HasValue ||
-                !asset.Salvge.HasValue ||
+                !asset.Salvage.HasValue ||
                 !asset.Life.HasValue)
                 return;
 
@@ -476,14 +474,15 @@ namespace AccountingServer.BLL
 
                                 if (flag)
                                     continue;
-                                if (items[i] is AcquisationItem ||
-                                    items[i] is DispositionItem)
-                                    continue;
-
-                                if (items[i] is DepreciateItem) // With IgnoranceMark
+                                switch (items[i])
                                 {
-                                    flag = true;
-                                    continue;
+                                    case AcquisitionItem _:
+                                    case DispositionItem _:
+                                        continue;
+                                    // With IgnoranceMark
+                                    case DepreciateItem _:
+                                        flag = true;
+                                        continue;
                                 }
                             }
 
@@ -498,14 +497,14 @@ namespace AccountingServer.BLL
                                 continue;
                             }
 
-                            var amount = items[i - 1].Value - asset.Salvge.Value;
-                            var monthes = 12 * (lastYear - dt.Year) + lastMonth - dt.Month;
+                            var amount = items[i - 1].Value - asset.Salvage.Value;
+                            var months = 12 * (lastYear - dt.Year) + lastMonth - dt.Month;
 
                             if (amount.IsZero() ||
-                                monthes < 0) // Ended, Over-depreciated or Dispositoned
+                                months < 0) // Ended, Over-depreciated or Disposed
                             {
                                 if (i < items.Count)
-                                    continue; // If another AcquisationItem exists
+                                    continue; // If another AcquisitionItem exists
 
                                 break;
                             }
@@ -515,8 +514,8 @@ namespace AccountingServer.BLL
                                 new DepreciateItem
                                     {
                                         Date = dt,
-                                        Amount = amount / (monthes + 1),
-                                        Value = items[i - 1].Value - amount / (monthes + 1),
+                                        Amount = amount / (months + 1),
+                                        Value = items[i - 1].Value - amount / (months + 1),
                                     });
 
                             dt = AccountantHelper.LastDayOfMonth(dt.Year, dt.Month + 1);
@@ -551,14 +550,14 @@ namespace AccountingServer.BLL
                     break;
                 case DepreciationMethod.SumOfTheYear:
                     if (items.Any(a => a is DevalueItem || a.Remark == AssetItem.IgnoranceMark) ||
-                        items.Count(a => a is AcquisationItem) != 1)
+                        items.Count(a => a is AcquisitionItem) != 1)
                         throw new NotImplementedException();
 
                     {
                         var n = asset.Life.Value;
                         var mo = asset.Date.Value.Month;
                         var yr = asset.Date.Value.Year;
-                        var amount = asset.Value.Value - asset.Salvge.Value;
+                        var amount = asset.Value.Value - asset.Salvage.Value;
                         var z = n * (n + 1) / 2;
                         var nstar = n - mo / 12D;
                         var zstar = (Math.Floor(nstar) + 1) * (Math.Floor(nstar) + 2 * (nstar - Math.Floor(nstar))) / 2;

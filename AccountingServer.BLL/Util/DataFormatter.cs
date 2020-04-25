@@ -57,7 +57,7 @@ namespace AccountingServer.BLL.Util
         /// <summary>
         ///     解析用户过滤器
         /// </summary>
-        /// <param name="spec">格式化后的用户</param>
+        /// <param name="value">格式化后的用户</param>
         /// <returns>用户过滤器</returns>
         public static string ParseUserSpec(this string value)
         {

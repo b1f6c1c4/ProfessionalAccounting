@@ -71,7 +71,7 @@ namespace AccountingServer.Shell.Serializer
                     User = obj["user"]?.Value<string>(),
                     Currency = obj["currency"]?.Value<string>(),
                     Value = obj["value"]?.Value<double>(),
-                    Salvge = obj["salvge"]?.Value<double>(),
+                    Salvage = obj["salvage"]?.Value<double>(),
                     Life = obj["life"]?.Value<int>(),
                     Title = obj["title"]?.Value<int>(),
                     Method = method,
@@ -201,8 +201,8 @@ namespace AccountingServer.Shell.Serializer
 
             switch (obj["type"].Value<string>())
             {
-                case "acquisation":
-                    return new AcquisationItem
+                case "acquisition":
+                    return new AcquisitionItem
                         {
                             Date = date,
                             VoucherID = voucherId,
@@ -278,7 +278,7 @@ namespace AccountingServer.Shell.Serializer
                     { "user", asset.User },
                     { "currency", asset.Currency },
                     { "value", asset.Value },
-                    { "salvge", asset.Salvge },
+                    { "salvage", asset.Salvage },
                     { "life", asset.Life },
                     { "title", asset.Title },
                     { "method", asset.Method?.ToString() },
@@ -328,9 +328,9 @@ namespace AccountingServer.Shell.Serializer
 
             switch (item)
             {
-                case AcquisationItem acq:
+                case AcquisitionItem acq:
                     obj["origValue"] = acq.OrigValue;
-                    obj["type"] = "acquisation";
+                    obj["type"] = "acquisition";
                     break;
                 case DepreciateItem dep:
                     obj["amount"] = dep.Amount;

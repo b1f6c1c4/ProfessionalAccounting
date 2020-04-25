@@ -30,7 +30,7 @@ namespace AccountingServer.Entities.Util
 
         public DateFilter Range => DateFilter.Unconstrained;
 
-        public IQueryCompunded<IDetailQueryAtom> DetailFilter => DetailQueryUnconstrained.Instance;
+        public IQueryCompounded<IDetailQueryAtom> DetailFilter => DetailQueryUnconstrained.Instance;
 
         public bool IsDangerous() => true;
 

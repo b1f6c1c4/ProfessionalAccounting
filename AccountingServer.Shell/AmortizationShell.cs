@@ -29,7 +29,7 @@ namespace AccountingServer.Shell
         /// <param name="showSchedule">是否显示折旧计算表</param>
         /// <param name="serializer">表示器</param>
         /// <returns>执行结果</returns>
-        protected override IQueryResult ExecuteList(IQueryCompunded<IDistributedQueryAtom> distQuery, DateTime? dt,
+        protected override IQueryResult ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery, DateTime? dt,
             bool showSchedule, IEntitiesSerializer serializer)
         {
             var sb = new StringBuilder();
@@ -40,14 +40,14 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        protected override IQueryResult ExecuteQuery(IQueryCompunded<IDistributedQueryAtom> distQuery,
+        protected override IQueryResult ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
             IEntitiesSerializer serializer)
             => new PlainText(serializer.PresentAmorts(Sort(Accountant.SelectAmortizations(distQuery))));
 
         /// <inheritdoc />
-        protected override IQueryResult ExecuteRegister(IQueryCompunded<IDistributedQueryAtom> distQuery,
+        protected override IQueryResult ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
             DateFilter rng,
-            IQueryCompunded<IVoucherQueryAtom> query, IEntitiesSerializer serializer)
+            IQueryCompounded<IVoucherQueryAtom> query, IEntitiesSerializer serializer)
         {
             var sb = new StringBuilder();
             foreach (var a in Sort(Accountant.SelectAmortizations(distQuery)))
@@ -63,9 +63,9 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        protected override IQueryResult ExecuteUnregister(IQueryCompunded<IDistributedQueryAtom> distQuery,
+        protected override IQueryResult ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery,
             DateFilter rng,
-            IQueryCompunded<IVoucherQueryAtom> query, IEntitiesSerializer serializer)
+            IQueryCompounded<IVoucherQueryAtom> query, IEntitiesSerializer serializer)
         {
             var sb = new StringBuilder();
             foreach (var a in Sort(Accountant.SelectAmortizations(distQuery)))
@@ -97,7 +97,7 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        protected override IQueryResult ExecuteRecal(IQueryCompunded<IDistributedQueryAtom> distQuery,
+        protected override IQueryResult ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery,
             IEntitiesSerializer serializer)
         {
             var lst = new List<Amortization>();
@@ -112,7 +112,7 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        protected override IQueryResult ExecuteResetSoft(IQueryCompunded<IDistributedQueryAtom> distQuery,
+        protected override IQueryResult ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery,
             DateFilter rng)
         {
             var cnt = 0L;
@@ -139,7 +139,7 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        protected override IQueryResult ExcuteResetMixed(IQueryCompunded<IDistributedQueryAtom> distQuery,
+        protected override IQueryResult ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery,
             DateFilter rng)
         {
             var cnt = 0L;
@@ -175,11 +175,11 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        protected override IQueryResult ExecuteResetHard(IQueryCompunded<IDistributedQueryAtom> distQuery,
-            IQueryCompunded<IVoucherQueryAtom> query) => throw new InvalidOperationException();
+        protected override IQueryResult ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery,
+            IQueryCompounded<IVoucherQueryAtom> query) => throw new InvalidOperationException();
 
         /// <inheritdoc />
-        protected override IQueryResult ExecuteApply(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
+        protected override IQueryResult ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
             bool isCollapsed)
         {
             var sb = new StringBuilder();
@@ -198,7 +198,7 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        protected override IQueryResult ExecuteCheck(IQueryCompunded<IDistributedQueryAtom> distQuery, DateFilter rng,
+        protected override IQueryResult ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
             IEntitiesSerializer serializer)
         {
             var sb = new StringBuilder();

@@ -23,7 +23,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>匹配检索式的记账凭证</returns>
-        IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query);
+        IEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query);
 
         /// <summary>
         ///     按检索式查找细目
@@ -58,7 +58,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="query">检索式</param>
         /// <returns>已删除的细目总数</returns>
-        long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query);
+        long DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query);
 
         /// <summary>
         ///     添加或替换记账凭证
@@ -84,7 +84,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">记账凭证过滤器</param>
         /// <returns>匹配记账凭证过滤器的资产</returns>
-        IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter);
+        IEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter);
 
         /// <summary>
         ///     按编号删除资产
@@ -98,7 +98,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">记账凭证过滤器</param>
         /// <returns>已删除的资产总数</returns>
-        long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter);
+        long DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter);
 
         /// <summary>
         ///     添加或替换资产
@@ -124,7 +124,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">记账凭证过滤器</param>
         /// <returns>匹配记账凭证过滤器的摊销</returns>
-        IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter);
+        IEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter);
 
         /// <summary>
         ///     按编号删除摊销
@@ -138,7 +138,7 @@ namespace AccountingServer.DAL
         /// </summary>
         /// <param name="filter">记账凭证过滤器</param>
         /// <returns>已删除的摊销总数</returns>
-        long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter);
+        long DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter);
 
         /// <summary>
         ///     添加或替换摊销

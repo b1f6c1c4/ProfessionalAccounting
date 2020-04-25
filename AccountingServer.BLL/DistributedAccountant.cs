@@ -43,13 +43,13 @@ namespace AccountingServer.BLL
         /// </summary>
         /// <param name="expected">应填细目</param>
         /// <param name="voucher">记账凭证</param>
-        /// <param name="sucess">是否成功</param>
+        /// <param name="success">是否成功</param>
         /// <param name="modified">是否更改了记账凭证</param>
         /// <param name="editOnly">是否只允许更新</param>
         protected static void UpdateDetail(VoucherDetail expected, Voucher voucher,
-            out bool sucess, out bool modified, bool editOnly = false)
+            out bool success, out bool modified, bool editOnly = false)
         {
-            sucess = false;
+            success = false;
             modified = false;
 
             var fund = expected.Fund ?? throw new ArgumentException("应填细目的金额为null", nameof(expected));
@@ -64,7 +64,7 @@ namespace AccountingServer.BLL
             {
                 if (isEliminated)
                 {
-                    sucess = true;
+                    success = true;
                     return;
                 }
 
@@ -72,7 +72,7 @@ namespace AccountingServer.BLL
                     return;
 
                 voucher.Details.Add(expected);
-                sucess = true;
+                success = true;
                 modified = true;
                 return;
             }
@@ -86,7 +86,7 @@ namespace AccountingServer.BLL
                     return;
 
                 voucher.Details.Remove(ds[0]);
-                sucess = true;
+                success = true;
                 modified = true;
                 return;
             }
@@ -94,7 +94,7 @@ namespace AccountingServer.BLL
             // ReSharper disable once PossibleInvalidOperationException
             if ((ds[0].Fund.Value - fund).IsZero())
             {
-                sucess = true;
+                success = true;
                 return;
             }
 

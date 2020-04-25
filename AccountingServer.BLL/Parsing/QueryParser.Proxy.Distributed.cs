@@ -85,7 +85,7 @@ namespace AccountingServer.BLL.Parsing
                         case "+":
                             return OperatorType.Union;
                         case "-":
-                            return OperatorType.Substract;
+                            return OperatorType.Subtract;
                         default:
                             throw new MemberAccessException("表达式错误");
                     }
@@ -93,7 +93,7 @@ namespace AccountingServer.BLL.Parsing
             }
 
             /// <inheritdoc />
-            public IQueryCompunded<IDistributedQueryAtom> Filter1
+            public IQueryCompounded<IDistributedQueryAtom> Filter1
             {
                 get
                 {
@@ -105,7 +105,7 @@ namespace AccountingServer.BLL.Parsing
             }
 
             /// <inheritdoc />
-            public IQueryCompunded<IDistributedQueryAtom> Filter2 => distributedQ1();
+            public IQueryCompounded<IDistributedQueryAtom> Filter2 => distributedQ1();
 
             /// <inheritdoc />
             public bool IsDangerous()
@@ -120,7 +120,7 @@ namespace AccountingServer.BLL.Parsing
                         return true;
                     case OperatorType.Union:
                         return Filter1.IsDangerous() || Filter2.IsDangerous();
-                    case OperatorType.Substract:
+                    case OperatorType.Subtract:
                         return Filter1.IsDangerous();
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -137,10 +137,10 @@ namespace AccountingServer.BLL.Parsing
             public OperatorType Operator => Op == null ? OperatorType.None : OperatorType.Intersect;
 
             /// <inheritdoc />
-            public IQueryCompunded<IDistributedQueryAtom> Filter1 => distributedQ0();
+            public IQueryCompounded<IDistributedQueryAtom> Filter1 => distributedQ0();
 
             /// <inheritdoc />
-            public IQueryCompunded<IDistributedQueryAtom> Filter2 => distributedQ1();
+            public IQueryCompounded<IDistributedQueryAtom> Filter2 => distributedQ1();
 
             /// <inheritdoc />
             public bool IsDangerous() => Filter1.IsDangerous() && (Filter2?.IsDangerous() ?? true);
@@ -155,11 +155,11 @@ namespace AccountingServer.BLL.Parsing
             public OperatorType Operator => OperatorType.None;
 
             /// <inheritdoc />
-            public IQueryCompunded<IDistributedQueryAtom> Filter1 => distributedQAtom() ??
-                (IQueryCompunded<IDistributedQueryAtom>)distributedQ();
+            public IQueryCompounded<IDistributedQueryAtom> Filter1
+                => (IQueryCompounded<IDistributedQueryAtom>)distributedQAtom() ?? distributedQ();
 
             /// <inheritdoc />
-            public IQueryCompunded<IDistributedQueryAtom> Filter2 => null;
+            public IQueryCompounded<IDistributedQueryAtom> Filter2 => null;
 
             /// <inheritdoc />
             public bool IsDangerous() => Filter1.IsDangerous();

@@ -33,7 +33,7 @@ namespace AccountingServer.Entities
     /// <summary>
     ///     取得资产
     /// </summary>
-    public class AcquisationItem : AssetItem
+    public class AcquisitionItem : AssetItem
     {
         /// <summary>
         ///     原值
@@ -124,7 +124,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     预计净残值
         /// </summary>
-        public double? Salvge { get; set; }
+        public double? Salvage { get; set; }
 
         /// <summary>
         ///     使用寿命
@@ -218,7 +218,7 @@ namespace AccountingServer.Entities
                     return 1;
                 if (t is DevalueItem)
                     return 2;
-                if (t is AcquisationItem)
+                if (t is AcquisitionItem)
                     return 3;
                 if (t is DispositionItem)
                     return 3; // 不对资产的取得和处置加以区分

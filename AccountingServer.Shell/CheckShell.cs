@@ -44,7 +44,7 @@ namespace AccountingServer.Shell
         }
 
         /// <inheritdoc />
-        public bool IsExecutable(string expr) => expr.Initital() == "chk";
+        public bool IsExecutable(string expr) => expr.Initial() == "chk";
 
         /// <summary>
         ///     检查每张会计记账凭证借贷方是否相等
@@ -156,14 +156,14 @@ namespace AccountingServer.Shell
         private static void DoCheck(IEnumerable<(Voucher Voucher, VoucherDetail Detail)> res, string info,
             StringBuilder sb)
         {
-            foreach (var d in res)
+            foreach (var (v, d) in res)
             {
-                if (d.Detail.Remark == "reconciliation")
+                if (d.Remark == "reconciliation")
                     continue;
 
                 // ReSharper disable PossibleInvalidOperationException
                 sb.AppendLine(
-                    $"{d.Voucher.ID} {d.Voucher.Date:yyyyMMdd} {info} {d.Detail.Content}:{d.Detail.Fund.Value:R}");
+                    $"{v.ID} {v.Date:yyyyMMdd} {info} {d.Content}:{d.Fund.Value:R}");
                 sb.AppendLine();
                 // ReSharper restore PossibleInvalidOperationException
             }

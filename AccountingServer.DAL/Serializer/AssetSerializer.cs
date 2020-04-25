@@ -26,7 +26,7 @@ namespace AccountingServer.DAL.Serializer
                     Date = bsonReader.ReadDateTime("date", ref read),
                     Currency = bsonReader.ReadString("currency", ref read),
                     Value = bsonReader.ReadDouble("value", ref read),
-                    Salvge = bsonReader.ReadDouble("salvge", ref read),
+                    Salvage = bsonReader.ReadDouble("salvage", ref read),
                     Life = bsonReader.ReadInt32("life", ref read),
                     Title = bsonReader.ReadInt32("title", ref read),
                     DepreciationTitle = bsonReader.ReadInt32("deptitle", ref read),
@@ -77,7 +77,7 @@ namespace AccountingServer.DAL.Serializer
             bsonWriter.Write("date", asset.Date);
             bsonWriter.Write("currency", asset.Currency);
             bsonWriter.Write("value", asset.Value);
-            bsonWriter.Write("salvge", asset.Salvge);
+            bsonWriter.Write("salvage", asset.Salvage);
             bsonWriter.Write("life", asset.Life);
             bsonWriter.Write("title", asset.Title);
             bsonWriter.Write("deptitle", asset.DepreciationTitle);
