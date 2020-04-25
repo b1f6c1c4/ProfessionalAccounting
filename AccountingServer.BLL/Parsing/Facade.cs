@@ -111,11 +111,7 @@ namespace AccountingServer.BLL.Parsing
                 throw new FormatException();
             }
 
-            return new VoucherGroupedQueryStub
-                {
-                    VoucherQuery = query,
-                    Subtotal = subtotal
-                };
+            return new VoucherGroupedQueryStub { VoucherQuery = query, Subtotal = subtotal };
         }
 
         public IGroupedQuery GroupedQuery(string s)
@@ -132,11 +128,7 @@ namespace AccountingServer.BLL.Parsing
                 throw new FormatException();
             }
 
-            return new GroupedQueryStub
-                {
-                    VoucherEmitQuery = query,
-                    Subtotal = subtotal
-                };
+            return new GroupedQueryStub { VoucherEmitQuery = query, Subtotal = subtotal };
         }
 
         public IQueryCompunded<IDistributedQueryAtom> DistributedQuery(string s)

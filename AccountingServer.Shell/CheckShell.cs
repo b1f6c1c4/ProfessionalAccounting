@@ -59,7 +59,7 @@ namespace AccountingServer.Shell
                 var flag = false;
                 var grps = voucher.Details
                     // ReSharper disable once PossibleInvalidOperationException
-                    .GroupBy(d => new { User = d.User, Currency = d.Currency }, d => d.Fund.Value);
+                    .GroupBy(d => new { d.User, d.Currency }, d => d.Fund.Value);
                 foreach (var grp in grps)
                 {
                     var val = grp.Sum();

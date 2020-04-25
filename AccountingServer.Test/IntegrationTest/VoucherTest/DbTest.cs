@@ -22,7 +22,8 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
             ClientUser.Set("b1");
         }
 
-        public void Dispose() { m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance); }
+        public void Dispose()
+            => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
 
         [Theory]
         [InlineData(null, VoucherType.Ordinary)]

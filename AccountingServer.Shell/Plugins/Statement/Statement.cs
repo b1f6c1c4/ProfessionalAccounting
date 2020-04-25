@@ -9,7 +9,6 @@ using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
-using static AccountingServer.BLL.Parsing.Facade;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.Shell.Plugins.Statement
@@ -94,8 +93,8 @@ namespace AccountingServer.Shell.Plugins.Statement
                     new IntersectQueries<IDetailQueryAtom>(
                         filt.DetailEmitFilter.DetailFilter,
                         new UnionQueries<IDetailQueryAtom>(
-                             new StmtDetailQuery(""),
-                             new StmtDetailQuery(marker))));
+                            new StmtDetailQuery(""),
+                            new StmtDetailQuery(marker))));
                 RunUnmark(markerFilt, sb);
                 RunMark(nullFilt, parsed, marker, sb);
                 RunCheck(nmFilt, parsed, sb);
@@ -123,12 +122,14 @@ namespace AccountingServer.Shell.Plugins.Statement
                             ? Math.Abs((v.Date.Value - b.Date).TotalDays)
                             : double.PositiveInfinity);
                     var voucher = resx
-                        .Where(v => v.Details.Any(d => (d.Fund.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter)))
+                        .Where(v => v.Details.Any(d
+                            => (d.Fund.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter)))
                         .FirstOrDefault();
                     if (voucher == null)
                         return false;
 
-                    var o = voucher.Details.First(d => (d.Fund.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter));
+                    var o = voucher.Details.First(d
+                        => (d.Fund.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter));
                     if (o.Remark == null)
                         marked++;
                     else if (o.Remark == marker)
@@ -190,30 +191,30 @@ namespace AccountingServer.Shell.Plugins.Statement
             var res = Accountant.SelectVouchers(filt.VoucherQuery);
             var lst = new List<BankItem>(parsed.Items);
             foreach (var v in res)
-                foreach (var d in v.Details)
+            foreach (var d in v.Details)
+            {
+                if (!d.IsMatch(filt.DetailEmitFilter.DetailFilter))
+                    continue;
+
+                var obj1 = lst.FirstOrDefault(b => (b.Fund - d.Fund.Value).IsZero() && b.Date == v.Date);
+                if (obj1 != null)
                 {
-                    if (!d.IsMatch(filt.DetailEmitFilter.DetailFilter))
-                        continue;
-
-                    var obj1 = lst.FirstOrDefault(b => (b.Fund - d.Fund.Value).IsZero() && b.Date == v.Date);
-                    if (obj1 != null)
-                    {
-                        lst.Remove(obj1);
-                        continue;
-                    }
-
-                    var obj2 = lst
-                        .Where(b => (b.Fund - d.Fund.Value).IsZero())
-                        .OrderBy(b => Math.Abs((b.Date - v.Date.Value).TotalDays))
-                        .FirstOrDefault();
-                    if (obj2 != null)
-                    {
-                        lst.Remove(obj2);
-                        continue;
-                    }
-
-                    sb.AppendLine($"{v.ID.Quotation('^')} {v.Date.AsDate()} {d.Content} {d.Fund.AsCurrency(d.Currency)}");
+                    lst.Remove(obj1);
+                    continue;
                 }
+
+                var obj2 = lst
+                    .Where(b => (b.Fund - d.Fund.Value).IsZero())
+                    .OrderBy(b => Math.Abs((b.Date - v.Date.Value).TotalDays))
+                    .FirstOrDefault();
+                if (obj2 != null)
+                {
+                    lst.Remove(obj2);
+                    continue;
+                }
+
+                sb.AppendLine($"{v.ID.Quotation('^')} {v.Date.AsDate()} {d.Content} {d.Fund.AsCurrency(d.Currency)}");
+            }
 
             foreach (var b in lst)
                 sb.AppendLine(b.Raw);

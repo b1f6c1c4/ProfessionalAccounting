@@ -73,7 +73,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     费用
         /// </summary>
-        Expense,
+        Expense
     }
 
     /// <summary>

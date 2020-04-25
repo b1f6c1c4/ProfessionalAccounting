@@ -57,7 +57,9 @@ namespace AccountingServer.DAL
         protected static FilterDefinition<TX> And<TX>(IReadOnlyCollection<FilterDefinition<TX>> lst) =>
             lst.Count == 0
                 ? Builders<TX>.Filter.Empty
-                : (lst.Count == 1 ? lst.First() : Builders<TX>.Filter.And(lst));
+                : lst.Count == 1
+                    ? lst.First()
+                    : Builders<TX>.Filter.And(lst);
 
         /// <summary>
         ///     日期过滤器的Native表示
@@ -130,6 +132,7 @@ namespace AccountingServer.DAL
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
             if (query.Dir != 0)
                 lst.Add(
                     query.Dir > 0
@@ -231,8 +234,7 @@ namespace AccountingServer.DAL
         {
             var lst = new List<FilterDefinition<Voucher>>
                 {
-                    GetNativeFilter(query.VoucherFilter),
-                    GetNativeFilter(query.Range)
+                    GetNativeFilter(query.VoucherFilter), GetNativeFilter(query.Range)
                 };
             var v = query.DetailFilter.Accept(new MongoDbNativeDetail());
             if (query.ForAll)

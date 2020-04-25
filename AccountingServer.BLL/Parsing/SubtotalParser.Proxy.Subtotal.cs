@@ -63,33 +63,33 @@ namespace AccountingServer.BLL.Parsing
                     return text
                         .Select(
                             ch =>
-                            {
-                                switch (ch)
                                 {
-                                    case 't':
-                                        return SubtotalLevel.Title;
-                                    case 's':
-                                        return SubtotalLevel.SubTitle;
-                                    case 'c':
-                                        return SubtotalLevel.Content;
-                                    case 'r':
-                                        return SubtotalLevel.Remark;
-                                    case 'C':
-                                        return SubtotalLevel.Currency;
-                                    case 'U':
-                                        return SubtotalLevel.User;
-                                    case 'd':
-                                        return SubtotalLevel.Day;
-                                    case 'w':
-                                        return SubtotalLevel.Week;
-                                    case 'm':
-                                        return SubtotalLevel.Month;
-                                    case 'y':
-                                        return SubtotalLevel.Year;
-                                }
+                                    switch (ch)
+                                    {
+                                        case 't':
+                                            return SubtotalLevel.Title;
+                                        case 's':
+                                            return SubtotalLevel.SubTitle;
+                                        case 'c':
+                                            return SubtotalLevel.Content;
+                                        case 'r':
+                                            return SubtotalLevel.Remark;
+                                        case 'C':
+                                            return SubtotalLevel.Currency;
+                                        case 'U':
+                                            return SubtotalLevel.User;
+                                        case 'd':
+                                            return SubtotalLevel.Day;
+                                        case 'w':
+                                            return SubtotalLevel.Week;
+                                        case 'm':
+                                            return SubtotalLevel.Month;
+                                        case 'y':
+                                            return SubtotalLevel.Year;
+                                    }
 
-                                throw new MemberAccessException("表达式错误");
-                            })
+                                    throw new MemberAccessException("表达式错误");
+                                })
                         .ToList();
                 }
             }
@@ -148,8 +148,8 @@ namespace AccountingServer.BLL.Parsing
             /// <inheritdoc />
             public string EquivalentCurrency =>
                 subtotalEqui() == null
-                  ? null
-                  : subtotalEqui().VoucherCurrency()?.GetText().ParseCurrency() ?? BaseCurrency.Now;
+                    ? null
+                    : subtotalEqui().VoucherCurrency()?.GetText().ParseCurrency() ?? BaseCurrency.Now;
 
             /// <inheritdoc />
             public DateTime? EquivalentDate

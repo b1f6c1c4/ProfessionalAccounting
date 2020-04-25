@@ -125,10 +125,8 @@ namespace AccountingServer.Shell.Carry
                         Value = 0D,
                         Voucher = new Voucher
                             {
-                                Date = ed,
-                                Type = VoucherType.Carry,
-                                Details = new List<VoucherDetail>()
-                            },
+                                Date = ed, Type = VoucherType.Carry, Details = new List<VoucherDetail>()
+                            }
                     }).ToList();
             foreach (var task in tasks)
                 PartialCarry(task, rng, false);
@@ -162,12 +160,7 @@ namespace AccountingServer.Shell.Carry
                                 Remark = "currency carry",
                                 Details = new List<VoucherDetail>
                                     {
-                                        new VoucherDetail
-                                            {
-                                                Currency = baseCur,
-                                                Title = 3999,
-                                                Fund = -total
-                                            },
+                                        new VoucherDetail { Currency = baseCur, Title = 3999, Fund = -total },
                                         new VoucherDetail
                                             {
                                                 Currency = baseCur,
@@ -256,20 +249,9 @@ namespace AccountingServer.Shell.Carry
                     * b;
 
                 voucher.Details.Add(
-                    new VoucherDetail
-                        {
-                            Currency = grpC.Currency,
-                            Title = 3999,
-                            Fund = b
-                        });
+                    new VoucherDetail { Currency = grpC.Currency, Title = 3999, Fund = b });
                 voucher.Details.Add(
-                    new VoucherDetail
-                        {
-                            Currency = baseCur,
-                            Title = 3999,
-                            Remark = voucher.ID,
-                            Fund = -cob
-                        });
+                    new VoucherDetail { Currency = baseCur, Title = 3999, Remark = voucher.ID, Fund = -cob });
                 total += cob;
             }
 
@@ -287,8 +269,7 @@ namespace AccountingServer.Shell.Carry
     [Serializable]
     public class UserCarrySettings
     {
-        [XmlElement("Target")]
-        public List<CarryTarget> Targets;
+        [XmlElement("Target")] public List<CarryTarget> Targets;
 
         [XmlAttribute("name")]
         public string User { get; set; }

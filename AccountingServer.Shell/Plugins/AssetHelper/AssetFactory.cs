@@ -51,7 +51,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
                     User = detail.User,
                     Currency = detail.Currency,
                     Value = detail.Fund,
-                    Salvge = life == 0 ? detail.Fund : (isFixed ? detail.Fund * 0.05 : 0),
+                    Salvge = life == 0 ? detail.Fund : isFixed ? detail.Fund * 0.05 : 0,
                     Life = life,
                     Title = detail.Title,
                     Method = life == 0 ? DepreciationMethod.None : DepreciationMethod.StraightLine,

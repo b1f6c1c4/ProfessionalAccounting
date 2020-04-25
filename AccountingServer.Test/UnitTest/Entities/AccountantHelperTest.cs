@@ -36,9 +36,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(true, -VoucherDetail.Tolerance * 0.999)]
         [InlineData(false, -VoucherDetail.Tolerance * 1.001)]
         public void IsNonNegativeTest(bool expected, double value)
-        {
-            Assert.Equal(expected, AccountantHelper.IsNonNegative(value));
-        }
+            => Assert.Equal(expected, AccountantHelper.IsNonNegative(value));
 
         [Theory]
         [InlineData(true, 0)]
@@ -46,8 +44,6 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(true, +VoucherDetail.Tolerance * 0.999)]
         [InlineData(false, +VoucherDetail.Tolerance * 1.001)]
         public void IsNonPositiveTest(bool expected, double value)
-        {
-            Assert.Equal(expected, AccountantHelper.IsNonPositive(value));
-        }
+            => Assert.Equal(expected, AccountantHelper.IsNonPositive(value));
     }
 }

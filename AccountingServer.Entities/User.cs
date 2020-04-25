@@ -16,6 +16,7 @@ namespace AccountingServer.Entities
 
         public static string Name => Instances.Value?.m_User ?? throw new InvalidOperationException("必须有一个用户");
 
-        public static void Set(string user) { Instances.Value = new ClientUser(user); }
+        public static void Set(string user)
+            => Instances.Value = new ClientUser(user);
     }
 }

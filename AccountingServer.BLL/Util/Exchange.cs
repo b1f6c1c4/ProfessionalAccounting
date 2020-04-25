@@ -56,6 +56,14 @@ namespace AccountingServer.BLL.Util
     internal class FixerIoExchange : IExchange
     {
         /// <summary>
+        ///     缓存
+        /// </summary>
+        private readonly Dictionary<string, (DateTime, double)> m_Cache =
+            new Dictionary<string, (DateTime, double)>();
+
+        private readonly ReaderWriterLockSlim m_Lock = new ReaderWriterLockSlim();
+
+        /// <summary>
         ///     汇率API配置
         /// </summary>
         public static IConfigManager<ExchangeInfo> ExchangeInfo { private get; set; } =
@@ -66,14 +74,6 @@ namespace AccountingServer.BLL.Util
 
         /// <inheritdoc />
         public double To(DateTime date, string target) => Invoke(date, BaseCurrency.Now, target);
-
-        /// <summary>
-        ///     缓存
-        /// </summary>
-        private readonly Dictionary<string, (DateTime, double)> m_Cache =
-            new Dictionary<string, (DateTime, double)>();
-
-        private readonly ReaderWriterLockSlim m_Lock = new ReaderWriterLockSlim();
 
         /// <summary>
         ///     调用查询接口
@@ -105,7 +105,8 @@ namespace AccountingServer.BLL.Util
                 m_Lock.ExitReadLock();
             }
 
-            var url = $"http://data.fixer.io/api/{endpoint}?access_key={ExchangeInfo.Config.AccessKey}&symbols={from},{to}";
+            var url =
+                $"http://data.fixer.io/api/{endpoint}?access_key={ExchangeInfo.Config.AccessKey}&symbols={from},{to}";
             Console.WriteLine($"AccountingServer.BLL.FixerIoExchange.Invoke(): {endpoint}: {from}/{to}");
             var req = WebRequest.CreateHttp(url);
             req.KeepAlive = true;

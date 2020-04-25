@@ -106,7 +106,8 @@ namespace AccountingServer.Test
     {
         public MockConfigManager(T config) => Config = config;
         public T Config { get; }
-        public void Reload(bool throws) { throw new NotImplementedException(); }
+
+        public void Reload(bool throws) => throw new NotImplementedException();
     }
 
     public class MockExchange : IExchange, IEnumerable

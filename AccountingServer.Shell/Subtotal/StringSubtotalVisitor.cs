@@ -16,12 +16,12 @@ namespace AccountingServer.Shell.Subtotal
     {
         protected string Cu;
         protected int Depth;
-        protected IEntitiesSerializer Serializer;
 
         protected GatheringType Ga;
 
         private ISubtotal m_Par;
         protected StringBuilder Sb;
+        protected IEntitiesSerializer Serializer;
 
         /// <inheritdoc />
         public string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer)
@@ -38,8 +38,6 @@ namespace AccountingServer.Shell.Subtotal
             return Sb.ToString();
         }
 
-        protected virtual void Pre() { }
-        protected virtual void Post() { }
         public abstract Nothing Visit(ISubtotalRoot sub);
         public abstract Nothing Visit(ISubtotalDate sub);
         public abstract Nothing Visit(ISubtotalUser sub);
@@ -49,6 +47,9 @@ namespace AccountingServer.Shell.Subtotal
         public abstract Nothing Visit(ISubtotalContent sub);
         public abstract Nothing Visit(ISubtotalRemark sub);
 
+        protected virtual void Pre() { }
+        protected virtual void Post() { }
+
         protected void VisitChildren(ISubtotalResult sub)
         {
             if (sub.Items == null)
@@ -57,7 +58,8 @@ namespace AccountingServer.Shell.Subtotal
             IEnumerable<ISubtotalResult> items;
             if (Depth < m_Par.Levels.Count)
             {
-                var comparer = CultureInfo.GetCultureInfo("zh-CN").CompareInfo.GetStringComparer(CompareOptions.StringSort);
+                var comparer = CultureInfo.GetCultureInfo("zh-CN").CompareInfo
+                    .GetStringComparer(CompareOptions.StringSort);
                 switch (m_Par.Levels[Depth])
                 {
                     case SubtotalLevel.Title:

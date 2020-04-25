@@ -1,8 +1,6 @@
 using System;
 using AccountingServer.Entities;
-using MongoDB.Bson;
 using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Driver;
 
 namespace AccountingServer.DAL.Serializer
@@ -16,7 +14,7 @@ namespace AccountingServer.DAL.Serializer
         {
             string read = null;
             bsonReader.ReadStartDocument();
-            var record = bsonReader.ReadDocument("_id", ref read, (IBsonReader br) =>
+            var record = bsonReader.ReadDocument("_id", ref read, br =>
                 {
                     br.ReadStartDocument();
                     var rec = new ExchangeRecord
@@ -49,6 +47,8 @@ namespace AccountingServer.DAL.Serializer
         public override ExchangeRecord GetId(ExchangeRecord entity) => entity;
         protected override void SetId(ExchangeRecord entity, ExchangeRecord id) => throw new NotImplementedException();
         protected override bool IsNull(ExchangeRecord id) => id == null;
-        protected override ExchangeRecord MakeId(IMongoCollection<ExchangeRecord> container, ExchangeRecord entity) => throw new NotImplementedException();
+
+        protected override ExchangeRecord MakeId(IMongoCollection<ExchangeRecord> container, ExchangeRecord entity)
+            => throw new NotImplementedException();
     }
 }

@@ -49,11 +49,7 @@ namespace AccountingServer.BLL
                 !(lst[0] is AcquisationItem acq0))
                 lst.Insert(
                     0,
-                    new AcquisationItem
-                        {
-                            Date = asset.Date,
-                            OrigValue = asset.Value.Value
-                        });
+                    new AcquisationItem { Date = asset.Date, OrigValue = asset.Value.Value });
             else if (lst[0].Remark != AssetItem.IgnoranceMark)
             {
                 acq0.Date = asset.Date;
@@ -110,7 +106,8 @@ namespace AccountingServer.BLL
 
             foreach (
                 var voucher in
-                Db.SelectVouchers(ParsingF.VoucherQuery($"U{asset.User.AsUser()} T{asset.Title.AsTitle()} {asset.StringID.Quotation('\'')}"))
+                Db.SelectVouchers(ParsingF.VoucherQuery(
+                        $"U{asset.User.AsUser()} T{asset.Title.AsTitle()} {asset.StringID.Quotation('\'')}"))
                     .Where(v => v.IsMatch(query)))
             {
                 if (voucher.Remark == Asset.IgnoranceMark)
@@ -159,7 +156,9 @@ namespace AccountingServer.BLL
             foreach (
                 var voucher in
                 Db.SelectVouchers(
-                    ParsingF.VoucherQuery($"U{asset.User.AsUser()} T{asset.DepreciationTitle.AsTitle()} {asset.StringID.Quotation('\'')}")))
+                    ParsingF.VoucherQuery(
+                        $"U{asset.User.AsUser()} T{asset.DepreciationTitle.AsTitle()} {asset.StringID.Quotation('\'')}"))
+            )
             {
                 if (voucher.Remark == Asset.IgnoranceMark)
                     continue;
@@ -182,7 +181,9 @@ namespace AccountingServer.BLL
             foreach (
                 var voucher in
                 Db.SelectVouchers(
-                    ParsingF.VoucherQuery($"U{asset.User.AsUser()} T{asset.DevaluationTitle.AsTitle()} {asset.StringID.Quotation('\'')}")))
+                    ParsingF.VoucherQuery(
+                        $"U{asset.User.AsUser()} T{asset.DevaluationTitle.AsTitle()} {asset.StringID.Quotation('\'')}"))
+            )
             {
                 if (voucher.Remark == Asset.IgnoranceMark)
                     continue;
@@ -569,8 +570,7 @@ namespace AccountingServer.BLL
                                 items.Add(
                                     new DepreciateItem
                                         {
-                                            Date = AccountantHelper.LastDayOfMonth(yr, mon),
-                                            Amount = a / (12 - mo)
+                                            Date = AccountantHelper.LastDayOfMonth(yr, mon), Amount = a / (12 - mo)
                                         });
                         }
 

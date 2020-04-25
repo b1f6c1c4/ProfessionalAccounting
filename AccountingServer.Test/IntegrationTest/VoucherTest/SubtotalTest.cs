@@ -101,10 +101,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "b1&b2",
-                                        Currency = "EUR",
-                                        Title = 2333,
-                                        Fund = 114514
+                                        User = "b1&b2", Currency = "EUR", Title = 2333, Fund = 114514
                                     }
                             }
                     });
@@ -144,11 +141,9 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         [InlineData(66.66, "\"rmk1\" : T123456-'cnt1' `v")]
         [InlineData(78.53 + 66.66, "< 20170201 : > `v")]
         public void RunTestValue(double? value, string query)
-        {
-            Assert.Equal(
+            => Assert.Equal(
                 value,
                 m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query)).SingleOrDefault()?.Fund);
-        }
 
         [Theory]
         [InlineData("b2", null, "``U")]
@@ -161,12 +156,10 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         [InlineData("b1", null, "Ub1&b2``U")]
         [InlineData("b1&b2", 114514, "Ub1&b2``U")]
         public void RunTestUser(string user, double? value, string query)
-        {
-            Assert.Equal(
+            => Assert.Equal(
                 value,
                 m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query))
                     .SingleOrDefault(b => b.User == user)?.Fund);
-        }
 
         [Theory]
         [InlineData("CNY", null, "``C")]
@@ -176,12 +169,10 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         [InlineData("USD", -66.66, "\"rmk2\"``C")]
         [InlineData("USD", null, "%xrmk1% : \"rmk1\"``C")]
         public void RunTestCurrency(string currency, double? value, string query)
-        {
-            Assert.Equal(
+            => Assert.Equal(
                 value,
                 m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query))
                     .SingleOrDefault(b => b.Currency == currency)?.Fund);
-        }
 
         [Theory]
         [InlineData("qwer", null, "``c")]
@@ -191,12 +182,10 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         [InlineData("cnt2", -66.66, "\"rmk2\"``c")]
         [InlineData("cnt2", null, "%xrmk1% : \"rmk1\"``c")]
         public void RunTestContent(string content, double? value, string query)
-        {
-            Assert.Equal(
+            => Assert.Equal(
                 value,
                 m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query))
                     .SingleOrDefault(b => b.Content == content)?.Fund);
-        }
 
         [Theory]
         [InlineData("qwer", null, "``r")]
@@ -206,12 +195,10 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         [InlineData("rmk2", -123.45 - 78.53, "'cnt1'``r")]
         [InlineData("rmk2", null, "%xrmk1% : 'cnt2'``r")]
         public void RunTestRemark(string remark, double? value, string query)
-        {
-            Assert.Equal(
+            => Assert.Equal(
                 value,
                 m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query))
                     .SingleOrDefault(b => b.Remark == remark)?.Fund);
-        }
 
         [Theory]
         [InlineData(null, null, "``t")]
@@ -221,12 +208,10 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         [InlineData(6541, -123.45 - 78.53, "'cnt1'``t")]
         [InlineData(6541, null, "%xrmk1% : 'cnt2'``t")]
         public void RunTestTitle(int? title, double? value, string query)
-        {
-            Assert.Equal(
+            => Assert.Equal(
                 value,
                 m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query))
                     .SingleOrDefault(b => b.Title == title)?.Fund);
-        }
 
         [Theory]
         [InlineData(6666, null, null, "``ts")]
@@ -236,12 +221,10 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         [InlineData(6541, 98, -123.45 - 78.53, "'cnt1'``ts")]
         [InlineData(6541, 98, null, "%xrmk1% : 'cnt2'``ts")]
         public void RunTestTitleSubTitle(int? title, int? subTitle, double? value, string query)
-        {
-            Assert.Equal(
+            => Assert.Equal(
                 value,
                 m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query))
                     .SingleOrDefault(b => b.Title == title && b.SubTitle == subTitle)?.Fund);
-        }
 
         [Theory]
         [InlineData(null, null, "``d")]
@@ -253,12 +236,10 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         [InlineData("2016-12-31", 123.45, ":T1234 ``vD")]
         [InlineData("2017-02-01", 78.53 + 66.66, ":T1234 ``vD[]")]
         public void RunTestDay(string dt, double? value, string query)
-        {
-            Assert.Equal(
+            => Assert.Equal(
                 value,
                 m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query))
                     .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
-        }
 
         [Theory]
         [InlineData(null, null, "``w")]
@@ -268,12 +249,10 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         [InlineData("2017-02-01", null, ":T1234 ``w")]
         [InlineData("2017-01-30", 78.53 + 66.66, ":T1234 ``w")]
         public void RunTestWeek(string dt, double? value, string query)
-        {
-            Assert.Equal(
+            => Assert.Equal(
                 value,
                 m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query))
                     .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
-        }
 
         [Theory]
         [InlineData(null, null, "``m")]
@@ -282,12 +261,10 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         [InlineData("2016-12-01", 123.45, ":T1234 ``m")]
         [InlineData("2017-02-01", 78.53 + 66.66, ":T1234 ``m")]
         public void RunTestMonth(string dt, double? value, string query)
-        {
-            Assert.Equal(
+            => Assert.Equal(
                 value,
                 m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query))
                     .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
-        }
 
         [Theory]
         [InlineData(null, null, "``y")]
@@ -295,11 +272,9 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         [InlineData("2016-01-01", 123.45, ":T1234 ``y")]
         [InlineData("2017-01-01", 78.53 + 66.66, ":T1234 ``y")]
         public void RunTestYear(string dt, double? value, string query)
-        {
-            Assert.Equal(
+            => Assert.Equal(
                 value,
                 m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query))
                     .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
-        }
     }
 }

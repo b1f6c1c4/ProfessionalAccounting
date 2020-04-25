@@ -166,7 +166,9 @@ namespace AccountingServer.Shell.Serializer
                     Date = date,
                     Remark = obj["remark"]?.Value<string>(),
                     Type = type,
-                    Details = detail == null ? new List<VoucherDetail>() : detail.Select(ParseVoucherDetail).ToList()
+                    Details = detail == null
+                        ? new List<VoucherDetail>()
+                        : detail.Select(ParseVoucherDetail).ToList()
                 };
         }
 
@@ -227,13 +229,7 @@ namespace AccountingServer.Shell.Serializer
                             FairValue = obj["fairValue"].Value<double>()
                         };
                 case "disposition":
-                    return new DispositionItem
-                        {
-                            Date = date,
-                            VoucherID = voucherId,
-                            Value = value,
-                            Remark = remark
-                        };
+                    return new DispositionItem { Date = date, VoucherID = voucherId, Value = value, Remark = remark };
                 default:
                     throw new ArgumentException("类型未知", nameof(obj));
             }
@@ -287,11 +283,13 @@ namespace AccountingServer.Shell.Serializer
                     { "title", asset.Title },
                     { "method", asset.Method?.ToString() },
                     {
-                        "depreciation", new JObject
+                        "depreciation",
+                        new JObject
                             {
                                 { "title", asset.DepreciationTitle },
                                 {
-                                    "expense", new JObject
+                                    "expense",
+                                    new JObject
                                         {
                                             { "title", asset.DepreciationExpenseTitle },
                                             { "subtitle", asset.DepreciationExpenseSubTitle }
@@ -300,11 +298,13 @@ namespace AccountingServer.Shell.Serializer
                             }
                     },
                     {
-                        "devaluation", new JObject
+                        "devaluation",
+                        new JObject
                             {
                                 { "title", asset.DevaluationTitle },
                                 {
-                                    "expense", new JObject
+                                    "expense",
+                                    new JObject
                                         {
                                             { "title", asset.DevaluationExpenseTitle },
                                             { "subtitle", asset.DevaluationExpenseSubTitle }

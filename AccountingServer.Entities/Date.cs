@@ -174,6 +174,7 @@ namespace AccountingServer.Entities
             DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal,
             out result);
 
-        public static void Set(DateTime timestamp) { Instances.Value = new ClientDateTime(timestamp); }
+        public static void Set(DateTime timestamp)
+            => Instances.Value = new ClientDateTime(timestamp);
     }
 }

@@ -32,30 +32,30 @@ namespace AccountingServer.Shell
                         new ShellComponent(
                             "soft",
                             (expr, serializer) =>
-                            {
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-                                Parsing.Eof(expr);
-                                return ExecuteResetSoft(dist, rng);
-                            }),
+                                {
+                                    var dist = Parsing.DistributedQuery(ref expr);
+                                    var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+                                    Parsing.Eof(expr);
+                                    return ExecuteResetSoft(dist, rng);
+                                }),
                         new ShellComponent(
                             "mixed",
                             (expr, serializer) =>
-                            {
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-                                Parsing.Eof(expr);
-                                return ExcuteResetMixed(dist, rng);
-                            }),
+                                {
+                                    var dist = Parsing.DistributedQuery(ref expr);
+                                    var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+                                    Parsing.Eof(expr);
+                                    return ExcuteResetMixed(dist, rng);
+                                }),
                         new ShellComponent(
                             "hard",
                             (expr, serializer) =>
-                            {
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var vouchers = Parsing.OptColVouchers(ref expr);
-                                Parsing.Eof(expr);
-                                return ExecuteResetHard(dist, vouchers);
-                            })
+                                {
+                                    var dist = Parsing.DistributedQuery(ref expr);
+                                    var vouchers = Parsing.OptColVouchers(ref expr);
+                                    Parsing.Eof(expr);
+                                    return ExecuteResetHard(dist, vouchers);
+                                })
                     };
             m_Composer =
                 new ShellComposer
@@ -63,96 +63,96 @@ namespace AccountingServer.Shell
                         new ShellComponent(
                             "all",
                             (expr, serializer) =>
-                            {
-                                var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                Parsing.Eof(expr);
-                                if (dist.IsDangerous() && safe)
-                                    throw new SecurityException("检测到弱检索式");
+                                {
+                                    var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
+                                    var dist = Parsing.DistributedQuery(ref expr);
+                                    Parsing.Eof(expr);
+                                    if (dist.IsDangerous() && safe)
+                                        throw new SecurityException("检测到弱检索式");
 
-                                return ExecuteList(dist, null, false, serializer);
-                            }),
+                                    return ExecuteList(dist, null, false, serializer);
+                                }),
                         new ShellComponent(
                             "li",
                             (expr, serializer) =>
-                            {
-                                var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
-                                var dt = Parsing.UniqueTime(ref expr) ?? ClientDateTime.Today;
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                Parsing.Eof(expr);
-                                if (dist.IsDangerous() && safe)
-                                    throw new SecurityException("检测到弱检索式");
+                                {
+                                    var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
+                                    var dt = Parsing.UniqueTime(ref expr) ?? ClientDateTime.Today;
+                                    var dist = Parsing.DistributedQuery(ref expr);
+                                    Parsing.Eof(expr);
+                                    if (dist.IsDangerous() && safe)
+                                        throw new SecurityException("检测到弱检索式");
 
-                                return ExecuteList(dist, dt, true, serializer);
-                            }),
+                                    return ExecuteList(dist, dt, true, serializer);
+                                }),
                         new ShellComponent(
                             "q",
                             (expr, serializer) =>
-                            {
-                                var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                Parsing.Eof(expr);
-                                if (dist.IsDangerous() && safe)
-                                    throw new SecurityException("检测到弱检索式");
+                                {
+                                    var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
+                                    var dist = Parsing.DistributedQuery(ref expr);
+                                    Parsing.Eof(expr);
+                                    if (dist.IsDangerous() && safe)
+                                        throw new SecurityException("检测到弱检索式");
 
-                                return ExecuteQuery(dist, serializer);
-                            }),
+                                    return ExecuteQuery(dist, serializer);
+                                }),
                         new ShellComponent(
                             "reg",
                             (expr, serializer) =>
-                            {
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-                                var vouchers = Parsing.OptColVouchers(ref expr);
-                                Parsing.Eof(expr);
-                                return ExecuteRegister(dist, rng, vouchers, serializer);
-                            }),
+                                {
+                                    var dist = Parsing.DistributedQuery(ref expr);
+                                    var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+                                    var vouchers = Parsing.OptColVouchers(ref expr);
+                                    Parsing.Eof(expr);
+                                    return ExecuteRegister(dist, rng, vouchers, serializer);
+                                }),
                         new ShellComponent(
                             "unreg",
                             (expr, serializer) =>
-                            {
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-                                var vouchers = Parsing.OptColVouchers(ref expr);
-                                Parsing.Eof(expr);
-                                return ExecuteUnregister(dist, rng, vouchers, serializer);
-                            }),
+                                {
+                                    var dist = Parsing.DistributedQuery(ref expr);
+                                    var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+                                    var vouchers = Parsing.OptColVouchers(ref expr);
+                                    Parsing.Eof(expr);
+                                    return ExecuteUnregister(dist, rng, vouchers, serializer);
+                                }),
                         new ShellComponent(
                             "recal",
                             (expr, serializer) =>
-                            {
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                Parsing.Eof(expr);
-                                return ExecuteRecal(dist, serializer);
-                            }),
+                                {
+                                    var dist = Parsing.DistributedQuery(ref expr);
+                                    Parsing.Eof(expr);
+                                    return ExecuteRecal(dist, serializer);
+                                }),
                         new ShellComponent("rst", (expr, serializer) => resetComopser.Execute(expr, serializer)),
                         new ShellComponent(
                             "ap",
                             (expr, serializer) =>
-                            {
-                                var collapse = Parsing.Optional(ref expr, "col");
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-                                Parsing.Eof(expr);
-                                return ExecuteApply(dist, rng, collapse);
-                            }),
+                                {
+                                    var collapse = Parsing.Optional(ref expr, "col");
+                                    var dist = Parsing.DistributedQuery(ref expr);
+                                    var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+                                    Parsing.Eof(expr);
+                                    return ExecuteApply(dist, rng, collapse);
+                                }),
                         new ShellComponent(
                             "chk",
                             (expr, serializer) =>
-                            {
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                Parsing.Eof(expr);
-                                return ExecuteCheck(dist, new DateFilter(null, ClientDateTime.Today), serializer);
-                            }),
+                                {
+                                    var dist = Parsing.DistributedQuery(ref expr);
+                                    Parsing.Eof(expr);
+                                    return ExecuteCheck(dist, new DateFilter(null, ClientDateTime.Today), serializer);
+                                }),
                         new ShellComponent(
                             null,
                             (expr, serializer) =>
-                            {
-                                var dt = Parsing.UniqueTime(ref expr) ?? ClientDateTime.Today;
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                Parsing.Eof(expr);
-                                return ExecuteList(dist, dt, false, serializer);
-                            })
+                                {
+                                    var dt = Parsing.UniqueTime(ref expr) ?? ClientDateTime.Today;
+                                    var dist = Parsing.DistributedQuery(ref expr);
+                                    Parsing.Eof(expr);
+                                    return ExecuteList(dist, dt, false, serializer);
+                                })
                     };
         }
 

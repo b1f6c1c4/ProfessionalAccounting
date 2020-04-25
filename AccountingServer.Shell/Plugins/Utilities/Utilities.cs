@@ -99,18 +99,17 @@ namespace AccountingServer.Shell.Plugins.Utilities
                                     Currency = d.Currency,
                                     Title = d.Title,
                                     SubTitle = d.SubTitle,
-                                    Content = d.Content == "G()" ? Guid.NewGuid().ToString().ToUpperInvariant() : d.Content,
+                                    Content =
+                                        d.Content == "G()"
+                                            ? Guid.NewGuid().ToString().ToUpperInvariant()
+                                            : d.Content,
                                     Fund = num * d.Fund,
-                                    Remark = d.Remark == "G()" ? Guid.NewGuid().ToString().ToUpperInvariant() : d.Remark
+                                    Remark = d.Remark == "G()"
+                                        ? Guid.NewGuid().ToString().ToUpperInvariant()
+                                        : d.Remark
                                 })
                     .ToList();
-            var voucher = new Voucher
-                {
-                    Date = time,
-                    Remark = template.Remark,
-                    Type = template.Type,
-                    Details = lst
-                };
+            var voucher = new Voucher { Date = time, Remark = template.Remark, Type = template.Type, Details = lst };
             return voucher;
         }
     }

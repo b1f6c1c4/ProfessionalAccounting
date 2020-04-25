@@ -142,11 +142,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                     grp.SingleOrDefault(
                         v =>
                             v.Details.Any(d => d.IsMatch(interestPattern, Dir())))
-                    ?? new Voucher
-                        {
-                            Date = key,
-                            Details = new List<VoucherDetail>()
-                        });
+                    ?? new Voucher { Date = key, Details = new List<VoucherDetail>() });
                 lastSettlement = key;
 
                 // Settle Loan
@@ -193,11 +189,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                     info,
                     capitalIntegral,
                     finalDay.Subtract(lastSettlement.Value).Days,
-                    new Voucher
-                        {
-                            Date = finalDay,
-                            Details = new List<VoucherDetail>()
-                        });
+                    new Voucher { Date = finalDay, Details = new List<VoucherDetail>() });
         }
 
         /// <summary>
@@ -211,11 +203,7 @@ namespace AccountingServer.Shell.Plugins.Interest
         private double SettleInterest(LoanInfo info, double capitalIntegral, int delta, Voucher voucher)
         {
             var interest = delta * info.Rate * capitalIntegral;
-            var create = new List<VoucherDetail>
-                {
-                    info.AsInterest(this, interest),
-                    info.AsMinor(this, -interest)
-                };
+            var create = new List<VoucherDetail> { info.AsInterest(this, interest), info.AsMinor(this, -interest) };
 
             // ReSharper disable once PossibleInvalidOperationException
             var detail = voucher.Details.SingleOrDefault(d => d.IsMatch(info.AsInterest(this)));
