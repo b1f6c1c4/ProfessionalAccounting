@@ -20,7 +20,7 @@ namespace AccountingServer.DAL.Serializer
             AssetItem item;
             double? val;
             if ((val = bsonReader.ReadDouble("acq", ref read)).HasValue)
-                item = new AcquisationItem { VoucherID = vid, Date = dt, Remark = rmk, OrigValue = val.Value };
+                item = new AcquisitionItem { VoucherID = vid, Date = dt, Remark = rmk, OrigValue = val.Value };
             else if ((val = bsonReader.ReadDouble("dep", ref read)).HasValue)
                 item = new DepreciateItem { VoucherID = vid, Date = dt, Remark = rmk, Amount = val.Value };
             else if ((val = bsonReader.ReadDouble("devto", ref read)).HasValue)
@@ -40,14 +40,21 @@ namespace AccountingServer.DAL.Serializer
             bsonWriter.Write("date", item.Date);
             bsonWriter.Write("remark", item.Remark);
 
-            if (item is AcquisationItem acq)
-                bsonWriter.Write("acq", acq.OrigValue);
-            else if (item is DepreciateItem dep)
-                bsonWriter.Write("dep", dep.Amount);
-            else if (item is DevalueItem dev)
-                bsonWriter.Write("devto", dev.FairValue);
-            else if (item is DispositionItem)
-                bsonWriter.WriteNull("dispo");
+            switch (item)
+            {
+                case AcquisitionItem acq:
+                    bsonWriter.Write("acq", acq.OrigValue);
+                    break;
+                case DepreciateItem dep:
+                    bsonWriter.Write("dep", dep.Amount);
+                    break;
+                case DevalueItem dev:
+                    bsonWriter.Write("devto", dev.FairValue);
+                    break;
+                case DispositionItem _:
+                    bsonWriter.WriteNull("dispo");
+                    break;
+            }
             bsonWriter.WriteEndDocument();
         }
     }

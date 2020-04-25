@@ -10,9 +10,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
     public class SecurityTest
     {
         public SecurityTest()
-        {
-            ClientUser.Set("b1");
-        }
+            => ClientUser.Set("b1");
 
         [Theory]
         [InlineData(true, "")]

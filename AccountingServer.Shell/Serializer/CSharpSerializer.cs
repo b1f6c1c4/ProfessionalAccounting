@@ -172,7 +172,7 @@ namespace AccountingServer.Shell.Serializer
             sb.AppendLine($"    Name = {ProcessString(asset.Name)},");
             sb.AppendLine(asset.Date.HasValue ? $"    Date = D(\"{asset.Date:yyyy-MM-dd}\")," : "    Date = null,");
             sb.AppendLine($"    Currency = {ProcessString(asset.Currency)},");
-            sb.AppendLine($"    Value = {asset.Value}, Salvge = {asset.Salvge}, Life = {asset.Life},");
+            sb.AppendLine($"    Value = {asset.Value}, Salvage = {asset.Salvage}, Life = {asset.Life},");
             sb.AppendLine($"    Title = {asset.Title}, Method = DepreciationMethod.{asset.Method},");
             sb.AppendLine(
                 $"    DepreciationTitle = {asset.DepreciationTitle}, DepreciationExpenseTitle = {asset.DepreciationExpenseTitle}, DepreciationExpenseSubTitle = {asset.DepreciationExpenseSubTitle},");
@@ -202,7 +202,7 @@ namespace AccountingServer.Shell.Serializer
                 foreach (var item in asset.Schedule)
                     switch (item)
                     {
-                        case AcquisationItem acq:
+                        case AcquisitionItem acq:
                             Present(item, $"OrigValue = {acq.OrigValue},");
                             break;
                         case DepreciateItem dep:

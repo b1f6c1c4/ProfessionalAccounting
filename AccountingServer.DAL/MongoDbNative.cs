@@ -47,19 +47,25 @@ namespace AccountingServer.DAL
                     return query.Filter1.Accept(this) | query.Filter2.Accept(this);
                 case OperatorType.Intersect:
                     return query.Filter1.Accept(this) & query.Filter2.Accept(this);
-                case OperatorType.Substract:
+                case OperatorType.Subtract:
                     return query.Filter1.Accept(this) & !query.Filter2.Accept(this);
                 default:
                     throw new ArgumentException("运算类型未知", nameof(query));
             }
         }
 
-        protected static FilterDefinition<TX> And<TX>(IReadOnlyCollection<FilterDefinition<TX>> lst) =>
-            lst.Count == 0
-                ? Builders<TX>.Filter.Empty
-                : lst.Count == 1
-                    ? lst.First()
-                    : Builders<TX>.Filter.And(lst);
+        protected static FilterDefinition<TX> And<TX>(IReadOnlyCollection<FilterDefinition<TX>> lst)
+        {
+            switch (lst.Count)
+            {
+                case 0:
+                    return Builders<TX>.Filter.Empty;
+                case 1:
+                    return lst.First();
+                default:
+                    return Builders<TX>.Filter.And(lst);
+            }
+        }
 
         /// <summary>
         ///     日期过滤器的Native表示

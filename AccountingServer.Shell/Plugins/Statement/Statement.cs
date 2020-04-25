@@ -122,13 +122,14 @@ namespace AccountingServer.Shell.Plugins.Statement
                             ? Math.Abs((v.Date.Value - b.Date).TotalDays)
                             : double.PositiveInfinity);
                     var voucher = resx
-                        .Where(v => v.Details.Any(d
-                            => (d.Fund.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter)))
-                        .FirstOrDefault();
+                        .FirstOrDefault(v => v.Details.Any(d
+                            // ReSharper disable once PossibleInvalidOperationException
+                            => (d.Fund.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter)));
                     if (voucher == null)
                         return false;
 
                     var o = voucher.Details.First(d
+                        // ReSharper disable once PossibleInvalidOperationException
                         => (d.Fund.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter));
                     if (o.Remark == null)
                         marked++;
@@ -196,6 +197,7 @@ namespace AccountingServer.Shell.Plugins.Statement
                 if (!d.IsMatch(filt.DetailEmitFilter.DetailFilter))
                     continue;
 
+                // ReSharper disable once PossibleInvalidOperationException
                 var obj1 = lst.FirstOrDefault(b => (b.Fund - d.Fund.Value).IsZero() && b.Date == v.Date);
                 if (obj1 != null)
                 {
@@ -204,7 +206,9 @@ namespace AccountingServer.Shell.Plugins.Statement
                 }
 
                 var obj2 = lst
+                    // ReSharper disable once PossibleInvalidOperationException
                     .Where(b => (b.Fund - d.Fund.Value).IsZero())
+                    // ReSharper disable once PossibleInvalidOperationException
                     .OrderBy(b => Math.Abs((b.Date - v.Date.Value).TotalDays))
                     .FirstOrDefault();
                 if (obj2 != null)
@@ -222,44 +226,26 @@ namespace AccountingServer.Shell.Plugins.Statement
 
         private sealed class StmtVoucherDetailQuery : IVoucherDetailQuery
         {
-            public StmtVoucherDetailQuery(IQueryCompunded<IVoucherQueryAtom> v, IQueryCompunded<IDetailQueryAtom> d)
+            public StmtVoucherDetailQuery(IQueryCompounded<IVoucherQueryAtom> v, IQueryCompounded<IDetailQueryAtom> d)
             {
                 VoucherQuery = v;
                 DetailEmitFilter = new StmtEmit { DetailFilter = d };
             }
 
-            public IQueryCompunded<IVoucherQueryAtom> VoucherQuery { get; }
+            public IQueryCompounded<IVoucherQueryAtom> VoucherQuery { get; }
 
             public IEmit DetailEmitFilter { get; }
         }
 
         private class StmtEmit : IEmit
         {
-            public IQueryCompunded<IDetailQueryAtom> DetailFilter { get; set; }
-        }
-
-        private sealed class StmtVoucherQuery : IVoucherQueryAtom
-        {
-            public bool ForAll { get; set; }
-
-            public Voucher VoucherFilter { get; set; }
-
-            public DateFilter Range { get; set; }
-
-            public bool IsDangerous() =>
-                VoucherFilter.IsDangerous() && Range.IsDangerous() && DetailFilter.IsDangerous();
-
-            public IQueryCompunded<IDetailQueryAtom> DetailFilter { get; set; }
-
-            public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
+            public IQueryCompounded<IDetailQueryAtom> DetailFilter { get; set; }
         }
 
         private sealed class StmtDetailQuery : IDetailQueryAtom
         {
             public StmtDetailQuery(string marker)
-            {
-                Filter = new VoucherDetail { Remark = marker };
-            }
+                => Filter = new VoucherDetail { Remark = marker };
 
             public TitleKind? Kind => null;
 

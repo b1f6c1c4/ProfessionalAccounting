@@ -17,8 +17,8 @@ namespace AccountingServer.BLL.Parsing
                 }
             }
 
-            public static implicit operator DateTime(RangeDayContext context) =>
-                context.RangeDeltaDay() != null
+            public static implicit operator DateTime(RangeDayContext context)
+                => context.RangeDeltaDay() != null
                     ? ClientDateTime.Today.AddDays(1 - context.RangeDeltaDay().GetText().Length)
                     : ClientDateTime.ParseExact(context.RangeADay().GetText(), "yyyyMMdd");
         }

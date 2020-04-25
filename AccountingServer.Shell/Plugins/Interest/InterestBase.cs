@@ -73,16 +73,16 @@ namespace AccountingServer.Shell.Plugins.Interest
                 endDate.HasValue)
             {
                 // ReSharper disable once PossibleInvalidOperationException
-                var lastD = Accountant.RunVoucherQuery(info.QueryInterest(this))
+                var lastD = Accountant.RunVoucherQuery(info.QueryInterest())
                         .OrderByDescending(v => v.Date, new DateComparer())
                         .FirstOrDefault()
                         ?.Date ??
-                    Accountant.RunVoucherQuery(info.QueryCapital(this))
+                    Accountant.RunVoucherQuery(info.QueryCapital())
                         .OrderBy(v => v.Date, new DateComparer())
                         .First()
                         .Date.Value;
-                var capQuery = $"{info.QueryCapital(this)} [~{lastD.AsDate()}]``v";
-                var intQuery = $"{info.QueryInterest(this)} [~{lastD.AsDate()}]``v";
+                var capQuery = $"{info.QueryCapital()} [~{lastD.AsDate()}]``v";
+                var intQuery = $"{info.QueryInterest()} [~{lastD.AsDate()}]``v";
                 var capitalIntegral = Accountant.RunGroupedQuery(capQuery).Fund;
                 var interestIntegral = Accountant.RunGroupedQuery(intQuery).Fund;
                 Regularize(
@@ -118,14 +118,14 @@ namespace AccountingServer.Shell.Plugins.Interest
         private void Regularize(LoanInfo info, ref double capitalIntegral, ref double interestIntegral,
             DateTime? lastSettlement, DateTime finalDay)
         {
-            var capitalPattern = info.AsCapital(this);
-            var interestPattern = info.AsInterest(this);
+            var capitalPattern = info.AsCapital();
+            var interestPattern = info.AsInterest();
             var rng = lastSettlement.HasValue
                 ? new DateFilter(lastSettlement.Value.AddDays(1), finalDay)
                 : new DateFilter(null, finalDay);
             foreach (var grp in
                 Accountant
-                    .RunVoucherQuery($"{info.QueryMajor(this)} {rng.AsDateRange()}")
+                    .RunVoucherQuery($"{info.QueryMajor()} {rng.AsDateRange()}")
                     .GroupBy(v => v.Date)
                     .OrderBy(grp => grp.Key, new DateComparer()))
             {
@@ -203,16 +203,16 @@ namespace AccountingServer.Shell.Plugins.Interest
         private double SettleInterest(LoanInfo info, double capitalIntegral, int delta, Voucher voucher)
         {
             var interest = delta * info.Rate * capitalIntegral;
-            var create = new List<VoucherDetail> { info.AsInterest(this, interest), info.AsMinor(this, -interest) };
+            var create = new List<VoucherDetail> { info.AsInterest(interest), info.AsMinor(this, -interest) };
 
             // ReSharper disable once PossibleInvalidOperationException
-            var detail = voucher.Details.SingleOrDefault(d => d.IsMatch(info.AsInterest(this)));
+            var detail = voucher.Details.SingleOrDefault(d => d.IsMatch(info.AsInterest()));
 
             if (interest.IsZero())
             {
                 if (detail != null)
                 {
-                    if (!voucher.Details.All(d => d.IsMatch(info.AsInterest(this)) || d.IsMatch(info.AsMinor(this))))
+                    if (!voucher.Details.All(d => d.IsMatch(info.AsInterest()) || d.IsMatch(info.AsMinor(this))))
                         throw new ArgumentException("该记账凭证包含计息以外的细目", nameof(voucher));
 
                     Accountant.DeleteVoucher(voucher.ID);
@@ -229,7 +229,7 @@ namespace AccountingServer.Shell.Plugins.Interest
             // ReSharper disable once PossibleInvalidOperationException
             else if (!(detail.Fund.Value - interest).IsZero())
             {
-                if (!voucher.Details.All(d => d.IsMatch(info.AsInterest(this)) || d.IsMatch(info.AsMinor(this))))
+                if (!voucher.Details.All(d => d.IsMatch(info.AsInterest()) || d.IsMatch(info.AsMinor(this))))
                     throw new ArgumentException("该记账凭证包含计息以外的细目", nameof(voucher));
 
                 voucher.Details = create;
@@ -253,7 +253,7 @@ namespace AccountingServer.Shell.Plugins.Interest
             var intFlag = false;
             for (var i = 0; i < voucher.Details.Count; i++)
             {
-                if (voucher.Details[i].IsMatch(info.AsCapital(this), -Dir()))
+                if (voucher.Details[i].IsMatch(info.AsCapital(), -Dir()))
                 {
                     if (capFlag || capVol.IsZero())
                     {
@@ -273,7 +273,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                     capFlag = true;
                 }
 
-                if (voucher.Details[i].IsMatch(info.AsInterest(this), -Dir()))
+                if (voucher.Details[i].IsMatch(info.AsInterest(), -Dir()))
                 {
                     if (intFlag || intVol.IsZero())
                     {
@@ -297,14 +297,14 @@ namespace AccountingServer.Shell.Plugins.Interest
             if (!capFlag &&
                 !capVol.IsZero())
             {
-                voucher.Details.Add(info.AsCapital(this, -capVol));
+                voucher.Details.Add(info.AsCapital(-capVol));
                 flag = true;
             }
 
             if (!intFlag &&
                 !intVol.IsZero())
             {
-                voucher.Details.Add(info.AsInterest(this, -intVol));
+                voucher.Details.Add(info.AsInterest(-intVol));
                 flag = true;
             }
 
@@ -339,16 +339,16 @@ namespace AccountingServer.Shell.Plugins.Interest
             /// </summary>
             public double Rate { get; set; }
 
-            public string QueryMajor(InterestBase my) =>
+            public string QueryMajor() =>
                 $"(@{Currency} T{Title.AsTitle()} {Content.Quotation('\'')})*({Remark.Quotation('"')}+{(Remark + "-利息").Quotation('"')})";
 
-            public string QueryCapital(InterestBase my) =>
+            public string QueryCapital() =>
                 $"@{Currency} T{Title.AsTitle()} {Content.Quotation('\'')} {Remark.Quotation('"')}";
 
-            public string QueryInterest(InterestBase my) =>
+            public string QueryInterest() =>
                 $"@{Currency} T{Title.AsTitle()} {Content.Quotation('\'')} {(Remark + "-利息").Quotation('"')}";
 
-            public VoucherDetail AsCapital(InterestBase my, double? fund = null)
+            public VoucherDetail AsCapital(double? fund = null)
                 => new VoucherDetail
                     {
                         Currency = Currency,
@@ -358,7 +358,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                         Fund = fund,
                     };
 
-            public VoucherDetail AsInterest(InterestBase my, double? fund = null)
+            public VoucherDetail AsInterest(double? fund = null)
                 => new VoucherDetail
                     {
                         Currency = Currency,

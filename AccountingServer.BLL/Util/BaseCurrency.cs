@@ -27,7 +27,7 @@ namespace AccountingServer.BLL.Util
     /// <summary>
     ///     记账本位币管理
     /// </summary>
-    public class BaseCurrency
+    public static class BaseCurrency
     {
         /// <summary>
         ///     记账本位币信息文档

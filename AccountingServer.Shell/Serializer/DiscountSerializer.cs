@@ -45,7 +45,7 @@ namespace AccountingServer.Shell.Serializer
         }
 
         /// <inheritdoc />
-        public virtual VoucherDetail ParseVoucherDetail(string expr) => throw new NotImplementedException();
+        public VoucherDetail ParseVoucherDetail(string expr) => throw new NotImplementedException();
 
         public string PresentAsset(Asset asset) => throw new NotImplementedException();
         public Asset ParseAsset(string str) => throw new NotImplementedException();
@@ -290,8 +290,8 @@ namespace AccountingServer.Shell.Serializer
             return resLst;
         }
 
-        protected virtual bool AlternativeTitle(ref string expr, ICollection<string> lst, ref ITitle title) =>
-            AbbrSerializer.GetAlternativeTitle(ref expr, lst, ref title);
+        private static bool AlternativeTitle(ref string expr, ICollection<string> lst, ref ITitle title)
+            => AbbrSerializer.GetAlternativeTitle(ref expr, lst, ref title);
 
         private sealed class Item : VoucherDetail
         {

@@ -14,16 +14,10 @@ namespace AccountingServer.BLL.Parsing
                 get
                 {
                     if (DetailTitle() != null)
-                    {
-                        var tt = int.Parse(DetailTitle().GetText().TrimStart('T'));
-                        return tt;
-                    }
+                        return int.Parse(DetailTitle().GetText().TrimStart('T'));
 
                     if (DetailTitleSubTitle() != null)
-                    {
-                        var tt = int.Parse(DetailTitleSubTitle().GetText().TrimStart('T'));
-                        return tt / 100;
-                    }
+                        return int.Parse(DetailTitleSubTitle().GetText().TrimStart('T')) / 100;
 
                     throw new MemberAccessException("表达式错误");
                 }
@@ -37,10 +31,7 @@ namespace AccountingServer.BLL.Parsing
                         return null;
 
                     if (DetailTitleSubTitle() != null)
-                    {
-                        var tt = int.Parse(DetailTitleSubTitle().GetText().TrimStart('T'));
-                        return tt % 100;
-                    }
+                        return int.Parse(DetailTitleSubTitle().GetText().TrimStart('T')) % 100;
 
                     throw new MemberAccessException("表达式错误");
                 }
@@ -142,7 +133,7 @@ namespace AccountingServer.BLL.Parsing
                         case "+":
                             return OperatorType.Union;
                         case "-":
-                            return OperatorType.Substract;
+                            return OperatorType.Subtract;
                         default:
                             throw new MemberAccessException("表达式错误");
                     }
@@ -150,7 +141,7 @@ namespace AccountingServer.BLL.Parsing
             }
 
             /// <inheritdoc />
-            public IQueryCompunded<IDetailQueryAtom> Filter1
+            public IQueryCompounded<IDetailQueryAtom> Filter1
             {
                 get
                 {
@@ -162,7 +153,7 @@ namespace AccountingServer.BLL.Parsing
             }
 
             /// <inheritdoc />
-            public IQueryCompunded<IDetailQueryAtom> Filter2 => details1();
+            public IQueryCompounded<IDetailQueryAtom> Filter2 => details1();
 
             /// <inheritdoc />
             public bool IsDangerous()
@@ -177,7 +168,7 @@ namespace AccountingServer.BLL.Parsing
                         return true;
                     case OperatorType.Union:
                         return Filter1.IsDangerous() || Filter2.IsDangerous();
-                    case OperatorType.Substract:
+                    case OperatorType.Subtract:
                         return Filter1.IsDangerous();
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -194,10 +185,10 @@ namespace AccountingServer.BLL.Parsing
             public OperatorType Operator => Op == null ? OperatorType.None : OperatorType.Intersect;
 
             /// <inheritdoc />
-            public IQueryCompunded<IDetailQueryAtom> Filter1 => details0();
+            public IQueryCompounded<IDetailQueryAtom> Filter1 => details0();
 
             /// <inheritdoc />
-            public IQueryCompunded<IDetailQueryAtom> Filter2 => details1();
+            public IQueryCompounded<IDetailQueryAtom> Filter2 => details1();
 
             /// <inheritdoc />
             public bool IsDangerous() => Filter1.IsDangerous() && (Filter2?.IsDangerous() ?? true);
@@ -212,11 +203,11 @@ namespace AccountingServer.BLL.Parsing
             public OperatorType Operator => OperatorType.None;
 
             /// <inheritdoc />
-            public IQueryCompunded<IDetailQueryAtom> Filter1 => detailQuery() ??
-                (IQueryCompunded<IDetailQueryAtom>)details();
+            public IQueryCompounded<IDetailQueryAtom> Filter1
+                => detailQuery() ?? (IQueryCompounded<IDetailQueryAtom>)details();
 
             /// <inheritdoc />
-            public IQueryCompunded<IDetailQueryAtom> Filter2 => null;
+            public IQueryCompounded<IDetailQueryAtom> Filter2 => null;
 
             /// <inheritdoc />
             public bool IsDangerous() => Filter1.IsDangerous();

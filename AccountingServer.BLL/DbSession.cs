@@ -105,7 +105,7 @@ namespace AccountingServer.BLL
         public Voucher SelectVoucher(string id)
             => Db.SelectVoucher(id);
 
-        public IEnumerable<Voucher> SelectVouchers(IQueryCompunded<IVoucherQueryAtom> query)
+        public IEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
             => Db.SelectVouchers(query);
 
         public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
@@ -128,7 +128,7 @@ namespace AccountingServer.BLL
         public bool DeleteVoucher(string id)
             => Db.DeleteVoucher(id);
 
-        public long DeleteVouchers(IQueryCompunded<IVoucherQueryAtom> query)
+        public long DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
             => Db.DeleteVouchers(query);
 
         public bool Upsert(Voucher entity)
@@ -156,13 +156,13 @@ namespace AccountingServer.BLL
         public Asset SelectAsset(Guid id)
             => Db.SelectAsset(id);
 
-        public IEnumerable<Asset> SelectAssets(IQueryCompunded<IDistributedQueryAtom> filter)
+        public IEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter)
             => Db.SelectAssets(filter);
 
         public bool DeleteAsset(Guid id)
             => Db.DeleteAsset(id);
 
-        public long DeleteAssets(IQueryCompunded<IDistributedQueryAtom> filter)
+        public long DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
             => Db.DeleteAssets(filter);
 
         public bool Upsert(Asset entity)
@@ -171,13 +171,13 @@ namespace AccountingServer.BLL
         public Amortization SelectAmortization(Guid id)
             => Db.SelectAmortization(id);
 
-        public IEnumerable<Amortization> SelectAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
+        public IEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
             => Db.SelectAmortizations(filter);
 
         public bool DeleteAmortization(Guid id)
             => Db.DeleteAmortization(id);
 
-        public long DeleteAmortizations(IQueryCompunded<IDistributedQueryAtom> filter)
+        public long DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
             => Db.DeleteAmortizations(filter);
 
         public bool Upsert(Amortization entity)

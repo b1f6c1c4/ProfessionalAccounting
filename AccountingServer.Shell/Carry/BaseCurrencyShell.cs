@@ -27,7 +27,7 @@ namespace AccountingServer.Shell.Carry
         public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             expr = expr.Rest();
-            switch (expr?.Initital())
+            switch (expr?.Initial())
             {
                 case "lst":
                     return ListHistory(expr.Rest());
@@ -41,7 +41,7 @@ namespace AccountingServer.Shell.Carry
         }
 
         /// <inheritdoc />
-        public bool IsExecutable(string expr) => expr.Initital() == "bc";
+        public bool IsExecutable(string expr) => expr.Initial() == "bc";
 
         /// <summary>
         ///     列出记账本位币变更历史

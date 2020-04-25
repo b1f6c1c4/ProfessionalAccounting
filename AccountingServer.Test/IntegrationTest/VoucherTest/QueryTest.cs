@@ -14,12 +14,10 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
     public abstract class QueryTestBase
     {
         protected QueryTestBase()
-        {
-            ClientUser.Set("b1");
-        }
+            => ClientUser.Set("b1");
 
         protected virtual void PrepareVoucher(Voucher voucher) { }
-        protected abstract bool RunQuery(IQueryCompunded<IVoucherQueryAtom> query);
+        protected abstract bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query);
         protected virtual void ResetVouchers() { }
 
         public virtual void RunTestA(bool expected, string query)
@@ -130,7 +128,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         private Voucher m_Voucher;
         protected override void PrepareVoucher(Voucher voucher) => m_Voucher = voucher;
 
-        protected override bool RunQuery(IQueryCompunded<IVoucherQueryAtom> query) => MatchHelper.IsMatch(
+        protected override bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query) => MatchHelper.IsMatch(
             m_Voucher,
             query);
 
@@ -158,7 +156,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
 
         protected override void PrepareVoucher(Voucher voucher) => m_Adapter.Upsert(voucher);
 
-        protected override bool RunQuery(IQueryCompunded<IVoucherQueryAtom> query) => m_Adapter.SelectVouchers(query)
+        protected override bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query) => m_Adapter.SelectVouchers(query)
             .SingleOrDefault() != null;
 
         protected override void ResetVouchers() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);

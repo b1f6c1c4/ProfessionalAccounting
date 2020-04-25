@@ -223,7 +223,7 @@ namespace AccountingServer.Shell.Util
         /// <param name="facade">占位符</param>
         /// <param name="expr">表达式</param>
         /// <returns>记账凭证检索式</returns>
-        public static IQueryCompunded<IVoucherQueryAtom> OptColVouchers(this FacadeBase facade, ref string expr)
+        public static IQueryCompounded<IVoucherQueryAtom> OptColVouchers(this FacadeBase facade, ref string expr)
             => Optional(facade, ref expr, ":") ? facade.VoucherQuery(ref expr) : null;
     }
 }

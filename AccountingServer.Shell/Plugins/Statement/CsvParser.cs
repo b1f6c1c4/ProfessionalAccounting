@@ -16,9 +16,7 @@ namespace AccountingServer.Shell.Plugins.Statement
         public List<BankItem> Items;
 
         public CsvParser(bool reversed)
-        {
-            m_Dir = reversed ? -1 : +1;
-        }
+            => m_Dir = reversed ? -1 : +1;
 
         private static string Next(ref string expr)
         {

@@ -37,7 +37,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     为两者差集
         /// </summary>
-        Substract,
+        Subtract,
 
         /// <summary>
         ///     为两者交集
@@ -80,7 +80,7 @@ namespace AccountingServer.Entities
     ///     一般检索式
     /// </summary>
     /// <typeparam name="TAtom">原子检索式的类型</typeparam>
-    public interface IQueryCompunded<TAtom> where TAtom : class
+    public interface IQueryCompounded<TAtom> where TAtom : class
     {
         /// <summary>
         ///     是否包含弱检索式
@@ -101,7 +101,7 @@ namespace AccountingServer.Entities
     ///     一般复合检索式
     /// </summary>
     /// <typeparam name="TAtom">原子检索式的类型</typeparam>
-    public interface IQueryAry<TAtom> : IQueryCompunded<TAtom> where TAtom : class
+    public interface IQueryAry<TAtom> : IQueryCompounded<TAtom> where TAtom : class
     {
         /// <summary>
         ///     运算符
@@ -111,12 +111,12 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     第一个检索式
         /// </summary>
-        IQueryCompunded<TAtom> Filter1 { get; }
+        IQueryCompounded<TAtom> Filter1 { get; }
 
         /// <summary>
         ///     第二个检索式
         /// </summary>
-        IQueryCompunded<TAtom> Filter2 { get; }
+        IQueryCompounded<TAtom> Filter2 { get; }
     }
 
     /// <summary>
@@ -134,7 +134,7 @@ namespace AccountingServer.Entities
     /// <summary>
     ///     原子细目检索式
     /// </summary>
-    public interface IDetailQueryAtom : IQueryCompunded<IDetailQueryAtom>
+    public interface IDetailQueryAtom : IQueryCompounded<IDetailQueryAtom>
     {
         /// <summary>
         ///     科目类型
@@ -166,7 +166,7 @@ namespace AccountingServer.Entities
     /// <summary>
     ///     原子记账凭证检索式
     /// </summary>
-    public interface IVoucherQueryAtom : IQueryCompunded<IVoucherQueryAtom>
+    public interface IVoucherQueryAtom : IQueryCompounded<IVoucherQueryAtom>
     {
         /// <summary>
         ///     对细目采用全称命题
@@ -186,7 +186,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     细目检索式
         /// </summary>
-        IQueryCompunded<IDetailQueryAtom> DetailFilter { get; }
+        IQueryCompounded<IDetailQueryAtom> DetailFilter { get; }
     }
 
     /// <summary>
@@ -197,7 +197,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     细目检索式
         /// </summary>
-        IQueryCompunded<IDetailQueryAtom> DetailFilter { get; }
+        IQueryCompounded<IDetailQueryAtom> DetailFilter { get; }
     }
 
     /// <summary>
@@ -208,7 +208,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     记账凭证检索式
         /// </summary>
-        IQueryCompunded<IVoucherQueryAtom> VoucherQuery { get; }
+        IQueryCompounded<IVoucherQueryAtom> VoucherQuery { get; }
 
         /// <summary>
         ///     细目映射检索式
@@ -328,7 +328,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     记账凭证检索式
         /// </summary>
-        IQueryCompunded<IVoucherQueryAtom> VoucherQuery { get; }
+        IQueryCompounded<IVoucherQueryAtom> VoucherQuery { get; }
 
         /// <summary>
         ///     分类汇总参数
@@ -339,7 +339,7 @@ namespace AccountingServer.Entities
     /// <summary>
     ///     分期检索式
     /// </summary>
-    public interface IDistributedQueryAtom : IQueryCompunded<IDistributedQueryAtom>
+    public interface IDistributedQueryAtom : IQueryCompounded<IDistributedQueryAtom>
     {
         /// <summary>
         ///     分期过滤器

@@ -154,7 +154,7 @@ namespace AccountingServer.Shell
         /// <param name="query">记账凭证检索式</param>
         /// <param name="serializer">表示器</param>
         /// <returns>记账凭证表达式</returns>
-        private IQueryResult PresentVoucherQuery(IQueryCompunded<IVoucherQueryAtom> query,
+        private IQueryResult PresentVoucherQuery(IQueryCompounded<IVoucherQueryAtom> query,
             IEntitiesSerializer serializer)
             => new PlainText(serializer.PresentVouchers(m_Accountant.SelectVouchers(query)));
 

@@ -41,7 +41,7 @@ namespace AccountingServer.BLL.Parsing
             public DateFilter Range => range().TheRange();
 
             /// <inheritdoc />
-            public IQueryCompunded<IDetailQueryAtom> DetailFilter => details();
+            public IQueryCompounded<IDetailQueryAtom> DetailFilter => details();
 
             /// <inheritdoc />
             public bool IsDangerous()
@@ -57,19 +57,11 @@ namespace AccountingServer.BLL.Parsing
             public OperatorType Operator => OperatorType.None;
 
             /// <inheritdoc />
-            public IQueryCompunded<IVoucherQueryAtom> Filter1
-            {
-                get
-                {
-                    if (voucherQuery() != null)
-                        return voucherQuery();
-
-                    return vouchers2();
-                }
-            }
+            public IQueryCompounded<IVoucherQueryAtom> Filter1
+                => (IQueryCompounded<IVoucherQueryAtom>)voucherQuery() ?? vouchers2();
 
             /// <inheritdoc />
-            public IQueryCompunded<IVoucherQueryAtom> Filter2 => throw new MemberAccessException("表达式错误");
+            public IQueryCompounded<IVoucherQueryAtom> Filter2 => throw new MemberAccessException("表达式错误");
 
             /// <inheritdoc />
             public bool IsDangerous() => Filter1.IsDangerous();
@@ -104,7 +96,7 @@ namespace AccountingServer.BLL.Parsing
                         case "+":
                             return OperatorType.Union;
                         case "-":
-                            return OperatorType.Substract;
+                            return OperatorType.Subtract;
                         default:
                             throw new MemberAccessException("表达式错误");
                     }
@@ -112,7 +104,7 @@ namespace AccountingServer.BLL.Parsing
             }
 
             /// <inheritdoc />
-            public IQueryCompunded<IVoucherQueryAtom> Filter1
+            public IQueryCompounded<IVoucherQueryAtom> Filter1
             {
                 get
                 {
@@ -124,7 +116,7 @@ namespace AccountingServer.BLL.Parsing
             }
 
             /// <inheritdoc />
-            public IQueryCompunded<IVoucherQueryAtom> Filter2 => vouchers1();
+            public IQueryCompounded<IVoucherQueryAtom> Filter2 => vouchers1();
 
             /// <inheritdoc />
             public bool IsDangerous()
@@ -139,7 +131,7 @@ namespace AccountingServer.BLL.Parsing
                         return true;
                     case OperatorType.Union:
                         return Filter1.IsDangerous() || Filter2.IsDangerous();
-                    case OperatorType.Substract:
+                    case OperatorType.Subtract:
                         return Filter1.IsDangerous();
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -156,10 +148,10 @@ namespace AccountingServer.BLL.Parsing
             public OperatorType Operator => Op == null ? OperatorType.None : OperatorType.Intersect;
 
             /// <inheritdoc />
-            public IQueryCompunded<IVoucherQueryAtom> Filter1 => vouchers0();
+            public IQueryCompounded<IVoucherQueryAtom> Filter1 => vouchers0();
 
             /// <inheritdoc />
-            public IQueryCompunded<IVoucherQueryAtom> Filter2 => vouchers1();
+            public IQueryCompounded<IVoucherQueryAtom> Filter2 => vouchers1();
 
             /// <inheritdoc />
             public bool IsDangerous() => Filter1.IsDangerous() && (Filter2?.IsDangerous() ?? true);
@@ -174,11 +166,11 @@ namespace AccountingServer.BLL.Parsing
             public OperatorType Operator => OperatorType.None;
 
             /// <inheritdoc />
-            public IQueryCompunded<IVoucherQueryAtom> Filter1 => voucherQuery() ??
-                (IQueryCompunded<IVoucherQueryAtom>)vouchers2();
+            public IQueryCompounded<IVoucherQueryAtom> Filter1 => voucherQuery() ??
+                (IQueryCompounded<IVoucherQueryAtom>)vouchers2();
 
             /// <inheritdoc />
-            public IQueryCompunded<IVoucherQueryAtom> Filter2 => null;
+            public IQueryCompounded<IVoucherQueryAtom> Filter2 => null;
 
             /// <inheritdoc />
             public bool IsDangerous() => Filter1.IsDangerous();
@@ -190,22 +182,14 @@ namespace AccountingServer.BLL.Parsing
         public partial class EmitContext : IEmit
         {
             /// <inheritdoc />
-            public IQueryCompunded<IDetailQueryAtom> DetailFilter => details();
+            public IQueryCompounded<IDetailQueryAtom> DetailFilter => details();
         }
 
         public partial class VoucherDetailQueryContext : IVoucherDetailQuery
         {
             /// <inheritdoc />
-            public IQueryCompunded<IVoucherQueryAtom> VoucherQuery
-            {
-                get
-                {
-                    if (voucherQuery() != null)
-                        return voucherQuery();
-
-                    return vouchers();
-                }
-            }
+            public IQueryCompounded<IVoucherQueryAtom> VoucherQuery
+                => (IQueryCompounded<IVoucherQueryAtom>)voucherQuery() ?? vouchers();
 
             /// <inheritdoc />
             public IEmit DetailEmitFilter => emit();

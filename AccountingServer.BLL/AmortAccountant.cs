@@ -108,7 +108,7 @@ namespace AccountingServer.BLL
         /// <param name="query">检索式</param>
         /// <returns>未注册的记账凭证</returns>
         public IEnumerable<Voucher> RegisterVouchers(Amortization amort, DateFilter rng,
-            IQueryCompunded<IVoucherQueryAtom> query)
+            IQueryCompounded<IVoucherQueryAtom> query)
         {
             if (amort.Remark == Amortization.IgnoranceMark)
                 yield break;
@@ -197,8 +197,8 @@ namespace AccountingServer.BLL
                 if (d.Remark == Amortization.IgnoranceMark)
                     continue;
 
-                UpdateDetail(d, voucher, out var sucess, out var mo, editOnly);
-                if (!sucess)
+                UpdateDetail(d, voucher, out var success, out var mo, editOnly);
+                if (!success)
                     return false;
 
                 modified |= mo;
@@ -312,7 +312,7 @@ namespace AccountingServer.BLL
             {
                 VoucherFilter = amort.Template;
                 DetailFilter = amort.Template.Details.Aggregate(
-                    (IQueryCompunded<IDetailQueryAtom>)DetailQueryUnconstrained.Instance,
+                    (IQueryCompounded<IDetailQueryAtom>)DetailQueryUnconstrained.Instance,
                     (query, filter) => new IntersectQueries<IDetailQueryAtom>(
                         query,
                         new RegisteringDetailQuery(filter)));
@@ -324,7 +324,7 @@ namespace AccountingServer.BLL
 
             public DateFilter Range => DateFilter.Unconstrained;
 
-            public IQueryCompunded<IDetailQueryAtom> DetailFilter { get; }
+            public IQueryCompounded<IDetailQueryAtom> DetailFilter { get; }
 
             public bool IsDangerous() => VoucherFilter.IsDangerous() && DetailFilter.IsDangerous();
 

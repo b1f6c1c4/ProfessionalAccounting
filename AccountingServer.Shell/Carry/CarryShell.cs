@@ -31,7 +31,7 @@ namespace AccountingServer.Shell.Carry
         public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
         {
             expr = expr.Rest();
-            switch (expr?.Initital())
+            switch (expr?.Initial())
             {
                 case "ap":
                     return DoCarry(expr.Rest());
@@ -43,7 +43,7 @@ namespace AccountingServer.Shell.Carry
         }
 
         /// <inheritdoc />
-        public bool IsExecutable(string expr) => expr.Initital() == "ca";
+        public bool IsExecutable(string expr) => expr.Initial() == "ca";
 
         /// <summary>
         ///     执行摊销

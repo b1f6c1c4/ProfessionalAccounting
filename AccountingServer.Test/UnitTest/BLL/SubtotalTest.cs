@@ -11,8 +11,7 @@ namespace AccountingServer.Test.UnitTest.BLL
     public class SubtotalTest
     {
         public SubtotalTest()
-        {
-            BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
+            => BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
                 new BaseCurrencyInfos
                     {
                         Infos = new List<BaseCurrencyInfo>
@@ -20,7 +19,6 @@ namespace AccountingServer.Test.UnitTest.BLL
                                 new BaseCurrencyInfo { Date = null, Currency = "CNY" },
                             },
                     });
-        }
 
         private readonly IExchange m_Exchange = new MockExchange
             {

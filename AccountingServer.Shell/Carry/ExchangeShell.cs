@@ -37,6 +37,6 @@ namespace AccountingServer.Shell.Carry
             return new PlainText((res * val.Value).ToString("R"));
         }
 
-        public bool IsExecutable(string expr) => expr.Initital() == "?e";
+        public bool IsExecutable(string expr) => expr.Initial() == "?e";
     }
 }
