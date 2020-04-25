@@ -77,7 +77,7 @@ namespace AccountingServer.BLL.Parsing
                             Title = t?.Title,
                             SubTitle = t?.SubTitle,
                             Content = token()?.GetPureText(),
-                            Remark = DoubleQuotedString()?.GetText().Dequotation()
+                            Remark = DoubleQuotedString()?.GetText().Dequotation(),
                         };
 
                     if (Floating() != null)

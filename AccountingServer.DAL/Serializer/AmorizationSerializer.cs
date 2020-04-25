@@ -26,7 +26,7 @@ namespace AccountingServer.DAL.Serializer
                     Name = bsonReader.ReadString("name", ref read),
                     Value = bsonReader.ReadDouble("value", ref read),
                     Date = bsonReader.ReadDateTime("date", ref read),
-                    TotalDays = bsonReader.ReadInt32("tday", ref read)
+                    TotalDays = bsonReader.ReadInt32("tday", ref read),
                 };
             switch (bsonReader.ReadString("interval", ref read))
             {

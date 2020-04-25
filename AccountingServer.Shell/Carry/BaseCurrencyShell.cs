@@ -135,18 +135,18 @@ namespace AccountingServer.Shell.Carry
                                                 Title = grpT.Title,
                                                 SubTitle = grpS.SubTitle,
                                                 Currency = grpC.Currency,
-                                                Fund = -oldb
+                                                Fund = -oldb,
                                             },
                                         new VoucherDetail
                                             {
                                                 Title = grpT.Title,
                                                 SubTitle = grpS.SubTitle,
                                                 Currency = to,
-                                                Fund = newb
+                                                Fund = newb,
                                             },
                                         new VoucherDetail { Title = 3999, Currency = grpC.Currency, Fund = oldb },
-                                        new VoucherDetail { Title = 3999, Currency = to, Fund = -newb }
-                                    }
+                                        new VoucherDetail { Title = 3999, Currency = to, Fund = -newb },
+                                    },
                         });
                 cnt++;
             }

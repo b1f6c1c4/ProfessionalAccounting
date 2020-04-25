@@ -39,7 +39,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                     Title = 1001,
                                     SubTitle = 05,
                                     Content = "cont1",
-                                    Fund = 123.45
+                                    Fund = 123.45,
                                 },
                             new VoucherDetail
                                 {
@@ -47,7 +47,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                     Currency = "JPY",
                                     Title = 1234,
                                     Remark = "remk2",
-                                    Fund = -123.45
+                                    Fund = -123.45,
                                 },
                             new VoucherDetail
                                 {
@@ -55,7 +55,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                     Currency = "USD",
                                     Title = 2345,
                                     Content = "cont3",
-                                    Fund = -77.66
+                                    Fund = -77.66,
                                 },
                             new VoucherDetail
                                 {
@@ -65,7 +65,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                     SubTitle = 05,
                                     Content = "cont4",
                                     Remark = "remk4",
-                                    Fund = 77.66
+                                    Fund = 77.66,
                                 },
                             new VoucherDetail
                                 {
@@ -73,9 +73,9 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                     Currency = "EUR",
                                     Title = 1111,
                                     SubTitle = 22,
-                                    Fund = 114514
-                                }
-                        }
+                                    Fund = 114514,
+                                },
+                        },
                 };
 
             ResetVouchers();
@@ -116,7 +116,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                     new object[] { true, "U@EUR" },
                     new object[] { true, "U'b1&b2'" },
                     new object[] { true, "Ub1+Ub1&b2 A" },
-                    new object[] { true, "U A" }
+                    new object[] { true, "U A" },
                 };
 
             public IEnumerator<object[]> GetEnumerator() => Data.GetEnumerator();

@@ -55,9 +55,9 @@ namespace AccountingServer.Http
                                             { "Access-Control-Allow-Origin", "*" },
                                             { "Access-Control-Allow-Methods", "*" },
                                             { "Access-Control-Allow-Headers", "*" },
-                                            { "Access-Control-Max-Time", "86400" }
+                                            { "Access-Control-Max-Time", "86400" },
                                         },
-                                    ResponseCode = 200
+                                    ResponseCode = 200,
                                 };
                         else
 #endif

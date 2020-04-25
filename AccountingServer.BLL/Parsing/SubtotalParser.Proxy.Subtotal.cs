@@ -46,7 +46,7 @@ namespace AccountingServer.BLL.Parsing
                                     SubtotalLevel.Title,
                                     SubtotalLevel.SubTitle,
                                     SubtotalLevel.User,
-                                    SubtotalLevel.Content
+                                    SubtotalLevel.Content,
                                 };
                         else
                             return new[]
@@ -54,7 +54,7 @@ namespace AccountingServer.BLL.Parsing
                                     SubtotalLevel.Title,
                                     SubtotalLevel.SubTitle,
                                     SubtotalLevel.User,
-                                    SubtotalLevel.Content
+                                    SubtotalLevel.Content,
                                 };
 
                     if (text == "v")

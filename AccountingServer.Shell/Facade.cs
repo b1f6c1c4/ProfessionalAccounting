@@ -51,7 +51,7 @@ namespace AccountingServer.Shell
                         new AssetShell(m_Accountant),
                         new AmortizationShell(m_Accountant),
                         new PluginShell(m_Accountant),
-                        new AccountingShell(m_Accountant)
+                        new AccountingShell(m_Accountant),
                     };
         }
 

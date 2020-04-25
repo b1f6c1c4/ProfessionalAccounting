@@ -60,7 +60,7 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                                     TargetCurrency = ds[0].Currency,
                                     TargetFund = -v1,
                                     OriginCurrency = ds[1].Currency,
-                                    OriginFund = v2
+                                    OriginFund = v2,
                                 });
                         continue;
                     }
@@ -75,7 +75,7 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                                     TargetCurrency = ds[1].Currency,
                                     TargetFund = -v2,
                                     OriginCurrency = ds[0].Currency,
-                                    OriginFund = v1
+                                    OriginFund = v1,
                                 });
                         continue;
                     }
@@ -120,8 +120,8 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                                     OriginCurrency = d1.Currency,
                                     OriginFund = d1.Fund.Value,
                                     TargetCurrency = d0.Currency,
-                                    TargetFund = d0.Fund.Value
-                                }
+                                    TargetFund = d0.Fund.Value,
+                                },
                         });
             }
 
@@ -198,7 +198,7 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                                         Title = 2241,
                                         SubTitle = 01,
                                         Content = content,
-                                        Fund = -to
+                                        Fund = -to,
                                     },
                                 new VoucherDetail { Currency = baseCurrency, Title = 3999, Fund = to },
                                 new VoucherDetail { Currency = currency, Title = 3999, Fund = -from },
@@ -209,10 +209,10 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                                             Title = 2241,
                                             SubTitle = 01,
                                             Content = content,
-                                            Fund = from
+                                            Fund = from,
                                         }
-                                    : new VoucherDetail { Currency = currency, Title = 6603, Fund = from }
-                            }
+                                    : new VoucherDetail { Currency = currency, Title = 6603, Fund = from },
+                            },
                     };
                 Accountant.Upsert(voucher);
                 lst.Add(voucher);

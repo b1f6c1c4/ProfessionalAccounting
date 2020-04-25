@@ -82,7 +82,7 @@ namespace AccountingServer.Shell.Serializer
                     DevaluationExpenseTitle = obj["devaluation"]?["expense"]?["title"]?.Value<int>(),
                     DevaluationExpenseSubTitle = obj["devaluation"]?["expense"]?["subtitle"]?.Value<int>(),
                     Remark = obj["remark"]?.Value<string>(),
-                    Schedule = schedule == null ? new List<AssetItem>() : schedule.Select(ParseAssetItem).ToList()
+                    Schedule = schedule == null ? new List<AssetItem>() : schedule.Select(ParseAssetItem).ToList(),
                 };
         }
 
@@ -117,7 +117,7 @@ namespace AccountingServer.Shell.Serializer
                     Interval = interval,
                     Template = ParseVoucher(obj["template"]),
                     Remark = obj["remark"]?.Value<string>(),
-                    Schedule = schedule == null ? new List<AmortItem>() : schedule.Select(ParseAmortItem).ToList()
+                    Schedule = schedule == null ? new List<AmortItem>() : schedule.Select(ParseAmortItem).ToList(),
                 };
         }
 
@@ -168,7 +168,7 @@ namespace AccountingServer.Shell.Serializer
                     Type = type,
                     Details = detail == null
                         ? new List<VoucherDetail>()
-                        : detail.Select(ParseVoucherDetail).ToList()
+                        : detail.Select(ParseVoucherDetail).ToList(),
                 };
         }
 
@@ -185,7 +185,7 @@ namespace AccountingServer.Shell.Serializer
                     VoucherID = obj["voucherId"]?.Value<string>(),
                     Amount = obj["amount"].Value<double>(),
                     Remark = obj["remark"]?.Value<string>(),
-                    Value = obj["value"]?.Value<double>() ?? 0
+                    Value = obj["value"]?.Value<double>() ?? 0,
                 };
         }
 
@@ -208,7 +208,7 @@ namespace AccountingServer.Shell.Serializer
                             VoucherID = voucherId,
                             Value = value,
                             Remark = remark,
-                            OrigValue = obj["origValue"].Value<double>()
+                            OrigValue = obj["origValue"].Value<double>(),
                         };
                 case "depreciation":
                     return new DepreciateItem
@@ -217,7 +217,7 @@ namespace AccountingServer.Shell.Serializer
                             VoucherID = voucherId,
                             Value = value,
                             Remark = remark,
-                            Amount = obj["amount"].Value<double>()
+                            Amount = obj["amount"].Value<double>(),
                         };
                 case "devaluation":
                     return new DevalueItem
@@ -226,7 +226,7 @@ namespace AccountingServer.Shell.Serializer
                             VoucherID = voucherId,
                             Value = value,
                             Remark = remark,
-                            FairValue = obj["fairValue"].Value<double>()
+                            FairValue = obj["fairValue"].Value<double>(),
                         };
                 case "disposition":
                     return new DispositionItem { Date = date, VoucherID = voucherId, Value = value, Remark = remark };
@@ -242,7 +242,7 @@ namespace AccountingServer.Shell.Serializer
                     { "date", voucher.Date?.ToString("yyyy-MM-dd") },
                     { "remark", voucher.Remark },
                     { "type", voucher.Type?.ToString() },
-                    { "detail", new JArray(voucher.Details.Select(PresentJson)) }
+                    { "detail", new JArray(voucher.Details.Select(PresentJson)) },
                 };
 
         private static JObject PresentJson(VoucherDetail detail)
@@ -254,7 +254,7 @@ namespace AccountingServer.Shell.Serializer
                     { "subtitle", detail.SubTitle },
                     { "content", detail.Content },
                     { "remark", detail.Remark },
-                    { "fund", detail.Fund }
+                    { "fund", detail.Fund },
                 };
 
         private static VoucherDetail ParseVoucherDetail(JToken obj)
@@ -266,7 +266,7 @@ namespace AccountingServer.Shell.Serializer
                     SubTitle = obj["subtitle"]?.Value<int?>(),
                     Content = obj["content"]?.Value<string>(),
                     Remark = obj["remark"]?.Value<string>(),
-                    Fund = obj["fund"]?.Value<double?>()
+                    Fund = obj["fund"]?.Value<double?>(),
                 };
 
         private static JObject PresentJson(Asset asset)
@@ -292,9 +292,9 @@ namespace AccountingServer.Shell.Serializer
                                     new JObject
                                         {
                                             { "title", asset.DepreciationExpenseTitle },
-                                            { "subtitle", asset.DepreciationExpenseSubTitle }
+                                            { "subtitle", asset.DepreciationExpenseSubTitle },
                                         }
-                                }
+                                },
                             }
                     },
                     {
@@ -307,13 +307,13 @@ namespace AccountingServer.Shell.Serializer
                                     new JObject
                                         {
                                             { "title", asset.DevaluationExpenseTitle },
-                                            { "subtitle", asset.DevaluationExpenseSubTitle }
+                                            { "subtitle", asset.DevaluationExpenseSubTitle },
                                         }
-                                }
+                                },
                             }
                     },
                     { "remark", asset.Remark },
-                    { "schedule", new JArray(asset.Schedule.Select(PresentJson)) }
+                    { "schedule", new JArray(asset.Schedule.Select(PresentJson)) },
                 };
 
         private static JObject PresentJson(AssetItem item)
@@ -323,7 +323,7 @@ namespace AccountingServer.Shell.Serializer
                     { "date", item.Date?.ToString("yyyy-MM-dd") },
                     { "voucherId", item.VoucherID },
                     { "value", item.Value },
-                    { "remark", item.Remark }
+                    { "remark", item.Remark },
                 };
 
             switch (item)
@@ -359,7 +359,7 @@ namespace AccountingServer.Shell.Serializer
                     { "interval", amort.Interval?.ToString() },
                     { "template", PresentJson(amort.Template) },
                     { "remark", amort.Remark },
-                    { "schedule", new JArray(amort.Schedule.Select(PresentJson)) }
+                    { "schedule", new JArray(amort.Schedule.Select(PresentJson)) },
                 };
 
         private static JObject PresentJson(AmortItem item)
@@ -369,7 +369,7 @@ namespace AccountingServer.Shell.Serializer
                     { "voucherId", item.VoucherID },
                     { "amount", item.Amount },
                     { "value", item.Value },
-                    { "remark", item.Remark }
+                    { "remark", item.Remark },
                 };
     }
 }

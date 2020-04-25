@@ -55,7 +55,7 @@ namespace AccountingServer.Shell
                                     var vouchers = Parsing.OptColVouchers(ref expr);
                                     Parsing.Eof(expr);
                                     return ExecuteResetHard(dist, vouchers);
-                                })
+                                }),
                     };
             m_Composer =
                 new ShellComposer
@@ -152,7 +152,7 @@ namespace AccountingServer.Shell
                                     var dist = Parsing.DistributedQuery(ref expr);
                                     Parsing.Eof(expr);
                                     return ExecuteList(dist, dt, false, serializer);
-                                })
+                                }),
                     };
         }
 

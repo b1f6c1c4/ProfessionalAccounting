@@ -18,7 +18,7 @@ namespace AccountingServer.DAL.Serializer
                     VoucherID = bsonReader.ReadObjectId("voucher", ref read),
                     Date = bsonReader.ReadDateTime("date", ref read),
                     Amount = bsonReader.ReadDouble("amount", ref read) ?? 0D,
-                    Remark = bsonReader.ReadString("remark", ref read)
+                    Remark = bsonReader.ReadString("remark", ref read),
                 };
             bsonReader.ReadEndDocument();
             return item;

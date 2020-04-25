@@ -139,7 +139,7 @@ namespace AccountingServer.Shell.Serializer
                     Remark = remark,
                     Type = type,
                     Date = date,
-                    Details = lst
+                    Details = lst,
                 };
         }
 
@@ -236,7 +236,7 @@ namespace AccountingServer.Shell.Serializer
                     SubTitle = title.SubTitle,
                     Content = string.IsNullOrEmpty(content) ? null : content,
                     Fund = fund,
-                    Remark = string.IsNullOrEmpty(remark) ? null : remark
+                    Remark = string.IsNullOrEmpty(remark) ? null : remark,
                 };
         }
 

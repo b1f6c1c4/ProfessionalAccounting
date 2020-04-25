@@ -231,7 +231,7 @@ namespace AccountingServer.BLL
                                 detail.Remark == AmortItem.IgnoranceMark
                                     ? detail.Fund
                                     : item.Amount * detail.Fund,
-                            Remark = item.Remark
+                            Remark = item.Remark,
                         })
                 .ToList();
             var voucher = new Voucher
@@ -239,7 +239,7 @@ namespace AccountingServer.BLL
                     Date = isCollapsed ? null : item.Date,
                     Type = template.Type,
                     Remark = template.Remark ?? "automatically generated",
-                    Details = lst
+                    Details = lst,
                 };
             var res = Db.Upsert(voucher);
             item.VoucherID = voucher.ID;

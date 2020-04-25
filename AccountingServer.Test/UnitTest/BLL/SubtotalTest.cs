@@ -17,15 +17,15 @@ namespace AccountingServer.Test.UnitTest.BLL
                     {
                         Infos = new List<BaseCurrencyInfo>
                             {
-                                new BaseCurrencyInfo { Date = null, Currency = "CNY" }
-                            }
+                                new BaseCurrencyInfo { Date = null, Currency = "CNY" },
+                            },
                     });
         }
 
         private readonly IExchange m_Exchange = new MockExchange
             {
                 { new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "JPY", 456 },
-                { new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "USD", 789 }
+                { new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "USD", 789 },
             };
 
         [Theory]
@@ -78,7 +78,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 {
                     new Balance { Date = null, Fund = 1 },
                     new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
-                    new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 }
+                    new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
                 };
 
             var res = builder.Build(bal);
@@ -164,7 +164,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             var bal = new[]
                 {
                     new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
-                    new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 }
+                    new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
                 };
 
             var res = builder.Build(bal);
@@ -313,27 +313,27 @@ namespace AccountingServer.Test.UnitTest.BLL
                         {
                             Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
                             Currency = "JPY",
-                            Fund = 2 / 2D / 456D
+                            Fund = 2 / 2D / 456D,
                         },
                     new Balance
                         {
                             Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
                             Currency = "JPY",
-                            Fund = 4 / 2D / 456D
+                            Fund = 4 / 2D / 456D,
                         },
                     new Balance { Date = null, Currency = "USD", Fund = 1 / 2D / 789D },
                     new Balance
                         {
                             Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
                             Currency = "USD",
-                            Fund = 2 / 2D / 789D
+                            Fund = 2 / 2D / 789D,
                         },
                     new Balance
                         {
                             Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
                             Currency = "USD",
-                            Fund = 4 / 2D / 789D
-                        }
+                            Fund = 4 / 2D / 789D,
+                        },
                 };
 
             var res = builder.Build(bal);
@@ -440,7 +440,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
                     new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
                     new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
-                    new Balance { Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 2 }
+                    new Balance { Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -465,13 +465,13 @@ namespace AccountingServer.Test.UnitTest.BLL
                         new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 8 + 1 },
                         new Balance
                             {
-                                Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 8 + 1 + 4
+                                Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 8 + 1 + 4,
                             },
                         new Balance
                             {
                                 Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
-                                Fund = 8 + 1 + 4 + 2
-                            }
+                                Fund = 8 + 1 + 4 + 2,
+                            },
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -488,26 +488,26 @@ namespace AccountingServer.Test.UnitTest.BLL
                         {
                             Currency = "JPY",
                             Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 8
+                            Fund = 8,
                         },
                     new Balance
                         {
                             Currency = "CNY",
                             Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 1
+                            Fund = 1,
                         },
                     new Balance
                         {
                             Currency = "USD",
                             Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 4
+                            Fund = 4,
                         },
                     new Balance
                         {
                             Currency = "CNY",
                             Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 2
-                        }
+                            Fund = 2,
+                        },
                 };
 
             var res = builder.Build(bal);
@@ -530,13 +530,14 @@ namespace AccountingServer.Test.UnitTest.BLL
                     {
                         new Balance
                             {
-                                Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 * 456 + 1
+                                Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
+                                Fund = 8 * 456 + 1,
                             },
                         new Balance
                             {
                                 Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
-                                Fund = 8 * 456 + 1 + 4 * 789 + 2
-                            }
+                                Fund = 8 * 456 + 1 + 4 * 789 + 2,
+                            },
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -552,7 +553,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     new Balance { Content = "JPY", Fund = 8 },
                     new Balance { Content = "CNY", Fund = 1 },
                     new Balance { Content = "USD", Fund = 4 },
-                    new Balance { Content = "CNY", Fund = 2 }
+                    new Balance { Content = "CNY", Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -574,7 +575,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     {
                         new Balance { Content = "JPY", Fund = 8 },
                         new Balance { Content = "CNY", Fund = 3 },
-                        new Balance { Content = "USD", Fund = 4 }
+                        new Balance { Content = "USD", Fund = 4 },
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -591,7 +592,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     new Balance { Currency = "JPY", Fund = 8 },
                     new Balance { Currency = "CNY", Fund = 1 },
                     new Balance { Currency = "USD", Fund = 4 },
-                    new Balance { Currency = "CNY", Fund = 2 }
+                    new Balance { Currency = "CNY", Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -613,7 +614,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     {
                         new Balance { Currency = "JPY", Fund = 8 },
                         new Balance { Currency = "CNY", Fund = 3 },
-                        new Balance { Currency = "USD", Fund = 4 }
+                        new Balance { Currency = "USD", Fund = 4 },
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -629,7 +630,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
                     new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
                     new Balance { Date = new DateTime(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
-                    new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 2 }
+                    new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -660,7 +661,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     new Balance { Currency = "JPY", Fund = 8 },
                     new Balance { Currency = "CNY", Fund = 1 },
                     new Balance { Currency = "USD", Fund = 4 },
-                    new Balance { Currency = "CNY", Fund = 2 }
+                    new Balance { Currency = "CNY", Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -679,7 +680,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
                     new Balance { Date = new DateTime(2017, 02, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
                     new Balance { Date = new DateTime(2017, 03, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
-                    new Balance { Date = new DateTime(2017, 04, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 2 }
+                    new Balance { Date = new DateTime(2017, 04, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -710,7 +711,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     new Balance { Remark = "JPY", Fund = 8 },
                     new Balance { Remark = "CNY", Fund = 1 },
                     new Balance { Remark = "USD", Fund = 4 },
-                    new Balance { Remark = "CNY", Fund = 2 }
+                    new Balance { Remark = "CNY", Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -732,7 +733,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     {
                         new Balance { Remark = "JPY", Fund = 8 },
                         new Balance { Remark = "CNY", Fund = 3 },
-                        new Balance { Remark = "USD", Fund = 4 }
+                        new Balance { Remark = "USD", Fund = 4 },
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -748,7 +749,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     new Balance { Title = 4567, Fund = 8 },
                     new Balance { Title = 1234, Fund = 1 },
                     new Balance { Title = 6543, Fund = 4 },
-                    new Balance { Title = 1234, Fund = 2 }
+                    new Balance { Title = 1234, Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -770,7 +771,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     {
                         new Balance { Title = 4567, Fund = 8 },
                         new Balance { Title = 1234, Fund = 3 },
-                        new Balance { Title = 6543, Fund = 4 }
+                        new Balance { Title = 6543, Fund = 4 },
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -790,7 +791,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     new Balance { Title = 4567, SubTitle = 01, Fund = 128 },
                     new Balance { Title = 1234, SubTitle = 02, Fund = 16 },
                     new Balance { Title = 6543, SubTitle = 01, Fund = 64 },
-                    new Balance { Title = 1234, SubTitle = 08, Fund = 32 }
+                    new Balance { Title = 1234, SubTitle = 08, Fund = 32 },
                 };
 
             var res = builder.Build(bal);
@@ -821,7 +822,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                         new Balance { Title = 1234, SubTitle = 02, Fund = 16 },
                         new Balance { Title = 1234, SubTitle = 08, Fund = 32 },
                         new Balance { Title = 6543, Fund = 4 },
-                        new Balance { Title = 6543, SubTitle = 01, Fund = 64 }
+                        new Balance { Title = 6543, SubTitle = 01, Fund = 64 },
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -837,7 +838,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     new Balance { User = "JPY", Fund = 8 },
                     new Balance { User = "CNY", Fund = 1 },
                     new Balance { User = "USD", Fund = 4 },
-                    new Balance { User = "CNY", Fund = 2 }
+                    new Balance { User = "CNY", Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -859,7 +860,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     {
                         new Balance { User = "JPY", Fund = 8 },
                         new Balance { User = "CNY", Fund = 3 },
-                        new Balance { User = "USD", Fund = 4 }
+                        new Balance { User = "USD", Fund = 4 },
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -875,7 +876,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
                     new Balance { Date = new DateTime(2017, 01, 09, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
                     new Balance { Date = new DateTime(2017, 01, 16, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
-                    new Balance { Date = new DateTime(2017, 01, 23, 0, 0, 0, DateTimeKind.Utc), Fund = 2 }
+                    new Balance { Date = new DateTime(2017, 01, 23, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -906,7 +907,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     new Balance { Date = new DateTime(2014, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
                     new Balance { Date = new DateTime(2015, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
                     new Balance { Date = new DateTime(2016, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
-                    new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 2 }
+                    new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
                 };
 
             var res = builder.Build(bal);

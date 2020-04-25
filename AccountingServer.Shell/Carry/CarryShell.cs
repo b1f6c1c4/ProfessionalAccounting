@@ -125,8 +125,8 @@ namespace AccountingServer.Shell.Carry
                         Value = 0D,
                         Voucher = new Voucher
                             {
-                                Date = ed, Type = VoucherType.Carry, Details = new List<VoucherDetail>()
-                            }
+                                Date = ed, Type = VoucherType.Carry, Details = new List<VoucherDetail>(),
+                            },
                     }).ToList();
             foreach (var task in tasks)
                 PartialCarry(task, rng, false);
@@ -163,12 +163,9 @@ namespace AccountingServer.Shell.Carry
                                         new VoucherDetail { Currency = baseCur, Title = 3999, Fund = -total },
                                         new VoucherDetail
                                             {
-                                                Currency = baseCur,
-                                                Title = 6603,
-                                                SubTitle = 03,
-                                                Fund = total
-                                            }
-                                    }
+                                                Currency = baseCur, Title = 6603, SubTitle = 03, Fund = total,
+                                            },
+                                    },
                             });
                     cnt++;
                 }
@@ -186,7 +183,7 @@ namespace AccountingServer.Shell.Carry
                                 Currency = BaseCurrency.At(task.Voucher.Date),
                                 Title = 4103,
                                 SubTitle = task.Target.IsSpecial ? 01 : (int?)null,
-                                Fund = task.Value
+                                Fund = task.Value,
                             });
 
                 if (task.Voucher.Details.Any())
@@ -229,7 +226,7 @@ namespace AccountingServer.Shell.Carry
                                 Title = grpt.Title,
                                 SubTitle = grps.SubTitle,
                                 Content = grpc.Content,
-                                Fund = -grpc.Fund
+                                Fund = -grpc.Fund,
                             });
 
                 if (b.IsZero())

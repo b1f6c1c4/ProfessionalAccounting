@@ -21,7 +21,7 @@ namespace AccountingServer.DAL.Serializer
                         {
                             Date = br.ReadDateTime("date", ref read).Value,
                             From = br.ReadString("from", ref read),
-                            To = br.ReadString("to", ref read)
+                            To = br.ReadString("to", ref read),
                         };
                     br.ReadEndDocument();
                     return rec;

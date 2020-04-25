@@ -21,14 +21,14 @@ namespace AccountingServer.DAL
 
         private static readonly BsonDocument ProjectDate = new BsonDocument
             {
-                ["_id"] = false, ["detail"] = true, ["date"] = true
+                ["_id"] = false, ["detail"] = true, ["date"] = true,
             };
 
         private static readonly BsonDocument ProjectNothing = new BsonDocument { ["_id"] = false };
 
         private static readonly BsonDocument ProjectNothingButDate = new BsonDocument
             {
-                ["_id"] = false, ["date"] = true
+                ["_id"] = false, ["date"] = true,
             };
 
         private static readonly BsonDocument ProjectDetail = new BsonDocument
@@ -39,7 +39,7 @@ namespace AccountingServer.DAL
                 ["subtitle"] = "$detail.subtitle",
                 ["content"] = "$detail.content",
                 ["fund"] = "$detail.fund",
-                ["remark"] = "$detail.remark"
+                ["remark"] = "$detail.remark",
             };
 
         private static readonly BsonDocument ProjectYear;
@@ -56,9 +56,9 @@ namespace AccountingServer.DAL
                     {
                         ["$not"] = new BsonDocument
                             {
-                                ["$gt"] = -VoucherDetail.Tolerance, ["$lt"] = +VoucherDetail.Tolerance
-                            }
-                    }
+                                ["$gt"] = -VoucherDetail.Tolerance, ["$lt"] = +VoucherDetail.Tolerance,
+                            },
+                    },
             };
 
         static MongoDbAdapter()
@@ -91,13 +91,13 @@ namespace AccountingServer.DAL
                                                                     {
                                                                         new BsonDocument
                                                                             {
-                                                                                ["$type"] = "$date"
+                                                                                ["$type"] = "$date",
                                                                             },
-                                                                        "missing"
-                                                                    }
+                                                                        "missing",
+                                                                    },
                                                             },
-                                                        ["then"] = BsonNull.Value
-                                                    }
+                                                        ["then"] = BsonNull.Value,
+                                                    },
                                             },
                                         ["default"] = new BsonDocument
                                             {
@@ -108,12 +108,12 @@ namespace AccountingServer.DAL
                                                             new BsonDocument
                                                                 {
                                                                     ["$multiply"] =
-                                                                        new BsonArray { days, 24 * 60 * 60 * 1000 }
-                                                                }
-                                                        }
-                                            }
-                                    }
-                            }
+                                                                        new BsonArray { days, 24 * 60 * 60 * 1000 },
+                                                                },
+                                                        },
+                                            },
+                                    },
+                            },
                     };
                 if (detail)
                     proj["detail"] = true;
@@ -122,11 +122,11 @@ namespace AccountingServer.DAL
 
             var year = new BsonDocument
                 {
-                    ["$subtract"] = new BsonArray { new BsonDocument { ["$dayOfYear"] = "$date" }, 1 }
+                    ["$subtract"] = new BsonArray { new BsonDocument { ["$dayOfYear"] = "$date" }, 1 },
                 };
             var month = new BsonDocument
                 {
-                    ["$subtract"] = new BsonArray { new BsonDocument { ["$dayOfMonth"] = "$date" }, 1 }
+                    ["$subtract"] = new BsonArray { new BsonDocument { ["$dayOfMonth"] = "$date" }, 1 },
                 };
             var week = new BsonDocument
                 {
@@ -136,11 +136,11 @@ namespace AccountingServer.DAL
                                 {
                                     ["$add"] = new BsonArray
                                         {
-                                            new BsonDocument { ["$dayOfWeek"] = "$date" }, 5
-                                        }
+                                            new BsonDocument { ["$dayOfWeek"] = "$date" }, 5,
+                                        },
                                 },
-                            7
-                        }
+                            7,
+                        },
                 };
 
             ProjectYear = MakeProject(year, true);

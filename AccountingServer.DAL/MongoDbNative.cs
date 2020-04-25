@@ -234,7 +234,7 @@ namespace AccountingServer.DAL
         {
             var lst = new List<FilterDefinition<Voucher>>
                 {
-                    GetNativeFilter(query.VoucherFilter), GetNativeFilter(query.Range)
+                    GetNativeFilter(query.VoucherFilter), GetNativeFilter(query.Range),
                 };
             var v = query.DetailFilter.Accept(new MongoDbNativeDetail());
             if (query.ForAll)

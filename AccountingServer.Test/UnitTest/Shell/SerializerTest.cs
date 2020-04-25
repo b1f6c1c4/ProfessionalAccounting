@@ -18,8 +18,8 @@ namespace AccountingServer.Test.UnitTest.Shell
                     {
                         Infos = new List<BaseCurrencyInfo>
                             {
-                                new BaseCurrencyInfo { Date = null, Currency = "CNY" }
-                            }
+                                new BaseCurrencyInfo { Date = null, Currency = "CNY" },
+                            },
                     });
 
             TitleManager.TitleInfos =
@@ -56,7 +56,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                                     Currency = "JPY",
                                     Title = 1001,
                                     Content = "%@!@#$%^&*(\nas\rdf\\",
-                                    Fund = 123.45
+                                    Fund = 123.45,
                                 },
                             new VoucherDetail
                                 {
@@ -65,7 +65,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                                     Title = 1002,
                                     SubTitle = 12,
                                     Fund = -123.45,
-                                    Remark = "\\qw\ter%@!@#$%^&*(%"
+                                    Remark = "\\qw\ter%@!@#$%^&*(%",
                                 },
                             new VoucherDetail
                                 {
@@ -73,9 +73,9 @@ namespace AccountingServer.Test.UnitTest.Shell
                                     Currency = "EUR",
                                     Title = 5555,
                                     Fund = -5,
-                                    Remark = "  7' 46r0*\" &)%\" *%)^ Q23'4"
-                                }
-                        }
+                                    Remark = "  7' 46r0*\" &)%\" *%)^ Q23'4",
+                                },
+                        },
                 };
 
             var voucher2 = serializer.ParseVoucher(serializer.PresentVoucher(voucher1));
@@ -94,7 +94,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                     new object[] { null, VoucherType.AnnualCarry },
                     new object[] { "2017-01-01", VoucherType.Depreciation },
                     new object[] { null, VoucherType.Devalue },
-                    new object[] { "2017-01-01", VoucherType.Amortization }
+                    new object[] { "2017-01-01", VoucherType.Amortization },
                 };
 
             public IEnumerator<object[]> GetEnumerator() => Data.GetEnumerator();
@@ -153,10 +153,10 @@ namespace AccountingServer.Test.UnitTest.Shell
                                             Title = 1234,
                                             SubTitle = 04,
                                             Content = "cnt",
-                                            Editable = false
+                                            Editable = false,
                                         },
-                                    new Abbreviation { Abbr = "abbr2", Title = 1234, Editable = true }
-                                }
+                                    new Abbreviation { Abbr = "abbr2", Title = 1234, Editable = true },
+                                },
                         });
 
         protected override IEntitySerializer GetSerializer() => new AbbrSerializer();
@@ -186,7 +186,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                                         SubTitle = 04,
                                         Content = "cnt",
                                         Remark = null,
-                                        Fund = 123
+                                        Fund = 123,
                                     },
                                 new VoucherDetail
                                     {
@@ -194,9 +194,9 @@ namespace AccountingServer.Test.UnitTest.Shell
                                         Currency = "CNY",
                                         Title = 1234,
                                         Content = "gg",
-                                        Fund = 765
-                                    }
-                            }
+                                        Fund = 765,
+                                    },
+                            },
                     },
                 voucher,
                 new VoucherEqualityComparer());
@@ -230,8 +230,8 @@ namespace AccountingServer.Test.UnitTest.Shell
                     {
                         Infos = new List<BaseCurrencyInfo>
                             {
-                                new BaseCurrencyInfo { Date = null, Currency = "CNY" }
-                            }
+                                new BaseCurrencyInfo { Date = null, Currency = "CNY" },
+                            },
                     });
 
             TitleManager.TitleInfos =
@@ -243,8 +243,8 @@ namespace AccountingServer.Test.UnitTest.Shell
                         {
                             Abbrs = new List<Abbreviation>
                                 {
-                                    new Abbreviation { Abbr = "aaa", Title = 1001, Editable = false }
-                                }
+                                    new Abbreviation { Abbr = "aaa", Title = 1001, Editable = false },
+                                },
                         });
 
             ClientUser.Set("b1");
@@ -321,18 +321,15 @@ d48
                             {
                                 new VoucherDetail
                                     {
-                                        User = "b1", Currency = "USD", Title = 1001, Fund = -29120
+                                        User = "b1", Currency = "USD", Title = 1001, Fund = -29120,
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "pn",
-                                        Currency = "USD",
-                                        Title = 1001,
-                                        Fund = 1000 + 500 + 6 - 8
+                                        User = "pn", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6 - 8,
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16
+                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16,
                                     },
                                 new VoucherDetail
                                     {
@@ -342,14 +339,14 @@ d48
                                         SubTitle = 66,
                                         Content = "hei",
                                         Remark = "ha",
-                                        Fund = 500 + 2
+                                        Fund = 500 + 2,
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "pn", Currency = "USD", Title = 6603, Fund = -50 - 16
+                                        User = "pn", Currency = "USD", Title = 6603, Fund = -50 - 16,
                                     },
-                                new VoucherDetail { User = "b1", Currency = "USD", Title = 6603, Fund = -8 }
-                            }
+                                new VoucherDetail { User = "b1", Currency = "USD", Title = 6603, Fund = -8 },
+                            },
                     },
                 voucher,
                 new VoucherEqualityComparer());
@@ -392,14 +389,11 @@ dnull
                                 new VoucherDetail { User = "b1", Currency = "USD", Title = 1001, Fund = -2864 },
                                 new VoucherDetail
                                     {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1001,
-                                        Fund = 1000 + 500 + 6 - 8
+                                        User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6 - 8,
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16
+                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16,
                                     },
                                 new VoucherDetail
                                     {
@@ -409,13 +403,13 @@ dnull
                                         SubTitle = 66,
                                         Content = "hei",
                                         Remark = "ha",
-                                        Fund = 500 + 2
+                                        Fund = 500 + 2,
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8
-                                    }
-                            }
+                                        User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8,
+                                    },
+                            },
                     },
                 voucher,
                 new VoucherEqualityComparer());
@@ -447,18 +441,15 @@ d8
                             {
                                 new VoucherDetail
                                     {
-                                        User = "b1", Currency = "USD", Title = 1001, Fund = -29120
+                                        User = "b1", Currency = "USD", Title = 1001, Fund = -29120,
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1001,
-                                        Fund = 1000 + 500 + 6 - 8
+                                        User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6 - 8,
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16
+                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16,
                                     },
                                 new VoucherDetail
                                     {
@@ -468,13 +459,13 @@ d8
                                         SubTitle = 66,
                                         Content = "hei",
                                         Remark = "ha",
-                                        Fund = 500 + 2
+                                        Fund = 500 + 2,
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8
-                                    }
-                            }
+                                        User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8,
+                                    },
+                            },
                     },
                 voucher,
                 new VoucherEqualityComparer());
@@ -505,14 +496,11 @@ tnull
                                 new VoucherDetail { User = "b1", Currency = "USD", Title = 1001, Fund = -2864 },
                                 new VoucherDetail
                                     {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1001,
-                                        Fund = 1000 + 500 + 6 - 8
+                                        User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6 - 8,
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16
+                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16,
                                     },
                                 new VoucherDetail
                                     {
@@ -522,13 +510,13 @@ tnull
                                         SubTitle = 66,
                                         Content = "hei",
                                         Remark = "ha",
-                                        Fund = 500 + 2
+                                        Fund = 500 + 2,
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8
-                                    }
-                            }
+                                        User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8,
+                                    },
+                            },
                     },
                 voucher,
                 new VoucherEqualityComparer());
@@ -559,11 +547,11 @@ t2
                                 new VoucherDetail { User = "b1", Currency = "CNY", Title = 1001, Fund = -2912 },
                                 new VoucherDetail
                                     {
-                                        User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6
+                                        User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6,
                                     },
                                 new VoucherDetail
                                     {
-                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4
+                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4,
                                     },
                                 new VoucherDetail
                                     {
@@ -571,10 +559,10 @@ t2
                                         Currency = "USD",
                                         Title = 1003,
                                         SubTitle = 66,
-                                        Fund = 500 + 2
+                                        Fund = 500 + 2,
                                     },
-                                new VoucherDetail { User = "b1", Currency = "USD", Title = 6603, Fund = -50 }
-                            }
+                                new VoucherDetail { User = "b1", Currency = "USD", Title = 6603, Fund = -50 },
+                            },
                     },
                 voucher,
                 new VoucherEqualityComparer());

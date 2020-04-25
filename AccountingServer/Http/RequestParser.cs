@@ -21,7 +21,7 @@ namespace AccountingServer.Http
                     BaseUri = baseUri,
                     Parameters = par,
                     Header = new Dictionary<string, string>(),
-                    RequestStream = stream
+                    RequestStream = stream,
                 };
             while (true)
             {
@@ -179,7 +179,7 @@ namespace AccountingServer.Http
             Method,
             Uri,
             HeaderKey,
-            HeaderValue
+            HeaderValue,
         }
     }
 }

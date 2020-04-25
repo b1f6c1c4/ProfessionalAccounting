@@ -18,7 +18,7 @@ namespace AccountingServer.Shell.Plugins.Utilities
     {
         [XmlEnum(Name = "fixed")] Fixed,
         [XmlEnum(Name = "value")] Value,
-        [XmlEnum(Name = "fill")] Fill
+        [XmlEnum(Name = "fill")] Fill,
     }
 
     [Serializable]

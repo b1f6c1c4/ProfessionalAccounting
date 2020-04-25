@@ -48,7 +48,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                     Currency = "CNY",
                                     Title = 1001,
                                     Content = "asdf",
-                                    Fund = 123.45
+                                    Fund = 123.45,
                                 },
                             new VoucherDetail
                                 {
@@ -57,9 +57,9 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                     Title = 1002,
                                     SubTitle = 12,
                                     Fund = -123.45,
-                                    Remark = "qwer"
-                                }
-                        }
+                                    Remark = "qwer",
+                                },
+                        },
                 };
 
             m_Adapter.Upsert(voucher1);

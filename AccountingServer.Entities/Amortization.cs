@@ -41,7 +41,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     每年最后一天
         /// </summary>
-        LastDayOfYear
+        LastDayOfYear,
     }
 
     /// <summary>

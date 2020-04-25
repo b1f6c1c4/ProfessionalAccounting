@@ -106,7 +106,7 @@ namespace AccountingServer.Shell.Plugins.Utilities
                                     Fund = num * d.Fund,
                                     Remark = d.Remark == "G()"
                                         ? Guid.NewGuid().ToString().ToUpperInvariant()
-                                        : d.Remark
+                                        : d.Remark,
                                 })
                     .ToList();
             var voucher = new Voucher { Date = time, Remark = template.Remark, Type = template.Type, Details = lst };

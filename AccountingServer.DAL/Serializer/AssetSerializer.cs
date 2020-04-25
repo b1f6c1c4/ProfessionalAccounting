@@ -32,7 +32,7 @@ namespace AccountingServer.DAL.Serializer
                     DepreciationTitle = bsonReader.ReadInt32("deptitle", ref read),
                     DevaluationTitle = bsonReader.ReadInt32("devtitle", ref read),
                     DepreciationExpenseTitle = bsonReader.ReadInt32("exptitle", ref read),
-                    DevaluationExpenseTitle = bsonReader.ReadInt32("exvtitle", ref read)
+                    DevaluationExpenseTitle = bsonReader.ReadInt32("exvtitle", ref read),
                 };
             switch (bsonReader.ReadString("method", ref read))
             {
