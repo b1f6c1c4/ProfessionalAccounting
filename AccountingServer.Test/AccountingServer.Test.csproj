@@ -69,6 +69,7 @@
     <Compile Include="IntegrationTest\VoucherTest\QueryTest.cs" />
     <Compile Include="IntegrationTest\VoucherTest\SecurityTest.cs" />
     <Compile Include="IntegrationTest\VoucherTest\SubtotalTest.cs" />
+    <Compile Include="UnitTest\BLL\ParseTest.cs" />
     <Compile Include="UnitTest\BLL\QuotedStringTest.cs" />
     <Compile Include="UnitTest\BLL\SubtotalTest.cs" />
     <Compile Include="UnitTest\Entities\AccountantHelperTest.cs" />
