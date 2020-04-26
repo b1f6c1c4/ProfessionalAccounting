@@ -4,8 +4,11 @@ using System.Collections.Generic;
 namespace AccountingServer.Entities
 {
     // ReSharper disable once ClassNeverInstantiated.Global
+    // ReSharper disable once ConvertToStaticClass
     public sealed class Nothing
     {
+        private Nothing() { }
+
         public static Nothing AtAll => null;
     }
 
