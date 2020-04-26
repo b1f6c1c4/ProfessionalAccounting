@@ -55,6 +55,7 @@ namespace AccountingServer.DAL.Serializer
                     bsonWriter.WriteNull("dispo");
                     break;
             }
+
             bsonWriter.WriteEndDocument();
         }
     }

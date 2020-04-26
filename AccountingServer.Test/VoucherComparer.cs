@@ -91,7 +91,7 @@ namespace AccountingServer.Test
 
         public int GetHashCode(Balance obj) => obj.Fund.GetHashCode();
     }
-    
+
     public class DistributedItemEqualityComparer : IEqualityComparer<IDistributedItem>
     {
         public bool Equals(IDistributedItem x, IDistributedItem y)

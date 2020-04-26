@@ -144,7 +144,7 @@ namespace AccountingServer.Test
     public class AmortEqualityComparer : DistributedEqualityComparer, IEqualityComparer<Amortization>
     {
         private readonly VoucherEqualityComparer m_Comparer = new VoucherEqualityComparer();
-        
+
         public bool Equals(Amortization x, Amortization y)
         {
             if (!base.Equals(x, y))
