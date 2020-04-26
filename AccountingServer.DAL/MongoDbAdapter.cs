@@ -176,7 +176,7 @@ namespace AccountingServer.DAL
             var res = collection.ReplaceOne(
                 Builders<T>.Filter.Eq("_id", idProvider.GetId(entity)),
                 entity,
-                new UpdateOptions { IsUpsert = true });
+                new ReplaceOptions { IsUpsert = true });
             return res.ModifiedCount <= 1;
         }
 
@@ -389,7 +389,7 @@ namespace AccountingServer.DAL
             var res = m_Assets.ReplaceOne(
                 Builders<Asset>.Filter.Eq("_id", entity.ID),
                 entity,
-                new UpdateOptions { IsUpsert = true });
+                new ReplaceOptions { IsUpsert = true });
             return res.ModifiedCount <= 1;
         }
 
@@ -426,7 +426,7 @@ namespace AccountingServer.DAL
             var res = m_Amortizations.ReplaceOne(
                 Builders<Amortization>.Filter.Eq("_id", entity.ID),
                 entity,
-                new UpdateOptions { IsUpsert = true });
+                new ReplaceOptions { IsUpsert = true });
             return res.ModifiedCount <= 1;
         }
 
