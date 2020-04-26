@@ -28,21 +28,17 @@ namespace AccountingServer.Test.UnitTest.Shell
             ClientUser.Set("b1");
         }
 
-        protected abstract IEntitySerializer GetSerializer();
+        protected abstract IEntitySerializer Serializer { get; }
 
         public virtual void SimpleTest()
         {
-            var serializer = GetSerializer();
-
-            Assert.NotNull(serializer.PresentVoucher(null));
-            Assert.Throws<FormatException>(() => serializer.ParseVoucher(""));
-            Assert.Throws<FormatException>(() => serializer.ParseVoucher("new Voucher {"));
+            Assert.NotNull(Serializer.PresentVoucher(null));
+            Assert.Throws<FormatException>(() => Serializer.ParseVoucher(""));
+            Assert.Throws<FormatException>(() => Serializer.ParseVoucher("new Voucher {"));
         }
 
         public virtual void VoucherTest(string dt, VoucherType type)
         {
-            var serializer = GetSerializer();
-
             var voucher1 = new Voucher
                 {
                     Date = dt.ToDateTime(),
@@ -78,7 +74,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                         },
                 };
 
-            var voucher2 = serializer.ParseVoucher(serializer.PresentVoucher(voucher1));
+            var voucher2 = Serializer.ParseVoucher(Serializer.PresentVoucher(voucher1));
             voucher2.Type = voucher2.Type ?? VoucherType.Ordinary;
 
             Assert.Equal(voucher1, voucher2, new VoucherEqualityComparer());
@@ -104,7 +100,7 @@ namespace AccountingServer.Test.UnitTest.Shell
 
     public class CSharpSerializerTest : SerializerTest
     {
-        protected override IEntitySerializer GetSerializer() => new CSharpSerializer();
+        protected override IEntitySerializer Serializer { get; } = new CSharpSerializer();
 
         [Theory]
         [ClassData(typeof(DataProvider))]
@@ -118,7 +114,7 @@ namespace AccountingServer.Test.UnitTest.Shell
 
     public class ExprSerializerTest : SerializerTest
     {
-        protected override IEntitySerializer GetSerializer() => new ExprSerializer();
+        protected override IEntitySerializer Serializer { get; } = new ExprSerializer();
 
         [Theory]
         [ClassData(typeof(DataProvider))]
@@ -127,11 +123,7 @@ namespace AccountingServer.Test.UnitTest.Shell
 
         [Fact]
         public void OtherTest()
-        {
-            var serializer = GetSerializer();
-
-            Assert.Null(serializer.ParseVoucher(@"new Voucher { T1001 null }").Details.Single().Fund);
-        }
+            => Assert.Null(Serializer.ParseVoucher(@"new Voucher { T1001 null }").Details.Single().Fund);
 
         [Fact]
         public override void SimpleTest()
@@ -159,7 +151,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                                 },
                         });
 
-        protected override IEntitySerializer GetSerializer() => new AbbrSerializer();
+        protected override IEntitySerializer Serializer => new AbbrSerializer();
 
         [Theory]
         [ClassData(typeof(DataProvider))]
@@ -169,9 +161,7 @@ namespace AccountingServer.Test.UnitTest.Shell
         [Fact]
         public void OtherTest()
         {
-            var serializer = GetSerializer();
-
-            var voucher = serializer.ParseVoucher(@"new Voucher { abbr1 123 abbr2 ""gg"" 765 }");
+            var voucher = Serializer.ParseVoucher(@"new Voucher { abbr1 123 abbr2 ""gg"" 765 }");
             Assert.Equal(
                 new Voucher
                     {
@@ -209,7 +199,7 @@ namespace AccountingServer.Test.UnitTest.Shell
 
     public class JsonSerializerTest : SerializerTest
     {
-        protected override IEntitySerializer GetSerializer() => new JsonSerializer();
+        protected override IEntitySerializer Serializer { get; } = new JsonSerializer();
 
         [Theory]
         [ClassData(typeof(DataProvider))]
