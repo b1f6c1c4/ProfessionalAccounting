@@ -65,10 +65,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DistributedComparer.cs" />
     <Compile Include="IntegrationTest\VoucherTest\DbTest.cs" />
     <Compile Include="IntegrationTest\VoucherTest\QueryTest.cs" />
     <Compile Include="IntegrationTest\VoucherTest\SecurityTest.cs" />
     <Compile Include="IntegrationTest\VoucherTest\SubtotalTest.cs" />
+    <Compile Include="Mock.cs" />
     <Compile Include="UnitTest\BLL\ParseTest.cs" />
     <Compile Include="UnitTest\BLL\QuotedStringTest.cs" />
     <Compile Include="UnitTest\BLL\SubtotalTest.cs" />
@@ -80,6 +82,7 @@
     <Compile Include="UnitTest\Shell\ParseTest.cs" />
     <Compile Include="UnitTest\Shell\SerializerTest.cs" />
     <Compile Include="Util.cs" />
+    <Compile Include="VoucherComparer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
