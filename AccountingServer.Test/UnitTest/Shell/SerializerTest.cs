@@ -42,7 +42,7 @@ namespace AccountingServer.Test.UnitTest.Shell
             Assert.NotNull(Serializer.PresentAsset(null));
             Assert.Throws<FormatException>(() => Serializer.ParseAsset(""));
             Assert.Throws<FormatException>(() => Serializer.ParseAsset("new Asset {"));
-            
+
             Assert.NotNull(Serializer.PresentAmort(null));
             Assert.Throws<FormatException>(() => Serializer.ParseAmort(""));
             Assert.Throws<FormatException>(() => Serializer.ParseAmort("new Amortization {"));
@@ -89,10 +89,10 @@ namespace AccountingServer.Test.UnitTest.Shell
         public override void AmortTest(string dt, AmortizeInterval type) => base.AmortTest(dt, type);
 
         [Fact]
-        public override void SimpleVoucherTest() => base.SimpleVoucherTest();
+        public override void SimpleAssetAmortTest() => base.SimpleAssetAmortTest();
 
         [Fact]
-        public override void SimpleAssetAmortTest() => base.SimpleAssetAmortTest();
+        public override void SimpleVoucherTest() => base.SimpleVoucherTest();
     }
 
     [Collection("SerializerTestCollection")]
@@ -105,13 +105,6 @@ namespace AccountingServer.Test.UnitTest.Shell
         public override void VoucherTest(string dt, VoucherType type) => base.VoucherTest(dt, type);
 
         [Fact]
-        public void OtherTest()
-            => Assert.Null(Serializer.ParseVoucher(@"new Voucher { T1001 null }").Details.Single().Fund);
-
-        [Fact]
-        public override void SimpleVoucherTest() => base.SimpleVoucherTest();
-
-        [Fact]
         public void NotImplementedTest()
         {
             Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
@@ -119,6 +112,13 @@ namespace AccountingServer.Test.UnitTest.Shell
             Assert.Throws<NotImplementedException>(() => Serializer.PresentAmort(null));
             Assert.Throws<NotImplementedException>(() => Serializer.ParseAmort(null));
         }
+
+        [Fact]
+        public void OtherTest()
+            => Assert.Null(Serializer.ParseVoucher(@"new Voucher { T1001 null }").Details.Single().Fund);
+
+        [Fact]
+        public override void SimpleVoucherTest() => base.SimpleVoucherTest();
     }
 
     [Collection("SerializerTestCollection")]
@@ -148,6 +148,15 @@ namespace AccountingServer.Test.UnitTest.Shell
         [Theory]
         [ClassData(typeof(VoucherDataProvider))]
         public override void VoucherTest(string dt, VoucherType type) => base.VoucherTest(dt, type);
+
+        [Fact]
+        public void NotImplementedTest()
+        {
+            Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
+            Assert.Throws<NotImplementedException>(() => Serializer.ParseAsset(null));
+            Assert.Throws<NotImplementedException>(() => Serializer.PresentAmort(null));
+            Assert.Throws<NotImplementedException>(() => Serializer.ParseAmort(null));
+        }
 
         [Fact]
         public void OtherTest()
@@ -185,15 +194,6 @@ namespace AccountingServer.Test.UnitTest.Shell
 
         [Fact]
         public override void SimpleVoucherTest() => base.SimpleVoucherTest();
-
-        [Fact]
-        public void NotImplementedTest()
-        {
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseAsset(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentAmort(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseAmort(null));
-        }
     }
 
     [Collection("SerializerTestCollection")]
@@ -214,10 +214,10 @@ namespace AccountingServer.Test.UnitTest.Shell
         public override void AmortTest(string dt, AmortizeInterval type) => base.AmortTest(dt, type);
 
         [Fact]
-        public override void SimpleVoucherTest() => base.SimpleVoucherTest();
+        public override void SimpleAssetAmortTest() => base.SimpleAssetAmortTest();
 
         [Fact]
-        public override void SimpleAssetAmortTest() => base.SimpleAssetAmortTest();
+        public override void SimpleVoucherTest() => base.SimpleVoucherTest();
     }
 
     [Collection("SerializerTestCollection")]
@@ -346,6 +346,20 @@ d48
                     },
                 voucher,
                 new VoucherEqualityComparer());
+        }
+
+        [Fact]
+        public void NotImplementedTest()
+        {
+            Assert.Throws<NotImplementedException>(() => Serializer.PresentVoucher(null));
+            Assert.Throws<NotImplementedException>(() => Serializer.PresentVoucherDetail((VoucherDetail)null));
+            // ReSharper disable once RedundantCast
+            Assert.Throws<NotImplementedException>(() => Serializer.PresentVoucherDetail((VoucherDetailR)null));
+
+            Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
+            Assert.Throws<NotImplementedException>(() => Serializer.ParseAsset(null));
+            Assert.Throws<NotImplementedException>(() => Serializer.PresentAmort(null));
+            Assert.Throws<NotImplementedException>(() => Serializer.ParseAmort(null));
         }
 
         [Fact]
@@ -553,26 +567,23 @@ t2
                 voucher,
                 new VoucherEqualityComparer());
         }
+    }
+
+    [Collection("SerializerTestCollection")]
+    public class CsvDefaultSerializerTest : SerializerTest
+    {
+        protected override IEntitySerializer Serializer { get; } = new CsvSerializer("");
 
         [Fact]
         public void NotImplementedTest()
         {
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentVoucher(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentVoucherDetail((VoucherDetail)null));
-            // ReSharper disable once RedundantCast
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentVoucherDetail((VoucherDetailR)null));
-            
+            Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher(null));
+            Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucherDetail(null));
             Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
             Assert.Throws<NotImplementedException>(() => Serializer.ParseAsset(null));
             Assert.Throws<NotImplementedException>(() => Serializer.PresentAmort(null));
             Assert.Throws<NotImplementedException>(() => Serializer.ParseAmort(null));
         }
-    }
-    
-    [Collection("SerializerTestCollection")]
-    public class CsvDefaultSerializerTest : SerializerTest
-    {
-        protected override IEntitySerializer Serializer { get; } = new CsvSerializer("");
 
         [Fact]
         public void OtherTest()
@@ -596,7 +607,7 @@ t2
                                 },
                         },
                 });
-            
+
             Assert.Contains("hhh", r);
             Assert.DoesNotContain("Carry", r);
             Assert.Contains("b1", r);
@@ -607,6 +618,12 @@ t2
             Assert.Contains("rmk", r);
             Assert.Contains("123", r);
         }
+    }
+
+    [Collection("SerializerTestCollection")]
+    public class CsvCustomSerializerTest : SerializerTest
+    {
+        protected override IEntitySerializer Serializer { get; } = new CsvSerializer("type d C v r c s t id U s' t'");
 
         [Fact]
         public void NotImplementedTest()
@@ -618,12 +635,6 @@ t2
             Assert.Throws<NotImplementedException>(() => Serializer.PresentAmort(null));
             Assert.Throws<NotImplementedException>(() => Serializer.ParseAmort(null));
         }
-    }
-    
-    [Collection("SerializerTestCollection")]
-    public class CsvCustomSerializerTest : SerializerTest
-    {
-        protected override IEntitySerializer Serializer { get; } = new CsvSerializer("type d C v r c s t id U s' t'");
 
         [Fact]
         public void OtherTest()
@@ -647,7 +658,7 @@ t2
                                 },
                         },
                 });
-            
+
             Assert.Contains("hhh", r);
             Assert.Contains("Carry", r);
             Assert.Contains("b1", r);
@@ -657,17 +668,6 @@ t2
             Assert.Contains("cnt", r);
             Assert.Contains("rmk", r);
             Assert.Contains("123", r);
-        }
-
-        [Fact]
-        public void NotImplementedTest()
-        {
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucherDetail(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseAsset(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentAmort(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseAmort(null));
         }
     }
 }
