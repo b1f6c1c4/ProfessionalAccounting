@@ -15,7 +15,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
 
         public DbTest()
         {
-            m_Adapter = Facade.Create("mongodb://localhost/accounting-test");
+            m_Adapter = Facade.Create(db: "accounting-test");
 
             m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
 
@@ -24,6 +24,10 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
 
         public void Dispose()
             => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+
+        [Fact]
+        public void UriInvalidTest()
+            => Assert.Throws<NotSupportedException>(() => Facade.Create("http:///"));
 
         [Theory]
         [InlineData(null, VoucherType.Ordinary)]

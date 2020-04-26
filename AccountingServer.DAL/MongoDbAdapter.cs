@@ -152,12 +152,12 @@ namespace AccountingServer.DAL
             ProjectNothingButWeek = MakeProject(week, false);
         }
 
-        public MongoDbAdapter(string uri)
+        public MongoDbAdapter(string uri, string db = null)
         {
             var url = new MongoUrl(uri);
             m_Client = new MongoClient(MongoClientSettings.FromUrl(url));
 
-            m_Db = m_Client.GetDatabase(url.DatabaseName ?? "accounting");
+            m_Db = m_Client.GetDatabase(db ?? url.DatabaseName ?? "accounting");
 
             m_Vouchers = m_Db.GetCollection<Voucher>("voucher");
             m_Assets = m_Db.GetCollection<Asset>("asset");

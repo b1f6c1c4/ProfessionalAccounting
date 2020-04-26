@@ -16,19 +16,15 @@ namespace AccountingServer.BLL.Parsing
         {
             var t = res.GetText();
             var i = 0;
-            var j = 0;
-            while (j < t.Length)
+            for (var j = 0; j < t.Length; i++)
             {
                 if (s[i] == t[j])
                 {
-                    i++;
                     j++;
                     continue;
                 }
 
-                if (char.IsWhiteSpace(s[i]))
-                    i++;
-                else
+                if (!char.IsWhiteSpace(s[i]))
                     throw new ApplicationException("内部错误");
             }
 
@@ -36,7 +32,7 @@ namespace AccountingServer.BLL.Parsing
             return res;
         }
 
-        internal virtual T Parse<T>(ref string s, Func<QueryParser, T> func)
+        internal virtual T QueryParse<T>(ref string s, Func<QueryParser, T> func)
             where T : RuleContext
         {
             var stream = new AntlrInputStream(s);
@@ -64,32 +60,32 @@ namespace AccountingServer.BLL.Parsing
             => Title(ref s);
 
         public ITitle Title(ref string s)
-            => Parse(ref s, p => p.title());
+            => QueryParse(ref s, p => p.title());
 
         public DateTime? UniqueTime(string s)
             => UniqueTime(ref s);
 
         public DateTime? UniqueTime(ref string s)
-            => Parse(ref s, p => p.uniqueTime());
+            => QueryParse(ref s, p => p.uniqueTime());
 
         public DateFilter Range(string s)
             => Range(ref s);
 
         public DateFilter Range(ref string s)
-            => Parse(ref s, p => p.range())?.Range;
+            => QueryParse(ref s, p => p.range())?.Range;
 
         public IQueryCompounded<IVoucherQueryAtom> VoucherQuery(string s)
             => VoucherQuery(ref s);
 
         public IQueryCompounded<IVoucherQueryAtom> VoucherQuery(ref string s)
-            => (IQueryCompounded<IVoucherQueryAtom>)Parse(ref s, p => p.vouchers()) ??
+            => (IQueryCompounded<IVoucherQueryAtom>)QueryParse(ref s, p => p.vouchers()) ??
                 VoucherQueryUnconstrained.Instance;
 
         public IVoucherDetailQuery DetailQuery(string s)
             => DetailQuery(ref s);
 
         public IVoucherDetailQuery DetailQuery(ref string s)
-            => Parse(ref s, p => p.voucherDetailQuery());
+            => QueryParse(ref s, p => p.voucherDetailQuery());
 
         public ISubtotal Subtotal(string s)
             => Subtotal(ref s);
@@ -135,7 +131,7 @@ namespace AccountingServer.BLL.Parsing
             => DistributedQuery(ref s);
 
         public IQueryCompounded<IDistributedQueryAtom> DistributedQuery(ref string s)
-            => (IQueryCompounded<IDistributedQueryAtom>)Parse(ref s, p => p.distributedQ()) ??
+            => (IQueryCompounded<IDistributedQueryAtom>)QueryParse(ref s, p => p.distributedQ()) ??
                 DistributedQueryUnconstrained.Instance;
 
         private sealed class VoucherGroupedQueryStub : IVoucherGroupedQuery
@@ -155,29 +151,25 @@ namespace AccountingServer.BLL.Parsing
 
     public sealed class FacadeF : FacadeBase
     {
-        private static readonly FacadeF Instance = new FacadeF();
-
         private FacadeF() { }
 
-        public static FacadeBase ParsingF => Instance;
+        public static FacadeBase ParsingF { get; } = new FacadeF();
     }
 
     public sealed class Facade : FacadeBase
     {
-        private static readonly Facade Instance = new Facade();
-
         private Facade() { }
 
-        public static FacadeBase Parsing => Instance;
+        public static FacadeBase Parsing { get; } = new Facade();
 
-        internal override T Parse<T>(ref string s, Func<QueryParser, T> func)
+        internal override T QueryParse<T>(ref string s, Func<QueryParser, T> func)
         {
             if (s == null)
                 return null;
 
             try
             {
-                return base.Parse(ref s, func);
+                return base.QueryParse(ref s, func);
             }
             catch (Exception)
             {
