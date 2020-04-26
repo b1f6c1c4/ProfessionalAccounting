@@ -49,16 +49,16 @@ namespace AccountingServer.Shell.Serializer
         /// <inheritdoc />
         public Asset ParseAsset(string str)
         {
-            if (str.StartsWith(VoucherToken, StringComparison.OrdinalIgnoreCase))
-                str = str.Substring(VoucherToken.Length);
+            if (str.StartsWith(AssetToken, StringComparison.OrdinalIgnoreCase))
+                str = str.Substring(AssetToken.Length);
 
             var obj = ParseJson(str);
             var dateStr = obj["date"]?.Value<string>();
             DateTime? date = null;
             if (dateStr != null)
                 date = ClientDateTime.Parse(dateStr);
-            var schedule = obj["detail"];
-            var typeStr = obj["type"]?.Value<string>();
+            var schedule = obj["schedule"];
+            var typeStr = obj["method"]?.Value<string>();
             var method = DepreciationMethod.StraightLine;
             if (typeStr != null)
                 Enum.TryParse(typeStr, out method);
@@ -70,17 +70,17 @@ namespace AccountingServer.Shell.Serializer
                     Date = date,
                     User = obj["user"]?.Value<string>(),
                     Currency = obj["currency"]?.Value<string>(),
-                    Value = obj["value"]?.Value<double>(),
-                    Salvage = obj["salvage"]?.Value<double>(),
-                    Life = obj["life"]?.Value<int>(),
-                    Title = obj["title"]?.Value<int>(),
+                    Value = obj["value"]?.Value<double?>(),
+                    Salvage = obj["salvage"]?.Value<double?>(),
+                    Life = obj["life"]?.Value<int?>(),
+                    Title = obj["title"]?.Value<int?>(),
                     Method = method,
-                    DepreciationTitle = obj["depreciation"]?["title"]?.Value<int>(),
-                    DepreciationExpenseTitle = obj["depreciation"]?["expense"]?["title"]?.Value<int>(),
-                    DepreciationExpenseSubTitle = obj["depreciation"]?["expense"]?["subtitle"]?.Value<int>(),
-                    DevaluationTitle = obj["devaluation"]?["title"]?.Value<int>(),
-                    DevaluationExpenseTitle = obj["devaluation"]?["expense"]?["title"]?.Value<int>(),
-                    DevaluationExpenseSubTitle = obj["devaluation"]?["expense"]?["subtitle"]?.Value<int>(),
+                    DepreciationTitle = obj["depreciation"]?["title"]?.Value<int?>(),
+                    DepreciationExpenseTitle = obj["depreciation"]?["expense"]?["title"]?.Value<int?>(),
+                    DepreciationExpenseSubTitle = obj["depreciation"]?["expense"]?["subtitle"]?.Value<int?>(),
+                    DevaluationTitle = obj["devaluation"]?["title"]?.Value<int?>(),
+                    DevaluationExpenseTitle = obj["devaluation"]?["expense"]?["title"]?.Value<int?>(),
+                    DevaluationExpenseSubTitle = obj["devaluation"]?["expense"]?["subtitle"]?.Value<int?>(),
                     Remark = obj["remark"]?.Value<string>(),
                     Schedule = schedule == null ? new List<AssetItem>() : schedule.Select(ParseAssetItem).ToList(),
                 };
@@ -93,16 +93,16 @@ namespace AccountingServer.Shell.Serializer
         /// <inheritdoc />
         public Amortization ParseAmort(string str)
         {
-            if (str.StartsWith(VoucherToken, StringComparison.OrdinalIgnoreCase))
-                str = str.Substring(VoucherToken.Length);
+            if (str.StartsWith(AmortToken, StringComparison.OrdinalIgnoreCase))
+                str = str.Substring(AmortToken.Length);
 
             var obj = ParseJson(str);
             var dateStr = obj["date"]?.Value<string>();
             DateTime? date = null;
             if (dateStr != null)
                 date = ClientDateTime.Parse(dateStr);
-            var schedule = obj["detail"];
-            var typeStr = obj["type"]?.Value<string>();
+            var schedule = obj["schedule"];
+            var typeStr = obj["interval"]?.Value<string>();
             var interval = AmortizeInterval.EveryDay;
             if (typeStr != null)
                 Enum.TryParse(typeStr, out interval);
@@ -112,8 +112,9 @@ namespace AccountingServer.Shell.Serializer
                     StringID = obj["id"]?.Value<string>(),
                     Name = obj["name"]?.Value<string>(),
                     Date = date,
-                    Value = obj["value"]?.Value<double>(),
-                    TotalDays = obj["totalDays"]?.Value<int>(),
+                    User = obj["user"]?.Value<string>(),
+                    Value = obj["value"]?.Value<double?>(),
+                    TotalDays = obj["totalDays"]?.Value<int?>(),
                     Interval = interval,
                     Template = ParseVoucher(obj["template"]),
                     Remark = obj["remark"]?.Value<string>(),
@@ -185,7 +186,7 @@ namespace AccountingServer.Shell.Serializer
                     VoucherID = obj["voucherId"]?.Value<string>(),
                     Amount = obj["amount"].Value<double>(),
                     Remark = obj["remark"]?.Value<string>(),
-                    Value = obj["value"]?.Value<double>() ?? 0,
+                    Value = obj["value"]?.Value<double?>() ?? 0,
                 };
         }
 
@@ -196,10 +197,10 @@ namespace AccountingServer.Shell.Serializer
             if (dateStr != null)
                 date = ClientDateTime.Parse(dateStr);
             var voucherId = obj["voucherId"]?.Value<string>();
-            var value = obj["value"]?.Value<double>() ?? 0;
+            var value = obj["value"]?.Value<double?>() ?? 0;
             var remark = obj["remark"]?.Value<string>();
 
-            switch (obj["type"].Value<string>())
+            switch (obj["type"]?.Value<string>())
             {
                 case "acquisition":
                     return new AcquisitionItem
@@ -210,7 +211,7 @@ namespace AccountingServer.Shell.Serializer
                             Remark = remark,
                             OrigValue = obj["origValue"].Value<double>(),
                         };
-                case "depreciation":
+                case "depreciate":
                     return new DepreciateItem
                         {
                             Date = date,
@@ -219,7 +220,7 @@ namespace AccountingServer.Shell.Serializer
                             Remark = remark,
                             Amount = obj["amount"].Value<double>(),
                         };
-                case "devaluation":
+                case "devalue":
                     return new DevalueItem
                         {
                             Date = date,
@@ -354,6 +355,7 @@ namespace AccountingServer.Shell.Serializer
                     { "id", amort.StringID },
                     { "name", amort.Name },
                     { "date", amort.Date?.ToString("yyyy-MM-dd") },
+                    { "user", amort.User },
                     { "value", amort.Value },
                     { "totalDays", amort.TotalDays },
                     { "interval", amort.Interval?.ToString() },

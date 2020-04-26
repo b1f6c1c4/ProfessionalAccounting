@@ -250,7 +250,7 @@ namespace AccountingServer.Shell.Serializer
             var sb = new StringBuilder();
             sb.Append("new Amortization {");
             sb.AppendLine($"  StringID = {ProcessString(amort.StringID)},");
-            sb.AppendLine($"  User = {ProcessString(amort.User)}, ");
+            sb.AppendLine($"    User = {ProcessString(amort.User)}, ");
             sb.AppendLine($"    Name = {ProcessString(amort.Name)},");
             if (amort.Date.HasValue)
             {
