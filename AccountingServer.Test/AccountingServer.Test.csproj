@@ -12,6 +12,7 @@
     <RootNamespace>AccountingServer.Test</RootNamespace>
     <AssemblyName>AccountingServer.Test</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <LangVersion>8.0</LangVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
