@@ -209,7 +209,7 @@ namespace AccountingServer.Shell.Serializer
                             Present(item, $"Amount    = {dep.Amount},");
                             break;
                         case DevalueItem dev:
-                            Present(item, $"FairValue = {dev.FairValue},");
+                            Present(item, $"FairValue = {dev.FairValue}, Amount = {dev.Amount},");
                             break;
                         case DispositionItem _:
                             Present(item, "");

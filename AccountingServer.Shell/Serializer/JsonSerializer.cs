@@ -228,6 +228,7 @@ namespace AccountingServer.Shell.Serializer
                             Value = value,
                             Remark = remark,
                             FairValue = obj["fairValue"].Value<double>(),
+                            Amount = obj["amount"].Value<double>(),
                         };
                 case "disposition":
                     return new DispositionItem { Date = date, VoucherID = voucherId, Value = value, Remark = remark };
@@ -338,7 +339,8 @@ namespace AccountingServer.Shell.Serializer
                     obj["type"] = "depreciate";
                     break;
                 case DevalueItem dev:
-                    obj["fairValue"] = dev.Amount;
+                    obj["fairValue"] = dev.FairValue;
+                    obj["amount"] = dev.Amount;
                     obj["type"] = "devalue";
                     break;
                 case DispositionItem _:

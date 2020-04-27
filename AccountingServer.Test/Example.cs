@@ -93,7 +93,7 @@ namespace AccountingServer.Test
                     {
                         new AcquisitionItem { Value = 123, OrigValue = 553, Remark = "\\\t@#$%^&*(%" },
                         new DepreciateItem { Value = -23, Amount = 3412, Remark = "\\qw\ter%@!@#$%^&*(%" },
-                        new DevalueItem { Value = -50, Amount = 2342, Remark = "  7' 46r0*\" &)%\" *%)^ Q23'4" },
+                        new DevalueItem { Value = -50, FairValue = 5462, Amount = 2342, Remark = "  7')^ Q23'4" },
                         new DispositionItem { Value = -50, Remark = "\\\t@#$%^&*(%" },
                     },
             };
