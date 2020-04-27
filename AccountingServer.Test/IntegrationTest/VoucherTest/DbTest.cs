@@ -51,7 +51,11 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         {
             var asset1 = AssetDataProvider.Create(dt, type);
             foreach (var item in asset1.Schedule)
+            {
                 item.Value = 0;
+                if (item is DevalueItem dev)
+                    dev.Amount = 0;
+            }
 
             m_Adapter.Upsert(asset1);
             Assert.NotNull(asset1.ID);

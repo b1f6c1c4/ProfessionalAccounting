@@ -61,16 +61,16 @@ namespace AccountingServer.Test
 
                 case DepreciateItem depX:
                     var depY = y as DepreciateItem;
-                    if (!(depY.Amount - depY.Amount).IsZero())
+                    if (!(depX.Amount - depY.Amount).IsZero())
                         return false;
 
                     return true;
 
                 case DevalueItem devX:
                     var devY = y as DevalueItem;
-                    if (!(devY.FairValue - devY.FairValue).IsZero())
+                    if (!(devX.FairValue - devY.FairValue).IsZero())
                         return false;
-                    if (!(devY.Amount - devY.Amount).IsZero())
+                    if (!(devX.Amount - devY.Amount).IsZero())
                         return false;
 
                     return true;
