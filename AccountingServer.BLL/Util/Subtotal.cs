@@ -16,8 +16,15 @@ namespace AccountingServer.BLL.Util
         public abstract T Accept<T>(ISubtotalVisitor<T> visitor);
     }
 
-    internal abstract class SubtotalResultFactory<T>
+    internal interface ISubtotalResultFactory<T> where T : IEnumerable<Balance>
     {
+        IEnumerable<T> Group(IEnumerable<Balance> bs);
+        SubtotalResult Create(T grp);
+    }
+
+    internal abstract class SubtotalResultFactory<T> : ISubtotalResultFactory<IGrouping<T, Balance>>
+    {
+        public IEnumerable<IGrouping<T, Balance>> Group(IEnumerable<Balance> bs) => bs.GroupBy(Selector);
         public abstract T Selector(Balance b);
         public abstract SubtotalResult Create(IGrouping<T, Balance> grp);
     }
@@ -25,6 +32,13 @@ namespace AccountingServer.BLL.Util
     internal class SubtotalRoot : SubtotalResult, ISubtotalRoot
     {
         public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
+    }
+
+    internal class SubtotalRootFactory : ISubtotalResultFactory<IEnumerable<Balance>>
+    {
+        public IEnumerable<IEnumerable<Balance>> Group(IEnumerable<Balance> bs) => new[] { bs };
+
+        public SubtotalResult Create(IEnumerable<Balance> grp) => new SubtotalRoot();
     }
 
     internal class SubtotalDate : SubtotalResult, ISubtotalDate
@@ -160,60 +174,59 @@ namespace AccountingServer.BLL.Util
         {
             m_Depth = 0;
             m_Flags = SubtotalLevel.None;
-            return Build(new SubtotalRoot(), raw);
+            return Group(raw).SingleOrDefault();
         }
 
-        private ISubtotalResult Build(SubtotalResult sub, IEnumerable<Balance> raw)
+        private List<ISubtotalResult> Group(IEnumerable<Balance> raw)
         {
-            if (m_Par.Levels.Count == m_Depth)
-                return BuildAggrPhase(sub, raw);
+            List<ISubtotalResult> Invoke<T>(ISubtotalResultFactory<T> f) where T : IEnumerable<Balance>
+                => f.Group(raw).Select(g =>
+                    {
+                        var sub = f.Create(g);
+                        if (m_Par.Levels.Count == m_Depth)
+                            return BuildAggrPhase(sub, g);
 
-            var level = m_Par.Levels[m_Depth];
-            m_Depth++;
-            BuildChildren(sub, raw, level);
-            m_Depth--;
-            if (!sub.TheItems.Any() &&
-                !(sub is ISubtotalRoot))
-                return null;
+                        sub.TheItems = Group(g);
+                        if (!sub.TheItems.Any() &&
+                            !(sub is ISubtotalRoot))
+                            return null;
 
-            sub.Fund = sub.TheItems.Sum(isr => isr.Fund);
-            return sub;
-        }
+                        sub.Fund = sub.TheItems.Sum(isr => isr.Fund);
+                        return sub;
+                    }).Where(g => g != null).ToList();
 
-        private void BuildChildren(SubtotalResult sub, IEnumerable<Balance> raw, SubtotalLevel level)
-        {
-            List<ISubtotalResult> Invoke<T>(SubtotalResultFactory<T> f) =>
-                raw.GroupBy(f.Selector).Select(g => Build(f.Create(g), g)).Where(g => g != null).ToList();
-
-            m_Flags = level & SubtotalLevel.Flags;
-            switch (level & SubtotalLevel.Subtotal)
+            var level = m_Par.Levels[m_Depth++];
+            try
             {
-                case SubtotalLevel.Title:
-                    sub.TheItems = Invoke(new SubtotalTitleFactory());
-                    break;
-                case SubtotalLevel.SubTitle:
-                    sub.TheItems = Invoke(new SubtotalSubTitleFactory());
-                    break;
-                case SubtotalLevel.Content:
-                    sub.TheItems = Invoke(new SubtotalContentFactory());
-                    break;
-                case SubtotalLevel.Remark:
-                    sub.TheItems = Invoke(new SubtotalRemarkFactory());
-                    break;
-                case SubtotalLevel.User:
-                    sub.TheItems = Invoke(new SubtotalUserFactory());
-                    break;
-                case SubtotalLevel.Currency:
-                    sub.TheItems = Invoke(new SubtotalCurrencyFactory());
-                    break;
-                case SubtotalLevel.Day:
-                case SubtotalLevel.Week:
-                case SubtotalLevel.Month:
-                case SubtotalLevel.Year:
-                    sub.TheItems = Invoke(new SubtotalDateFactory(level));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                m_Flags = level & SubtotalLevel.Flags;
+                switch (level & SubtotalLevel.Subtotal)
+                {
+                    case SubtotalLevel.None:
+                        return Invoke(new SubtotalRootFactory());
+                    case SubtotalLevel.Title:
+                        return Invoke(new SubtotalTitleFactory());
+                    case SubtotalLevel.SubTitle:
+                        return Invoke(new SubtotalSubTitleFactory());
+                    case SubtotalLevel.Content:
+                        return Invoke(new SubtotalContentFactory());
+                    case SubtotalLevel.Remark:
+                        return Invoke(new SubtotalRemarkFactory());
+                    case SubtotalLevel.User:
+                        return Invoke(new SubtotalUserFactory());
+                    case SubtotalLevel.Currency:
+                        return Invoke(new SubtotalCurrencyFactory());
+                    case SubtotalLevel.Day:
+                    case SubtotalLevel.Week:
+                    case SubtotalLevel.Month:
+                    case SubtotalLevel.Year:
+                        return Invoke(new SubtotalDateFactory(level));
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            finally
+            {
+                m_Depth--;
             }
         }
 
