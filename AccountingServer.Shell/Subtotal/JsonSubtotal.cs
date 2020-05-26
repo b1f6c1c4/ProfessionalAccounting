@@ -56,7 +56,7 @@ namespace AccountingServer.Shell.Subtotal
 
             string field;
             if (m_Depth < m_Par.Levels.Count)
-                switch (m_Par.Levels[m_Depth])
+                switch (m_Par.Levels[m_Depth] & SubtotalLevel.Subtotal)
                 {
                     case SubtotalLevel.Title:
                         field = "title";

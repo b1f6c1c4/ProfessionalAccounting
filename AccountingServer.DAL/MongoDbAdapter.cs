@@ -342,7 +342,7 @@ namespace AccountingServer.DAL
 
             var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Unwind("detail").Match(chk).Group(grp);
             if (query.Subtotal.AggrType != AggregationType.ChangedDay &&
-                query.Subtotal.GatherType == GatheringType.NonZero)
+                query.Subtotal.GatherType == GatheringType.Sum)
                 fluent = fluent.Match(FilterNonZero);
             return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
         }

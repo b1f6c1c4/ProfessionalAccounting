@@ -5,8 +5,17 @@ grammar Subtotal;
  */
 
 subtotal
-	:	Mark=SumMark SubtotalFields? subtotalAggr? subtotalEqui?
-	|	Mark=CountMark SubtotalFields? subtotalAggr?
+	:	Mark=SumMark subtotalFields? subtotalAggr? subtotalEqui?
+	|	Mark=CountMark subtotalFields? subtotalAggr?
+	;
+
+subtotalFields
+	:	SubtotalNoField
+	|	subtotalField+
+	;
+
+subtotalField
+	:	SubtotalField SubtotalFieldZ?
 	;
 
 subtotalAggr
@@ -60,9 +69,16 @@ CountMark
 	:	'!' | '!!'
 	;
 
-SubtotalFields
-	:	[tscrdwmyCU]+
-	|	'v'
+SubtotalField
+	:	[tscrdwmyCU]
+	;
+
+SubtotalNoField
+	:	'v'
+	;
+
+SubtotalFieldZ
+	:	'z'
 	;
 
 RangeNull

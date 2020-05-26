@@ -63,6 +63,21 @@ namespace AccountingServer.Entities
         ///     按年分类
         /// </summary>
         Year = 0b0010_0110_0000,
+
+        /// <summary>
+        ///     分类汇总普通部分
+        /// </summary>
+        Subtotal = 0b0111_1111_1111_1111_1111_1111_1111_1111,
+
+        /// <summary>
+        ///     分类汇总特殊部分
+        /// </summary>
+        Flags = unchecked((int)0b1000_0000_0000_0000_0000_0000_0000_0000),
+
+        /// <summary>
+        ///     提取非零项
+        /// </summary>
+        NonZero = unchecked((int)0b1000_0000_0000_0000_0000_0000_0000_0000),
     }
 
     /// <summary>

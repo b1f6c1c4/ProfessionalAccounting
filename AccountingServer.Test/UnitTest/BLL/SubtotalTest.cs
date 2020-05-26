@@ -641,7 +641,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 Assert.IsAssignableFrom<ISubtotalDate>(item);
                 var resxx = (ISubtotalDate)item;
                 Assert.Null(resxx.Items);
-                Assert.Equal(SubtotalLevel.Day, resxx.Level);
+                Assert.Equal(SubtotalLevel.Day | SubtotalLevel.NonZero, resxx.Level);
                 lst.Add(new Balance { Date = resxx.Date, Fund = resxx.Fund });
             }
 
@@ -691,7 +691,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 Assert.IsAssignableFrom<ISubtotalDate>(item);
                 var resxx = (ISubtotalDate)item;
                 Assert.Null(resxx.Items);
-                Assert.Equal(SubtotalLevel.Month, resxx.Level);
+                Assert.Equal(SubtotalLevel.Month | SubtotalLevel.NonZero, resxx.Level);
                 lst.Add(new Balance { Date = resxx.Date, Fund = resxx.Fund });
             }
 
@@ -887,7 +887,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 Assert.IsAssignableFrom<ISubtotalDate>(item);
                 var resxx = (ISubtotalDate)item;
                 Assert.Null(resxx.Items);
-                Assert.Equal(SubtotalLevel.Week, resxx.Level);
+                Assert.Equal(SubtotalLevel.Week | SubtotalLevel.NonZero, resxx.Level);
                 lst.Add(new Balance { Date = resxx.Date, Fund = resxx.Fund });
             }
 
@@ -918,7 +918,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 Assert.IsAssignableFrom<ISubtotalDate>(item);
                 var resxx = (ISubtotalDate)item;
                 Assert.Null(resxx.Items);
-                Assert.Equal(SubtotalLevel.Year, resxx.Level);
+                Assert.Equal(SubtotalLevel.Year | SubtotalLevel.NonZero, resxx.Level);
                 lst.Add(new Balance { Date = resxx.Date, Fund = resxx.Fund });
             }
 

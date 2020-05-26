@@ -187,8 +187,8 @@ namespace AccountingServer.Test.UnitTest.BLL
             => PairedFail(nameof(ParsingF.Range), s);
 
         [Theory]
-        [InlineData("{}+{}:>`v", GatheringType.NonZero)]
-        [InlineData("``cU", GatheringType.Zero, SubtotalLevel.Content, SubtotalLevel.User)]
+        [InlineData("{}+{}:>`v", GatheringType.Sum)]
+        [InlineData("``cU", GatheringType.Sum, SubtotalLevel.Content, SubtotalLevel.User)]
         [InlineData("!", GatheringType.Count, SubtotalLevel.Currency, SubtotalLevel.Title, SubtotalLevel.SubTitle,
             SubtotalLevel.User, SubtotalLevel.Content)]
         public void GroupedQueryTest(string s, GatheringType gt, params SubtotalLevel[] levels)
@@ -247,11 +247,20 @@ namespace AccountingServer.Test.UnitTest.BLL
             => PairedFail(nameof(ParsingF.VoucherQuery), s, VoucherQueryUnconstrained.Instance);
 
         [Theory]
-        [InlineData("`ts", GatheringType.NonZero, SubtotalLevel.Title, SubtotalLevel.SubTitle)]
-        [InlineData("``cUr", GatheringType.Zero, SubtotalLevel.Content, SubtotalLevel.User, SubtotalLevel.Remark)]
+        [InlineData("`ts", GatheringType.Sum, SubtotalLevel.Title | SubtotalLevel.NonZero,
+            SubtotalLevel.SubTitle | SubtotalLevel.NonZero)]
+        [InlineData("``cUr", GatheringType.Sum, SubtotalLevel.Content, SubtotalLevel.User, SubtotalLevel.Remark)]
+        [InlineData("``Czryz", GatheringType.Sum, SubtotalLevel.Currency | SubtotalLevel.NonZero, SubtotalLevel.Remark,
+            SubtotalLevel.Year | SubtotalLevel.NonZero)]
         [InlineData("!!v", GatheringType.VoucherCount)]
-        [InlineData("`dC", GatheringType.NonZero, SubtotalLevel.Day, SubtotalLevel.Currency)]
+        [InlineData("`dC", GatheringType.Sum, SubtotalLevel.Day | SubtotalLevel.NonZero,
+            SubtotalLevel.Currency | SubtotalLevel.NonZero)]
         [InlineData("!!wy", GatheringType.VoucherCount, SubtotalLevel.Week, SubtotalLevel.Year)]
+        [InlineData("``", GatheringType.Count, SubtotalLevel.User, SubtotalLevel.Currency, SubtotalLevel.Title,
+            SubtotalLevel.SubTitle, SubtotalLevel.Content)]
+        [InlineData("`", GatheringType.Count, SubtotalLevel.User | SubtotalLevel.NonZero,
+            SubtotalLevel.Currency | SubtotalLevel.NonZero, SubtotalLevel.Title | SubtotalLevel.NonZero,
+            SubtotalLevel.SubTitle | SubtotalLevel.NonZero, SubtotalLevel.Content | SubtotalLevel.NonZero)]
         [InlineData("!", GatheringType.Count, SubtotalLevel.Currency, SubtotalLevel.Title, SubtotalLevel.SubTitle,
             SubtotalLevel.User, SubtotalLevel.Content)]
         public void SubtotalTest(string s, GatheringType gt, params SubtotalLevel[] levels)
@@ -264,7 +273,6 @@ namespace AccountingServer.Test.UnitTest.BLL
 
         [Theory]
         [InlineData(null)]
-        [InlineData("[[]")]
         public void SubtotalFailTest(string s)
             => PairedFail(nameof(ParsingF.Subtotal), s);
 

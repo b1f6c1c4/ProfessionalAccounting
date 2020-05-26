@@ -60,7 +60,7 @@ namespace AccountingServer.Shell.Subtotal
             {
                 var comparer = CultureInfo.GetCultureInfo("zh-CN").CompareInfo
                     .GetStringComparer(CompareOptions.StringSort);
-                switch (m_Par.Levels[Depth])
+                switch (m_Par.Levels[Depth] & SubtotalLevel.Subtotal)
                 {
                     case SubtotalLevel.Title:
                         items = sub.Items.Cast<ISubtotalTitle>().OrderBy(s => s.Title);

@@ -225,14 +225,9 @@ namespace AccountingServer.Entities
     public enum GatheringType
     {
         /// <summary>
-        ///     求和，不显示零汇总项
+        ///     求和
         /// </summary>
-        NonZero,
-
-        /// <summary>
-        ///     求和，显示零汇总项
-        /// </summary>
-        Zero,
+        Sum,
 
         /// <summary>
         ///     计数
