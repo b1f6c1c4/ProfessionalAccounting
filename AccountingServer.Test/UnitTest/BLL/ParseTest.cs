@@ -187,10 +187,10 @@ namespace AccountingServer.Test.UnitTest.BLL
             => PairedFail(nameof(ParsingF.Range), s);
 
         [Theory]
-        [InlineData("{}+{}:>`v", GatheringType.Sum)]
-        [InlineData("``cU", GatheringType.Sum, SubtotalLevel.Content, SubtotalLevel.User)]
-        [InlineData("!", GatheringType.Count, SubtotalLevel.Currency, SubtotalLevel.Title, SubtotalLevel.SubTitle,
-            SubtotalLevel.User, SubtotalLevel.Content)]
+        [InlineData("{}+{}:>`v", GatheringType.Sum, SubtotalLevel.NonZero)]
+        [InlineData("``cU", GatheringType.Sum, SubtotalLevel.None, SubtotalLevel.Content, SubtotalLevel.User)]
+        [InlineData("!", GatheringType.Count, SubtotalLevel.None, SubtotalLevel.Currency, SubtotalLevel.Title,
+            SubtotalLevel.SubTitle, SubtotalLevel.User, SubtotalLevel.Content)]
         public void GroupedQueryTest(string s, GatheringType gt, params SubtotalLevel[] levels)
             => PairedSucc<IGroupedQuery>(nameof(ParsingF.GroupedQuery), s,
                 r =>
@@ -209,9 +209,10 @@ namespace AccountingServer.Test.UnitTest.BLL
             => PairedFail(nameof(ParsingF.GroupedQuery), s);
 
         [Theory]
-        [InlineData("!!v")]
-        [InlineData("!!y", SubtotalLevel.Year)]
-        [InlineData("!!", SubtotalLevel.Currency, SubtotalLevel.Title, SubtotalLevel.SubTitle, SubtotalLevel.User,
+        [InlineData("!!v", SubtotalLevel.None)]
+        [InlineData("!!y", SubtotalLevel.None, SubtotalLevel.Year)]
+        [InlineData("!!", SubtotalLevel.None, SubtotalLevel.Currency, SubtotalLevel.Title, SubtotalLevel.SubTitle,
+            SubtotalLevel.User,
             SubtotalLevel.Content)]
         public void VoucherGroupedQueryTest(string s, params SubtotalLevel[] levels)
             => PairedSucc<IVoucherGroupedQuery>(nameof(ParsingF.VoucherGroupedQuery), s,
@@ -247,22 +248,23 @@ namespace AccountingServer.Test.UnitTest.BLL
             => PairedFail(nameof(ParsingF.VoucherQuery), s, VoucherQueryUnconstrained.Instance);
 
         [Theory]
-        [InlineData("`ts", GatheringType.Sum, SubtotalLevel.Title | SubtotalLevel.NonZero,
+        [InlineData("`ts", GatheringType.Sum, SubtotalLevel.NonZero, SubtotalLevel.Title | SubtotalLevel.NonZero,
             SubtotalLevel.SubTitle | SubtotalLevel.NonZero)]
-        [InlineData("``cUr", GatheringType.Sum, SubtotalLevel.Content, SubtotalLevel.User, SubtotalLevel.Remark)]
-        [InlineData("``Czryz", GatheringType.Sum, SubtotalLevel.Currency | SubtotalLevel.NonZero, SubtotalLevel.Remark,
-            SubtotalLevel.Year | SubtotalLevel.NonZero)]
-        [InlineData("!!v", GatheringType.VoucherCount)]
-        [InlineData("`dC", GatheringType.Sum, SubtotalLevel.Day | SubtotalLevel.NonZero,
+        [InlineData("``cUr", GatheringType.Sum, SubtotalLevel.None, SubtotalLevel.Content, SubtotalLevel.User,
+            SubtotalLevel.Remark)]
+        [InlineData("``Czryz", GatheringType.Sum, SubtotalLevel.None, SubtotalLevel.Currency | SubtotalLevel.NonZero,
+            SubtotalLevel.Remark, SubtotalLevel.Year | SubtotalLevel.NonZero)]
+        [InlineData("!!v", GatheringType.VoucherCount, SubtotalLevel.None)]
+        [InlineData("`dC", GatheringType.Sum, SubtotalLevel.NonZero, SubtotalLevel.Day | SubtotalLevel.NonZero,
             SubtotalLevel.Currency | SubtotalLevel.NonZero)]
-        [InlineData("!!wy", GatheringType.VoucherCount, SubtotalLevel.Week, SubtotalLevel.Year)]
-        [InlineData("``", GatheringType.Sum, SubtotalLevel.Currency, SubtotalLevel.Title, SubtotalLevel.SubTitle,
-            SubtotalLevel.User, SubtotalLevel.Content)]
-        [InlineData("`", GatheringType.Sum, SubtotalLevel.Currency | SubtotalLevel.NonZero,
+        [InlineData("!!wy", GatheringType.VoucherCount, SubtotalLevel.None, SubtotalLevel.Week, SubtotalLevel.Year)]
+        [InlineData("``", GatheringType.Sum, SubtotalLevel.None, SubtotalLevel.Currency, SubtotalLevel.Title,
+            SubtotalLevel.SubTitle, SubtotalLevel.User, SubtotalLevel.Content)]
+        [InlineData("`", GatheringType.Sum, SubtotalLevel.NonZero, SubtotalLevel.Currency | SubtotalLevel.NonZero,
             SubtotalLevel.Title | SubtotalLevel.NonZero, SubtotalLevel.SubTitle | SubtotalLevel.NonZero,
             SubtotalLevel.User | SubtotalLevel.NonZero, SubtotalLevel.Content | SubtotalLevel.NonZero)]
-        [InlineData("!", GatheringType.Count, SubtotalLevel.Currency, SubtotalLevel.Title, SubtotalLevel.SubTitle,
-            SubtotalLevel.User, SubtotalLevel.Content)]
+        [InlineData("!", GatheringType.Count, SubtotalLevel.None, SubtotalLevel.Currency, SubtotalLevel.Title,
+            SubtotalLevel.SubTitle, SubtotalLevel.User, SubtotalLevel.Content)]
         public void SubtotalTest(string s, GatheringType gt, params SubtotalLevel[] levels)
             => PairedSucc<ISubtotal>(nameof(ParsingF.Subtotal), s,
                 r =>
