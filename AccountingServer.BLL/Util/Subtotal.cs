@@ -143,6 +143,7 @@ namespace AccountingServer.BLL.Util
         private readonly IExchange m_Exchange;
         private readonly ISubtotal m_Par;
         private int m_Depth;
+        private SubtotalLevel m_Flags;
 
         public SubtotalBuilder(ISubtotal par, IExchange ex)
         {
@@ -158,6 +159,7 @@ namespace AccountingServer.BLL.Util
         public ISubtotalResult Build(IEnumerable<Balance> raw)
         {
             m_Depth = 0;
+            m_Flags = SubtotalLevel.None;
             return Build(new SubtotalRoot(), raw);
         }
 
@@ -183,7 +185,8 @@ namespace AccountingServer.BLL.Util
             List<ISubtotalResult> Invoke<T>(SubtotalResultFactory<T> f) =>
                 raw.GroupBy(f.Selector).Select(g => Build(f.Create(g), g)).Where(g => g != null).ToList();
 
-            switch (level)
+            m_Flags = level & SubtotalLevel.Flags;
+            switch (level & SubtotalLevel.Subtotal)
             {
                 case SubtotalLevel.Title:
                     sub.TheItems = Invoke(new SubtotalTitleFactory());
@@ -220,7 +223,7 @@ namespace AccountingServer.BLL.Util
             {
                 case AggregationType.None:
                     sub.Fund = BuildEquiPhase(raw);
-                    if (m_Par.GatherType == GatheringType.NonZero &&
+                    if (m_Flags.HasFlag(SubtotalLevel.NonZero) &&
                         sub.Fund.IsZero() &&
                         !(sub is ISubtotalRoot))
                         return null;
