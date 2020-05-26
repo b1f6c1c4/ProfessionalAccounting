@@ -37,11 +37,7 @@ namespace AccountingServer.BLL.Parsing
                 get
                 {
                     var z = Mark.Text == "`" ? SubtotalLevel.NonZero : SubtotalLevel.None;
-                    if (subtotalFields()?.SubtotalNoField != null)
-                        return new SubtotalLevel[0];
-
-                    var text = SubtotalFields()?.GetText();
-                    if (text == null)
+                    if (subtotalFields() == null)
                         if (subtotalEqui() == null)
                             return new[]
                                 {
@@ -60,32 +56,39 @@ namespace AccountingServer.BLL.Parsing
                                     z | SubtotalLevel.Content,
                                 };
 
-                    return text
+                    if (subtotalFields().SubtotalNoField() != null)
+                        return new SubtotalLevel[0];
+
+                    return subtotalFields().subtotalField()
                         .Select(
-                            ch =>
+                            f =>
                                 {
+                                    var ch = f.SubtotalField().GetText()[0];
+                                    var zz = z | (f.SubtotalFieldZ() == null
+                                        ? SubtotalLevel.None
+                                        : SubtotalLevel.NonZero);
                                     switch (ch)
                                     {
                                         case 't':
-                                            return z | SubtotalLevel.Title;
+                                            return zz | SubtotalLevel.Title;
                                         case 's':
-                                            return z | SubtotalLevel.SubTitle;
+                                            return zz | SubtotalLevel.SubTitle;
                                         case 'c':
-                                            return z | SubtotalLevel.Content;
+                                            return zz | SubtotalLevel.Content;
                                         case 'r':
-                                            return z | SubtotalLevel.Remark;
+                                            return zz | SubtotalLevel.Remark;
                                         case 'C':
-                                            return z | SubtotalLevel.Currency;
+                                            return zz | SubtotalLevel.Currency;
                                         case 'U':
-                                            return z | SubtotalLevel.User;
+                                            return zz | SubtotalLevel.User;
                                         case 'd':
-                                            return z | SubtotalLevel.Day;
+                                            return zz | SubtotalLevel.Day;
                                         case 'w':
-                                            return z | SubtotalLevel.Week;
+                                            return zz | SubtotalLevel.Week;
                                         case 'm':
-                                            return z | SubtotalLevel.Month;
+                                            return zz | SubtotalLevel.Month;
                                         case 'y':
-                                            return z | SubtotalLevel.Year;
+                                            return zz | SubtotalLevel.Year;
                                     }
 
                                     throw new MemberAccessException("表达式错误");

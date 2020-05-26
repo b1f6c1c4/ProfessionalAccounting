@@ -256,11 +256,11 @@ namespace AccountingServer.Test.UnitTest.BLL
         [InlineData("`dC", GatheringType.Sum, SubtotalLevel.Day | SubtotalLevel.NonZero,
             SubtotalLevel.Currency | SubtotalLevel.NonZero)]
         [InlineData("!!wy", GatheringType.VoucherCount, SubtotalLevel.Week, SubtotalLevel.Year)]
-        [InlineData("``", GatheringType.Count, SubtotalLevel.User, SubtotalLevel.Currency, SubtotalLevel.Title,
-            SubtotalLevel.SubTitle, SubtotalLevel.Content)]
-        [InlineData("`", GatheringType.Count, SubtotalLevel.User | SubtotalLevel.NonZero,
-            SubtotalLevel.Currency | SubtotalLevel.NonZero, SubtotalLevel.Title | SubtotalLevel.NonZero,
-            SubtotalLevel.SubTitle | SubtotalLevel.NonZero, SubtotalLevel.Content | SubtotalLevel.NonZero)]
+        [InlineData("``", GatheringType.Sum, SubtotalLevel.Currency, SubtotalLevel.Title, SubtotalLevel.SubTitle,
+            SubtotalLevel.User, SubtotalLevel.Content)]
+        [InlineData("`", GatheringType.Sum, SubtotalLevel.Currency | SubtotalLevel.NonZero,
+            SubtotalLevel.Title | SubtotalLevel.NonZero, SubtotalLevel.SubTitle | SubtotalLevel.NonZero,
+            SubtotalLevel.User | SubtotalLevel.NonZero, SubtotalLevel.Content | SubtotalLevel.NonZero)]
         [InlineData("!", GatheringType.Count, SubtotalLevel.Currency, SubtotalLevel.Title, SubtotalLevel.SubTitle,
             SubtotalLevel.User, SubtotalLevel.Content)]
         public void SubtotalTest(string s, GatheringType gt, params SubtotalLevel[] levels)

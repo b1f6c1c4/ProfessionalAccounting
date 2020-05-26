@@ -135,6 +135,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
 
         [Theory]
         [InlineData(null, "T9999 `v")]
+        [InlineData(null, "T9999 ``v")]
         [InlineData(null, "`v")]
         [InlineData(0, "``v")]
         [InlineData(123.45 + 78.53 + 66.66, "\"rmk1\"`v")]
