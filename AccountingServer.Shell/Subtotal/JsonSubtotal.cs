@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
@@ -10,7 +11,7 @@ namespace AccountingServer.Shell.Subtotal
     /// <summary>
     ///     分类汇总结果导出
     /// </summary>
-    internal class JsonSubtotal : ISubtotalVisitor<JProperty>, ISubtotalStringify
+    internal class JsonSubtotal : ISubtotalVisitor<JProperty>, ISubtotalItemsVisitor<string>, ISubtotalStringify
     {
         private int m_Depth;
 
@@ -24,75 +25,56 @@ namespace AccountingServer.Shell.Subtotal
             return (raw?.Accept(this)?.Value as JObject)?.ToString();
         }
 
-        JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalRoot sub)
+        JProperty ISubtotalVisitor<JProperty>.Visit<TC>(ISubtotalRoot<TC> sub)
             => new JProperty("", VisitChildren(sub));
 
-        JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalDate sub)
+        JProperty ISubtotalVisitor<JProperty>.Visit<TC>(ISubtotalDate<TC> sub)
             => new JProperty(sub.Date.AsDate(sub.Level), VisitChildren(sub));
 
-        JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalUser sub)
+        JProperty ISubtotalVisitor<JProperty>.Visit<TC>(ISubtotalUser<TC> sub)
             => new JProperty(sub.User, VisitChildren(sub));
 
-        JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalCurrency sub)
+        JProperty ISubtotalVisitor<JProperty>.Visit<TC>(ISubtotalCurrency<TC> sub)
             => new JProperty(sub.Currency, VisitChildren(sub));
 
-        JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalTitle sub)
+        JProperty ISubtotalVisitor<JProperty>.Visit<TC>(ISubtotalTitle<TC> sub)
             => new JProperty(sub.Title.AsTitle(), VisitChildren(sub));
 
-        JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalSubTitle sub)
+        JProperty ISubtotalVisitor<JProperty>.Visit<TC>(ISubtotalSubTitle<TC> sub)
             => new JProperty(sub.SubTitle.AsSubTitle(), VisitChildren(sub));
 
-        JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalContent sub)
+        JProperty ISubtotalVisitor<JProperty>.Visit<TC>(ISubtotalContent<TC> sub)
             => new JProperty(sub.Content ?? "", VisitChildren(sub));
 
-        JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalRemark sub)
+        JProperty ISubtotalVisitor<JProperty>.Visit<TC>(ISubtotalRemark<TC> sub)
             => new JProperty(sub.Remark ?? "", VisitChildren(sub));
 
-        private JObject VisitChildren(ISubtotalResult sub)
+        private JObject VisitChildren<TC>(ISubtotalResult<TC> sub) where TC : ISubtotalResult
         {
             var obj = new JObject(new JProperty("value", sub.Fund));
             if (sub.Items == null)
                 return obj;
 
-            string field;
-            if (m_Depth < m_Par.Levels.Count)
-                switch (m_Par.Levels[m_Depth] & SubtotalLevel.Subtotal)
-                {
-                    case SubtotalLevel.Title:
-                        field = "title";
-                        break;
-                    case SubtotalLevel.SubTitle:
-                        field = "subtitle";
-                        break;
-                    case SubtotalLevel.Content:
-                        field = "content";
-                        break;
-                    case SubtotalLevel.Remark:
-                        field = "remark";
-                        break;
-                    case SubtotalLevel.User:
-                        field = "user";
-                        break;
-                    case SubtotalLevel.Currency:
-                        field = "currency";
-                        break;
-                    case SubtotalLevel.Day:
-                    case SubtotalLevel.Week:
-                    case SubtotalLevel.Month:
-                    case SubtotalLevel.Year:
-                        field = "date";
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            else
-                field = "aggr";
-
             m_Depth++;
+            var field = m_Depth < m_Par.Levels.Count ? sub.Items.Accept(this) : "aggr";
             obj[field] = new JObject(sub.Items.Select(it => it.Accept(this)));
             m_Depth--;
 
             return obj;
         }
+
+        public string Visit<TC>(IEnumerable<ISubtotalDate<TC>> sub) where TC : ISubtotalResult => "date";
+
+        public string Visit<TC>(IEnumerable<ISubtotalUser<TC>> sub) where TC : ISubtotalResult => "user";
+
+        public string Visit<TC>(IEnumerable<ISubtotalCurrency<TC>> sub) where TC : ISubtotalResult => "currency";
+
+        public string Visit<TC>(IEnumerable<ISubtotalTitle<TC>> sub) where TC : ISubtotalResult => "title";
+
+        public string Visit<TC>(IEnumerable<ISubtotalSubTitle<TC>> sub) where TC : ISubtotalResult => "subtitle";
+
+        public string Visit<TC>(IEnumerable<ISubtotalContent<TC>> sub) where TC : ISubtotalResult => "content";
+
+        public string Visit<TC>(IEnumerable<ISubtotalRemark<TC>> sub) where TC : ISubtotalResult => "remark";
     }
 }

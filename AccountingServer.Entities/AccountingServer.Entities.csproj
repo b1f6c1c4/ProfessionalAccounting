@@ -51,7 +51,11 @@
     <Compile Include="QueryInterface.cs" />
     <Compile Include="SubtotalLevel.cs" />
     <Compile Include="User.cs" />
+    <Compile Include="Util\SubtotalHelpers.cs" />
     <Compile Include="Voucher.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Util\SubtotalLists.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

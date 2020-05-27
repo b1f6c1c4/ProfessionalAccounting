@@ -14,7 +14,7 @@ namespace AccountingServer.Shell.Subtotal
 
         public RawSubtotal(bool separate = false) => m_Separate = separate;
 
-        private void ShowSubtotal(ISubtotalResult sub)
+        private void ShowSubtotal<TC>(ISubtotalResult<TC> sub) where TC : ISubtotalResult
         {
             if (sub.Items == null)
             {
@@ -32,55 +32,55 @@ namespace AccountingServer.Shell.Subtotal
 
         protected override void Post() => Sb.Append(Serializer.PresentVoucherDetails(m_History));
 
-        public override Nothing Visit(ISubtotalRoot sub)
+        public override Nothing Visit<TC>(ISubtotalRoot<TC> sub)
         {
             ShowSubtotal(sub);
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalDate sub)
+        public override Nothing Visit<TC>(ISubtotalDate<TC> sub)
         {
             m_Path.Voucher.Date = sub.Date;
             ShowSubtotal(sub);
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalUser sub)
+        public override Nothing Visit<TC>(ISubtotalUser<TC> sub)
         {
             m_Path.User = sub.User;
             ShowSubtotal(sub);
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalCurrency sub)
+        public override Nothing Visit<TC>(ISubtotalCurrency<TC> sub)
         {
             m_Path.Currency = sub.Currency;
             ShowSubtotal(sub);
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalTitle sub)
+        public override Nothing Visit<TC>(ISubtotalTitle<TC> sub)
         {
             m_Path.Title = sub.Title;
             ShowSubtotal(sub);
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalSubTitle sub)
+        public override Nothing Visit<TC>(ISubtotalSubTitle<TC> sub)
         {
             m_Path.SubTitle = sub.SubTitle;
             ShowSubtotal(sub);
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalContent sub)
+        public override Nothing Visit<TC>(ISubtotalContent<TC> sub)
         {
             m_Path.Content = sub.Content;
             ShowSubtotal(sub);
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalRemark sub)
+        public override Nothing Visit<TC>(ISubtotalRemark<TC> sub)
         {
             m_Path.Remark = sub.Remark;
             ShowSubtotal(sub);

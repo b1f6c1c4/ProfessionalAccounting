@@ -19,32 +19,32 @@ namespace AccountingServer.Shell.Subtotal
             ? f.ToString("N0")
             : f.AsCurrency(Cu ?? m_Currency);
 
-        private void ShowSubtotal(ISubtotalResult sub, string str)
+        private void ShowSubtotal<TC>(ISubtotalResult<TC> sub, string str) where TC : ISubtotalResult
         {
             Sb.AppendLine($"{Idents}{str.CPadRight(38)}{Ts(sub.Fund).CPadLeft(12 + 2 * Depth)}");
             VisitChildren(sub);
         }
 
-        public override Nothing Visit(ISubtotalRoot sub)
+        public override Nothing Visit<TC>(ISubtotalRoot<TC> sub)
         {
             Sb.AppendLine($"{Idents}{Ts(sub.Fund)}");
             VisitChildren(sub);
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalDate sub)
+        public override Nothing Visit<TC>(ISubtotalDate<TC> sub)
         {
             ShowSubtotal(sub, sub.Date.AsDate(sub.Level));
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalUser sub)
+        public override Nothing Visit<TC>(ISubtotalUser<TC> sub)
         {
             ShowSubtotal(sub, $"U{sub.User.AsUser()}");
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalCurrency sub)
+        public override Nothing Visit<TC>(ISubtotalCurrency<TC> sub)
         {
             m_Currency = sub.Currency;
             ShowSubtotal(sub, $"@{sub.Currency}");
@@ -52,14 +52,14 @@ namespace AccountingServer.Shell.Subtotal
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalTitle sub)
+        public override Nothing Visit<TC>(ISubtotalTitle<TC> sub)
         {
             m_Title = sub.Title;
             ShowSubtotal(sub, $"{sub.Title.AsTitle()} {TitleManager.GetTitleName(sub.Title)}");
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalSubTitle sub)
+        public override Nothing Visit<TC>(ISubtotalSubTitle<TC> sub)
         {
             ShowSubtotal(
                 sub,
@@ -67,13 +67,13 @@ namespace AccountingServer.Shell.Subtotal
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalContent sub)
+        public override Nothing Visit<TC>(ISubtotalContent<TC> sub)
         {
             ShowSubtotal(sub, sub.Content.Quotation('\''));
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalRemark sub)
+        public override Nothing Visit<TC>(ISubtotalRemark<TC> sub)
         {
             ShowSubtotal(sub, sub.Remark.Quotation('"'));
             return Nothing.AtAll;

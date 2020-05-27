@@ -6,42 +6,40 @@ using AccountingServer.Entities.Util;
 
 namespace AccountingServer.BLL.Util
 {
-    internal abstract class SubtotalResult : ISubtotalResult
+    internal abstract class SubtotalResult<TC> : ISubtotalResult<TC> where TC : ISubtotalResult
     {
-        internal List<ISubtotalResult> TheItems { get; set; }
+        public ISubtotalResults<TC> Items { get; set; }
         public double Fund { get; set; }
-
-        public IEnumerable<ISubtotalResult> Items => TheItems?.AsReadOnly();
-
         public abstract T Accept<T>(ISubtotalVisitor<T> visitor);
     }
 
-    internal interface ISubtotalResultFactory<T> where T : IEnumerable<Balance>
+    internal interface IResultFactory<T, TC> where T : IEnumerable<Balance> where TC : ISubtotalResult
     {
         IEnumerable<T> Group(IEnumerable<Balance> bs);
-        SubtotalResult Create(T grp);
+        SubtotalResult<TC> Create(T grp);
     }
 
-    internal abstract class SubtotalResultFactory<T> : ISubtotalResultFactory<IGrouping<T, Balance>>
+    internal abstract class ResultFactory<T, TC> : IResultFactory<IGrouping<T, Balance>, TC>
+        where TC : ISubtotalResult
     {
         public IEnumerable<IGrouping<T, Balance>> Group(IEnumerable<Balance> bs) => bs.GroupBy(Selector);
-        public abstract T Selector(Balance b);
-        public abstract SubtotalResult Create(IGrouping<T, Balance> grp);
+        protected abstract T Selector(Balance b);
+        public abstract SubtotalResult<TC> Create(IGrouping<T, Balance> grp);
     }
 
-    internal class SubtotalRoot : SubtotalResult, ISubtotalRoot
+    internal class SubtotalRoot<TC> : SubtotalResult<TC>, ISubtotalRoot<TC> where TC : ISubtotalResult
     {
         public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
     }
 
-    internal class SubtotalRootFactory : ISubtotalResultFactory<IEnumerable<Balance>>
+    internal class RootFactory<TC> : IResultFactory<IEnumerable<Balance>, TC> where TC : ISubtotalResult
     {
         public IEnumerable<IEnumerable<Balance>> Group(IEnumerable<Balance> bs) => new[] { bs };
 
-        public SubtotalResult Create(IEnumerable<Balance> grp) => new SubtotalRoot();
+        public SubtotalResult<TC> Create(IEnumerable<Balance> grp) => new SubtotalRoot<TC>();
     }
 
-    internal class SubtotalDate : SubtotalResult, ISubtotalDate
+    internal class SubtotalDate<TC> : SubtotalResult<TC>, ISubtotalDate<TC> where TC : ISubtotalResult
     {
         public SubtotalDate(DateTime? date, SubtotalLevel level)
         {
@@ -56,16 +54,16 @@ namespace AccountingServer.BLL.Util
         public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
     }
 
-    internal class SubtotalDateFactory : SubtotalResultFactory<DateTime?>
+    internal class DateFactory<TC> : ResultFactory<DateTime?, TC> where TC : ISubtotalResult
     {
         private readonly SubtotalLevel m_Level;
-        public SubtotalDateFactory(SubtotalLevel level) => m_Level = level;
+        public DateFactory(SubtotalLevel level) => m_Level = level;
 
-        public override DateTime? Selector(Balance b) => b.Date;
-        public override SubtotalResult Create(IGrouping<DateTime?, Balance> grp) => new SubtotalDate(grp.Key, m_Level);
+        protected override DateTime? Selector(Balance b) => b.Date;
+        public override SubtotalResult<TC> Create(IGrouping<DateTime?, Balance> grp) => new SubtotalDate<TC>(grp.Key, m_Level);
     }
 
-    internal class SubtotalUser : SubtotalResult, ISubtotalUser
+    internal class SubtotalUser<TC> : SubtotalResult<TC>, ISubtotalUser<TC> where TC : ISubtotalResult
     {
         public SubtotalUser(string user) => User = user;
         public string User { get; }
@@ -73,13 +71,13 @@ namespace AccountingServer.BLL.Util
         public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
     }
 
-    internal class SubtotalUserFactory : SubtotalResultFactory<string>
+    internal class UserFactory<TC> : ResultFactory<string, TC> where TC : ISubtotalResult
     {
-        public override string Selector(Balance b) => b.User;
-        public override SubtotalResult Create(IGrouping<string, Balance> grp) => new SubtotalUser(grp.Key);
+        protected override string Selector(Balance b) => b.User;
+        public override SubtotalResult<TC> Create(IGrouping<string, Balance> grp) => new SubtotalUser<TC>(grp.Key);
     }
 
-    internal class SubtotalCurrency : SubtotalResult, ISubtotalCurrency
+    internal class SubtotalCurrency<TC> : SubtotalResult<TC>, ISubtotalCurrency<TC> where TC : ISubtotalResult
     {
         public SubtotalCurrency(string currency) => Currency = currency;
         public string Currency { get; }
@@ -87,13 +85,13 @@ namespace AccountingServer.BLL.Util
         public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
     }
 
-    internal class SubtotalCurrencyFactory : SubtotalResultFactory<string>
+    internal class CurrencyFactory<TC> : ResultFactory<string, TC> where TC : ISubtotalResult
     {
-        public override string Selector(Balance b) => b.Currency;
-        public override SubtotalResult Create(IGrouping<string, Balance> grp) => new SubtotalCurrency(grp.Key);
+        protected override string Selector(Balance b) => b.Currency;
+        public override SubtotalResult<TC> Create(IGrouping<string, Balance> grp) => new SubtotalCurrency<TC>(grp.Key);
     }
 
-    internal class SubtotalTitle : SubtotalResult, ISubtotalTitle
+    internal class SubtotalTitle<TC> : SubtotalResult<TC>, ISubtotalTitle<TC> where TC : ISubtotalResult
     {
         public SubtotalTitle(int? title) => Title = title;
         public int? Title { get; }
@@ -101,13 +99,13 @@ namespace AccountingServer.BLL.Util
         public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
     }
 
-    internal class SubtotalTitleFactory : SubtotalResultFactory<int?>
+    internal class TitleFactory<TC> : ResultFactory<int?, TC> where TC : ISubtotalResult
     {
-        public override int? Selector(Balance b) => b.Title;
-        public override SubtotalResult Create(IGrouping<int?, Balance> grp) => new SubtotalTitle(grp.Key);
+        protected override int? Selector(Balance b) => b.Title;
+        public override SubtotalResult<TC> Create(IGrouping<int?, Balance> grp) => new SubtotalTitle<TC>(grp.Key);
     }
 
-    internal class SubtotalSubTitle : SubtotalResult, ISubtotalSubTitle
+    internal class SubtotalSubTitle<TC> : SubtotalResult<TC>, ISubtotalSubTitle<TC> where TC : ISubtotalResult
     {
         public SubtotalSubTitle(int? subTitle) => SubTitle = subTitle;
         public int? SubTitle { get; }
@@ -115,13 +113,13 @@ namespace AccountingServer.BLL.Util
         public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
     }
 
-    internal class SubtotalSubTitleFactory : SubtotalResultFactory<int?>
+    internal class SubTitleFactory<TC> : ResultFactory<int?, TC> where TC : ISubtotalResult
     {
-        public override int? Selector(Balance b) => b.SubTitle;
-        public override SubtotalResult Create(IGrouping<int?, Balance> grp) => new SubtotalSubTitle(grp.Key);
+        protected override int? Selector(Balance b) => b.SubTitle;
+        public override SubtotalResult<TC> Create(IGrouping<int?, Balance> grp) => new SubtotalSubTitle<TC>(grp.Key);
     }
 
-    internal class SubtotalContent : SubtotalResult, ISubtotalContent
+    internal class SubtotalContent<TC> : SubtotalResult<TC>, ISubtotalContent<TC> where TC : ISubtotalResult
     {
         public SubtotalContent(string content) => Content = content;
         public string Content { get; }
@@ -129,13 +127,13 @@ namespace AccountingServer.BLL.Util
         public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
     }
 
-    internal class SubtotalContentFactory : SubtotalResultFactory<string>
+    internal class ContentFactory<TC> : ResultFactory<string, TC> where TC : ISubtotalResult
     {
-        public override string Selector(Balance b) => b.Content;
-        public override SubtotalResult Create(IGrouping<string, Balance> grp) => new SubtotalContent(grp.Key);
+        protected override string Selector(Balance b) => b.Content;
+        public override SubtotalResult<TC> Create(IGrouping<string, Balance> grp) => new SubtotalContent<TC>(grp.Key);
     }
 
-    internal class SubtotalRemark : SubtotalResult, ISubtotalRemark
+    internal class SubtotalRemark<TC> : SubtotalResult<TC>, ISubtotalRemark<TC> where TC : ISubtotalResult
     {
         public SubtotalRemark(string remark) => Remark = remark;
         public string Remark { get; }
@@ -143,10 +141,10 @@ namespace AccountingServer.BLL.Util
         public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
     }
 
-    internal class SubtotalRemarkFactory : SubtotalResultFactory<string>
+    internal class RemarkFactory<TC> : ResultFactory<string, TC> where TC : ISubtotalResult
     {
-        public override string Selector(Balance b) => b.Remark;
-        public override SubtotalResult Create(IGrouping<string, Balance> grp) => new SubtotalRemark(grp.Key);
+        protected override string Selector(Balance b) => b.Remark;
+        public override SubtotalResult<TC> Create(IGrouping<string, Balance> grp) => new SubtotalRemark<TC>(grp.Key);
     }
 
     /// <summary>
@@ -177,9 +175,9 @@ namespace AccountingServer.BLL.Util
             return Group(raw).SingleOrDefault();
         }
 
-        private List<ISubtotalResult> Group(IEnumerable<Balance> raw)
+        private List<ISubtotalResult> Group<TC>(IEnumerable<Balance> raw) where TC : ISubtotalResult
         {
-            List<ISubtotalResult> Invoke<T>(ISubtotalResultFactory<T> f) where T : IEnumerable<Balance>
+            List<ISubtotalResult> Invoke<T>(IResultFactory<T, TC> f) where T : IEnumerable<Balance>
                 => f.Group(raw).Select(g =>
                     {
                         var sub = f.Create(g);
@@ -202,24 +200,24 @@ namespace AccountingServer.BLL.Util
                 switch (level & SubtotalLevel.Subtotal)
                 {
                     case SubtotalLevel.None:
-                        return Invoke(new SubtotalRootFactory());
+                        return Invoke(new RootFactory<>());
                     case SubtotalLevel.Title:
-                        return Invoke(new SubtotalTitleFactory());
+                        return Invoke(new TitleFactory());
                     case SubtotalLevel.SubTitle:
-                        return Invoke(new SubtotalSubTitleFactory());
+                        return Invoke(new SubTitleFactory());
                     case SubtotalLevel.Content:
-                        return Invoke(new SubtotalContentFactory());
+                        return Invoke(new ContentFactory());
                     case SubtotalLevel.Remark:
-                        return Invoke(new SubtotalRemarkFactory());
+                        return Invoke(new RemarkFactory());
                     case SubtotalLevel.User:
-                        return Invoke(new SubtotalUserFactory());
+                        return Invoke(new UserFactory());
                     case SubtotalLevel.Currency:
-                        return Invoke(new SubtotalCurrencyFactory());
+                        return Invoke(new CurrencyFactory());
                     case SubtotalLevel.Day:
                     case SubtotalLevel.Week:
                     case SubtotalLevel.Month:
                     case SubtotalLevel.Year:
-                        return Invoke(new SubtotalDateFactory(level));
+                        return Invoke(new DateFactory(level));
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

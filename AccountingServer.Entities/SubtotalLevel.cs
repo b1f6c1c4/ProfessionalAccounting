@@ -91,11 +91,6 @@ namespace AccountingServer.Entities
         double Fund { get; }
 
         /// <summary>
-        ///     子项
-        /// </summary>
-        IEnumerable<ISubtotalResult> Items { get; }
-
-        /// <summary>
         ///     二次分配
         /// </summary>
         /// <typeparam name="T">返回值类型</typeparam>
@@ -104,41 +99,62 @@ namespace AccountingServer.Entities
         T Accept<T>(ISubtotalVisitor<T> visitor);
     }
 
-    public interface ISubtotalRoot : ISubtotalResult { }
+    public interface ISubtotalResults { }
 
-    public interface ISubtotalDate : ISubtotalResult
+    public interface ISubtotalResults<out T> : IEnumerable<T>, ISubtotalResults
+    {
+        /// <summary>
+        ///     二次分配
+        /// </summary>
+        /// <typeparam name="T">返回值类型</typeparam>
+        /// <param name="visitor">访问者</param>
+        /// <returns>访问者返回值</returns>
+        T Accept<T>(ISubtotalItemsVisitor<T> visitor);
+    }
+
+    public interface ISubtotalResult<out TC> : ISubtotalResult where TC : ISubtotalResult
+    {
+        /// <summary>
+        ///     子项
+        /// </summary>
+        ISubtotalResults<TC> Items { get; }
+    }
+
+    public interface ISubtotalRoot<out TC> : ISubtotalResult<TC> where TC : ISubtotalResult { }
+
+    public interface ISubtotalDate<out TC> : ISubtotalResult<TC> where TC : ISubtotalResult
     {
         SubtotalLevel Level { get; }
 
         DateTime? Date { get; }
     }
 
-    public interface ISubtotalUser : ISubtotalResult
+    public interface ISubtotalUser<out TC> : ISubtotalResult<TC> where TC : ISubtotalResult
     {
         string User { get; }
     }
 
-    public interface ISubtotalCurrency : ISubtotalResult
+    public interface ISubtotalCurrency<out TC> : ISubtotalResult<TC> where TC : ISubtotalResult
     {
         string Currency { get; }
     }
 
-    public interface ISubtotalTitle : ISubtotalResult
+    public interface ISubtotalTitle<out TC> : ISubtotalResult<TC> where TC : ISubtotalResult
     {
         int? Title { get; }
     }
 
-    public interface ISubtotalSubTitle : ISubtotalResult
+    public interface ISubtotalSubTitle<out TC> : ISubtotalResult<TC> where TC : ISubtotalResult
     {
         int? SubTitle { get; }
     }
 
-    public interface ISubtotalContent : ISubtotalResult
+    public interface ISubtotalContent<out TC> : ISubtotalResult<TC> where TC : ISubtotalResult
     {
         string Content { get; }
     }
 
-    public interface ISubtotalRemark : ISubtotalResult
+    public interface ISubtotalRemark<out TC> : ISubtotalResult<TC> where TC : ISubtotalResult
     {
         string Remark { get; }
     }
@@ -149,13 +165,25 @@ namespace AccountingServer.Entities
     /// <typeparam name="T">返回值类型</typeparam>
     public interface ISubtotalVisitor<out T>
     {
-        T Visit(ISubtotalRoot sub);
-        T Visit(ISubtotalDate sub);
-        T Visit(ISubtotalUser sub);
-        T Visit(ISubtotalCurrency sub);
-        T Visit(ISubtotalTitle sub);
-        T Visit(ISubtotalSubTitle sub);
-        T Visit(ISubtotalContent sub);
-        T Visit(ISubtotalRemark sub);
+        T Visit<TC>(ISubtotalRoot<TC> sub) where TC : ISubtotalResult;
+        T Visit<TC>(ISubtotalDate<TC> sub) where TC : ISubtotalResult;
+        T Visit<TC>(ISubtotalUser<TC> sub) where TC : ISubtotalResult;
+        T Visit<TC>(ISubtotalCurrency<TC> sub) where TC : ISubtotalResult;
+        T Visit<TC>(ISubtotalTitle<TC> sub) where TC : ISubtotalResult;
+        T Visit<TC>(ISubtotalSubTitle<TC> sub) where TC : ISubtotalResult;
+        T Visit<TC>(ISubtotalContent<TC> sub) where TC : ISubtotalResult;
+        T Visit<TC>(ISubtotalRemark<TC> sub) where TC : ISubtotalResult;
+    }
+
+    public interface ISubtotalItemsVisitor<out T>
+    {
+        T Visit<TC>(IEnumerable<ISubtotalRoot<TC>> sub) where TC : ISubtotalResult;
+        T Visit<TC>(IEnumerable<ISubtotalDate<TC>> sub) where TC : ISubtotalResult;
+        T Visit<TC>(IEnumerable<ISubtotalUser<TC>> sub) where TC : ISubtotalResult;
+        T Visit<TC>(IEnumerable<ISubtotalCurrency<TC>> sub) where TC : ISubtotalResult;
+        T Visit<TC>(IEnumerable<ISubtotalTitle<TC>> sub) where TC : ISubtotalResult;
+        T Visit<TC>(IEnumerable<ISubtotalSubTitle<TC>> sub) where TC : ISubtotalResult;
+        T Visit<TC>(IEnumerable<ISubtotalContent<TC>> sub) where TC : ISubtotalResult;
+        T Visit<TC>(IEnumerable<ISubtotalRemark<TC>> sub) where TC : ISubtotalResult;
     }
 }

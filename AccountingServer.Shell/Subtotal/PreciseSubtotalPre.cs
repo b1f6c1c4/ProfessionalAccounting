@@ -33,20 +33,20 @@ namespace AccountingServer.Shell.Subtotal
             return path + interval + token;
         }
 
-        private void ShowSubtotal(ISubtotalResult sub)
+        private void ShowSubtotal<TC>(ISubtotalResult<TC> sub) where TC : ISubtotalResult
         {
             if (m_WithSubtotal || sub.Items == null)
                 Sb.AppendLine($"{m_Path}\t{sub.Fund:R}");
             VisitChildren(sub);
         }
 
-        public override Nothing Visit(ISubtotalRoot sub)
+        public override Nothing Visit<TC>(ISubtotalRoot<TC> sub)
         {
             ShowSubtotal(sub);
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalDate sub)
+        public override Nothing Visit<TC>(ISubtotalDate<TC> sub)
         {
             var prev = m_Path;
             m_Path = Merge(m_Path, sub.Date.AsDate(sub.Level));
@@ -55,7 +55,7 @@ namespace AccountingServer.Shell.Subtotal
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalUser sub)
+        public override Nothing Visit<TC>(ISubtotalUser<TC> sub)
         {
             var prev = m_Path;
             m_Path = Merge(m_Path, $"U{sub.User.AsUser()}");
@@ -64,7 +64,7 @@ namespace AccountingServer.Shell.Subtotal
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalCurrency sub)
+        public override Nothing Visit<TC>(ISubtotalCurrency<TC> sub)
         {
             var prev = m_Path;
             m_Path = Merge(m_Path, $"@{sub.Currency}");
@@ -73,7 +73,7 @@ namespace AccountingServer.Shell.Subtotal
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalTitle sub)
+        public override Nothing Visit<TC>(ISubtotalTitle<TC> sub)
         {
             var prev = m_Path;
             m_Path = Merge(m_Path, TitleManager.GetTitleName(sub.Title));
@@ -83,7 +83,7 @@ namespace AccountingServer.Shell.Subtotal
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalSubTitle sub)
+        public override Nothing Visit<TC>(ISubtotalSubTitle<TC> sub)
         {
             var prev = m_Path;
             m_Path = Merge(m_Path, TitleManager.GetTitleName(m_Title, sub.SubTitle));
@@ -92,7 +92,7 @@ namespace AccountingServer.Shell.Subtotal
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalContent sub)
+        public override Nothing Visit<TC>(ISubtotalContent<TC> sub)
         {
             var prev = m_Path;
             m_Path = Merge(m_Path, sub.Content);
@@ -101,7 +101,7 @@ namespace AccountingServer.Shell.Subtotal
             return Nothing.AtAll;
         }
 
-        public override Nothing Visit(ISubtotalRemark sub)
+        public override Nothing Visit<TC>(ISubtotalRemark<TC> sub)
         {
             var prev = m_Path;
             m_Path = Merge(m_Path, sub.Remark);
