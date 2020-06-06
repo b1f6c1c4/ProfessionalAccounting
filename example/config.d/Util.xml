@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Templates>
+  <Template name="ye" type="fill" query="T1101 '余额宝'" desc="余额宝">
+    <Detail currency="CNY">
+      <Title>1101</Title>
+      <SubTitle>02</SubTitle>
+      <Content>余额宝</Content>
+      <Fund>-1</Fund>
+    </Detail>
+    <Detail currency="CNY">
+      <Title>6111</Title>
+      <SubTitle>02</SubTitle>
+      <Content>余额宝</Content>
+      <Fund>1</Fund>
+    </Detail>
+  </Template>
+  <Template name="lyft" type="value" desc="Lyft">
+    <Detail currency="USD">
+      <Title>6602</Title>
+      <SubTitle>08</SubTitle>
+      <Content>Lyft</Content>
+      <Fund>1</Fund>
+    </Detail>
+    <Detail currency="USD">
+      <Title>2241</Title>
+      <SubTitle>01</SubTitle>
+      <Content>XXXX</Content>
+      <Fund>-1</Fund>
+    </Detail>
+  </Template>
+</Templates>

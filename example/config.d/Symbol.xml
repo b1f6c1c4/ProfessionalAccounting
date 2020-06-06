@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Symbols>
+  <Symbol currency="CNY">¥</Symbol>
+  <Symbol currency="USD">$</Symbol>
+  <Symbol currency="EUR">€</Symbol>
+  <Symbol currency="JPY">¥</Symbol>
+  <Symbol currency="HKD">$</Symbol>
+  <Symbol currency="TWD">$</Symbol>
+  <Symbol currency="AUD">$</Symbol>
+  <Symbol currency="CAD">$</Symbol>
+  <Symbol currency="MXN">$</Symbol>
+  <Symbol currency="KRW">₩</Symbol>
+  <Symbol currency="PLN">zł</Symbol>
+  <Symbol currency="RUB">р.</Symbol>
+  <Symbol currency="VND">₫</Symbol>
+</Symbols>

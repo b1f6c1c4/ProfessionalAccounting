@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<BaseCurrencies>
+  <BaseCurrency>
+    <Currency>CNY</Currency>
+  </BaseCurrency>
+  <!-- <BaseCurrency>
+      <Date>2018-08-10T00:00:00Z</Date>
+      <Currency>USD</Currency>
+  </BaseCurrency> -->
+</BaseCurrencies>

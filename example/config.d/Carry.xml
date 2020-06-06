@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<CarrySettings>
+  <User name="b1">
+    <Target>
+      T6401+
+      T640299+
+      T6602+
+      T660304+
+      T660399+
+      T6701+
+      T6711
+    </Target>
+    <Target>
+      T630103+
+      T630104+
+      T630199+
+      T6001+
+      T6051+
+      T640200+
+      T6101+
+      T6111+
+      T630101+
+      T630102+
+      T660300+
+      T660301+
+      T660302+
+      T660303
+    </Target>
+  </User>
+</CarrySettings>

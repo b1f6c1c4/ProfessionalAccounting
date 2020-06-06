@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Templates>
+  <!-- <Account user="b1" currency="CNY">
+  <QuickAsset>Ub1 T1001+Ub1 T1002+Ub1 T1101 '余额宝'</QuickAsset>
+  <Items>
+    <SimpleCreditCard bill="1"  repay="10">Ub1 T2001 '花呗'</SimpleCreditCard>
+    <MonthlyItem day="10" fund="100"/>
+  </Items>
+  </Account> -->
+</Templates>
