@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Templates>
+
+  <!-- <Template name="al">
+    <InquiriesHub name="Ub1">
+      <Inquiry name="Asset" ext="true" general="false">Ub1 T1001+Ub1 T1002+Ub1 T1012+Ub1 T1101+Ub1 T1123+Ub1 T1501</Inquiry>
+      <Inquiry name="Liability" ext="true" general="false">Ub1 T2001+Ub1 T2201+Ub1 T2202+Ub1 T2203+Ub1 T2241</Inquiry>
+    </InquiriesHub>
+    <InquiriesHub name="Upn">
+      <Inquiry name="Asset" ext="true" general="false">Upn T1001+Upn T1002+Upn T1012+Upn T1101+Upn T1123+Upn T1501</Inquiry>
+      <Inquiry name="Liability" ext="true" general="false">Upn T2001+Upn T2201+Upn T2202+Upn T2203+Upn T2241</Inquiry>
+    </InquiriesHub>
+  </Template> -->
+
+</Templates>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Abbrs>
+  <Abbr string="alipay">
+    <Title>1012</Title>
+    <SubTitle>03</SubTitle>
+  </Abbr>
+  <Abbr string="zfb">
+    <Title>1012</Title>
+    <SubTitle>03</SubTitle>
+  </Abbr>
+  <Abbr string="ye">
+    <Title>1101</Title>
+    <SubTitle>01</SubTitle>
+    <Content>余额宝</Content>
+  </Abbr>
+  <Abbr string="hb">
+    <Title>2001</Title>
+    <Content>花呗</Content>
+  </Abbr>
+  <Abbr string="fz">
+    <Title>6602</Title>
+    <SubTitle>06</SubTitle>
+    <Content>服装</Content>
+  </Abbr>
+  <Abbr string="cat">
+    <Title>6602</Title>
+    <SubTitle>06</SubTitle>
+    <Content>宠物</Content>
+  </Abbr>
+  <Abbr string="shyp">
+    <Title>6602</Title>
+    <SubTitle>06</SubTitle>
+    <Content>生活用品</Content>
+  </Abbr>
+  <Abbr string="sp">
+    <Title>6602</Title>
+    <SubTitle>06</SubTitle>
+    <Content>食品</Content>
+  </Abbr>
+  <Abbr string="jtysf" edit="true">
+    <Title>6602</Title>
+    <SubTitle>08</SubTitle>
+  </Abbr>
+  <Abbr string="dt">
+    <Title>6602</Title>
+    <SubTitle>08</SubTitle>
+    <Content>地铁</Content>
+  </Abbr>
+  <Abbr string="uber">
+    <Title>6602</Title>
+    <SubTitle>08</SubTitle>
+    <Content>Uber</Content>
+  </Abbr>
+  <Abbr string="lyft">
+    <Title>6602</Title>
+    <SubTitle>08</SubTitle>
+    <Content>Lyft</Content>
+  </Abbr>
+  <Abbr string="czc">
+    <Title>6602</Title>
+    <SubTitle>08</SubTitle>
+    <Content>出租车</Content>
+  </Abbr>
+</Abbrs>
