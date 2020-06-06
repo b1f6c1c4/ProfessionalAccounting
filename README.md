@@ -85,7 +85,7 @@
 
 ### 记账（记账凭证的增加、修改与删除）
 
-![记账过程](create.gif)
+![记账过程](example/create.gif)
 
 1. 在客户端上使用浏览器访问服务器的18080端口：`https://<server>:18080/`
 1. 可以看到用户界面分为两部分：上面的一行命令框和下面的编辑器
@@ -118,7 +118,7 @@
 
 ### 检索
 
-![检索过程](query.gif)
+![检索过程](example/query.gif)
 
 在命令框中执行检索命令可以列出相应的记账凭证：
 
@@ -135,7 +135,7 @@
 
 ### 汇总
 
-![汇总过程](subtotal.gif)
+![汇总过程](example/subtotal.gif)
 
 在命令框中执行分类汇总命令可以对帐务数据进行统计：
 
@@ -162,8 +162,18 @@
 
 ## 开发
 
-TODO
+- `nginx` - 前端
+- `AccountingServer` - HTTP Server
+- `AccountingServer.Shell` - 记账凭证的序列化/反序列化，分类汇总的显示
+- `AccountingServer.BLL` - 汇率转换，分类汇总，固定资产处理，摊销处理
+- `AccountingServer.DAL` - mongoDB数据库访问
+- `AccountingServer.Entities` - 基本对象结构定义
+- `AccountingServer.QueryGeneration` - 基于Antlr4的DSL Parser
+- `AccountingServer.Test` - 单元测试和集成测试
 
 ## 许可
 
-TODO
+- `nginx`- MIT
+- `AccuntingServer*` - **GNU AGPL v3**
+- 其他文件和文件夹皆为 **Public Domain**
+
