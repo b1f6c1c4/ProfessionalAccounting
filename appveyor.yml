@@ -35,7 +35,8 @@ services:
   - mongodb
 
 install:
-  - choco install --no-progress sed
+  - choco install --no-progress sed archiver
+  - arc archive nginx/archive.tar.xz .
   - nuget restore AccountingServer.sln
   - openssl rsa -in ./certs/key.pem -out ./certs/key.pem -passin env:PRIVATE_KEY_PASSWORD
 
@@ -73,7 +74,6 @@ before_deploy:
   - docker version
 
 deploy_script:
-  - git archive HEAD -o nginx/archive.zip
   - docker build -t b1f6c1c4/accounting-frontend:latest ./nginx
   - docker build -t b1f6c1c4/accounting-backend:latest ./AccountingServer/bin/Release
   - docker login -u %DOCKER_USER% -p %DOCKER_PASS%
