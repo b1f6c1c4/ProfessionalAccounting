@@ -229,6 +229,7 @@ editor.onkeydown = (e) => {
     cmdLine.focus();
   }
 };
+editor.value = notice;
 
 cmdLine.onkeydown = (e) => {
   if (e.keyCode == 9) {

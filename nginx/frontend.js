@@ -237,6 +237,7 @@ editor.commands.addCommands([{
 editor.commands.bindKeys({
   'Tab': () => { cmdLine.focus(); },
 });
+editor.insert(notice);
 
 cmdLine.commands.bindKeys({
   'Tab': () => { editor.focus(); },

@@ -173,7 +173,16 @@
 
 ## 许可
 
-- `nginx`- MIT
-- `AccuntingServer*` - **GNU AGPL v3**
-- 其他文件和文件夹皆为 **Public Domain**
+本项目以GNU AGPL v3.0协议开源。
+This project is licensed under **GNU AGPL v3.0** only. (AGPL-3.0-only).
+
+注解：（请参阅协议原文，以下解释没有法律效力）
+
+- 若个人开发者采用客户端证书的方式将端口保护起来，阻止自己以外的其他任何人访问，
+  这种行为不算“making available to the public”，也不构成协议中的
+  “propagate/convey/remote network interaction”，
+  因此将**不受GNU AGPL v3.0协议的限制**。
+- 但是若个人开发者不采用任何方式保护端口，其他人将有可能通过网络与该软件交互
+  （“remote network interaction”），这种行为就算作“convey”了。
+  这种情况下该行为**受到GNU AGPL v3.0协议的限制**，必须提供与后端程序的**版本一致**、**完整的**源代码。
 
