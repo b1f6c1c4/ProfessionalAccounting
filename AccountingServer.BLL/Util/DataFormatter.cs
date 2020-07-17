@@ -182,7 +182,7 @@ namespace AccountingServer.BLL.Util
             if (!value.HasValue)
                 return "[null]";
 
-            switch (level)
+            switch (level & SubtotalLevel.Subtotal)
             {
                 case SubtotalLevel.None:
                 case SubtotalLevel.Day:
