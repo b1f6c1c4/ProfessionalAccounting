@@ -162,6 +162,8 @@
 
 ## 开发
 
+### 项目文件结构
+
 - `nginx` - 前端
 - `AccountingServer` - HTTP Server
 - `AccountingServer.Shell` - 记账凭证的序列化/反序列化，分类汇总的显示
@@ -170,6 +172,37 @@
 - `AccountingServer.Entities` - 基本对象结构定义
 - `AccountingServer.QueryGeneration` - 基于Antlr4的DSL Parser
 - `AccountingServer.Test` - 单元测试和集成测试
+
+### 本地开发环境
+
+#### 在Linux上构建开发环境
+
+1. 请先安装以下工具：
+    - [Mono Project](https://www.mono-project.com/)
+    - [JetBrains Rider](https://www.jetbrains.com/rider/)
+    - [Docker](https://www.docker.com/)
+1. 启动测试数据库：
+
+    ```bash
+    docker run -d --rm --name mongo -p 27017:27017 mongo
+    ```
+
+1. 启动Rider即可。
+1. 若在执行单元测试时，所有需要数据库的测试均卡死不动，
+    请在`Settings`/`Appearance & Behavior`中添加变量：
+    - Name: `MONGO_URI`
+    - Value: `mongodb://192.168.1.xx:27017`
+        - 其中`192.168.1.xx`为物理IP
+        - 此处填写`127.0.0.1`或者`localhost`不一定有效
+
+#### 在Windows上构建开发环境
+
+1. 请先安装以下工具：
+    - [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework)
+    - [Visual Studio](https://visualstudio.microsoft.com/)
+    - [Mongo DB](https://www.mongodb.com/)
+1. 启动测试数据库：在`services.msc`中启动`MongoDB`服务。
+1. 启动Visual Studio即可。
 
 ## 许可
 
