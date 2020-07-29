@@ -26,7 +26,8 @@ namespace AccountingServer.DAL
         {
             uri = uri ?? Environment.GetEnvironmentVariable("MONGO_URI") ?? "mongodb://localhost";
 
-            if (uri.StartsWith("mongodb://", StringComparison.Ordinal))
+            if (uri.StartsWith("mongodb://", StringComparison.Ordinal) ||
+                uri.StartsWith("mongodb+srv://", StringComparison.Ordinal))
                 return new MongoDbAdapter(uri, db);
 
             throw new NotSupportedException("Uri无效");
