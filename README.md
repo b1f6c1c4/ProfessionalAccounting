@@ -11,9 +11,9 @@
 - C/S架构
 - 使用DSL（Domain Specfic Langauge）来增删改查
 - 后端
-    - 单体架构，业务逻辑使用`C# 7.3`编写
+    - 单体架构，业务逻辑使用`C# 8.0`编写
     - 数据库采用MongoDB
-    - 使用`.NET Framework v4.7.2`平台编译
+    - 使用`.NET Framework v4.8`平台编译
     - 使用docker部署，其中采用`mono`执行编译好的程序
 - 前端
     - 由于逻辑非常简单，前端部分没有采用任何框架
