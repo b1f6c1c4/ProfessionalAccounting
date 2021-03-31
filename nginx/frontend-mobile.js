@@ -27,6 +27,7 @@ const freeze = (f) => {
   document.getElementById('create').disabled = f;
   document.getElementById('upsert').disabled = f;
   document.getElementById('remove').disabled = f;
+  document.getElementById('upload').disabled = f;
 };
 
 const getRow = (pos) => {
