@@ -29,7 +29,7 @@ environment:
   DOCKER_MACHINE_NAME: accounting
   DOCKER_USER: b1f6c1c4
   DOCKER_PASS:
-    secure: OoQDRsCepo+DniKf6E5WGQ==
+    secure: xh4rPu+6sbJUK4FlcoIUcrvOxrDhIhs2iLOtimcKtdd5aHi1M7hYXQtMg0JkluLe
 
 services:
   - mongodb
