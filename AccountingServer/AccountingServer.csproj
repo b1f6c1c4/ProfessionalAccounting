@@ -10,4 +10,13 @@
     <ProjectReference Include="..\AccountingServer.Shell\AccountingServer.Shell.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Dockerfile">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update=".dockerignore">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
