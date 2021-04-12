@@ -30,3 +30,8 @@ ipch
 /AccountingServer.BLL/Parsing/SubtotalLexer.cs
 /AccountingServer.BLL/Parsing/SubtotalLexer.tokens
 /AccountingServer.BLL/Parsing/SubtotalParser.cs
+
+# IDEs
+.idea
+.vs
+.vscode

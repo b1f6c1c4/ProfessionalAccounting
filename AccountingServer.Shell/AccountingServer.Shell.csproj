@@ -1,150 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{0DDC759F-23DE-4443-A97C-4EDC1C40690C}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AccountingServer.Shell</RootNamespace>
-    <AssemblyName>AccountingServer.Shell</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <LangVersion>8.0</LangVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.IO.Compression" />
-    <Reference Include="System.ValueTuple">
-      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <PackageReference Include="System.CodeDom" Version="5.0.0" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Carry\BaseCurrencyShell.cs" />
-    <Compile Include="Serializer\CsvSerializer.cs" />
-    <Compile Include="Plugins\AssetHelper\AssetDisposition.cs" />
-    <Compile Include="Plugins\AssetHelper\AssetFactory.cs" />
-    <Compile Include="Plugins\CreditCardConvert\CreditCardConvert.cs" />
-    <Compile Include="Plugins\Interest\InterestBase.cs" />
-    <Compile Include="Plugins\Interest\InterestExpense.cs" />
-    <Compile Include="Serializer\AlternativeSerializer.cs" />
-    <Compile Include="Carry\ExchangeShell.cs" />
-    <Compile Include="Plugins\BankBalance\AverageDailyBalance.cs" />
-    <Compile Include="Plugins\CashFlow\CashFlow.cs" />
-    <Compile Include="Plugins\CashFlow\CashTemplate.cs" />
-    <Compile Include="Plugins\Interest\InterestRevenue.cs" />
-    <Compile Include="Plugins\Composite\Composite.cs" />
-    <Compile Include="Plugins\Composite\Inquiry.cs" />
-    <Compile Include="Plugins\Statement\CsvParser.cs" />
-    <Compile Include="Plugins\Statement\Statement.cs" />
-    <Compile Include="Plugins\Utilities\Utilities.cs" />
-    <Compile Include="Plugins\Utilities\UtilTemplate.cs" />
-    <Compile Include="Plugins\YieldRate\YieldRate.cs" />
-    <Compile Include="Plugins\YieldRate\YieldRateSolver.cs" />
-    <Compile Include="Serializer\DiscountSerializer.cs" />
-    <Compile Include="Serializer\JsonSerializer.cs" />
-    <Compile Include="Subtotal\ISubtotalStringify.cs" />
-    <Compile Include="Subtotal\RawSubtotal.cs" />
-    <Compile Include="Subtotal\JsonSubtotal.cs" />
-    <Compile Include="Subtotal\StringSubtotalVisitor.cs" />
-    <Compile Include="Subtotal\PreciseSubtotalPre.cs" />
-    <Compile Include="Serializer\AbbrSerializer.cs" />
-    <Compile Include="AmortizationShell.cs" />
-    <Compile Include="AssetShell.cs" />
-    <Compile Include="Carry\CarryYearShell.cs" />
-    <Compile Include="DistributedShell.cs" />
-    <Compile Include="Serializer\ExprSerializer.cs" />
-    <Compile Include="Facade.cs" />
-    <Compile Include="Serializer\IEntitySerializer.cs" />
-    <Compile Include="IShellComponent.cs" />
-    <Compile Include="Util\ParseHelper.cs" />
-    <Compile Include="PluginShell.cs" />
-    <Compile Include="CheckShell.cs" />
-    <Compile Include="AccountingShell.cs" />
-    <Compile Include="Carry\CarryShell.cs" />
-    <Compile Include="Subtotal\RichSubtotalPre.cs" />
-    <Compile Include="Plugins\PluginBase.cs" />
-    <Compile Include="Serializer\CSharpSerializer.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueryResult.cs" />
+    <ProjectReference Include="..\AccountingServer.BLL\AccountingServer.BLL.csproj" />
+    <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AccountingServer.BLL\AccountingServer.BLL.csproj">
-      <Project>{4f938d5a-6b22-4150-a74c-8203fdf1d215}</Project>
-      <Name>AccountingServer.BLL</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj">
-      <Project>{7246deb7-bda2-49d8-9490-3ed074219106}</Project>
-      <Name>AccountingServer.Entities</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Document.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Plugins\BankBalance\Resources\Document.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Plugins\Interest\Resources\Document.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Plugins\Composite\Resources\Document.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Plugins\Utilities\Resources\Document.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Plugins\YieldRate\Resources\Document.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Plugins\CashFlow\Resources\Document.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Plugins\Statement\Resources\Document.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Plugins\CreditCardConvert\Resources\Document.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Plugins\AssetHelper\Resources\Document.txt" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>
