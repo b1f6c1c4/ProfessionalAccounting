@@ -18,4 +18,11 @@ sed '-i.bak' 's/^public partial class Subtotal/internal partial class Subtotal/'
     AccountingServer.BLL/Parsing/SubtotalLexer.cs `
     AccountingServer.BLL/Parsing/SubtotalParser.cs
 
+sed '-i.bak' 's/AccountingServer\.QueryGeneration/AccountingServer.BLL.Parsing/' `
+    AccountingServer.BLL/Parsing/QueryLexer.cs `
+    AccountingServer.BLL/Parsing/QueryParser.cs
+sed '-i.bak' 's/AccountingServer\.QueryGeneration/AccountingServer.BLL.Parsing/' `
+    AccountingServer.BLL/Parsing/SubtotalLexer.cs `
+    AccountingServer.BLL/Parsing/SubtotalParser.cs
+
 rm -Force sed*
