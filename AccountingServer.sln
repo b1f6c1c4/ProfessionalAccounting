@@ -1,34 +1,33 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2003
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31112.23
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.Entities", "AccountingServer.Entities\AccountingServer.Entities.csproj", "{7246DEB7-BDA2-49D8-9490-3ED074219106}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AccountingServer.Entities", "AccountingServer.Entities\AccountingServer.Entities.csproj", "{7246DEB7-BDA2-49D8-9490-3ED074219106}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.DAL", "AccountingServer.DAL\AccountingServer.DAL.csproj", "{2CAB5DC7-A5A8-47A4-9D46-BFE2A474BB48}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AccountingServer.DAL", "AccountingServer.DAL\AccountingServer.DAL.csproj", "{2CAB5DC7-A5A8-47A4-9D46-BFE2A474BB48}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.BLL", "AccountingServer.BLL\AccountingServer.BLL.csproj", "{4F938D5A-6B22-4150-A74C-8203FDF1D215}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AccountingServer.BLL", "AccountingServer.BLL\AccountingServer.BLL.csproj", "{4F938D5A-6B22-4150-A74C-8203FDF1D215}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.Shell", "AccountingServer.Shell\AccountingServer.Shell.csproj", "{0DDC759F-23DE-4443-A97C-4EDC1C40690C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AccountingServer.Shell", "AccountingServer.Shell\AccountingServer.Shell.csproj", "{0DDC759F-23DE-4443-A97C-4EDC1C40690C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Middleware", "Middleware", "{13C35141-C1A9-46DB-9ED4-3310DCD021FC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fundation", "Fundation", "{A3156D54-41A5-4265-A07B-0E80030A4EE6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.QueryGeneration", "AccountingServer.QueryGeneration\AccountingServer.QueryGeneration.csproj", "{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AccountingServer.QueryGeneration", "AccountingServer.QueryGeneration\AccountingServer.QueryGeneration.csproj", "{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shell", "Shell", "{15EBBDC7-0339-4A91-922A-D4A6FE4D6F5C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer.Test", "AccountingServer.Test\AccountingServer.Test.csproj", "{80DCCEC9-EE8D-43C1-BC74-8A45AE10FBCB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountingServer", "AccountingServer\AccountingServer.csproj", "{D0E1986D-0084-4480-A31A-C09B01DA92E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AccountingServer", "AccountingServer\AccountingServer.csproj", "{D0E1986D-0084-4480-A31A-C09B01DA92E1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7F1EDC1B-C64B-4AEC-944F-23EF7A2F8460}"
 	ProjectSection(SolutionItems) = preProject
-		docker-compose.yml = docker-compose.yml
 		appveyor.yml = appveyor.yml
 		DeployParser.ps1 = DeployParser.ps1
 		DeployParser.sh = DeployParser.sh
+		docker-compose.yml = docker-compose.yml
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -40,35 +39,50 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nginx", "nginx", "{1F49F7D7
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Gen|Any CPU = Gen|Any CPU
 		Debug|Any CPU = Debug|Any CPU
+		Gen|Any CPU = Gen|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{7246DEB7-BDA2-49D8-9490-3ED074219106}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7246DEB7-BDA2-49D8-9490-3ED074219106}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7246DEB7-BDA2-49D8-9490-3ED074219106}.Gen|Any CPU.ActiveCfg = Release|Any CPU
+		{7246DEB7-BDA2-49D8-9490-3ED074219106}.Gen|Any CPU.Build.0 = Release|Any CPU
 		{7246DEB7-BDA2-49D8-9490-3ED074219106}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7246DEB7-BDA2-49D8-9490-3ED074219106}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2CAB5DC7-A5A8-47A4-9D46-BFE2A474BB48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2CAB5DC7-A5A8-47A4-9D46-BFE2A474BB48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CAB5DC7-A5A8-47A4-9D46-BFE2A474BB48}.Gen|Any CPU.ActiveCfg = Release|Any CPU
+		{2CAB5DC7-A5A8-47A4-9D46-BFE2A474BB48}.Gen|Any CPU.Build.0 = Release|Any CPU
 		{2CAB5DC7-A5A8-47A4-9D46-BFE2A474BB48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CAB5DC7-A5A8-47A4-9D46-BFE2A474BB48}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4F938D5A-6B22-4150-A74C-8203FDF1D215}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4F938D5A-6B22-4150-A74C-8203FDF1D215}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F938D5A-6B22-4150-A74C-8203FDF1D215}.Gen|Any CPU.ActiveCfg = Release|Any CPU
+		{4F938D5A-6B22-4150-A74C-8203FDF1D215}.Gen|Any CPU.Build.0 = Release|Any CPU
 		{4F938D5A-6B22-4150-A74C-8203FDF1D215}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F938D5A-6B22-4150-A74C-8203FDF1D215}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0DDC759F-23DE-4443-A97C-4EDC1C40690C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0DDC759F-23DE-4443-A97C-4EDC1C40690C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DDC759F-23DE-4443-A97C-4EDC1C40690C}.Gen|Any CPU.ActiveCfg = Release|Any CPU
+		{0DDC759F-23DE-4443-A97C-4EDC1C40690C}.Gen|Any CPU.Build.0 = Release|Any CPU
 		{0DDC759F-23DE-4443-A97C-4EDC1C40690C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0DDC759F-23DE-4443-A97C-4EDC1C40690C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}.Gen|Any CPU.ActiveCfg = Gen|Any CPU
 		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}.Gen|Any CPU.Build.0 = Gen|Any CPU
+		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}.Release|Any CPU.ActiveCfg = Gen|Any CPU
+		{FB220E46-AC14-4198-9807-2B9F2FFA0D3F}.Release|Any CPU.Build.0 = Gen|Any CPU
 		{80DCCEC9-EE8D-43C1-BC74-8A45AE10FBCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{80DCCEC9-EE8D-43C1-BC74-8A45AE10FBCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80DCCEC9-EE8D-43C1-BC74-8A45AE10FBCB}.Gen|Any CPU.ActiveCfg = Release|Any CPU
+		{80DCCEC9-EE8D-43C1-BC74-8A45AE10FBCB}.Gen|Any CPU.Build.0 = Release|Any CPU
 		{80DCCEC9-EE8D-43C1-BC74-8A45AE10FBCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80DCCEC9-EE8D-43C1-BC74-8A45AE10FBCB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D0E1986D-0084-4480-A31A-C09B01DA92E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D0E1986D-0084-4480-A31A-C09B01DA92E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0E1986D-0084-4480-A31A-C09B01DA92E1}.Gen|Any CPU.ActiveCfg = Release|Any CPU
 		{D0E1986D-0084-4480-A31A-C09B01DA92E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0E1986D-0084-4480-A31A-C09B01DA92E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
