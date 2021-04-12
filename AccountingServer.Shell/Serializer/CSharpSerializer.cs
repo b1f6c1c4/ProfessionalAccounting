@@ -17,12 +17,16 @@
  */
 
 using System;
-using System.CodeDom.Compiler;
 using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Loader;
 using System.Text;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
-using Microsoft.CSharp;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace AccountingServer.Shell.Serializer
 {
@@ -50,13 +54,6 @@ namespace AccountingServer.Shell.Serializer
         /// <returns>对象</returns>
         private static object ParseCSharp(string str, Type type)
         {
-            var provider = new CSharpCodeProvider();
-            var paras = new CompilerParameters
-                {
-                    GenerateExecutable = false,
-                    GenerateInMemory = true,
-                    ReferencedAssemblies = { "AccountingServer.Entities.dll" },
-                };
             var sb = new StringBuilder();
             sb.AppendLine("using System;");
             sb.AppendLine("using System.Collections.Generic;");
@@ -79,13 +76,45 @@ namespace AccountingServer.Shell.Serializer
             sb.AppendLine("        }");
             sb.AppendLine("    }");
             sb.AppendLine("}");
-            var result = provider.CompileAssemblyFromSource(paras, sb.ToString());
-            if (result.Errors.HasErrors)
-                throw new Exception(result.Errors[0].ToString());
 
-            var resultAssembly = result.CompiledAssembly;
+            var syntaxTree = CSharpSyntaxTree.ParseText(sb.ToString());
+            var assemblyName = Path.GetRandomFileName();
+
+            var refPaths = new[]
+                {
+                    typeof(object).GetTypeInfo().Assembly.Location,
+                    typeof(Console).GetTypeInfo().Assembly.Location,
+                    Path.Combine(
+                        Path.GetDirectoryName(typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.Location)!,
+                        "System.Runtime.dll"),
+                    Path.Combine(Path.GetDirectoryName(typeof(System.Collections.IList).GetTypeInfo().Assembly.Location)!,
+                        "System.Collections.dll"),
+                    Path.Combine(Path.GetDirectoryName(typeof(Voucher).GetTypeInfo().Assembly.Location)!,
+                        "AccountingServer.Entities.dll"),
+                };
+            var references = refPaths.Select(r => MetadataReference.CreateFromFile(r)).ToArray();
+            var compilation = CSharpCompilation.Create(
+                assemblyName,
+                syntaxTrees: new[] { syntaxTree },
+                references: references,
+                options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+            using var ms = new MemoryStream();
+
+            var result = compilation.Emit(ms);
+            if (!result.Success)
+            {
+                var failure = result.Diagnostics.First(diagnostic =>
+                    diagnostic.IsWarningAsError ||
+                    diagnostic.Severity == DiagnosticSeverity.Error);
+                throw new Exception(failure.GetMessage());
+            }
+
+            ms.Seek(0, SeekOrigin.Begin);
+
+            var resultAssembly = AssemblyLoadContext.Default.LoadFromStream(ms);
             return
-                resultAssembly.GetType("AccountingServer.Shell.Dynamic.ObjectCreator")
+                resultAssembly.GetType("AccountingServer.Shell.Dynamic.ObjectCreator")!
                     .GetMethod("GetObject")
                     ?.Invoke(null, null);
         }
