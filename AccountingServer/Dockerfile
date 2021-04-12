@@ -1,6 +1,6 @@
-FROM mono:6.0
+FROM mcr.microsoft.com/dotnet/runtime:5.0-alpine
 
 WORKDIR /opt/accounting
 COPY . .
 
-CMD ["mono", "AccountingServer.exe"]
+CMD ["dotnet", "AccountingServer.exe"]
