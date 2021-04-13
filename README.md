@@ -11,10 +11,10 @@
 - C/S架构
 - 使用DSL（Domain Specfic Langauge）来增删改查
 - 后端
-    - 单体架构，业务逻辑使用`C# 8.0`编写
+    - 单体架构，业务逻辑使用`C# 9.0`编写
     - 数据库采用MongoDB
-    - 使用`.NET Framework v4.8`平台编译
-    - 使用docker部署，其中采用`mono`执行编译好的程序
+    - 使用`.NET 5.0`平台编译
+    - 使用docker部署
 - 前端
     - 由于逻辑非常简单，前端部分没有采用任何框架
     - （其实只有一个编辑器和一个命令框）
@@ -57,7 +57,7 @@
 ### 配置服务器和客户端x509证书
 
 1. 将服务器证书和私钥（`server.crt`，`server.key`）放在服务器的`/data/accounting/certs`目录下
-    1. 如果你没有服务器证书，推荐使用[acme.sh](https://github.com/acmesh-official/acme.sh/wiki/%E8%AF%B4%E6%98%8E)来免费获得一个
+    1. 如果你没有服务器证书，推荐使用 [acme.sh](https://github.com/acmesh-official/acme.sh/wiki/%E8%AF%B4%E6%98%8E) 来免费获得一个
 1. 在服务器上创建dhparams：
     ```bash
     openssl dhparam -out /data/accounting/certs/dhparam.pem 2048
@@ -181,7 +181,7 @@
 #### 在Linux上构建开发环境
 
 1. 请先安装以下工具：
-    - [Mono Project](https://www.mono-project.com/)
+    - [.NET 5.0](https://dotnet.microsoft.com/download/dotnet/5.0)
     - [JetBrains Rider](https://www.jetbrains.com/rider/)
     - [Docker](https://www.docker.com/)
 1. 启动测试数据库：
@@ -201,7 +201,7 @@
 #### 在Windows上构建开发环境
 
 1. 请先安装以下工具：
-    - [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework)
+    - [.NET 5.0](https://dotnet.microsoft.com/download/dotnet/5.0)
     - [Visual Studio](https://visualstudio.microsoft.com/)
     - [Mongo DB](https://www.mongodb.com/)
 1. 启动测试数据库：在`services.msc`中启动`MongoDB`服务。
