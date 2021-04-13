@@ -32,7 +32,7 @@ namespace AccountingServer.BLL
         /// <summary>
         ///     数据库访问
         /// </summary>
-        public IDbAdapter Db { private get; set; }
+        public IDbAdapter Db { private get; init; }
 
         public double From(DateTime date, string target)
         {

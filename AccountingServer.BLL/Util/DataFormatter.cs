@@ -84,8 +84,8 @@ namespace AccountingServer.BLL.Util
             if (value == "U")
                 return null;
             if (value.StartsWith("U'", StringComparison.Ordinal))
-                return value.Substring(1).Dequotation();
-            return value.Substring(1);
+                return value[1..].Dequotation();
+            return value[1..];
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace AccountingServer.BLL.Util
                 throw new MemberAccessException("表达式错误");
             if (value == "@@")
                 return BaseCurrency.Now;
-            return value.Substring(1).ToUpperInvariant();
+            return value[1..].ToUpperInvariant();
         }
 
         /// <summary>

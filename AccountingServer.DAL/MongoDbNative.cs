@@ -44,7 +44,7 @@ namespace AccountingServer.DAL
         /// <param name="id">编号</param>
         /// <returns>Bson查询</returns>
         public static FilterDefinition<T> GetNQuery<T>(Guid? id) =>
-            Builders<T>.Filter.Eq("_id", id.HasValue ? id.Value.ToBsonValue() as BsonValue : BsonNull.Value);
+            Builders<T>.Filter.Eq<BsonValue>("_id", id.HasValue ? id.Value.ToBsonValue() : BsonNull.Value);
     }
 
     internal abstract class MongoDbNativeVisitor<T, TAtom> : IQueryVisitor<TAtom, FilterDefinition<T>>

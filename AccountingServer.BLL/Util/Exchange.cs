@@ -134,7 +134,7 @@ namespace AccountingServer.BLL.Util
             {
                 var reader = new StreamReader(stream ?? throw new NetworkInformationException());
                 var json = JObject.Parse(reader.ReadToEnd());
-                rate = json["rates"][to].Value<double>() / json["rates"][from].Value<double>();
+                rate = json["rates"]![to]!.Value<double>() / json["rates"]![from]!.Value<double>();
             }
 
             m_Lock.EnterWriteLock();

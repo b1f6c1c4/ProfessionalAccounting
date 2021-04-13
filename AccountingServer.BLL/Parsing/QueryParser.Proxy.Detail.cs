@@ -84,7 +84,7 @@ namespace AccountingServer.BLL.Parsing
 
                     if (Floating() != null)
                     {
-                        var f = Floating().GetText().Substring(1);
+                        var f = Floating().GetText()[1..];
                         filter.Fund = double.Parse(f);
                     }
 

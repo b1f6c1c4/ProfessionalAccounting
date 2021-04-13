@@ -33,7 +33,7 @@ namespace AccountingServer.BLL.Parsing
             public IDistributed Filter
                 => new MyDistributedFilter
                     {
-                        ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : (Guid?)null,
+                        ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : null,
                         User = (UserSpec()?.GetText()).ParseUserSpec(),
                         Name = RegexString()?.GetText().Dequotation().Replace(@"\/", "/"),
                         Remark = PercentQuotedString()?.GetText().Dequotation(),
@@ -55,13 +55,13 @@ namespace AccountingServer.BLL.Parsing
             private sealed class MyDistributedFilter : IDistributed
             {
                 /// <inheritdoc />
-                public Guid? ID { get; set; }
+                public Guid? ID { get; init; }
 
                 /// <inheritdoc />
-                public string User { get; set; }
+                public string User { get; init; }
 
                 /// <inheritdoc />
-                public string Name { get; set; }
+                public string Name { get; init; }
 
                 /// <inheritdoc />
                 public DateTime? Date { get; set; }
@@ -70,7 +70,7 @@ namespace AccountingServer.BLL.Parsing
                 public double? Value { get; set; }
 
                 /// <inheritdoc />
-                public string Remark { get; set; }
+                public string Remark { get; init; }
 
                 /// <inheritdoc />
                 public IEnumerable<IDistributedItem> TheSchedule { get; set; }

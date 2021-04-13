@@ -156,13 +156,12 @@ namespace AccountingServer.Shell.Carry
                             bal => m_Accountant.From(ed.Value, bal.Currency)
                                 * m_Accountant.To(ed.Value, baseCur)
                                 * bal.Fund);
-                // ReSharper disable once PossibleInvalidOperationException
                 var totalC =
                     tasks.SelectMany(t => t.Voucher.Details)
                         .Where(d => d.Title == 3999).Sum(
                             d => m_Accountant.From(ed.Value, d.Currency)
                                 * m_Accountant.To(ed.Value, baseCur)
-                                * d.Fund.Value);
+                                * d.Fund!.Value);
 
                 var total = totalG + totalC;
                 if (!total.IsZero())
@@ -197,7 +196,7 @@ namespace AccountingServer.Shell.Carry
                             {
                                 Currency = BaseCurrency.At(task.Voucher.Date),
                                 Title = 4103,
-                                SubTitle = task.Target.IsSpecial ? 01 : (int?)null,
+                                SubTitle = task.Target.IsSpecial ? 01 : null,
                                 Fund = task.Value,
                             });
 
@@ -299,10 +298,10 @@ namespace AccountingServer.Shell.Carry
 
     internal class CarryTask
     {
-        public CarryTarget Target { get; set; }
+        public CarryTarget Target { get; init; }
 
         public double Value { get; set; }
 
-        public Voucher Voucher { get; set; }
+        public Voucher Voucher { get; init; }
     }
 }

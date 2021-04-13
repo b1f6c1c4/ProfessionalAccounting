@@ -52,7 +52,7 @@ namespace AccountingServer.Shell.Serializer
         public Voucher ParseVoucher(string str)
         {
             if (str.StartsWith(VoucherToken, StringComparison.OrdinalIgnoreCase))
-                str = str.Substring(VoucherToken.Length);
+                str = str[VoucherToken.Length..];
 
             return ParseVoucher(ParseJson(str));
         }
@@ -68,7 +68,7 @@ namespace AccountingServer.Shell.Serializer
         public Asset ParseAsset(string str)
         {
             if (str.StartsWith(AssetToken, StringComparison.OrdinalIgnoreCase))
-                str = str.Substring(AssetToken.Length);
+                str = str[AssetToken.Length..];
 
             var obj = ParseJson(str);
             var dateStr = obj["date"]?.Value<string>();
@@ -112,7 +112,7 @@ namespace AccountingServer.Shell.Serializer
         public Amortization ParseAmort(string str)
         {
             if (str.StartsWith(AmortToken, StringComparison.OrdinalIgnoreCase))
-                str = str.Substring(AmortToken.Length);
+                str = str[AmortToken.Length..];
 
             var obj = ParseJson(str);
             var dateStr = obj["date"]?.Value<string>();
@@ -357,7 +357,7 @@ namespace AccountingServer.Shell.Serializer
                     obj["amount"] = dev.Amount;
                     obj["type"] = "devalue";
                     break;
-                case DispositionItem _:
+                case DispositionItem:
                     obj["type"] = "disposition";
                     break;
             }

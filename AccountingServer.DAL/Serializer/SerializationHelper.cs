@@ -119,7 +119,7 @@ namespace AccountingServer.DAL.Serializer
         /// <returns>读取结果</returns>
         private static T? ReadStruct<T>(this IBsonReader bsonReader, string expected, ref string read,
             Func<T> readFunc) where T : struct
-            => ReadPrep(bsonReader, expected, ref read) ? readFunc() : (T?)null;
+            => ReadPrep(bsonReader, expected, ref read) ? readFunc() : null;
 
         /// <summary>
         ///     安全地读入<c>ObjectId</c>类型的字段
@@ -334,6 +334,6 @@ namespace AccountingServer.DAL.Serializer
         ///     <c>Guid</c>
         /// </param>
         /// <returns>Bson对象</returns>
-        public static BsonBinaryData ToBsonValue(this Guid id) => new(id);
+        public static BsonBinaryData ToBsonValue(this Guid id) => new(id, GuidRepresentation.CSharpLegacy);
     }
 }

@@ -252,14 +252,14 @@ namespace AccountingServer.Shell.Serializer
                             AcquisitionItem acq => $"OrigValue = {acq.OrigValue},",
                             DepreciateItem dep => $"Amount    = {dep.Amount},",
                             DevalueItem dev => $"FairValue = {dev.FairValue}, Amount = {dev.Amount},",
-                            DispositionItem _ => "",
+                            DispositionItem => "",
                             _ => throw new InvalidOperationException(),
                         });
 
                 sb.Append("} }");
             }
             else
-                sb.Append("}");
+                sb.Append('}');
 
             return sb.ToString();
         }
@@ -332,7 +332,7 @@ namespace AccountingServer.Shell.Serializer
             else
             {
                 sb.AppendLine("    Schedule = null");
-                sb.Append("}");
+                sb.Append('}');
             }
 
             return sb.ToString();

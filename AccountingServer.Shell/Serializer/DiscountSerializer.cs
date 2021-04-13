@@ -49,7 +49,7 @@ namespace AccountingServer.Shell.Serializer
             if (!expr.StartsWith(TheToken, StringComparison.Ordinal))
                 throw new FormatException("格式错误");
 
-            expr = expr.Substring(TheToken.Length);
+            expr = expr[TheToken.Length..];
             if (ParsingF.Token(ref expr, false, s => s == "!") == null)
                 throw new NotImplementedException();
 
@@ -88,8 +88,7 @@ namespace AccountingServer.Shell.Serializer
                 // ignore
             }
 
-            var currency = Parsing.Token(ref expr, false, s => s.StartsWith("@", StringComparison.Ordinal))
-                    ?.Substring(1)
+            var currency = Parsing.Token(ref expr, false, s => s.StartsWith("@", StringComparison.Ordinal))[1..]
                     .ToUpperInvariant()
                 ?? BaseCurrency.Now;
 
@@ -140,14 +139,12 @@ namespace AccountingServer.Shell.Serializer
             }
 
 
-            // ReSharper disable PossibleInvalidOperationException
-            var total = lst.Sum(it => it.Fund.Value);
+            var total = lst.Sum(it => it.Fund!.Value);
             foreach (var item in lst)
             {
-                item.DiscountFund += d.Value / total * item.Fund.Value;
+                item.DiscountFund += d!.Value / total * item.Fund!.Value;
                 item.Fund += t.Value / total * item.Fund;
             }
-            // ReSharper restore PossibleInvalidOperationException
 
             foreach (var item in lst)
             {
@@ -170,8 +167,7 @@ namespace AccountingServer.Shell.Serializer
                     },
                 new DetailEqualityComparer()))
             {
-                // ReSharper disable once PossibleInvalidOperationException
-                grp.Key.Fund = grp.Sum(it => it.Fund.Value);
+                grp.Key.Fund = grp.Sum(it => it.Fund!.Value);
                 resLst.Add(grp.Key);
             }
 
@@ -272,7 +268,7 @@ namespace AccountingServer.Shell.Serializer
                 var fund0 = Convert.ToDouble(m.Groups["num"].Value);
                 var fundd = 0D;
                 if (m.Groups["equals"].Success)
-                    fundd = fund0 - Convert.ToDouble(m.Groups["equals"].Value.Substring(1));
+                    fundd = fund0 - Convert.ToDouble(m.Groups["equals"].Value[1..]);
                 else if (m.Groups["plus"].Success)
                 {
                     var sreg = new Regex(@"\+[0-9]+(?:\.[0-9]+)?");
@@ -315,7 +311,7 @@ namespace AccountingServer.Shell.Serializer
         {
             public double DiscountFund { get; set; }
 
-            public bool UseActualFund { get; set; }
+            public bool UseActualFund { get; init; }
         }
 
         private sealed class DetailEqualityComparer : IEqualityComparer<VoucherDetail>

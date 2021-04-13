@@ -63,7 +63,7 @@ namespace AccountingServer.Http
             }
 
             var spp = sp[1].Split('&');
-            par = spp.ToDictionary(s => s.Substring(0, s.IndexOf('=')), s => s.Substring(s.IndexOf('=') + 1));
+            par = spp.ToDictionary(s => s[..s.IndexOf('=')], s => s[(s.IndexOf('=') + 1)..]);
             return sp[0];
         }
 
@@ -83,8 +83,7 @@ namespace AccountingServer.Http
             while (true)
             {
                 var ch = stream.ReadByte();
-                if (ch < 0 ||
-                    ch > 255)
+                if (ch is < 0 or > 255)
                     throw new HttpException(400);
                 if (ch == ' ' &&
                     sb.Length == 0)
@@ -109,8 +108,7 @@ namespace AccountingServer.Http
             while (true)
             {
                 var ch = stream.ReadByte();
-                if (ch < 0 ||
-                    ch > 255)
+                if (ch is < 0 or > 255)
                     throw new HttpException(400);
                 if (ch == ':')
                     break;
@@ -136,8 +134,7 @@ namespace AccountingServer.Http
             while (true)
             {
                 var ch = stream.ReadByte();
-                if (ch < 0 ||
-                    ch > 255)
+                if (ch is < 0 or > 255)
                     throw new HttpException(400);
                 if (ch == '\r')
                 {
@@ -161,8 +158,7 @@ namespace AccountingServer.Http
             while (true)
             {
                 var ch = stream.ReadByte();
-                if (ch < 0 ||
-                    ch > 255)
+                if (ch is < 0 or > 255)
                     throw new HttpException(400);
                 if (ch == ' ')
                     break;

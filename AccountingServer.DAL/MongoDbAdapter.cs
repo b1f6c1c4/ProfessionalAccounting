@@ -90,7 +90,7 @@ namespace AccountingServer.DAL
             BsonSerializer.RegisterSerializer(new BalanceSerializer());
             BsonSerializer.RegisterSerializer(new ExchangeSerializer());
 
-            BsonDocument MakeProject(BsonValue days, bool detail)
+            static BsonDocument MakeProject(BsonValue days, bool detail)
             {
                 var proj = new BsonDocument
                     {

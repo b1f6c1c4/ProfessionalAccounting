@@ -115,7 +115,7 @@ namespace AccountingServer.Shell
                 return null;
 
             var id = str.IndexOfAny(new[] { ' ', '-' });
-            return id < 0 ? str : str.Substring(0, id);
+            return id < 0 ? str : str[..id];
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace AccountingServer.Shell
         public static string Rest(this string str)
         {
             var id = str.IndexOfAny(new[] { ' ', '-' });
-            return id < 0 ? "" : str.Substring(id + 1).TrimStart();
+            return id < 0 ? "" : str[(id + 1)..].TrimStart();
         }
     }
 }

@@ -194,6 +194,6 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     所属记账凭证
         /// </summary>
-        public Voucher Voucher { get; set; }
+        public Voucher Voucher { get; }
     }
 }

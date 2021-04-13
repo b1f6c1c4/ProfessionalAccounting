@@ -17,7 +17,6 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
@@ -115,7 +114,7 @@ namespace AccountingServer.Shell.Carry
             {
                 var sd = new DateTime(dt.Value.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                 ed = sd.AddYears(1).AddDays(-1);
-                rng = new(includeNull ? (DateTime?)null : sd, ed);
+                rng = new(includeNull ? null : sd, ed);
             }
             else
             {

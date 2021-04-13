@@ -65,7 +65,7 @@ namespace AccountingServer.Shell
             var help = false;
             if (expr.StartsWith("?", StringComparison.Ordinal))
             {
-                expr = expr.Substring(1);
+                expr = expr[1..];
                 help = true;
             }
 

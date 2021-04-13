@@ -229,7 +229,7 @@ namespace AccountingServer.Shell
                             v => v.Details.Where(d => d.IsMatch(query.DetailEmitFilter.DetailFilter))
                                 .Select(d => new VoucherDetailR(v, d)))));
 
-            if (!(query.VoucherQuery is IVoucherQueryAtom dQuery))
+            if (query.VoucherQuery is not IVoucherQueryAtom dQuery)
                 throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query));
 
             return new PlainText(

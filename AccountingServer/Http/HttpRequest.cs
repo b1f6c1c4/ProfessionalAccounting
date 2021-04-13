@@ -18,6 +18,10 @@
 
 using System.Collections.Generic;
 using System.IO;
+// ReSharper disable ClassNeverInstantiated.Global
+// ReSharper disable CollectionNeverUpdated.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+// ReSharper disable UnusedMember.Global
 
 namespace AccountingServer.Http
 {

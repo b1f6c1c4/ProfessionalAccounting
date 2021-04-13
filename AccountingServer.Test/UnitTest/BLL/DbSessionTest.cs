@@ -16,7 +16,6 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-using System.Collections.Generic;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using Xunit;
@@ -269,7 +268,7 @@ namespace AccountingServer.Test.UnitTest.BLL
 
             voucher.Details = null;
             DbSession.Regularize(voucher);
-            // ReSharper disable once PossibleNullReferenceException
+            Assert.NotNull(voucher.Details);
             Assert.Empty(voucher.Details);
         }
     }

@@ -51,7 +51,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
                 throw new ApplicationException("找不到记账凭证");
 
             var sb = new StringBuilder();
-            foreach (var detail in voucher.Details.Where(vd => vd.Title == 1601 || vd.Title == 1701))
+            foreach (var detail in voucher.Details.Where(vd => vd.Title is 1601 or 1701))
             {
                 if (guids.Count != 0 &&
                     !guids.Contains(detail.Content))

@@ -78,25 +78,21 @@ namespace AccountingServer.BLL
 
             expected.Fund = fund;
 
-            if (ds.Count == 0)
+            switch (ds.Count)
             {
-                if (isEliminated)
-                {
+                case 0 when isEliminated:
                     success = true;
                     return;
-                }
-
-                if (editOnly)
+                case 0 when editOnly:
                     return;
-
-                voucher.Details.Add(expected);
-                success = true;
-                modified = true;
-                return;
+                case 0:
+                    voucher.Details.Add(expected);
+                    success = true;
+                    modified = true;
+                    return;
+                case > 1:
+                    return;
             }
-
-            if (ds.Count > 1)
-                return;
 
             if (isEliminated)
             {
@@ -109,8 +105,7 @@ namespace AccountingServer.BLL
                 return;
             }
 
-            // ReSharper disable once PossibleInvalidOperationException
-            if ((ds[0].Fund.Value - fund).IsZero())
+            if ((ds[0].Fund!.Value - fund).IsZero())
             {
                 success = true;
                 return;

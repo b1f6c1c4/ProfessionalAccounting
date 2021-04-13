@@ -33,7 +33,7 @@ namespace AccountingServer.Shell.Subtotal
         private int? m_Title;
         private string Idents => new(' ', (Depth > 0 ? Depth - 1 : 0) * Ident);
 
-        private string Ts(double f) => Ga == GatheringType.Count || Ga == GatheringType.VoucherCount
+        private string Ts(double f) => Ga is GatheringType.Count or GatheringType.VoucherCount
             ? f.ToString("N0")
             : f.AsCurrency(Cu ?? m_Currency);
 
