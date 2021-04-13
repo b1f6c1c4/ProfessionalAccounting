@@ -88,7 +88,7 @@ namespace AccountingServer.Shell.Serializer
                 // ignore
             }
 
-            var currency = Parsing.Token(ref expr, false, s => s.StartsWith("@", StringComparison.Ordinal))[1..]
+            var currency = Parsing.Token(ref expr, false, s => s.StartsWith("@", StringComparison.Ordinal))?[1..]
                     .ToUpperInvariant()
                 ?? BaseCurrency.Now;
 
