@@ -317,7 +317,7 @@ namespace AccountingServer.Shell
                         dev.Amount.AsCurrency().CPadLeft(13),
                         assetItem.VoucherID,
                         assetItem.Value.AsCurrency().CPadLeft(13)),
-                    DispositionItem _ => string.Format(
+                    DispositionItem => string.Format(
                         "   {0:yyyMMdd} DSP:{1} ={3} ({2})",
                         assetItem.Date,
                         "ALL".CPadLeft(13),

@@ -141,14 +141,12 @@ namespace AccountingServer.Shell.Plugins.Statement
                             : double.PositiveInfinity);
                     var voucher = resx
                         .FirstOrDefault(v => v.Details.Any(d
-                            // ReSharper disable once PossibleInvalidOperationException
-                            => (d.Fund.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter)));
+                            => (d.Fund!.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter)));
                     if (voucher == null)
                         return false;
 
                     var o = voucher.Details.First(d
-                        // ReSharper disable once PossibleInvalidOperationException
-                        => (d.Fund.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter));
+                        => (d.Fund!.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter));
                     if (o.Remark == null)
                         marked++;
                     else if (o.Remark == marker)
@@ -215,8 +213,7 @@ namespace AccountingServer.Shell.Plugins.Statement
                 if (!d.IsMatch(filt.DetailEmitFilter.DetailFilter))
                     continue;
 
-                // ReSharper disable once PossibleInvalidOperationException
-                var obj1 = lst.FirstOrDefault(b => (b.Fund - d.Fund.Value).IsZero() && b.Date == v.Date);
+                var obj1 = lst.FirstOrDefault(b => (b.Fund - d.Fund!.Value).IsZero() && b.Date == v.Date);
                 if (obj1 != null)
                 {
                     lst.Remove(obj1);
@@ -224,10 +221,8 @@ namespace AccountingServer.Shell.Plugins.Statement
                 }
 
                 var obj2 = lst
-                    // ReSharper disable once PossibleInvalidOperationException
-                    .Where(b => (b.Fund - d.Fund.Value).IsZero())
-                    // ReSharper disable once PossibleInvalidOperationException
-                    .OrderBy(b => Math.Abs((b.Date - v.Date.Value).TotalDays))
+                    .Where(b => (b.Fund - d.Fund!.Value).IsZero())
+                    .OrderBy(b => Math.Abs((b.Date - v.Date!.Value).TotalDays))
                     .FirstOrDefault();
                 if (obj2 != null)
                 {
@@ -257,7 +252,7 @@ namespace AccountingServer.Shell.Plugins.Statement
 
         private class StmtEmit : IEmit
         {
-            public IQueryCompounded<IDetailQueryAtom> DetailFilter { get; set; }
+            public IQueryCompounded<IDetailQueryAtom> DetailFilter { get; init; }
         }
 
         private sealed class StmtDetailQuery : IDetailQueryAtom

@@ -69,7 +69,7 @@ namespace AccountingServer.DAL.Serializer
                 case DevalueItem dev:
                     bsonWriter.Write("devto", dev.FairValue);
                     break;
-                case DispositionItem _:
+                case DispositionItem:
                     bsonWriter.WriteNull("dispo");
                     break;
             }

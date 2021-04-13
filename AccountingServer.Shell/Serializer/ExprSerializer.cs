@@ -59,7 +59,7 @@ namespace AccountingServer.Shell.Serializer
                     sb.Append(PresentVoucherDetail(d));
             }
 
-            sb.Append("}");
+            sb.Append('}');
             return sb.ToString();
         }
 
@@ -96,7 +96,7 @@ namespace AccountingServer.Shell.Serializer
             if (!expr.StartsWith(TheToken, StringComparison.Ordinal))
                 throw new FormatException("格式错误");
 
-            expr = expr.Substring(TheToken.Length);
+            expr = expr[TheToken.Length..];
             var v = GetVoucher(ref expr);
             Parsing.TrimStartComment(ref expr);
             if (Parsing.Token(ref expr, false) != "}")
@@ -206,8 +206,7 @@ namespace AccountingServer.Shell.Serializer
 
             Parsing.TrimStartComment(ref expr);
             var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal)).ParseUserSpec();
-            var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))
-                    ?.Substring(1)
+            var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))?[1..]
                     .ToUpperInvariant()
                 ?? BaseCurrency.Now;
             Parsing.TrimStartComment(ref expr);

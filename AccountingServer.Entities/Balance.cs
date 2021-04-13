@@ -28,37 +28,37 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     日期
         /// </summary>
-        public DateTime? Date { get; set; }
+        public DateTime? Date { get; init; }
 
         /// <summary>
         ///     一级科目编号
         /// </summary>
-        public int? Title { get; set; }
+        public int? Title { get; init; }
 
         /// <summary>
         ///     二级科目编号
         /// </summary>
-        public int? SubTitle { get; set; }
+        public int? SubTitle { get; init; }
 
         /// <summary>
         ///     内容
         /// </summary>
-        public string Content { get; set; }
+        public string Content { get; init; }
 
         /// <summary>
         ///     备注
         /// </summary>
-        public string Remark { get; set; }
+        public string Remark { get; init; }
 
         /// <summary>
         ///     币种
         /// </summary>
-        public string Currency { get; set; }
+        public string Currency { get; init; }
 
         /// <summary>
         ///     用户
         /// </summary>
-        public string User { get; set; }
+        public string User { get; init; }
 
         /// <summary>
         ///     余额

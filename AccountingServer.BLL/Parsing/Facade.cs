@@ -46,7 +46,7 @@ namespace AccountingServer.BLL.Parsing
                     throw new ApplicationException("内部错误");
             }
 
-            s = s.Substring(i);
+            s = s[i..];
             return res;
         }
 
@@ -154,16 +154,16 @@ namespace AccountingServer.BLL.Parsing
 
         private sealed class VoucherGroupedQueryStub : IVoucherGroupedQuery
         {
-            public IQueryCompounded<IVoucherQueryAtom> VoucherQuery { get; set; }
+            public IQueryCompounded<IVoucherQueryAtom> VoucherQuery { get; init; }
 
-            public ISubtotal Subtotal { get; set; }
+            public ISubtotal Subtotal { get; init; }
         }
 
         private sealed class GroupedQueryStub : IGroupedQuery
         {
-            public IVoucherDetailQuery VoucherEmitQuery { get; set; }
+            public IVoucherDetailQuery VoucherEmitQuery { get; init; }
 
-            public ISubtotal Subtotal { get; set; }
+            public ISubtotal Subtotal { get; init; }
         }
     }
 

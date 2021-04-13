@@ -41,7 +41,7 @@ HttpResponse Server_OnHttpRequest(HttpRequest request)
             return GenerateHttpResponse(File.OpenRead(fn), "text/html");
 
     if (request.BaseUri.StartsWith("/api", StringComparison.Ordinal))
-        request.BaseUri = request.BaseUri.Substring(4);
+        request.BaseUri = request.BaseUri[4..];
 #endif
     string user;
     if (request.Header.ContainsKey("x-user"))

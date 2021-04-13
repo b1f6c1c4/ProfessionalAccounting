@@ -33,8 +33,7 @@ namespace AccountingServer.Test.UnitTest.BLL
     {
         private void PairedSucc<TR>(string name, string s, Action<TR> pred = null)
         {
-            if (pred == null)
-                pred = r => Assert.NotNull(r);
+            pred ??= r => Assert.NotNull(r);
 
             {
                 var m = typeof(FacadeBase).GetMethod(name, new[] { typeof(string) });

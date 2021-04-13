@@ -68,8 +68,7 @@ namespace AccountingServer.Shell
             {
                 var flag = false;
                 var grps = voucher.Details
-                    // ReSharper disable once PossibleInvalidOperationException
-                    .GroupBy(d => new { d.User, d.Currency }, d => d.Fund.Value);
+                    .GroupBy(d => new { d.User, d.Currency }, d => d.Fund!.Value);
                 foreach (var grp in grps)
                 {
                     var val = grp.Sum();
@@ -151,16 +150,15 @@ namespace AccountingServer.Shell
             foreach (var grpC in res.Items.Cast<ISubtotalCurrency>())
             foreach (var grpc in grpC.Items.Cast<ISubtotalContent>())
             foreach (var grpd in grpc.Items.Cast<ISubtotalDate>())
-            {
-                if (dir > 0 &&
-                    grpd.Fund.IsNonNegative())
-                    continue;
-                if (dir < 0 &&
-                    grpd.Fund.IsNonPositive())
-                    continue;
-
-                sb.AppendLine($"{grpd.Date:yyyyMMdd} {info} {grpc.Content}:@{grpC.Currency} {grpd.Fund:R}");
-            }
+                switch (dir)
+                {
+                    case > 0 when grpd.Fund.IsNonNegative():
+                    case < 0 when grpd.Fund.IsNonPositive():
+                        continue;
+                    default:
+                        sb.AppendLine($"{grpd.Date:yyyyMMdd} {info} {grpc.Content}:@{grpC.Currency} {grpd.Fund:R}");
+                        break;
+                }
         }
 
         private static void DoCheck(IEnumerable<(Voucher Voucher, VoucherDetail Detail)> res, string info,
@@ -171,11 +169,9 @@ namespace AccountingServer.Shell
                 if (d.Remark == "reconciliation")
                     continue;
 
-                // ReSharper disable PossibleInvalidOperationException
                 sb.AppendLine(
-                    $"{v.ID} {v.Date:yyyyMMdd} {info} {d.Content}:{d.Fund.Value:R}");
+                    $"{v.ID} {v.Date:yyyyMMdd} {info} {d.Content}:{d.Fund!.Value:R}");
                 sb.AppendLine();
-                // ReSharper restore PossibleInvalidOperationException
             }
         }
     }

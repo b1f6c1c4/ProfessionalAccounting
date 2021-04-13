@@ -180,8 +180,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                 var tmp = Composite.Composite.GetTemplate(account.Reimburse);
                 var rng = Composite.Composite.DateRange(tmp.Day);
                 rb.DoInquiry(rng, tmp, out var rbVal, BaseCurrency.Now, serializer);
-                // ReSharper disable once PossibleInvalidOperationException
-                var rbF = rng.EndDate.Value;
+                var rbF = rng.EndDate!.Value;
                 yield return (rbF, rbVal);
             }
 
@@ -254,8 +253,8 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                                 mos[mo] = cob;
                         }
 
-                        foreach (var kvp in mos)
-                            yield return (kvp.Key, kvp.Value);
+                        foreach (var (key, value) in mos)
+                            yield return (key, value);
 
                         break;
 

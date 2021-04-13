@@ -73,8 +73,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                         !b.Remark.EndsWith("-利息", StringComparison.Ordinal));
             var titleObj = rmkObj.Items.Cast<ISubtotalTitle>().Single();
             var cntObj = titleObj.Items.Cast<ISubtotalContent>().Single();
-            // ReSharper disable once PossibleInvalidOperationException
-            var title = titleObj.Title.Value;
+            var title = titleObj.Title!.Value;
             var content = cntObj.Content;
             var rmk = rmkObj.Remark;
             var currency = cntObj.Items.Cast<ISubtotalCurrency>().Single().Currency;
@@ -90,7 +89,6 @@ namespace AccountingServer.Shell.Plugins.Interest
             if (!all && !endDate.HasValue ||
                 endDate.HasValue)
             {
-                // ReSharper disable once PossibleInvalidOperationException
                 var lastD = Accountant.RunVoucherQuery(info.QueryInterest())
                         .OrderByDescending(v => v.Date, new DateComparer())
                         .FirstOrDefault()
@@ -98,7 +96,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                     Accountant.RunVoucherQuery(info.QueryCapital())
                         .OrderBy(v => v.Date, new DateComparer())
                         .First()
-                        .Date.Value;
+                        .Date!.Value;
                 var capQuery = $"{info.QueryCapital()} [~{lastD.AsDate()}]``v";
                 var intQuery = $"{info.QueryInterest()} [~{lastD.AsDate()}]``v";
                 var capitalIntegral = Accountant.RunGroupedQuery(capQuery).Fund;
@@ -163,10 +161,9 @@ namespace AccountingServer.Shell.Plugins.Interest
                 lastSettlement = key;
 
                 // Settle Loan
-                // ReSharper disable once PossibleInvalidOperationException
                 capitalIntegral +=
                     grp.SelectMany(v => v.Details.Where(d => d.IsMatch(capitalPattern, Dir())))
-                        .Select(d => d.Fund.Value)
+                        .Select(d => d.Fund!.Value)
                         .Sum();
 
                 // Settle Return
@@ -178,11 +175,10 @@ namespace AccountingServer.Shell.Plugins.Interest
                                     d => d.IsMatch(capitalPattern, -Dir()) || d.IsMatch(interestPattern, -Dir())))
                         .OrderBy(v => v.ID))
                 {
-                    // ReSharper disable once PossibleInvalidOperationException
                     var value =
                         -voucher.Details.Where(
                                 d => d.IsMatch(capitalPattern, -Dir()) || d.IsMatch(interestPattern, -Dir()))
-                            .Select(d => d.Fund.Value)
+                            .Select(d => d.Fund!.Value)
                             .Sum();
                     if ((Dir() * (-value + interestIntegral)).IsNonNegative())
                     {
@@ -222,7 +218,6 @@ namespace AccountingServer.Shell.Plugins.Interest
             var interest = delta * info.Rate * capitalIntegral;
             var create = new List<VoucherDetail> { info.AsInterest(interest), info.AsMinor(this, -interest) };
 
-            // ReSharper disable once PossibleInvalidOperationException
             var detail = voucher.Details.SingleOrDefault(d => d.IsMatch(info.AsInterest()));
 
             if (interest.IsZero())
@@ -243,8 +238,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                 voucher.Details = create;
                 Accountant.Upsert(voucher);
             }
-            // ReSharper disable once PossibleInvalidOperationException
-            else if (!(detail.Fund.Value - interest).IsZero())
+            else if (!(detail.Fund!.Value - interest).IsZero())
             {
                 if (!voucher.Details.All(d => d.IsMatch(info.AsInterest()) || d.IsMatch(info.AsMinor(this))))
                     throw new ArgumentException("该记账凭证包含计息以外的细目", nameof(voucher));
@@ -280,8 +274,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                         continue;
                     }
 
-                    // ReSharper disable once PossibleInvalidOperationException
-                    if (!(voucher.Details[i].Fund.Value - capVol).IsZero())
+                    if (!(voucher.Details[i].Fund!.Value - capVol).IsZero())
                     {
                         voucher.Details[i].Fund = -capVol;
                         flag = true;
@@ -300,8 +293,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                         continue;
                     }
 
-                    // ReSharper disable once PossibleInvalidOperationException
-                    if (!(voucher.Details[i].Fund.Value - intVol).IsZero())
+                    if (!(voucher.Details[i].Fund!.Value - intVol).IsZero())
                     {
                         voucher.Details[i].Fund = -intVol;
                         flag = true;
@@ -334,27 +326,27 @@ namespace AccountingServer.Shell.Plugins.Interest
             /// <summary>
             ///     币种
             /// </summary>
-            public string Currency { private get; set; }
+            public string Currency { private get; init; }
 
             /// <summary>
             ///     科目
             /// </summary>
-            public int Title { private get; set; }
+            public int Title { private get; init; }
 
             /// <summary>
             ///     借款人
             /// </summary>
-            public string Content { private get; set; }
+            public string Content { private get; init; }
 
             /// <summary>
             ///     借款代码
             /// </summary>
-            public string Remark { private get; set; }
+            public string Remark { private get; init; }
 
             /// <summary>
             ///     日利率
             /// </summary>
-            public double Rate { get; set; }
+            public double Rate { get; init; }
 
             public string QueryMajor() =>
                 $"(@{Currency} T{Title.AsTitle()} {Content.Quotation('\'')})*({Remark.Quotation('"')}+{(Remark + "-利息").Quotation('"')})";

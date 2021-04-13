@@ -191,7 +191,7 @@ namespace AccountingServer.BLL.Util
             BuildChildren(sub, raw, level);
             m_Depth--;
             if (!sub.TheItems.Any() &&
-                !(sub is ISubtotalRoot))
+                sub is not ISubtotalRoot)
                 return null;
 
             sub.Fund = sub.TheItems.Sum(isr => isr.Fund);
@@ -228,7 +228,7 @@ namespace AccountingServer.BLL.Util
                     sub.Fund = BuildEquiPhase(raw);
                     if (m_Flags.HasFlag(SubtotalLevel.NonZero) &&
                         sub.Fund.IsZero() &&
-                        !(sub is ISubtotalRoot))
+                        sub is not ISubtotalRoot)
                         return null;
 
                     return sub;

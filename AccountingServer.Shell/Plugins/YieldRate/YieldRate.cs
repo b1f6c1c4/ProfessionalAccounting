@@ -69,18 +69,16 @@ namespace AccountingServer.Shell.Plugins.YieldRate
         /// <returns>实际收益率</returns>
         private static double GetRate(IReadOnlyList<ISubtotalDate> lst, double pv)
         {
-            // ReSharper disable PossibleInvalidOperationException
             if (!pv.IsZero())
                 return
                     new YieldRateSolver(
-                        lst.Select(b => ClientDateTime.Today.Subtract(b.Date.Value).TotalDays).Concat(new[] { 0D }),
+                        lst.Select(b => ClientDateTime.Today.Subtract(b.Date!.Value).TotalDays).Concat(new[] { 0D }),
                         lst.Select(b => b.Fund).Concat(new[] { -pv })).Solve();
 
             return
                 new YieldRateSolver(
-                    lst.Select(b => lst.Last().Date.Value.Subtract(b.Date.Value).TotalDays),
+                    lst.Select(b => lst[^1].Date!.Value.Subtract(b.Date!.Value).TotalDays),
                     lst.Select(b => b.Fund)).Solve();
-            // ReSharper restore PossibleInvalidOperationException
         }
     }
 }

@@ -63,10 +63,8 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
 
                 if (ds.Count == 2)
                 {
-                    // ReSharper disable PossibleInvalidOperationException
-                    var v1 = ds[0].Fund.Value;
-                    var v2 = ds[1].Fund.Value;
-                    // ReSharper restore PossibleInvalidOperationException
+                    var v1 = ds[0].Fund!.Value;
+                    var v2 = ds[1].Fund!.Value;
 
                     if (v1 < 0 &&
                         v2 > 0)
@@ -100,8 +98,7 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                 }
 
                 trans.AddRange(
-                    // ReSharper disable once PossibleInvalidOperationException
-                    ds.Where(d => d.Fund.Value < 0)
+                    ds.Where(d => d.Fund!.Value < 0)
                         .Select(
                             d => new Trans { Date = voucher.Date, RawCurrency = d.Currency, RawFund = -d.Fund.Value }));
             }

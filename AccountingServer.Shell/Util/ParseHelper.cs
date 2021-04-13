@@ -86,7 +86,7 @@ namespace AccountingServer.Shell.Util
                     return;
                 }
 
-                expr = expr.Substring(m.Length);
+                expr = expr[m.Length..];
                 expr = expr.TrimStart();
             }
         }
@@ -107,8 +107,8 @@ namespace AccountingServer.Shell.Util
                 return tmp;
             }
 
-            var line = expr.Substring(0, id);
-            expr = expr.Substring(id + 1);
+            var line = expr[..id];
+            expr = expr[(id + 1)..];
             return line;
         }
 
@@ -149,11 +149,11 @@ namespace AccountingServer.Shell.Util
                 id++;
             }
 
-            var t = expr.Substring(0, id);
+            var t = expr[..id];
             if (!predicate?.Invoke(t) == true)
                 return null;
 
-            expr = expr.Substring(id);
+            expr = expr[id..];
             return t;
         }
 
@@ -195,7 +195,7 @@ namespace AccountingServer.Shell.Util
             if (!expr.StartsWith(opt, StringComparison.Ordinal))
                 return false;
 
-            expr = expr.Substring(opt.Length);
+            expr = expr[opt.Length..];
             return true;
         }
 
@@ -230,8 +230,8 @@ namespace AccountingServer.Shell.Util
                     break;
             }
 
-            var s = expr.Substring(0, id + 1);
-            expr = expr.Substring(id + 1);
+            var s = expr[..(id + 1)];
+            expr = expr[(id + 1)..];
             return s.Dequotation();
         }
 

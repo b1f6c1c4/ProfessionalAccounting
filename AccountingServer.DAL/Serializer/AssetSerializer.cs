@@ -105,9 +105,9 @@ namespace AccountingServer.DAL.Serializer
             if (asset.Method != DepreciationMethod.None)
                 bsonWriter.Write("method", asset.Method switch
                     {
-                        DepreciationMethod.StraightLine => ("sl"),
-                        DepreciationMethod.SumOfTheYear => ("sy"),
-                        DepreciationMethod.DoubleDeclineMethod => ("dd"),
+                        DepreciationMethod.StraightLine => "sl",
+                        DepreciationMethod.SumOfTheYear => "sy",
+                        DepreciationMethod.DoubleDeclineMethod => "dd",
                         _ => throw new InvalidOperationException(),
                     });
 

@@ -39,12 +39,19 @@ namespace AccountingServer.Test.UnitTest.Entities
             var b2 = b2S.ToDateTime();
 
             var result = DateHelper.CompareDate(b1, b2);
-            if (expected == 0)
-                Assert.Equal(0, result);
-            if (expected < 0)
-                Assert.InRange(result, int.MinValue, -1);
-            if (expected > 0)
-                Assert.InRange(result, +1, int.MaxValue);
+            switch (expected)
+            {
+                case 0:
+                    Assert.Equal(0, result);
+                    break;
+                case < 0:
+                    Assert.InRange(result, int.MinValue, -1);
+                    break;
+                case > 0:
+                    Assert.InRange(result, +1, int.MaxValue);
+                    break;
+            }
+
         }
 
         [Theory]

@@ -178,7 +178,7 @@ namespace AccountingServer.DAL
         ExchangeRecord SelectExchangeRecord(ExchangeRecord record);
 
         /// <summary>
-        ///     添加或替换///
+        ///     添加或替换
         /// </summary>
         /// <param name="record">汇率</param>
         /// <returns>是否成功</returns>

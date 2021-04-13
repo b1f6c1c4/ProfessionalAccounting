@@ -38,7 +38,7 @@ namespace AccountingServer.QueryGeneration
                 var line = inputStream.ReadLine();
                 if (line.StartsWith("use "))
                 {
-                    var desc = line.Substring(4).Trim().Split('.');
+                    var desc = line[4..].Trim().Split('.');
                     kind = desc[0];
                     method = desc[1];
                     continue;

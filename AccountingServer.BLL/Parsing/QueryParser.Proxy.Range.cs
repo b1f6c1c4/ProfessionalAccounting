@@ -144,6 +144,9 @@ namespace AccountingServer.BLL.Parsing
             public static implicit operator DateTime?(UniqueTimeCoreContext context)
                 => context switch
                     {
+                        // The case is necessary because, without that, the switch expression
+                        // will be of type RangeDayContext (given by the third clause) and
+                        // an implicit conversion from RangeDayContext to DateTime? will occur. 
                         // ReSharper disable once RedundantCast
                         null => (DateTime?)null,
                         var x when x.RangeNull() != null => null,

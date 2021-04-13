@@ -49,7 +49,7 @@ namespace AccountingServer.Shell.Plugins.Statement
 
                 if (expr[0] == ',')
                 {
-                    expr = expr.Substring(1);
+                    expr = expr[1..];
                     return tmp;
                 }
 
@@ -64,8 +64,8 @@ namespace AccountingServer.Shell.Plugins.Statement
                 return tmp;
             }
 
-            var f = expr.Substring(0, id);
-            expr = expr.Substring(id + 1);
+            var f = expr[..id];
+            expr = expr[(id + 1)..];
             return f;
         }
 

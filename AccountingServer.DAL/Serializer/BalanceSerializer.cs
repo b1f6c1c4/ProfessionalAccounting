@@ -59,8 +59,7 @@ namespace AccountingServer.DAL.Serializer
                                 return bal;
                                 // ReSharper restore AccessToModifiedClosure
                             });
-            // ReSharper disable once PossibleInvalidOperationException
-            balance.Fund = bsonReader.ReadDouble("total", ref read) ?? bsonReader.ReadInt32("count", ref read).Value;
+            balance.Fund = bsonReader.ReadDouble("total", ref read) ?? bsonReader.ReadInt32("count", ref read)!.Value;
             bsonReader.ReadEndDocument();
 
             return balance;

@@ -49,7 +49,7 @@ namespace AccountingServer.Shell
                     {
                         new ShellComponent(
                             "soft",
-                            (expr, serializer) =>
+                            (expr, _) =>
                                 {
                                     var dist = Parsing.DistributedQuery(ref expr);
                                     var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
@@ -58,7 +58,7 @@ namespace AccountingServer.Shell
                                 }),
                         new ShellComponent(
                             "mixed",
-                            (expr, serializer) =>
+                            (expr, _) =>
                                 {
                                     var dist = Parsing.DistributedQuery(ref expr);
                                     var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
@@ -67,7 +67,7 @@ namespace AccountingServer.Shell
                                 }),
                         new ShellComponent(
                             "hard",
-                            (expr, serializer) =>
+                            (expr, _) =>
                                 {
                                     var dist = Parsing.DistributedQuery(ref expr);
                                     var vouchers = Parsing.OptColVouchers(ref expr);
@@ -146,7 +146,7 @@ namespace AccountingServer.Shell
                         new ShellComponent("rst", (expr, serializer) => resetComposer.Execute(expr, serializer)),
                         new ShellComponent(
                             "ap",
-                            (expr, serializer) =>
+                            (expr, _) =>
                                 {
                                     var collapse = Parsing.Optional(ref expr, "col");
                                     var dist = Parsing.DistributedQuery(ref expr);

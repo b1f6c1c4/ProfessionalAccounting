@@ -58,8 +58,7 @@ namespace AccountingServer.Entities.Util
 
                         break;
                     case VoucherType.General:
-                        if (voucher.Type == VoucherType.Carry ||
-                            voucher.Type == VoucherType.AnnualCarry)
+                        if (voucher.Type is VoucherType.Carry or VoucherType.AnnualCarry)
                             return false;
 
                         break;

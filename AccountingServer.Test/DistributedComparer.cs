@@ -66,7 +66,7 @@ namespace AccountingServer.Test
                     (DepreciateItem x, DepreciateItem y) => (x.Amount - y.Amount).IsZero(),
                     (DevalueItem x, DevalueItem y)
                     => (x.FairValue - y.FairValue).IsZero() && (x.Amount - y.Amount).IsZero(),
-                    (DispositionItem _, DispositionItem _) => true,
+                    (DispositionItem, DispositionItem) => true,
                     _ => throw new InvalidOperationException(),
                 };
 
@@ -79,34 +79,34 @@ namespace AccountingServer.Test
         {
             if (!base.Equals(x, y))
                 return false;
-            if (x.Currency != y.Currency)
+            if (x!.Currency != y!.Currency)
                 return false;
-            if (x.Salvage.HasValue != y.Salvage.HasValue)
+            if (x!.Salvage.HasValue != y!.Salvage.HasValue)
                 return false;
-            if (x.Salvage.HasValue &&
-                y.Salvage.HasValue)
-                if (!(x.Salvage.Value - y.Salvage.Value).IsZero())
+            if (x!.Salvage.HasValue &&
+                y!.Salvage.HasValue)
+                if (!(x!.Salvage.Value - y!.Salvage.Value).IsZero())
                     return false;
-            if (x.Life != y.Life)
+            if (x!.Life != y!.Life)
                 return false;
-            if (x.Title != y.Title)
+            if (x!.Title != y!.Title)
                 return false;
-            if (x.DepreciationTitle != y.DepreciationTitle)
+            if (x!.DepreciationTitle != y!.DepreciationTitle)
                 return false;
-            if (x.DevaluationTitle != y.DevaluationTitle)
+            if (x!.DevaluationTitle != y!.DevaluationTitle)
                 return false;
-            if (x.DepreciationExpenseTitle != y.DepreciationExpenseTitle)
+            if (x!.DepreciationExpenseTitle != y!.DepreciationExpenseTitle)
                 return false;
-            if (x.DepreciationExpenseSubTitle != y.DepreciationExpenseSubTitle)
+            if (x!.DepreciationExpenseSubTitle != y!.DepreciationExpenseSubTitle)
                 return false;
-            if (x.DevaluationExpenseTitle != y.DevaluationExpenseTitle)
+            if (x!.DevaluationExpenseTitle != y!.DevaluationExpenseTitle)
                 return false;
-            if (x.DevaluationExpenseSubTitle != y.DevaluationExpenseSubTitle)
+            if (x!.DevaluationExpenseSubTitle != y!.DevaluationExpenseSubTitle)
                 return false;
-            if (x.Method != y.Method)
+            if (x!.Method != y!.Method)
                 return false;
 
-            return x.Schedule.SequenceEqual(y.Schedule, new AssetItemEqualityComparer());
+            return x!.Schedule.SequenceEqual(y!.Schedule, new AssetItemEqualityComparer());
         }
 
         public int GetHashCode(Asset obj) => base.GetHashCode(obj);
@@ -119,7 +119,7 @@ namespace AccountingServer.Test
             if (!base.Equals(x, y))
                 return false;
 
-            if (!(x.Amount - y.Amount).IsZero())
+            if (!(x!.Amount - y!.Amount).IsZero())
                 return false;
 
             return true;
@@ -136,14 +136,14 @@ namespace AccountingServer.Test
         {
             if (!base.Equals(x, y))
                 return false;
-            if (x.TotalDays != y.TotalDays)
+            if (x!.TotalDays != y!.TotalDays)
                 return false;
-            if (x.Interval != y.Interval)
+            if (x!.Interval != y!.Interval)
                 return false;
-            if (!m_Comparer.Equals(x.Template, y.Template))
+            if (!m_Comparer.Equals(x!.Template, y!.Template))
                 return false;
 
-            return x.Schedule.SequenceEqual(y.Schedule, new AmortItemEqualityComparer());
+            return x!.Schedule.SequenceEqual(y!.Schedule, new AmortItemEqualityComparer());
         }
 
         public int GetHashCode(Amortization obj) => base.GetHashCode(obj);

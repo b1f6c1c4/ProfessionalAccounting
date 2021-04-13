@@ -174,8 +174,8 @@ namespace AccountingServer.Shell
             var serializer = GetSerializer(spec);
 
             var voucher = serializer.ParseVoucher(str);
-            var grpCs = voucher.Details.GroupBy(d => d.Currency ?? BaseCurrency.Now);
-            var grpUs = voucher.Details.GroupBy(d => d.User ?? ClientUser.Name);
+            var grpCs = voucher.Details.GroupBy(d => d.Currency ?? BaseCurrency.Now).ToList();
+            var grpUs = voucher.Details.GroupBy(d => d.User ?? ClientUser.Name).ToList();
             foreach (var grpC in grpCs)
             {
                 var unc = grpC.SingleOrDefault(d => !d.Fund.HasValue);
@@ -183,20 +183,20 @@ namespace AccountingServer.Shell
                     unc.Fund = -grpC.Sum(d => d.Fund ?? 0D);
             }
 
-            if (grpCs.Count() == 1 && grpUs.Count() > 1)
+            if (grpCs.Count == 1 && grpUs.Count > 1)
                 foreach (var grpU in grpUs)
                 {
-                    var sum = grpU.Sum(d => d.Fund.Value);
+                    var sum = grpU.Sum(d => d.Fund!.Value);
                     if (sum.IsZero())
                         continue;
 
                     voucher.Details.Add(
                         new() { User = grpU.Key, Currency = grpCs.First().Key, Title = 3998, Fund = -sum });
                 }
-            else if (grpCs.Count() > 1 && grpUs.Count() == 1)
+            else if (grpCs.Count > 1 && grpUs.Count == 1)
                 foreach (var grpC in grpCs)
                 {
-                    var sum = grpC.Sum(d => d.Fund.Value);
+                    var sum = grpC.Sum(d => d.Fund!.Value);
                     if (sum.IsZero())
                         continue;
 

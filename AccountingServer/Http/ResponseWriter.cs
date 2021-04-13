@@ -17,7 +17,6 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace AccountingServer.Http
@@ -48,8 +47,8 @@ namespace AccountingServer.Http
 
         private static void SendHeader(Stream stream, HttpResponse response)
         {
-            foreach (var kvp in response.Header)
-                stream.WriteLine($"{kvp.Key}: {kvp.Value}");
+            foreach (var (key, value) in response.Header)
+                stream.WriteLine($"{key}: {value}");
             stream.WriteLine();
         }
 

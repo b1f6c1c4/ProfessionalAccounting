@@ -64,7 +64,7 @@ namespace AccountingServer.BLL
             lst.Sort(new AssetItemComparer());
 
             if (lst.Count == 0 ||
-                !(lst[0] is AcquisitionItem acq0))
+                lst[0] is not AcquisitionItem acq0)
                 lst.Insert(
                     0,
                     new AcquisitionItem { Date = asset.Date, OrigValue = asset.Value.Value });
@@ -97,7 +97,7 @@ namespace AccountingServer.BLL
                         bookValue = dev.FairValue;
                         item.Value = dev.FairValue;
                         break;
-                    case DispositionItem _:
+                    case DispositionItem:
                         bookValue = 0;
                         break;
                 }
@@ -132,41 +132,46 @@ namespace AccountingServer.BLL
                 if (asset.Schedule.Any(item => item.VoucherID == voucher.ID))
                     continue;
 
-                // ReSharper disable once PossibleInvalidOperationException
                 var value =
-                    voucher.Details.Single(d => d.Title == asset.Title && d.Content == asset.StringID).Fund.Value;
+                    voucher.Details.Single(d => d.Title == asset.Title && d.Content == asset.StringID).Fund!.Value;
 
-                if (value > 0)
+                switch (value)
                 {
-                    var lst = asset.Schedule.Where(item => item.Date.Within(rng))
-                        .Where(
-                            item =>
-                                item is AcquisitionItem acq &&
-                                (!voucher.Date.HasValue || acq.Date == voucher.Date) &&
-                                (acq.OrigValue - value).IsZero())
-                        .ToList();
+                    case > 0:
+                        {
+                            var lst = asset.Schedule.Where(item => item.Date.Within(rng))
+                                .Where(
+                                    item =>
+                                        item is AcquisitionItem acq &&
+                                        (!voucher.Date.HasValue || acq.Date == voucher.Date) &&
+                                        (acq.OrigValue - value).IsZero())
+                                .ToList();
 
-                    if (lst.Count == 1)
-                        lst[0].VoucherID = voucher.ID;
-                    else
-                        yield return voucher;
-                }
-                else if (value < 0)
-                {
-                    var lst = asset.Schedule.Where(item => item.Date.Within(rng))
-                        .Where(
-                            item =>
-                                item is DispositionItem &&
-                                (!voucher.Date.HasValue || item.Date == voucher.Date))
-                        .ToList();
+                            if (lst.Count == 1)
+                                lst[0].VoucherID = voucher.ID;
+                            else
+                                yield return voucher;
+                            break;
+                        }
+                    case < 0:
+                        {
+                            var lst = asset.Schedule.Where(item => item.Date.Within(rng))
+                                .Where(
+                                    item =>
+                                        item is DispositionItem &&
+                                        (!voucher.Date.HasValue || item.Date == voucher.Date))
+                                .ToList();
 
-                    if (lst.Count == 1)
-                        lst[0].VoucherID = voucher.ID;
-                    else
+                            if (lst.Count == 1)
+                                lst[0].VoucherID = voucher.ID;
+                            else
+                                yield return voucher;
+                            break;
+                        }
+                    default:
                         yield return voucher;
+                        break;
                 }
-                else
-                    yield return voucher;
             }
 
             foreach (
@@ -465,7 +470,7 @@ namespace AccountingServer.BLL
             var items =
                 asset.Schedule.Where(
                         assetItem =>
-                            !(assetItem is DepreciateItem) || assetItem.Remark == AssetItem.IgnoranceMark)
+                            assetItem is not DepreciateItem || assetItem.Remark == AssetItem.IgnoranceMark)
                     .ToList();
 
             switch (asset.Method)
@@ -494,11 +499,11 @@ namespace AccountingServer.BLL
                                     continue;
                                 switch (items[i])
                                 {
-                                    case AcquisitionItem _:
-                                    case DispositionItem _:
+                                    case AcquisitionItem:
+                                    case DispositionItem:
                                         continue;
                                     // With IgnoranceMark
-                                    case DepreciateItem _:
+                                    case DepreciateItem:
                                         flag = true;
                                         continue;
                                 }
