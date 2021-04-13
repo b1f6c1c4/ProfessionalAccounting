@@ -25,7 +25,6 @@ using AccountingServer.Shell;
 using static AccountingServer.Http.HttpUtil;
 
 var facade = new Facade();
-
 var server = new HttpServer(IPAddress.Any, 30000);
 server.OnHttpRequest += Server_OnHttpRequest;
 server.Start();

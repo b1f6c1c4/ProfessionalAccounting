@@ -65,7 +65,7 @@ namespace AccountingServer.Test
                     (AcquisitionItem x, AcquisitionItem y) => (x.OrigValue - y.OrigValue).IsZero(),
                     (DepreciateItem x, DepreciateItem y) => (x.Amount - y.Amount).IsZero(),
                     (DevalueItem x, DevalueItem y)
-                    => (x.FairValue - y.FairValue).IsZero() && (x.Amount - y.Amount).IsZero(),
+                        => (x.FairValue - y.FairValue).IsZero() && (x.Amount - y.Amount).IsZero(),
                     (DispositionItem, DispositionItem) => true,
                     _ => throw new InvalidOperationException(),
                 };

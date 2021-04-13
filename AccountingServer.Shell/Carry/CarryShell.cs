@@ -140,7 +140,9 @@ namespace AccountingServer.Shell.Carry
                         Value = 0D,
                         Voucher = new()
                             {
-                                Date = ed, Type = VoucherType.Carry, Details = new(),
+                                Date = ed,
+                                Type = VoucherType.Carry,
+                                Details = new(),
                             },
                     }).ToList();
             foreach (var task in tasks)

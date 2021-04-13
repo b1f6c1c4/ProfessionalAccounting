@@ -28,6 +28,8 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
     [Collection("DbTestCollection")]
     public class DbTest : IDisposable
     {
+        private readonly IDbAdapter m_Adapter;
+
         public DbTest()
         {
             m_Adapter = Facade.Create(db: "accounting-test");
@@ -39,8 +41,6 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
 
         public void Dispose()
             => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
-
-        private readonly IDbAdapter m_Adapter;
 
         [Theory]
         [ClassData(typeof(VoucherDataProvider))]

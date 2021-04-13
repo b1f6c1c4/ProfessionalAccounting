@@ -592,7 +592,8 @@ namespace AccountingServer.BLL
                                 items.Add(
                                     new DepreciateItem
                                         {
-                                            Date = AccountantHelper.LastDayOfMonth(yr, mon), Amount = a / (12 - mo),
+                                            Date = AccountantHelper.LastDayOfMonth(yr, mon),
+                                            Amount = a / (12 - mo),
                                         });
                         }
 
