@@ -334,6 +334,6 @@ namespace AccountingServer.DAL.Serializer
         ///     <c>Guid</c>
         /// </param>
         /// <returns>Bson对象</returns>
-        public static BsonBinaryData ToBsonValue(this Guid id) => new BsonBinaryData(id);
+        public static BsonBinaryData ToBsonValue(this Guid id) => new(id);
     }
 }

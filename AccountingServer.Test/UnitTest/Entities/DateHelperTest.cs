@@ -73,7 +73,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         public void WithinTestBy(bool expected, string valueS)
         {
             var value = valueS == null ? (DateTime?)null : ClientDateTime.Parse(valueS);
-            var filter = new DateFilter(null, new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+            var filter = new DateFilter(null, new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc));
             Assert.True(filter.Nullable);
             Assert.Equal(expected, DateHelper.Within(value, filter));
         }
@@ -86,7 +86,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         public void WithinTestByA(bool expected, string valueS)
         {
             var value = valueS == null ? (DateTime?)null : ClientDateTime.Parse(valueS);
-            var filter = new DateFilter(null, new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc)) { Nullable = false };
+            var filter = new DateFilter(null, new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc)) { Nullable = false };
             Assert.Equal(expected, DateHelper.Within(value, filter));
         }
 
@@ -98,7 +98,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         public void WithinTestSince(bool expected, string valueS)
         {
             var value = valueS == null ? (DateTime?)null : ClientDateTime.Parse(valueS);
-            var filter = new DateFilter(new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), null);
+            var filter = new DateFilter(new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), null);
             Assert.False(filter.Nullable);
             Assert.Equal(expected, DateHelper.Within(value, filter));
         }
@@ -111,7 +111,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         public void WithinTestSinceA(bool expected, string valueS)
         {
             var value = valueS == null ? (DateTime?)null : ClientDateTime.Parse(valueS);
-            var filter = new DateFilter(new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), null) { Nullable = true };
+            var filter = new DateFilter(new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), null) { Nullable = true };
             Assert.Equal(expected, DateHelper.Within(value, filter));
         }
     }

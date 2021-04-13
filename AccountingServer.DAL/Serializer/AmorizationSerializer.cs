@@ -28,8 +28,8 @@ namespace AccountingServer.DAL.Serializer
     /// </summary>
     internal class AmortizationSerializer : BaseSerializer<Amortization, Guid?>
     {
-        private static readonly AmortItemSerializer ItemSerializer = new AmortItemSerializer();
-        private static readonly VoucherSerializer VoucherSerializer = new VoucherSerializer();
+        private static readonly AmortItemSerializer ItemSerializer = new();
+        private static readonly VoucherSerializer VoucherSerializer = new();
 
         public override Amortization Deserialize(IBsonReader bsonReader)
         {

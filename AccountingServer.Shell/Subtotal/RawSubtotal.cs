@@ -26,7 +26,7 @@ namespace AccountingServer.Shell.Subtotal
     /// </summary>
     internal class RawSubtotal : StringSubtotalVisitor
     {
-        private readonly VoucherDetailR m_Path = new VoucherDetailR(new Voucher(), new VoucherDetail());
+        private readonly VoucherDetailR m_Path = new(new(), new());
         private readonly bool m_Separate;
         private List<VoucherDetailR> m_History;
 
@@ -40,13 +40,13 @@ namespace AccountingServer.Shell.Subtotal
                 if (m_Separate)
                     Sb.Append(Serializer.PresentVoucherDetail(m_Path));
                 else
-                    m_History.Add(new VoucherDetailR(m_Path));
+                    m_History.Add(new(m_Path));
             }
 
             VisitChildren(sub);
         }
 
-        protected override void Pre() => m_History = new List<VoucherDetailR>();
+        protected override void Pre() => m_History = new();
 
         protected override void Post() => Sb.Append(Serializer.PresentVoucherDetails(m_History));
 

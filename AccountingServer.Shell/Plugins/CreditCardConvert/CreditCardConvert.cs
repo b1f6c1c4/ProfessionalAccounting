@@ -72,7 +72,7 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                         v2 > 0)
                     {
                         convs.Add(
-                            new Conversion
+                            new()
                                 {
                                     Date = voucher.Date,
                                     TargetCurrency = ds[0].Currency,
@@ -87,7 +87,7 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                         v2 < 0)
                     {
                         convs.Add(
-                            new Conversion
+                            new()
                                 {
                                     Date = voucher.Date,
                                     TargetCurrency = ds[1].Currency,
@@ -127,12 +127,12 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                     continue;
 
                 rebates.Add(
-                    new Rebate
+                    new()
                         {
                             Date = voucher.Date,
                             RawCurrency = d1.Currency,
                             RawFund = d1.Fund.Value,
-                            TheConversion = new Conversion
+                            TheConversion = new()
                                 {
                                     Date = voucher.Date,
                                     OriginCurrency = d1.Currency,
@@ -208,9 +208,9 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                 var voucher = new Voucher
                     {
                         Date = date.Value,
-                        Details = new List<VoucherDetail>
+                        Details = new()
                             {
-                                new VoucherDetail
+                                new()
                                     {
                                         Currency = baseCurrency,
                                         Title = 2241,
@@ -218,10 +218,10 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                                         Content = content,
                                         Fund = -to,
                                     },
-                                new VoucherDetail { Currency = baseCurrency, Title = 3999, Fund = to },
-                                new VoucherDetail { Currency = currency, Title = 3999, Fund = -from },
+                                new() { Currency = baseCurrency, Title = 3999, Fund = to },
+                                new() { Currency = currency, Title = 3999, Fund = -from },
                                 from >= 0
-                                    ? new VoucherDetail
+                                    ? new()
                                         {
                                             Currency = currency,
                                             Title = 2241,
@@ -229,7 +229,7 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                                             Content = content,
                                             Fund = from,
                                         }
-                                    : new VoucherDetail { Currency = currency, Title = 6603, Fund = from },
+                                    : new() { Currency = currency, Title = 6603, Fund = from },
                             },
                     };
                 Accountant.Upsert(voucher);

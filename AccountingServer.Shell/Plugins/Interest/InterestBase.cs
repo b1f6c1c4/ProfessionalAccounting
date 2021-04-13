@@ -138,9 +138,9 @@ namespace AccountingServer.Shell.Plugins.Interest
         {
             var capitalPattern = info.AsCapital();
             var interestPattern = info.AsInterest();
-            var rng = lastSettlement.HasValue
-                ? new DateFilter(lastSettlement.Value.AddDays(1), finalDay)
-                : new DateFilter(null, finalDay);
+            DateFilter rng = lastSettlement.HasValue
+                ? new(lastSettlement.Value.AddDays(1), finalDay)
+                : new(null, finalDay);
             foreach (var grp in
                 Accountant
                     .RunVoucherQuery($"{info.QueryMajor()} {rng.AsDateRange()}")
@@ -159,7 +159,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                     grp.SingleOrDefault(
                         v =>
                             v.Details.Any(d => d.IsMatch(interestPattern, Dir())))
-                    ?? new Voucher { Date = key, Details = new List<VoucherDetail>() });
+                    ?? new() { Date = key, Details = new() });
                 lastSettlement = key;
 
                 // Settle Loan
@@ -206,7 +206,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                     info,
                     capitalIntegral,
                     finalDay.Subtract(lastSettlement.Value).Days,
-                    new Voucher { Date = finalDay, Details = new List<VoucherDetail>() });
+                    new() { Date = finalDay, Details = new() });
         }
 
         /// <summary>
@@ -366,7 +366,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                 $"@{Currency} T{Title.AsTitle()} {Content.Quotation('\'')} {(Remark + "-利息").Quotation('"')}";
 
             public VoucherDetail AsCapital(double? fund = null)
-                => new VoucherDetail
+                => new()
                     {
                         Currency = Currency,
                         Title = Title,
@@ -376,7 +376,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                     };
 
             public VoucherDetail AsInterest(double? fund = null)
-                => new VoucherDetail
+                => new()
                     {
                         Currency = Currency,
                         Title = Title,
@@ -386,7 +386,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                     };
 
             public VoucherDetail AsMinor(InterestBase my, double? fund = null)
-                => new VoucherDetail
+                => new()
                     {
                         Currency = Currency,
                         Title = 6603,

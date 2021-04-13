@@ -263,7 +263,7 @@ namespace AccountingServer.Shell.Plugins.Statement
         private sealed class StmtDetailQuery : IDetailQueryAtom
         {
             public StmtDetailQuery(string marker)
-                => Filter = new VoucherDetail { Remark = marker };
+                => Filter = new() { Remark = marker };
 
             public TitleKind? Kind => null;
 

@@ -81,7 +81,7 @@ namespace AccountingServer.Shell.Serializer
             if (typeStr != null)
                 Enum.TryParse(typeStr, out method);
 
-            return new Asset
+            return new()
                 {
                     StringID = obj["id"]?.Value<string>(),
                     Name = obj["name"]?.Value<string>(),
@@ -100,7 +100,7 @@ namespace AccountingServer.Shell.Serializer
                     DevaluationExpenseTitle = obj["devaluation"]?["expense"]?["title"]?.Value<int?>(),
                     DevaluationExpenseSubTitle = obj["devaluation"]?["expense"]?["subtitle"]?.Value<int?>(),
                     Remark = obj["remark"]?.Value<string>(),
-                    Schedule = schedule == null ? new List<AssetItem>() : schedule.Select(ParseAssetItem).ToList(),
+                    Schedule = schedule != null ? schedule.Select(ParseAssetItem).ToList() : new(),
                 };
         }
 
@@ -125,7 +125,7 @@ namespace AccountingServer.Shell.Serializer
             if (typeStr != null)
                 Enum.TryParse(typeStr, out interval);
 
-            return new Amortization
+            return new()
                 {
                     StringID = obj["id"]?.Value<string>(),
                     Name = obj["name"]?.Value<string>(),
@@ -136,7 +136,7 @@ namespace AccountingServer.Shell.Serializer
                     Interval = interval,
                     Template = ParseVoucher(obj["template"]),
                     Remark = obj["remark"]?.Value<string>(),
-                    Schedule = schedule == null ? new List<AmortItem>() : schedule.Select(ParseAmortItem).ToList(),
+                    Schedule = schedule != null ? schedule.Select(ParseAmortItem).ToList() : new(),
                 };
         }
 
@@ -179,15 +179,13 @@ namespace AccountingServer.Shell.Serializer
             if (typeStr != null)
                 Enum.TryParse(typeStr, out type);
 
-            return new Voucher
+            return new()
                 {
                     ID = obj["id"]?.Value<string>(),
                     Date = date,
                     Remark = obj["remark"]?.Value<string>(),
                     Type = type,
-                    Details = detail == null
-                        ? new List<VoucherDetail>()
-                        : detail.Select(ParseVoucherDetail).ToList(),
+                    Details = detail != null ? detail.Select(ParseVoucherDetail).ToList() : new(),
                 };
         }
 
@@ -198,7 +196,7 @@ namespace AccountingServer.Shell.Serializer
             if (dateStr != null)
                 date = ClientDateTime.Parse(dateStr);
 
-            return new AmortItem
+            return new()
                 {
                     Date = date,
                     VoucherID = obj["voucherId"]?.Value<string>(),
@@ -254,7 +252,7 @@ namespace AccountingServer.Shell.Serializer
         }
 
         private static JObject PresentJson(Voucher voucher)
-            => new JObject
+            => new()
                 {
                     { "id", voucher.ID },
                     { "date", voucher.Date?.ToString("yyyy-MM-dd") },
@@ -264,7 +262,7 @@ namespace AccountingServer.Shell.Serializer
                 };
 
         private static JObject PresentJson(VoucherDetail detail)
-            => new JObject
+            => new()
                 {
                     { "user", detail.User },
                     { "currency", detail.Currency },
@@ -276,7 +274,7 @@ namespace AccountingServer.Shell.Serializer
                 };
 
         private static VoucherDetail ParseVoucherDetail(JToken obj)
-            => new VoucherDetail
+            => new()
                 {
                     User = obj["user"]?.Value<string>(),
                     Currency = obj["currency"]?.Value<string>(),
@@ -288,7 +286,7 @@ namespace AccountingServer.Shell.Serializer
                 };
 
         private static JObject PresentJson(Asset asset)
-            => new JObject
+            => new()
                 {
                     { "id", asset.StringID },
                     { "name", asset.Name },
@@ -368,7 +366,7 @@ namespace AccountingServer.Shell.Serializer
         }
 
         private static JObject PresentJson(Amortization amort)
-            => new JObject
+            => new()
                 {
                     { "id", amort.StringID },
                     { "name", amort.Name },
@@ -383,7 +381,7 @@ namespace AccountingServer.Shell.Serializer
                 };
 
         private static JObject PresentJson(AmortItem item)
-            => new JObject
+            => new()
                 {
                     { "date", item.Date?.ToString("yyyy-MM-dd") },
                     { "voucherId", item.VoucherID },

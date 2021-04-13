@@ -74,18 +74,18 @@ namespace AccountingServer.Shell.Plugins.Composite
             DateFilter the;
             var now = ClientDateTime.Today;
             if (day == 0)
-                return new DateFilter(
-                    new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc),
+                return new(
+                    new(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc),
                     new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(1).AddDays(-1));
 
             if (now.Day > day)
-                the = new DateFilter(
-                    new DateTime(now.Year, now.Month, day + 1, 0, 0, 0, DateTimeKind.Utc),
+                the = new(
+                    new(now.Year, now.Month, day + 1, 0, 0, 0, DateTimeKind.Utc),
                     new DateTime(now.Year, now.Month, day, 0, 0, 0, DateTimeKind.Utc).AddMonths(1));
             else
-                the = new DateFilter(
+                the = new(
                     new DateTime(now.Year, now.Month, day + 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-1),
-                    new DateTime(now.Year, now.Month, day, 0, 0, 0, DateTimeKind.Utc));
+                    new(now.Year, now.Month, day, 0, 0, 0, DateTimeKind.Utc));
             return the;
         }
 
@@ -138,7 +138,7 @@ namespace AccountingServer.Shell.Plugins.Composite
         private readonly Accountant m_Accountant;
         private readonly string m_BaseCurrency;
         private readonly DateFilter m_Rng;
-        private readonly StringBuilder m_Sb = new StringBuilder();
+        private readonly StringBuilder m_Sb = new();
         private readonly IEntitiesSerializer m_Serializer;
 
         private string m_Path = "";

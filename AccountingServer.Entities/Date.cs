@@ -59,17 +59,17 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     任意日期
         /// </summary>
-        public static DateFilter Unconstrained { get; } = new DateFilter(null, null);
+        public static DateFilter Unconstrained { get; } = new(null, null);
 
         /// <summary>
         ///     仅限无日期
         /// </summary>
-        public static DateFilter TheNullOnly { get; } = new DateFilter(null, null) { NullOnly = true };
+        public static DateFilter TheNullOnly { get; } = new(null, null) { NullOnly = true };
 
         /// <summary>
         ///     非无日期
         /// </summary>
-        public static DateFilter TheNotNull { get; } = new DateFilter(null, null) { Nullable = false };
+        public static DateFilter TheNotNull { get; } = new(null, null) { Nullable = false };
 
         /// <inheritdoc />
         public DateFilter Range => this;
@@ -156,7 +156,7 @@ namespace AccountingServer.Entities
     /// </summary>
     public class ClientDateTime
     {
-        private static readonly ThreadLocal<ClientDateTime> Instances = new ThreadLocal<ClientDateTime>();
+        private static readonly ThreadLocal<ClientDateTime> Instances = new();
 
         private readonly DateTime m_Today;
 
@@ -193,6 +193,6 @@ namespace AccountingServer.Entities
             out result);
 
         public static void Set(DateTime timestamp)
-            => Instances.Value = new ClientDateTime(timestamp);
+            => Instances.Value = new(timestamp);
     }
 }

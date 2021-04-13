@@ -26,7 +26,7 @@ namespace AccountingServer.Entities
     /// </summary>
     public class ClientUser
     {
-        private static readonly ThreadLocal<ClientUser> Instances = new ThreadLocal<ClientUser>();
+        private static readonly ThreadLocal<ClientUser> Instances = new();
 
         private readonly string m_User;
 
@@ -35,6 +35,6 @@ namespace AccountingServer.Entities
         public static string Name => Instances.Value?.m_User ?? throw new InvalidOperationException("必须有一个用户");
 
         public static void Set(string user)
-            => Instances.Value = new ClientUser(user);
+            => Instances.Value = new(user);
     }
 }

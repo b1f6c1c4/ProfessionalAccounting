@@ -151,7 +151,7 @@ namespace AccountingServer.Shell.Serializer
             while ((d = ParseVoucherDetail(ref expr)) != null)
                 lst.Add(d);
 
-            return new Voucher
+            return new()
                 {
                     ID = id,
                     Remark = remark,
@@ -246,7 +246,7 @@ namespace AccountingServer.Shell.Serializer
             if (remark == "G()")
                 remark = Guid.NewGuid().ToString().ToUpperInvariant();
 
-            return new VoucherDetail
+            return new()
                 {
                     User = user,
                     Currency = currency,

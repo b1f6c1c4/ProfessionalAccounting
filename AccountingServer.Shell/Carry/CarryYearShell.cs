@@ -115,7 +115,7 @@ namespace AccountingServer.Shell.Carry
             {
                 var sd = new DateTime(dt.Value.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                 ed = sd.AddYears(1).AddDays(-1);
-                rng = new DateFilter(includeNull ? (DateTime?)null : sd, ed);
+                rng = new(includeNull ? (DateTime?)null : sd, ed);
             }
             else
             {
@@ -136,10 +136,10 @@ namespace AccountingServer.Shell.Carry
                             Date = ed,
                             Type = VoucherType.AnnualCarry,
                             Details =
-                                new List<VoucherDetail>
+                                new()
                                     {
-                                        new VoucherDetail { Title = 4101, Currency = grpC.Currency, Fund = b00 },
-                                        new VoucherDetail { Title = 4103, Currency = grpC.Currency, Fund = -b00 },
+                                        new() { Title = 4101, Currency = grpC.Currency, Fund = b00 },
+                                        new() { Title = 4103, Currency = grpC.Currency, Fund = -b00 },
                                     },
                         });
                 cnt++;
@@ -154,13 +154,13 @@ namespace AccountingServer.Shell.Carry
                             Date = ed,
                             Type = VoucherType.AnnualCarry,
                             Details =
-                                new List<VoucherDetail>
+                                new()
                                     {
-                                        new VoucherDetail
+                                        new()
                                             {
                                                 Title = 4101, SubTitle = 01, Currency = grpC.Currency, Fund = b01,
                                             },
-                                        new VoucherDetail
+                                        new()
                                             {
                                                 Title = 4103, SubTitle = 01, Currency = grpC.Currency, Fund = -b01,
                                             },

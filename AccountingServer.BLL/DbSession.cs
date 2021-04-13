@@ -158,7 +158,7 @@ namespace AccountingServer.BLL
 
         public static void Regularize(Voucher entity)
         {
-            entity.Details ??= new List<VoucherDetail>();
+            entity.Details ??= new();
 
             foreach (var d in entity.Details)
             {

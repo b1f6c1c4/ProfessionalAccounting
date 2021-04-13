@@ -87,7 +87,7 @@ namespace AccountingServer.BLL
                 !amort.Value.HasValue)
                 return;
 
-            var lst = amort.Schedule?.ToList() ?? new List<AmortItem>();
+            var lst = amort.Schedule?.ToList() ?? new();
 
             lst.Sort((item1, item2) => DateHelper.CompareDate(item1.Date, item2.Date));
 
@@ -271,7 +271,7 @@ namespace AccountingServer.BLL
 
                 if (dtNxt >= dtEnd)
                 {
-                    lst.Add(new AmortItem { Date = dtNxt, Amount = residue });
+                    lst.Add(new() { Date = dtNxt, Amount = residue });
                     break;
                 }
 
@@ -282,7 +282,7 @@ namespace AccountingServer.BLL
                 var amount = a * n;
                 residue -= amount;
                 if (!amount.IsZero())
-                    lst.Add(new AmortItem { Date = dtNxt, Amount = amount });
+                    lst.Add(new() { Date = dtNxt, Amount = amount });
                 dtCur = dtNxt;
             }
 

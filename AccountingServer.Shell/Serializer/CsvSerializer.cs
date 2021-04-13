@@ -33,7 +33,7 @@ namespace AccountingServer.Shell.Serializer
     public class CsvSerializer : IEntitiesSerializer
     {
         private readonly string m_Sep = "\t";
-        private readonly List<ColumnSpec> m_Specs = new List<ColumnSpec>();
+        private readonly List<ColumnSpec> m_Specs = new();
 
         public CsvSerializer(string spec)
         {

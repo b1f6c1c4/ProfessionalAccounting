@@ -28,7 +28,7 @@ namespace AccountingServer.Entities.Util
 
         public TitleKind? Kind => null;
 
-        public VoucherDetail Filter { get; } = new VoucherDetail();
+        public VoucherDetail Filter { get; } = new();
 
         public int Dir => 0;
 
@@ -44,7 +44,7 @@ namespace AccountingServer.Entities.Util
 
         public bool ForAll => true;
 
-        public Voucher VoucherFilter { get; } = new Voucher();
+        public Voucher VoucherFilter { get; } = new();
 
         public DateFilter Range => DateFilter.Unconstrained;
 

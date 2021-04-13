@@ -36,9 +36,9 @@ namespace AccountingServer.BLL
 
         public Accountant()
         {
-            m_Db = new DbSession();
-            m_AssetAccountant = new AssetAccountant(m_Db);
-            m_AmortAccountant = new AmortAccountant(m_Db);
+            m_Db = new();
+            m_AssetAccountant = new(m_Db);
+            m_AmortAccountant = new(m_Db);
         }
 
         #region Voucher

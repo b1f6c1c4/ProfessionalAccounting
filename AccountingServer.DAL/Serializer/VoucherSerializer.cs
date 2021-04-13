@@ -91,7 +91,7 @@ namespace AccountingServer.DAL.Serializer
             bsonWriter.WriteEndDocument();
         }
 
-        public override ObjectId GetId(Voucher entity) => entity.ID != null ? new ObjectId(entity.ID) : ObjectId.Empty;
+        public override ObjectId GetId(Voucher entity) => entity.ID != null ? new(entity.ID) : ObjectId.Empty;
         protected override void SetId(Voucher entity, ObjectId id) => entity.ID = id.ToString();
         protected override bool IsNull(ObjectId id) => id == ObjectId.Empty;
 

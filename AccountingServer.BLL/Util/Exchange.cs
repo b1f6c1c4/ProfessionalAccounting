@@ -77,9 +77,9 @@ namespace AccountingServer.BLL.Util
         ///     缓存
         /// </summary>
         private readonly Dictionary<string, (DateTime, double)> m_Cache =
-            new Dictionary<string, (DateTime, double)>();
+            new();
 
-        private readonly ReaderWriterLockSlim m_Lock = new ReaderWriterLockSlim();
+        private readonly ReaderWriterLockSlim m_Lock = new();
 
         /// <summary>
         ///     汇率API配置

@@ -28,7 +28,7 @@ namespace AccountingServer.Http
         {
             stream.WriteLine($"HTTP/1.1 {response.ResponseCode} {ResponseCodes.Get(response.ResponseCode)}");
 
-            response.Header ??= new Dictionary<string, string>();
+            response.Header ??= new();
             response.Header["Connection"] = "close";
 
             if (response.ResponseStream != null &&

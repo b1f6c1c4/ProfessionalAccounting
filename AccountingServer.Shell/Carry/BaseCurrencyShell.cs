@@ -142,24 +142,24 @@ namespace AccountingServer.Shell.Carry
                             Type = VoucherType.Ordinary,
                             Remark = "equity conversion",
                             Details =
-                                new List<VoucherDetail>
+                                new()
                                     {
-                                        new VoucherDetail
+                                        new()
                                             {
                                                 Title = grpT.Title,
                                                 SubTitle = grpS.SubTitle,
                                                 Currency = grpC.Currency,
                                                 Fund = -oldb,
                                             },
-                                        new VoucherDetail
+                                        new()
                                             {
                                                 Title = grpT.Title,
                                                 SubTitle = grpS.SubTitle,
                                                 Currency = to,
                                                 Fund = newb,
                                             },
-                                        new VoucherDetail { Title = 3999, Currency = grpC.Currency, Fund = oldb },
-                                        new VoucherDetail { Title = 3999, Currency = to, Fund = -newb },
+                                        new() { Title = 3999, Currency = grpC.Currency, Fund = oldb },
+                                        new() { Title = 3999, Currency = to, Fund = -newb },
                                     },
                         });
                 cnt++;

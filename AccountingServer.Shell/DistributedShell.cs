@@ -160,7 +160,7 @@ namespace AccountingServer.Shell
                                 {
                                     var dist = Parsing.DistributedQuery(ref expr);
                                     Parsing.Eof(expr);
-                                    return ExecuteCheck(dist, new DateFilter(null, ClientDateTime.Today), serializer);
+                                    return ExecuteCheck(dist, new(null, ClientDateTime.Today), serializer);
                                 }),
                         new ShellComponent(
                             null,

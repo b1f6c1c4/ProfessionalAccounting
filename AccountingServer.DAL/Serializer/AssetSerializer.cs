@@ -28,7 +28,7 @@ namespace AccountingServer.DAL.Serializer
     /// </summary>
     internal class AssetSerializer : BaseSerializer<Asset, Guid?>
     {
-        private static readonly AssetItemSerializer ItemSerializer = new AssetItemSerializer();
+        private static readonly AssetItemSerializer ItemSerializer = new();
 
         public override Asset Deserialize(IBsonReader bsonReader)
         {

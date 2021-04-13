@@ -32,16 +32,15 @@ namespace AccountingServer.Test.UnitTest.Shell
         protected SerializerTest()
         {
             BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
-                new BaseCurrencyInfos
+                new()
                     {
-                        Infos = new List<BaseCurrencyInfo>
+                        Infos = new()
                             {
-                                new BaseCurrencyInfo { Date = null, Currency = "CNY" },
+                                new() { Date = null, Currency = "CNY" },
                             },
                     });
 
-            TitleManager.TitleInfos =
-                new MockConfigManager<TitleInfos>(new TitleInfos { Titles = new List<TitleInfo>() });
+            TitleManager.TitleInfos = new MockConfigManager<TitleInfos>(new() { Titles = new() });
 
             ClientUser.Set("b1");
         }
@@ -70,7 +69,7 @@ namespace AccountingServer.Test.UnitTest.Shell
         {
             var voucher1 = VoucherDataProvider.Create(dt, type);
             var voucher2 = Serializer.ParseVoucher(Serializer.PresentVoucher(voucher1));
-            voucher2.Type = voucher2.Type ?? VoucherType.Ordinary;
+            voucher2.Type ??= VoucherType.Ordinary;
             Assert.Equal(voucher1, voucher2, new VoucherEqualityComparer());
         }
 
@@ -145,11 +144,11 @@ namespace AccountingServer.Test.UnitTest.Shell
         public AbbrSerializerTest()
             => AbbrSerializer.Abbrs =
                 new MockConfigManager<Abbreviations>(
-                    new Abbreviations
+                    new()
                         {
-                            Abbrs = new List<Abbreviation>
+                            Abbrs = new()
                                 {
-                                    new Abbreviation
+                                    new()
                                         {
                                             Abbr = "abbr1",
                                             Title = 1234,
@@ -157,7 +156,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                                             Content = "cnt",
                                             Editable = false,
                                         },
-                                    new Abbreviation { Abbr = "abbr2", Title = 1234, Editable = true },
+                                    new() { Abbr = "abbr2", Title = 1234, Editable = true },
                                 },
                         });
 
@@ -184,9 +183,9 @@ namespace AccountingServer.Test.UnitTest.Shell
                 new Voucher
                     {
                         Date = ClientDateTime.Today,
-                        Details = new List<VoucherDetail>
+                        Details = new()
                             {
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1",
                                         Currency = "CNY",
@@ -196,7 +195,7 @@ namespace AccountingServer.Test.UnitTest.Shell
                                         Remark = null,
                                         Fund = 123,
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1",
                                         Currency = "CNY",
@@ -244,24 +243,24 @@ namespace AccountingServer.Test.UnitTest.Shell
         public DiscountSerializerTest()
         {
             BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
-                new BaseCurrencyInfos
+                new()
                     {
-                        Infos = new List<BaseCurrencyInfo>
+                        Infos = new()
                             {
-                                new BaseCurrencyInfo { Date = null, Currency = "CNY" },
+                                new() { Date = null, Currency = "CNY" },
                             },
                     });
 
             TitleManager.TitleInfos =
-                new MockConfigManager<TitleInfos>(new TitleInfos { Titles = new List<TitleInfo>() });
+                new MockConfigManager<TitleInfos>(new() { Titles = new() });
 
             AbbrSerializer.Abbrs =
                 new MockConfigManager<Abbreviations>(
-                    new Abbreviations
+                    new()
                         {
-                            Abbrs = new List<Abbreviation>
+                            Abbrs = new()
                                 {
-                                    new Abbreviation { Abbr = "aaa", Title = 1001, Editable = false },
+                                    new() { Abbr = "aaa", Title = 1001, Editable = false },
                                 },
                         });
 
@@ -331,21 +330,21 @@ d48
                     {
                         Date = ClientDateTime.Today,
                         Type = VoucherType.Ordinary,
-                        Details = new List<VoucherDetail>
+                        Details = new()
                             {
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1", Currency = "USD", Title = 1001, Fund = -29120,
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "pn", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6 - 8,
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16,
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1",
                                         Currency = "USD",
@@ -355,11 +354,11 @@ d48
                                         Remark = "ha",
                                         Fund = 500 + 2,
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "pn", Currency = "USD", Title = 6603, Fund = -50 - 16,
                                     },
-                                new VoucherDetail { User = "b1", Currency = "USD", Title = 6603, Fund = -8 },
+                                new() { User = "b1", Currency = "USD", Title = 6603, Fund = -8 },
                             },
                     },
                 voucher,
@@ -408,18 +407,18 @@ dnull
                     {
                         Date = ClientDateTime.Today,
                         Type = VoucherType.Ordinary,
-                        Details = new List<VoucherDetail>
+                        Details = new()
                             {
-                                new VoucherDetail { User = "b1", Currency = "USD", Title = 1001, Fund = -2864 },
-                                new VoucherDetail
+                                new() { User = "b1", Currency = "USD", Title = 1001, Fund = -2864 },
+                                new()
                                     {
                                         User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6 - 8,
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16,
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1",
                                         Currency = "USD",
@@ -429,7 +428,7 @@ dnull
                                         Remark = "ha",
                                         Fund = 500 + 2,
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8,
                                     },
@@ -459,21 +458,21 @@ d8
                     {
                         Date = ClientDateTime.Today,
                         Type = VoucherType.Ordinary,
-                        Details = new List<VoucherDetail>
+                        Details = new()
                             {
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1", Currency = "USD", Title = 1001, Fund = -29120,
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6 - 8,
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16,
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1",
                                         Currency = "USD",
@@ -483,7 +482,7 @@ d8
                                         Remark = "ha",
                                         Fund = 500 + 2,
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8,
                                     },
@@ -511,18 +510,18 @@ tnull
                     {
                         Date = ClientDateTime.Today,
                         Type = VoucherType.Ordinary,
-                        Details = new List<VoucherDetail>
+                        Details = new()
                             {
-                                new VoucherDetail { User = "b1", Currency = "USD", Title = 1001, Fund = -2864 },
-                                new VoucherDetail
+                                new() { User = "b1", Currency = "USD", Title = 1001, Fund = -2864 },
+                                new()
                                     {
                                         User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6 - 8,
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16,
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1",
                                         Currency = "USD",
@@ -532,7 +531,7 @@ tnull
                                         Remark = "ha",
                                         Fund = 500 + 2,
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8,
                                     },
@@ -558,20 +557,20 @@ t2
             Assert.Equal(
                 new Voucher
                     {
-                        Date = new DateTime(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                        Date = new(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                         Type = VoucherType.Ordinary,
-                        Details = new List<VoucherDetail>
+                        Details = new()
                             {
-                                new VoucherDetail { User = "b1", Currency = "CNY", Title = 1001, Fund = -2912 },
-                                new VoucherDetail
+                                new() { User = "b1", Currency = "CNY", Title = 1001, Fund = -2912 },
+                                new()
                                     {
                                         User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6,
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4,
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1",
                                         Currency = "USD",
@@ -579,7 +578,7 @@ t2
                                         SubTitle = 66,
                                         Fund = 500 + 2,
                                     },
-                                new VoucherDetail { User = "b1", Currency = "USD", Title = 6603, Fund = -50 },
+                                new() { User = "b1", Currency = "USD", Title = 6603, Fund = -50 },
                             },
                     },
                 voucher,
@@ -606,14 +605,14 @@ t2
         [Fact]
         public void OtherTest()
         {
-            var r = Serializer.PresentVoucher(new Voucher
+            var r = Serializer.PresentVoucher(new()
                 {
                     ID = "hhh",
                     Date = ClientDateTime.Today,
                     Type = VoucherType.Carry,
-                    Details = new List<VoucherDetail>
+                    Details = new()
                         {
-                            new VoucherDetail
+                            new()
                                 {
                                     User = "b1",
                                     Currency = "CNY",
@@ -662,9 +661,9 @@ t2
                     ID = "hhh",
                     Date = ClientDateTime.Today,
                     Type = VoucherType.Carry,
-                    Details = new List<VoucherDetail>
+                    Details = new()
                         {
-                            new VoucherDetail
+                            new()
                                 {
                                     User = "b1",
                                     Currency = "CNY",

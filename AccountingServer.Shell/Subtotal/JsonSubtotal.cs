@@ -43,28 +43,28 @@ namespace AccountingServer.Shell.Subtotal
         }
 
         JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalRoot sub)
-            => new JProperty("", VisitChildren(sub));
+            => new("", VisitChildren(sub));
 
         JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalDate sub)
-            => new JProperty(sub.Date.AsDate(sub.Level), VisitChildren(sub));
+            => new(sub.Date.AsDate(sub.Level), VisitChildren(sub));
 
         JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalUser sub)
-            => new JProperty(sub.User, VisitChildren(sub));
+            => new(sub.User, VisitChildren(sub));
 
         JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalCurrency sub)
-            => new JProperty(sub.Currency, VisitChildren(sub));
+            => new(sub.Currency, VisitChildren(sub));
 
         JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalTitle sub)
-            => new JProperty(sub.Title.AsTitle(), VisitChildren(sub));
+            => new(sub.Title.AsTitle(), VisitChildren(sub));
 
         JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalSubTitle sub)
-            => new JProperty(sub.SubTitle.AsSubTitle(), VisitChildren(sub));
+            => new(sub.SubTitle.AsSubTitle(), VisitChildren(sub));
 
         JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalContent sub)
-            => new JProperty(sub.Content ?? "", VisitChildren(sub));
+            => new(sub.Content ?? "", VisitChildren(sub));
 
         JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalRemark sub)
-            => new JProperty(sub.Remark ?? "", VisitChildren(sub));
+            => new(sub.Remark ?? "", VisitChildren(sub));
 
         private JObject VisitChildren(ISubtotalResult sub)
         {

@@ -79,7 +79,7 @@ namespace AccountingServer.Shell
     /// </summary>
     internal sealed class ShellComposer : IShellComponent, IEnumerable
     {
-        private readonly List<IShellComponent> m_Components = new List<IShellComponent>();
+        private readonly List<IShellComponent> m_Components = new();
 
         /// <inheritdoc />
         public IEnumerator GetEnumerator() => m_Components.GetEnumerator();

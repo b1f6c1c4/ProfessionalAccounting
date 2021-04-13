@@ -74,7 +74,7 @@ namespace AccountingServer.Shell
             if (help)
             {
                 Parsing.Eof(expr);
-                return plgName == "" ? new PlainText(ListPlugins()) : new PlainText(GetHelp(plgName));
+                return plgName == "" ? new PlainText(ListPlugins()) : new(GetHelp(plgName));
             }
 
             return GetPlugin(plgName).Execute(expr, serializer);
@@ -106,8 +106,8 @@ namespace AccountingServer.Shell
         private string ListPlugins()
         {
             var sb = new StringBuilder();
-            foreach (var info in m_Plugins)
-                sb.AppendLine($"{info.Key,-8}{info.Value.GetType().FullName}");
+            foreach (var (key, value) in m_Plugins)
+                sb.AppendLine($"{key,-8}{value.GetType().FullName}");
 
             return sb.ToString();
         }

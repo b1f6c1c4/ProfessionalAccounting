@@ -108,7 +108,7 @@ namespace AccountingServer.Shell.Plugins.Statement
             if (fundId < 0)
                 throw new ApplicationException("找不到金额字段");
 
-            Items = new List<BankItem>();
+            Items = new();
             while (!string.IsNullOrWhiteSpace(expr))
             {
                 var l = ParsingF.Line(ref expr);

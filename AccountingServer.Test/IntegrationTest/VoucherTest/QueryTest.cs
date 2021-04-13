@@ -46,9 +46,9 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                     Date = null,
                     Type = VoucherType.Uncertain,
                     Remark = "rmk1",
-                    Details = new List<VoucherDetail>
+                    Details = new()
                         {
-                            new VoucherDetail
+                            new()
                                 {
                                     User = "b1",
                                     Currency = "JPY",
@@ -57,7 +57,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                     Content = "cont1",
                                     Fund = 123.45,
                                 },
-                            new VoucherDetail
+                            new()
                                 {
                                     User = "b1",
                                     Currency = "JPY",
@@ -65,7 +65,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                     Remark = "remk2",
                                     Fund = -123.45,
                                 },
-                            new VoucherDetail
+                            new()
                                 {
                                     User = "b1",
                                     Currency = "USD",
@@ -73,7 +73,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                     Content = "cont3",
                                     Fund = -77.66,
                                 },
-                            new VoucherDetail
+                            new()
                                 {
                                     User = "b1",
                                     Currency = "USD",
@@ -83,7 +83,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                     Remark = "remk4",
                                     Fund = 77.66,
                                 },
-                            new VoucherDetail
+                            new()
                                 {
                                     User = "b1&b2",
                                     Currency = "EUR",
@@ -102,7 +102,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
 
         protected class DataProvider : IEnumerable<object[]>
         {
-            private static readonly List<object[]> Data = new List<object[]>
+            private static readonly List<object[]> Data = new()
                 {
                     new object[] { true, "" },
                     new object[] { true, "^59278b516c2f021e80f51912^[null]Uncertain%rmk%" },

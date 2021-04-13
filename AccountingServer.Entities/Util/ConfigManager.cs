@@ -43,7 +43,7 @@ namespace AccountingServer.Entities.Util
         /// <summary>
         ///     所有配置文件
         /// </summary>
-        private static readonly List<IConfigManager> ConfigManagers = new List<IConfigManager>();
+        private static readonly List<IConfigManager> ConfigManagers = new();
 
         /// <summary>
         ///     添加配置文件

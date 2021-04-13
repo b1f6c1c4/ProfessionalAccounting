@@ -38,7 +38,7 @@ namespace AccountingServer.Http
                     Uri = uri,
                     BaseUri = baseUri,
                     Parameters = par,
-                    Header = new Dictionary<string, string>(),
+                    Header = new(),
                     RequestStream = stream,
                 };
             while (true)

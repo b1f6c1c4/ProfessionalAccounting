@@ -31,7 +31,7 @@ namespace AccountingServer.BLL.Parsing
                 get
                 {
                     var dt = (DateTime)this;
-                    return new DateFilter(dt, dt);
+                    return new(dt, dt);
                 }
             }
 
@@ -52,7 +52,7 @@ namespace AccountingServer.BLL.Parsing
                     var dt = ClientDateTime.Today;
                     dt = dt.AddDays(dt.DayOfWeek == DayOfWeek.Sunday ? -6 : 1 - (int)dt.DayOfWeek);
                     dt = dt.AddDays(delta * 7);
-                    return new DateFilter(dt, dt.AddDays(6));
+                    return new(dt, dt.AddDays(6));
                 }
             }
         }
@@ -68,7 +68,7 @@ namespace AccountingServer.BLL.Parsing
                     if (RangeDeltaMonth() != null)
                     {
                         var delta = int.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
-                        dt = new DateTime(
+                        dt = new(
                             ClientDateTime.Today.Year,
                             ClientDateTime.Today.Month,
                             1,
@@ -81,7 +81,7 @@ namespace AccountingServer.BLL.Parsing
                     else
                         dt = ClientDateTime.ParseExact(RangeAMonth().GetText() + "01", "yyyyMMdd");
 
-                    return new DateFilter(dt, dt.AddMonths(1).AddDays(-1));
+                    return new(dt, dt.AddMonths(1).AddDays(-1));
                 }
             }
         }
@@ -94,9 +94,9 @@ namespace AccountingServer.BLL.Parsing
                 get
                 {
                     var year = int.Parse(RangeAYear().GetText());
-                    return new DateFilter(
-                        new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                        new DateTime(year, 12, 31, 0, 0, 0, DateTimeKind.Utc));
+                    return new(
+                        new(year, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                        new(year, 12, 31, 0, 0, 0, DateTimeKind.Utc));
                 }
             }
         }

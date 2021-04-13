@@ -58,7 +58,7 @@ namespace AccountingServer.Http
                 {
                     ResponseCode = 200,
                     Header =
-                        new Dictionary<string, string>
+                        new()
                             {
                                 { "Content-Type", contentType },
                                 { "Content-Length", stream.Length.ToString(CultureInfo.InvariantCulture) },

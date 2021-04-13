@@ -28,7 +28,7 @@ namespace AccountingServer
 {
     internal static class Program
     {
-        private static readonly Facade Facade = new Facade();
+        private static readonly Facade Facade = new();
 
         private static void Main()
         {
@@ -54,9 +54,9 @@ namespace AccountingServer
             if (request.Header.ContainsKey("x-user"))
                 user = request.Header["x-user"];
             else
-                return new HttpResponse { ResponseCode = 400 };
+                return new() { ResponseCode = 400 };
             if (user == "anonymous")
-                return new HttpResponse { ResponseCode = 401 };
+                return new() { ResponseCode = 401 };
 
             string spec = null;
             if (request.Header.ContainsKey("x-serializer"))
@@ -67,15 +67,15 @@ namespace AccountingServer
                 if (request.BaseUri == "/emptyVoucher")
                     return GenerateHttpResponse(Facade.EmptyVoucher(spec), "text/plain; charset=utf-8");
 
-                return new HttpResponse { ResponseCode = 404 };
+                return new() { ResponseCode = 404 };
             }
 
             if (request.Method != "POST")
-                return new HttpResponse { ResponseCode = 405 };
+                return new() { ResponseCode = 405 };
 
             if (!request.Header.ContainsKey("x-clientdatetime") ||
                 !ClientDateTime.TryParse(request.Header["x-clientdatetime"], out var timestamp))
-                return new HttpResponse { ResponseCode = 400 };
+                return new() { ResponseCode = 400 };
 
             ClientUser.Set(user);
             ClientDateTime.Set(timestamp);
@@ -103,7 +103,7 @@ namespace AccountingServer
                     {
                         var code = request.ReadToEnd();
                         var res = Facade.ExecuteVoucherRemoval(code, spec);
-                        return new HttpResponse { ResponseCode = res ? 204 : 404 };
+                        return new() { ResponseCode = res ? 204 : 404 };
                     }
 
                 case "/assetUpsert":
@@ -116,7 +116,7 @@ namespace AccountingServer
                     {
                         var code = request.ReadToEnd();
                         var res = Facade.ExecuteAssetRemoval(code, spec);
-                        return new HttpResponse { ResponseCode = res ? 204 : 404 };
+                        return new() { ResponseCode = res ? 204 : 404 };
                     }
 
                 case "/amortUpsert":
@@ -129,10 +129,10 @@ namespace AccountingServer
                     {
                         var code = request.ReadToEnd();
                         var res = Facade.ExecuteAmortRemoval(code, spec);
-                        return new HttpResponse { ResponseCode = res ? 204 : 404 };
+                        return new() { ResponseCode = res ? 204 : 404 };
                     }
                 default:
-                    return new HttpResponse { ResponseCode = 404 };
+                    return new() { ResponseCode = 404 };
             }
         }
     }
