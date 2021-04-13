@@ -51,7 +51,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
                 throw new ApplicationException("找不到记账凭证");
 
             var detail = voucher.Details.Single(
-                vd => (vd.Title is 1601 or 1701) &&
+                vd => vd.Title is 1601 or 1701 &&
                     (!guid.HasValue || string.Equals(
                         vd.Content,
                         guid.ToString(),

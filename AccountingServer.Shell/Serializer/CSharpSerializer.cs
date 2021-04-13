@@ -17,10 +17,12 @@
  */
 
 using System;
+using System.Collections;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime;
 using System.Runtime.Loader;
 using System.Text;
 using AccountingServer.BLL.Util;
@@ -85,9 +87,9 @@ namespace AccountingServer.Shell.Serializer
                     typeof(object).GetTypeInfo().Assembly.Location,
                     typeof(Console).GetTypeInfo().Assembly.Location,
                     Path.Combine(
-                        Path.GetDirectoryName(typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.Location)!,
+                        Path.GetDirectoryName(typeof(GCSettings).GetTypeInfo().Assembly.Location)!,
                         "System.Runtime.dll"),
-                    Path.Combine(Path.GetDirectoryName(typeof(System.Collections.IList).GetTypeInfo().Assembly.Location)!,
+                    Path.Combine(Path.GetDirectoryName(typeof(IList).GetTypeInfo().Assembly.Location)!,
                         "System.Collections.dll"),
                     Path.Combine(Path.GetDirectoryName(typeof(Voucher).GetTypeInfo().Assembly.Location)!,
                         "AccountingServer.Entities.dll"),

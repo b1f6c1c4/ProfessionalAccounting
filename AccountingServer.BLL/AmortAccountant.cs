@@ -46,7 +46,7 @@ namespace AccountingServer.BLL
                     AmortizeInterval.SameDayOfYear => the.Month == 2 && the.Day == 29 ? the.AddDays(1) : the,
                     AmortizeInterval.SameDayOfMonth => the.Day > 28 ? the.AddDays(1 - the.Day).AddMonths(1) : the,
                     AmortizeInterval.LastDayOfWeek =>
-                    the.DayOfWeek == DayOfWeek.Sunday ? the : the.AddDays(7 - (int)the.DayOfWeek),
+                        the.DayOfWeek == DayOfWeek.Sunday ? the : the.AddDays(7 - (int)the.DayOfWeek),
                     AmortizeInterval.LastDayOfMonth => AccountantHelper.LastDayOfMonth(the.Year, the.Month),
                     AmortizeInterval.LastDayOfYear => new DateTime(the.Year + 1, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                         .AddDays(-1),
