@@ -43,11 +43,11 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
             m_Adapter.Upsert(
                 new Voucher
                     {
-                        Date = new DateTime(2016, 12, 31, 0, 0, 0, DateTimeKind.Utc),
+                        Date = new(2016, 12, 31, 0, 0, 0, DateTimeKind.Utc),
                         Remark = "xrmk1",
-                        Details = new List<VoucherDetail>
+                        Details = new()
                             {
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1",
                                         Currency = "JPY",
@@ -57,7 +57,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                         Fund = 123.45,
                                         Remark = "rmk1",
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1",
                                         Currency = "JPY",
@@ -73,11 +73,11 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
             m_Adapter.Upsert(
                 new Voucher
                     {
-                        Date = new DateTime(2017, 02, 01, 0, 0, 0, DateTimeKind.Utc),
+                        Date = new(2017, 02, 01, 0, 0, 0, DateTimeKind.Utc),
                         Remark = "xrmk2",
-                        Details = new List<VoucherDetail>
+                        Details = new()
                             {
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1",
                                         Currency = "JPY",
@@ -87,7 +87,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                         Fund = 78.53,
                                         Remark = "rmk1",
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1",
                                         Currency = "JPY",
@@ -97,7 +97,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                         Fund = -78.53,
                                         Remark = "rmk2",
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1",
                                         Currency = "USD",
@@ -107,7 +107,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                         Fund = 66.66,
                                         Remark = "rmk1",
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1",
                                         Currency = "USD",
@@ -117,7 +117,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                         Fund = -66.66,
                                         Remark = "rmk2",
                                     },
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1&b2", Currency = "EUR", Title = 2333, Fund = 114514,
                                     },

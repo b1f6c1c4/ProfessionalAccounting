@@ -30,18 +30,18 @@ namespace AccountingServer.Test.UnitTest.BLL
     {
         public SubtotalTest()
             => BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
-                new BaseCurrencyInfos
+                new()
                     {
-                        Infos = new List<BaseCurrencyInfo>
+                        Infos = new()
                             {
-                                new BaseCurrencyInfo { Date = null, Currency = "CNY" },
+                                new() { Date = null, Currency = "CNY" },
                             },
                     });
 
         private readonly IExchange m_Exchange = new MockExchange
             {
-                { new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "JPY", 456 },
-                { new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "USD", 789 },
+                { new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "JPY", 456 },
+                { new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "USD", 789 },
             };
 
         [Theory]
@@ -90,11 +90,11 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]").Subtotal, m_Exchange);
 
-            var bal = new[]
+            var bal = new Balance[]
                 {
-                    new Balance { Date = null, Fund = 1 },
-                    new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
-                    new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
+                    new() { Date = null, Fund = 1 },
+                    new() { Date = new(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
+                    new() { Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
                 };
 
             var res = builder.Build(bal);
@@ -108,26 +108,24 @@ namespace AccountingServer.Test.UnitTest.BLL
                 var resxx = (ISubtotalDate)item;
                 Assert.Null(resxx.Items);
                 Assert.Equal(SubtotalLevel.Day, resxx.Level);
-                lst.Add(new Balance { Date = resxx.Date, Fund = resxx.Fund });
+                lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
             }
 
             Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
 
             var lst0 = new List<Balance>();
             if (incl[0] == '1')
-                lst0.Add(new Balance { Date = null, Fund = 1 });
+                lst0.Add(new() { Date = null, Fund = 1 });
             if (incl[1] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 1 });
+                lst0.Add(new() { Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 1 });
             if (incl[2] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 });
+                lst0.Add(new() { Date = new(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 });
             if (incl[3] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 });
+                lst0.Add(new() { Date = new(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 });
             if (incl[4] == '1')
-                lst0.Add(
-                    new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 + 4 });
+                lst0.Add(new() { Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 + 4 });
             if (incl[5] == '1')
-                lst0.Add(
-                    new Balance { Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 + 4 });
+                lst0.Add(new() { Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 + 4 });
             Assert.Equal(lst0, lst, new BalanceEqualityComparer());
         }
 
@@ -177,10 +175,10 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]").Subtotal, m_Exchange);
 
-            var bal = new[]
+            var bal = new Balance[]
                 {
-                    new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
-                    new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
+                    new() { Date = new(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
+                    new() { Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
                 };
 
             var res = builder.Build(bal);
@@ -194,24 +192,24 @@ namespace AccountingServer.Test.UnitTest.BLL
                 var resxx = (ISubtotalDate)item;
                 Assert.Null(resxx.Items);
                 Assert.Equal(SubtotalLevel.Day, resxx.Level);
-                lst.Add(new Balance { Date = resxx.Date, Fund = resxx.Fund });
+                lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
             }
 
             Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
 
             var lst0 = new List<Balance>();
             if (incl[0] == '1')
-                lst0.Add(new Balance { Date = null, Fund = 0 });
+                lst0.Add(new() { Date = null, Fund = 0 });
             if (incl[1] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
+                lst0.Add(new() { Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
             if (incl[2] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 2 });
+                lst0.Add(new() { Date = new(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 2 });
             if (incl[3] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 2 });
+                lst0.Add(new() { Date = new(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 2 });
             if (incl[4] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 2 + 4 });
+                lst0.Add(new() { Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 2 + 4 });
             if (incl[5] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 2 + 4 });
+                lst0.Add(new() { Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 2 + 4 });
             Assert.Equal(lst0, lst, new BalanceEqualityComparer());
         }
 
@@ -245,7 +243,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]").Subtotal, m_Exchange);
 
-            var bal = new Balance[] { };
+            var bal = Array.Empty<Balance>();
 
             var res = builder.Build(bal);
             Assert.IsAssignableFrom<ISubtotalRoot>(res);
@@ -258,20 +256,20 @@ namespace AccountingServer.Test.UnitTest.BLL
                 var resxx = (ISubtotalDate)item;
                 Assert.Null(resxx.Items);
                 Assert.Equal(SubtotalLevel.Day, resxx.Level);
-                lst.Add(new Balance { Date = resxx.Date, Fund = resxx.Fund });
+                lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
             }
 
             Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
 
             var lst0 = new List<Balance>();
             if (incl[0] == '1')
-                lst0.Add(new Balance { Date = null, Fund = 0 });
+                lst0.Add(new() { Date = null, Fund = 0 });
             if (incl[1] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
+                lst0.Add(new() { Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
             if (incl[2] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
+                lst0.Add(new() { Date = new(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
             if (incl[3] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
+                lst0.Add(new() { Date = new(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
             Assert.Equal(lst0, lst, new BalanceEqualityComparer());
         }
 
@@ -322,31 +320,31 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]X[20170101]").Subtotal, m_Exchange);
 
-            var bal = new[]
+            var bal = new Balance[]
                 {
-                    new Balance { Date = null, Currency = "JPY", Fund = 1 / 2D / 456D },
-                    new Balance
+                    new() { Date = null, Currency = "JPY", Fund = 1 / 2D / 456D },
+                    new()
                         {
-                            Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
                             Currency = "JPY",
                             Fund = 2 / 2D / 456D,
                         },
-                    new Balance
+                    new()
                         {
-                            Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
                             Currency = "JPY",
                             Fund = 4 / 2D / 456D,
                         },
-                    new Balance { Date = null, Currency = "USD", Fund = 1 / 2D / 789D },
-                    new Balance
+                    new() { Date = null, Currency = "USD", Fund = 1 / 2D / 789D },
+                    new()
                         {
-                            Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc),
                             Currency = "USD",
                             Fund = 2 / 2D / 789D,
                         },
-                    new Balance
+                    new()
                         {
-                            Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc),
                             Currency = "USD",
                             Fund = 4 / 2D / 789D,
                         },
@@ -363,26 +361,24 @@ namespace AccountingServer.Test.UnitTest.BLL
                 var resxx = (ISubtotalDate)item;
                 Assert.Null(resxx.Items);
                 Assert.Equal(SubtotalLevel.Day, resxx.Level);
-                lst.Add(new Balance { Date = resxx.Date, Fund = resxx.Fund });
+                lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
             }
 
             Assert.Equal(1 + 2 + 4, res.Fund);
 
             var lst0 = new List<Balance>();
             if (incl[0] == '1')
-                lst0.Add(new Balance { Date = null, Fund = 1 });
+                lst0.Add(new() { Date = null, Fund = 1 });
             if (incl[1] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 1 });
+                lst0.Add(new() { Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 1 });
             if (incl[2] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 });
+                lst0.Add(new() { Date = new(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 });
             if (incl[3] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 });
+                lst0.Add(new() { Date = new(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 });
             if (incl[4] == '1')
-                lst0.Add(
-                    new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 + 4 });
+                lst0.Add(new() { Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 + 4 });
             if (incl[5] == '1')
-                lst0.Add(
-                    new Balance { Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 + 4 });
+                lst0.Add(new() { Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 1 + 2 + 4 });
             Assert.Equal(lst0, lst, new BalanceEqualityComparer());
         }
 
@@ -416,7 +412,7 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]X[20170101]").Subtotal, m_Exchange);
 
-            var bal = new Balance[] { };
+            var bal = Array.Empty<Balance>();
 
             var res = builder.Build(bal);
             Assert.IsAssignableFrom<ISubtotalRoot>(res);
@@ -429,20 +425,20 @@ namespace AccountingServer.Test.UnitTest.BLL
                 var resxx = (ISubtotalDate)item;
                 Assert.Null(resxx.Items);
                 Assert.Equal(SubtotalLevel.Day, resxx.Level);
-                lst.Add(new Balance { Date = resxx.Date, Fund = resxx.Fund });
+                lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
             }
 
             Assert.Equal(0, res.Fund);
 
             var lst0 = new List<Balance>();
             if (incl[0] == '1')
-                lst0.Add(new Balance { Date = null, Fund = 0 });
+                lst0.Add(new() { Date = null, Fund = 0 });
             if (incl[1] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
+                lst0.Add(new() { Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
             if (incl[2] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
+                lst0.Add(new() { Date = new(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
             if (incl[3] == '1')
-                lst0.Add(new Balance { Date = new DateTime(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
+                lst0.Add(new() { Date = new(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 0 });
             Assert.Equal(lst0, lst, new BalanceEqualityComparer());
         }
 
@@ -451,12 +447,12 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`vD").Subtotal, m_Exchange);
 
-            var bal = new[]
+            var bal = new Balance[]
                 {
-                    new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
-                    new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
-                    new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
-                    new Balance { Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
+                    new() { Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
+                    new() { Date = new(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
+                    new() { Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
+                    new() { Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -470,22 +466,22 @@ namespace AccountingServer.Test.UnitTest.BLL
                 var resxx = (ISubtotalDate)item;
                 Assert.Null(resxx.Items);
                 Assert.Equal(SubtotalLevel.Day, resxx.Level);
-                lst.Add(new Balance { Date = resxx.Date, Fund = resxx.Fund });
+                lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
             }
 
             Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
             Assert.Equal(
-                new[]
+                new Balance[]
                     {
-                        new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
-                        new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 8 + 1 },
-                        new Balance
+                        new() { Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
+                        new() { Date = new(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 8 + 1 },
+                        new()
                             {
-                                Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 8 + 1 + 4,
+                                Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 8 + 1 + 4,
                             },
-                        new Balance
+                        new()
                             {
-                                Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
+                                Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
                                 Fund = 8 + 1 + 4 + 2,
                             },
                     },
@@ -498,30 +494,30 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`vDX[20170101]").Subtotal, m_Exchange);
 
-            var bal = new[]
+            var bal = new Balance[]
                 {
-                    new Balance
+                    new()
                         {
                             Currency = "JPY",
-                            Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 8,
                         },
-                    new Balance
+                    new()
                         {
                             Currency = "CNY",
-                            Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 1,
                         },
-                    new Balance
+                    new()
                         {
                             Currency = "USD",
-                            Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 4,
                         },
-                    new Balance
+                    new()
                         {
                             Currency = "CNY",
-                            Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
                             Fund = 2,
                         },
                 };
@@ -537,21 +533,21 @@ namespace AccountingServer.Test.UnitTest.BLL
                 var resxx = (ISubtotalDate)item;
                 Assert.Null(resxx.Items);
                 Assert.Equal(SubtotalLevel.Day, resxx.Level);
-                lst.Add(new Balance { Date = resxx.Date, Fund = resxx.Fund });
+                lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
             }
 
             Assert.Equal(8 * 456 + 1 + 4 * 789 + 2, res.Fund);
             Assert.Equal(
-                new[]
+                new Balance[]
                     {
-                        new Balance
+                        new()
                             {
-                                Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
+                                Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
                                 Fund = 8 * 456 + 1,
                             },
-                        new Balance
+                        new()
                             {
-                                Date = new DateTime(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
+                                Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
                                 Fund = 8 * 456 + 1 + 4 * 789 + 2,
                             },
                     },
@@ -564,12 +560,12 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`c").Subtotal, m_Exchange);
 
-            var bal = new[]
+            var bal = new Balance[]
                 {
-                    new Balance { Content = "JPY", Fund = 8 },
-                    new Balance { Content = "CNY", Fund = 1 },
-                    new Balance { Content = "USD", Fund = 4 },
-                    new Balance { Content = "CNY", Fund = 2 },
+                    new() { Content = "JPY", Fund = 8 },
+                    new() { Content = "CNY", Fund = 1 },
+                    new() { Content = "USD", Fund = 4 },
+                    new() { Content = "CNY", Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -582,16 +578,16 @@ namespace AccountingServer.Test.UnitTest.BLL
                 Assert.IsAssignableFrom<ISubtotalContent>(item);
                 var resxx = (ISubtotalContent)item;
                 Assert.Null(resxx.Items);
-                lst.Add(new Balance { Content = resxx.Content, Fund = resxx.Fund });
+                lst.Add(new() { Content = resxx.Content, Fund = resxx.Fund });
             }
 
             Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
             Assert.Equal(
                 new List<Balance>
                     {
-                        new Balance { Content = "JPY", Fund = 8 },
-                        new Balance { Content = "CNY", Fund = 3 },
-                        new Balance { Content = "USD", Fund = 4 },
+                        new() { Content = "JPY", Fund = 8 },
+                        new() { Content = "CNY", Fund = 3 },
+                        new() { Content = "USD", Fund = 4 },
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -603,12 +599,12 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`C").Subtotal, m_Exchange);
 
-            var bal = new[]
+            var bal = new Balance[]
                 {
-                    new Balance { Currency = "JPY", Fund = 8 },
-                    new Balance { Currency = "CNY", Fund = 1 },
-                    new Balance { Currency = "USD", Fund = 4 },
-                    new Balance { Currency = "CNY", Fund = 2 },
+                    new() { Currency = "JPY", Fund = 8 },
+                    new() { Currency = "CNY", Fund = 1 },
+                    new() { Currency = "USD", Fund = 4 },
+                    new() { Currency = "CNY", Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -621,16 +617,16 @@ namespace AccountingServer.Test.UnitTest.BLL
                 Assert.IsAssignableFrom<ISubtotalCurrency>(item);
                 var resxx = (ISubtotalCurrency)item;
                 Assert.Null(resxx.Items);
-                lst.Add(new Balance { Currency = resxx.Currency, Fund = resxx.Fund });
+                lst.Add(new() { Currency = resxx.Currency, Fund = resxx.Fund });
             }
 
             Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
             Assert.Equal(
                 new List<Balance>
                     {
-                        new Balance { Currency = "JPY", Fund = 8 },
-                        new Balance { Currency = "CNY", Fund = 3 },
-                        new Balance { Currency = "USD", Fund = 4 },
+                        new() { Currency = "JPY", Fund = 8 },
+                        new() { Currency = "CNY", Fund = 3 },
+                        new() { Currency = "USD", Fund = 4 },
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -641,12 +637,12 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`d").Subtotal, m_Exchange);
 
-            var bal = new[]
+            var bal = new Balance[]
                 {
-                    new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
-                    new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
-                    new Balance { Date = new DateTime(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
-                    new Balance { Date = new DateTime(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
+                    new() { Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
+                    new() { Date = new(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
+                    new() { Date = new(2017, 01, 03, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
+                    new() { Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -660,7 +656,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 var resxx = (ISubtotalDate)item;
                 Assert.Null(resxx.Items);
                 Assert.Equal(SubtotalLevel.Day | SubtotalLevel.NonZero, resxx.Level);
-                lst.Add(new Balance { Date = resxx.Date, Fund = resxx.Fund });
+                lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
             }
 
             Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
@@ -672,12 +668,12 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`vX@JPY[20170101]").Subtotal, m_Exchange);
 
-            var bal = new[]
+            var bal = new Balance[]
                 {
-                    new Balance { Currency = "JPY", Fund = 8 },
-                    new Balance { Currency = "CNY", Fund = 1 },
-                    new Balance { Currency = "USD", Fund = 4 },
-                    new Balance { Currency = "CNY", Fund = 2 },
+                    new() { Currency = "JPY", Fund = 8 },
+                    new() { Currency = "CNY", Fund = 1 },
+                    new() { Currency = "USD", Fund = 4 },
+                    new() { Currency = "CNY", Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -691,12 +687,12 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`m").Subtotal, m_Exchange);
 
-            var bal = new[]
+            var bal = new Balance[]
                 {
-                    new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
-                    new Balance { Date = new DateTime(2017, 02, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
-                    new Balance { Date = new DateTime(2017, 03, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
-                    new Balance { Date = new DateTime(2017, 04, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
+                    new() { Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
+                    new() { Date = new(2017, 02, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
+                    new() { Date = new(2017, 03, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
+                    new() { Date = new(2017, 04, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -710,7 +706,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 var resxx = (ISubtotalDate)item;
                 Assert.Null(resxx.Items);
                 Assert.Equal(SubtotalLevel.Month | SubtotalLevel.NonZero, resxx.Level);
-                lst.Add(new Balance { Date = resxx.Date, Fund = resxx.Fund });
+                lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
             }
 
             Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
@@ -722,12 +718,12 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`r").Subtotal, m_Exchange);
 
-            var bal = new[]
+            var bal = new Balance[]
                 {
-                    new Balance { Remark = "JPY", Fund = 8 },
-                    new Balance { Remark = "CNY", Fund = 1 },
-                    new Balance { Remark = "USD", Fund = 4 },
-                    new Balance { Remark = "CNY", Fund = 2 },
+                    new() { Remark = "JPY", Fund = 8 },
+                    new() { Remark = "CNY", Fund = 1 },
+                    new() { Remark = "USD", Fund = 4 },
+                    new() { Remark = "CNY", Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -740,16 +736,16 @@ namespace AccountingServer.Test.UnitTest.BLL
                 Assert.IsAssignableFrom<ISubtotalRemark>(item);
                 var resxx = (ISubtotalRemark)item;
                 Assert.Null(resxx.Items);
-                lst.Add(new Balance { Remark = resxx.Remark, Fund = resxx.Fund });
+                lst.Add(new() { Remark = resxx.Remark, Fund = resxx.Fund });
             }
 
             Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
             Assert.Equal(
                 new List<Balance>
                     {
-                        new Balance { Remark = "JPY", Fund = 8 },
-                        new Balance { Remark = "CNY", Fund = 3 },
-                        new Balance { Remark = "USD", Fund = 4 },
+                        new() { Remark = "JPY", Fund = 8 },
+                        new() { Remark = "CNY", Fund = 3 },
+                        new() { Remark = "USD", Fund = 4 },
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -760,12 +756,12 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`t").Subtotal, m_Exchange);
 
-            var bal = new[]
+            var bal = new Balance[]
                 {
-                    new Balance { Title = 4567, Fund = 8 },
-                    new Balance { Title = 1234, Fund = 1 },
-                    new Balance { Title = 6543, Fund = 4 },
-                    new Balance { Title = 1234, Fund = 2 },
+                    new() { Title = 4567, Fund = 8 },
+                    new() { Title = 1234, Fund = 1 },
+                    new() { Title = 6543, Fund = 4 },
+                    new() { Title = 1234, Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -778,16 +774,16 @@ namespace AccountingServer.Test.UnitTest.BLL
                 Assert.IsAssignableFrom<ISubtotalTitle>(item);
                 var resxx = (ISubtotalTitle)item;
                 Assert.Null(resxx.Items);
-                lst.Add(new Balance { Title = resxx.Title, Fund = resxx.Fund });
+                lst.Add(new() { Title = resxx.Title, Fund = resxx.Fund });
             }
 
             Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
             Assert.Equal(
                 new List<Balance>
                     {
-                        new Balance { Title = 4567, Fund = 8 },
-                        new Balance { Title = 1234, Fund = 3 },
-                        new Balance { Title = 6543, Fund = 4 },
+                        new() { Title = 4567, Fund = 8 },
+                        new() { Title = 1234, Fund = 3 },
+                        new() { Title = 6543, Fund = 4 },
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -798,16 +794,16 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`ts").Subtotal, m_Exchange);
 
-            var bal = new[]
+            var bal = new Balance[]
                 {
-                    new Balance { Title = 4567, Fund = 8 },
-                    new Balance { Title = 1234, Fund = 1 },
-                    new Balance { Title = 6543, Fund = 4 },
-                    new Balance { Title = 1234, Fund = 2 },
-                    new Balance { Title = 4567, SubTitle = 01, Fund = 128 },
-                    new Balance { Title = 1234, SubTitle = 02, Fund = 16 },
-                    new Balance { Title = 6543, SubTitle = 01, Fund = 64 },
-                    new Balance { Title = 1234, SubTitle = 08, Fund = 32 },
+                    new() { Title = 4567, Fund = 8 },
+                    new() { Title = 1234, Fund = 1 },
+                    new() { Title = 6543, Fund = 4 },
+                    new() { Title = 1234, Fund = 2 },
+                    new() { Title = 4567, SubTitle = 01, Fund = 128 },
+                    new() { Title = 1234, SubTitle = 02, Fund = 16 },
+                    new() { Title = 6543, SubTitle = 01, Fund = 64 },
+                    new() { Title = 1234, SubTitle = 08, Fund = 32 },
                 };
 
             var res = builder.Build(bal);
@@ -824,7 +820,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                     Assert.IsAssignableFrom<ISubtotalSubTitle>(item2);
                     var resxxx = (ISubtotalSubTitle)item2;
                     Assert.Null(resxxx.Items);
-                    lst.Add(new Balance { Title = resxx.Title, SubTitle = resxxx.SubTitle, Fund = resxxx.Fund });
+                    lst.Add(new() { Title = resxx.Title, SubTitle = resxxx.SubTitle, Fund = resxxx.Fund });
                 }
             }
 
@@ -832,13 +828,13 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 new List<Balance>
                     {
-                        new Balance { Title = 4567, Fund = 8 },
-                        new Balance { Title = 4567, SubTitle = 01, Fund = 128 },
-                        new Balance { Title = 1234, Fund = 3 },
-                        new Balance { Title = 1234, SubTitle = 02, Fund = 16 },
-                        new Balance { Title = 1234, SubTitle = 08, Fund = 32 },
-                        new Balance { Title = 6543, Fund = 4 },
-                        new Balance { Title = 6543, SubTitle = 01, Fund = 64 },
+                        new() { Title = 4567, Fund = 8 },
+                        new() { Title = 4567, SubTitle = 01, Fund = 128 },
+                        new() { Title = 1234, Fund = 3 },
+                        new() { Title = 1234, SubTitle = 02, Fund = 16 },
+                        new() { Title = 1234, SubTitle = 08, Fund = 32 },
+                        new() { Title = 6543, Fund = 4 },
+                        new() { Title = 6543, SubTitle = 01, Fund = 64 },
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -849,12 +845,12 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`U").Subtotal, m_Exchange);
 
-            var bal = new[]
+            var bal = new Balance[]
                 {
-                    new Balance { User = "JPY", Fund = 8 },
-                    new Balance { User = "CNY", Fund = 1 },
-                    new Balance { User = "USD", Fund = 4 },
-                    new Balance { User = "CNY", Fund = 2 },
+                    new() { User = "JPY", Fund = 8 },
+                    new() { User = "CNY", Fund = 1 },
+                    new() { User = "USD", Fund = 4 },
+                    new() { User = "CNY", Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -867,16 +863,16 @@ namespace AccountingServer.Test.UnitTest.BLL
                 Assert.IsAssignableFrom<ISubtotalUser>(item);
                 var resxx = (ISubtotalUser)item;
                 Assert.Null(resxx.Items);
-                lst.Add(new Balance { User = resxx.User, Fund = resxx.Fund });
+                lst.Add(new() { User = resxx.User, Fund = resxx.Fund });
             }
 
             Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
             Assert.Equal(
                 new List<Balance>
                     {
-                        new Balance { User = "JPY", Fund = 8 },
-                        new Balance { User = "CNY", Fund = 3 },
-                        new Balance { User = "USD", Fund = 4 },
+                        new() { User = "JPY", Fund = 8 },
+                        new() { User = "CNY", Fund = 3 },
+                        new() { User = "USD", Fund = 4 },
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -887,12 +883,12 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`w").Subtotal, m_Exchange);
 
-            var bal = new[]
+            var bal = new Balance[]
                 {
-                    new Balance { Date = new DateTime(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
-                    new Balance { Date = new DateTime(2017, 01, 09, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
-                    new Balance { Date = new DateTime(2017, 01, 16, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
-                    new Balance { Date = new DateTime(2017, 01, 23, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
+                    new() { Date = new(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
+                    new() { Date = new(2017, 01, 09, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
+                    new() { Date = new(2017, 01, 16, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
+                    new() { Date = new(2017, 01, 23, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -906,7 +902,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 var resxx = (ISubtotalDate)item;
                 Assert.Null(resxx.Items);
                 Assert.Equal(SubtotalLevel.Week | SubtotalLevel.NonZero, resxx.Level);
-                lst.Add(new Balance { Date = resxx.Date, Fund = resxx.Fund });
+                lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
             }
 
             Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
@@ -918,12 +914,12 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`y").Subtotal, m_Exchange);
 
-            var bal = new[]
+            var bal = new Balance[]
                 {
-                    new Balance { Date = new DateTime(2014, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
-                    new Balance { Date = new DateTime(2015, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
-                    new Balance { Date = new DateTime(2016, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
-                    new Balance { Date = new DateTime(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
+                    new() { Date = new(2014, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
+                    new() { Date = new(2015, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
+                    new() { Date = new(2016, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
+                    new() { Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -937,7 +933,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                 var resxx = (ISubtotalDate)item;
                 Assert.Null(resxx.Items);
                 Assert.Equal(SubtotalLevel.Year | SubtotalLevel.NonZero, resxx.Level);
-                lst.Add(new Balance { Date = resxx.Date, Fund = resxx.Fund });
+                lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
             }
 
             Assert.Equal(bal.Sum(b => b.Fund), res.Fund);

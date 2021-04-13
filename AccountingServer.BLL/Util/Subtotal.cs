@@ -241,7 +241,7 @@ namespace AccountingServer.BLL.Util
                                 }).Cast<ISubtotalResult>().ToList();
                     return sub;
                 case AggregationType.EveryDay:
-                    sub.TheItems = new List<ISubtotalResult>();
+                    sub.TheItems = new();
                     var initial = Prev(m_Par.EveryDayRange.Range.StartDate);
                     var ed = Next(Prev(m_Par.EveryDayRange.Range.EndDate));
                     var last = initial;

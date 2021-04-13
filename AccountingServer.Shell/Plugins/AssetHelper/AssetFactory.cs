@@ -79,7 +79,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper
                     DevaluationTitle = isFixed ? 1603 : 1703,
                     DevaluationExpenseTitle = 6701,
                     DevaluationExpenseSubTitle = isFixed ? 5 : 6,
-                    Schedule = new List<AssetItem>
+                    Schedule = new()
                         {
                             new AcquisitionItem
                                 {

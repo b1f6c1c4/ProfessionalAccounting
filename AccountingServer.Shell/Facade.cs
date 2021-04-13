@@ -57,9 +57,9 @@ namespace AccountingServer.Shell
 
         public Facade()
         {
-            m_Accountant = new Accountant();
+            m_Accountant = new();
             m_Composer =
-                new ShellComposer
+                new()
                     {
                         new CheckShell(m_Accountant),
                         new CarryShell(m_Accountant),
@@ -191,7 +191,7 @@ namespace AccountingServer.Shell
                         continue;
 
                     voucher.Details.Add(
-                        new VoucherDetail { User = grpU.Key, Currency = grpCs.First().Key, Title = 3998, Fund = -sum });
+                        new() { User = grpU.Key, Currency = grpCs.First().Key, Title = 3998, Fund = -sum });
                 }
             else if (grpCs.Count() > 1 && grpUs.Count() == 1)
                 foreach (var grpC in grpCs)
@@ -201,7 +201,7 @@ namespace AccountingServer.Shell
                         continue;
 
                     voucher.Details.Add(
-                        new VoucherDetail { User = grpUs.First().Key, Currency = grpC.Key, Title = 3999, Fund = -sum });
+                        new() { User = grpUs.First().Key, Currency = grpC.Key, Title = 3999, Fund = -sum });
                 }
 
             if (!m_Accountant.Upsert(voucher))

@@ -51,7 +51,7 @@ namespace AccountingServer.BLL
                 !asset.Value.HasValue)
                 return asset;
 
-            var lst = asset.Schedule?.ToList() ?? new List<AssetItem>();
+            var lst = asset.Schedule?.ToList() ?? new();
 
             foreach (var assetItem in lst)
                 if (assetItem is DepreciateItem ||
@@ -278,7 +278,7 @@ namespace AccountingServer.BLL
                     isCollapsed,
                     editOnly,
                     VoucherType.Depreciation,
-                    new VoucherDetail
+                    new()
                         {
                             User = asset.User,
                             Currency = asset.Currency,
@@ -287,7 +287,7 @@ namespace AccountingServer.BLL
                             Content = asset.StringID,
                             Fund = dep.Amount,
                         },
-                    new VoucherDetail
+                    new()
                         {
                             User = asset.User,
                             Currency = asset.Currency,
@@ -302,7 +302,7 @@ namespace AccountingServer.BLL
                     isCollapsed,
                     editOnly,
                     VoucherType.Devalue,
-                    new VoucherDetail
+                    new()
                         {
                             User = asset.User,
                             Currency = asset.Currency,
@@ -311,7 +311,7 @@ namespace AccountingServer.BLL
                             Content = asset.StringID,
                             Fund = dev.Amount,
                         },
-                    new VoucherDetail
+                    new()
                         {
                             User = asset.User,
                             Currency = asset.Currency,
@@ -339,7 +339,7 @@ namespace AccountingServer.BLL
                     isCollapsed,
                     editOnly,
                     VoucherType.Ordinary,
-                    new VoucherDetail
+                    new()
                         {
                             User = asset.User,
                             Currency = asset.Currency,
@@ -347,7 +347,7 @@ namespace AccountingServer.BLL
                             Content = asset.StringID,
                             Fund = -asset.Value,
                         },
-                    new VoucherDetail
+                    new()
                         {
                             User = asset.User,
                             Currency = asset.Currency,
@@ -355,7 +355,7 @@ namespace AccountingServer.BLL
                             Content = asset.StringID,
                             Fund = totalDep,
                         },
-                    new VoucherDetail
+                    new()
                         {
                             User = asset.User,
                             Currency = asset.Currency,
@@ -363,7 +363,7 @@ namespace AccountingServer.BLL
                             Content = asset.StringID,
                             Fund = totalDev,
                         },
-                    new VoucherDetail
+                    new()
                         {
                             User = asset.User,
                             Currency = asset.Currency,

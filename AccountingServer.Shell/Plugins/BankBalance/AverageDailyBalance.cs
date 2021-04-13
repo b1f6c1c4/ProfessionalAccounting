@@ -45,7 +45,7 @@ namespace AccountingServer.Shell.Plugins.BankBalance
 
             var tdy = ClientDateTime.Today;
             var ldom = AccountantHelper.LastDayOfMonth(tdy.Year, tdy.Month);
-            var srng = new DateFilter(new DateTime(tdy.Year, tdy.Month, 1, 0, 0, 0, DateTimeKind.Utc), tdy);
+            var srng = new DateFilter(new(tdy.Year, tdy.Month, 1, 0, 0, 0, DateTimeKind.Utc), tdy);
             var balance = Accountant.RunGroupedQuery(
                 $"T1002 {content.Quotation('\'')} [~{tdy.AsDate()}]`vD{srng.AsDateRange()}");
 

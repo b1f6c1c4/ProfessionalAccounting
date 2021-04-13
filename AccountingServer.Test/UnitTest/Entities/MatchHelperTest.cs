@@ -53,7 +53,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(false, "", "test")]
         [InlineData(true, "test", "test")]
         public void VoucherMatchTestID(bool expected, string value, string filter)
-            => Assert.Equal(expected, MatchHelper.IsMatch(new Voucher { ID = value }, new Voucher { ID = filter }));
+            => Assert.Equal(expected, MatchHelper.IsMatch(new() { ID = value }, new Voucher { ID = filter }));
 
         [Theory]
         [InlineData(true, null, null)]
@@ -65,7 +65,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         {
             var value = valueS.ToDateTime();
             var filter = filterS.ToDateTime();
-            Assert.Equal(expected, MatchHelper.IsMatch(new Voucher { Date = value }, new Voucher { Date = filter }));
+            Assert.Equal(expected, MatchHelper.IsMatch(new() { Date = value }, new Voucher { Date = filter }));
         }
 
         [Theory]
@@ -85,7 +85,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(false, VoucherType.Carry, VoucherType.General)]
         [InlineData(false, VoucherType.AnnualCarry, VoucherType.General)]
         public void VoucherMatchTestType(bool expected, VoucherType? value, VoucherType? filter)
-            => Assert.Equal(expected, MatchHelper.IsMatch(new Voucher { Type = value }, new Voucher { Type = filter }));
+            => Assert.Equal(expected, MatchHelper.IsMatch(new() { Type = value }, new Voucher { Type = filter }));
 
         [Theory]
         [InlineData(true, "b1", null)]
@@ -97,7 +97,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         public void DetailMatchTestUser(bool expected, string value, string filter)
             => Assert.Equal(
                 expected,
-                MatchHelper.IsMatch(new VoucherDetail { User = value }, new VoucherDetail { User = filter }));
+                MatchHelper.IsMatch(new() { User = value }, new VoucherDetail { User = filter }));
 
         [Theory]
         [InlineData(true, null, null)]
@@ -112,7 +112,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         public void DetailMatchTestCurrency(bool expected, string value, string filter)
             => Assert.Equal(
                 expected,
-                MatchHelper.IsMatch(new VoucherDetail { Currency = value }, new VoucherDetail { Currency = filter }));
+                MatchHelper.IsMatch(new() { Currency = value }, new VoucherDetail { Currency = filter }));
 
         [Theory]
         [InlineData(true, 1001, null)]
@@ -121,7 +121,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         public void DetailMatchTestTitle(bool expected, int? value, int? filter)
             => Assert.Equal(
                 expected,
-                MatchHelper.IsMatch(new VoucherDetail { Title = value }, new VoucherDetail { Title = filter }));
+                MatchHelper.IsMatch(new() { Title = value }, new VoucherDetail { Title = filter }));
 
         [Theory]
         [InlineData(true, null, null)]
@@ -135,7 +135,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         public void DetailMatchTestSubTitle(bool expected, int? value, int? filter)
             => Assert.Equal(
                 expected,
-                MatchHelper.IsMatch(new VoucherDetail { SubTitle = value }, new VoucherDetail { SubTitle = filter }));
+                MatchHelper.IsMatch(new() { SubTitle = value }, new VoucherDetail { SubTitle = filter }));
 
         [Theory]
         [InlineData(true, null, null)]
@@ -146,7 +146,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         public void DetailMatchTestFund(bool expected, double? value, double? filter)
             => Assert.Equal(
                 expected,
-                MatchHelper.IsMatch(new VoucherDetail { Fund = value }, new VoucherDetail { Fund = filter }));
+                MatchHelper.IsMatch(new() { Fund = value }, new VoucherDetail { Fund = filter }));
 
         [Theory]
         [InlineData(true, null, 0)]
@@ -159,24 +159,24 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(true, +0.5 * VoucherDetail.Tolerance, -1)]
         public void DetailMatchTestDir(bool expected, double? value, int dir)
             => Assert.Equal(expected,
-                MatchHelper.IsMatch(new VoucherDetail { Fund = value }, new VoucherDetail(), dir));
+                MatchHelper.IsMatch(new() { Fund = value }, new VoucherDetail(), dir));
 
         [Fact]
         public void DetailMatchTestContent()
             => StringMatchTest(
-                (v, f) => MatchHelper.IsMatch(new VoucherDetail { Content = v }, new VoucherDetail { Content = f }));
+                (v, f) => MatchHelper.IsMatch(new() { Content = v }, new VoucherDetail { Content = f }));
 
         [Fact]
         public void DetailMatchTestNull()
             => Assert.True(
                 MatchHelper.IsMatch(
-                    new VoucherDetail { Content = "cnt", Fund = 10, Remark = "rmk" },
+                    new() { Content = "cnt", Fund = 10, Remark = "rmk" },
                     (VoucherDetail)null));
 
         [Fact]
         public void DetailMatchTestRemark()
             => StringMatchTest(
-                (v, f) => MatchHelper.IsMatch(new VoucherDetail { Remark = v }, new VoucherDetail { Remark = f }));
+                (v, f) => MatchHelper.IsMatch(new() { Remark = v }, new VoucherDetail { Remark = f }));
 
         [Fact]
         public void VoucherMatchTest()
@@ -184,57 +184,57 @@ namespace AccountingServer.Test.UnitTest.Entities
             var filter = new Voucher
                 {
                     ID = "abc",
-                    Date = new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    Date = new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                     Type = VoucherType.Ordinary,
                     Remark = "abc",
                 };
 
             Assert.False(
                 MatchHelper.IsMatch(
-                    new Voucher
+                    new()
                         {
                             ID = "abc0",
-                            Date = new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                             Type = VoucherType.Ordinary,
                             Remark = "abc",
                         },
                     filter));
             Assert.False(
                 MatchHelper.IsMatch(
-                    new Voucher
+                    new()
                         {
                             ID = "abc",
-                            Date = new DateTime(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                             Type = VoucherType.Ordinary,
                             Remark = "abc",
                         },
                     filter));
             Assert.False(
                 MatchHelper.IsMatch(
-                    new Voucher
+                    new()
                         {
                             ID = "abc",
-                            Date = new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                             Type = VoucherType.Carry,
                             Remark = "abc",
                         },
                     filter));
             Assert.False(
                 MatchHelper.IsMatch(
-                    new Voucher
+                    new()
                         {
                             ID = "abc",
-                            Date = new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                             Type = VoucherType.Ordinary,
                             Remark = "abc0",
                         },
                     filter));
             Assert.True(
                 MatchHelper.IsMatch(
-                    new Voucher
+                    new()
                         {
                             ID = "abc",
-                            Date = new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                             Type = VoucherType.Ordinary,
                             Remark = "abc",
                         },
@@ -243,10 +243,10 @@ namespace AccountingServer.Test.UnitTest.Entities
 
         [Fact]
         public void VoucherMatchTestNull()
-            => Assert.True(MatchHelper.IsMatch(new Voucher { ID = "id", Remark = "rmk" }, (Voucher)null));
+            => Assert.True(MatchHelper.IsMatch(new() { ID = "id", Remark = "rmk" }, (Voucher)null));
 
         [Fact]
         public void VoucherMatchTestRemark()
-            => StringMatchTest((v, f) => MatchHelper.IsMatch(new Voucher { Remark = v }, new Voucher { Remark = f }));
+            => StringMatchTest((v, f) => MatchHelper.IsMatch(new() { Remark = v }, new Voucher { Remark = f }));
     }
 }

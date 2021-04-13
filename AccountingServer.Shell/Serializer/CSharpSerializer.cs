@@ -95,9 +95,9 @@ namespace AccountingServer.Shell.Serializer
             var references = refPaths.Select(r => MetadataReference.CreateFromFile(r)).ToArray();
             var compilation = CSharpCompilation.Create(
                 assemblyName,
-                syntaxTrees: new[] { syntaxTree },
-                references: references,
-                options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+                new[] { syntaxTree },
+                references,
+                new(OutputKind.DynamicallyLinkedLibrary));
 
             using var ms = new MemoryStream();
 
@@ -168,7 +168,7 @@ namespace AccountingServer.Shell.Serializer
                 sb.AppendLine($"    Type = VoucherType.{voucher.Type},");
             if (voucher.Remark != null)
                 sb.AppendLine($"    Remark = {ProcessString(voucher.Remark)},");
-            sb.AppendLine("    Details = new List<VoucherDetail> {");
+            sb.AppendLine("    Details = new() {");
             foreach (var detail in voucher.Details)
                 sb.Append(PresentVoucherDetail(detail));
 
@@ -227,7 +227,7 @@ namespace AccountingServer.Shell.Serializer
                 $"    DevaluationTitle = {asset.DevaluationTitle}, DevaluationExpenseTitle = {asset.DevaluationExpenseTitle}, DevaluationExpenseSubTitle = {asset.DevaluationExpenseSubTitle},");
             if (asset.Remark != null)
                 sb.AppendLine($"    Remark = {ProcessString(asset.Remark)},");
-            sb.AppendLine("    Schedule = new List<AssetItem> {");
+            sb.AppendLine("    Schedule = new() {");
             if (asset.Schedule != null)
             {
                 void Present(AssetItem item, string str)
@@ -310,7 +310,7 @@ namespace AccountingServer.Shell.Serializer
 
             if (amort.Schedule != null)
             {
-                sb.AppendLine("    Schedule = new List<AmortItem> {");
+                sb.AppendLine("    Schedule = new() {");
                 foreach (var item in amort.Schedule)
                 {
                     sb.Append("        new AmortItem { ");

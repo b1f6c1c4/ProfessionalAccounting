@@ -30,7 +30,7 @@ namespace AccountingServer.Http
 
         private readonly TcpListener m_Listener;
 
-        public HttpServer(IPAddress ip, int port) => m_Listener = new TcpListener(ip, port);
+        public HttpServer(IPAddress ip, int port) => m_Listener = new(ip, port);
 
         public event OnHttpRequestEventHandler OnHttpRequest;
 
@@ -66,9 +66,9 @@ namespace AccountingServer.Http
                         var request = RequestParser.Parse(stream);
 #if DEBUG
                         if (request.Method == "OPTIONS")
-                            response = new HttpResponse
+                            response = new()
                                 {
-                                    Header = new Dictionary<string, string>
+                                    Header = new()
                                         {
                                             { "Access-Control-Allow-Origin", "*" },
                                             { "Access-Control-Allow-Methods", "*" },
@@ -83,7 +83,7 @@ namespace AccountingServer.Http
                     }
                     catch (HttpException e)
                     {
-                        response = new HttpResponse { ResponseCode = e.ResponseCode };
+                        response = new() { ResponseCode = e.ResponseCode };
                     }
                     catch (Exception e)
                     {
@@ -92,7 +92,7 @@ namespace AccountingServer.Http
                     }
 
 #if DEBUG
-                    response.Header ??= new Dictionary<string, string>();
+                    response.Header ??= new();
                     if (!response.Header.ContainsKey("Access-Control-Allow-Origin"))
                         response.Header["Access-Control-Allow-Origin"] = "*";
 #endif

@@ -43,7 +43,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 -1,
                 DbSession.TheComparison(
-                    new VoucherDetail
+                    new()
                         {
                             User = "b0",
                             Currency = "USD",
@@ -57,7 +57,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 +1,
                 DbSession.TheComparison(
-                    new VoucherDetail
+                    new()
                         {
                             User = "b2",
                             Currency = "USD",
@@ -72,7 +72,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 -1,
                 DbSession.TheComparison(
-                    new VoucherDetail
+                    new()
                         {
                             User = "b1",
                             Currency = "USC",
@@ -86,7 +86,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 +1,
                 DbSession.TheComparison(
-                    new VoucherDetail
+                    new()
                         {
                             User = "b1",
                             Currency = "USE",
@@ -101,7 +101,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 -1,
                 DbSession.TheComparison(
-                    new VoucherDetail
+                    new()
                         {
                             User = "b1",
                             Currency = "USD",
@@ -115,7 +115,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 +1,
                 DbSession.TheComparison(
-                    new VoucherDetail
+                    new()
                         {
                             User = "b1",
                             Currency = "USD",
@@ -130,7 +130,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 -1,
                 DbSession.TheComparison(
-                    new VoucherDetail
+                    new()
                         {
                             User = "b1",
                             Currency = "USD",
@@ -144,7 +144,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 +1,
                 DbSession.TheComparison(
-                    new VoucherDetail
+                    new()
                         {
                             User = "b1",
                             Currency = "USD",
@@ -159,7 +159,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 -1,
                 DbSession.TheComparison(
-                    new VoucherDetail
+                    new()
                         {
                             User = "b1",
                             Currency = "USD",
@@ -173,7 +173,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 +1,
                 DbSession.TheComparison(
-                    new VoucherDetail
+                    new()
                         {
                             User = "b1",
                             Currency = "USD",
@@ -188,7 +188,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 -1,
                 DbSession.TheComparison(
-                    new VoucherDetail
+                    new()
                         {
                             User = "b1",
                             Currency = "USD",
@@ -202,7 +202,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 +1,
                 DbSession.TheComparison(
-                    new VoucherDetail
+                    new()
                         {
                             User = "b1",
                             Currency = "USD",
@@ -217,7 +217,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 -1,
                 DbSession.TheComparison(
-                    new VoucherDetail
+                    new()
                         {
                             User = "b1",
                             Currency = "USD",
@@ -231,7 +231,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 +1,
                 DbSession.TheComparison(
-                    new VoucherDetail
+                    new()
                         {
                             User = "b1",
                             Currency = "USD",
@@ -249,11 +249,11 @@ namespace AccountingServer.Test.UnitTest.BLL
         {
             var voucher = new Voucher
                 {
-                    Details = new List<VoucherDetail>
+                    Details = new()
                         {
-                            new VoucherDetail { User = "b1", Currency = "jPy" },
-                            new VoucherDetail { User = "b2", Currency = "cnY" },
-                            new VoucherDetail { User = "b1", Currency = "Cny" },
+                            new() { User = "b1", Currency = "jPy" },
+                            new() { User = "b2", Currency = "cnY" },
+                            new() { User = "b1", Currency = "Cny" },
                         },
                 };
 

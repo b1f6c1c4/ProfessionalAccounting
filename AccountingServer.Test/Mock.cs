@@ -34,21 +34,20 @@ namespace AccountingServer.Test
 
     public class MockExchange : IExchange, IEnumerable
     {
-        private readonly Dictionary<Tuple<DateTime, string>, double> m_Dic =
-            new Dictionary<Tuple<DateTime, string>, double>();
+        private readonly Dictionary<Tuple<DateTime, string>, double> m_Dic = new();
 
         public IEnumerator GetEnumerator() => m_Dic.GetEnumerator();
 
         public double From(DateTime date, string target) => target == BaseCurrency.Now
             ? 1
-            : m_Dic[new Tuple<DateTime, string>(date, target)];
+            : m_Dic[new(date, target)];
 
         public double To(DateTime date, string target) => target == BaseCurrency.Now
             ? 1
-            : 1D / m_Dic[new Tuple<DateTime, string>(date, target)];
+            : 1D / m_Dic[new(date, target)];
 
         public void Add(DateTime date, string target, double val) => m_Dic.Add(
-            new Tuple<DateTime, string>(date, target),
+            new(date, target),
             val);
     }
 }

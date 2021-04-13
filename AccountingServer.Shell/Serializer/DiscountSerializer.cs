@@ -185,9 +185,9 @@ namespace AccountingServer.Shell.Serializer
             foreach (var kvp in totalDs)
                 if (!kvp.Value.IsZero())
                     resLst.Add(
-                        new VoucherDetail { User = kvp.Key, Currency = currency, Title = 6603, Fund = -kvp.Value });
+                        new() { User = kvp.Key, Currency = currency, Title = 6603, Fund = -kvp.Value });
 
-            return new Voucher { Type = VoucherType.Ordinary, Date = date, Details = resLst };
+            return new() { Type = VoucherType.Ordinary, Date = date, Details = resLst };
         }
 
         private VoucherDetail ParseVoucherDetail(string currency, ref string expr)
@@ -230,7 +230,7 @@ namespace AccountingServer.Shell.Serializer
                 remark = Guid.NewGuid().ToString().ToUpperInvariant();
 
 
-            return new VoucherDetail
+            return new()
                 {
                     User = user,
                     Currency = currency,

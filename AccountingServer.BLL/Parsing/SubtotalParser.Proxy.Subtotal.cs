@@ -65,7 +65,7 @@ namespace AccountingServer.BLL.Parsing
                                 };
 
                     if (subtotalFields().SubtotalNoField() != null)
-                        return new SubtotalLevel[0];
+                        return Array.Empty<SubtotalLevel>();
 
                     return subtotalFields().subtotalField()
                         .Select(

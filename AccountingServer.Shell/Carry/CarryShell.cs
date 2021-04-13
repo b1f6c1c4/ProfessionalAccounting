@@ -124,7 +124,7 @@ namespace AccountingServer.Shell.Carry
             {
                 var sd = new DateTime(dt.Value.Year, dt.Value.Month, 1, 0, 0, 0, DateTimeKind.Utc);
                 ed = AccountantHelper.LastDayOfMonth(dt.Value.Year, dt.Value.Month);
-                rng = new DateFilter(sd, ed);
+                rng = new(sd, ed);
             }
             else
             {
@@ -138,9 +138,9 @@ namespace AccountingServer.Shell.Carry
                     {
                         Target = t,
                         Value = 0D,
-                        Voucher = new Voucher
+                        Voucher = new()
                             {
-                                Date = ed, Type = VoucherType.Carry, Details = new List<VoucherDetail>(),
+                                Date = ed, Type = VoucherType.Carry, Details = new(),
                             },
                     }).ToList();
             foreach (var task in tasks)
@@ -173,10 +173,10 @@ namespace AccountingServer.Shell.Carry
                                 Date = ed,
                                 Type = VoucherType.Carry,
                                 Remark = "currency carry",
-                                Details = new List<VoucherDetail>
+                                Details = new()
                                     {
-                                        new VoucherDetail { Currency = baseCur, Title = 3999, Fund = -total },
-                                        new VoucherDetail
+                                        new() { Currency = baseCur, Title = 3999, Fund = -total },
+                                        new()
                                             {
                                                 Currency = baseCur, Title = 6603, SubTitle = 03, Fund = total,
                                             },
@@ -193,7 +193,7 @@ namespace AccountingServer.Shell.Carry
             {
                 if (!task.Value.IsZero())
                     task.Voucher.Details.Add(
-                        new VoucherDetail
+                        new()
                             {
                                 Currency = BaseCurrency.At(task.Voucher.Date),
                                 Title = 4103,
@@ -235,7 +235,7 @@ namespace AccountingServer.Shell.Carry
                 foreach (var grps in grpt.Items.Cast<ISubtotalSubTitle>())
                 foreach (var grpc in grps.Items.Cast<ISubtotalContent>())
                     voucher.Details.Add(
-                        new VoucherDetail
+                        new()
                             {
                                 Currency = grpC.Currency,
                                 Title = grpt.Title,
@@ -261,9 +261,9 @@ namespace AccountingServer.Shell.Carry
                     * b;
 
                 voucher.Details.Add(
-                    new VoucherDetail { Currency = grpC.Currency, Title = 3999, Fund = b });
+                    new() { Currency = grpC.Currency, Title = 3999, Fund = b });
                 voucher.Details.Add(
-                    new VoucherDetail { Currency = baseCur, Title = 3999, Remark = voucher.ID, Fund = -cob });
+                    new() { Currency = baseCur, Title = 3999, Remark = voucher.ID, Fund = -cob });
                 total += cob;
             }
 

@@ -23,7 +23,7 @@ namespace AccountingServer.Http
     internal static class ResponseCodes
     {
         private static readonly Dictionary<int, string> Codes
-            = new Dictionary<int, string>
+            = new()
                 {
                     { 100, "Continue" },
                     { 101, "Switching Protocols" },

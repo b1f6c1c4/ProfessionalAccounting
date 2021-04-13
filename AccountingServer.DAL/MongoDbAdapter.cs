@@ -35,21 +35,21 @@ namespace AccountingServer.DAL
     [SuppressMessage("ReSharper", "PrivateFieldCanBeConvertedToLocalVariable")]
     internal class MongoDbAdapter : IDbAdapter
     {
-        private static readonly BsonDocument ProjectDetails = new BsonDocument { ["_id"] = false, ["detail"] = true };
+        private static readonly BsonDocument ProjectDetails = new() { ["_id"] = false, ["detail"] = true };
 
-        private static readonly BsonDocument ProjectDate = new BsonDocument
+        private static readonly BsonDocument ProjectDate = new()
             {
                 ["_id"] = false, ["detail"] = true, ["date"] = true,
             };
 
-        private static readonly BsonDocument ProjectNothing = new BsonDocument { ["_id"] = false };
+        private static readonly BsonDocument ProjectNothing = new() { ["_id"] = false };
 
-        private static readonly BsonDocument ProjectNothingButDate = new BsonDocument
+        private static readonly BsonDocument ProjectNothingButDate = new()
             {
                 ["_id"] = false, ["date"] = true,
             };
 
-        private static readonly BsonDocument ProjectDetail = new BsonDocument
+        private static readonly BsonDocument ProjectDetail = new()
             {
                 ["user"] = "$detail.user",
                 ["currency"] = "$detail.currency",
@@ -68,7 +68,7 @@ namespace AccountingServer.DAL
         private static readonly BsonDocument ProjectNothingButMonth;
         private static readonly BsonDocument ProjectNothingButWeek;
 
-        private static readonly BsonDocument FilterNonZero = new BsonDocument
+        private static readonly BsonDocument FilterNonZero = new()
             {
                 ["total"] = new BsonDocument
                     {
@@ -173,7 +173,7 @@ namespace AccountingServer.DAL
         public MongoDbAdapter(string uri, string db = null)
         {
             var url = new MongoUrl(uri);
-            m_Client = new MongoClient(MongoClientSettings.FromUrl(url));
+            m_Client = new(MongoClientSettings.FromUrl(url));
 
             m_Db = m_Client.GetDatabase(db ?? url.DatabaseName ?? "accounting");
 

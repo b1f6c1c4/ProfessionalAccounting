@@ -25,7 +25,7 @@ namespace AccountingServer.Test
 {
     internal class VoucherDataProvider : IEnumerable<object[]>
     {
-        private static readonly List<object[]> Data = new List<object[]>
+        private static readonly List<object[]> Data = new()
             {
                 new object[] { null, VoucherType.Ordinary },
                 new object[] { "2017-01-01", VoucherType.Uncertain },
@@ -39,14 +39,14 @@ namespace AccountingServer.Test
         public IEnumerator<object[]> GetEnumerator() => Data.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => Data.GetEnumerator();
 
-        public static Voucher Create(string dt, VoucherType type) => new Voucher
+        public static Voucher Create(string dt, VoucherType type) => new()
             {
                 Date = dt.ToDateTime(),
                 Type = type,
                 Remark = " t 't\"-.\" %@!@#$%^&*( ",
-                Details = new List<VoucherDetail>
+                Details = new()
                     {
-                        new VoucherDetail
+                        new()
                             {
                                 User = "b1",
                                 Currency = "JPY",
@@ -54,7 +54,7 @@ namespace AccountingServer.Test
                                 Content = "%@!@#$%^&*(\nas\rdf\\",
                                 Fund = 123.45,
                             },
-                        new VoucherDetail
+                        new()
                             {
                                 User = "b1",
                                 Currency = "USD",
@@ -63,7 +63,7 @@ namespace AccountingServer.Test
                                 Fund = -123.45,
                                 Remark = "\\qw\ter%@!@#$%^&*(%",
                             },
-                        new VoucherDetail
+                        new()
                             {
                                 User = "b1",
                                 Currency = "EUR",
@@ -77,7 +77,7 @@ namespace AccountingServer.Test
 
     internal class AssetDataProvider : IEnumerable<object[]>
     {
-        private static readonly List<object[]> Data = new List<object[]>
+        private static readonly List<object[]> Data = new()
             {
                 new object[] { "2017-01-01", DepreciationMethod.None },
                 new object[] { null, DepreciationMethod.StraightLine },
@@ -88,7 +88,7 @@ namespace AccountingServer.Test
         public IEnumerator<object[]> GetEnumerator() => Data.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => Data.GetEnumerator();
 
-        public static Asset Create(string dt, DepreciationMethod type) => new Asset
+        public static Asset Create(string dt, DepreciationMethod type) => new()
             {
                 ID = Guid.Parse("9F4FDBA8-94BD-45C2-AF53-36BCFFB591FF"),
                 Name = "nm",
@@ -107,7 +107,7 @@ namespace AccountingServer.Test
                 DepreciationExpenseSubTitle = 05,
                 DevaluationExpenseTitle = 6623,
                 DevaluationExpenseSubTitle = 06,
-                Schedule = new List<AssetItem>
+                Schedule = new()
                     {
                         new AcquisitionItem { Value = 123, OrigValue = 553, Remark = "\\\t@#$%^&*(%" },
                         new DepreciateItem { Value = -23, Amount = 3412, Remark = "\\qw\ter%@!@#$%^&*(%" },
@@ -119,7 +119,7 @@ namespace AccountingServer.Test
 
     internal class AmortDataProvider : IEnumerable<object[]>
     {
-        private static readonly List<object[]> Data = new List<object[]>
+        private static readonly List<object[]> Data = new()
             {
                 new object[] { null, AmortizeInterval.EveryDay },
                 new object[] { "2017-01-01", AmortizeInterval.LastDayOfMonth },
@@ -133,7 +133,7 @@ namespace AccountingServer.Test
         public IEnumerator<object[]> GetEnumerator() => Data.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => Data.GetEnumerator();
 
-        public static Amortization Create(string dt, AmortizeInterval type) => new Amortization
+        public static Amortization Create(string dt, AmortizeInterval type) => new()
             {
                 ID = Guid.Parse("9F4FDBA8-94BD-45C2-AF53-36BCFFB591FF"),
                 Name = "nm",
@@ -143,14 +143,14 @@ namespace AccountingServer.Test
                 TotalDays = 1233,
                 Remark = " t 't\"-.\" %@!@#$%^&*( ",
                 Value = 33344,
-                Template = new Voucher
+                Template = new()
                     {
                         Date = dt.ToDateTime(),
                         Remark = " t 't\"-.\" %@!@#$%^&*( ",
                         Type = VoucherType.AnnualCarry,
-                        Details = new List<VoucherDetail>
+                        Details = new()
                             {
-                                new VoucherDetail
+                                new()
                                     {
                                         User = "b1",
                                         Currency = "EUR",
@@ -160,10 +160,10 @@ namespace AccountingServer.Test
                                     },
                             },
                     },
-                Schedule = new List<AmortItem>
+                Schedule = new()
                     {
-                        new AmortItem { Amount = 123, Value = 666, Remark = "\\\t@#$%^&*(%" },
-                        new AmortItem { Amount = 974, Value = 2342, Remark = "*(%" },
+                        new() { Amount = 123, Value = 666, Remark = "\\\t@#$%^&*(%" },
+                        new() { Amount = 974, Value = 2342, Remark = "*(%" },
                     },
             };
     }
