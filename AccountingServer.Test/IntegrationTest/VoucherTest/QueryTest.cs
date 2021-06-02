@@ -21,6 +21,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using AccountingServer.BLL;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -181,6 +182,33 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
             => m_Adapter.SelectVouchers(query).SingleOrDefault() != null;
 
         protected override void ResetVouchers() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+
+        [Theory]
+        [ClassData(typeof(DataProvider))]
+        public override void RunTestA(bool expected, string query) => base.RunTestA(expected, query);
+    }
+
+    [Collection("DbTestCollection")]
+    [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
+    public class BLLQueryTest : QueryTestBase, IDisposable
+    {
+        private readonly Accountant m_Accountant;
+
+        public BLLQueryTest()
+        {
+            m_Accountant = new(db: "accounting-test");
+
+            m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+        }
+
+        public void Dispose() => m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+
+        protected override void PrepareVoucher(Voucher voucher) => m_Accountant.Upsert(voucher);
+
+        protected override bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
+            => m_Accountant.SelectVouchers(query).SingleOrDefault() != null;
+
+        protected override void ResetVouchers() => m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
 
         [Theory]
         [ClassData(typeof(DataProvider))]

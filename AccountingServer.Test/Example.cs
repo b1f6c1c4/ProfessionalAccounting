@@ -97,7 +97,7 @@ namespace AccountingServer.Test
                 Date = dt.ToDateTime(),
                 Method = type,
                 Remark = " t 't\"-.\" %@!@#$%^&*( ",
-                Value = 33344,
+                Value = 5553,
                 Salvage = 213,
                 Life = 11,
                 Title = 1234,
@@ -109,10 +109,10 @@ namespace AccountingServer.Test
                 DevaluationExpenseSubTitle = 06,
                 Schedule = new()
                     {
-                        new AcquisitionItem { Value = 123, OrigValue = 553, Remark = "\\\t@#$%^&*(%" },
-                        new DepreciateItem { Value = -23, Amount = 3412, Remark = "\\qw\ter%@!@#$%^&*(%" },
-                        new DevalueItem { Value = -50, FairValue = 5462, Amount = 2342, Remark = "  7')^ Q23'4" },
-                        new DispositionItem { Value = -50, Remark = "\\\t@#$%^&*(%" },
+                        new AcquisitionItem { Date = "2017-01-01".ToDateTime(), Value = 5553, OrigValue = 5553, Remark = "\\\t@#$%^&*(%" },
+                        new DepreciateItem { Date = "2017-02-28".ToDateTime(), Value = 2141, Amount = 3412, Remark = "\\qw\ter%@!@#$%^&*(%" },
+                        new DevalueItem { Date = "2017-02-28".ToDateTime(), Value = 2140, FairValue = 2140, Amount = 1, Remark = "  7')^ Q23'4" },
+                        new DispositionItem { Date = "2017-03-10".ToDateTime(), Value = 0, Remark = "\\\t@#$%^&*(%" },
                     },
             };
     }
@@ -162,8 +162,8 @@ namespace AccountingServer.Test
                     },
                 Schedule = new()
                     {
-                        new() { Amount = 123, Value = 666, Remark = "\\\t@#$%^&*(%" },
-                        new() { Amount = 974, Value = 2342, Remark = "*(%" },
+                        new() { Date = "2001-02-03".ToDateTime(), Amount = 123, Value = 33344 - 123, Remark = "\\\t@#$%^&*(%" },
+                        new() { Date = "2011-03-04".ToDateTime(), Amount = 974, Value = 33344 - 123 - 974, Remark = "*(%" },
                     },
             };
     }
