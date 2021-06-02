@@ -198,6 +198,19 @@ namespace AccountingServer.DAL
             return res.ModifiedCount <= 1;
         }
 
+        private static long Upsert<T, TId>(IMongoCollection<T> collection, IEnumerable<T> entities, BaseSerializer<T, TId> idProvider)
+        {
+            var ops = new List<WriteModel<T>>();
+            foreach (var entity in entities)
+                if (idProvider.FillId(collection, entity))
+                    ops.Add(new InsertOneModel<T>(entity));
+                else
+                    ops.Add(new ReplaceOneModel<T>(Builders<T>.Filter.Eq("_id", idProvider.GetId(entity)), entity)
+                            { IsUpsert = true });
+            var res = collection.BulkWrite(ops, new() { IsOrdered = false });
+            return res.ProcessedRequests.Count;
+        }
+
         #region Member
 
         /// <summary>
@@ -381,6 +394,9 @@ namespace AccountingServer.DAL
 
         /// <inheritdoc />
         public bool Upsert(Voucher entity) => Upsert(m_Vouchers, entity, new VoucherSerializer());
+
+        /// <inheritdoc />
+        public long Upsert(IEnumerable<Voucher> entities) => Upsert(m_Vouchers, entities, new VoucherSerializer());
 
         #endregion
 

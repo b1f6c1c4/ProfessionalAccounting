@@ -86,6 +86,14 @@ namespace AccountingServer.DAL
         /// <returns>是否成功</returns>
         bool Upsert(Voucher entity);
 
+        /// <summary>
+        ///     添加或替换多个记账凭证
+        ///     <para>若无编号，则添加新编号</para>
+        /// </summary>
+        /// <param name="entities">新记账凭证</param>
+        /// <returns>成功个数</returns>
+        long Upsert(IEnumerable<Voucher> entities);
+
         #endregion
 
         #region Asset

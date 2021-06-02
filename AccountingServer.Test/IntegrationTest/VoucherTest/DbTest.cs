@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
@@ -48,8 +49,11 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         {
             var voucher1 = VoucherDataProvider.Create(dt, type);
 
-            m_Adapter.Upsert(voucher1);
+            Assert.True(m_Adapter.Upsert(voucher1));
             Assert.NotNull(voucher1.ID);
+
+            voucher1.Remark = "whatever";
+            Assert.True(m_Adapter.Upsert(voucher1));
 
             var voucher2 = m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).Single();
             Assert.Equal(voucher1, voucher2, new VoucherEqualityComparer());
@@ -59,6 +63,30 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
 
             Assert.True(m_Adapter.DeleteVoucher(voucher1.ID));
             Assert.False(m_Adapter.DeleteVoucher(voucher1.ID));
+
+            Assert.False(m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).Any());
+        }
+
+        [Fact]
+        public void VoucherBulkStoreTest()
+        {
+            var vouchers = new VoucherDataProvider().Select(pars
+                => VoucherDataProvider.Create((string)pars[0], (VoucherType)pars[1])).ToList();
+            var cnt = vouchers.Count;
+
+            Assert.Equal(cnt, m_Adapter.Upsert(vouchers));
+            foreach (var voucher in vouchers)
+                Assert.NotNull(voucher.ID);
+
+            vouchers.AddRange(new VoucherDataProvider().Select(pars
+                => VoucherDataProvider.Create((string)pars[0], (VoucherType)pars[1])));
+            Assert.Equal(cnt * 2, m_Adapter.Upsert(vouchers));
+            foreach (var voucher in vouchers)
+                Assert.NotNull(voucher.ID);
+
+            Assert.Equal(cnt * 2, m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).Count());
+
+            Assert.Equal(cnt * 2, m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance));
 
             Assert.False(m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).Any());
         }
@@ -75,8 +103,11 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                     dev.Amount = 0;
             }
 
-            m_Adapter.Upsert(asset1);
+            Assert.True(m_Adapter.Upsert(asset1));
             Assert.NotNull(asset1.ID);
+
+            asset1.Remark = "whatever";
+            Assert.True(m_Adapter.Upsert(asset1));
 
             var asset2 = m_Adapter.SelectAssets(DistributedQueryUnconstrained.Instance).Single();
             Assert.Equal(asset1, asset2, new AssetEqualityComparer());
@@ -86,6 +117,8 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
 
             Assert.True(m_Adapter.DeleteAsset(asset1.ID.Value));
             Assert.False(m_Adapter.DeleteAsset(asset1.ID.Value));
+
+            Assert.Equal(0, m_Adapter.DeleteAssets(DistributedQueryUnconstrained.Instance));
 
             Assert.False(m_Adapter.SelectAssets(DistributedQueryUnconstrained.Instance).Any());
         }
@@ -98,8 +131,11 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
             foreach (var item in amort1.Schedule)
                 item.Value = 0;
 
-            m_Adapter.Upsert(amort1);
+            Assert.True(m_Adapter.Upsert(amort1));
             Assert.NotNull(amort1.ID);
+
+            amort1.Remark = "whatever";
+            Assert.True(m_Adapter.Upsert(amort1));
 
             var amort2 = m_Adapter.SelectAmortizations(DistributedQueryUnconstrained.Instance).Single();
             Assert.Equal(amort1, amort2, new AmortEqualityComparer());
@@ -109,6 +145,8 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
 
             Assert.True(m_Adapter.DeleteAmortization(amort1.ID.Value));
             Assert.False(m_Adapter.DeleteAmortization(amort1.ID.Value));
+
+            Assert.Equal(0, m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance));
 
             Assert.False(m_Adapter.SelectAmortizations(DistributedQueryUnconstrained.Instance).Any());
         }
