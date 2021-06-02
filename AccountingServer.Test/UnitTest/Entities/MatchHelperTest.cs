@@ -149,6 +149,27 @@ namespace AccountingServer.Test.UnitTest.Entities
                 MatchHelper.IsMatch(new() { Fund = value }, new VoucherDetail { Fund = filter }));
 
         [Theory]
+        [InlineData(true, null, null)]
+        [InlineData(false, 500, TitleKind.Asset)]
+        [InlineData(true, 1500, TitleKind.Asset)]
+        [InlineData(false, 2000, TitleKind.Asset)]
+        [InlineData(false, 1500, TitleKind.Liability)]
+        [InlineData(true, 2500, TitleKind.Liability)]
+        [InlineData(false, 3000, TitleKind.Liability)]
+        [InlineData(false, 3500, TitleKind.Equity)]
+        [InlineData(true, 4500, TitleKind.Equity)]
+        [InlineData(false, 5000, TitleKind.Equity)]
+        [InlineData(false, 5800, TitleKind.Revenue)]
+        [InlineData(true, 6000, TitleKind.Revenue)]
+        [InlineData(false, 6400, TitleKind.Revenue)]
+        [InlineData(false, 6300, TitleKind.Expense)]
+        [InlineData(true, 6500, TitleKind.Expense)]
+        [InlineData(false, 7000, TitleKind.Expense)]
+        public void DetailMatchTestKind(bool expected, int? value, TitleKind? kind)
+            => Assert.Equal(expected,
+                MatchHelper.IsMatch(new() { Title = value }, new VoucherDetail(), kind: kind));
+
+        [Theory]
         [InlineData(true, null, 0)]
         [InlineData(true, 123.45, 0)]
         [InlineData(false, null, +1)]
@@ -159,7 +180,7 @@ namespace AccountingServer.Test.UnitTest.Entities
         [InlineData(true, +0.5 * VoucherDetail.Tolerance, -1)]
         public void DetailMatchTestDir(bool expected, double? value, int dir)
             => Assert.Equal(expected,
-                MatchHelper.IsMatch(new() { Fund = value }, new VoucherDetail(), dir));
+                MatchHelper.IsMatch(new() { Fund = value }, new VoucherDetail(), dir: dir));
 
         [Fact]
         public void DetailMatchTestContent()

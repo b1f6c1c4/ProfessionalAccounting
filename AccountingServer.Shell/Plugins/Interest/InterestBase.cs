@@ -156,13 +156,13 @@ namespace AccountingServer.Shell.Plugins.Interest
                     key.Subtract(lastSettlement.Value).Days,
                     grp.SingleOrDefault(
                         v =>
-                            v.Details.Any(d => d.IsMatch(interestPattern, Dir())))
+                            v.Details.Any(d => d.IsMatch(interestPattern, dir: Dir())))
                     ?? new() { Date = key, Details = new() });
                 lastSettlement = key;
 
                 // Settle Loan
                 capitalIntegral +=
-                    grp.SelectMany(v => v.Details.Where(d => d.IsMatch(capitalPattern, Dir())))
+                    grp.SelectMany(v => v.Details.Where(d => d.IsMatch(capitalPattern, dir: Dir())))
                         .Select(d => d.Fund!.Value)
                         .Sum();
 
@@ -172,12 +172,12 @@ namespace AccountingServer.Shell.Plugins.Interest
                     grp.Where(
                             v =>
                                 v.Details.Any(
-                                    d => d.IsMatch(capitalPattern, -Dir()) || d.IsMatch(interestPattern, -Dir())))
+                                    d => d.IsMatch(capitalPattern, dir: -Dir()) || d.IsMatch(interestPattern, dir: -Dir())))
                         .OrderBy(v => v.ID))
                 {
                     var value =
                         -voucher.Details.Where(
-                                d => d.IsMatch(capitalPattern, -Dir()) || d.IsMatch(interestPattern, -Dir()))
+                                d => d.IsMatch(capitalPattern, dir: -Dir()) || d.IsMatch(interestPattern, dir: -Dir()))
                             .Select(d => d.Fund!.Value)
                             .Sum();
                     if ((Dir() * (-value + interestIntegral)).IsNonNegative())
@@ -264,7 +264,7 @@ namespace AccountingServer.Shell.Plugins.Interest
             var intFlag = false;
             for (var i = 0; i < voucher.Details.Count; i++)
             {
-                if (voucher.Details[i].IsMatch(info.AsCapital(), -Dir()))
+                if (voucher.Details[i].IsMatch(info.AsCapital(), dir: -Dir()))
                 {
                     if (capFlag || capVol.IsZero())
                     {
@@ -283,7 +283,7 @@ namespace AccountingServer.Shell.Plugins.Interest
                     capFlag = true;
                 }
 
-                if (voucher.Details[i].IsMatch(info.AsInterest(), -Dir()))
+                if (voucher.Details[i].IsMatch(info.AsInterest(), dir: -Dir()))
                 {
                     if (intFlag || intVol.IsZero())
                     {

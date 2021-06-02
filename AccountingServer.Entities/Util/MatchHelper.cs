@@ -81,10 +81,22 @@ namespace AccountingServer.Entities.Util
         /// </summary>
         /// <param name="voucherDetail">细目</param>
         /// <param name="filter">细目过滤器</param>
+        /// <param name="kind">科目类型</param>
         /// <param name="dir">借贷方向</param>
         /// <returns>是否符合</returns>
-        public static bool IsMatch(this VoucherDetail voucherDetail, VoucherDetail filter, int dir = 0)
+        public static bool IsMatch(this VoucherDetail voucherDetail, VoucherDetail filter, TitleKind? kind = null,
+            int dir = 0)
         {
+            switch (kind)
+            {
+                case TitleKind.Asset when voucherDetail.Title is not (>= 1000 and < 2000):
+                case TitleKind.Liability when voucherDetail.Title is not (>= 2000 and < 3000):
+                case TitleKind.Equity when voucherDetail.Title is not (>= 4000 and < 5000):
+                case TitleKind.Revenue when voucherDetail.Title is not (>= 6000 and < 6400):
+                case TitleKind.Expense when voucherDetail.Title is not (>= 6400 and < 7000):
+                    return false;
+            }
+
             if (filter == null)
                 return true;
 
@@ -142,7 +154,7 @@ namespace AccountingServer.Entities.Util
         }
 
         public static bool IsMatch(this VoucherDetail voucherDetail, IQueryCompounded<IDetailQueryAtom> query)
-            => IsMatch(query, q => IsMatch(voucherDetail, q.Filter, q.Dir));
+            => IsMatch(query, q => IsMatch(voucherDetail, q.Filter, q.Kind, q.Dir));
 
         /// <summary>
         ///     判断记账凭证是否符合记账凭证检索式
