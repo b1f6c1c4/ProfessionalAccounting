@@ -17,14 +17,13 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using Xunit;
 
-namespace AccountingServer.Test.IntegrationTest.VoucherTest
+namespace AccountingServer.Test.IntegrationTest
 {
     [Collection("DbTestCollection")]
     public class DbTest : IDisposable
