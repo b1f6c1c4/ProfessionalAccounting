@@ -57,22 +57,6 @@ namespace AccountingServer.BLL.Util
             new ConfigManager<CurrencySymbols>("Symbol.xml");
 
         /// <summary>
-        ///     格式化用户
-        /// </summary>
-        /// <param name="value">用户</param>
-        /// <returns>格式化后的用户</returns>
-        public static string AsUser(this string value)
-        {
-            if (value == null)
-                return string.Empty;
-
-            if (Reg.IsMatch(value))
-                return value;
-
-            return value.Quotation('\'');
-        }
-
-        /// <summary>
         ///     解析用户过滤器
         /// </summary>
         /// <param name="value">格式化后的用户</param>
@@ -86,6 +70,22 @@ namespace AccountingServer.BLL.Util
             if (value.StartsWith("U'", StringComparison.Ordinal))
                 return value[1..].Dequotation();
             return value[1..];
+        }
+
+        /// <summary>
+        ///     格式化用户
+        /// </summary>
+        /// <param name="value">用户</param>
+        /// <returns>格式化后的用户</returns>
+        public static string AsUser(this string value)
+        {
+            if (value == null)
+                return string.Empty;
+
+            if (Reg.IsMatch(value))
+                return value;
+
+            return value.Quotation('\'');
         }
 
         /// <summary>
@@ -209,7 +209,7 @@ namespace AccountingServer.BLL.Util
 
                 return value.Nullable
                     ? $"[~{value.EndDate.AsDate()}]"
-                    : $"[={value.EndDate.AsDate()}]";
+                    : $"[~~{value.EndDate.AsDate()}]";
             }
 
             if (value.StartDate.HasValue)
