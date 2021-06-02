@@ -22,7 +22,7 @@ using AccountingServer.Shell.Util;
 using Xunit;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
-namespace AccountingServer.Test.IntegrationTest.VoucherTest
+namespace AccountingServer.Test.IntegrationTest
 {
     [Collection("SecurityTestCollection")]
     public class SecurityTest
