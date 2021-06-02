@@ -106,7 +106,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                 {
                     new object[] { true, "" },
                     new object[] { true, "^59278b516c2f021e80f51912^[null]Uncertain%rmk%" },
-                    new object[] { true, "{^59278b516c2f021e80f51912^}-{null}*{Devalue}" },
+                    new object[] { true, "{^59278b516c2f021e80f51912^}-{null}*{{Devalue}+{Amortization}}" },
                     new object[] { true, "-{%rrr%}+{20170101}" },
                     new object[] { false, "{^59278b516c2f021e80f51911^}+{G}*{%asdf%}" },
                     new object[] { true, "@JPY T100105'cont1'>" },
@@ -129,10 +129,14 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                     new object[] { true, "-" },
                     new object[] { false, "U- A" },
                     new object[] { false, "- A" },
-                    new object[] { true, "U@EUR" },
+                    new object[] { true, "U@EUR\"\"" },
                     new object[] { true, "U'b1&b2'" },
                     new object[] { true, "Ub1+Ub1&b2 A" },
                     new object[] { true, "U A" },
+                    new object[] { true, "@JPY Asset" },
+                    new object[] { true, "Liability cont3" },
+                    new object[] { true, "U @USD - U Asset - U Equity - U Revenue - U Expense" },
+                    new object[] { false, "%%" },
                 };
 
             public IEnumerator<object[]> GetEnumerator() => Data.GetEnumerator();
