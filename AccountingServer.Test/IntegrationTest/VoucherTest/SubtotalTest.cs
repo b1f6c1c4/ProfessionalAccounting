@@ -39,8 +39,8 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
 
             m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
 
-            m_Adapter.Upsert(
-                new Voucher
+            m_Adapter.Upsert(new Voucher[] {
+                new ()
                     {
                         Date = new(2016, 12, 31, 0, 0, 0, DateTimeKind.Utc),
                         Remark = "xrmk1",
@@ -67,10 +67,8 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                         Remark = "rmk2",
                                     },
                             },
-                    });
-
-            m_Adapter.Upsert(
-                new Voucher
+                    },
+                new ()
                     {
                         Date = new(2017, 02, 01, 0, 0, 0, DateTimeKind.Utc),
                         Remark = "xrmk2",
@@ -121,7 +119,8 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                         User = "b1&b2", Currency = "EUR", Title = 2333, Fund = 114514,
                                     },
                             },
-                    });
+                    }
+            });
 
             ClientUser.Set("b1");
         }
@@ -293,6 +292,77 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
             => Assert.Equal(
                 value,
                 m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query))
+                    .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
+
+        [Theory]
+        [InlineData("!!U")]
+        [InlineData("!!C")]
+        [InlineData("!!t")]
+        [InlineData("!!s")]
+        [InlineData("!!c")]
+        [InlineData("!!r")]
+        public void RunVTestErr(string query)
+            => Assert.Throws<InvalidOperationException>(() =>
+                {
+                    m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query));
+                });
+
+        [Theory]
+        [InlineData(2, "!!v")]
+        public void RunVTestValue(long? value, string query)
+            => Assert.Equal(
+                value,
+                m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query)) .SingleOrDefault()?.Fund);
+
+        [Theory]
+        [InlineData(null, null, "!!d")]
+        [InlineData("2016-01-01", null, "!!d")]
+        [InlineData("2016-12-31", 1, "!!d")]
+        [InlineData("2017-02-01", 1, "!!d")]
+        [InlineData(null, null, "!!vD[2017~2018]")]
+        [InlineData("2016-01-01", null, "!!vD[]")]
+        [InlineData("2016-12-31", 1, "!!vD")]
+        [InlineData("2017-02-01", 1, "!!vD[]")]
+        public void RunVTestDay(string dt, long? value, string query)
+            => Assert.Equal(
+                value,
+                m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query))
+                    .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
+
+        [Theory]
+        [InlineData(null, null, "!!w")]
+        [InlineData("2016-01-01", null, "!!w")]
+        [InlineData("2016-12-31", null, "!!w")]
+        [InlineData("2016-12-26", 1, "!!w")]
+        [InlineData("2017-02-01", null, "!!w")]
+        [InlineData("2017-01-30", 1, "!!w")]
+        public void RunVTestWeek(string dt, long? value, string query)
+            => Assert.Equal(
+                value,
+                m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query))
+                    .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
+
+        [Theory]
+        [InlineData(null, null, "!!m")]
+        [InlineData("2016-01-01", null, "!!m")]
+        [InlineData("2016-12-31", null, "!!m")]
+        [InlineData("2016-12-01", 1, "!!m")]
+        [InlineData("2017-02-01", 1, "!!m")]
+        public void RunVTestMonth(string dt, long? value, string query)
+            => Assert.Equal(
+                value,
+                m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query))
+                    .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
+
+        [Theory]
+        [InlineData("2016-12-31", null, "!!y")]
+        [InlineData("2016-01-01", 1, "!!y")]
+        [InlineData("2017-01-01", 1, "!!y")]
+        [InlineData("2017-01-01", 1, "!!vY")]
+        public void RunVTestYear(string dt, long? value, string query)
+            => Assert.Equal(
+                value,
+                m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query))
                     .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
     }
 }
