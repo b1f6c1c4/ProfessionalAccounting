@@ -27,7 +27,7 @@ namespace AccountingServer.BLL
 {
     public class DbSession : IExchange
     {
-        public DbSession() => Db = Facade.Create();
+        public DbSession(string uri = null, string db = null) => Db = Facade.Create(uri, db);
 
         /// <summary>
         ///     数据库访问

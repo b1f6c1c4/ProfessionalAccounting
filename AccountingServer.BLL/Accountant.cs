@@ -34,9 +34,9 @@ namespace AccountingServer.BLL
         private readonly AssetAccountant m_AssetAccountant;
         private readonly DbSession m_Db;
 
-        public Accountant()
+        public Accountant(string uri = null, string db = null)
         {
-            m_Db = new();
+            m_Db = new(uri, db);
             m_AssetAccountant = new(m_Db);
             m_AmortAccountant = new(m_Db);
         }

@@ -21,6 +21,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using AccountingServer.BLL;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -111,6 +112,43 @@ namespace AccountingServer.Test.IntegrationTest.DistributedTest
 
         protected override void ResetAssets() => m_Adapter.DeleteAssets(DistributedQueryUnconstrained.Instance);
         protected override void ResetAmorts() => m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance);
+
+        [Theory]
+        [ClassData(typeof(DataProvider))]
+        public override void RunTestA(bool expectedA, bool expectedB, string query)
+            => base.RunTestA(expectedA, expectedB, query);
+    }
+
+    [Collection("DbTestCollection")]
+    [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
+    public class BLLQueryTest : QueryTestBase, IDisposable
+    {
+        private readonly Accountant m_Accountant;
+
+        public BLLQueryTest()
+        {
+            m_Accountant = new(db: "accounting-test");
+
+            m_Accountant.DeleteAssets(DistributedQueryUnconstrained.Instance);
+            m_Accountant.DeleteAmortizations(DistributedQueryUnconstrained.Instance);
+        }
+
+        public void Dispose()
+        {
+            m_Accountant.DeleteAssets(DistributedQueryUnconstrained.Instance);
+            m_Accountant.DeleteAmortizations(DistributedQueryUnconstrained.Instance);
+        }
+
+        protected override void PrepareAsset(Asset asset) => m_Accountant.Upsert(asset);
+        protected override void PrepareAmort(Amortization amort) => m_Accountant.Upsert(amort);
+
+        protected override bool RunAssetQuery(IQueryCompounded<IDistributedQueryAtom> query)
+            => m_Accountant.SelectAssets(query).SingleOrDefault() != null;
+        protected override bool RunAmortQuery(IQueryCompounded<IDistributedQueryAtom> query)
+            => m_Accountant.SelectAmortizations(query).SingleOrDefault() != null;
+
+        protected override void ResetAssets() => m_Accountant.DeleteAssets(DistributedQueryUnconstrained.Instance);
+        protected override void ResetAmorts() => m_Accountant.DeleteAmortizations(DistributedQueryUnconstrained.Instance);
 
         [Theory]
         [ClassData(typeof(DataProvider))]
