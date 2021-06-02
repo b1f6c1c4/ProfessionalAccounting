@@ -156,6 +156,14 @@ namespace AccountingServer.BLL
             return Db.Upsert(entity);
         }
 
+        public long Upsert(IReadOnlyCollection<Voucher> entities)
+        {
+            foreach (var entity in entities)
+                Regularize(entity);
+
+            return Db.Upsert(entities);
+        }
+
         public static void Regularize(Voucher entity)
         {
             entity.Details ??= new();

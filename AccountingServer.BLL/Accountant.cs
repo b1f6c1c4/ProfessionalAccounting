@@ -67,6 +67,9 @@ namespace AccountingServer.BLL
         public bool Upsert(Voucher entity)
             => m_Db.Upsert(entity);
 
+        public long Upsert(IReadOnlyCollection<Voucher> entities)
+            => m_Db.Upsert(entities);
+
         #endregion
 
         #region Asset
