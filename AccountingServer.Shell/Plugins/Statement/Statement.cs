@@ -130,6 +130,7 @@ namespace AccountingServer.Shell.Plugins.Statement
             var remarked = 0;
             var converted = 0;
             var res = Accountant.SelectVouchers(filt.VoucherQuery).ToList();
+            var ops = new List<Voucher>();
             foreach (var b in parsed.Items)
             {
                 bool Trial(bool date)
@@ -155,7 +156,7 @@ namespace AccountingServer.Shell.Plugins.Statement
                         converted++;
 
                     o.Remark = marker;
-                    Accountant.Upsert(voucher);
+                    ops.Add(voucher);
                     return true;
                 }
 
@@ -164,6 +165,7 @@ namespace AccountingServer.Shell.Plugins.Statement
 
                 sb.AppendLine(b.Raw);
             }
+            Accountant.Upsert(ops);
 
             sb.AppendLine($"{marked} marked");
             sb.AppendLine($"{remarked} remarked");
@@ -178,6 +180,7 @@ namespace AccountingServer.Shell.Plugins.Statement
             var cnt = 0;
             var cntAll = 0;
             var res = Accountant.SelectVouchers(filt.VoucherQuery);
+            var ops = new List<Voucher>();
             foreach (var v in res)
             {
                 foreach (var d in v.Details)
@@ -193,9 +196,10 @@ namespace AccountingServer.Shell.Plugins.Statement
                     cnt++;
                 }
 
-                Accountant.Upsert(v);
+                ops.Add(v);
             }
 
+            Accountant.Upsert(ops);
             sb.AppendLine($"{cntAll} selected");
             sb.AppendLine($"{cnt} unmarked");
         }
