@@ -55,9 +55,9 @@ namespace AccountingServer.Shell
         /// </summary>
         private readonly ShellComposer m_Composer;
 
-        public Facade()
+        public Facade(string uri = null, string db = null)
         {
-            m_Accountant = new();
+            m_Accountant = new(uri, db);
             m_Composer =
                 new()
                     {
