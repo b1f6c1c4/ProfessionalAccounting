@@ -229,14 +229,14 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
                                     : new() { Currency = currency, Title = 6603, Fund = from },
                             },
                     };
-                Accountant.Upsert(voucher);
                 lst.Add(voucher);
             }
 
-            if (lst.Any())
-                return new DirtyText(serializer.PresentVouchers(lst));
+            if (!lst.Any())
+                return new PlainSucceed();
 
-            return new PlainSucceed();
+            Accountant.Upsert(lst);
+            return new DirtyText(serializer.PresentVouchers(lst));
         }
 
         private class Trans

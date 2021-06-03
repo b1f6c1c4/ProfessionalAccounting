@@ -47,9 +47,7 @@ namespace AccountingServer.Shell
                 {
                     "1" => BasicCheck(serializer),
                     "2" => AdvancedCheck(),
-                    "3" => m_Accountant.RunVoucherQuery("A").Any(voucher => !m_Accountant.Upsert(voucher))
-                        ? throw new ApplicationException("未知错误")
-                        : new DirtySucceed(),
+                    "3" => new NumberAffected(m_Accountant.Upsert(m_Accountant.RunVoucherQuery("U A").ToList())),
                     _ => throw new InvalidOperationException("表达式无效"),
                 };
 
