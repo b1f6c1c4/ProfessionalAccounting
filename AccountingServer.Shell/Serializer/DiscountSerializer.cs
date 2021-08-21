@@ -257,7 +257,7 @@ namespace AccountingServer.Shell.Serializer
             var resLst = new List<Item>();
 
             var reg = new Regex(
-                @"(?<num>[0-9]+(?:\.[0-9]+)?)(?:(?<equals>=[0-9]+(?:\.[0-9]+)?)|(?<plus>(?:\+[0-9]+(?:\.[0-9]+)?)+)|(?<minus>(?:-[0-9]+(?:\.[0-9]+)?)+))?");
+                @"(?<num>[0-9]+(?:\.[0-9]+)?)(?:(?<equals>=[0-9]+(?:\.[0-9]+)?)|(?<plus>(?:\+[0-9]+(?:\.[0-9]+)?)+)|(?<minus>(?:-[0-9]+(?:\.[0-9]+)?)+))?(?<times>\*[0-9]+(?:\.[0-9]+)?)?");
             while (true)
             {
                 var res = Parsing.Token(ref expr, false, reg.IsMatch);
@@ -281,6 +281,13 @@ namespace AccountingServer.Shell.Serializer
                     var sreg = new Regex(@"-[0-9]+(?:\.[0-9]+)?");
                     foreach (Match sm in sreg.Matches(m.Groups["minus"].Value))
                         fundd -= Convert.ToDouble(sm.Value);
+                }
+
+                if (m.Groups["times"].Success)
+                {
+                    var mult = Convert.ToDouble(m.Groups["times"].Value[1..]);
+                    fund0 *= mult;
+                    fundd *= mult;
                 }
 
                 resLst.AddRange(
