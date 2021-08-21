@@ -85,6 +85,11 @@ namespace AccountingServer.Shell
                 type |= ExprType.GroupedQueries | ExprType.DetailRQuery;
                 visitor = new RawSubtotal(true);
             }
+            else if (ParsingF.Token(ref expr, false, t => t == "fancy") != null)
+            {
+                type |= ExprType.FancyQuery;
+                visitor = null;
+            }
             else
             {
                 type |= ExprType.GroupedQueries | ExprType.VoucherQuery;
@@ -116,6 +121,7 @@ namespace AccountingServer.Shell
                     ExprType.VoucherQuery => TryVoucherQuery(expr, !type.HasFlag(ExprType.Unsafe)),
                     ExprType.DetailQuery => TryDetailQuery(expr, !type.HasFlag(ExprType.Unsafe)),
                     ExprType.DetailRQuery => TryDetailRQuery(expr, !type.HasFlag(ExprType.Unsafe)),
+                    ExprType.FancyQuery => TryFancyQuery(expr, !type.HasFlag(ExprType.Unsafe)),
                     _ => throw new InvalidOperationException("表达式无效"),
                 };
         }
@@ -240,6 +246,52 @@ namespace AccountingServer.Shell
         }
 
         /// <summary>
+        ///     按记账凭证检索式解析，但仅保留部分细目
+        /// </summary>
+        /// <param name="expr">表达式</param>
+        /// <param name="safe">仅限强检索式</param>
+        /// <returns>执行结果</returns>
+        private Func<IEntitiesSerializer, IQueryResult> TryFancyQuery(string expr, bool safe)
+        {
+            var res = ParsingF.DetailQuery(ref expr);
+            ParsingF.Eof(expr);
+            if (res.IsDangerous() && safe)
+                throw new SecurityException("检测到弱检索式");
+
+            return serializer => PresentFancyQuery(res, serializer);
+        }
+
+        /// <summary>
+        ///     执行记账凭证检索式，保留部分细目并呈现结果
+        /// </summary>
+        /// <param name="query">带记账凭证的细目检索式</param>
+        /// <param name="serializer">表示器</param>
+        /// <returns>执行结果</returns>
+        private IQueryResult PresentFancyQuery(IVoucherDetailQuery query, IEntitiesSerializer serializer)
+        {
+            var res = m_Accountant.SelectVouchers(query.VoucherQuery);
+            if (query.DetailEmitFilter != null)
+                return new PlainText(
+                    serializer.PresentVouchers(
+                        res.Select(v =>
+                            {
+                                v.Details.RemoveAll(d => !d.IsMatch(query.DetailEmitFilter.DetailFilter));
+                                return v;
+                            })));
+
+            if (query.VoucherQuery is not IVoucherQueryAtom dQuery)
+                throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query));
+
+            return new PlainText(
+                serializer.PresentVouchers(
+                    res.Select(v =>
+                        {
+                            v.Details.RemoveAll(d => !d.IsMatch(dQuery.DetailFilter));
+                            return v;
+                        })));
+        }
+
+        /// <summary>
         ///     执行记账凭证分类汇总检索式并呈现结果
         /// </summary>
         /// <param name="query">记账凭证分类汇总检索式</param>
@@ -274,10 +326,11 @@ namespace AccountingServer.Shell
             GroupedQueries = 0x00000011,
             GroupedQuery = 0x00000001,
             VoucherGroupedQuery = 0x00000010,
-            NonGroupedQueries = 0x00011100,
+            NonGroupedQueries = 0x00111100,
             DetailQuery = 0x00000100,
             DetailRQuery = 0x00001000,
             VoucherQuery = 0x00010000,
+            FancyQuery = 0x00100000,
             Unsafe = 0x10000000,
         }
     }
