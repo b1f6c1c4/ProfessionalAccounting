@@ -137,6 +137,18 @@ Ub2 T3998\s+10
   }
 }", res.ToString()!);
 
+            res = m_Facade.Execute("unsafe fancy U T3998", null);
+            Assert.False(res.Dirty);
+            Assert.False(res.AutoReturn);
+            Assert.Matches(@"@new Voucher {\^[0-9a-f]{24}\^
+[0-9]{8}
+// kyh
+T3998\s+-10
+// kyh
+Ub2 T3998\s+10
+}@
+", res.ToString()!);
+
             res = m_Facade.Execute("chk-1", null);
             Assert.False(res.Dirty);
             Assert.True(res.AutoReturn);
