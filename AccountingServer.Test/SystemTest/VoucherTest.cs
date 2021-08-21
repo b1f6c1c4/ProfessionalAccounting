@@ -27,7 +27,7 @@ using Xunit;
 
 namespace AccountingServer.Test.SystemTest
 {
-    [Collection("DbTestCollection")]
+    [CollectionDefinition("DbTestCollection", DisableParallelization = true)]
     public class VoucherTest
     {
         private readonly Facade m_Facade;
@@ -69,15 +69,8 @@ namespace AccountingServer.Test.SystemTest
             ClientUser.Set("b1");
 
             m_Facade = new(db: "accounting-test");
-        }
 
-        [Fact]
-        public void Test()
-        {
-            Assert.Equal("@new Voucher {\n\n}@\n", m_Facade.EmptyVoucher(null));
-
-            IQueryResult res;
-
+            var res = m_Facade.ExecuteVoucherUpsert("new Voucher { Ub2 T123401 whatever / aaa huh 10 }", null);
             Assert.Matches(@"@new Voucher {\^[0-9a-f]{24}\^
 [0-9]{8}
 // kyh
@@ -89,9 +82,20 @@ Ub2 T123401 'whatever'\s+-10
 // kyh
 Ub2 T3998\s+10
 }@
-", m_Facade.ExecuteVoucherUpsert("new Voucher { Ub2 T123401 whatever / aaa huh 10 }", null));
+", res);
+            m_ID = new Regex(@"\^[0-9a-f]{24}\^").Match(res).Value;
+        }
 
-            res = m_Facade.Execute("\"huh\"", null);
+        private readonly string m_ID;
+
+        [Fact]
+        public void EmptyTest()
+            => Assert.Equal("@new Voucher {\n\n}@\n", m_Facade.EmptyVoucher(null));
+
+        [Fact]
+        public void SimpleTest()
+        {
+            var res = m_Facade.Execute("\"huh\"", null);
             Assert.False(res.Dirty);
             Assert.False(res.AutoReturn);
             Assert.Matches(@"@new Voucher {\^[0-9a-f]{24}\^
@@ -106,12 +110,16 @@ Ub2 T123401 'whatever'\s+-10
 Ub2 T3998\s+10
 }@
 ", res.ToString()!);
+        }
 
-            var id = new Regex(@"\^[0-9a-f]{24}\^").Match(res.ToString()!).Value;
+        [Fact]
+        public void SafeSrawTest()
+            => Assert.ThrowsAny<Exception>(() => m_Facade.Execute("sraw Ub2", null));
 
-            Assert.ThrowsAny<Exception>(() => m_Facade.Execute("sraw Ub2", null));
-
-            res = m_Facade.Execute("unsafe sraw Ub2", null);
+        [Fact]
+        public void UnsafeSrawTest()
+        {
+            var res = m_Facade.Execute("unsafe sraw Ub2", null);
             Assert.False(res.Dirty);
             Assert.False(res.AutoReturn);
             Assert.Matches(@"[0-9]{8} // sth-obj
@@ -119,25 +127,35 @@ Ub2 T123401 'whatever'\s+-10
 [0-9]{8} // kyh
 Ub2 T3998\s+10
 ", res.ToString()!);
+        }
 
-            Assert.ThrowsAny<Exception>(() => m_Facade.Execute("invalid command", null));
+        [Fact]
+        public void InvalidTest()
+            => Assert.ThrowsAny<Exception>(() => m_Facade.Execute("invalid command", null));
 
-            res = m_Facade.Execute("json U > `t", null);
+        [Fact]
+        public void SubtotalTest()
+        {
+            var res = m_Facade.Execute("json U > `t", null);
             Assert.False(res.Dirty);
             Assert.False(res.AutoReturn);
-            Assert.Equal(@"{
+            Assert.Matches(@"{
   ""value"": 20.0,
   ""title"": {
-    ""3998"": {
+    ""(?:3998|5678)"": {
       ""value"": 10.0
     },
-    ""5678"": {
+    ""(?:5678|3998)"": {
       ""value"": 10.0
     }
   }
 }", res.ToString()!);
+        }
 
-            res = m_Facade.Execute("unsafe fancy U T3998", null);
+        [Fact]
+        public void FancyTest()
+        {
+            var res = m_Facade.Execute("unsafe fancy U T3998", null);
             Assert.False(res.Dirty);
             Assert.False(res.AutoReturn);
             Assert.Matches(@"@new Voucher {\^[0-9a-f]{24}\^
@@ -148,14 +166,21 @@ T3998\s+-10
 Ub2 T3998\s+10
 }@
 ", res.ToString()!);
+        }
 
-            res = m_Facade.Execute("chk-1", null);
+        [Fact]
+        public void ChkTest()
+        {
+            var res = m_Facade.Execute("chk-1", null);
             Assert.False(res.Dirty);
             Assert.True(res.AutoReturn);
             Assert.Equal("OK", res.ToString()!);
+        }
 
-            Assert.True(m_Facade.ExecuteVoucherRemoval($"new Voucher {{ {id} }}", null));
-            Assert.False(m_Facade.ExecuteVoucherRemoval($"new Voucher {{ {id} }}", null));
+        [Fact]
+        public void RemoveTest() {
+            Assert.True(m_Facade.ExecuteVoucherRemoval($"new Voucher {{ {m_ID} }}", null));
+            Assert.False(m_Facade.ExecuteVoucherRemoval($"new Voucher {{ {m_ID} }}", null));
         }
     }
 }
