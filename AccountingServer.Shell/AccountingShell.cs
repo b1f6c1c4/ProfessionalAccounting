@@ -322,16 +322,16 @@ namespace AccountingServer.Shell
         [Flags]
         private enum ExprType
         {
-            None = 0x00000000,
-            GroupedQueries = 0x00000011,
-            GroupedQuery = 0x00000001,
-            VoucherGroupedQuery = 0x00000010,
-            NonGroupedQueries = 0x00111100,
-            DetailQuery = 0x00000100,
-            DetailRQuery = 0x00001000,
-            VoucherQuery = 0x00010000,
-            FancyQuery = 0x00100000,
-            Unsafe = 0x10000000,
+            None = 0b00000000,
+            GroupedQueries = 0b00000011,
+            GroupedQuery = 0b00000001,
+            VoucherGroupedQuery = 0b00000010,
+            NonGroupedQueries = 0b00111100,
+            DetailQuery = 0b00000100,
+            DetailRQuery = 0b00001000,
+            VoucherQuery = 0b00010000,
+            FancyQuery = 0b00100000,
+            Unsafe = 0b10000000,
         }
     }
 }
