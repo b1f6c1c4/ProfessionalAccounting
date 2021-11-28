@@ -42,6 +42,7 @@ HttpResponse Server_OnHttpRequest(HttpRequest request)
     if (request.BaseUri.StartsWith("/api", StringComparison.Ordinal))
         request.BaseUri = request.BaseUri[4..];
 #endif
+
     string user;
     if (request.Header.ContainsKey("x-user"))
         user = request.Header["x-user"];
@@ -50,27 +51,34 @@ HttpResponse Server_OnHttpRequest(HttpRequest request)
     if (user == "anonymous")
         return new() { ResponseCode = 401 };
 
-    string spec = null;
-    if (request.Header.ContainsKey("x-serializer"))
-        spec = request.Header["x-serializer"];
-
-    if (request.Method == "GET")
-    {
-        if (request.BaseUri == "/emptyVoucher")
-            return GenerateHttpResponse(facade.EmptyVoucher(spec), "text/plain; charset=utf-8");
-
-        return new() { ResponseCode = 404 };
-    }
-
-    if (request.Method != "POST")
-        return new() { ResponseCode = 405 };
-
     if (!request.Header.ContainsKey("x-clientdatetime") ||
         !ClientDateTime.TryParse(request.Header["x-clientdatetime"], out var timestamp))
         return new() { ResponseCode = 400 };
 
     ClientUser.Set(user);
     ClientDateTime.Set(timestamp);
+
+    string spec = null;
+    if (request.Header.ContainsKey("x-serializer"))
+        spec = request.Header["x-serializer"];
+
+    if (request.Method == "GET")
+        switch (request.BaseUri)
+        {
+            case "/emptyVoucher":
+                return GenerateHttpResponse(facade.EmptyVoucher(spec), "text/plain; charset=utf-8");
+            case "/autocomplete":
+                {
+                    var response = GenerateHttpResponse("[]", "application/json; charset=utf-8");
+                    response.Header["Cache-Control"] = "public, max-age=30";
+                    return response;
+                }
+            default:
+                return new() { ResponseCode = 404 };
+        }
+
+    if (request.Method != "POST")
+        return new() { ResponseCode = 405 };
 
     switch (request.BaseUri)
     {
