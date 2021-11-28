@@ -83,9 +83,11 @@ namespace AccountingServer.Entities.Util
         /// <param name="filter">细目过滤器</param>
         /// <param name="kind">科目类型</param>
         /// <param name="dir">借贷方向</param>
+        /// <param name="contentPrefix">内容前缀</param>
+        /// <param name="remarkPrefix">备注前缀</param>
         /// <returns>是否符合</returns>
         public static bool IsMatch(this VoucherDetail voucherDetail, VoucherDetail filter, TitleKind? kind = null,
-            int dir = 0)
+            int dir = 0, string contentPrefix = null, string remarkPrefix = null)
         {
             switch (kind)
             {
@@ -130,6 +132,10 @@ namespace AccountingServer.Entities.Util
                 else if (filter.Content != voucherDetail.Content)
                     return false;
 
+            if (contentPrefix != null)
+                if (voucherDetail.Content?.StartsWith(contentPrefix, StringComparison.InvariantCultureIgnoreCase) != true)
+                    return false;
+
             if (filter.Fund != null)
                 if (!voucherDetail.Fund.HasValue ||
                     !(filter.Fund.Value - voucherDetail.Fund.Value).IsZero())
@@ -150,11 +156,15 @@ namespace AccountingServer.Entities.Util
                 else if (filter.Remark != voucherDetail.Remark)
                     return false;
 
+            if (remarkPrefix != null)
+                if (voucherDetail.Remark?.StartsWith(remarkPrefix, StringComparison.InvariantCultureIgnoreCase) != true)
+                    return false;
+
             return true;
         }
 
         public static bool IsMatch(this VoucherDetail voucherDetail, IQueryCompounded<IDetailQueryAtom> query)
-            => IsMatch(query, q => IsMatch(voucherDetail, q.Filter, q.Kind, q.Dir));
+            => IsMatch(query, q => IsMatch(voucherDetail, q.Filter, q.Kind, q.Dir, q.ContentPrefix, q.RemarkPrefix));
 
         /// <summary>
         ///     判断记账凭证是否符合记账凭证检索式

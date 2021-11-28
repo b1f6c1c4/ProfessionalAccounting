@@ -20,6 +20,7 @@ using System;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
+using Antlr4.Runtime.Tree;
 
 namespace AccountingServer.BLL.Parsing
 {
@@ -66,6 +67,27 @@ namespace AccountingServer.BLL.Parsing
                         var x => (TitleKind?)Enum.Parse(typeof(TitleKind), x.GetText()),
                     };
 
+            private string ContentText => token()?.GetPureText();
+
+            private string RemarkText => DoubleQuotedString()?.GetText().Dequotation();
+
+            private (bool, bool) DecideEtc()
+            {
+                switch (Etc().Length)
+                {
+                    case 0:
+                        return (false, false);
+                    case 2:
+                        return (true, true);
+                }
+                if (ContentText == null)
+                    return (false, true);
+                if (RemarkText == null)
+                    return (true, false);
+                return Etc(0).SourceInterval.StartsBeforeDisjoint(DoubleQuotedString().SourceInterval)
+                    ? (true, false) : (false, true);
+            }
+
             /// <inheritdoc />
             public VoucherDetail Filter
             {
@@ -78,9 +100,15 @@ namespace AccountingServer.BLL.Parsing
                             Currency = VoucherCurrency()?.GetText().ParseCurrency(),
                             Title = t?.Title,
                             SubTitle = t?.SubTitle,
-                            Content = Etc(0) == null ? token()?.GetPureText() : null,
-                            Remark = Etc(1) == null ? DoubleQuotedString()?.GetText().Dequotation() : null,
+                            Content = token()?.GetPureText(),
+                            Remark = DoubleQuotedString()?.GetText().Dequotation(),
                         };
+
+                    var (cEtc, rEtc) = DecideEtc();
+                    if (cEtc)
+                        filter.Content = null;
+                    if (rEtc)
+                        filter.Remark = null;
 
                     if (Floating() != null)
                     {
@@ -103,10 +131,10 @@ namespace AccountingServer.BLL.Parsing
                     };
 
             public string ContentPrefix
-                => Etc(0) != null ? token()?.GetPureText() : null;
+                => DecideEtc().Item1 ? ContentText : null;
 
             public string RemarkPrefix
-                => Etc(1) == null ? DoubleQuotedString()?.GetText().Dequotation() : null;
+                => DecideEtc().Item2 ? RemarkText : null;
 
             /// <inheritdoc />
             public bool IsDangerous() => Filter.IsDangerous();
