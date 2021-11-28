@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using AccountingServer.DAL.Serializer;
 using AccountingServer.Entities;
 using MongoDB.Bson;
@@ -149,6 +150,10 @@ namespace AccountingServer.DAL
                     query.Dir > 0
                         ? Builders<T>.Filter.Gt(p + "fund", -VoucherDetail.Tolerance)
                         : Builders<T>.Filter.Lt(p + "fund", +VoucherDetail.Tolerance));
+            if (query.ContentPrefix != null)
+                lst.Add(Builders<T>.Filter.Regex(p + "content", PrefixRegex(query.ContentPrefix)));
+            if (query.RemarkPrefix != null)
+                lst.Add(Builders<T>.Filter.Regex(p + "remark", PrefixRegex(query.RemarkPrefix)));
             if (query.Filter?.User != null)
                 lst.Add(Builders<T>.Filter.Eq(p + "user", query.Filter?.User));
             if (query.Filter?.Currency != null)
@@ -179,6 +184,14 @@ namespace AccountingServer.DAL
                     Builders<T>.Filter.Lte(p + "fund", query.Filter.Fund.Value + VoucherDetail.Tolerance));
             return And(lst);
         }
+
+        /// <summary>
+        ///     获取前缀正则表达式
+        /// </summary>
+        /// <param name="s">前缀字符串</param>
+        /// <returns>前缀正则表达式</returns>
+        private static BsonRegularExpression PrefixRegex(string s)
+            => new("^" + Regex.Escape(s), "i");
     }
 
     internal class MongoDbNativeDetail : MongoDbNativeDetail<VoucherDetail> { }
