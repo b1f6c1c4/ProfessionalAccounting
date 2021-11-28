@@ -54,15 +54,17 @@ namespace AccountingServer.DAL
         ///     按检索式执行记账凭证分类汇总
         /// </summary>
         /// <param name="query">检索式</param>
+        /// <param name="limit">返回结果数量上限</param>
         /// <returns>匹配检索式的记账凭证数量</returns>
-        IEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query);
+        IEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit = 0);
 
         /// <summary>
         ///     按检索式执行分类汇总
         /// </summary>
         /// <param name="query">检索式</param>
+        /// <param name="limit">返回结果数量上限</param>
         /// <returns>分类汇总结果</returns>
-        IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query);
+        IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit = 0);
 
         /// <summary>
         ///     按编号删除记账凭证

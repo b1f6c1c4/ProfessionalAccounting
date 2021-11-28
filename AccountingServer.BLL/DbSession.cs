@@ -129,16 +129,16 @@ namespace AccountingServer.BLL
         public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
             => Db.SelectVoucherDetails(query);
 
-        public ISubtotalResult SelectVouchersGrouped(IVoucherGroupedQuery query)
+        public ISubtotalResult SelectVouchersGrouped(IVoucherGroupedQuery query, int limit = 0)
         {
-            var res = Db.SelectVouchersGrouped(query);
+            var res = Db.SelectVouchersGrouped(query, limit);
             var conv = new SubtotalBuilder(query.Subtotal, this);
             return conv.Build(res);
         }
 
-        public ISubtotalResult SelectVoucherDetailsGrouped(IGroupedQuery query)
+        public ISubtotalResult SelectVoucherDetailsGrouped(IGroupedQuery query, int limit = 0)
         {
-            var res = Db.SelectVoucherDetailsGrouped(query);
+            var res = Db.SelectVoucherDetailsGrouped(query, limit);
             var conv = new SubtotalBuilder(query.Subtotal, this);
             return conv.Build(res);
         }

@@ -52,11 +52,11 @@ namespace AccountingServer.BLL
         public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
             => m_Db.SelectVoucherDetails(query);
 
-        public ISubtotalResult SelectVoucherDetailsGrouped(IGroupedQuery query)
-            => m_Db.SelectVoucherDetailsGrouped(query);
+        public ISubtotalResult SelectVoucherDetailsGrouped(IGroupedQuery query, int limit = 0)
+            => m_Db.SelectVoucherDetailsGrouped(query, limit);
 
-        public ISubtotalResult SelectVouchersGrouped(IVoucherGroupedQuery query)
-            => m_Db.SelectVouchersGrouped(query);
+        public ISubtotalResult SelectVouchersGrouped(IVoucherGroupedQuery query, int limit = 0)
+            => m_Db.SelectVouchersGrouped(query, limit);
 
         public bool DeleteVoucher(string id)
             => m_Db.DeleteVoucher(id);
