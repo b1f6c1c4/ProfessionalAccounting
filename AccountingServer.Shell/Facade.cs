@@ -50,6 +50,8 @@ namespace AccountingServer.Shell
         /// </summary>
         private readonly Accountant m_Accountant;
 
+        private readonly AccountingShell m_AccountingShell;
+
         /// <summary>
         ///     复合表达式解释器
         /// </summary>
@@ -58,6 +60,7 @@ namespace AccountingServer.Shell
         public Facade(string uri = null, string db = null)
         {
             m_Accountant = new(uri, db);
+            m_AccountingShell = new(m_Accountant);
             m_Composer =
                 new()
                     {
@@ -69,7 +72,7 @@ namespace AccountingServer.Shell
                         new AssetShell(m_Accountant),
                         new AmortizationShell(m_Accountant),
                         new PluginShell(m_Accountant),
-                        new AccountingShell(m_Accountant),
+                        m_AccountingShell,
                     };
         }
 
@@ -130,6 +133,15 @@ namespace AccountingServer.Shell
 
             return m_Composer.Execute(expr, GetSerializer(spec));
         }
+
+        /// <summary>
+        ///     执行基础表达式
+        /// </summary>
+        /// <param name="expr">表达式</param>
+        /// <param name="spec">表示器代号</param>
+        /// <returns>执行结果</returns>
+        public IQueryResult SafeExecute(string expr, string spec)
+            => m_AccountingShell.Execute(expr, GetSerializer(spec));
 
         #region Miscellaneous
 
