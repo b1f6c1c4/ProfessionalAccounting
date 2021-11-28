@@ -74,7 +74,10 @@ HttpResponse Server_OnHttpRequest(HttpRequest request)
                 return GenerateHttpResponse(facade.EmptyVoucher(spec), "text/plain; charset=utf-8");
             case "/autocomplete":
                 {
-                    var response = GenerateHttpResponse("[]", "application/json; charset=utf-8");
+                    var expr = request.Parameters["q"];
+                    var res = facade.SafeExecute(expr, spec);
+                    var response = GenerateHttpResponse(res.ToString(), "application/json; charset=utf-8");
+                    response.Header["X-Type"] = res.GetType().Name;
                     response.Header["Cache-Control"] = "public, max-age=30";
                     return response;
                 }
