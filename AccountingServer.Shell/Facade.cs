@@ -74,6 +74,12 @@ namespace AccountingServer.Shell
         }
 
         /// <summary>
+        ///     修改返回结果数量上限
+        /// </summary>
+        public void AdjustLimit(int limit)
+            => m_Accountant.AdjustLimit(limit);
+
+        /// <summary>
         ///     空记账凭证的表示
         /// </summary>
         // ReSharper disable once MemberCanBeMadeStatic.Global
