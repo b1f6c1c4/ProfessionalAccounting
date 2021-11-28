@@ -55,8 +55,13 @@ HttpResponse Server_OnHttpRequest(HttpRequest request)
         !ClientDateTime.TryParse(request.Header["x-clientdatetime"], out var timestamp))
         return new() { ResponseCode = 400 };
 
+    int limit = 0;
+    if (request.Header.ContainsKey("x-limit") && !int.TryParse(request.Header["x-limit"], out limit))
+        return new() { ResponseCode = 400 };
+
     ClientUser.Set(user);
     ClientDateTime.Set(timestamp);
+    facade.AdjustLimit(limit);
 
     string spec = null;
     if (request.Header.ContainsKey("x-serializer"))
