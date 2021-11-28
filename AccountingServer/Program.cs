@@ -72,12 +72,14 @@ HttpResponse Server_OnHttpRequest(HttpRequest request)
         {
             case "/emptyVoucher":
                 return GenerateHttpResponse(facade.EmptyVoucher(spec), "text/plain; charset=utf-8");
-            case "/autocomplete":
+            case "/safe":
                 {
                     var expr = request.Parameters["q"];
                     var res = facade.SafeExecute(expr, spec);
-                    var response = GenerateHttpResponse(res.ToString(), "application/json; charset=utf-8");
+                    var response = GenerateHttpResponse(res.ToString(), "text/plain; charset=utf-8");
                     response.Header["X-Type"] = res.GetType().Name;
+                    response.Header["X-AutoReturn"] = res.AutoReturn ? "true" : "false";
+                    response.Header["X-Dirty"] = res.Dirty ? "true" : "false";
                     response.Header["Cache-Control"] = "public, max-age=30";
                     return response;
                 }
