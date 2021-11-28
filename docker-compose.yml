@@ -14,7 +14,7 @@ services:
   server:
     image: b1f6c1c4/accounting-backend
     restart: always
-    readonly: true
+    read_only: true
     environment:
       MONGO_URI: mongodb://mongo/accounting
     volumes:
