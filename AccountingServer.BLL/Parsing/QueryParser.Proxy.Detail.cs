@@ -137,7 +137,9 @@ namespace AccountingServer.BLL.Parsing
                 => DecideEtc().Item2 ? RemarkText : null;
 
             /// <inheritdoc />
-            public bool IsDangerous() => Filter.IsDangerous();
+            public bool IsDangerous()
+                => Filter.IsDangerous()
+                    && string.IsNullOrEmpty(ContentPrefix) && string.IsNullOrEmpty(RemarkPrefix);
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
