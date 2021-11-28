@@ -78,8 +78,8 @@ namespace AccountingServer.BLL.Parsing
                             Currency = VoucherCurrency()?.GetText().ParseCurrency(),
                             Title = t?.Title,
                             SubTitle = t?.SubTitle,
-                            Content = token()?.GetPureText(),
-                            Remark = DoubleQuotedString()?.GetText().Dequotation(),
+                            Content = Etc(0) == null ? token()?.GetPureText() : null,
+                            Remark = Etc(1) == null ? DoubleQuotedString()?.GetText().Dequotation() : null,
                         };
 
                     if (Floating() != null)
@@ -101,6 +101,12 @@ namespace AccountingServer.BLL.Parsing
                         "<" => -1,
                         _ => throw new MemberAccessException("表达式错误"),
                     };
+
+            public string ContentPrefix
+                => Etc(0) != null ? token()?.GetPureText() : null;
+
+            public string RemarkPrefix
+                => Etc(1) == null ? DoubleQuotedString()?.GetText().Dequotation() : null;
 
             /// <inheritdoc />
             public bool IsDangerous() => Filter.IsDangerous();

@@ -171,6 +171,16 @@ namespace AccountingServer.Entities
         ///     借贷方向
         /// </summary>
         int Dir { get; }
+
+        /// <summary>
+        ///     内容前缀
+        /// </summary>
+        string ContentPrefix { get; }
+
+        /// <summary>
+        ///     备注前缀
+        /// </summary>
+        string RemarkPrefix { get; }
     }
 
     /// <summary>
