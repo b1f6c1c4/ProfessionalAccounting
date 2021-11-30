@@ -36,4 +36,6 @@ export const {
     dateDec,
 } = editSlice.actions;
 
+console.log(dateInc());
+
 export default editSlice.reducer;
