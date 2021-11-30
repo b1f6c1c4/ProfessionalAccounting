@@ -1,0 +1,27 @@
+{
+  "name": "professional-accounting",
+  "version": "0.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "serve": "webpack serve --mode=development",
+    "build": "webpack --mode=production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/b1f6c1c4/ProfessionalAccounting.git"
+  },
+  "author": [
+    "b1f6c1c4 <b1f6c1c4@gmail.com>",
+    "IoriOikawa <paperneko.moe@gmail.com>"
+  ],
+  "license": "AGPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/b1f6c1c4/ProfessionalAccounting/issues"
+  },
+  "homepage": "https://github.com/b1f6c1c4/ProfessionalAccounting#readme",
+  "devDependencies": {
+    "webpack": "^5.64.4",
+    "webpack-cli": "^4.9.1"
+  }
+}
