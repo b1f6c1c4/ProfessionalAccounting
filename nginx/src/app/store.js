@@ -1,5 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
+import editReducer from '../features/edit/editSlice.js';
 
 export const store = configureStore({
-  reducer: {},
+    reducer: {
+        edit: editReducer,
+    },
 });
