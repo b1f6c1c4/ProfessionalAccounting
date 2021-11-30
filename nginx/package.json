@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.6.2",
+    "dayjs": "^1.10.7",
     "p5": "^1.4.0"
   }
 }
