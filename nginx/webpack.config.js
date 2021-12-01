@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
@@ -12,5 +13,6 @@ module.exports = {
       title: '专业记账系统+',
       template: 'index-gui.html',
     }),
+    new webpack.EnvironmentPlugin(['API_URL']),
   ],
 };

@@ -54,6 +54,4 @@ export const {
     submitVoucherFailed,
 } = editSlice.actions;
 
-console.log(dateInc());
-
 export default editSlice.reducer;
