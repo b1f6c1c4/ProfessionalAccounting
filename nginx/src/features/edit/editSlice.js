@@ -12,8 +12,9 @@ const initialState = {
         adjustments: [],
         payments: [],
         checksum: 0,
-        commited: false,
+        committed: false,
     },
+    error: null,
 };
 
 export const editSlice = createSlice({
@@ -28,12 +29,29 @@ export const editSlice = createSlice({
             const d = dayjs(state.editor.date, 'YYYYMMDD');
             state.editor.date = d.subtract(1, 'day').format('YYYYMMDD');
         },
+        submitVoucherRequested: (state) => {
+            state.loading = true;
+            state.error = null;
+            state.editor.committed = false;
+        },
+        submitVoucherSucceeded: (state, { payload }) => {
+            state.loading = false;
+            state.liveViewText = payload;
+            state.editor.committed = true;
+        },
+        submitVoucherFailed: (state, { payload }) => {
+            state.loading = false;
+            state.error = payload;
+        },
     },
 });
 
 export const {
     dateInc,
     dateDec,
+    submitVoucherRequested,
+    submitVoucherSucceeded,
+    submitVoucherFailed,
 } = editSlice.actions;
 
 console.log(dateInc());
