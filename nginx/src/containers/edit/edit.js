@@ -1,9 +1,28 @@
 import dayjs from 'dayjs';
 import Button from '../../components/button.js';
-import { dateInc, dateDec } from './editSlice.js';
+import Selector from '../../components/selector.js';
+import {
+    dateInc,
+    dateDec,
+    addPayee,
+    removePayee,
+    addPayer,
+    removePayer,
+} from './editSlice.js';
 
 export default function Edit(p, store) {
+    this.payerSelector = new Selector(p, store,
+        (state) => Object.keys(state.edit.editor.payers), addPayer, removePayer, (t) => [
+        'U!U',
+        `U @@ T122100 + U @@ T224100 + U @@ T630103 + U @@ T671109 !c`,
+    ], () => store.getState().edit.payees);
+    this.payeeSelector = new Selector(p, store,
+        (state) => Object.keys(state.edit.editor.payees), addPayee, removePayee, (t) => [
+        'U!U',
+        `U @@ T122100 + U @@ T224100 + U @@ T630103 + U @@ T671109 !c`,
+    ], () => store.getState().edit.payers);
     this.draw = function() {
+        const state = store.getState().edit;
         const gap = 5;
 
         let editorWidth, editorHeight;
@@ -40,14 +59,14 @@ export default function Edit(p, store) {
         p.pop();
 
         let editorRows = 5
-            + store.getState().edit.editor.details.length
-            + store.getState().edit.editor.payments.length;
+            + state.editor.details.length
+            + state.editor.payments.length;
         if (editorRows < 8)
             editorRows = 8;
         const editorRowHeight = editorHeight / editorRows;
         let row = 0;
         p.push();
-        { // editor line 1: date, user
+        { // editor line 1: date, payer, payee
             p.translate(0, row * editorRowHeight);
             p.push();
             p.stroke(170);
@@ -56,7 +75,7 @@ export default function Edit(p, store) {
 
             p.textSize(editorRowHeight * 0.5);
             let baseLine = editorRowHeight * 0.62;
-            let date = store.getState().edit.editor.date;
+            let date = state.editor.date;
             switch (dayjs(date, 'YYYYMMDD').day()) {
                 case 0: date += '[S]'; break;
                 case 1: date += '[M]'; break;
@@ -69,19 +88,45 @@ export default function Edit(p, store) {
             p.textAlign(p.LEFT);
             p.text(date, gap, baseLine);
             const dateWidth = p.textWidth(date);
-            const user = store.getState().edit.editor.user;
-            p.textAlign(p.RIGHT);
-            p.text(user, editorWidth - gap, baseLine);
 
-            this.dateDec = new Button(dateDec, 0, row * editorRowHeight, dateWidth / 2, editorRowHeight);
-            this.dateInc = new Button(dateInc, dateWidth / 2, row * editorRowHeight, dateWidth, editorRowHeight);
+            let arrowWidth = 25;
+            p.textSize(editorRowHeight * 0.3);
+            baseLine = editorRowHeight * 0.58;
+            const payers = state.editor.payers;
+            let payerList = Object.keys(payers).join('&');
+            if (!payerList)
+                payerList = 'anonymous';
+            const payerWidth = p.textWidth(payerList);
+            const payees = state.editor.payees;
+            let payeeList = Object.keys(payees).join('&');
+            if (!payeeList)
+                payeeList = 'anonymous';
+            const payeeWidth = p.textWidth(payeeList);
+            p.textAlign(p.RIGHT);
+            p.text(payerList, editorWidth - gap - payeeWidth - 2 * gap - arrowWidth, baseLine);
+            p.push();
+            { // arrow
+                p.translate(editorWidth - gap - payeeWidth - gap - arrowWidth, editorRowHeight / 2);
+                p.strokeWeight(4);
+                p.stroke(0);
+                p.line(0, 0, arrowWidth, 0);
+                p.line(arrowWidth, 0, arrowWidth * 0.7, +arrowWidth * 0.3);
+                p.line(arrowWidth, 0, arrowWidth * 0.7, -arrowWidth * 0.3);
+            }
+            p.pop();
+            p.text(payeeList, editorWidth - gap, baseLine);
+
+            this.btnDateDec = new Button(0, row * editorRowHeight, dateWidth / 2, editorRowHeight);
+            this.btnDateInc = new Button(dateWidth / 2, row * editorRowHeight, dateWidth, editorRowHeight);
+            this.btnPayers = new Button(editorWidth - gap - payeeWidth - 2 * gap - arrowWidth - payerWidth, row * editorRowHeight, payerWidth, editorRowHeight);
+            this.btnPayees = new Button(editorWidth - gap - payeeWidth, row * editorRowHeight, payeeWidth, editorRowHeight);
             row++;
         }
         p.pop();
 
         p.push();
         { // liveView
-            let liveViewText = store.getState().edit.liveViewText;
+            let liveViewText = state.liveViewText;
             if (!liveViewText)
                 liveViewText = '(no live view available)';
             p.textAlign(p.LEFT);
@@ -92,9 +137,18 @@ export default function Edit(p, store) {
         p.pop();
 
         p.pop();
+
+        this.payerSelector.draw();
+        this.payeeSelector.draw();
     };
-    this.mouseClicked = function () {
-        this.dateDec.check(p, store);
-        this.dateInc.check(p, store);
+    this.mouseClicked = function() {
+        if (!this.payerSelector.mouseClicked()) return;
+        if (!this.payeeSelector.mouseClicked()) return;
+        this.btnDateDec.dispatch(p, store, dateDec());
+        this.btnDateInc.dispatch(p, store, dateInc());
+        if (this.btnPayers.check(p))
+            this.payerSelector.activate();
+        if (this.btnPayees.check(p))
+            this.payeeSelector.activate();
     }
 }

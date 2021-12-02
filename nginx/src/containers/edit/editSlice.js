@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSelector, createSlice } from '@reduxjs/toolkit';
 import dayjs from 'dayjs';
 
 const initialState = {
@@ -6,12 +6,12 @@ const initialState = {
     liveViewText: '',
     editor: {
         date: dayjs().format('YYYYMMDD'),
-        user: 'anonymous',
-        activity: '',
+        payees: {},
+        payers: {},
         details: [],
-        adjustments: [],
-        payments: [],
+        adjustments: { t: 0, d: 0 },
         checksum: 0,
+        payments: [],
         committed: false,
     },
     error: null,
@@ -28,6 +28,18 @@ export const editSlice = createSlice({
         dateDec: (state) => {
             const d = dayjs(state.editor.date, 'YYYYMMDD');
             state.editor.date = d.subtract(1, 'day').format('YYYYMMDD');
+        },
+        addPayee: (state, { payload }) => {
+            state.editor.payees[payload] = 1 + (payload.match(/&/g) || [] ).length;
+        },
+        removePayee: (state, { payload }) => {
+            delete state.editor.payees[payload];
+        },
+        addPayer: (state, { payload }) => {
+            state.editor.payers[payload] = 1 + (payload.match(/&/g) || [] ).length;
+        },
+        removePayer: (state, { payload }) => {
+            delete state.editor.payers[payload];
         },
         submitVoucherRequested: (state) => {
             state.loading = true;
@@ -49,6 +61,10 @@ export const editSlice = createSlice({
 export const {
     dateInc,
     dateDec,
+    addPayee,
+    removePayee,
+    addPayer,
+    removePayer,
     submitVoucherRequested,
     submitVoucherSucceeded,
     submitVoucherFailed,
