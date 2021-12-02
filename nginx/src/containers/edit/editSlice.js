@@ -6,7 +6,7 @@ const initialState = {
     liveViewText: '',
     editor: {
         date: dayjs().format('YYYYMMDD'),
-        person: 'anonymous',
+        user: 'anonymous',
         activity: '',
         details: [],
         adjustments: [],

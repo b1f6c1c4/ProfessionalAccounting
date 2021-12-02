@@ -4,4 +4,6 @@ import App from './app/app.js';
 
 new p5((p) => {
     new App(p, store);
+    p.noLoop();
+    store.subscribe(p.draw);
 }, document.getElementById('app'));
