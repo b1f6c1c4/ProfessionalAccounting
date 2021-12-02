@@ -1,13 +1,22 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 const plugins = [
     new HtmlWebpackPlugin({
       template: 'index-gui.html',
     }),
-    new webpack.EnvironmentPlugin(['API_URL']),
+    new webpack.EnvironmentPlugin({
+        API_URL: '/api',
+    }),
+    new CopyPlugin({
+        patterns: [
+            { from: 'node_modules/p5/lib/p5.min.js', to: '.' },
+            { from: 'node_modules/dayjs/dayjs.min.js', to: '.' },
+        ],
+    }),
 ];
 
 if (process.env.ANALYZE) {
