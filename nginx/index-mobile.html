@@ -35,80 +35,13 @@
     <meta name="theme-color" content="#ffffff">
     <title>专业记账系统</title>
 
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
-
-    <style>
-      #wrapper {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        z-index: 200;
-        background-color: white;
-        display: flex;
-        flex-direction: row;
-        border-bottom: gray 1.5px solid;
-      }
-      #user {
-        font-size: 15px;
-        line-height: 17px;
-        padding: 0 3px;
-        background-color: #ddd;
-        font-family: monospace;
-      }
-      #cmdLine {
-        flex-grow: 1;
-        font-size: 18px;
-        line-height: 20px;
-        border: none;
-      }
-      #tools {
-        position: fixed;
-        top: calc(20px + 1.5px);
-        left: 0;
-        width: 100%;
-        z-index: 100;
-        background-color: white;
-        display: flex;
-        justify-content: center;
-        border-bottom: gray 1.5px solid;
-      }
-      #tools button {
-        margin: 5px 2.5px;
-        border: none;
-        height: 28px;
-        line-height: 28px;
-        padding: 0 16px;
-        font-size: 14px;
-        background-color: lightgray;
-      }
-      #editor {
-        display: block;
-        position: absolute;
-        top: calc(20px + 1.5px * 2 + 38px);
-        font-size: 14px;
-        line-height: 16px;
-        width: calc(100% - 14px);
-        min-height: calc(100% - 20px - 1.5px * 2 - 38px);
-        border-left: #ebebeb 14px solid;
-        border-right: none;
-        border-top: none;
-        border-bottom: none;
-      }
-      input:focus, textarea:focus {
-        outline-style: solid;
-        outline-width: 2px;
-      }
-      #cmdLine, #editor {
-        margin: 0;
-        padding: 0;
-        font-family: monospace;
-      }
-    </style>
+    <link rel="stylesheet" href="/modern-normalize.css">
+    <link rel="stylesheet" href="/index.css">
 
   </head>
-  <body>
+  <body class="mobile">
 
+    <a id="swap" href="/">G</a>
     <div id="wrapper">
       <div id="user"></div>
       <script>
@@ -124,13 +57,13 @@
     </div>
     <textarea id="editor"></textarea>
 
-    <script src="notice.js"></script>
+    <script src="/js/notice.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/autosize.js/4.0.2/autosize.js" integrity="sha256-/cqRc6tEehZivJ5tlpUjFjiy1PoDrCVChM5lmg2WNUo=" crossorigin="anonymous"></script>
     <script>
       autosize(document.getElementById('editor'));
     </script>
-    <script src="backend.js"></script>
-    <script src="frontend-mobile.js"></script>
+    <script src="/js/backend.js"></script>
+    <script src="/js/frontend-mobile.js"></script>
 
   </body>
 </html>
