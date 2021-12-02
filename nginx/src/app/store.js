@@ -1,8 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
 import createSagaMiddleware from 'redux-saga';
 
-import editReducer from '../features/edit/editSlice.js';
-import editSaga from '../features/edit/editSagas.js';
+import editReducer from '../containers/edit/editSlice.js';
+import editSaga from '../containers/edit/editSagas.js';
 
 const sagaMiddleware = createSagaMiddleware();
 

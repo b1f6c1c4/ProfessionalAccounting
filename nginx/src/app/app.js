@@ -1,4 +1,4 @@
-import Edit from '../features/edit/edit.js';
+import Edit from '../containers/edit/edit.js';
 
 export default function App(p, store) {
     let inst;
