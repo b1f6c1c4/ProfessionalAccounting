@@ -11,11 +11,21 @@ export default function App(p, store) {
             // TODO: dynamically decide which container to use
             inst = new Edit(p, store);
         }
+        // clear everything
+        p.background(200);
         inst.draw();
     };
     p.windowResized = function() {
         p.resizeCanvas(p.windowWidth, p.windowHeight);
         if (inst.windowResized)
             inst.windowResized();
+    };
+    p.mouseClicked = function(event) {
+        if (inst.mouseClicked)
+            inst.mouseClicked(event);
+    };
+    p.touchEnded = function(event) {
+        if (inst.mouseClicked)
+            inst.mouseClicked(event);
     };
 }
