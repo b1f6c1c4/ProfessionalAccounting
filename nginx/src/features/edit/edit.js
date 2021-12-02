@@ -1,8 +1,5 @@
 export default function Edit(p, store) {
-    p.setup = function() {
-        p.createCanvas(800, 600);
-    };
-    p.draw = function() {
+    this.draw = function() {
         const date = store.getState().edit.editor.date;
         p.background(0);
         p.fill(255);

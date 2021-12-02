@@ -1,7 +1,7 @@
 import p5 from 'p5';
 import { store } from './app/store.js';
-import Edit from './features/edit/edit.js';
+import App from './app/app.js';
 
 new p5((p) => {
-    new Edit(p, store);
+    new App(p, store);
 }, document.getElementById('app'));
