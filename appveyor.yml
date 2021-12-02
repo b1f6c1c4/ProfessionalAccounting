@@ -37,11 +37,11 @@ services:
 install:
   - choco install --no-progress sed archiver nodejs
   - arc archive nginx/archive.tar.xz .
+  - cd nginx && npm ci
   - nuget restore AccountingServer.sln
   - openssl rsa -in ./certs/key.pem -out ./certs/key.pem -passin env:PRIVATE_KEY_PASSWORD
 
 build_script:
-  - cd nginx && npm ci
   - cd nginx && npm run build
   - msbuild /p:Configuration=Gen     /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer.QueryGeneration/AccountingServer.QueryGeneration.csproj
   - ps: ./DeployParser.ps1

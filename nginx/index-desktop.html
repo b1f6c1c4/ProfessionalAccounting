@@ -35,47 +35,13 @@
     <meta name="theme-color" content="#ffffff">
     <title>专业记账系统</title>
 
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
-
-    <style>
-      body {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-      }
-      #wrapper {
-        display: flex;
-        flex-direction: row;
-        border-bottom: gray 1.5px solid;
-      }
-      #user {
-        font-size: 11px;
-        line-height: 13px;
-        padding: 0 3px;
-        background-color: #ddd;
-        font-family: monospace;
-      }
-      #cmdLine {
-        flex-grow: 1;
-        font-size: 14px;
-        line-height: 16px;
-      }
-      #editor {
-        flex-grow: 1;
-        font-size: 14px;
-        line-height: 16px;
-      }
-      .ace_gutter-cell {
-        padding-left: 0;
-      }
-    </style>
+    <link rel="stylesheet" href="/modern-normalize.css">
+    <link rel="stylesheet" href="/index.css">
 
   </head>
-  <body>
+  <body class="desktop">
 
+    <a id="swap" href="/gui.html">G</a>
     <div id="wrapper">
       <div id="user"></div>
       <script>
@@ -85,13 +51,13 @@
     </div>
     <div id="editor"></div>
 
-    <script src="notice.js"></script>
+    <script src="/js/notice.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/ace.js"></script>
-    <script src="backend.js"></script>
-    <script src="highlight.js"></script>
-    <script src="fold.js"></script>
-    <script src="mode.js"></script>
-    <script src="frontend.js"></script>
+    <script src="/js/backend.js"></script>
+    <script src="/js/highlight.js"></script>
+    <script src="/js/fold.js"></script>
+    <script src="/js/mode.js"></script>
+    <script src="/js/frontend.js"></script>
 
   </body>
 </html>

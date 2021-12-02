@@ -6,15 +6,20 @@ const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 const plugins = [
     new HtmlWebpackPlugin({
-      template: 'index-gui.html',
+        filename: 'gui.html',
+        template: 'gui.html',
     }),
     new webpack.EnvironmentPlugin({
         API_URL: '/api',
     }),
     new CopyPlugin({
         patterns: [
+            { from: 'index-desktop.html', to: '.' },
+            { from: 'index-mobile.html', to: '.' },
+            { from: 'src/index.css', to: '.' },
             { from: 'node_modules/p5/lib/p5.min.js', to: '.' },
             { from: 'node_modules/dayjs/dayjs.min.js', to: '.' },
+            { from: 'node_modules/modern-normalize/modern-normalize.css', to: '.' },
         ],
     }),
 ];
@@ -41,6 +46,7 @@ module.exports = {
     devServer: {
         static: [
             'art/',
+            'js/',
             'node_modules/p5/lib/',
             'node_modules/dayjs/',
         ],
