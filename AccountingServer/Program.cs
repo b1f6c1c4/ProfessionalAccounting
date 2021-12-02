@@ -71,7 +71,12 @@ HttpResponse Server_OnHttpRequest(HttpRequest request)
         switch (request.BaseUri)
         {
             case "/emptyVoucher":
-                return GenerateHttpResponse(facade.EmptyVoucher(spec), "text/plain; charset=utf-8");
+                {
+                    var response = GenerateHttpResponse(facade.EmptyVoucher(spec), "text/plain; charset=utf-8");
+                    response.Header["Cache-Control"] = "public, max-age=30";
+                    response.Header["Vary"] = "X-Serializer";
+                    return response;
+                }
             case "/safe":
                 {
                     var expr = request.Parameters["q"];
@@ -81,6 +86,7 @@ HttpResponse Server_OnHttpRequest(HttpRequest request)
                     response.Header["X-AutoReturn"] = res.AutoReturn ? "true" : "false";
                     response.Header["X-Dirty"] = res.Dirty ? "true" : "false";
                     response.Header["Cache-Control"] = "public, max-age=30";
+                    response.Header["Vary"] = "X-User, X-Serializer, X-ClientDateTime";
                     return response;
                 }
             default:

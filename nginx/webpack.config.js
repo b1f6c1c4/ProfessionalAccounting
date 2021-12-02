@@ -15,4 +15,7 @@ module.exports = {
     }),
     new webpack.EnvironmentPlugin(['API_URL']),
   ],
+  devServer: {
+    static: 'art',
+  }
 };
