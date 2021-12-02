@@ -1,5 +1,5 @@
 import * as Api from '../app/api.js';
-import _ from 'lodash';
+import { without, uniq } from 'lodash-es';
 
 export default class Selector {
     constructor(p, store, selector, adder, remover, query, aux) {
@@ -51,7 +51,7 @@ export default class Selector {
                 const { data } = await Api.safeApi('rps ' + q);
                 tmp.push(...data.split('\n').filter((s) => s).map((s) => s.split('\t')[0]));
             }
-            this.autocomplete = _.uniq(tmp);
+            this.autocomplete = uniq(tmp);
             this.error = null;
         } catch (e) {
             console.error(e);
@@ -69,7 +69,7 @@ export default class Selector {
             this.doFetch();
             this.candidates = null;
         } else {
-            this.candidates = _.without(this.autocomplete, ...this.selected);
+            this.candidates = without(this.autocomplete, ...this.selected);
         }
 
         const p = this.p;

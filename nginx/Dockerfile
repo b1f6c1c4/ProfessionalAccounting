@@ -12,4 +12,5 @@ FROM nginx
 
 COPY default.conf /etc/nginx/conf.d/default.conf
 COPY art /var/www/art/
+COPY --from=builder /code/node_modules/p5/lib/p5.min.js /code/node_modules/dayjs/dayjs.min.js /var/www/
 COPY --from=builder /code/dist /var/www/
