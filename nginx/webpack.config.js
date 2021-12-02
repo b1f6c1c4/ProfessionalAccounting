@@ -45,8 +45,9 @@ module.exports = {
     plugins,
     devServer: {
         static: [
+            '.',
             'art/',
-            'js/',
+            'src/',
             'node_modules/p5/lib/',
             'node_modules/dayjs/',
         ],
