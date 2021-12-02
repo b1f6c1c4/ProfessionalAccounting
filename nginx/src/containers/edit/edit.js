@@ -10,17 +10,25 @@ import {
     removePayer,
 } from './editSlice.js';
 
+const querier = (t) => {
+    const res = [];
+    if (!t) {
+        res.push('U!U');
+        res.push('U @@ T122100 + U @@ T224100 + U @@ T630103 + U @@ T671109 -9~ !c');
+    } else {
+        const rt = t.replace(/'/g, '\'\'');
+        res.push(`(U @@ T122100 + U @@ T224100 + U @@ T630103 + U @@ T671109) * (U '${rt}'.*) !c`);
+    }
+    return res;
+};
+
 export default function Edit(p, store) {
     this.payerSelector = new Selector(p, store,
-        (state) => Object.keys(state.edit.editor.payers), addPayer, removePayer, (t) => [
-        'U!U',
-        `U @@ T122100 + U @@ T224100 + U @@ T630103 + U @@ T671109 !c`,
-    ], () => store.getState().edit.payees);
+        (state) => Object.keys(state.edit.editor.payers), addPayer, removePayer,
+        querier, () => store.getState().edit.payees);
     this.payeeSelector = new Selector(p, store,
-        (state) => Object.keys(state.edit.editor.payees), addPayee, removePayee, (t) => [
-        'U!U',
-        `U @@ T122100 + U @@ T224100 + U @@ T630103 + U @@ T671109 !c`,
-    ], () => store.getState().edit.payers);
+        (state) => Object.keys(state.edit.editor.payees), addPayee, removePayee,
+        querier, () => store.getState().edit.payers);
     this.draw = function() {
         const state = store.getState().edit;
         const gap = 5;

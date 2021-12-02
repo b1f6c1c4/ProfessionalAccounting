@@ -10,6 +10,7 @@ const instance = axios.create({
 const createHeaders = (user) => ({
     'X-ClientDateTime': dayjs().format(),
     'X-User': user,
+    'X-Limit': 20,
 });
 
 export async function safeApi(expr, user) {
