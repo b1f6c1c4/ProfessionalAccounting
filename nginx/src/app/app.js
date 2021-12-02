@@ -20,10 +20,6 @@ export default function App(p, store) {
         if (inst.windowResized)
             inst.windowResized();
     };
-    p.mouseClicked = function(event) {
-        if (inst.mouseClicked)
-            inst.mouseClicked(event);
-    };
     p.touchEnded = function(event) {
         if (inst.mouseClicked)
             inst.mouseClicked(event);
