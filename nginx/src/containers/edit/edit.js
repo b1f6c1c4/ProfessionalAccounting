@@ -9,10 +9,17 @@ import {
     removePayee,
     addPayer,
     removePayer,
+    updateTitle,
+    updateSubtitle,
+    updateContent,
     updateFund,
+    removeDetail,
+    newDetail,
 } from './editSlice.js';
 
-const querier = (t) => {
+const titleQuerier = (t) => ['U @@ Expense -9~ !Ut'];
+
+const personQuerier = (t) => {
     const res = [];
     if (!t) {
         res.push('U!U');
@@ -26,19 +33,69 @@ const querier = (t) => {
 
 export default function Edit(p, store) {
     this.activeDetailId = null;
-    this.payerSelector = new Selector(p, store,
-        (state) => Object.keys(state.edit.editor.payers), addPayer, removePayer,
-        querier, () => store.getState().edit.payees);
-    this.payeeSelector = new Selector(p, store,
-        (state) => Object.keys(state.edit.editor.payees), addPayee, removePayee,
-        querier, () => store.getState().edit.payers);
-    this.textbox = new Textbox(p, store,
+    this.payerSelector = new Selector(p, store, {
+        selector: (state) => Object.keys(state.edit.editor.payers),
+        adder: addPayer,
+        remover: removePayer,
+        query: personQuerier,
+        aux: () => store.getState().edit.payees,
+    });
+    this.payeeSelector = new Selector(p, store, {
+        selector: (state) => Object.keys(state.edit.editor.payees),
+        adder: addPayee,
+        remover: removePayee,
+        query: personQuerier,
+        aux: () => store.getState().edit.payers,
+    });
+    this.titleSelector = new Selector(p, store, {
+        selector: (state) => {
+            const { title } = state.edit.editor.details[this.activeDetailId];
+            if (!title) return [];
+            return [title];
+        },
+        adder: (t) => updateTitle({ id: this.activeDetailId, title: t }),
+        remover: (t) => updateTitle({ id: this.activeDetailId, title: 0 }),
+        query: (t) => [`U @@ Expense -9~ !t`],
+        aux: null,
+    });
+    this.subtitleSelector = new Selector(p, store, {
+        selector: (state) => {
+            const { subtitle } = state.edit.editor.details[this.activeDetailId];
+            if (!subtitle) return [];
+            return [subtitle];
+        },
+        adder: (t) => updateSubtitle({ id: this.activeDetailId, subtitle: t }),
+        remover: (t) => updateSubtitle({ id: this.activeDetailId, subtitle: 0 }),
+        query: (t) => {
+            const { title } = store.getState().edit.editor.details[this.activeDetailId];
+            return [`U @@ T${title} -9~ !s`];
+        },
+        aux: null,
+    });
+    this.contentSelector = new Selector(p, store, {
+        selector: (state) => {
+            const { content } = state.edit.editor.details[this.activeDetailId];
+            if (!content) return [];
+            return [content];
+        },
+        adder: (t) => updateContent({ id: this.activeDetailId, content: t }),
+        remover: (t) => updateContent({ id: this.activeDetailId, content: 0 }),
+        query: (t) => {
+            const { title, subtitle } = store.getState().edit.editor.details[this.activeDetailId];
+            const s = `U @@ T${title}${(''+subtitle).padStart(2, '0')}`;
+            if (t) return [`${s} '${t.replace(/'/g, '\'\'')}'.* -9~ !c`];
+            return [`${s} -9~ !c`];
+        },
+        aux: null,
+    });
+    this.textboxFund = new Textbox(p, store,
         (state) => state.edit.editor.details[this.activeDetailId].fund,
         (v) => {
             const id = this.activeDetailId;
             this.activeDetailId = null;
             return updateFund({ id, fund: v });
         });
+
     this.draw = function() {
         const state = store.getState().edit;
         const gap = 5;
@@ -112,12 +169,12 @@ export default function Edit(p, store) {
             p.textSize(editorRowHeight * 0.3);
             baseLine = editorRowHeight * 0.58;
             const payers = state.editor.payers;
-            let payerList = Object.keys(payers).join('&');
+            let payerList = Object.keys(payers).join('+');
             if (!payerList)
                 payerList = 'anonymous';
             const payerWidth = p.textWidth(payerList);
             const payees = state.editor.payees;
-            let payeeList = Object.keys(payees).join('&');
+            let payeeList = Object.keys(payees).join('+');
             if (!payeeList)
                 payeeList = 'anonymous';
             const payeeWidth = p.textWidth(payeeList);
@@ -136,7 +193,7 @@ export default function Edit(p, store) {
             p.text(payeeList, editorWidth - gap, baseLine);
 
             this.btnDateDec = new Button(0, row * editorRowHeight, dateWidth / 2, editorRowHeight);
-            this.btnDateInc = new Button(dateWidth / 2, row * editorRowHeight, dateWidth, editorRowHeight);
+            this.btnDateInc = new Button(dateWidth / 2, row * editorRowHeight, dateWidth / 2, editorRowHeight);
             this.btnPayers = new Button(editorWidth - gap - payeeWidth - 2 * gap - arrowWidth - payerWidth, row * editorRowHeight, payerWidth, editorRowHeight);
             this.btnPayees = new Button(editorWidth - gap - payeeWidth, row * editorRowHeight, payeeWidth, editorRowHeight);
             row++;
@@ -145,8 +202,9 @@ export default function Edit(p, store) {
 
         p.push();
         this.btnDetails = [];
-        { // editor line 2+=n: details
+        { // editor line 2: details
             for (const d of state.editor.details) {
+                p.push();
                 p.translate(0, row * editorRowHeight);
                 p.push();
                 p.stroke(170);
@@ -158,48 +216,77 @@ export default function Edit(p, store) {
                 p.push();
                 p.fill(90);
                 p.rect(btnOffset, btnOffset, btnSize, btnSize);
-                p.rect(2 * btnOffset + btnSize, btnOffset, btnSize, btnSize);
                 p.textSize(editorRowHeight * 0.3);
                 let baseLine = editorRowHeight * 0.58;
                 p.textAlign(p.CENTER);
-                p.fill(160);
-                p.text('e', btnOffset + btnSize * 0.5, baseLine);
-                p.text('x', 2 * btnOffset + btnSize * 1.5, baseLine);
+                p.fill(255, 230, 230);
+                p.text('x', btnOffset + btnSize * 0.5, baseLine);
                 p.pop();
 
                 p.textSize(editorRowHeight * 0.5);
                 baseLine = editorRowHeight * 0.68;
                 const title = d.title ? 'T' + d.title : 'T????';
                 const titleWidth = p.textWidth(title);
-                p.text(title, 2 * btnSize + 3 * btnOffset, baseLine);
+                p.text(title, btnSize + 2 * btnOffset, baseLine);
 
                 const subtitle = (''+d.subtitle).padStart(2, '0');
                 const subtitleWidth = p.textWidth(subtitle);
-                p.text(subtitle, 2 * btnSize + 3 * btnOffset + gap + titleWidth, baseLine);
+                p.text(subtitle, btnSize + 2 * btnOffset + gap + titleWidth, baseLine);
 
                 let content = d.content;
                 if (!d.content)
                     content = '\'\'';
                 let contentWidth = p.textWidth(content);
-                if (2 * btnSize + 3 * btnOffset + 4 * gap + titleWidth + subtitleWidth + contentWidth > editorWidth * 0.5) {
+                if (btnSize + 2 * btnOffset + 4 * gap + titleWidth + subtitleWidth + contentWidth > editorWidth * 0.5) {
                     content = `${content.substr(0, 2)}...`;
                     contentWidth = p.textWidth(content);
                 }
-                p.text(content, 2 * btnSize + 3 * btnOffset + 4 * gap + titleWidth + subtitleWidth, baseLine);
+                p.text(content, btnSize + 2 * btnOffset + 4 * gap + titleWidth + subtitleWidth, baseLine);
+                const sepX = btnSize + 2 * btnOffset + 10 * gap + titleWidth + subtitleWidth + contentWidth;
 
                 p.push();
                 p.strokeWeight(5);
                 p.stroke(175);
-                p.line(2 * btnSize + 3 * btnOffset + 10 * gap + titleWidth + subtitleWidth + contentWidth, gap,
-                        2 * btnSize + 3 * btnOffset + 10 * gap + titleWidth + subtitleWidth + contentWidth, editorRowHeight - gap);
+                p.line(sepX, gap, sepX, editorRowHeight - gap);
                 p.pop();
 
                 const fund = d.fund;
                 p.textAlign(p.RIGHT);
                 p.text(fund, editorWidth - gap, baseLine);
 
+                this.btnDetails.push({
+                    btnRemove: new Button(btnOffset, row * editorRowHeight + btnOffset, btnSize, btnSize),
+                    btnTitle: new Button(btnSize + 2 * btnOffset, row * editorRowHeight, titleWidth, editorRowHeight),
+                    btnSubtitle: new Button(btnSize + 2 * btnOffset + gap + titleWidth, row * editorRowHeight, subtitleWidth, editorRowHeight),
+                    btnContent: new Button(btnSize + 2 * btnOffset + 2 * gap + titleWidth + gap + subtitleWidth, row * editorRowHeight, contentWidth, editorRowHeight),
+                    btnFund: new Button(sepX, row * editorRowHeight, editorWidth - gap - sepX, editorRowHeight),
+                });
+                p.pop();
                 row++;
             }
+        }
+        p.pop();
+
+        p.push();
+        { // editor line 3: append, t, d
+            p.translate(0, row * editorRowHeight);
+            p.push();
+            p.stroke(170);
+            p.line(0, editorRowHeight, editorWidth, editorRowHeight);
+            p.pop();
+
+            const btnSize = editorRowHeight * 0.5;
+            const btnOffset = editorRowHeight * 0.25;
+            p.push();
+            p.fill(90);
+            p.rect(btnOffset, btnOffset, btnSize, btnSize);
+            p.textSize(editorRowHeight * 0.3);
+            let baseLine = editorRowHeight * 0.58;
+            p.textAlign(p.CENTER);
+            p.fill(230, 255, 230);
+            p.text('+', btnOffset + btnSize * 0.5, baseLine);
+            p.pop();
+            this.btnAppend = new Button(btnOffset, row * editorRowHeight + btnOffset, btnSize, btnSize);
         }
         p.pop();
 
@@ -219,21 +306,43 @@ export default function Edit(p, store) {
 
         this.payerSelector.draw();
         this.payeeSelector.draw();
-        this.textbox.draw();
+        this.titleSelector.draw();
+        this.subtitleSelector.draw();
+        this.contentSelector.draw();
+        this.textboxFund.draw();
     };
+
     this.mouseClicked = function() {
         if (!this.payerSelector.mouseClicked()) return;
         if (!this.payeeSelector.mouseClicked()) return;
-        if (!this.textbox.mouseClicked()) return;
+        if (!this.titleSelector.mouseClicked()) return;
+        if (!this.subtitleSelector.mouseClicked()) return;
+        if (!this.contentSelector.mouseClicked()) return;
+        if (!this.textboxFund.mouseClicked()) return;
         this.btnDateDec.dispatch(p, store, dateDec());
         this.btnDateInc.dispatch(p, store, dateInc());
         if (this.btnPayers.check(p))
             this.payerSelector.activate();
         if (this.btnPayees.check(p))
             this.payeeSelector.activate();
-        if (this.activeDetailId == null) { // TODO
-            this.activeDetailId = 0;
-            this.textbox.activate();
+        for (let i = 0; i < this.btnDetails.length; i++) {
+            const btns = this.btnDetails[i];
+            if (btns.btnRemove.check(p)) {
+                store.dispatch(removeDetail(i));
+            } else if (btns.btnTitle.check(p)) {
+                this.activeDetailId = i;
+                this.titleSelector.activate();
+            } else if (btns.btnSubtitle.check(p)) {
+                this.activeDetailId = i;
+                this.subtitleSelector.activate();
+            } else if (btns.btnContent.check(p)) {
+                this.activeDetailId = i;
+                this.contentSelector.activate();
+            } else if (btns.btnFund.check(p)) {
+                this.activeDetailId = i;
+                this.textboxFund.activate();
+            }
         }
+        this.btnAppend.dispatch(p, store, newDetail());
     }
 }

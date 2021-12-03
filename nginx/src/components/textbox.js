@@ -15,6 +15,7 @@ export default class Textbox {
         this.input.position(this.p.width * 0.15, this.p.height * 0.45);
         this.input.size(this.p.width * 0.7, this.p.height * 0.1);
         this.input.elt.focus();
+        this.input.elt.select();
         this.p.redraw();
         this.debounce = +new Date();
     }
