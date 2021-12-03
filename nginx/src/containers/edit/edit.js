@@ -42,6 +42,11 @@ export default function Edit(p, store) {
             return store.getState().edit.editor.payment;
         return store.getState().edit.editor.details[this.activeDetailId];
     };
+    this.activeUser = function() {
+        if (this.activeDetailId === -1)
+            return store.getState().edit.editor.payer;
+        return 'U';
+    };
     this.payerSelector = new Selector(p, store, {
         selector: (state) => {
             const { payer } = state.edit.editor;
@@ -52,6 +57,7 @@ export default function Edit(p, store) {
         remover: () => updatePayer(''),
         query: personQuerier,
         aux: () => Object.keys(store.getState().edit.editor.payees),
+        single: true,
     });
     this.payeeSelector = new Selector(p, store, {
         selector: (state) => Object.keys(state.edit.editor.payees),
@@ -72,8 +78,13 @@ export default function Edit(p, store) {
         },
         adder: (t) => updateTitle({ id: this.activeDetailId, title: t }),
         remover: (t) => updateTitle({ id: this.activeDetailId, title: '' }),
-        query: (t) => [`U @@ Expense -9~ !t`],
-        aux: null,
+        query: (t) => {
+            if (this.activeDetailId !== -1) {
+                return [`U @@ Expense -9~ !t`];
+            }
+            return [`${this.activeUser()} @@ * (U T1001 + U T1002 + U T1012 + U T2001 + U T2201 + T2241)`];
+        },
+        single: true,
     });
     this.subtitleSelector = new Selector(p, store, {
         selector: (state) => {
@@ -85,10 +96,14 @@ export default function Edit(p, store) {
         remover: (t) => updateSubtitle({ id: this.activeDetailId, subtitle: '' }),
         query: (t) => {
             const { title } = this.activeDetail();
-            return [`U @@ T${title.split(':')[0]} -9~ !ts`];
+            return [`${this.activeUser()} @@ T${title.split(':')[0]} -9~ !ts`];
         },
-        aux: null,
-        trim: (s) => s.split('-')[1],
+        trim: (s) => {
+            const sp = s.split('-')[1];
+            if (sp && sp.startsWith(':')) return `00${sp}`;
+            return sp;
+        },
+        single: true,
     });
     this.contentSelector = new Selector(p, store, {
         selector: (state) => {
@@ -100,11 +115,11 @@ export default function Edit(p, store) {
         remover: (t) => updateContent({ id: this.activeDetailId, content: 0 }),
         query: (t) => {
             const { title, subtitle } = this.activeDetail();
-            const s = `U @@ T${title.split(':')[0]}${subtitle.split(':')[0]}`;
+            const s = `${this.activeUser()} @@ T${title.split(':')[0]}${subtitle.split(':')[0]}`;
             if (t) return [`${s} '${t.replace(/'/g, '\'\'')}'.* -9~ !c`];
             return [`${s} -9~ !c`];
         },
-        aux: null,
+        single: true,
     });
     this.textboxFund = new Textbox(p, store,
         (state) => this.activeDetail().fund,
@@ -395,59 +410,37 @@ export default function Edit(p, store) {
 
         p.push();
         if (state.liveViewText) { // submit
-            if (state.committed) {
-                p.stroke(255, 0, 0);
-                p.fill(250, 110, 110);
-            } else {
-                p.stroke(0, 255, 0);
-                p.fill(110, 250, 110);
-            }
-            if (p.width > p.height) {
-                p.circle(liveViewX + 20 + 30, liveViewHeight - 20 - 30, 60);
-                this.btnSubmitRevert = new Button(liveViewX + 20, liveViewHeight - 20 - 60, 60, 60);
-            } else {
-                p.circle(liveViewWidth - 20 - 30, liveViewY + 20 + 30, 60);
-                this.btnSubmitRevert = new Button(liveViewWidth - 20 - 60, liveViewY + 20, 60, 60);
-            }
             p.noStroke();
+            if (state.committed) {
+                p.fill(100, 0, 0);
+            } else {
+                p.fill(0, 100, 0);
+            }
+            p.circle(liveViewX + 20 + 30, liveViewY + liveViewHeight - 20 - 30, 60);
+            this.btnSubmitRevert = new Button(liveViewX + 20, liveViewY + liveViewHeight - 20 - 60, 60, 60);
             let txt;
             if (state.committed) {
                 txt = 'R';
-                p.fill(0);
             } else {
                 txt = 'S';
-                p.fill(255);
             }
+            p.fill(255);
             p.textSize(30);
             p.textAlign(p.CENTER);
-            if (p.width > p.height) {
-                p.text(txt, liveViewX + 20 + 30, liveViewHeight - 20 - 30 + 10);
-            } else {
-                p.text(txt, liveViewWidth - 20 - 30, liveViewY + 20 + 30 + 10);
-            }
+            p.text(txt, liveViewX + 20 + 30, liveViewY + liveViewHeight - 20 - 30 + 10);
         }
         p.pop();
 
         p.push();
         if (state.committed) { // reset
-            p.stroke(0, 0, 255);
-            p.fill(110, 110, 250);
-            if (p.width > p.height) {
-                p.circle(liveViewX + 20 + 30 + 20 + 60, liveViewHeight - 20 - 30, 60);
-                this.btnReset = new Button(liveViewX + 20 + 20 + 60, liveViewHeight - 20 - 60, 60, 60);
-            } else {
-                p.circle(liveViewWidth - 20 - 30, liveViewY + 20 + 30 + 20 + 60, 60);
-                this.btnReset = new Button(liveViewWidth - 20 - 60, liveViewY + 20 + 20 + 60, 60, 60);
-            }
             p.noStroke();
+            p.fill(0, 0, 100);
+            p.circle(liveViewX + 20 + 30 + 20 + 60, liveViewY + liveViewHeight - 20 - 30, 60);
+            this.btnReset = new Button(liveViewX + 20 + 20 + 60, liveViewY + liveViewHeight - 20 - 60, 60, 60);
             p.fill(255);
             p.textSize(30);
             p.textAlign(p.CENTER);
-            if (p.width > p.height) {
-                p.text('+', liveViewX + 20 + 30 + 20 + 60, liveViewHeight - 20 - 30 + 10);
-            } else {
-                p.text('+', liveViewWidth - 20 - 30, liveViewY + 20 + 30 + 20 + 60 + 10);
-            }
+            p.text('+', liveViewX + 20 + 30 + 20 + 60, liveViewY + liveViewHeight - 20 - 30 + 10);
         }
         p.pop();
 

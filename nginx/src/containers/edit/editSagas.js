@@ -14,7 +14,9 @@ const theUser = window.localStorage.getItem('user') || 'anonymous';
 function* submitVoucher(action) {
     try {
         const code = yield select((state) => state.edit.liveViewText);
-        const { data } = yield call(Api.voucherUpsertApi, code, theUser);
+        let { data } = yield call(Api.voucherUpsertApi, code, theUser);
+        data = data.trim();
+        data = data.substr(1, data.length - 2);
         yield put(submitVoucherSucceeded(data));
     } catch (e) {
         yield put(submitVoucherFailed(e.message));
