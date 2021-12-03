@@ -9,10 +9,10 @@ const initialState = {
         date: dayjs().format('YYYYMMDD'),
         payees: {}, // { [person]: share }
         payer: '',
-        details: [], // [{ title: int, subtitle: int, content: string, fund: string }]
+        details: [], // [{ title: string, subtitle: string, content: string, fund: string }]
         adjustments: { t: 0, d: 0 },
         checksum: { payment: 0, discount: 0 },
-        payment: null, // { title: int, subtitle: int, content: string, fund: string }
+        payment: null, // { title: string, subtitle: string, content: string, fund: string }
     },
     error: null,
 };
@@ -88,7 +88,7 @@ const computeExpr = (editor) => {
             for (const p of Object.keys(editor.payees))
                 for (let i = 0; i < editor.payees[p]; i++)
                     if (isUser(p)) {
-                        ps.push(`${p} T${(''+d.title).padStart(4, '0')}${(''+d.subtitle).padStart(2, '0')} '${d.content.replace(/'/g, '\'\'')}'`);
+                        ps.push(`${p} T${d.title.split(':')[0]}${d.subtitle.split(':')[0]} '${d.content.replace(/'/g, '\'\'')}'`);
                     } else {
                         const [pu, pp] = p.split('-', 2);
                         ps.push(`${pu} T1221 '${pp.replace(/'/g, '\'\'')}'`);
@@ -100,7 +100,7 @@ const computeExpr = (editor) => {
         expr += `\n`;
         if (isUser(editor.payer)) {
             const d = editor.payment;
-            expr += `${editor.payer} T${(''+d.title).padStart(4, '0')}${(''+d.subtitle).padStart(2, '0')} '${d.content.replace(/'/g, '\'\'')}' /\n`;
+            expr += `${editor.payer} T${d.title.split(':')[0]}${d.subtitle.split(':')[0]} '${d.content.replace(/'/g, '\'\'')}' /\n`;
         } else {
             const m = editor.payer.match(/^(?<user>U[^-]+|'(?:[^']|'')+')-(?<peer>.*)$/);
             expr += `${m.groups.user} T2241 '${m.groups.peer.replace(/'/g, '\'\'')} /\n`;
@@ -117,7 +117,7 @@ const prepare = (state, payload) => {
     if (payload.id === -1) {
         if (!isUser(state.editor.payer)) return;
         if (!state.editor.payment) {
-            state.editor.payment = { title: 0, subtitle: 0, content: 0 };
+            state.editor.payment = { title: '', subtitle: '', content: '' };
         }
         return state.editor.payment;
     } else {
@@ -154,7 +154,7 @@ export const editSlice = createSlice({
                     state.editor.payees[payload] = computeShare(payload);
                 if (isUser(payload)) {
                     if (!state.editor.payment) {
-                        state.editor.payment = { title: 0, subtitle: 0, content: '' };
+                        state.editor.payment = { title: '', subtitle: '', content: '' };
                     }
                 } else {
                     state.editor.payment = null;
@@ -188,8 +188,8 @@ export const editSlice = createSlice({
         },
         newDetail: (state) => {
             state.editor.details.push({
-                title: 0,
-                subtitle: 0,
+                title: '',
+                subtitle: '',
                 content: '',
                 fund: '0',
             });
