@@ -41,6 +41,9 @@ namespace AccountingServer.BLL
             m_AmortAccountant = new(m_Db);
         }
 
+        public void AdjustLimit(int limit)
+            => m_Db.Limit = limit;
+
         #region Voucher
 
         public Voucher SelectVoucher(string id)

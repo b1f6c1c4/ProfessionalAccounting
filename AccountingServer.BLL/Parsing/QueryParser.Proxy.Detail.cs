@@ -20,6 +20,7 @@ using System;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
+using Antlr4.Runtime.Tree;
 
 namespace AccountingServer.BLL.Parsing
 {
@@ -66,6 +67,27 @@ namespace AccountingServer.BLL.Parsing
                         var x => (TitleKind?)Enum.Parse(typeof(TitleKind), x.GetText()),
                     };
 
+            private string ContentText => token()?.GetPureText();
+
+            private string RemarkText => DoubleQuotedString()?.GetText().Dequotation();
+
+            private (bool, bool) DecideEtc()
+            {
+                switch (Etc().Length)
+                {
+                    case 0:
+                        return (false, false);
+                    case 2:
+                        return (true, true);
+                }
+                if (ContentText == null)
+                    return (false, true);
+                if (RemarkText == null)
+                    return (true, false);
+                return Etc(0).SourceInterval.StartsBeforeDisjoint(DoubleQuotedString().SourceInterval)
+                    ? (true, false) : (false, true);
+            }
+
             /// <inheritdoc />
             public VoucherDetail Filter
             {
@@ -81,6 +103,12 @@ namespace AccountingServer.BLL.Parsing
                             Content = token()?.GetPureText(),
                             Remark = DoubleQuotedString()?.GetText().Dequotation(),
                         };
+
+                    var (cEtc, rEtc) = DecideEtc();
+                    if (cEtc)
+                        filter.Content = null;
+                    if (rEtc)
+                        filter.Remark = null;
 
                     if (Floating() != null)
                     {
@@ -102,8 +130,16 @@ namespace AccountingServer.BLL.Parsing
                         _ => throw new MemberAccessException("表达式错误"),
                     };
 
+            public string ContentPrefix
+                => DecideEtc().Item1 ? ContentText : null;
+
+            public string RemarkPrefix
+                => DecideEtc().Item2 ? RemarkText : null;
+
             /// <inheritdoc />
-            public bool IsDangerous() => Filter.IsDangerous();
+            public bool IsDangerous()
+                => Filter.IsDangerous()
+                    && string.IsNullOrEmpty(ContentPrefix) && string.IsNullOrEmpty(RemarkPrefix);
 
             /// <inheritdoc />
             public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);

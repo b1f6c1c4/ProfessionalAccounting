@@ -38,32 +38,14 @@
     <link rel="stylesheet" href="/modern-normalize.css">
     <link rel="stylesheet" href="/index.css">
 
+    <script defer src="/p5.min.js"></script>
+    <script defer src="/dayjs.min.js"></script>
+
   </head>
-  <body class="mobile">
+  <body class="gui">
 
-    <a id="swap" href="/gui.html">G</a>
-    <div id="wrapper">
-      <div id="user"></div>
-      <script>
-        document.getElementById('user').innerText = window.localStorage.getItem('user') || 'anonymous';
-      </script>
-      <input id="cmdLine" type="text"></div>
-    </div>
-    <div id="tools">
-      <button id="create">Create</button>
-      <button id="upsert">Upsert</button>
-      <button id="remove">Remove</button>
-      <button id="upload">Upload</button>
-    </div>
-    <textarea id="editor"></textarea>
-
-    <script src="/js/notice.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/autosize.js/4.0.2/autosize.js" integrity="sha256-/cqRc6tEehZivJ5tlpUjFjiy1PoDrCVChM5lmg2WNUo=" crossorigin="anonymous"></script>
-    <script>
-      autosize(document.getElementById('editor'));
-    </script>
-    <script src="/js/backend.js"></script>
-    <script src="/js/frontend-mobile.js"></script>
+    <a id="swap" href="/">C</a>
+    <div id="app"></div>
 
   </body>
 </html>

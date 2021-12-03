@@ -41,8 +41,8 @@ namespace AccountingServer.Test.UnitTest.BLL
                     {
                         Symbols = new()
                             {
-                                new() { Currency = "DOGE", Symbol = "#" }
-                            }
+                                new() { Currency = "DOGE", Symbol = "#" },
+                            },
                     });
             ClientUser.Set("b1");
         }

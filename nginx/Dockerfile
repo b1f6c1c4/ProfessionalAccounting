@@ -1,5 +1,6 @@
 FROM nginx
 
 COPY default.conf /etc/nginx/conf.d/default.conf
-
-COPY *.html *.js *.png *.xml *.ico *.webmanifest *.tar.xz /var/www/
+COPY art /var/www/
+COPY js /var/www/js/
+COPY dist archive.tar.xz /var/www/

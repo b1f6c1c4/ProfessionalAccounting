@@ -119,7 +119,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                                         User = "b1&b2", Currency = "EUR", Title = 2333, Fund = 114514,
                                     },
                             },
-                    }
+                    },
             });
 
             ClientUser.Set("b1");

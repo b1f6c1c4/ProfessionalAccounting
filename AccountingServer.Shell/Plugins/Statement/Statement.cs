@@ -270,6 +270,10 @@ namespace AccountingServer.Shell.Plugins.Statement
 
             public int Dir => 0;
 
+            public string ContentPrefix => null;
+
+            public string RemarkPrefix => null;
+
             public bool IsDangerous() => Filter.IsDangerous();
 
             public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);

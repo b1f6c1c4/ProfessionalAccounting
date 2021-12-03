@@ -138,6 +138,8 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
                     new object[] { true, "Liability cont3" },
                     new object[] { true, "U @USD - U Asset - U Equity - U Revenue - U Expense" },
                     new object[] { false, "%%" },
+                    new object[] { true, "U 'ConT'.**U\"rEMk\".*" },
+                    new object[] { false, "U 'cont\\'.*+U\"remk#\".*" },
                 };
 
             public IEnumerator<object[]> GetEnumerator() => Data.GetEnumerator();

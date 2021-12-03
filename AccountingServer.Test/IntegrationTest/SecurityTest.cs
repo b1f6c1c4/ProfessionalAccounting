@@ -110,6 +110,10 @@ namespace AccountingServer.Test.IntegrationTest
         [InlineData(false, "{.}:")]
         [InlineData(false, "{}:=114514")]
         [InlineData(false, "{.}:=114514")]
+        [InlineData(true, "''.*")]
+        [InlineData(false, "'a'.*")]
+        [InlineData(true, "\"\".*")]
+        [InlineData(false, "\"a\".*")]
         public void DetailQueryTest(bool dangerous, string expr)
         {
             var query = ParsingF.DetailQuery(ref expr);

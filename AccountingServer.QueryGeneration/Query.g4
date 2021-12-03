@@ -51,7 +51,7 @@ details0
 	;
 
 detailQuery
-	:	UserSpec? VoucherCurrency? TitleKind? title? token? DoubleQuotedString? Floating? Direction?
+	:	UserSpec? VoucherCurrency? TitleKind? title? (token Etc?)? (DoubleQuotedString Etc?)? Floating? Direction?
 	;
 
 title
@@ -274,6 +274,10 @@ MatchAllMark
 
 EmitMark
 	:	':'
+	;
+
+Etc
+	:   '.*'
 	;
 
 WS

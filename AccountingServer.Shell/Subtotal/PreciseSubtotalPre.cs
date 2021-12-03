@@ -94,7 +94,7 @@ namespace AccountingServer.Shell.Subtotal
         public override Nothing Visit(ISubtotalTitle sub)
         {
             var prev = m_Path;
-            m_Path = Merge(m_Path, TitleManager.GetTitleName(sub.Title));
+            m_Path = Merge(m_Path, $"{sub.Title.AsTitle()}:{TitleManager.GetTitleName(sub.Title)}");
             m_Title = sub.Title;
             ShowSubtotal(sub);
             m_Path = prev;
@@ -104,7 +104,7 @@ namespace AccountingServer.Shell.Subtotal
         public override Nothing Visit(ISubtotalSubTitle sub)
         {
             var prev = m_Path;
-            m_Path = Merge(m_Path, TitleManager.GetTitleName(m_Title, sub.SubTitle));
+            m_Path = Merge(m_Path, $"{sub.SubTitle.AsSubTitle()}:{TitleManager.GetTitleName(m_Title, sub.SubTitle)}");
             ShowSubtotal(sub);
             m_Path = prev;
             return Nothing.AtAll;

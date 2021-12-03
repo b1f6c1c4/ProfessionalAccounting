@@ -277,7 +277,7 @@ namespace AccountingServer.DAL
         }
 
         /// <inheritdoc />
-        public IEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query)
+        public IEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit = 0)
         {
             if (query.Subtotal.GatherType != GatheringType.VoucherCount)
                 throw new InvalidOperationException("记账凭证分类汇总只能计数");
@@ -322,11 +322,13 @@ namespace AccountingServer.DAL
             var grp = new BsonDocument { ["_id"] = prj, ["count"] = new BsonDocument { ["$sum"] = 1 } };
 
             var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Group(grp);
+            if (limit > 0)
+                fluent = fluent.Sort(new SortDefinitionBuilder<BsonDocument>().Descending("count")).Limit(limit);
             return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
         }
 
         /// <inheritdoc />
-        public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query)
+        public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit = 0)
         {
             var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
             if (query.Subtotal.AggrType != AggregationType.None)
@@ -375,6 +377,8 @@ namespace AccountingServer.DAL
             if (query.Subtotal.AggrType != AggregationType.ChangedDay &&
                 query.Subtotal.Levels.LastOrDefault().HasFlag(SubtotalLevel.NonZero))
                 fluent = fluent.Match(FilterNonZero);
+            if (limit > 0)
+                fluent = fluent.Sort(new SortDefinitionBuilder<BsonDocument>().Descending("count")).Limit(limit);
             return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
         }
 

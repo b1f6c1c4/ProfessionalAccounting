@@ -34,6 +34,11 @@ namespace AccountingServer.BLL
         /// </summary>
         public IDbAdapter Db { private get; init; }
 
+        /// <summary>
+        ///     返回结果数量上限
+        /// </summary>
+        public int Limit { private get; set; } = 0;
+
         public double From(DateTime date, string target)
         {
             var record = new ExchangeRecord { Date = date, From = target, To = BaseCurrency.Now };
@@ -131,14 +136,14 @@ namespace AccountingServer.BLL
 
         public ISubtotalResult SelectVouchersGrouped(IVoucherGroupedQuery query)
         {
-            var res = Db.SelectVouchersGrouped(query);
+            var res = Db.SelectVouchersGrouped(query, Limit);
             var conv = new SubtotalBuilder(query.Subtotal, this);
             return conv.Build(res);
         }
 
         public ISubtotalResult SelectVoucherDetailsGrouped(IGroupedQuery query)
         {
-            var res = Db.SelectVoucherDetailsGrouped(query);
+            var res = Db.SelectVoucherDetailsGrouped(query, Limit);
             var conv = new SubtotalBuilder(query.Subtotal, this);
             return conv.Build(res);
         }

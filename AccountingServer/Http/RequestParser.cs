@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Web;
 
 namespace AccountingServer.Http
 {
@@ -63,7 +64,7 @@ namespace AccountingServer.Http
             }
 
             var spp = sp[1].Split('&');
-            par = spp.ToDictionary(s => s[..s.IndexOf('=')], s => s[(s.IndexOf('=') + 1)..]);
+            par = spp.ToDictionary(s => s[..s.IndexOf('=')], s => HttpUtility.UrlDecode(s[(s.IndexOf('=') + 1)..]));
             return sp[0];
         }
 

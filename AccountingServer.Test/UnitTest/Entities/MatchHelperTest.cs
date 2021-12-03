@@ -42,6 +42,27 @@ namespace AccountingServer.Test.UnitTest.Entities
             Assert.True(pred("abc", "abc"));
         }
 
+        private static void StringPrefixMatchTest(Func<string, string, bool> pred)
+        {
+            Assert.True(pred(null, null));
+            Assert.True(pred("", null));
+            Assert.True(pred("whatever", null));
+
+            Assert.False(pred(null, ""));
+            Assert.True(pred("", ""));
+            Assert.True(pred("whatever", ""));
+
+            Assert.False(pred(null, "W"));
+            Assert.False(pred("", "W"));
+            Assert.True(pred("w", "W"));
+            Assert.True(pred("whatever", "W"));
+            Assert.False(pred("hat", "W"));
+
+            Assert.False(pred("a", "[ab]"));
+            Assert.False(pred("ba", "[ab]"));
+            Assert.True(pred("[ab]", "[ab]"));
+        }
+
         [Theory]
         [InlineData(true, null, null)]
         [InlineData(true, "", null)]
@@ -188,6 +209,11 @@ namespace AccountingServer.Test.UnitTest.Entities
                 (v, f) => MatchHelper.IsMatch(new() { Content = v }, new VoucherDetail { Content = f }));
 
         [Fact]
+        public void DetailMatchTestContentPrefix()
+            => StringPrefixMatchTest(
+                (v, f) => MatchHelper.IsMatch(new() { Content = v }, new VoucherDetail(), contentPrefix: f));
+
+        [Fact]
         public void DetailMatchTestNull()
             => Assert.True(
                 MatchHelper.IsMatch(
@@ -269,5 +295,10 @@ namespace AccountingServer.Test.UnitTest.Entities
         [Fact]
         public void VoucherMatchTestRemark()
             => StringMatchTest((v, f) => MatchHelper.IsMatch(new() { Remark = v }, new Voucher { Remark = f }));
+
+        [Fact]
+        public void DetailMatchTestRemarkPrefix()
+            => StringPrefixMatchTest(
+                (v, f) => MatchHelper.IsMatch(new() { Remark = v }, new VoucherDetail(), remarkPrefix: f));
     }
 }

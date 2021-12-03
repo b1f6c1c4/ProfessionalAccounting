@@ -42,6 +42,7 @@ HttpResponse Server_OnHttpRequest(HttpRequest request)
     if (request.BaseUri.StartsWith("/api", StringComparison.Ordinal))
         request.BaseUri = request.BaseUri[4..];
 #endif
+
     string user;
     if (request.Header.ContainsKey("x-user"))
         user = request.Header["x-user"];
@@ -50,27 +51,50 @@ HttpResponse Server_OnHttpRequest(HttpRequest request)
     if (user == "anonymous")
         return new() { ResponseCode = 401 };
 
+    if (!request.Header.ContainsKey("x-clientdatetime") ||
+        !ClientDateTime.TryParse(request.Header["x-clientdatetime"], out var timestamp))
+        return new() { ResponseCode = 400 };
+
+    int limit = 0;
+    if (request.Header.ContainsKey("x-limit") && !int.TryParse(request.Header["x-limit"], out limit))
+        return new() { ResponseCode = 400 };
+
+    ClientUser.Set(user);
+    ClientDateTime.Set(timestamp);
+    facade.AdjustLimit(limit);
+
     string spec = null;
     if (request.Header.ContainsKey("x-serializer"))
         spec = request.Header["x-serializer"];
 
     if (request.Method == "GET")
-    {
-        if (request.BaseUri == "/emptyVoucher")
-            return GenerateHttpResponse(facade.EmptyVoucher(spec), "text/plain; charset=utf-8");
-
-        return new() { ResponseCode = 404 };
-    }
+        switch (request.BaseUri)
+        {
+            case "/emptyVoucher":
+                {
+                    var response = GenerateHttpResponse(facade.EmptyVoucher(spec), "text/plain; charset=utf-8");
+                    response.Header["Cache-Control"] = "public, max-age=30";
+                    response.Header["Vary"] = "X-Serializer, X-Limit";
+                    return response;
+                }
+            case "/safe":
+                {
+                    var expr = request.Parameters["q"];
+                    var res = facade.SafeExecute(expr, spec);
+                    var response = GenerateHttpResponse(res.ToString(), "text/plain; charset=utf-8");
+                    response.Header["X-Type"] = res.GetType().Name;
+                    response.Header["X-AutoReturn"] = res.AutoReturn ? "true" : "false";
+                    response.Header["X-Dirty"] = res.Dirty ? "true" : "false";
+                    response.Header["Cache-Control"] = "public, max-age=30";
+                    response.Header["Vary"] = "X-User, X-Serializer, X-ClientDateTime, X-Limit";
+                    return response;
+                }
+            default:
+                return new() { ResponseCode = 404 };
+        }
 
     if (request.Method != "POST")
         return new() { ResponseCode = 405 };
-
-    if (!request.Header.ContainsKey("x-clientdatetime") ||
-        !ClientDateTime.TryParse(request.Header["x-clientdatetime"], out var timestamp))
-        return new() { ResponseCode = 400 };
-
-    ClientUser.Set(user);
-    ClientDateTime.Set(timestamp);
 
     switch (request.BaseUri)
     {
