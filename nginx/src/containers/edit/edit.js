@@ -19,18 +19,17 @@ import {
     submitVoucherRequested,
     revertVoucherRequested,
     resetForm,
+    clearError,
 } from './editSlice.js';
-
-const titleQuerier = (t) => ['U @@ Expense -9~ !Ut'];
 
 const personQuerier = (t) => {
     const res = [];
     if (!t) {
         res.push('U!U');
-        res.push('U @@ T122100 + U @@ T224100 + U @@ T630103 + U @@ T671109 -9~ !Uc');
+        res.push('U T122100 + U T224100 + U T630103 + U T671109 -9~ !Uc');
     } else {
         const rt = t.replace(/'/g, '\'\'');
-        res.push(`(U @@ T122100 + U @@ T224100 + U @@ T630103 + U @@ T671109) * (U '${rt}'.*) !Uc`);
+        res.push(`(U T122100 + U T224100 + U T630103 + U T671109) * (U '${rt}'.*) !Uc`);
     }
     return res;
 };
@@ -56,7 +55,6 @@ export default function Edit(p, store) {
         adder: updatePayer,
         remover: () => updatePayer(''),
         query: personQuerier,
-        aux: () => Object.keys(store.getState().edit.editor.payees),
         single: true,
     });
     this.payeeSelector = new Selector(p, store, {
@@ -80,9 +78,9 @@ export default function Edit(p, store) {
         remover: (t) => updateTitle({ id: this.activeDetailId, title: '' }),
         query: (t) => {
             if (this.activeDetailId !== -1) {
-                return [`U @@ Expense -9~ !t`];
+                return [`U Expense -9~ !t`];
             }
-            return [`${this.activeUser()} @@ * (U T1001 + U T1002 + U T1012 + U T2001 + U T2201 + T2241)`];
+            return [`${this.activeUser()} * (U T1001 + U T1002 + U T1012 + U T2001 + U T2201 + T2241) -9~ !t`];
         },
         single: true,
     });
@@ -96,7 +94,7 @@ export default function Edit(p, store) {
         remover: (t) => updateSubtitle({ id: this.activeDetailId, subtitle: '' }),
         query: (t) => {
             const { title } = this.activeDetail();
-            return [`${this.activeUser()} @@ T${title.split(':')[0]} -9~ !ts`];
+            return [`${this.activeUser()} T${title.split(':')[0]} -9~ !ts`];
         },
         trim: (s) => {
             const sp = s.split('-')[1];
@@ -115,8 +113,8 @@ export default function Edit(p, store) {
         remover: (t) => updateContent({ id: this.activeDetailId, content: 0 }),
         query: (t) => {
             const { title, subtitle } = this.activeDetail();
-            const s = `${this.activeUser()} @@ T${title.split(':')[0]}${subtitle.split(':')[0]}`;
-            if (t) return [`${s} '${t.replace(/'/g, '\'\'')}'.* -9~ !c`];
+            const s = `${this.activeUser()} T${title.split(':')[0]}${subtitle.split(':')[0]}`;
+            if (t) return [`${s} '${t.replace(/'/g, '\'\'')}'.* !c`];
             return [`${s} -9~ !c`];
         },
         single: true,
@@ -456,10 +454,17 @@ export default function Edit(p, store) {
         this.textboxD.draw();
 
         if (store.getState().edit.loading) {
-            p.background(0, 0, 70, 70);
+            p.push();
+            p.background(0, 127);
+            p.textSize(20);
+            p.textAlign(p.CENTER);
+            p.fill(255);
+            p.text('Loading', p.width / 2, p.height / 2);
+            p.pop();
         }
         if (store.getState().edit.error) {
             p.push();
+            p.background(0, 127);
             p.textSize(20);
             p.textAlign(p.CENTER);
             p.fill(200, 0, 0);
@@ -470,6 +475,10 @@ export default function Edit(p, store) {
 
     this.mouseClicked = function() {
         if (store.getState().edit.loading) return true;
+        if (store.getState().edit.error) {
+            store.dispatch(clearError());
+            return true;
+        }
 
         if (!this.payerSelector.mouseClicked()) return false;
         if (!this.payeeSelector.mouseClicked()) return false;

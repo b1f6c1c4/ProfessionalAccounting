@@ -18,31 +18,36 @@ export default class Selector {
         this.error = null;
         this.active = false;
         this.debounce = 0;
+        this.rows = 0;
         this.rowHeight = NaN;
         this.selected = [];
     }
 
     activate() {
         this.active = true;
-        this.input = this.p.createInput('');
-        this.input.elt.onkeypress = (e) => {
-            if (e.key !== 'Enter') return;
-            if (this.input.value()) {
-                this.store.dispatch(this.adder(this.input.value()));
-                this.input.value('');
-                if (this.single) this.deactivate();
-            }
-        };
-        this.input.input(this.doFetch.bind(this));
-        this.input.position(this.p.width * 0.15, this.p.height * 0.15);
-        this.input.size(this.p.width * 0.7, this.p.height * 0.05);
+        setTimeout(() => {
+            if (!this.active) return;
+            this.input = this.p.createInput('');
+            this.input.elt.onkeypress = (e) => {
+                if (e.key !== 'Enter') return;
+                if (this.input.value()) {
+                    this.store.dispatch(this.adder(this.input.value()));
+                    this.input.value('');
+                    if (this.single) this.deactivate();
+                }
+            };
+            this.input.input(this.doFetch.bind(this));
+            this.input.position(this.p.width * 0.15, this.p.height * 0.15);
+            this.input.size(this.p.width * 0.7, this.p.height * 0.05);
+        }, 50);
         this.p.redraw();
         this.debounce = +new Date();
     }
 
     deactivate() {
         this.active = false;
-        this.input.remove();
+        if (this.input)
+            this.input.remove();
         this.autocomplete = null;
         this.p.redraw();
     }
@@ -55,7 +60,7 @@ export default class Selector {
                 tmp.push(...a);
         }
         try {
-            const queries = this.query(this.input.value());
+            const queries = this.query(this.input ? this.input.value() : '');
             for (const q of queries) {
                 const { data } = await Api.safeApi('rps ' + q);
                 tmp.push(...data
@@ -101,10 +106,10 @@ export default class Selector {
         let row = 0;
         p.push();
         { // selected
-            let rows = this.selected.length;
+            this.rows = this.selected.length;
             if (this.candidates)
-                rows += this.candidates.length;
-            this.rowHeight = height / rows;
+                this.rows += this.candidates.length;
+            this.rowHeight = height / this.rows;
             p.textAlign(p.RIGHT);
             p.textSize(15);
             for (const s of this.selected) {
@@ -163,12 +168,14 @@ export default class Selector {
             this.deactivate();
             return false;
         }
-        const row = Math.floor((p.mouseY - p.height * 0.20) / this.rowHeight);
-        if (row < this.selected.length) {
-            this.store.dispatch(this.remover(this.selected[row]));
-        } else if (this.candidates) {
-            this.store.dispatch(this.adder(this.candidates[row - this.selected.length]));
-            if (this.single) this.deactivate();
+        if (this.rows) {
+            const row = Math.floor((p.mouseY - p.height * 0.20) / this.rowHeight);
+            if (row < this.selected.length) {
+                this.store.dispatch(this.remover(this.selected[row]));
+            } else if (this.candidates) {
+                this.store.dispatch(this.adder(this.candidates[row - this.selected.length]));
+                if (this.single) this.deactivate();
+            }
         }
         return false;
     }
