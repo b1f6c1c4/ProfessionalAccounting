@@ -23,6 +23,13 @@ export default class Selector {
     activate() {
         this.active = true;
         this.input = this.p.createInput('');
+        this.input.elt.onkeypress = (e) => {
+            if (e.key !== 'Enter') return;
+            if (this.input.value()) {
+                this.store.dispatch(this.adder(this.input.value()));
+                this.input.value('');
+            }
+        };
         this.input.input(this.doFetch.bind(this));
         this.input.position(this.p.width * 0.15, this.p.height * 0.15);
         this.input.size(this.p.width * 0.7, this.p.height * 0.05);
