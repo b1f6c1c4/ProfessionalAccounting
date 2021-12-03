@@ -78,32 +78,39 @@ const updateChecksum = (editor) => {
 };
 
 const computeExpr = (editor) => {
-    if (!editor.payer) return '';
-    let expr = `new Voucher {! ${editor.date}\n`;
-    for (const d of editor.details) {
-        let ps = [];
-        for (const p of Object.keys(editor.payees))
-            for (let i = 0; i < editor.payees[p]; i++)
-                if (isUser(p)) {
-                    ps.push(`${p} T${(''+d.title).padStart(4, '0')}${(''+d.subtitle).padStart(2, '0')} '${d.content.replace(/'/g, '\'\'')}'`);
-                } else {
-                    const [pu, pp] = p.split('-', 2);
-                    ps.push(`${pu} T1221 '${pp.replace(/'/g, '\'\'')}'`);
-                }
-        expr += `${ps.join(' + ')} : ${d.fund} ;\n`;
+    try {
+        if (!editor.payer) return '';
+        if (!Object.keys(editor.payees).length) return '';
+        if (!editor.details.length) return '';
+        let expr = `new Voucher {! ${editor.date}\n`;
+        for (const d of editor.details) {
+            let ps = [];
+            for (const p of Object.keys(editor.payees))
+                for (let i = 0; i < editor.payees[p]; i++)
+                    if (isUser(p)) {
+                        ps.push(`${p} T${(''+d.title).padStart(4, '0')}${(''+d.subtitle).padStart(2, '0')} '${d.content.replace(/'/g, '\'\'')}'`);
+                    } else {
+                        const [pu, pp] = p.split('-', 2);
+                        ps.push(`${pu} T1221 '${pp.replace(/'/g, '\'\'')}'`);
+                    }
+            expr += `${ps.join(' + ')} : ${d.fund} ;\n`;
+        }
+        expr += `t${editor.adjustments.t} `;
+        expr += `d${editor.adjustments.d}\n`;
+        expr += `\n`;
+        if (isUser(editor.payer)) {
+            const d = editor.payment;
+            expr += `${editor.payer} T${(''+d.title).padStart(4, '0')}${(''+d.subtitle).padStart(2, '0')} '${d.content.replace(/'/g, '\'\'')}' /\n`;
+        } else {
+            const m = editor.payer.match(/^(?<user>U[^-]+|'(?:[^']|'')+')-(?<peer>.*)$/);
+            expr += `${m.groups.user} T2241 '${m.groups.peer.replace(/'/g, '\'\'')} /\n`;
+        }
+        expr += `}`;
+        return expr;
+    } catch (e) {
+        console.error(e);
+        return 'Error: ' + e.message;
     }
-    expr += `t${editor.adjustments.t} `;
-    expr += `d${editor.adjustments.d}\n`;
-    expr += `\n`;
-    if (isUser(editor.payer)) {
-        const d = editor.payment;
-        expr += `${editor.payer} T${(''+d.title).padStart(4, '0')}${(''+d.subtitle).padStart(2, '0')} '${d.content.replace(/'/g, '\'\'')}' /\n`;
-    } else {
-        const m = editor.payer.match(/^(?<user>U[^-]+|'(?:[^']|'')+')-(?<peer>.*)$/);
-        expr += `${m.groups.user} T2241 '${m.groups.peer.replace(/'/g, '\'\'')} /\n`;
-    }
-    expr += `}`;
-    return expr;
 };
 
 const prepare = (state, payload) => {
@@ -142,11 +149,15 @@ export const editSlice = createSlice({
         },
         updatePayer: (state, { payload }) => {
             state.editor.payer = payload;
-            if (!state.editor.payees.length)
-                state.editor.payees[payload] = computeShare(payload);
-            if (isUser(payload)) {
-                if (!state.editor.payment) {
-                    state.editor.payment = { title: 0, subtitle: 0, content: '' };
+            if (payload) {
+                if (!Object.keys(state.editor.payees).length)
+                    state.editor.payees[payload] = computeShare(payload);
+                if (isUser(payload)) {
+                    if (!state.editor.payment) {
+                        state.editor.payment = { title: 0, subtitle: 0, content: '' };
+                    }
+                } else {
+                    state.editor.payment = null;
                 }
             } else {
                 state.editor.payment = null;
