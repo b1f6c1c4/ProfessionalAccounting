@@ -71,7 +71,7 @@ export default function Edit(p, store) {
             return [title];
         },
         adder: (t) => updateTitle({ id: this.activeDetailId, title: t }),
-        remover: (t) => updateTitle({ id: this.activeDetailId, title: 0 }),
+        remover: (t) => updateTitle({ id: this.activeDetailId, title: '' }),
         query: (t) => [`U @@ Expense -9~ !t`],
         aux: null,
     });
@@ -82,12 +82,13 @@ export default function Edit(p, store) {
             return [subtitle];
         },
         adder: (t) => updateSubtitle({ id: this.activeDetailId, subtitle: t }),
-        remover: (t) => updateSubtitle({ id: this.activeDetailId, subtitle: 0 }),
+        remover: (t) => updateSubtitle({ id: this.activeDetailId, subtitle: '' }),
         query: (t) => {
             const { title } = this.activeDetail();
-            return [`U @@ T${title} -9~ !s`];
+            return [`U @@ T${title.split(':')[0]} -9~ !ts`];
         },
         aux: null,
+        trim: (s) => s.split('-')[1],
     });
     this.contentSelector = new Selector(p, store, {
         selector: (state) => {
@@ -99,7 +100,7 @@ export default function Edit(p, store) {
         remover: (t) => updateContent({ id: this.activeDetailId, content: 0 }),
         query: (t) => {
             const { title, subtitle } = this.activeDetail();
-            const s = `U @@ T${title}${(''+subtitle).padStart(2, '0')}`;
+            const s = `U @@ T${title.split(':')[0]}${subtitle.split(':')[0]}`;
             if (t) return [`${s} '${t.replace(/'/g, '\'\'')}'.* -9~ !c`];
             return [`${s} -9~ !c`];
         },
@@ -242,11 +243,11 @@ export default function Edit(p, store) {
 
                 p.textSize(editorRowHeight * 0.5);
                 baseLine = editorRowHeight * 0.68;
-                const title = d.title ? 'T' + d.title : 'T????';
+                const title = d.title ? 'T' + d.title.split(':')[0] : 'T????';
                 const titleWidth = p.textWidth(title);
                 p.text(title, btnSize + 2 * btnOffset, baseLine);
 
-                const subtitle = (''+d.subtitle).padStart(2, '0');
+                const subtitle = d.subtitle ? d.subtitle.split(':')[0] : '00';
                 const subtitleWidth = p.textWidth(subtitle);
                 p.text(subtitle, btnSize + 2 * btnOffset + gap + titleWidth, baseLine);
 
@@ -338,11 +339,11 @@ export default function Edit(p, store) {
             p.textSize(editorRowHeight * 0.5);
             let baseLine = editorRowHeight * 0.68;
             if (d) {
-                const title = d.title ? 'T' + d.title : 'T????';
+                const title = d.title ? 'T' + d.title.split(':')[0] : 'T????';
                 const titleWidth = p.textWidth(title);
                 p.text(title, gap, baseLine);
 
-                const subtitle = (''+d.subtitle).padStart(2, '0');
+                const subtitle = d.subtitle ? d.subtitle.split(':')[0] : '00';
                 const subtitleWidth = p.textWidth(subtitle);
                 p.text(subtitle, 2 * gap + titleWidth, baseLine);
 

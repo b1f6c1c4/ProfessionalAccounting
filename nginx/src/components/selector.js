@@ -10,6 +10,7 @@ export default class Selector {
         this.remover = options.remover;
         this.query = options.query;
         this.aux = options.aux;
+        this.trim = options.trim;
         this.autocomplete = null;
         this.candidates = null;
         this.input = null;
@@ -55,7 +56,11 @@ export default class Selector {
             const queries = this.query(this.input.value());
             for (const q of queries) {
                 const { data } = await Api.safeApi('rps ' + q);
-                tmp.push(...data.split('\n').filter((s) => s).map((s) => s.split('\t')[0]));
+                tmp.push(...data
+                    .split('\n')
+                    .filter((s) => s)
+                    .map((s) => s.split('\t')[0])
+                    .map((s) => this.trim ? this.trim(s) : s));
             }
             this.autocomplete = uniq(tmp);
             this.error = null;
