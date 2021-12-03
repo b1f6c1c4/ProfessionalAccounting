@@ -7,18 +7,20 @@ const initialState = {
     editor: {
         date: dayjs().format('YYYYMMDD'),
         payees: {}, // { [person]: share }
-        payers: {}, // { [person]: share }
+        payer: '',
         details: [], // [{ title: int, subtitle: int, content: string, fund: string }]
         adjustments: { t: 0, d: 0 },
         checksum: { payment: 0, discount: 0 },
-        payments: [],
+        payment: null, // { title: int, subtitle: int, content: string, fund: string }
         committed: false,
     },
     error: null,
 };
 
+const isUser = (person) => /^U([A-Za-z0-9_]+(&[A-Za-z0-9_]+)*|'([^']|'')+')$/.test(person);
+
 const computeShare = (person) => {
-    if (/^U([a-z&]+|'([^']|'')+')$/.test(person)) {
+    if (isUser(person)) {
         return 1 + (person.match(/&/g) || []).length;
     } else {
         return 1;
@@ -31,21 +33,21 @@ const parseFund = (fund) => {
     for (const s of sp) {
         const m = s.match(/(?<num>[0-9]+(?:\.[0-9]+)?)(?:(?<equals>=[0-9]+(?:\.[0-9]+)?)|(?<plus>(?:\+[0-9]+(?:\.[0-9]+)?)+)|(?<minus>(?:-[0-9]+(?:\.[0-9]+)?)+))?(?<times>\*[0-9]+(?:\.[0-9]+)?)?/);
         if (!m) return null;
-        let fund0 = +m.num;
+        let fund0 = +m.groups.num;
         let fundd = 0;
-        if (m.equals) {
-            fundd = fund0 - m.equals.substr(1);
-        } else if (m.plus) {
-            for (const m of m.plus.match(/\+[0-9]+(?:\.[0-9]+)?/g))
-                fundd += +m;
+        if (m.groups.equals) {
+            fundd = fund0 - m.groups.equals.substr(1);
+        } else if (m.groups.plus) {
+            for (const mm of m.groups.plus.match(/\+[0-9]+(?:\.[0-9]+)?/g))
+                fundd += +mm;
             fund0 += fundd;
-        } else if (m.minus) {
-            for (const m of m.minus.match(/\-[0-9]+(?:\.[0-9]+)?/g))
-                fundd -= +m;
+        } else if (m.groups.minus) {
+            for (const mm of m.groups.minus.match(/\-[0-9]+(?:\.[0-9]+)?/g))
+                fundd -= +mm;
         }
 
-        if (m.times) {
-            const mult = +m.times;
+        if (m.groups.times) {
+            const mult = +m.groups.times.substr(1);
             fund0 *= mult;
             fundd *= mult;
         }
@@ -76,13 +78,14 @@ const updateChecksum = (editor) => {
 };
 
 const computeExpr = (editor) => {
+    if (!editor.payer) return '';
     let expr = `new Voucher {! ${editor.date}\n`;
     for (const d of editor.details) {
         let ps = [];
         for (const p of Object.keys(editor.payees))
             for (let i = 0; i < editor.payees[p]; i++)
-                if (/^U([a-z&]+|'([^']|'')+')$/.test(p)) {
-                    ps.push(`${p} T${d.title}${(''+d.subtitle).padStart(2)} '${d.content.replace(/'/g, '\'\'')}'`);
+                if (isUser(p)) {
+                    ps.push(`${p} T${(''+d.title).padStart(4, '0')}${(''+d.subtitle).padStart(2, '0')} '${d.content.replace(/'/g, '\'\'')}'`);
                 } else {
                     const [pu, pp] = p.split('-', 2);
                     ps.push(`${pu} T1221 '${pp.replace(/'/g, '\'\'')}'`);
@@ -92,9 +95,27 @@ const computeExpr = (editor) => {
     expr += `t${editor.adjustments.t} `;
     expr += `d${editor.adjustments.d}\n`;
     expr += `\n`;
-    // TODO: payments
+    if (isUser(editor.payer)) {
+        const d = editor.payment;
+        expr += `${editor.payer} T${(''+d.title).padStart(4, '0')}${(''+d.subtitle).padStart(2, '0')} '${d.content.replace(/'/g, '\'\'')}' /\n`;
+    } else {
+        const m = editor.payer.match(/^(?<user>U[^-]+|'(?:[^']|'')+')-(?<peer>.*)$/);
+        expr += `${m.groups.user} T2241 '${m.groups.peer.replace(/'/g, '\'\'')} /\n`;
+    }
     expr += `}`;
     return expr;
+};
+
+const prepare = (state, payload) => {
+    if (payload.id === -1) {
+        if (!isUser(state.editor.payer)) return;
+        if (!state.editor.payment) {
+            state.editor.payment = { title: 0, subtitle: 0, content: 0 };
+        }
+        return state.editor.payment;
+    } else {
+        return state.editor.details[payload.id];
+    }
 };
 
 export const editSlice = createSlice({
@@ -119,33 +140,38 @@ export const editSlice = createSlice({
             delete state.editor.payees[payload];
             state.liveViewText = computeExpr(state.editor);
         },
-        addPayer: (state, { payload }) => {
-            state.editor.payers[payload] = computeShare(payload);
-            state.liveViewText = computeExpr(state.editor);
-        },
-        removePayer: (state, { payload }) => {
-            delete state.editor.payers[payload];
+        updatePayer: (state, { payload }) => {
+            state.editor.payer = payload;
+            if (!state.editor.payees.length)
+                state.editor.payees[payload] = computeShare(payload);
+            if (isUser(payload)) {
+                if (!state.editor.payment) {
+                    state.editor.payment = { title: 0, subtitle: 0, content: '' };
+                }
+            } else {
+                state.editor.payment = null;
+            }
             state.liveViewText = computeExpr(state.editor);
         },
         updateTitle: (state, { payload }) => {
-            state.editor.details[payload.id].title = payload.title;
+            prepare(state, payload).title = payload.title;
             state.liveViewText = computeExpr(state.editor);
         },
         updateSubtitle: (state, { payload }) => {
-            state.editor.details[payload.id].subtitle = payload.subtitle;
+            prepare(state, payload).subtitle = payload.subtitle;
             state.liveViewText = computeExpr(state.editor);
         },
         updateContent: (state, { payload }) => {
-            state.editor.details[payload.id].content = payload.content;
+            prepare(state, payload).content = payload.content;
             state.liveViewText = computeExpr(state.editor);
         },
         updateFund: (state, { payload }) => {
-            state.editor.details[payload.id].fund = payload.fund;
+            prepare(state, payload).fund = payload.fund;
             state.liveViewText = computeExpr(state.editor);
             updateChecksum(state.editor);
         },
         removeDetail: (state, { payload }) => {
-            state.editor.details.splice(payload.id);
+            state.editor.details.splice(payload, 1);
             state.liveViewText = computeExpr(state.editor);
             updateChecksum(state.editor);
         },
@@ -157,6 +183,16 @@ export const editSlice = createSlice({
                 fund: '0',
             });
             state.liveViewText = computeExpr(state.editor);
+        },
+        updateT: (state, { payload }) => {
+            state.editor.adjustments.t = payload;
+            state.liveViewText = computeExpr(state.editor);
+            updateChecksum(state.editor);
+        },
+        updateD: (state, { payload }) => {
+            state.editor.adjustments.d = payload;
+            state.liveViewText = computeExpr(state.editor);
+            updateChecksum(state.editor);
         },
         submitVoucherRequested: (state) => {
             state.loading = true;
@@ -180,14 +216,15 @@ export const {
     dateDec,
     addPayee,
     removePayee,
-    addPayer,
-    removePayer,
+    updatePayer,
     updateTitle,
     updateSubtitle,
     updateContent,
     updateFund,
     removeDetail,
     newDetail,
+    updateT,
+    updateD,
     submitVoucherRequested,
     submitVoucherSucceeded,
     submitVoucherFailed,
