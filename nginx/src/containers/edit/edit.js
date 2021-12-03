@@ -14,10 +14,10 @@ const querier = (t) => {
     const res = [];
     if (!t) {
         res.push('U!U');
-        res.push('U @@ T122100 + U @@ T224100 + U @@ T630103 + U @@ T671109 -9~ !c');
+        res.push('U @@ T122100 + U @@ T224100 + U @@ T630103 + U @@ T671109 -9~ !Uc');
     } else {
         const rt = t.replace(/'/g, '\'\'');
-        res.push(`(U @@ T122100 + U @@ T224100 + U @@ T630103 + U @@ T671109) * (U '${rt}'.*) !c`);
+        res.push(`(U @@ T122100 + U @@ T224100 + U @@ T630103 + U @@ T671109) * (U '${rt}'.*) !Uc`);
     }
     return res;
 };
@@ -137,9 +137,10 @@ export default function Edit(p, store) {
             let liveViewText = state.liveViewText;
             if (!liveViewText)
                 liveViewText = '(no live view available)';
+            p.textLeading(16);
             p.textAlign(p.LEFT);
             p.textSize(16);
-            p.textWrap(p.CHAR);
+            p.textFont('monospace');
             p.text(liveViewText, liveViewX, liveViewY, liveViewWidth, liveViewHeight);
         }
         p.pop();

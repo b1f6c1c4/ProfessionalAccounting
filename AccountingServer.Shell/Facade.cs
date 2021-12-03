@@ -141,7 +141,17 @@ namespace AccountingServer.Shell
         /// <param name="spec">表示器代号</param>
         /// <returns>执行结果</returns>
         public IQueryResult SafeExecute(string expr, string spec)
-            => m_AccountingShell.Execute(expr, GetSerializer(spec));
+        {
+            switch (expr)
+            {
+                case "T":
+                    return ListTitles();
+                case "?":
+                    return ListHelp();
+            }
+
+            return m_AccountingShell.Execute(expr, GetSerializer(spec));
+        }
 
         #region Miscellaneous
 
