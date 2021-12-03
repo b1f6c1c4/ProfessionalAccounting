@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import createSagaMiddleware from 'redux-saga';
+import logger from 'redux-logger';
 
 import editReducer from '../containers/edit/editSlice.js';
 import editSaga from '../containers/edit/editSagas.js';
@@ -11,7 +12,7 @@ export const store = configureStore({
         edit: editReducer,
     },
     middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(sagaMiddleware),
+        getDefaultMiddleware().concat(sagaMiddleware, logger),
     devTools: process.env.NODE_ENV !== 'production',
 });
 
