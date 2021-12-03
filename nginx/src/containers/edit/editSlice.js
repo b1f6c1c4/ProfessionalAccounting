@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 const initialState = {
     loading: false,
     liveViewText: '',
+    committed: false,
     editor: {
         date: dayjs().format('YYYYMMDD'),
         payees: {}, // { [person]: share }
@@ -12,7 +13,6 @@ const initialState = {
         adjustments: { t: 0, d: 0 },
         checksum: { payment: 0, discount: 0 },
         payment: null, // { title: int, subtitle: int, content: string, fund: string }
-        committed: false,
     },
     error: null,
 };
@@ -197,16 +197,32 @@ export const editSlice = createSlice({
         submitVoucherRequested: (state) => {
             state.loading = true;
             state.error = null;
-            state.editor.committed = false;
+            state.committed = false;
         },
         submitVoucherSucceeded: (state, { payload }) => {
             state.loading = false;
             state.liveViewText = payload;
-            state.editor.committed = true;
+            state.committed = true;
         },
         submitVoucherFailed: (state, { payload }) => {
             state.loading = false;
             state.error = payload;
+        },
+        revertVoucherRequested: (state) => {
+            state.loading = true;
+            state.error = null;
+        },
+        revertVoucherSucceeded: (state) => {
+            state.loading = false;
+            state.liveViewText = computeExpr(state.editor);
+            state.committed = false;
+        },
+        revertVoucherFailed: (state, { payload }) => {
+            state.loading = false;
+            state.error = payload;
+        },
+        resetForm: (state) => {
+            Object.assign(state, initialState);
         },
     },
 });
@@ -228,6 +244,10 @@ export const {
     submitVoucherRequested,
     submitVoucherSucceeded,
     submitVoucherFailed,
+    revertVoucherRequested,
+    revertVoucherSucceeded,
+    revertVoucherFailed,
+    resetForm,
 } = editSlice.actions;
 
 export default editSlice.reducer;

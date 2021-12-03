@@ -16,6 +16,9 @@ import {
     newDetail,
     updateT,
     updateD,
+    submitVoucherRequested,
+    revertVoucherRequested,
+    resetForm,
 } from './editSlice.js';
 
 const titleQuerier = (t) => ['U @@ Expense -9~ !Ut'];
@@ -384,6 +387,64 @@ export default function Edit(p, store) {
         }
         p.pop();
 
+        p.push();
+        if (state.liveViewText) { // submit
+            if (state.committed) {
+                p.stroke(255, 0, 0);
+                p.fill(250, 110, 110);
+            } else {
+                p.stroke(0, 255, 0);
+                p.fill(110, 250, 110);
+            }
+            if (p.width > p.height) {
+                p.circle(liveViewX + 20 + 30, liveViewHeight - 20 - 30, 60);
+                this.btnSubmitRevert = new Button(liveViewX + 20, liveViewHeight - 20 - 60, 60, 60);
+            } else {
+                p.circle(liveViewWidth - 20 - 30, liveViewY + 20 + 30, 60);
+                this.btnSubmitRevert = new Button(liveViewWidth - 20 - 60, liveViewY + 20, 60, 60);
+            }
+            p.noStroke();
+            let txt;
+            if (state.committed) {
+                txt = 'R';
+                p.fill(0);
+            } else {
+                txt = 'S';
+                p.fill(255);
+            }
+            p.textSize(30);
+            p.textAlign(p.CENTER);
+            if (p.width > p.height) {
+                p.text(txt, liveViewX + 20 + 30, liveViewHeight - 20 - 30 + 10);
+            } else {
+                p.text(txt, liveViewWidth - 20 - 30, liveViewY + 20 + 30 + 10);
+            }
+        }
+        p.pop();
+
+        p.push();
+        if (state.committed) { // reset
+            p.stroke(0, 0, 255);
+            p.fill(110, 110, 250);
+            if (p.width > p.height) {
+                p.circle(liveViewX + 20 + 30 + 20 + 60, liveViewHeight - 20 - 30, 60);
+                this.btnReset = new Button(liveViewX + 20 + 20 + 60, liveViewHeight - 20 - 60, 60, 60);
+            } else {
+                p.circle(liveViewWidth - 20 - 30, liveViewY + 20 + 30 + 20 + 60, 60);
+                this.btnReset = new Button(liveViewWidth - 20 - 60, liveViewY + 20 + 20 + 60, 60, 60);
+            }
+            p.noStroke();
+            p.fill(255);
+            p.textSize(30);
+            p.textAlign(p.CENTER);
+            if (p.width > p.height) {
+                p.text('+', liveViewX + 20 + 30 + 20 + 60, liveViewHeight - 20 - 30 + 10);
+            } else {
+                p.text('+', liveViewWidth - 20 - 30, liveViewY + 20 + 30 + 20 + 60 + 10);
+            }
+        }
+        p.pop();
+
         p.pop();
 
         this.payerSelector.draw();
@@ -394,9 +455,23 @@ export default function Edit(p, store) {
         this.textboxFund.draw();
         this.textboxT.draw();
         this.textboxD.draw();
+
+        if (store.getState().edit.loading) {
+            p.background(0, 0, 70, 70);
+        }
+        if (store.getState().edit.error) {
+            p.push();
+            p.textSize(20);
+            p.textAlign(p.CENTER);
+            p.fill(200, 0, 0);
+            p.text(store.getState().edit.error, p.width / 2, p.height / 2);
+            p.pop();
+        }
     };
 
     this.mouseClicked = function() {
+        if (store.getState().edit.loading) return true;
+
         if (!this.payerSelector.mouseClicked()) return false;
         if (!this.payeeSelector.mouseClicked()) return false;
         if (!this.titleSelector.mouseClicked()) return false;
@@ -454,5 +529,17 @@ export default function Edit(p, store) {
             this.textboxD.activate();
             return false;
         };
+
+        if (this.btnSubmitRevert && this.btnSubmitRevert.check(p, store)) {
+            if (store.getState().edit.committed)
+                store.dispatch(revertVoucherRequested());
+            else
+                store.dispatch(submitVoucherRequested());
+            return false;
+        }
+
+        if (this.btnReset && this.btnReset.dispatch(p, store, resetForm())) return false;
+
+        return true;
     }
 }
