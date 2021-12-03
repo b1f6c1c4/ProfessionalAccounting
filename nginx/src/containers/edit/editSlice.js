@@ -8,15 +8,21 @@ const initialState = {
         date: dayjs().format('YYYYMMDD'),
         payees: {}, // { [person]: share }
         payers: {}, // { [person]: share }
-        details: [
-            { title: 6602, subtitle: 3, content: 'itst', fund: '123+456*3' },
-        ], // [{ title: int, subtitle: int, content: string, fund: string }]
+        details: [], // [{ title: int, subtitle: int, content: string, fund: string }]
         adjustments: { t: 0, d: 0 },
         checksum: { payment: 0, discount: 0 },
         payments: [],
         committed: false,
     },
     error: null,
+};
+
+const computeShare = (person) => {
+    if (/^U([a-z&]+|'([^']|'')+')$/.test(person)) {
+        return 1 + (person.match(/&/g) || []).length;
+    } else {
+        return 1;
+    }
 };
 
 const parseFund = (fund) => {
@@ -74,11 +80,11 @@ const computeExpr = (editor) => {
     for (const d of editor.details) {
         let ps = [];
         for (const p of Object.keys(editor.payees))
-            for (let i = 0; i < editor.payee[p]; i++)
+            for (let i = 0; i < editor.payees[p]; i++)
                 if (/^U([a-z&]+|'([^']|'')+')$/.test(p)) {
                     ps.push(`${p} T${d.title}${(''+d.subtitle).padStart(2)} '${d.content.replace(/'/g, '\'\'')}'`);
                 } else {
-                    const [pu, pp] = p.split('-', 1);
+                    const [pu, pp] = p.split('-', 2);
                     ps.push(`${pu} T1221 '${pp.replace(/'/g, '\'\'')}'`);
                 }
         expr += `${ps.join(' + ')} : ${d.fund} ;\n`;
@@ -106,7 +112,7 @@ export const editSlice = createSlice({
             state.liveViewText = computeExpr(state.editor);
         },
         addPayee: (state, { payload }) => {
-            state.editor.payees[payload] = 1 + (payload.match(/&/g) || [] ).length;
+            state.editor.payees[payload] = computeShare(payload);
             state.liveViewText = computeExpr(state.editor);
         },
         removePayee: (state, { payload }) => {
@@ -114,17 +120,43 @@ export const editSlice = createSlice({
             state.liveViewText = computeExpr(state.editor);
         },
         addPayer: (state, { payload }) => {
-            state.editor.payers[payload] = 1 + (payload.match(/&/g) || [] ).length;
+            state.editor.payers[payload] = computeShare(payload);
             state.liveViewText = computeExpr(state.editor);
         },
         removePayer: (state, { payload }) => {
             delete state.editor.payers[payload];
             state.liveViewText = computeExpr(state.editor);
         },
+        updateTitle: (state, { payload }) => {
+            state.editor.details[payload.id].title = payload.title;
+            state.liveViewText = computeExpr(state.editor);
+        },
+        updateSubtitle: (state, { payload }) => {
+            state.editor.details[payload.id].subtitle = payload.subtitle;
+            state.liveViewText = computeExpr(state.editor);
+        },
+        updateContent: (state, { payload }) => {
+            state.editor.details[payload.id].content = payload.content;
+            state.liveViewText = computeExpr(state.editor);
+        },
         updateFund: (state, { payload }) => {
             state.editor.details[payload.id].fund = payload.fund;
             state.liveViewText = computeExpr(state.editor);
             updateChecksum(state.editor);
+        },
+        removeDetail: (state, { payload }) => {
+            state.editor.details.splice(payload.id);
+            state.liveViewText = computeExpr(state.editor);
+            updateChecksum(state.editor);
+        },
+        newDetail: (state) => {
+            state.editor.details.push({
+                title: 0,
+                subtitle: 0,
+                content: '',
+                fund: '0',
+            });
+            state.liveViewText = computeExpr(state.editor);
         },
         submitVoucherRequested: (state) => {
             state.loading = true;
@@ -150,7 +182,12 @@ export const {
     removePayee,
     addPayer,
     removePayer,
+    updateTitle,
+    updateSubtitle,
+    updateContent,
     updateFund,
+    removeDetail,
+    newDetail,
     submitVoucherRequested,
     submitVoucherSucceeded,
     submitVoucherFailed,

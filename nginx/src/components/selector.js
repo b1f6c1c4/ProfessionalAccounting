@@ -2,15 +2,14 @@ import * as Api from '../app/api.js';
 import { without, uniq } from 'lodash-es';
 
 export default class Selector {
-    constructor(p, store, selector, adder, remover, query, aux) {
+    constructor(p, store, options) {
         this.p = p;
         this.store = store;
-        this.selector = selector;
-        this.remover = remover;
-        this.adder = adder;
-        this.remover = remover;
-        this.query = query;
-        this.aux = aux;
+        this.selector = options.selector;
+        this.adder = options.adder;
+        this.remover = options.remover;
+        this.query = options.query;
+        this.aux = options.aux;
         this.autocomplete = null;
         this.candidates = null;
         this.input = null;
