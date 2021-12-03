@@ -109,15 +109,16 @@ export default class Selector {
             this.rows = this.selected.length;
             if (this.candidates)
                 this.rows += this.candidates.length;
-            this.rowHeight = height / this.rows;
+            const minimumRows = Math.round(height / (width / 7));
+            this.rowHeight = height / Math.max(this.rows, minimumRows);
             p.textAlign(p.RIGHT);
-            p.textSize(15);
+            p.textSize(this.rowHeight * 0.6);
             for (const s of this.selected) {
                 p.noStroke();
                 p.fill(0, 70, 0);
                 p.rect(0, row * this.rowHeight, width, this.rowHeight);
                 p.fill(250);
-                p.text(s, width, (row + 0.5) * this.rowHeight);
+                p.text(s, width, (row + 0.75) * this.rowHeight);
                 p.strokeWeight(1);
                 p.stroke(200);
                 p.line(0, (row + 1) * this.rowHeight, width, (row + 1) * this.rowHeight);
@@ -136,11 +137,11 @@ export default class Selector {
                 p.text('Error:' + this.error, 0, 0, width, height);
             } else if (this.candidates) {
                 p.textAlign(p.LEFT);
-                p.textSize(13);
+                p.textSize(this.rowHeight * 0.6);
                 p.fill(250);
                 for (const a of this.candidates) {
                     p.noStroke();
-                    p.text(a, 0, (row + 0.5) * this.rowHeight);
+                    p.text(a, 0, (row + 0.75) * this.rowHeight);
                     p.strokeWeight(1);
                     p.stroke(200);
                     p.line(0, (row + 1) * this.rowHeight, width, (row + 1) * this.rowHeight);
@@ -172,7 +173,7 @@ export default class Selector {
             const row = Math.floor((p.mouseY - p.height * 0.20) / this.rowHeight);
             if (row < this.selected.length) {
                 this.store.dispatch(this.remover(this.selected[row]));
-            } else if (this.candidates) {
+            } else if (this.candidates && row < this.selected.length + this.candidates.length) {
                 this.store.dispatch(this.adder(this.candidates[row - this.selected.length]));
                 if (this.single) this.deactivate();
             }
