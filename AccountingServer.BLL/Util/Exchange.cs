@@ -249,7 +249,7 @@ namespace AccountingServer.BLL.Util
                         rate = json["data"][to]["quote"][from]["price"].Value<double>();
                 }
             }
-            if (rate.HasValue)
+            if (!rate.HasValue)
             {
                 var url =
                     $"https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/{endpoint}?symbol={from}&convert={to}";
