@@ -8,7 +8,9 @@ const initialState = {
         date: dayjs().format('YYYYMMDD'),
         payees: {}, // { [person]: share }
         payers: {}, // { [person]: share }
-        details: [], // [{ title: int, subtitle: int, content: string, fund: string }]
+        details: [
+            { title: 6602, subtitle: 3, content: 'itst', fund: '123+456*3' },
+        ], // [{ title: int, subtitle: int, content: string, fund: string }]
         adjustments: { t: 0, d: 0 },
         checksum: { payment: 0, discount: 0 },
         payments: [],
@@ -71,7 +73,7 @@ const computeExpr = (editor) => {
     let expr = `new Voucher {! ${editor.date}\n`;
     for (const d of editor.details) {
         let ps = [];
-        for (const p of Object.keys(editor.payee))
+        for (const p of Object.keys(editor.payees))
             for (let i = 0; i < editor.payee[p]; i++)
                 if (/^U([a-z&]+|'([^']|'')+')$/.test(p)) {
                     ps.push(`${p} T${d.title}${(''+d.subtitle).padStart(2)} '${d.content.replace(/'/g, '\'\'')}'`);
@@ -79,7 +81,7 @@ const computeExpr = (editor) => {
                     const [pu, pp] = p.split('-', 1);
                     ps.push(`${pu} T1221 '${pp.replace(/'/g, '\'\'')}'`);
                 }
-        expr += `${ps.join(' + ')} : ${d.fund}\n`;
+        expr += `${ps.join(' + ')} : ${d.fund} ;\n`;
     }
     expr += `t${editor.adjustments.t} `;
     expr += `d${editor.adjustments.d}\n`;
@@ -119,6 +121,11 @@ export const editSlice = createSlice({
             delete state.editor.payers[payload];
             state.liveViewText = computeExpr(state.editor);
         },
+        updateFund: (state, { payload }) => {
+            state.editor.details[payload.id].fund = payload.fund;
+            state.liveViewText = computeExpr(state.editor);
+            updateChecksum(state.editor);
+        },
         submitVoucherRequested: (state) => {
             state.loading = true;
             state.error = null;
@@ -143,6 +150,7 @@ export const {
     removePayee,
     addPayer,
     removePayer,
+    updateFund,
     submitVoucherRequested,
     submitVoucherSucceeded,
     submitVoucherFailed,

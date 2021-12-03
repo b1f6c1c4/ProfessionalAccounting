@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import Button from '../../components/button.js';
 import Selector from '../../components/selector.js';
+import Textbox from '../../components/textbox.js';
 import {
     dateInc,
     dateDec,
@@ -8,6 +9,7 @@ import {
     removePayee,
     addPayer,
     removePayer,
+    updateFund,
 } from './editSlice.js';
 
 const querier = (t) => {
@@ -23,12 +25,20 @@ const querier = (t) => {
 };
 
 export default function Edit(p, store) {
+    this.activeDetailId = null;
     this.payerSelector = new Selector(p, store,
         (state) => Object.keys(state.edit.editor.payers), addPayer, removePayer,
         querier, () => store.getState().edit.payees);
     this.payeeSelector = new Selector(p, store,
         (state) => Object.keys(state.edit.editor.payees), addPayee, removePayee,
         querier, () => store.getState().edit.payers);
+    this.textbox = new Textbox(p, store,
+        (state) => state.edit.editor.details[this.activeDetailId].fund,
+        (v) => {
+            const id = this.activeDetailId;
+            this.activeDetailId = null;
+            return updateFund({ id, fund: v });
+        });
     this.draw = function() {
         const state = store.getState().edit;
         const gap = 5;
@@ -41,6 +51,7 @@ export default function Edit(p, store) {
 
         p.fill(0);
         p.rectMode(p.CORNER);
+        p.textFont('monospace');
 
         p.push();
         { // @media
@@ -97,7 +108,7 @@ export default function Edit(p, store) {
             p.text(date, gap, baseLine);
             const dateWidth = p.textWidth(date);
 
-            let arrowWidth = 25;
+            let arrowWidth = 35;
             p.textSize(editorRowHeight * 0.3);
             baseLine = editorRowHeight * 0.58;
             const payers = state.editor.payers;
@@ -133,6 +144,66 @@ export default function Edit(p, store) {
         p.pop();
 
         p.push();
+        this.btnDetails = [];
+        { // editor line 2+=n: details
+            for (const d of state.editor.details) {
+                p.translate(0, row * editorRowHeight);
+                p.push();
+                p.stroke(170);
+                p.line(0, editorRowHeight, editorWidth, editorRowHeight);
+                p.pop();
+
+                const btnSize = editorRowHeight * 0.5;
+                const btnOffset = editorRowHeight * 0.25;
+                p.push();
+                p.fill(90);
+                p.rect(btnOffset, btnOffset, btnSize, btnSize);
+                p.rect(2 * btnOffset + btnSize, btnOffset, btnSize, btnSize);
+                p.textSize(editorRowHeight * 0.3);
+                let baseLine = editorRowHeight * 0.58;
+                p.textAlign(p.CENTER);
+                p.fill(160);
+                p.text('e', btnOffset + btnSize * 0.5, baseLine);
+                p.text('x', 2 * btnOffset + btnSize * 1.5, baseLine);
+                p.pop();
+
+                p.textSize(editorRowHeight * 0.5);
+                baseLine = editorRowHeight * 0.68;
+                const title = d.title ? 'T' + d.title : 'T????';
+                const titleWidth = p.textWidth(title);
+                p.text(title, 2 * btnSize + 3 * btnOffset, baseLine);
+
+                const subtitle = (''+d.subtitle).padStart(2, '0');
+                const subtitleWidth = p.textWidth(subtitle);
+                p.text(subtitle, 2 * btnSize + 3 * btnOffset + gap + titleWidth, baseLine);
+
+                let content = d.content;
+                if (!d.content)
+                    content = '\'\'';
+                let contentWidth = p.textWidth(content);
+                if (2 * btnSize + 3 * btnOffset + 4 * gap + titleWidth + subtitleWidth + contentWidth > editorWidth * 0.5) {
+                    content = `${content.substr(0, 2)}...`;
+                    contentWidth = p.textWidth(content);
+                }
+                p.text(content, 2 * btnSize + 3 * btnOffset + 4 * gap + titleWidth + subtitleWidth, baseLine);
+
+                p.push();
+                p.strokeWeight(5);
+                p.stroke(175);
+                p.line(2 * btnSize + 3 * btnOffset + 10 * gap + titleWidth + subtitleWidth + contentWidth, gap,
+                        2 * btnSize + 3 * btnOffset + 10 * gap + titleWidth + subtitleWidth + contentWidth, editorRowHeight - gap);
+                p.pop();
+
+                const fund = d.fund;
+                p.textAlign(p.RIGHT);
+                p.text(fund, editorWidth - gap, baseLine);
+
+                row++;
+            }
+        }
+        p.pop();
+
+        p.push();
         { // liveView
             let liveViewText = state.liveViewText;
             if (!liveViewText)
@@ -140,7 +211,6 @@ export default function Edit(p, store) {
             p.textLeading(16);
             p.textAlign(p.LEFT);
             p.textSize(16);
-            p.textFont('monospace');
             p.text(liveViewText, liveViewX, liveViewY, liveViewWidth, liveViewHeight);
         }
         p.pop();
@@ -149,15 +219,21 @@ export default function Edit(p, store) {
 
         this.payerSelector.draw();
         this.payeeSelector.draw();
+        this.textbox.draw();
     };
     this.mouseClicked = function() {
         if (!this.payerSelector.mouseClicked()) return;
         if (!this.payeeSelector.mouseClicked()) return;
+        if (!this.textbox.mouseClicked()) return;
         this.btnDateDec.dispatch(p, store, dateDec());
         this.btnDateInc.dispatch(p, store, dateInc());
         if (this.btnPayers.check(p))
             this.payerSelector.activate();
         if (this.btnPayees.check(p))
             this.payeeSelector.activate();
+        if (this.activeDetailId == null) { // TODO
+            this.activeDetailId = 0;
+            this.textbox.activate();
+        }
     }
 }
