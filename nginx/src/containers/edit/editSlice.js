@@ -141,6 +141,10 @@ export const editSlice = createSlice({
         },
         addPayee: (state, { payload }) => {
             state.editor.payees[payload] = computeShare(payload);
+            if (/^U([a-zA-Z0-9_]+)(&[a-zA-Z0-9_]+)+$/.test(payload)) {
+                for (const s of payload.substr(1).split('&'))
+                    delete state.editor.payees[`U${s}`];
+            }
             state.liveViewText = computeExpr(state.editor);
         },
         removePayee: (state, { payload }) => {
