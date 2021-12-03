@@ -11,6 +11,7 @@ export default class Selector {
         this.query = options.query;
         this.aux = options.aux;
         this.trim = options.trim;
+        this.single = options.single;
         this.autocomplete = null;
         this.candidates = null;
         this.input = null;
@@ -29,6 +30,7 @@ export default class Selector {
             if (this.input.value()) {
                 this.store.dispatch(this.adder(this.input.value()));
                 this.input.value('');
+                if (this.single) this.deactivate();
             }
         };
         this.input.input(this.doFetch.bind(this));
@@ -154,6 +156,7 @@ export default class Selector {
     mouseClicked() {
         if (!this.active) return true;
         if (new Date() - this.debounce < 150) return false;
+        this.debounce = +new Date();
         const p = this.p;
         if (p.mouseX < p.width * 0.15 || p.mouseX > p.width * 0.85 ||
             p.mouseY < p.height * 0.15 || p.mouseY > p.height * 0.85) {
@@ -165,6 +168,7 @@ export default class Selector {
             this.store.dispatch(this.remover(this.selected[row]));
         } else if (this.candidates) {
             this.store.dispatch(this.adder(this.candidates[row - this.selected.length]));
+            if (this.single) this.deactivate();
         }
         return false;
     }
