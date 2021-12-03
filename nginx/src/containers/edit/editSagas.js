@@ -19,7 +19,11 @@ function* submitVoucher(action) {
         data = data.substr(1, data.length - 2);
         yield put(submitVoucherSucceeded(data));
     } catch (e) {
-        yield put(submitVoucherFailed(e.message));
+        if (e.response) {
+            yield put(submitVoucherFailed(e.message + '\n' + e.response.data));
+        } else {
+            yield put(submitVoucherFailed(e.message));
+        }
     }
 }
 
@@ -29,7 +33,11 @@ function* revertVoucher(action) {
         yield call(Api.voucherRemovalApi, code, theUser);
         yield put(revertVoucherSucceeded());
     } catch (e) {
-        yield put(revertVoucherFailed(e.message));
+        if (e.response) {
+            yield put(revertVoucherFailed(e.message + '\n' + e.response.data));
+        } else {
+            yield put(revertVoucherFailed(e.message));
+        }
     }
 }
 

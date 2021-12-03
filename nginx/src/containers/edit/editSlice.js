@@ -103,7 +103,7 @@ const computeExpr = (editor) => {
             expr += `${editor.payer} T${d.title.split(':')[0]}${d.subtitle.split(':')[0]} '${d.content.replace(/'/g, '\'\'')}' /\n`;
         } else {
             const m = editor.payer.match(/^(?<user>U[^-]+|'(?:[^']|'')+')-(?<peer>.*)$/);
-            expr += `${m.groups.user} T2241 '${m.groups.peer.replace(/'/g, '\'\'')} /\n`;
+            expr += `${m.groups.user} T2241 '${m.groups.peer.replace(/'/g, '\'\'')}' /\n`;
         }
         expr += `}`;
         return expr;
@@ -196,12 +196,12 @@ export const editSlice = createSlice({
             state.liveViewText = computeExpr(state.editor);
         },
         updateT: (state, { payload }) => {
-            state.editor.adjustments.t = payload;
+            state.editor.adjustments.t = +payload;
             state.liveViewText = computeExpr(state.editor);
             updateChecksum(state.editor);
         },
         updateD: (state, { payload }) => {
-            state.editor.adjustments.d = payload;
+            state.editor.adjustments.d = +payload;
             state.liveViewText = computeExpr(state.editor);
             updateChecksum(state.editor);
         },
@@ -235,6 +235,9 @@ export const editSlice = createSlice({
         resetForm: (state) => {
             Object.assign(state, initialState);
         },
+        clearError: (state) => {
+            state.error = null;
+        },
     },
 });
 
@@ -259,6 +262,7 @@ export const {
     revertVoucherSucceeded,
     revertVoucherFailed,
     resetForm,
+    clearError,
 } = editSlice.actions;
 
 export default editSlice.reducer;
