@@ -153,10 +153,10 @@ export default function Edit(p, store) {
         }
         p.pop();
 
-        let editorRows = 3
-            + state.editor.details.length
-        if (editorRows < 8)
-            editorRows = 8;
+        let editorRows = 3 + state.editor.details.length;
+        const minimumRows = Math.round(editorHeight / (editorWidth / 10));
+        if (editorRows < minimumRows)
+            editorRows = minimumRows;
         const editorRowHeight = editorHeight / editorRows;
         let row = 0;
         p.push();
@@ -183,7 +183,7 @@ export default function Edit(p, store) {
             p.text(date, gap, baseLine);
             const dateWidth = p.textWidth(date);
 
-            let arrowWidth = 35;
+            let arrowWidth = editorRowHeight * 0.4;
             p.textSize(editorRowHeight * 0.3);
             baseLine = editorRowHeight * 0.58;
             let payer = state.editor.payer;
@@ -267,7 +267,12 @@ export default function Edit(p, store) {
                 p.line(sepX, gap, sepX, editorRowHeight - gap);
                 p.pop();
 
-                const fund = d.fund;
+                let fund = d.fund;
+                let fundWidth = p.textWidth(fund);
+                if (sepX + fundWidth > editorWidth - gap) {
+                    fund = `${fund.substr(0, 2)}...`;
+                    fundWidth = p.textWidth(fund);
+                }
                 p.textAlign(p.RIGHT);
                 p.text(fund, editorWidth - gap, baseLine);
 
