@@ -80,7 +80,7 @@ export default function Edit(p, store) {
             if (this.activeDetailId !== -1) {
                 return [`U Expense -9~ !t`];
             }
-            return [`${this.activeUser()} * (U T1001 + U T1002 + U T1012 + U T2001 + U T2201 + T2241) -9~ !t`];
+            return [`${this.activeUser()} * (U T1001 + U T1002 + U T1012 + U T2001 + U T2201 + U T2241) -9~ !t`];
         },
         single: true,
     });
