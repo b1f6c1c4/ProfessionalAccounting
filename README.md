@@ -13,7 +13,7 @@
 - 后端
     - 单体架构，业务逻辑使用`C# 9.0`编写
     - 数据库采用MongoDB
-    - 使用`.NET 5.0`平台编译
+    - 使用`.NET 6.0`平台编译
     - 使用docker部署
 - 前端
     - 由于逻辑非常简单，前端部分没有采用任何框架
@@ -181,7 +181,7 @@
 #### 在Linux上构建开发环境
 
 1. 请先安装以下工具：
-    - [.NET 5.0](https://dotnet.microsoft.com/download/dotnet/5.0)
+    - [.NET 6.0](https://dotnet.microsoft.com/download/dotnet/6.0)
     - [JetBrains Rider](https://www.jetbrains.com/rider/)
     - [Docker](https://www.docker.com/)
 1. 启动测试数据库：
@@ -201,7 +201,7 @@
 #### 在Windows上构建开发环境
 
 1. 请先安装以下工具：
-    - [.NET 5.0](https://dotnet.microsoft.com/download/dotnet/5.0)
+    - [.NET 6.0](https://dotnet.microsoft.com/download/dotnet/6.0)
     - [Visual Studio](https://visualstudio.microsoft.com/)
     - [Mongo DB](https://www.mongodb.com/)
 1. 启动测试数据库：在`services.msc`中启动`MongoDB`服务。

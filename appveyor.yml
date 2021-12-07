@@ -11,7 +11,7 @@ skip_commits:
 
 max_jobs: 1
 
-image: Visual Studio 2019
+image: Visual Studio 2022
 
 clone_folder: c:\projects\accounting
 
@@ -55,13 +55,13 @@ build_script:
 test:
   assemblies:
     only:
-      - AccountingServer.Test\bin\Release\AccountingServer.Test.dll
+      - AccountingServer.Test\bin\Release\net6.0\AccountingServer.Test.dll
 
 artifacts:
   - path: 'AccountingServer.BLL\Parsing'
     name: Parsing
     type: zip
-  - path: 'AccountingServer\bin\Release\net5.0'
+  - path: 'AccountingServer\bin\Release\net6.0'
     name: AccountingServer
     type: zip
 
@@ -70,7 +70,7 @@ before_deploy:
 
 deploy_script:
   - docker build -t b1f6c1c4/accounting-frontend:latest ./nginx
-  - docker build -t b1f6c1c4/accounting-backend:latest ./AccountingServer/bin/Release/net5.0
+  - docker build -t b1f6c1c4/accounting-backend:latest ./AccountingServer/bin/Release/net6.0
   - docker login -u %DOCKER_USER% -p %DOCKER_PASS%
   - docker push b1f6c1c4/accounting-frontend
   - docker push b1f6c1c4/accounting-backend
