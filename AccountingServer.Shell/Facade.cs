@@ -21,12 +21,14 @@ using System.IO;
 using System.Linq;
 using System.Resources;
 using System.Text;
+using System.Timers;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Carry;
 using AccountingServer.Shell.Serializer;
+using AccountingServer.Shell.Util;
 
 namespace AccountingServer.Shell
 {
@@ -74,6 +76,7 @@ namespace AccountingServer.Shell
                         new PluginShell(m_Accountant),
                         m_AccountingShell,
                     };
+            m_Timer.Elapsed += OnTimedEvent;
         }
 
         /// <summary>
@@ -325,6 +328,35 @@ namespace AccountingServer.Shell
                 throw new ApplicationException("编号未知");
 
             return m_Accountant.DeleteAmortization(amort.ID.Value);
+        }
+
+        #endregion
+
+        #region Exchange
+
+        /// <summary>
+        ///     定时登记汇率
+        /// </summary>
+        private readonly Timer m_Timer = new(60 * 60 * 1000)
+            {
+                AutoReset = true,
+            };
+
+        /// <summary>
+        ///     启动定时登记汇率
+        /// </summary>
+        public void EnableTimer()
+        {
+            OnTimedEvent(null, null);
+            m_Timer.Enabled = true;
+        }
+
+        private void OnTimedEvent(object source, ElapsedEventArgs e)
+        {
+            var date = DateTime.UtcNow.Subtract(new TimeSpan(23, 0, 0));
+            Console.WriteLine($"{DateTime.UtcNow:o} Ensuring exchange rates exist since {date:o}");
+            foreach (var grpC in m_Accountant.RunGroupedQuery("U!C").Items.Cast<ISubtotalCurrency>())
+                m_Accountant.From(date, grpC.Currency);
         }
 
         #endregion

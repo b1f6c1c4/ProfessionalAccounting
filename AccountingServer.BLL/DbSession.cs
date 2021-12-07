@@ -59,7 +59,7 @@ namespace AccountingServer.BLL
             if (res != null)
                 return res.Value;
 
-            Console.WriteLine($"{now:o} Explicit querying: {from}/{to}");
+            Console.WriteLine($"{DateTime.UtcNow:o} Querying: {now:o} {from}/{to}");
             var value = ExchangeFactory.Instance.Query(from, to);
             Db.Upsert(new ExchangeRecord
                 {
