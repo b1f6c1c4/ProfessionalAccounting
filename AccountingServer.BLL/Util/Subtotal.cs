@@ -158,12 +158,12 @@ namespace AccountingServer.BLL.Util
     /// </summary>
     public class SubtotalBuilder
     {
-        private readonly IExchange m_Exchange;
+        private readonly IHistoricalExchange m_Exchange;
         private readonly ISubtotal m_Par;
         private int m_Depth;
         private SubtotalLevel m_Flags;
 
-        public SubtotalBuilder(ISubtotal par, IExchange ex)
+        public SubtotalBuilder(ISubtotal par, IHistoricalExchange ex)
         {
             m_Par = par;
             m_Exchange = ex;

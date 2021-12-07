@@ -27,7 +27,7 @@ namespace AccountingServer.BLL
     /// <summary>
     ///     基本会计业务处理类
     /// </summary>
-    public class Accountant : IExchange
+    public class Accountant : IHistoricalExchange
     {
         private readonly AmortAccountant m_AmortAccountant;
 
@@ -147,9 +147,9 @@ namespace AccountingServer.BLL
 
         #region Exchange
 
-        public double From(DateTime date, string target) => m_Db.From(date, target);
+        public double From(DateTime? date, string target) => m_Db.From(date, target);
 
-        public double To(DateTime date, string target) => m_Db.To(date, target);
+        public double To(DateTime? date, string target) => m_Db.To(date, target);
 
         #endregion
     }

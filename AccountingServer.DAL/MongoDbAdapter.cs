@@ -481,11 +481,13 @@ namespace AccountingServer.DAL
 
         /// <inheritdoc />
         public ExchangeRecord SelectExchangeRecord(ExchangeRecord record) =>
-            m_Records.FindSync(
-                Builders<ExchangeRecord>.Filter.Eq("_id.date", record.Date) &
-                Builders<ExchangeRecord>.Filter.Eq("_id.from", record.From) &
-                Builders<ExchangeRecord>.Filter.Eq("_id.to", record.To)
-            ).SingleOrDefault();
+            m_Records.Find(
+                    Builders<ExchangeRecord>.Filter.Gte("_id.date", record.Time) &
+                    Builders<ExchangeRecord>.Filter.Eq("_id.from", record.From) &
+                    Builders<ExchangeRecord>.Filter.Eq("_id.to", record.To)
+                ).Sort(Builders<ExchangeRecord>.Sort.Ascending("_id.date"))
+                .Limit(1)
+                .SingleOrDefault();
 
         /// <inheritdoc />
         public bool Upsert(ExchangeRecord record)

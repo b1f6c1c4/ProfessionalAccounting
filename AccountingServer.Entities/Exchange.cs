@@ -29,7 +29,7 @@ namespace AccountingServer.Entities
         /// <summary>
         ///     日期
         /// </summary>
-        public DateTime Date { get; set; }
+        public DateTime Time { get; set; }
 
         /// <summary>
         ///     购汇币种

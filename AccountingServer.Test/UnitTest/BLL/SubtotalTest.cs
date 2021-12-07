@@ -38,7 +38,7 @@ namespace AccountingServer.Test.UnitTest.BLL
                             },
                     });
 
-        private readonly IExchange m_Exchange = new MockExchange
+        private readonly IHistoricalExchange m_Exchange = new MockExchange
             {
                 { new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "JPY", 456 },
                 { new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "USD", 789 },

@@ -25,7 +25,7 @@ using AccountingServer.Entities;
 
 namespace AccountingServer.BLL
 {
-    public class DbSession : IExchange
+    public class DbSession : IHistoricalExchange
     {
         public DbSession(string uri = null, string db = null) => Db = Facade.Create(uri, db);
 
@@ -39,41 +39,45 @@ namespace AccountingServer.BLL
         /// </summary>
         public int Limit { private get; set; } = 0;
 
-        public double From(DateTime date, string target)
+        /// <summary>
+        ///     查询汇率
+        /// </summary>
+        /// <param name="date">日期</param>
+        /// <param name="from">购汇币种</param>
+        /// <param name="to">结汇币种</param>
+        /// <returns>汇率</returns>
+        public double LookupExchange(DateTime date, string from, string to)
         {
-            var record = new ExchangeRecord { Date = date, From = target, To = BaseCurrency.Now };
-
-            if (record.From == record.To)
+            if (from == to)
                 return 1;
 
-            var res = Db.SelectExchangeRecord(record);
+            var now = DateTime.UtcNow;
+            if (date > now)
+                date = now;
+
+            var res = Db.SelectExchangeRecord(new ExchangeRecord{ Time = date, From = from, To = to });
             if (res != null)
                 return res.Value;
 
-            record.Value = ExchangeFactory.Instance.From(date, target);
-            if (record.Date <= DateTime.UtcNow.AddDays(-1))
-                Db.Upsert(record);
-
-            return record.Value;
+            Console.WriteLine($"{now:o} Explicit querying: {from}/{to}");
+            var value = ExchangeFactory.Instance.Query(from, to);
+            Db.Upsert(new ExchangeRecord
+                {
+                    Time = now,
+                    From = from,
+                    To = to,
+                    Value = value,
+                });
+            return value;
         }
 
-        public double To(DateTime date, string target)
-        {
-            var record = new ExchangeRecord { Date = date, From = BaseCurrency.Now, To = target };
+        /// <inheritdoc />
+        public double From(DateTime? date, string target)
+            => LookupExchange(date ?? DateTime.UtcNow, target, BaseCurrency.Now);
 
-            if (record.From == record.To)
-                return 1;
-
-            var res = Db.SelectExchangeRecord(record);
-            if (res != null)
-                return res.Value;
-
-            record.Value = ExchangeFactory.Instance.To(date, target);
-            if (record.Date <= DateTime.UtcNow.AddDays(-1))
-                Db.Upsert(record);
-
-            return record.Value;
-        }
+        /// <inheritdoc />
+        public double To(DateTime? date, string target)
+            => LookupExchange(date ?? DateTime.UtcNow, BaseCurrency.Now, target);
 
         private static int Compare<T>(T? lhs, T? rhs)
             where T : struct, IComparable<T>

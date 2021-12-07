@@ -32,17 +32,17 @@ namespace AccountingServer.Test
         public void Reload(bool throws) => throw new NotImplementedException();
     }
 
-    public class MockExchange : IExchange, IEnumerable
+    public class MockExchange : IHistoricalExchange, IEnumerable
     {
-        private readonly Dictionary<Tuple<DateTime, string>, double> m_Dic = new();
+        private readonly Dictionary<Tuple<DateTime?, string>, double> m_Dic = new();
 
         public IEnumerator GetEnumerator() => m_Dic.GetEnumerator();
 
-        public double From(DateTime date, string target) => target == BaseCurrency.Now
+        public double From(DateTime? date, string target) => target == BaseCurrency.Now
             ? 1
             : m_Dic[new(date, target)];
 
-        public double To(DateTime date, string target) => target == BaseCurrency.Now
+        public double To(DateTime? date, string target) => target == BaseCurrency.Now
             ? 1
             : 1D / m_Dic[new(date, target)];
 

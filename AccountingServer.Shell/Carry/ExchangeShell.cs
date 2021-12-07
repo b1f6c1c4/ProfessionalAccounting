@@ -48,7 +48,7 @@ namespace AccountingServer.Shell.Carry
                 val = Parsing.DoubleF(ref expr);
             }
 
-            var date = Parsing.UniqueTime(ref expr) ?? ClientDateTime.Today;
+            var date = Parsing.UniqueTime(ref expr);
             Parsing.Eof(expr);
             var res = rev ? m_Accountant.To(date, curr) : m_Accountant.From(date, curr);
 
