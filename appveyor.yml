@@ -52,12 +52,13 @@ build_script:
   - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer\AccountingServer.csproj
   - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer.Test\AccountingServer.Test.csproj
 
-test:
-  assemblies:
-    only:
-      - AccountingServer.Test\bin\Release\net6.0\AccountingServer.Test.dll
+test_script:
+  - dotnet test AccountingServer.Test\bin\Release\net6.0\AccountingServer.Test.dll
 
 artifacts:
+  - path: 'nginx\dist'
+    name: webpack
+    type: zip
   - path: 'AccountingServer.BLL\Parsing'
     name: Parsing
     type: zip
