@@ -495,9 +495,8 @@ namespace AccountingServer.DAL
                 m_Records.InsertOne(record);
                 return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e);
                 return false;
             }
         }

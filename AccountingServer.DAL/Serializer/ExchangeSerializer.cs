@@ -34,17 +34,19 @@ namespace AccountingServer.DAL.Serializer
             bsonReader.ReadStartDocument();
             var record = bsonReader.ReadDocument("_id", ref read, br =>
                 {
+                    // ReSharper disable AccessToModifiedClosure
                     br.ReadStartDocument();
                     var rec = new ExchangeRecord
                         {
-                            Date = br.ReadDateTime("date", ref read).Value,
+                            Date = br.ReadDateTime("date", ref read)!.Value,
                             From = br.ReadString("from", ref read),
                             To = br.ReadString("to", ref read),
                         };
                     br.ReadEndDocument();
                     return rec;
+                    // ReSharper restore AccessToModifiedClosure
                 });
-            record.Value = bsonReader.ReadDouble("value", ref read).Value;
+            record.Value = bsonReader.ReadDouble("value", ref read)!.Value;
             bsonReader.ReadEndDocument();
             return record;
         }
