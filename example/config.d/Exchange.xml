@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Exchange>
-  <!-- <fixer_io></fixer_io> -->
-  <!-- <coin_mkt></coin_mkt> -->
+  <fixer_io></fixer_io>
+  <coin_mkt></coin_mkt>
+  <currencies>
+    <conventional id="2781">USD</conventional>
+    <conventional id="2787">CNY</conventional>
+    <conventional id="2799">MXN</conventional>
+    <conventional id="2784">CAD</conventional>
+    <conventional id="2797">JPY</conventional>
+    <conventional id="2790">EUR</conventional>
+    <conventional id="2806">RUB</conventional>
+    <conventional id="2805">PLN</conventional>
+    <conventional id="2791">GBP</conventional>
+    <crypto id="1">BTC</crypto>
+    <crypto id="1027">ETH</crypto>
+    <crypto id="2">LTC</crypto>
+    <crypto id="825">USDT</crypto>
+    <crypto id="328">XMR</crypto>
+  </currencies>
 </Exchange>

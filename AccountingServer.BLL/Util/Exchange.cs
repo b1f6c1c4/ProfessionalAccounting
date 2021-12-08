@@ -73,6 +73,34 @@ namespace AccountingServer.BLL.Util
     {
         [XmlElement("fixer_io")] public string FixerAccessKey;
         [XmlElement("coin_mkt")] public string CoinAccessKey;
+
+        [XmlArray("currencies")]
+        [XmlArrayItem("conventional", typeof(ConventionalCurrency))]
+        [XmlArrayItem("crypto", typeof(CryptoCurrency))]
+        public List<Currency> Currencies;
+    }
+
+    [Serializable]
+    public abstract class Currency { }
+
+    [Serializable]
+    public class ConventionalCurrency : Currency
+    {
+        [XmlAttribute("id")]
+        public int CoinMarketCapId { get; set; }
+
+        [XmlText]
+        public string Symbol { get; set; }
+    }
+
+    [Serializable]
+    public class CryptoCurrency : Currency
+    {
+        [XmlAttribute("id")]
+        public int CoinMarketCapId { get; set; }
+
+        [XmlText]
+        public string Symbol { get; set; }
     }
 
     internal abstract class ExchangeApi : IExchange
@@ -131,43 +159,41 @@ namespace AccountingServer.BLL.Util
     /// </summary>
     internal class CoinMarketCapExchange : ExchangeApi
     {
-        private readonly Dictionary<string, int> m_Map = new();
-
-        private void AppendList(string status)
-        {
-            var url =
-                $"https://pro-api.coinmarketcap.com/v1/cryptocurrency/map?listing_status={status}";
-            var req = WebRequest.CreateHttp(url);
-            req.KeepAlive = true;
-            req.Headers.Add("X-CMC_PRO_API_KEY", ExchangeInfo.Config.CoinAccessKey);
-            req.Accept = "application/json";
-            var res = req.GetResponse();
-            using var stream = res.GetResponseStream();
-            var reader = new StreamReader(stream ?? throw new NetworkInformationException());
-            var json = JObject.Parse(reader.ReadToEnd());
-            foreach (var item in json["data"]!.Children<JObject>())
-            {
-                var key = item["symbol"]?.Value<string>() ?? throw new InvalidOperationException();
-                m_Map.TryAdd(key, item["id"]!.Value<int>());
-            }
-        }
-
-        public CoinMarketCapExchange() => AppendList("active");
-
         protected override double Invoke(string from, string to)
         {
-            if (m_Map.ContainsKey(from))
-                return PartialInvoke(from, to);
-            if (m_Map.ContainsKey(to))
-                return 1D / PartialInvoke(to, from);
+            int? fromId = null, toId = null;
+            var isCrypto = false;
+            foreach (var cur in ExchangeInfo.Config.Currencies)
+                switch (cur)
+                {
+                    case CryptoCurrency c:
+                        if (c.Symbol == from)
+                        {
+                            fromId = c.CoinMarketCapId;
+                            isCrypto = true;
+                        }
+                        if (c.Symbol == to)
+                        {
+                            toId = c.CoinMarketCapId;
+                            isCrypto = true;
+                        }
+                        break;
+                    case ConventionalCurrency c:
+                        if (c.Symbol == from)
+                            fromId = c.CoinMarketCapId;
+                        if (c.Symbol == to)
+                            toId = c.CoinMarketCapId;
+                        break;
+                }
+            if (fromId.HasValue && toId.HasValue && isCrypto)
+                return PartialInvoke(fromId.Value, toId.Value);
             throw new InvalidOperationException();
         }
 
-        private double PartialInvoke(string from, string to)
+        private static double PartialInvoke(int fromId, int toId)
         {
-            var fromId = m_Map[from];
             var url =
-                $"https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id={fromId}&convert={to}";
+                $"https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id={fromId}&convert_id={toId}";
             var req = WebRequest.CreateHttp(url);
             req.KeepAlive = true;
             req.Headers.Add("X-CMC_PRO_API_KEY", ExchangeInfo.Config.CoinAccessKey);
@@ -176,7 +202,7 @@ namespace AccountingServer.BLL.Util
             using var stream = res.GetResponseStream();
             var reader = new StreamReader(stream ?? throw new NetworkInformationException());
             var json = JObject.Parse(reader.ReadToEnd());
-            return json["data"]![fromId.ToString()]!["quote"]![to]!["price"]!.Value<double>();
+            return json["data"]![fromId.ToString()]!["quote"]![toId.ToString()]!["price"]!.Value<double>();
         }
     }
 }
