@@ -42,6 +42,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             {
                 { new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "JPY", 456 },
                 { new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "USD", 789 },
+                { new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "CNY", 1 },
             };
 
         [Theory]
@@ -679,7 +680,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             var res = builder.Build(bal);
             Assert.IsAssignableFrom<ISubtotalRoot>(res);
             Assert.Null(res.Items);
-            Assert.Equal((8 * 456 + 1 + 4 * 789 + 2) / 456D, res.Fund);
+            Assert.Equal((8 * 456 + 1 + 4 * 789 + 2) / 456D, res.Fund, 14);
         }
 
         [Fact]

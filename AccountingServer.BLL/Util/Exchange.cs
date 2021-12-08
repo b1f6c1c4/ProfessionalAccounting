@@ -17,7 +17,9 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Xml.Serialization;
@@ -29,7 +31,7 @@ namespace AccountingServer.BLL.Util
     internal static class ExchangeFactory
     {
         public static IExchange Instance { get; set; } =
-            new FixerIoExchange { Successor = new CoinMarketCapExchange() };
+            new CoinMarketCapExchange { Successor = new FixerIoExchange() };
     }
 
     /// <summary>
@@ -81,41 +83,28 @@ namespace AccountingServer.BLL.Util
         protected static IConfigManager<ExchangeInfo> ExchangeInfo { get; set; } =
             new ConfigManager<ExchangeInfo>("Exchange.xml");
 
-        internal ExchangeApi Successor { private protected get; set; }
+        internal ExchangeApi Successor { private get; init; }
 
-        double IExchange.From(DateTime date, string target)
+        public double Query(string from, string to)
+            => Query(from, to, Enumerable.Empty<Exception>());
+
+        private double Query(string from, string to, IEnumerable<Exception> err)
         {
             try
             {
-                return From(date, target);
+                return Invoke(from, to);
             }
             catch (Exception e)
             {
-                if (Successor == null)
-                    throw;
+                var ne = err.Append(e);
+                if (Successor != null)
+                    return Successor.Query(from, to, ne);
 
-                return Successor.From(date, target);
+                throw new AggregateException(ne);
             }
         }
 
-        double IExchange.To(DateTime date, string target)
-        {
-            try
-            {
-                return To(date, target);
-            }
-            catch (Exception e)
-            {
-                if (Successor == null)
-                    throw;
-
-                return Successor.To(date, target);
-            }
-        }
-
-        protected abstract double From(DateTime date, string target);
-
-        protected abstract double To(DateTime date, string target);
+        protected abstract double Invoke(string from, string to);
     }
 
     /// <summary>
@@ -123,38 +112,10 @@ namespace AccountingServer.BLL.Util
     /// </summary>
     internal class FixerIoExchange : ExchangeApi
     {
-        /// <summary>
-        ///     缓存
-        /// </summary>
-        private readonly Dictionary<string, (DateTime, double)> m_Cache =
-            new Dictionary<string, (DateTime, double)>();
-
-        private readonly ReaderWriterLockSlim m_Lock = new ReaderWriterLockSlim();
-
-        /// <summary>
-        ///     汇率API配置
-        /// </summary>
-        public static IConfigManager<ExchangeInfo> ExchangeInfo { private get; set; } =
-            new ConfigManager<ExchangeInfo>("Exchange.xml");
-
-        /// <inheritdoc />
-        public double From(DateTime date, string target) => Invoke(date, target, BaseCurrency.Now);
-
-        /// <inheritdoc />
-        public double To(DateTime date, string target) => Invoke(date, BaseCurrency.Now, target);
-
-        /// <summary>
-        ///     调用查询接口
-        /// </summary>
-        /// <param name="date">日期</param>
-        /// <param name="from">基准</param>
-        /// <param name="to">目标</param>
-        /// <returns>汇率</returns>
-        private double Invoke(DateTime date, string from, string to)
+        protected override double Invoke(string from, string to)
         {
             var url =
-                $"http://data.fixer.io/api/{endpoint}?access_key={ExchangeInfo.Config.AccessKey}&symbols={from},{to}";
-            Console.WriteLine($"AccountingServer.BLL.FixerIoExchange.Invoke(): {endpoint}: {from}/{to}");
+                $"http://data.fixer.io/api/latest?access_key={ExchangeInfo.Config.FixerAccessKey}&symbols={from},{to}";
             var req = WebRequest.CreateHttp(url);
             req.KeepAlive = true;
             var res = req.GetResponse();
@@ -170,106 +131,52 @@ namespace AccountingServer.BLL.Util
     /// </summary>
     internal class CoinMarketCapExchange : ExchangeApi
     {
-        /// <summary>
-        ///     缓存
-        /// </summary>
-        private readonly Dictionary<string, (DateTime, double)> m_Cache =
-            new Dictionary<string, (DateTime, double)>();
+        private readonly Dictionary<string, int> m_Map = new();
 
-        private readonly ReaderWriterLockSlim m_Lock = new ReaderWriterLockSlim();
-
-        /// <inheritdoc />
-        protected override double From(DateTime date, string target) => Invoke(date, target, BaseCurrency.Now);
-
-        /// <inheritdoc />
-        protected override double To(DateTime date, string target) => Invoke(date, BaseCurrency.Now, target);
-
-        /// <summary>
-        ///     调用查询接口
-        /// </summary>
-        /// <param name="date">日期</param>
-        /// <param name="from">基准</param>
-        /// <param name="to">目标</param>
-        /// <returns>汇率</returns>
-        private double Invoke(DateTime date, string from, string to)
+        private void AppendList(string status)
         {
-            if (from == to)
-                return 1;
-
-            var endpoint = date > DateTime.UtcNow
-                ? "latest"
-                : throw new ApplicationException("Historical rate unavailable.");
-            var token = $"{endpoint}#{from}#{to}";
-
-            m_Lock.EnterReadLock();
-            try
+            var url =
+                $"https://pro-api.coinmarketcap.com/v1/cryptocurrency/map?listing_status={status}";
+            var req = WebRequest.CreateHttp(url);
+            req.KeepAlive = true;
+            req.Headers.Add("X-CMC_PRO_API_KEY", ExchangeInfo.Config.CoinAccessKey);
+            req.Accept = "application/json";
+            var res = req.GetResponse();
+            using var stream = res.GetResponseStream();
+            var reader = new StreamReader(stream ?? throw new NetworkInformationException());
+            var json = JObject.Parse(reader.ReadToEnd());
+            foreach (var item in json["data"]!.Children<JObject>())
             {
-                if (m_Cache.ContainsKey(token))
-                {
-                    var (d, v) = m_Cache[token];
-                    if ((DateTime.UtcNow - d).TotalHours < 12)
-                        return v;
-                }
+                var key = item["symbol"]?.Value<string>() ?? throw new InvalidOperationException();
+                m_Map.TryAdd(key, item["id"]!.Value<int>());
             }
-            finally
-            {
-                m_Lock.ExitReadLock();
-            }
+        }
 
-            double? rate = null;
+        public CoinMarketCapExchange() => AppendList("active");
 
-            {
-                var url =
-                    $"https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/{endpoint}?symbol={to}&convert={from}";
+        protected override double Invoke(string from, string to)
+        {
+            if (m_Map.ContainsKey(from))
+                return PartialInvoke(from, to);
+            if (m_Map.ContainsKey(to))
+                return 1D / PartialInvoke(to, from);
+            throw new InvalidOperationException();
+        }
 
-                Console.WriteLine($"AccountingServer.BLL.CoinMarketCapExchange.Invoke(): {endpoint}: {from}/{to}");
-                var req = WebRequest.CreateHttp(url);
-                req.KeepAlive = true;
-                req.Headers.Add("X-CMC_PRO_API_KEY", ExchangeInfo.Config.CoinAccessKey);
-                req.Accept = "application/json";
-                var res = req.GetResponse();
-                using (var stream = res.GetResponseStream())
-                {
-                    var reader = new StreamReader(stream ?? throw new NetworkInformationException());
-                    var json = JObject.Parse(reader.ReadToEnd());
-                    if (json["status"]["error_code"].Value<int>() == 0)
-                        rate = json["data"][to]["quote"][from]["price"].Value<double>();
-                }
-            }
-            if (!rate.HasValue)
-            {
-                var url =
-                    $"https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/{endpoint}?symbol={from}&convert={to}";
-
-                Console.WriteLine($"AccountingServer.BLL.CoinMarketCapExchange.Invoke(): {endpoint}: {to}/{from}");
-                var req = WebRequest.CreateHttp(url);
-                req.KeepAlive = true;
-                req.Headers.Add("X-CMC_PRO_API_KEY", ExchangeInfo.Config.CoinAccessKey);
-                req.Accept = "application/json";
-                var res = req.GetResponse();
-                using (var stream = res.GetResponseStream())
-                {
-                    var reader = new StreamReader(stream ?? throw new NetworkInformationException());
-                    var json = JObject.Parse(reader.ReadToEnd());
-                    if (json["status"]["error_code"].Value<int>() == 0)
-                        rate = json["data"][from]["quote"][to]["price"].Value<double>();
-                }
-            }
-
-            if (!rate.HasValue)
-                throw new InvalidOperationException("Unknown currency.");
-
-            m_Lock.EnterWriteLock();
-            try
-            {
-                m_Cache[token] = (DateTime.UtcNow, rate.Value);
-            }
-            finally
-            {
-                m_Lock.ExitWriteLock();
-            }
-
-            return rate.Value;
+        private double PartialInvoke(string from, string to)
+        {
+            var fromId = m_Map[from];
+            var url =
+                $"https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id={fromId}&convert={to}";
+            var req = WebRequest.CreateHttp(url);
+            req.KeepAlive = true;
+            req.Headers.Add("X-CMC_PRO_API_KEY", ExchangeInfo.Config.CoinAccessKey);
+            req.Accept = "application/json";
+            var res = req.GetResponse();
+            using var stream = res.GetResponseStream();
+            var reader = new StreamReader(stream ?? throw new NetworkInformationException());
+            var json = JObject.Parse(reader.ReadToEnd());
+            return json["data"]![fromId.ToString()]!["quote"]![to]!["price"]!.Value<double>();
         }
     }
 }

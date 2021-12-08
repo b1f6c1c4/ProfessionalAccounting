@@ -58,8 +58,11 @@ namespace AccountingServer.BLL
             var res = Db.SelectExchangeRecord(new ExchangeRecord{ Time = date, From = from, To = to });
             if (res != null)
                 return res.Value;
+            res = Db.SelectExchangeRecord(new ExchangeRecord{ Time = date, From = to, To = from });
+            if (res != null)
+                return 1D / res.Value;
 
-            Console.WriteLine($"{DateTime.UtcNow:o} Querying: {now:o} {from}/{to}");
+            Console.WriteLine($"{now:o} Query: {date:o} {from}/{to}");
             var value = ExchangeFactory.Instance.Query(from, to);
             Db.Upsert(new ExchangeRecord
                 {

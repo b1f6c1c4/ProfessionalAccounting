@@ -16,6 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Shell.Serializer;
@@ -48,7 +49,7 @@ namespace AccountingServer.Shell
                 val = Parsing.DoubleF(ref expr);
             }
 
-            var date = Parsing.UniqueTime(ref expr);
+            var date = Parsing.UniqueTime(ref expr) ?? DateTime.UtcNow.Subtract(new TimeSpan(0, 30, 0));
             Parsing.Eof(expr);
             var res = rev
                 ? m_Accountant.Query(date, BaseCurrency.Now, curr)
