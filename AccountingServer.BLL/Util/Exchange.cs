@@ -26,7 +26,7 @@ using Newtonsoft.Json.Linq;
 
 namespace AccountingServer.BLL.Util
 {
-    public static class ExchangeFactory
+    internal static class ExchangeFactory
     {
         public static IExchange Instance { get; set; } =
             new FixerIoExchange { Successor = new CoinMarketCapExchange() };
@@ -35,7 +35,7 @@ namespace AccountingServer.BLL.Util
     /// <summary>
     ///     汇率查询
     /// </summary>
-    public interface IExchange
+    internal interface IExchange
     {
         /// <summary>
         ///     汇率查询
@@ -56,26 +56,13 @@ namespace AccountingServer.BLL.Util
     public interface IHistoricalExchange
     {
         /// <summary>
-        ///     买入汇率
+        ///     汇率查询
         /// </summary>
-        /// <example>
-        ///     若<c>BaseCurrency.Now == "CNY"</c>，则<c>IExchange.From(dt, "USD") == 6.8</c>
-        /// </example>
         /// <param name="date">日期</param>
-        /// <param name="target">购汇币种</param>
+        /// <param name="from">购汇币种</param>
+        /// <param name="to">结汇币种</param>
         /// <returns>汇率</returns>
-        double From(DateTime? date, string target);
-
-        /// <summary>
-        ///     卖出汇率
-        /// </summary>
-        /// <example>
-        ///     若<c>BaseCurrency.Now == "CNY"</c>，则<c>IExchange.From(dt, "USD") == 0.147</c>
-        /// </example>
-        /// <param name="date">日期</param>
-        /// <param name="target">结汇币种</param>
-        /// <returns>汇率</returns>
-        double To(DateTime? date, string target);
+        double Query(DateTime? date, string from, string to);
     }
 
     [Serializable]

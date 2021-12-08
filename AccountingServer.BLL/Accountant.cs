@@ -147,9 +147,7 @@ namespace AccountingServer.BLL
 
         #region Exchange
 
-        public double From(DateTime? date, string target) => m_Db.From(date, target);
-
-        public double To(DateTime? date, string target) => m_Db.To(date, target);
+        public double Query(DateTime? date, string from, string to) => m_Db.Query(date, from, to);
 
         #endregion
     }

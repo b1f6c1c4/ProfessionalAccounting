@@ -100,9 +100,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                 var sum = 0D;
                 for (var i = 0; i < n; i++)
                 {
-                    sum += aggs[i] * Accountant.From(
-                        ClientDateTime.Today,
-                        accts[i].Currency);
+                    sum += aggs[i] * Accountant.Query(ClientDateTime.Today, accts[i].Currency, BaseCurrency.Now);
 
                     sb.Append("".PadLeft(15));
                     sb.Append("".PadLeft(15));
@@ -122,9 +120,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                 {
                     aggs[i] += kvp.Value[i, 0] + kvp.Value[i, 1];
 
-                    sum += aggs[i] * Accountant.From(
-                        kvp.Key,
-                        accts[i].Currency);
+                    sum += aggs[i] * Accountant.Query(kvp.Key, accts[i].Currency, BaseCurrency.Now);
 
                     if (!kvp.Value[i, 0].IsZero())
                         sb.Append(kvp.Value[i, 0].AsCurrency(accts[i].Currency).PadLeft(15));
@@ -221,8 +217,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         foreach (var b in grpC.Items.Cast<ISubtotalDate>())
                         {
                             var mo = NextDate(cc.RepaymentDay, NextDate(cc.BillDay, b.Date.Value), true);
-                            var cob = Accountant.From(mo, grpC.Currency)
-                                * Accountant.To(mo, account.Currency)
+                            var cob = Accountant.Query(mo, grpC.Currency, account.Currency)
                                 * b.Fund;
                             if (mos.ContainsKey(mo))
                                 mos[mo] += cob;

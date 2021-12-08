@@ -17,6 +17,7 @@
  */
 
 using AccountingServer.BLL;
+using AccountingServer.BLL.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
@@ -49,7 +50,9 @@ namespace AccountingServer.Shell
 
             var date = Parsing.UniqueTime(ref expr);
             Parsing.Eof(expr);
-            var res = rev ? m_Accountant.To(date, curr) : m_Accountant.From(date, curr);
+            var res = rev
+                ? m_Accountant.Query(date, BaseCurrency.Now, curr)
+                : m_Accountant.Query(date, curr, BaseCurrency.Now);
 
             return new PlainText((res * val.Value).ToString("R"));
         }

@@ -344,8 +344,7 @@ namespace AccountingServer.BLL.Util
         private double BuildEquiPhase(IEnumerable<Balance> raw) => m_Par.EquivalentDate.HasValue
             ? raw.Sum(
                 b => b.Fund
-                    * m_Exchange.From(m_Par.EquivalentDate.Value, b.Currency)
-                    * m_Exchange.To(m_Par.EquivalentDate.Value, m_Par.EquivalentCurrency))
+                    * m_Exchange.Query(m_Par.EquivalentDate.Value, b.Currency, m_Par.EquivalentCurrency))
             : raw.Sum(b => b.Fund);
     }
 }

@@ -46,7 +46,7 @@ namespace AccountingServer.BLL
         /// <param name="from">购汇币种</param>
         /// <param name="to">结汇币种</param>
         /// <returns>汇率</returns>
-        public double LookupExchange(DateTime date, string from, string to)
+        private double LookupExchange(DateTime date, string from, string to)
         {
             if (from == to)
                 return 1;
@@ -72,12 +72,8 @@ namespace AccountingServer.BLL
         }
 
         /// <inheritdoc />
-        public double From(DateTime? date, string target)
-            => LookupExchange(date ?? DateTime.UtcNow, target, BaseCurrency.Now);
-
-        /// <inheritdoc />
-        public double To(DateTime? date, string target)
-            => LookupExchange(date ?? DateTime.UtcNow, BaseCurrency.Now, target);
+        public double Query(DateTime? date, string from, string to)
+            => LookupExchange(date ?? DateTime.UtcNow, from, to);
 
         private static int Compare<T>(T? lhs, T? rhs)
             where T : struct, IComparable<T>

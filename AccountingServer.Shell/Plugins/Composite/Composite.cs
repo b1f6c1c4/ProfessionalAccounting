@@ -185,8 +185,7 @@ namespace AccountingServer.Shell.Plugins.Composite
                 foreach (var grp in gq.Items.Cast<ISubtotalCurrency>())
                 {
                     var curr = grp.Currency;
-                    var ratio = m_Accountant.From(m_Rng.EndDate!.Value, curr)
-                        * m_Accountant.To(m_Rng.EndDate!.Value, m_BaseCurrency);
+                    var ratio = m_Accountant.Query(m_Rng.EndDate!.Value, curr, m_BaseCurrency);
 
                     var theFmt = new CurrencyDecorator(fmt, curr, ratio);
 
