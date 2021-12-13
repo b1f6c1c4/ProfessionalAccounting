@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -eux
+
+rm -rf /data/accounting/backup/{accounting,config.d}
+mkdir -p /data/accounting/backup/
+chown 999 /data/accounting/backup/
+cp -a /data/accounting/config.d /data/accounting/backup/config.d
+
+docker run --rm --name mongo_dumper -v /data/accounting:/opt/accounting mongo \
+    mongodump --uri="$(cat /data/accounting/atlas/url)" \
+    --ssl --sslPEMKeyFile /opt/accounting/atlas/cert.pem -o /opt/accounting/backup/
+
+F="$(date -I)"
+tar cJvf "/data/accounting/backup/$F.tar" -C /data/accounting/backup --owner=0 --group=0 accounting config.d
+chmod -w "/data/accounting/backup/$F.tar"
+rm -rf /data/accounting/backup/{accounting,config.d}
