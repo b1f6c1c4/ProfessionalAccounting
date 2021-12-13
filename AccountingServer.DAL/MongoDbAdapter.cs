@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using AccountingServer.DAL.Serializer;
 using AccountingServer.Entities;
 using MongoDB.Bson;
@@ -170,10 +171,17 @@ namespace AccountingServer.DAL
             ProjectNothingButWeek = MakeProject(week, false);
         }
 
-        public MongoDbAdapter(string uri, string db = null)
+        public MongoDbAdapter(string uri, string db = null, string x509 = null)
         {
             var url = new MongoUrl(uri);
-            m_Client = new(MongoClientSettings.FromUrl(url));
+            var settings = MongoClientSettings.FromUrl(url);
+            if (!string.IsNullOrEmpty(x509))
+            {
+                var cert = X509Certificate2.CreateFromPemFile(x509);
+                settings.SslSettings.ClientCertificates = new[] { cert };
+            }
+
+            m_Client = new(settings);
 
             m_Db = m_Client.GetDatabase(db ?? url.DatabaseName ?? "accounting");
 
