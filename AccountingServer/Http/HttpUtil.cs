@@ -41,7 +41,7 @@ namespace AccountingServer.Http
             return Encoding.UTF8.GetString(buff);
         }
 
-        public static HttpResponse GenerateHttpResponse(string str, string contentType = "text/json")
+        public static HttpResponse GenerateHttpResponse(string str, string contentType = "application/json")
         {
             var stream = new MemoryStream();
             var sw = new StreamWriter(stream);
@@ -50,7 +50,7 @@ namespace AccountingServer.Http
             return GenerateHttpResponse(stream, contentType);
         }
 
-        public static HttpResponse GenerateHttpResponse(Stream stream, string contentType = "text/json")
+        public static HttpResponse GenerateHttpResponse(Stream stream, string contentType = "application/json")
         {
             stream.Position = 0;
             return new HttpResponse

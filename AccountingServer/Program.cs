@@ -34,11 +34,21 @@ HttpResponse Server_OnHttpRequest(HttpRequest request)
 {
 #if DEBUG
     var fn = Path.Combine(
-        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../nginx/"),
-        (request.BaseUri == "/" ? "/index.html" : request.BaseUri).TrimStart('/'));
+        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../../nginx/dist"),
+        (request.BaseUri == "/" ? "/index-desktop.html" : request.BaseUri).TrimStart('/'));
     if (request.Method == "GET")
         if (File.Exists(fn))
-            return GenerateHttpResponse(File.OpenRead(fn), "text/html");
+            return GenerateHttpResponse(File.OpenRead(fn), fn.Split(".")[^1] switch
+                {
+                    "html" => "text/html",
+                    "js" => "application/javascript",
+                    "css" => "text/css",
+                    "png" => "image/png",
+                    "ico" => "image/x-icon",
+                    "txt" => "text/plain",
+                    "xml" => "application/xml",
+                    _ => "application/octet-stream",
+                });
 
     if (request.BaseUri.StartsWith("/api", StringComparison.Ordinal))
         request.BaseUri = request.BaseUri[4..];
