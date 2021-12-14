@@ -67,6 +67,13 @@ namespace AccountingServer.DAL
         IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit = 0);
 
         /// <summary>
+        ///     查找重复的记账凭证
+        /// </summary>
+        /// <param name="query">检索式</param>
+        /// <returns>匹配检索式的记账凭证及其数量</returns>
+        IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query);
+
+        /// <summary>
         ///     按编号删除记账凭证
         /// </summary>
         /// <param name="id">编号</param>

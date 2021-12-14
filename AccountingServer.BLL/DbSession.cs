@@ -151,6 +151,9 @@ namespace AccountingServer.BLL
             return conv.Build(res);
         }
 
+        public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+            => Db.SelectDuplicatedVouchers(query);
+
         public bool DeleteVoucher(string id)
             => Db.DeleteVoucher(id);
 

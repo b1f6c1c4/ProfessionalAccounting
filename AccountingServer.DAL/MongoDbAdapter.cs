@@ -24,6 +24,7 @@ using System.Security.Cryptography.X509Certificates;
 using AccountingServer.DAL.Serializer;
 using AccountingServer.Entities;
 using MongoDB.Bson;
+using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using static AccountingServer.DAL.MongoDbNative;
@@ -389,6 +390,28 @@ namespace AccountingServer.DAL
                 fluent = fluent.Sort(new SortDefinitionBuilder<BsonDocument>().Descending("count")).Limit(limit);
             return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
         }
+
+        public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+            => m_Vouchers.Aggregate().Match(query.Accept(new MongoDbNativeVoucher()))
+                .Group(new BsonDocument
+                    {
+                        ["_id"] = new BsonDocument { ["date"] = "$date", ["detail"] = "$detail" },
+                        ["count"] = new BsonDocument { ["$sum"] = 1 },
+                        ["ids"] = new BsonDocument { ["$push"] = "$_id" },
+                    })
+                .Match(new FilterDefinitionBuilder<BsonDocument>().Gt("count", 1))
+                .Sort(new SortDefinitionBuilder<BsonDocument>().Ascending("_id.date"))
+                .ToEnumerable().Select(b =>
+                    {
+                        var bsonReader = new BsonDocumentReader(b);
+                        string read = null;
+                        bsonReader.ReadStartDocument();
+                        var v = bsonReader.ReadDocument("_id", ref read, new VoucherSerializer().Deserialize);
+                        bsonReader.ReadInt32("count", ref read);
+                        var ids = bsonReader.ReadArray("ids", ref read, bR => bR.ReadObjectId().ToString());
+                        bsonReader.ReadEndDocument();
+                        return (v, ids);
+                    });
 
         /// <inheritdoc />
         public bool DeleteVoucher(string id)

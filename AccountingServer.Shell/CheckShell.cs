@@ -26,6 +26,7 @@ using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
+using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Shell
 {
@@ -48,6 +49,7 @@ namespace AccountingServer.Shell
                     "1" => BasicCheck(serializer),
                     "2" => AdvancedCheck(),
                     "3" => new NumberAffected(m_Accountant.Upsert(m_Accountant.RunVoucherQuery("U A").ToList())),
+                    var x when x.StartsWith("4") => DuplicationCheck(serializer, x.Rest()),
                     _ => throw new InvalidOperationException("表达式无效"),
                 };
 
@@ -171,6 +173,25 @@ namespace AccountingServer.Shell
                     $"{v.ID} {v.Date:yyyyMMdd} {info} {d.Content}:{d.Fund!.Value:R}");
                 sb.AppendLine();
             }
+        }
+
+        private IQueryResult DuplicationCheck(IEntitiesSerializer serializer, string expr)
+        {
+            var sb = new StringBuilder();
+            var query = Parsing.VoucherQuery(ref expr);
+            Parsing.Eof(expr);
+            foreach (var (v, ids) in m_Accountant.SelectDuplicatedVouchers(query))
+            {
+                sb.AppendLine($"// Date = {v.Date.AsDate()} Duplication = {ids.Count}");
+                foreach (var id in ids)
+                    sb.AppendLine($"//   ^{id}^");
+                sb.AppendLine(serializer.PresentVoucher(v).Wrap());
+            }
+
+            if (sb.Length > 0)
+                return new PlainText(sb.ToString());
+
+            return new PlainSucceed();
         }
     }
 }

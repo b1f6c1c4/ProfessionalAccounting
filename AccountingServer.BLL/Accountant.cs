@@ -61,6 +61,9 @@ namespace AccountingServer.BLL
         public ISubtotalResult SelectVouchersGrouped(IVoucherGroupedQuery query)
             => m_Db.SelectVouchersGrouped(query);
 
+        public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+            => m_Db.SelectDuplicatedVouchers(query);
+
         public bool DeleteVoucher(string id)
             => m_Db.DeleteVoucher(id);
 
