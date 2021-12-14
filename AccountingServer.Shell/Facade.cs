@@ -355,8 +355,15 @@ namespace AccountingServer.Shell
         {
             var date = DateTime.UtcNow.Subtract(new TimeSpan(23, 0, 0));
             Console.WriteLine($"{DateTime.UtcNow:o} Ensuring exchange rates exist since {date:o}");
-            foreach (var grpC in m_Accountant.RunGroupedQuery("U!C").Items.Cast<ISubtotalCurrency>())
-                m_Accountant.Query(date, grpC.Currency, BaseCurrency.Now);
+            try
+            {
+                foreach (var grpC in m_Accountant.RunGroupedQuery("U!C").Items.Cast<ISubtotalCurrency>())
+                    m_Accountant.Query(date, grpC.Currency, BaseCurrency.Now);
+            }
+            catch (Exception err)
+            {
+                Console.WriteLine(err);
+            }
         }
 
         #endregion

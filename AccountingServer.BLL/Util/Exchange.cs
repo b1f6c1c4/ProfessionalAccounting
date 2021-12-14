@@ -71,8 +71,8 @@ namespace AccountingServer.BLL.Util
     [XmlRoot("Exchange")]
     public class ExchangeInfo
     {
-        [XmlElement("fixer_io")] public string FixerAccessKey;
-        [XmlElement("coin_mkt")] public string CoinAccessKey;
+        [XmlElement("fixer_io")] public List<string> FixerAccessKey;
+        [XmlElement("coin_mkt")] public List<string> CoinAccessKey;
 
         [XmlArray("currencies")]
         [XmlArrayItem("conventional", typeof(ConventionalCurrency))]
@@ -142,8 +142,15 @@ namespace AccountingServer.BLL.Util
     {
         protected override double Invoke(string from, string to)
         {
+            foreach (var key in ExchangeInfo.Config.FixerAccessKey)
+                return PartialInvoke(from, to, key);
+            throw new UnauthorizedAccessException();
+        }
+
+        private static double PartialInvoke(string from, string to, string key)
+        {
             var url =
-                $"http://data.fixer.io/api/latest?access_key={ExchangeInfo.Config.FixerAccessKey}&symbols={from},{to}";
+                $"http://data.fixer.io/api/latest?access_key={key}&symbols={from},{to}";
             var req = WebRequest.CreateHttp(url);
             req.KeepAlive = true;
             var res = req.GetResponse();
@@ -185,18 +192,21 @@ namespace AccountingServer.BLL.Util
                             toId = c.CoinMarketCapId;
                         break;
                 }
-            if (fromId.HasValue && toId.HasValue && isCrypto)
-                return PartialInvoke(fromId.Value, toId.Value);
-            throw new InvalidOperationException();
+
+            if (!fromId.HasValue || !toId.HasValue || !isCrypto)
+                throw new InvalidOperationException();
+            foreach (var key in ExchangeInfo.Config.CoinAccessKey)
+                return PartialInvoke(fromId.Value, toId.Value, key);
+            throw new UnauthorizedAccessException();
         }
 
-        private static double PartialInvoke(int fromId, int toId)
+        private static double PartialInvoke(int fromId, int toId, string key)
         {
             var url =
                 $"https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id={fromId}&convert_id={toId}";
             var req = WebRequest.CreateHttp(url);
             req.KeepAlive = true;
-            req.Headers.Add("X-CMC_PRO_API_KEY", ExchangeInfo.Config.CoinAccessKey);
+            req.Headers.Add("X-CMC_PRO_API_KEY", key);
             req.Accept = "application/json";
             var res = req.GetResponse();
             using var stream = res.GetResponseStream();
