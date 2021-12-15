@@ -391,6 +391,52 @@ namespace AccountingServer.DAL
             return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
         }
 
+        public IEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+            => m_Vouchers.Aggregate().Match(query.Accept(new MongoDbNativeVoucher()))
+                .Unwind("detail").Group(new BsonDocument
+                    {
+                        ["_id"] = new BsonDocument
+                            {
+                                ["id"] = "$_id",
+                                ["user"] = "$detail.user",
+                                ["currency"] = "$detail.currency",
+                            },
+                        ["value"] = new BsonDocument { ["$sum"] = "$detail.fund" },
+                    })
+                .Match(new BsonDocument
+                    {
+                        ["$expr"] = new BsonDocument
+                            {
+                                ["$gt"] = new BsonArray
+                                    {
+                                        new BsonDocument{ ["$abs"] = "$value" },
+                                        VoucherDetail.Tolerance,
+                                    },
+                            },
+                    })
+                .Lookup("voucher", "_id.id", "_id", "voucher")
+                .Sort(new SortDefinitionBuilder<BsonDocument>().Ascending("voucher.date"))
+                .ToEnumerable().Select(b =>
+                    {
+                        var bsonReader = new BsonDocumentReader(b);
+                        string read = null;
+                        bsonReader.ReadStartDocument();
+                        var (user, curr) = bsonReader.ReadDocument("_id", ref read, bR =>
+                            {
+                                bR.ReadStartDocument();
+                                bR.ReadObjectId("id", ref read);
+                                var u = bR.ReadString("user", ref read);
+                                var c = bR.ReadString("currency", ref read);
+                                bR.ReadEndDocument();
+                                return (u, c);
+                            });
+                        var v = bsonReader.ReadDouble("value", ref read)!.Value;
+                        var voucher = bsonReader.ReadArray("voucher", ref read, new VoucherSerializer().Deserialize)
+                            .Single();
+                        bsonReader.ReadEndDocument();
+                        return (voucher, user, curr, v);
+                    });
+
         public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
             => m_Vouchers.Aggregate().Match(query.Accept(new MongoDbNativeVoucher()))
                 .Group(new BsonDocument

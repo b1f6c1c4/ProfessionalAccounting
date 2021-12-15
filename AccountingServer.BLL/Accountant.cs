@@ -61,6 +61,9 @@ namespace AccountingServer.BLL
         public ISubtotalResult SelectVouchersGrouped(IVoucherGroupedQuery query)
             => m_Db.SelectVouchersGrouped(query);
 
+        public IEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+            => m_Db.SelectUnbalancedVouchers(query);
+
         public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
             => m_Db.SelectDuplicatedVouchers(query);
 

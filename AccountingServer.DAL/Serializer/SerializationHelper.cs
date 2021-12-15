@@ -211,8 +211,8 @@ namespace AccountingServer.DAL.Serializer
         /// <param name="parser">文档读取器</param>
         /// <returns>读取结果</returns>
         public static T ReadDocument<T>(this IBsonReader bsonReader, string expected, ref string read,
-            Func<IBsonReader, T> parser) where T : class
-            => ReadPrep(bsonReader, expected, ref read) ? parser(bsonReader) : null;
+            Func<IBsonReader, T> parser)
+            => ReadPrep(bsonReader, expected, ref read) ? parser(bsonReader) : default;
 
         /// <summary>
         ///     安全地读入数组字段

@@ -64,27 +64,22 @@ namespace AccountingServer.Shell
         private IQueryResult BasicCheck(IEntitySerializer serializer)
         {
             var sb = new StringBuilder();
-            foreach (var voucher in m_Accountant.SelectVouchers(VoucherQueryUnconstrained.Instance))
+            Voucher old = null;
+            foreach (var (voucher, user, curr, v) in
+                m_Accountant.SelectUnbalancedVouchers(VoucherQueryUnconstrained.Instance))
             {
-                var flag = false;
-                var grps = voucher.Details
-                    .GroupBy(d => new { d.User, d.Currency }, d => d.Fund!.Value);
-                foreach (var grp in grps)
+                if (old == null)
+                    old = voucher;
+                else if (voucher.ID != old.ID)
                 {
-                    var val = grp.Sum();
-                    if (val.IsZero())
-                        continue;
-
-                    flag = true;
-                    sb.AppendLine(
-                        val > 0
-                            ? $"/* U{grp.Key.User.AsUser()} @{grp.Key.Currency}: Debit - Credit = {val:R} */"
-                            : $"/* U{grp.Key.User.AsUser()} @{grp.Key.Currency}: Credit - Debit = {-val:R} */");
+                    sb.Append(serializer.PresentVoucher(old).Wrap());
+                    sb.AppendLine();
                 }
-
-                if (flag)
-                    sb.Append(serializer.PresentVoucher(voucher).Wrap());
+                sb.AppendLine($"/* U{user.AsUser()} @{curr}: Debit - Credit = {v:R} */");
             }
+
+            if (old != null)
+                sb.Append(serializer.PresentVoucher(old).Wrap());
 
             if (sb.Length > 0)
                 return new PlainText(sb.ToString());

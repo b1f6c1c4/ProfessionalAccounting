@@ -67,10 +67,17 @@ namespace AccountingServer.DAL
         IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit = 0);
 
         /// <summary>
+        ///     查找借贷不平的记账凭证
+        /// </summary>
+        /// <param name="query">检索式</param>
+        /// <returns>匹配检索式的记账凭证以及不匹配原因</returns>
+        IEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query);
+
+        /// <summary>
         ///     查找重复的记账凭证
         /// </summary>
         /// <param name="query">检索式</param>
-        /// <returns>匹配检索式的记账凭证及其数量</returns>
+        /// <returns>匹配检索式的记账凭证及其重复数量</returns>
         IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query);
 
         /// <summary>

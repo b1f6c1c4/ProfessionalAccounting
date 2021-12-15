@@ -151,6 +151,9 @@ namespace AccountingServer.BLL
             return conv.Build(res);
         }
 
+        public IEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+            => Db.SelectUnbalancedVouchers(query);
+
         public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
             => Db.SelectDuplicatedVouchers(query);
 
