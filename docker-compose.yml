@@ -4,7 +4,8 @@ services:
   nginx:
     image: b1f6c1c4/accounting-frontend
     ports:
-      - "18080:443"
+      - "18080:443/tcp"
+      - "18080:443/udp"
     volumes:
       - /data/accounting/certs:/opt/accounting/certs
     networks:
