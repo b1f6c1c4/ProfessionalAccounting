@@ -66,7 +66,7 @@ namespace AccountingServer.Shell
             var sb = new StringBuilder();
             Voucher old = null;
             foreach (var (voucher, user, curr, v) in
-                m_Accountant.SelectUnbalancedVouchers(VoucherQueryUnconstrained.Instance))
+                     m_Accountant.SelectUnbalancedVouchers(VoucherQueryUnconstrained.Instance))
             {
                 if (old == null)
                     old = voucher;
@@ -75,6 +75,7 @@ namespace AccountingServer.Shell
                     sb.Append(serializer.PresentVoucher(old).Wrap());
                     sb.AppendLine();
                 }
+
                 sb.AppendLine($"/* U{user.AsUser()} @{curr}: Debit - Credit = {v:R} */");
             }
 

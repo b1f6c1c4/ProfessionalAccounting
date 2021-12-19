@@ -211,9 +211,9 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         var mv = $"{{({user}*{cc.Query})+{user} T3999+{user} T6603 A {rng}}}";
                         var mos = new Dictionary<DateTime, double>();
                         foreach (var grpC in Accountant.RunGroupedQuery(
-                                $"{{{user}*({cc.Query})*({user} <+(-{user} {curr})) {rng}}}+{mv}:{user}*({cc.Query})`Cd")
-                            .Items
-                            .Cast<ISubtotalCurrency>())
+                                         $"{{{user}*({cc.Query})*({user} <+(-{user} {curr})) {rng}}}+{mv}:{user}*({cc.Query})`Cd")
+                                     .Items
+                                     .Cast<ISubtotalCurrency>())
                         foreach (var b in grpC.Items.Cast<ISubtotalDate>())
                         {
                             var mo = NextDate(cc.RepaymentDay, NextDate(cc.BillDay, b.Date.Value), true);
@@ -226,10 +226,10 @@ namespace AccountingServer.Shell.Plugins.CashFlow
                         }
 
                         foreach (var b in Accountant
-                            .RunGroupedQuery(
-                                $"{{{user}*({cc.Query})*({user} {curr}>) {rng}}}-{mv}:{user}*({cc.Query})`d")
-                            .Items
-                            .Cast<ISubtotalDate>())
+                                     .RunGroupedQuery(
+                                         $"{{{user}*({cc.Query})*({user} {curr}>) {rng}}}-{mv}:{user}*({cc.Query})`d")
+                                     .Items
+                                     .Cast<ISubtotalDate>())
                         {
                             var mo = NextDate(cc.RepaymentDay, b.Date.Value, true);
                             if (mos.ContainsKey(mo))

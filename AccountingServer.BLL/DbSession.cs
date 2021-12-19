@@ -55,10 +55,10 @@ namespace AccountingServer.BLL
             if (date > now)
                 date = now;
 
-            var res = Db.SelectExchangeRecord(new ExchangeRecord{ Time = date, From = from, To = to });
+            var res = Db.SelectExchangeRecord(new ExchangeRecord { Time = date, From = from, To = to });
             if (res != null)
                 return res.Value;
-            res = Db.SelectExchangeRecord(new ExchangeRecord{ Time = date, From = to, To = from });
+            res = Db.SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = from });
             if (res != null)
                 return 1D / res.Value;
 

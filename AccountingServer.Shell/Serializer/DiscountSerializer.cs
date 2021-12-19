@@ -156,16 +156,16 @@ namespace AccountingServer.Shell.Serializer
             }
 
             foreach (var grp in lst.GroupBy(
-                it => new VoucherDetail
-                    {
-                        User = it.User,
-                        Currency = it.Currency,
-                        Title = it.Title,
-                        SubTitle = it.SubTitle,
-                        Content = it.Content,
-                        Remark = it.Remark,
-                    },
-                new DetailEqualityComparer()))
+                         it => new VoucherDetail
+                             {
+                                 User = it.User,
+                                 Currency = it.Currency,
+                                 Title = it.Title,
+                                 SubTitle = it.SubTitle,
+                                 Content = it.Content,
+                                 Remark = it.Remark,
+                             },
+                         new DetailEqualityComparer()))
             {
                 grp.Key.Fund = grp.Sum(it => it.Fund!.Value);
                 resLst.Add(grp.Key);

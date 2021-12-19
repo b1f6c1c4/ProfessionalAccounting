@@ -134,8 +134,8 @@ namespace AccountingServer.Shell
 
                 var flag = false;
                 foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
-                    .Where(item => item.VoucherID != null)
-                    .Where(item => Accountant.SelectVoucher(item.VoucherID) == null))
+                             .Where(item => item.VoucherID != null)
+                             .Where(item => Accountant.SelectVoucher(item.VoucherID) == null))
                 {
                     item.VoucherID = null;
                     cnt++;
@@ -161,7 +161,7 @@ namespace AccountingServer.Shell
 
                 var flag = false;
                 foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
-                    .Where(item => item.VoucherID != null))
+                             .Where(item => item.VoucherID != null))
                 {
                     var voucher = Accountant.SelectVoucher(item.VoucherID);
                     if (voucher == null)

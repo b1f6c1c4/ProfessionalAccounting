@@ -46,10 +46,7 @@ namespace AccountingServer.DAL
 
         private static readonly BsonDocument ProjectNothing = new() { ["_id"] = false };
 
-        private static readonly BsonDocument ProjectNothingButDate = new()
-            {
-                ["_id"] = false, ["date"] = true,
-            };
+        private static readonly BsonDocument ProjectNothingButDate = new() { ["_id"] = false, ["date"] = true };
 
         private static readonly BsonDocument ProjectDetail = new()
             {
@@ -215,7 +212,9 @@ namespace AccountingServer.DAL
                     ops.Add(new InsertOneModel<T>(entity));
                 else
                     ops.Add(new ReplaceOneModel<T>(Builders<T>.Filter.Eq("_id", idProvider.GetId(entity)), entity)
-                            { IsUpsert = true });
+                        {
+                            IsUpsert = true,
+                        });
             var res = collection.BulkWrite(ops, new() { IsOrdered = false });
             return res.ProcessedRequests.Count;
         }

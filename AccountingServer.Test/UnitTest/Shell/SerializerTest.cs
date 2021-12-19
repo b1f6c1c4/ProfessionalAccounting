@@ -31,13 +31,7 @@ namespace AccountingServer.Test.UnitTest.Shell
         protected SerializerTest()
         {
             BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
-                new()
-                    {
-                        Infos = new()
-                            {
-                                new() { Date = null, Currency = "CNY" },
-                            },
-                    });
+                new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
             TitleManager.TitleInfos = new MockConfigManager<TitleInfos>(new() { Titles = new() });
 
@@ -242,26 +236,14 @@ namespace AccountingServer.Test.UnitTest.Shell
         public DiscountSerializerTest()
         {
             BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
-                new()
-                    {
-                        Infos = new()
-                            {
-                                new() { Date = null, Currency = "CNY" },
-                            },
-                    });
+                new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
             TitleManager.TitleInfos =
                 new MockConfigManager<TitleInfos>(new() { Titles = new() });
 
             AbbrSerializer.Abbrs =
                 new MockConfigManager<Abbreviations>(
-                    new()
-                        {
-                            Abbrs = new()
-                                {
-                                    new() { Abbr = "aaa", Title = 1001, Editable = false },
-                                },
-                        });
+                    new() { Abbrs = new() { new() { Abbr = "aaa", Title = 1001, Editable = false } } });
 
             ClientUser.Set("b1");
         }

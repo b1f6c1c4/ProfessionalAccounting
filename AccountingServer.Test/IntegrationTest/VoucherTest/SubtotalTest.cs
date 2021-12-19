@@ -312,7 +312,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest
         public void RunVTestValue(long? value, string query)
             => Assert.Equal(
                 value,
-                m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query)) .SingleOrDefault()?.Fund);
+                m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query)).SingleOrDefault()?.Fund);
 
         [Theory]
         [InlineData(null, null, "!!d")]

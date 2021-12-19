@@ -165,6 +165,7 @@ namespace AccountingServer.Shell.Plugins.Statement
 
                 sb.AppendLine(b.Raw);
             }
+
             Accountant.Upsert(ops);
 
             sb.AppendLine($"{marked} marked");

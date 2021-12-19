@@ -224,7 +224,7 @@ namespace AccountingServer.DAL
                     {
                         VoucherType.Ordinary => Builders<Voucher>.Filter.Exists("special", false),
                         VoucherType.General =>
-                        Builders<Voucher>.Filter.Nin("special", new[] { "acarry", "carry" }),
+                            Builders<Voucher>.Filter.Nin("special", new[] { "acarry", "carry" }),
                         VoucherType.Amortization => Builders<Voucher>.Filter.Eq("special", "amorz"),
                         VoucherType.AnnualCarry => Builders<Voucher>.Filter.Eq("special", "acarry"),
                         VoucherType.Carry => Builders<Voucher>.Filter.Eq("special", "carry"),

@@ -297,7 +297,7 @@ namespace AccountingServer.BLL.Util
                         DateHelper.CompareDate(last, ed) < 0)
                         Append(ed, tmp0, tmp0);
                     else if (initial.HasValue &&
-                        last == initial)
+                             last == initial)
                         Append(Next(initial.Value), sub.Fund, sub.Fund);
 
                     return sub;

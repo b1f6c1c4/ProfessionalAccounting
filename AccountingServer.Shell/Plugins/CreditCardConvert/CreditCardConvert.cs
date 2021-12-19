@@ -105,8 +105,8 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert
 
 
             foreach (var voucher in Accountant.RunVoucherQuery(
-                $"{{T224101 {content.Quotation('\'')}}}*{{T660300}}*{{T224101 {content.Quotation('\'')} +T3999+T660300 A {rng.AsDateRange()}}}")
-            )
+                         $"{{T224101 {content.Quotation('\'')}}}*{{T660300}}*{{T224101 {content.Quotation('\'')} +T3999+T660300 A {rng.AsDateRange()}}}")
+                    )
             {
                 // Assume proper ordering here
                 var d0 = voucher.Details.Single(d => d.Title == 2241);

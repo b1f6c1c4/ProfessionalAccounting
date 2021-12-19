@@ -235,7 +235,8 @@ namespace AccountingServer.Shell
                         new() { User = grpUs.First().Key, Currency = grpC.Key, Title = 3999, Fund = -sum });
                 }
             else if (voucher.Details.GroupBy(d => (d.User ?? ClientUser.Name, d.Currency ?? BaseCurrency.Now))
-                .Where(grp => !grp.Sum(d => d.Fund!.Value).IsZero()).ToList() is var grpUCs && grpUCs.Count == 2)
+                         .Where(grp => !grp.Sum(d => d.Fund!.Value).IsZero()).ToList() is var grpUCs &&
+                     grpUCs.Count == 2)
             {
                 var p = grpUCs[0];
                 var ps = p.Sum(d => d.Fund!.Value);
@@ -363,10 +364,7 @@ namespace AccountingServer.Shell
         /// <summary>
         ///     定时登记汇率
         /// </summary>
-        private readonly Timer m_Timer = new(60 * 60 * 1000)
-            {
-                AutoReset = true,
-            };
+        private readonly Timer m_Timer = new(60 * 60 * 1000) { AutoReset = true };
 
         /// <summary>
         ///     启动定时登记汇率

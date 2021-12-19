@@ -76,8 +76,8 @@ namespace AccountingServer.Shell.Util
             expr = expr.TrimStart();
             var regex = new Regex(@"[^\r\n]*(\r\n|\n|\n\r)");
             while (expr.Length > 2 &&
-                expr[0] == '/' &&
-                expr[1] == '/')
+                   expr[0] == '/' &&
+                   expr[1] == '/')
             {
                 var m = regex.Match(expr);
                 if (!m.Success)

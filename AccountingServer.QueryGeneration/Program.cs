@@ -24,26 +24,26 @@ using Antlr4.Runtime.Tree;
 using AccountingServer.QueryGeneration;
 
 Type GetLexer(string kind)
-=> kind switch
-    {
-        "Query" => typeof(QueryLexer),
-        "Subtotal" => typeof(SubtotalLexer),
-        _ => throw new ArgumentOutOfRangeException(nameof(kind)),
-    };
+    => kind switch
+        {
+            "Query" => typeof(QueryLexer),
+            "Subtotal" => typeof(SubtotalLexer),
+            _ => throw new ArgumentOutOfRangeException(nameof(kind)),
+        };
 
 Type GetParser(string kind)
-=> kind switch
-    {
-        "Query" => typeof(QueryParser),
-        "Subtotal" => typeof(SubtotalParser),
-        _ => throw new ArgumentOutOfRangeException(nameof(kind)),
-    };
+    => kind switch
+        {
+            "Query" => typeof(QueryParser),
+            "Subtotal" => typeof(SubtotalParser),
+            _ => throw new ArgumentOutOfRangeException(nameof(kind)),
+        };
 
 IParseTree CallParser(Parser parser, string name)
-=> (IParseTree)parser
-    .GetType()
-    .GetMethod(name, BindingFlags.Public | BindingFlags.Instance)
-    .Invoke(parser, new object[0]);
+    => (IParseTree)parser
+        .GetType()
+        .GetMethod(name, BindingFlags.Public | BindingFlags.Instance)
+        .Invoke(parser, new object[0]);
 
 var kind = "Query";
 var method = "lexer";

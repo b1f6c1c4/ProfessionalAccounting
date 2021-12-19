@@ -140,10 +140,10 @@ namespace AccountingServer.Shell.Plugins.Interest
                 ? new(lastSettlement.Value.AddDays(1), finalDay)
                 : new(null, finalDay);
             foreach (var grp in
-                Accountant
-                    .RunVoucherQuery($"{info.QueryMajor()} {rng.AsDateRange()}")
-                    .GroupBy(v => v.Date)
-                    .OrderBy(grp => grp.Key, new DateComparer()))
+                     Accountant
+                         .RunVoucherQuery($"{info.QueryMajor()} {rng.AsDateRange()}")
+                         .GroupBy(v => v.Date)
+                         .OrderBy(grp => grp.Key, new DateComparer()))
             {
                 var key = grp.Key ?? throw new ApplicationException("无法处理无穷长时间以前的利息收入");
 
@@ -172,7 +172,8 @@ namespace AccountingServer.Shell.Plugins.Interest
                     grp.Where(
                             v =>
                                 v.Details.Any(
-                                    d => d.IsMatch(capitalPattern, dir: -Dir()) || d.IsMatch(interestPattern, dir: -Dir())))
+                                    d => d.IsMatch(capitalPattern, dir: -Dir()) ||
+                                        d.IsMatch(interestPattern, dir: -Dir())))
                         .OrderBy(v => v.ID))
                 {
                     var value =

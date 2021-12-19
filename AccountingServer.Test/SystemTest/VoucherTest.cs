@@ -37,34 +37,29 @@ namespace AccountingServer.Test.SystemTest
             DAL.Facade.Create(db: "accounting-test").DeleteVouchers(VoucherQueryUnconstrained.Instance);
 
             BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
-                new()
-                    {
-                        Infos = new()
-                            {
-                                new() { Date = null, Currency = "CNY" },
-                            },
-                    });
+                new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
             TitleManager.TitleInfos = new MockConfigManager<TitleInfos>(new()
                 {
                     Titles = new()
                         {
-                            new() { Direction = 0, Id = 1234, IsVirtual = true, Name = "sth", SubTitles = new()
+                            new()
                                 {
-                                    new() { Direction = 0, Id = 01, Name = "obj" },
-                                }},
+                                    Direction = 0,
+                                    Id = 1234,
+                                    IsVirtual = true,
+                                    Name = "sth",
+                                    SubTitles = new() { new() { Direction = 0, Id = 01, Name = "obj" } },
+                                },
                             new() { Direction = 0, Id = 5678, IsVirtual = false, Name = "els" },
                             new() { Direction = 0, Id = 3998, IsVirtual = false, Name = "kyh" },
                         },
                 });
 
-            AbbrSerializer.Abbrs = new MockConfigManager<Abbreviations>( new()
-                        {
-                            Abbrs = new()
-                                {
-                                    new() { Abbr = "aaa", Title = 5678, Editable = false },
-                                },
-                        });
+            AbbrSerializer.Abbrs = new MockConfigManager<Abbreviations>(new()
+                {
+                    Abbrs = new() { new() { Abbr = "aaa", Title = 5678, Editable = false } },
+                });
 
             ClientUser.Set("b1");
 
@@ -178,7 +173,8 @@ Ub2 T3998\s+10
         }
 
         [Fact]
-        public void RemoveTest() {
+        public void RemoveTest()
+        {
             Assert.True(m_Facade.ExecuteVoucherRemoval($"new Voucher {{ {m_ID} }}", null));
             Assert.False(m_Facade.ExecuteVoucherRemoval($"new Voucher {{ {m_ID} }}", null));
         }

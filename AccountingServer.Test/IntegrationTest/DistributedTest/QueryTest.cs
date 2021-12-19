@@ -107,6 +107,7 @@ namespace AccountingServer.Test.IntegrationTest.DistributedTest
 
         protected override bool RunAssetQuery(IQueryCompounded<IDistributedQueryAtom> query)
             => m_Adapter.SelectAssets(query).SingleOrDefault() != null;
+
         protected override bool RunAmortQuery(IQueryCompounded<IDistributedQueryAtom> query)
             => m_Adapter.SelectAmortizations(query).SingleOrDefault() != null;
 

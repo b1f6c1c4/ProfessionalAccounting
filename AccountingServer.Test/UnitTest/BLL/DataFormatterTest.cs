@@ -28,21 +28,9 @@ namespace AccountingServer.Test.UnitTest.BLL
         public DataFormatterTest()
         {
             BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
-                new()
-                    {
-                        Infos = new()
-                            {
-                                new() { Date = null, Currency = "CNY" },
-                            },
-                    });
+                new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
             DataFormatter.CurrencySymbols = new MockConfigManager<CurrencySymbols>(
-                new()
-                    {
-                        Symbols = new()
-                            {
-                                new() { Currency = "DOGE", Symbol = "#" },
-                            },
-                    });
+                new() { Symbols = new() { new() { Currency = "DOGE", Symbol = "#" } } });
             ClientUser.Set("b1");
         }
 

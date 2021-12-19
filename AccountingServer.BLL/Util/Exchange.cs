@@ -179,11 +179,13 @@ namespace AccountingServer.BLL.Util
                             fromId = c.CoinMarketCapId;
                             isCrypto = true;
                         }
+
                         if (c.Symbol == to)
                         {
                             toId = c.CoinMarketCapId;
                             isCrypto = true;
                         }
+
                         break;
                     case ConventionalCurrency c:
                         if (c.Symbol == from)

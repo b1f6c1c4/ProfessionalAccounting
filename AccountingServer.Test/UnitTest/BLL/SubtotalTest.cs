@@ -30,13 +30,7 @@ namespace AccountingServer.Test.UnitTest.BLL
     {
         public SubtotalTest()
             => BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
-                new()
-                    {
-                        Infos = new()
-                            {
-                                new() { Date = null, Currency = "CNY" },
-                            },
-                    });
+                new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
         private readonly IHistoricalExchange m_Exchange = new MockExchange
             {
@@ -476,15 +470,8 @@ namespace AccountingServer.Test.UnitTest.BLL
                     {
                         new() { Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
                         new() { Date = new(2017, 01, 02, 0, 0, 0, DateTimeKind.Utc), Fund = 8 + 1 },
-                        new()
-                            {
-                                Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 8 + 1 + 4,
-                            },
-                        new()
-                            {
-                                Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
-                                Fund = 8 + 1 + 4 + 2,
-                            },
+                        new() { Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 8 + 1 + 4 },
+                        new() { Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 8 + 1 + 4 + 2 },
                     },
                 lst,
                 new BalanceEqualityComparer());
@@ -497,30 +484,10 @@ namespace AccountingServer.Test.UnitTest.BLL
 
             var bal = new Balance[]
                 {
-                    new()
-                        {
-                            Currency = "JPY",
-                            Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 8,
-                        },
-                    new()
-                        {
-                            Currency = "CNY",
-                            Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 1,
-                        },
-                    new()
-                        {
-                            Currency = "USD",
-                            Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 4,
-                        },
-                    new()
-                        {
-                            Currency = "CNY",
-                            Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
-                            Fund = 2,
-                        },
+                    new() { Currency = "JPY", Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 },
+                    new() { Currency = "CNY", Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 1 },
+                    new() { Currency = "USD", Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
+                    new() { Currency = "CNY", Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
                 };
 
             var res = builder.Build(bal);
@@ -541,11 +508,7 @@ namespace AccountingServer.Test.UnitTest.BLL
             Assert.Equal(
                 new Balance[]
                     {
-                        new()
-                            {
-                                Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc),
-                                Fund = 8 * 456 + 1,
-                            },
+                        new() { Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 8 * 456 + 1 },
                         new()
                             {
                                 Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc),
