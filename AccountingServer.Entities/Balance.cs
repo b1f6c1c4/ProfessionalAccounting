@@ -18,51 +18,50 @@
 
 using System;
 
-namespace AccountingServer.Entities
+namespace AccountingServer.Entities;
+
+/// <summary>
+///     余额表条目
+/// </summary>
+public class Balance
 {
     /// <summary>
-    ///     余额表条目
+    ///     日期
     /// </summary>
-    public class Balance
-    {
-        /// <summary>
-        ///     日期
-        /// </summary>
-        public DateTime? Date { get; init; }
+    public DateTime? Date { get; init; }
 
-        /// <summary>
-        ///     一级科目编号
-        /// </summary>
-        public int? Title { get; init; }
+    /// <summary>
+    ///     一级科目编号
+    /// </summary>
+    public int? Title { get; init; }
 
-        /// <summary>
-        ///     二级科目编号
-        /// </summary>
-        public int? SubTitle { get; init; }
+    /// <summary>
+    ///     二级科目编号
+    /// </summary>
+    public int? SubTitle { get; init; }
 
-        /// <summary>
-        ///     内容
-        /// </summary>
-        public string Content { get; init; }
+    /// <summary>
+    ///     内容
+    /// </summary>
+    public string Content { get; init; }
 
-        /// <summary>
-        ///     备注
-        /// </summary>
-        public string Remark { get; init; }
+    /// <summary>
+    ///     备注
+    /// </summary>
+    public string Remark { get; init; }
 
-        /// <summary>
-        ///     币种
-        /// </summary>
-        public string Currency { get; init; }
+    /// <summary>
+    ///     币种
+    /// </summary>
+    public string Currency { get; init; }
 
-        /// <summary>
-        ///     用户
-        /// </summary>
-        public string User { get; init; }
+    /// <summary>
+    ///     用户
+    /// </summary>
+    public string User { get; init; }
 
-        /// <summary>
-        ///     余额
-        /// </summary>
-        public double Fund { get; set; }
-    }
+    /// <summary>
+    ///     余额
+    /// </summary>
+    public double Fund { get; set; }
 }

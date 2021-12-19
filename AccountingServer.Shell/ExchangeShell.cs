@@ -23,41 +23,40 @@ using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
-namespace AccountingServer.Shell
+namespace AccountingServer.Shell;
+
+/// <summary>
+///     汇率
+/// </summary>
+internal class ExchangeShell : IShellComponent
 {
     /// <summary>
-    ///     汇率
+    ///     基本会计业务处理类
     /// </summary>
-    internal class ExchangeShell : IShellComponent
+    private readonly Accountant m_Accountant;
+
+    public ExchangeShell(Accountant helper) => m_Accountant = helper;
+
+    public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
     {
-        /// <summary>
-        ///     基本会计业务处理类
-        /// </summary>
-        private readonly Accountant m_Accountant;
-
-        public ExchangeShell(Accountant helper) => m_Accountant = helper;
-
-        public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+        expr = expr.Rest();
+        var rev = true;
+        var val = Parsing.Double(ref expr);
+        var curr = Parsing.Token(ref expr).ToUpperInvariant();
+        if (!val.HasValue)
         {
-            expr = expr.Rest();
-            var rev = true;
-            var val = Parsing.Double(ref expr);
-            var curr = Parsing.Token(ref expr).ToUpperInvariant();
-            if (!val.HasValue)
-            {
-                rev = false;
-                val = Parsing.DoubleF(ref expr);
-            }
-
-            var date = Parsing.UniqueTime(ref expr) ?? DateTime.UtcNow.Subtract(new TimeSpan(0, 30, 0));
-            Parsing.Eof(expr);
-            var res = rev
-                ? m_Accountant.Query(date, BaseCurrency.Now, curr)
-                : m_Accountant.Query(date, curr, BaseCurrency.Now);
-
-            return new PlainText((res * val.Value).ToString("R"));
+            rev = false;
+            val = Parsing.DoubleF(ref expr);
         }
 
-        public bool IsExecutable(string expr) => expr.Initial() == "?e";
+        var date = Parsing.UniqueTime(ref expr) ?? DateTime.UtcNow.Subtract(new TimeSpan(0, 30, 0));
+        Parsing.Eof(expr);
+        var res = rev
+            ? m_Accountant.Query(date, BaseCurrency.Now, curr)
+            : m_Accountant.Query(date, curr, BaseCurrency.Now);
+
+        return new PlainText((res * val.Value).ToString("R"));
     }
+
+    public bool IsExecutable(string expr) => expr.Initial() == "?e";
 }

@@ -29,558 +29,557 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using static AccountingServer.DAL.MongoDbNative;
 
-namespace AccountingServer.DAL
+namespace AccountingServer.DAL;
+
+/// <summary>
+///     MongoDb数据访问类
+/// </summary>
+[SuppressMessage("ReSharper", "PrivateFieldCanBeConvertedToLocalVariable")]
+internal class MongoDbAdapter : IDbAdapter
 {
-    /// <summary>
-    ///     MongoDb数据访问类
-    /// </summary>
-    [SuppressMessage("ReSharper", "PrivateFieldCanBeConvertedToLocalVariable")]
-    internal class MongoDbAdapter : IDbAdapter
+    private static readonly BsonDocument ProjectDetails = new() { ["_id"] = false, ["detail"] = true };
+
+    private static readonly BsonDocument ProjectDate = new()
+        {
+            ["_id"] = false, ["detail"] = true, ["date"] = true,
+        };
+
+    private static readonly BsonDocument ProjectNothing = new() { ["_id"] = false };
+
+    private static readonly BsonDocument ProjectNothingButDate = new() { ["_id"] = false, ["date"] = true };
+
+    private static readonly BsonDocument ProjectDetail = new()
+        {
+            ["user"] = "$detail.user",
+            ["currency"] = "$detail.currency",
+            ["title"] = "$detail.title",
+            ["subtitle"] = "$detail.subtitle",
+            ["content"] = "$detail.content",
+            ["fund"] = "$detail.fund",
+            ["remark"] = "$detail.remark",
+        };
+
+    private static readonly BsonDocument ProjectYear;
+    private static readonly BsonDocument ProjectMonth;
+    private static readonly BsonDocument ProjectWeek;
+
+    private static readonly BsonDocument ProjectNothingButYear;
+    private static readonly BsonDocument ProjectNothingButMonth;
+    private static readonly BsonDocument ProjectNothingButWeek;
+
+    private static readonly BsonDocument FilterNonZero = new()
+        {
+            ["total"] = new BsonDocument
+                {
+                    ["$not"] = new BsonDocument
+                        {
+                            ["$gt"] = -VoucherDetail.Tolerance, ["$lt"] = +VoucherDetail.Tolerance,
+                        },
+                },
+        };
+
+    static MongoDbAdapter()
     {
-        private static readonly BsonDocument ProjectDetails = new() { ["_id"] = false, ["detail"] = true };
+        BsonSerializer.RegisterSerializer(new VoucherSerializer());
+        BsonSerializer.RegisterSerializer(new VoucherDetailSerializer());
+        BsonSerializer.RegisterSerializer(new AssetSerializer());
+        BsonSerializer.RegisterSerializer(new AssetItemSerializer());
+        BsonSerializer.RegisterSerializer(new AmortizationSerializer());
+        BsonSerializer.RegisterSerializer(new AmortItemSerializer());
+        BsonSerializer.RegisterSerializer(new BalanceSerializer());
+        BsonSerializer.RegisterSerializer(new ExchangeSerializer());
 
-        private static readonly BsonDocument ProjectDate = new()
+        static BsonDocument MakeProject(BsonValue days, bool detail)
+        {
+            var proj = new BsonDocument
+                {
+                    ["_id"] = false,
+                    ["date"] = new BsonDocument
+                        {
+                            ["$switch"] = new BsonDocument
+                                {
+                                    ["branches"] = new BsonArray
+                                        {
+                                            new BsonDocument
+                                                {
+                                                    ["case"] = new BsonDocument
+                                                        {
+                                                            ["$eq"] = new BsonArray
+                                                                {
+                                                                    new BsonDocument
+                                                                        {
+                                                                            ["$type"] = "$date",
+                                                                        },
+                                                                    "missing",
+                                                                },
+                                                        },
+                                                    ["then"] = BsonNull.Value,
+                                                },
+                                        },
+                                    ["default"] = new BsonDocument
+                                        {
+                                            ["$subtract"] =
+                                                new BsonArray
+                                                    {
+                                                        "$date",
+                                                        new BsonDocument
+                                                            {
+                                                                ["$multiply"] =
+                                                                    new BsonArray { days, 24 * 60 * 60 * 1000 },
+                                                            },
+                                                    },
+                                        },
+                                },
+                        },
+                };
+            if (detail)
+                proj["detail"] = true;
+            return proj;
+        }
+
+        var year = new BsonDocument
             {
-                ["_id"] = false, ["detail"] = true, ["date"] = true,
+                ["$subtract"] = new BsonArray { new BsonDocument { ["$dayOfYear"] = "$date" }, 1 },
             };
-
-        private static readonly BsonDocument ProjectNothing = new() { ["_id"] = false };
-
-        private static readonly BsonDocument ProjectNothingButDate = new() { ["_id"] = false, ["date"] = true };
-
-        private static readonly BsonDocument ProjectDetail = new()
+        var month = new BsonDocument
             {
-                ["user"] = "$detail.user",
-                ["currency"] = "$detail.currency",
-                ["title"] = "$detail.title",
-                ["subtitle"] = "$detail.subtitle",
-                ["content"] = "$detail.content",
-                ["fund"] = "$detail.fund",
-                ["remark"] = "$detail.remark",
+                ["$subtract"] = new BsonArray { new BsonDocument { ["$dayOfMonth"] = "$date" }, 1 },
             };
-
-        private static readonly BsonDocument ProjectYear;
-        private static readonly BsonDocument ProjectMonth;
-        private static readonly BsonDocument ProjectWeek;
-
-        private static readonly BsonDocument ProjectNothingButYear;
-        private static readonly BsonDocument ProjectNothingButMonth;
-        private static readonly BsonDocument ProjectNothingButWeek;
-
-        private static readonly BsonDocument FilterNonZero = new()
+        var week = new BsonDocument
             {
-                ["total"] = new BsonDocument
+                ["$mod"] = new BsonArray
                     {
-                        ["$not"] = new BsonDocument
+                        new BsonDocument
                             {
-                                ["$gt"] = -VoucherDetail.Tolerance, ["$lt"] = +VoucherDetail.Tolerance,
+                                ["$add"] = new BsonArray
+                                    {
+                                        new BsonDocument { ["$dayOfWeek"] = "$date" }, 5,
+                                    },
                             },
+                        7,
                     },
             };
 
-        static MongoDbAdapter()
-        {
-            BsonSerializer.RegisterSerializer(new VoucherSerializer());
-            BsonSerializer.RegisterSerializer(new VoucherDetailSerializer());
-            BsonSerializer.RegisterSerializer(new AssetSerializer());
-            BsonSerializer.RegisterSerializer(new AssetItemSerializer());
-            BsonSerializer.RegisterSerializer(new AmortizationSerializer());
-            BsonSerializer.RegisterSerializer(new AmortItemSerializer());
-            BsonSerializer.RegisterSerializer(new BalanceSerializer());
-            BsonSerializer.RegisterSerializer(new ExchangeSerializer());
+        ProjectYear = MakeProject(year, true);
+        ProjectMonth = MakeProject(month, true);
+        ProjectWeek = MakeProject(week, true);
 
-            static BsonDocument MakeProject(BsonValue days, bool detail)
-            {
-                var proj = new BsonDocument
-                    {
-                        ["_id"] = false,
-                        ["date"] = new BsonDocument
-                            {
-                                ["$switch"] = new BsonDocument
-                                    {
-                                        ["branches"] = new BsonArray
-                                            {
-                                                new BsonDocument
-                                                    {
-                                                        ["case"] = new BsonDocument
-                                                            {
-                                                                ["$eq"] = new BsonArray
-                                                                    {
-                                                                        new BsonDocument
-                                                                            {
-                                                                                ["$type"] = "$date",
-                                                                            },
-                                                                        "missing",
-                                                                    },
-                                                            },
-                                                        ["then"] = BsonNull.Value,
-                                                    },
-                                            },
-                                        ["default"] = new BsonDocument
-                                            {
-                                                ["$subtract"] =
-                                                    new BsonArray
-                                                        {
-                                                            "$date",
-                                                            new BsonDocument
-                                                                {
-                                                                    ["$multiply"] =
-                                                                        new BsonArray { days, 24 * 60 * 60 * 1000 },
-                                                                },
-                                                        },
-                                            },
-                                    },
-                            },
-                    };
-                if (detail)
-                    proj["detail"] = true;
-                return proj;
-            }
-
-            var year = new BsonDocument
-                {
-                    ["$subtract"] = new BsonArray { new BsonDocument { ["$dayOfYear"] = "$date" }, 1 },
-                };
-            var month = new BsonDocument
-                {
-                    ["$subtract"] = new BsonArray { new BsonDocument { ["$dayOfMonth"] = "$date" }, 1 },
-                };
-            var week = new BsonDocument
-                {
-                    ["$mod"] = new BsonArray
-                        {
-                            new BsonDocument
-                                {
-                                    ["$add"] = new BsonArray
-                                        {
-                                            new BsonDocument { ["$dayOfWeek"] = "$date" }, 5,
-                                        },
-                                },
-                            7,
-                        },
-                };
-
-            ProjectYear = MakeProject(year, true);
-            ProjectMonth = MakeProject(month, true);
-            ProjectWeek = MakeProject(week, true);
-
-            ProjectNothingButYear = MakeProject(year, false);
-            ProjectNothingButMonth = MakeProject(month, false);
-            ProjectNothingButWeek = MakeProject(week, false);
-        }
-
-        public MongoDbAdapter(string uri, string db = null, string x509 = null)
-        {
-            var url = new MongoUrl(uri);
-            var settings = MongoClientSettings.FromUrl(url);
-            if (!string.IsNullOrEmpty(x509))
-            {
-                var cert = X509Certificate2.CreateFromPemFile(x509);
-                settings.SslSettings.ClientCertificates = new[] { cert };
-            }
-
-            m_Client = new(settings);
-
-            m_Db = m_Client.GetDatabase(db ?? url.DatabaseName ?? "accounting");
-
-            m_Vouchers = m_Db.GetCollection<Voucher>("voucher");
-            m_Assets = m_Db.GetCollection<Asset>("asset");
-            m_Amortizations = m_Db.GetCollection<Amortization>("amortization");
-            m_Records = m_Db.GetCollection<ExchangeRecord>("exchangeRecord");
-        }
-
-        private static bool Upsert<T, TId>(IMongoCollection<T> collection, T entity, BaseSerializer<T, TId> idProvider)
-        {
-            if (idProvider.FillId(collection, entity))
-            {
-                collection.InsertOne(entity);
-                return true;
-            }
-
-            var res = collection.ReplaceOne(
-                Builders<T>.Filter.Eq("_id", idProvider.GetId(entity)),
-                entity,
-                new ReplaceOptions { IsUpsert = true });
-            return res.ModifiedCount <= 1;
-        }
-
-        private static long Upsert<T, TId>(IMongoCollection<T> collection, IEnumerable<T> entities, BaseSerializer<T, TId> idProvider)
-        {
-            var ops = new List<WriteModel<T>>();
-            foreach (var entity in entities)
-                if (idProvider.FillId(collection, entity))
-                    ops.Add(new InsertOneModel<T>(entity));
-                else
-                    ops.Add(new ReplaceOneModel<T>(Builders<T>.Filter.Eq("_id", idProvider.GetId(entity)), entity)
-                        {
-                            IsUpsert = true,
-                        });
-            var res = collection.BulkWrite(ops, new() { IsOrdered = false });
-            return res.ProcessedRequests.Count;
-        }
-
-        #region Member
-
-        /// <summary>
-        ///     MongoDb客户端
-        /// </summary>
-        private readonly MongoClient m_Client;
-
-        /// <summary>
-        ///     MongoDb数据库
-        /// </summary>
-        private readonly IMongoDatabase m_Db;
-
-        /// <summary>
-        ///     记账凭证集合
-        /// </summary>
-        private readonly IMongoCollection<Voucher> m_Vouchers;
-
-        /// <summary>
-        ///     资产集合
-        /// </summary>
-        private readonly IMongoCollection<Asset> m_Assets;
-
-        /// <summary>
-        ///     摊销集合
-        /// </summary>
-        private readonly IMongoCollection<Amortization> m_Amortizations;
-
-        /// <summary>
-        ///     汇率集合
-        /// </summary>
-        private readonly IMongoCollection<ExchangeRecord> m_Records;
-
-        #endregion
-
-        #region Voucher
-
-        /// <inheritdoc />
-        public Voucher SelectVoucher(string id) =>
-            m_Vouchers.FindSync(GetNQuery<Voucher>(id)).FirstOrDefault();
-
-        /// <inheritdoc />
-        public IEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query) =>
-            m_Vouchers.Find(query.Accept(new MongoDbNativeVoucher())).Sort(Builders<Voucher>.Sort.Ascending("date"))
-                .ToEnumerable();
-
-        private static FilterDefinition<BsonDocument> GetChk(IVoucherDetailQuery query)
-        {
-            var visitor = new MongoDbNativeDetailUnwinded();
-            return query.DetailEmitFilter != null
-                ? query.DetailEmitFilter.DetailFilter.Accept(visitor)
-                : query.VoucherQuery is IVoucherQueryAtom dQuery
-                    ? dQuery.DetailFilter.Accept(visitor)
-                    : throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query));
-        }
-
-        /// <inheritdoc />
-        public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
-        {
-            var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher());
-            var chk = GetChk(query);
-            var srt = Builders<Voucher>.Sort.Ascending("date");
-            return m_Vouchers.Aggregate().Match(preF).Sort(srt).Project(ProjectDetails).Unwind("detail").Match(chk)
-                .Project(ProjectDetail).ToEnumerable().Select(b => BsonSerializer.Deserialize<VoucherDetail>(b));
-        }
-
-        /// <inheritdoc />
-        public IEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit = 0)
-        {
-            if (query.Subtotal.GatherType != GatheringType.VoucherCount)
-                throw new InvalidOperationException("记账凭证分类汇总只能计数");
-            if (query.Subtotal.EquivalentDate.HasValue)
-                throw new InvalidOperationException("记账凭证分类汇总不能等值");
-
-            var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
-            if (query.Subtotal.AggrType != AggregationType.None)
-                level |= query.Subtotal.AggrInterval;
-
-            if (level.HasFlag(SubtotalLevel.User))
-                throw new InvalidOperationException("记账凭证不能按用户分类汇总");
-            if (level.HasFlag(SubtotalLevel.Currency))
-                throw new InvalidOperationException("记账凭证不能按币种分类汇总");
-            if (level.HasFlag(SubtotalLevel.Title))
-                throw new InvalidOperationException("记账凭证不能按一级科目分类汇总");
-            if (level.HasFlag(SubtotalLevel.SubTitle))
-                throw new InvalidOperationException("记账凭证不能按二级科目分类汇总");
-            if (level.HasFlag(SubtotalLevel.Content))
-                throw new InvalidOperationException("记账凭证不能按内容分类汇总");
-            if (level.HasFlag(SubtotalLevel.Remark))
-                throw new InvalidOperationException("记账凭证不能按备注分类汇总");
-
-            var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher());
-
-            BsonDocument pprj;
-            if (!level.HasFlag(SubtotalLevel.Day))
-                pprj = ProjectNothing;
-            else if (!level.HasFlag(SubtotalLevel.Week))
-                pprj = ProjectNothingButDate;
-            else if (level.HasFlag(SubtotalLevel.Year))
-                pprj = ProjectNothingButYear;
-            else if (level.HasFlag(SubtotalLevel.Month))
-                pprj = ProjectNothingButMonth;
-            else // if (level.HasFlag(SubtotalLevel.Week))
-                pprj = ProjectNothingButWeek;
-
-            var prj = new BsonDocument();
-            if (level.HasFlag(SubtotalLevel.Day))
-                prj["date"] = "$date";
-
-            var grp = new BsonDocument { ["_id"] = prj, ["count"] = new BsonDocument { ["$sum"] = 1 } };
-
-            var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Group(grp);
-            if (limit > 0)
-                fluent = fluent.Sort(new SortDefinitionBuilder<BsonDocument>().Descending("count")).Limit(limit);
-            return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
-        }
-
-        /// <inheritdoc />
-        public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit = 0)
-        {
-            var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
-            if (query.Subtotal.AggrType != AggregationType.None)
-                level |= query.Subtotal.AggrInterval;
-            if (query.Subtotal.EquivalentDate.HasValue)
-                level |= SubtotalLevel.Currency;
-
-            var preF = query.VoucherEmitQuery.VoucherQuery.Accept(new MongoDbNativeVoucher());
-            var chk = GetChk(query.VoucherEmitQuery);
-
-            BsonDocument pprj;
-            if (!level.HasFlag(SubtotalLevel.Day))
-                pprj = ProjectDetails;
-            else if (!level.HasFlag(SubtotalLevel.Week))
-                pprj = ProjectDate;
-            else if (level.HasFlag(SubtotalLevel.Year))
-                pprj = ProjectYear;
-            else if (level.HasFlag(SubtotalLevel.Month))
-                pprj = ProjectMonth;
-            else // if (level.HasFlag(SubtotalLevel.Week))
-                pprj = ProjectWeek;
-
-            var prj = new BsonDocument();
-            if (level.HasFlag(SubtotalLevel.Day))
-                prj["date"] = "$date";
-            if (level.HasFlag(SubtotalLevel.User))
-                prj["user"] = "$detail.user";
-            if (level.HasFlag(SubtotalLevel.Currency))
-                prj["currency"] = "$detail.currency";
-            if (level.HasFlag(SubtotalLevel.Title))
-                prj["title"] = "$detail.title";
-            if (level.HasFlag(SubtotalLevel.SubTitle))
-                prj["subtitle"] = "$detail.subtitle";
-            if (level.HasFlag(SubtotalLevel.Content))
-                prj["content"] = "$detail.content";
-            if (level.HasFlag(SubtotalLevel.Remark))
-                prj["remark"] = "$detail.remark";
-
-            BsonDocument grp;
-            if (query.Subtotal.GatherType == GatheringType.Count)
-                grp = new BsonDocument { ["_id"] = prj, ["count"] = new BsonDocument { ["$sum"] = 1 } };
-            else
-                grp = new BsonDocument { ["_id"] = prj, ["total"] = new BsonDocument { ["$sum"] = "$detail.fund" } };
-
-            var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Unwind("detail").Match(chk).Group(grp);
-            if (query.Subtotal.AggrType != AggregationType.ChangedDay &&
-                query.Subtotal.Levels.LastOrDefault().HasFlag(SubtotalLevel.NonZero))
-                fluent = fluent.Match(FilterNonZero);
-            if (limit > 0)
-                fluent = fluent.Sort(new SortDefinitionBuilder<BsonDocument>().Descending("count")).Limit(limit);
-            return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
-        }
-
-        public IEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-            => m_Vouchers.Aggregate().Match(query.Accept(new MongoDbNativeVoucher()))
-                .Unwind("detail").Group(new BsonDocument
-                    {
-                        ["_id"] = new BsonDocument
-                            {
-                                ["id"] = "$_id",
-                                ["user"] = "$detail.user",
-                                ["currency"] = "$detail.currency",
-                            },
-                        ["value"] = new BsonDocument { ["$sum"] = "$detail.fund" },
-                    })
-                .Match(new BsonDocument
-                    {
-                        ["$expr"] = new BsonDocument
-                            {
-                                ["$gt"] = new BsonArray
-                                    {
-                                        new BsonDocument{ ["$abs"] = "$value" },
-                                        VoucherDetail.Tolerance,
-                                    },
-                            },
-                    })
-                .Lookup("voucher", "_id.id", "_id", "voucher")
-                .Sort(new SortDefinitionBuilder<BsonDocument>().Ascending("voucher.date"))
-                .ToEnumerable().Select(b =>
-                    {
-                        var bsonReader = new BsonDocumentReader(b);
-                        string read = null;
-                        bsonReader.ReadStartDocument();
-                        var (user, curr) = bsonReader.ReadDocument("_id", ref read, bR =>
-                            {
-                                // ReSharper disable AccessToModifiedClosure
-                                bR.ReadStartDocument();
-                                bR.ReadObjectId("id", ref read);
-                                var u = bR.ReadString("user", ref read);
-                                var c = bR.ReadString("currency", ref read);
-                                bR.ReadEndDocument();
-                                return (u, c);
-                                // ReSharper restore AccessToModifiedClosure
-                            });
-                        var v = bsonReader.ReadDouble("value", ref read)!.Value;
-                        var voucher = bsonReader.ReadArray("voucher", ref read, new VoucherSerializer().Deserialize)
-                            .Single();
-                        bsonReader.ReadEndDocument();
-                        return (voucher, user, curr, v);
-                    });
-
-        public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-            => m_Vouchers.Aggregate().Match(query.Accept(new MongoDbNativeVoucher()))
-                .Group(new BsonDocument
-                    {
-                        ["_id"] = new BsonDocument { ["date"] = "$date", ["detail"] = "$detail" },
-                        ["count"] = new BsonDocument { ["$sum"] = 1 },
-                        ["ids"] = new BsonDocument { ["$push"] = "$_id" },
-                    })
-                .Match(new FilterDefinitionBuilder<BsonDocument>().Gt("count", 1))
-                .Sort(new SortDefinitionBuilder<BsonDocument>().Ascending("_id.date"))
-                .ToEnumerable().Select(b =>
-                    {
-                        var bsonReader = new BsonDocumentReader(b);
-                        string read = null;
-                        bsonReader.ReadStartDocument();
-                        var v = bsonReader.ReadDocument("_id", ref read, new VoucherSerializer().Deserialize);
-                        bsonReader.ReadInt32("count", ref read);
-                        var ids = bsonReader.ReadArray("ids", ref read, bR => bR.ReadObjectId().ToString());
-                        bsonReader.ReadEndDocument();
-                        return (v, ids);
-                    });
-
-        /// <inheritdoc />
-        public bool DeleteVoucher(string id)
-        {
-            var res = m_Vouchers.DeleteOne(GetNQuery<Voucher>(id));
-            return res.DeletedCount == 1;
-        }
-
-        /// <inheritdoc />
-        public long DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-        {
-            var res = m_Vouchers.DeleteMany(query.Accept(new MongoDbNativeVoucher()));
-            return res.DeletedCount;
-        }
-
-        /// <inheritdoc />
-        public bool Upsert(Voucher entity) => Upsert(m_Vouchers, entity, new VoucherSerializer());
-
-        /// <inheritdoc />
-        public long Upsert(IEnumerable<Voucher> entities) => Upsert(m_Vouchers, entities, new VoucherSerializer());
-
-        #endregion
-
-        #region Asset
-
-        /// <inheritdoc />
-        public Asset SelectAsset(Guid id) => m_Assets.FindSync(GetNQuery<Asset>(id)).FirstOrDefault();
-
-        /// <inheritdoc />
-        public IEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter) =>
-            m_Assets.FindSync(filter.Accept(new MongoDbNativeDistributed<Asset>()))
-                .ToEnumerable();
-
-        /// <inheritdoc />
-        public bool DeleteAsset(Guid id)
-        {
-            var res = m_Assets.DeleteOne(GetNQuery<Asset>(id));
-            return res.DeletedCount == 1;
-        }
-
-        /// <inheritdoc />
-        public bool Upsert(Asset entity)
-        {
-            var res = m_Assets.ReplaceOne(
-                Builders<Asset>.Filter.Eq("_id", entity.ID),
-                entity,
-                new ReplaceOptions { IsUpsert = true });
-            return res.ModifiedCount <= 1;
-        }
-
-        /// <inheritdoc />
-        public long DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
-        {
-            var res = m_Assets.DeleteMany(filter.Accept(new MongoDbNativeDistributed<Asset>()));
-            return res.DeletedCount;
-        }
-
-        #endregion
-
-        #region Amortization
-
-        /// <inheritdoc />
-        public Amortization SelectAmortization(Guid id) =>
-            m_Amortizations.FindSync(GetNQuery<Amortization>(id)).FirstOrDefault();
-
-        /// <inheritdoc />
-        public IEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter) =>
-            m_Amortizations.FindSync(filter.Accept(new MongoDbNativeDistributed<Amortization>()))
-                .ToEnumerable();
-
-        /// <inheritdoc />
-        public bool DeleteAmortization(Guid id)
-        {
-            var res = m_Amortizations.DeleteOne(GetNQuery<Amortization>(id));
-            return res.DeletedCount == 1;
-        }
-
-        /// <inheritdoc />
-        public bool Upsert(Amortization entity)
-        {
-            var res = m_Amortizations.ReplaceOne(
-                Builders<Amortization>.Filter.Eq("_id", entity.ID),
-                entity,
-                new ReplaceOptions { IsUpsert = true });
-            return res.ModifiedCount <= 1;
-        }
-
-        /// <inheritdoc />
-        public long DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
-        {
-            var res = m_Amortizations.DeleteMany(filter.Accept(new MongoDbNativeDistributed<Amortization>()));
-            return res.DeletedCount;
-        }
-
-        #endregion
-
-        #region ExchangeRecord
-
-        /// <inheritdoc />
-        public ExchangeRecord SelectExchangeRecord(ExchangeRecord record) =>
-            m_Records.Find(
-                    Builders<ExchangeRecord>.Filter.Gte("_id.date", record.Time) &
-                    Builders<ExchangeRecord>.Filter.Eq("_id.from", record.From) &
-                    Builders<ExchangeRecord>.Filter.Eq("_id.to", record.To)
-                ).Sort(Builders<ExchangeRecord>.Sort.Ascending("_id.date"))
-                .Limit(1)
-                .SingleOrDefault();
-
-        /// <inheritdoc />
-        public bool Upsert(ExchangeRecord record)
-        {
-            try
-            {
-                m_Records.InsertOne(record);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        #endregion
+        ProjectNothingButYear = MakeProject(year, false);
+        ProjectNothingButMonth = MakeProject(month, false);
+        ProjectNothingButWeek = MakeProject(week, false);
     }
+
+    public MongoDbAdapter(string uri, string db = null, string x509 = null)
+    {
+        var url = new MongoUrl(uri);
+        var settings = MongoClientSettings.FromUrl(url);
+        if (!string.IsNullOrEmpty(x509))
+        {
+            var cert = X509Certificate2.CreateFromPemFile(x509);
+            settings.SslSettings.ClientCertificates = new[] { cert };
+        }
+
+        m_Client = new(settings);
+
+        m_Db = m_Client.GetDatabase(db ?? url.DatabaseName ?? "accounting");
+
+        m_Vouchers = m_Db.GetCollection<Voucher>("voucher");
+        m_Assets = m_Db.GetCollection<Asset>("asset");
+        m_Amortizations = m_Db.GetCollection<Amortization>("amortization");
+        m_Records = m_Db.GetCollection<ExchangeRecord>("exchangeRecord");
+    }
+
+    private static bool Upsert<T, TId>(IMongoCollection<T> collection, T entity, BaseSerializer<T, TId> idProvider)
+    {
+        if (idProvider.FillId(collection, entity))
+        {
+            collection.InsertOne(entity);
+            return true;
+        }
+
+        var res = collection.ReplaceOne(
+            Builders<T>.Filter.Eq("_id", idProvider.GetId(entity)),
+            entity,
+            new ReplaceOptions { IsUpsert = true });
+        return res.ModifiedCount <= 1;
+    }
+
+    private static long Upsert<T, TId>(IMongoCollection<T> collection, IEnumerable<T> entities, BaseSerializer<T, TId> idProvider)
+    {
+        var ops = new List<WriteModel<T>>();
+        foreach (var entity in entities)
+            if (idProvider.FillId(collection, entity))
+                ops.Add(new InsertOneModel<T>(entity));
+            else
+                ops.Add(new ReplaceOneModel<T>(Builders<T>.Filter.Eq("_id", idProvider.GetId(entity)), entity)
+                    {
+                        IsUpsert = true,
+                    });
+        var res = collection.BulkWrite(ops, new() { IsOrdered = false });
+        return res.ProcessedRequests.Count;
+    }
+
+    #region Member
+
+    /// <summary>
+    ///     MongoDb客户端
+    /// </summary>
+    private readonly MongoClient m_Client;
+
+    /// <summary>
+    ///     MongoDb数据库
+    /// </summary>
+    private readonly IMongoDatabase m_Db;
+
+    /// <summary>
+    ///     记账凭证集合
+    /// </summary>
+    private readonly IMongoCollection<Voucher> m_Vouchers;
+
+    /// <summary>
+    ///     资产集合
+    /// </summary>
+    private readonly IMongoCollection<Asset> m_Assets;
+
+    /// <summary>
+    ///     摊销集合
+    /// </summary>
+    private readonly IMongoCollection<Amortization> m_Amortizations;
+
+    /// <summary>
+    ///     汇率集合
+    /// </summary>
+    private readonly IMongoCollection<ExchangeRecord> m_Records;
+
+    #endregion
+
+    #region Voucher
+
+    /// <inheritdoc />
+    public Voucher SelectVoucher(string id) =>
+        m_Vouchers.FindSync(GetNQuery<Voucher>(id)).FirstOrDefault();
+
+    /// <inheritdoc />
+    public IEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query) =>
+        m_Vouchers.Find(query.Accept(new MongoDbNativeVoucher())).Sort(Builders<Voucher>.Sort.Ascending("date"))
+            .ToEnumerable();
+
+    private static FilterDefinition<BsonDocument> GetChk(IVoucherDetailQuery query)
+    {
+        var visitor = new MongoDbNativeDetailUnwinded();
+        return query.DetailEmitFilter != null
+            ? query.DetailEmitFilter.DetailFilter.Accept(visitor)
+            : query.VoucherQuery is IVoucherQueryAtom dQuery
+                ? dQuery.DetailFilter.Accept(visitor)
+                : throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query));
+    }
+
+    /// <inheritdoc />
+    public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
+    {
+        var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher());
+        var chk = GetChk(query);
+        var srt = Builders<Voucher>.Sort.Ascending("date");
+        return m_Vouchers.Aggregate().Match(preF).Sort(srt).Project(ProjectDetails).Unwind("detail").Match(chk)
+            .Project(ProjectDetail).ToEnumerable().Select(b => BsonSerializer.Deserialize<VoucherDetail>(b));
+    }
+
+    /// <inheritdoc />
+    public IEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit = 0)
+    {
+        if (query.Subtotal.GatherType != GatheringType.VoucherCount)
+            throw new InvalidOperationException("记账凭证分类汇总只能计数");
+        if (query.Subtotal.EquivalentDate.HasValue)
+            throw new InvalidOperationException("记账凭证分类汇总不能等值");
+
+        var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
+        if (query.Subtotal.AggrType != AggregationType.None)
+            level |= query.Subtotal.AggrInterval;
+
+        if (level.HasFlag(SubtotalLevel.User))
+            throw new InvalidOperationException("记账凭证不能按用户分类汇总");
+        if (level.HasFlag(SubtotalLevel.Currency))
+            throw new InvalidOperationException("记账凭证不能按币种分类汇总");
+        if (level.HasFlag(SubtotalLevel.Title))
+            throw new InvalidOperationException("记账凭证不能按一级科目分类汇总");
+        if (level.HasFlag(SubtotalLevel.SubTitle))
+            throw new InvalidOperationException("记账凭证不能按二级科目分类汇总");
+        if (level.HasFlag(SubtotalLevel.Content))
+            throw new InvalidOperationException("记账凭证不能按内容分类汇总");
+        if (level.HasFlag(SubtotalLevel.Remark))
+            throw new InvalidOperationException("记账凭证不能按备注分类汇总");
+
+        var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher());
+
+        BsonDocument pprj;
+        if (!level.HasFlag(SubtotalLevel.Day))
+            pprj = ProjectNothing;
+        else if (!level.HasFlag(SubtotalLevel.Week))
+            pprj = ProjectNothingButDate;
+        else if (level.HasFlag(SubtotalLevel.Year))
+            pprj = ProjectNothingButYear;
+        else if (level.HasFlag(SubtotalLevel.Month))
+            pprj = ProjectNothingButMonth;
+        else // if (level.HasFlag(SubtotalLevel.Week))
+            pprj = ProjectNothingButWeek;
+
+        var prj = new BsonDocument();
+        if (level.HasFlag(SubtotalLevel.Day))
+            prj["date"] = "$date";
+
+        var grp = new BsonDocument { ["_id"] = prj, ["count"] = new BsonDocument { ["$sum"] = 1 } };
+
+        var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Group(grp);
+        if (limit > 0)
+            fluent = fluent.Sort(new SortDefinitionBuilder<BsonDocument>().Descending("count")).Limit(limit);
+        return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
+    }
+
+    /// <inheritdoc />
+    public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit = 0)
+    {
+        var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
+        if (query.Subtotal.AggrType != AggregationType.None)
+            level |= query.Subtotal.AggrInterval;
+        if (query.Subtotal.EquivalentDate.HasValue)
+            level |= SubtotalLevel.Currency;
+
+        var preF = query.VoucherEmitQuery.VoucherQuery.Accept(new MongoDbNativeVoucher());
+        var chk = GetChk(query.VoucherEmitQuery);
+
+        BsonDocument pprj;
+        if (!level.HasFlag(SubtotalLevel.Day))
+            pprj = ProjectDetails;
+        else if (!level.HasFlag(SubtotalLevel.Week))
+            pprj = ProjectDate;
+        else if (level.HasFlag(SubtotalLevel.Year))
+            pprj = ProjectYear;
+        else if (level.HasFlag(SubtotalLevel.Month))
+            pprj = ProjectMonth;
+        else // if (level.HasFlag(SubtotalLevel.Week))
+            pprj = ProjectWeek;
+
+        var prj = new BsonDocument();
+        if (level.HasFlag(SubtotalLevel.Day))
+            prj["date"] = "$date";
+        if (level.HasFlag(SubtotalLevel.User))
+            prj["user"] = "$detail.user";
+        if (level.HasFlag(SubtotalLevel.Currency))
+            prj["currency"] = "$detail.currency";
+        if (level.HasFlag(SubtotalLevel.Title))
+            prj["title"] = "$detail.title";
+        if (level.HasFlag(SubtotalLevel.SubTitle))
+            prj["subtitle"] = "$detail.subtitle";
+        if (level.HasFlag(SubtotalLevel.Content))
+            prj["content"] = "$detail.content";
+        if (level.HasFlag(SubtotalLevel.Remark))
+            prj["remark"] = "$detail.remark";
+
+        BsonDocument grp;
+        if (query.Subtotal.GatherType == GatheringType.Count)
+            grp = new BsonDocument { ["_id"] = prj, ["count"] = new BsonDocument { ["$sum"] = 1 } };
+        else
+            grp = new BsonDocument { ["_id"] = prj, ["total"] = new BsonDocument { ["$sum"] = "$detail.fund" } };
+
+        var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Unwind("detail").Match(chk).Group(grp);
+        if (query.Subtotal.AggrType != AggregationType.ChangedDay &&
+            query.Subtotal.Levels.LastOrDefault().HasFlag(SubtotalLevel.NonZero))
+            fluent = fluent.Match(FilterNonZero);
+        if (limit > 0)
+            fluent = fluent.Sort(new SortDefinitionBuilder<BsonDocument>().Descending("count")).Limit(limit);
+        return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
+    }
+
+    public IEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+        => m_Vouchers.Aggregate().Match(query.Accept(new MongoDbNativeVoucher()))
+            .Unwind("detail").Group(new BsonDocument
+                {
+                    ["_id"] = new BsonDocument
+                        {
+                            ["id"] = "$_id",
+                            ["user"] = "$detail.user",
+                            ["currency"] = "$detail.currency",
+                        },
+                    ["value"] = new BsonDocument { ["$sum"] = "$detail.fund" },
+                })
+            .Match(new BsonDocument
+                {
+                    ["$expr"] = new BsonDocument
+                        {
+                            ["$gt"] = new BsonArray
+                                {
+                                    new BsonDocument{ ["$abs"] = "$value" },
+                                    VoucherDetail.Tolerance,
+                                },
+                        },
+                })
+            .Lookup("voucher", "_id.id", "_id", "voucher")
+            .Sort(new SortDefinitionBuilder<BsonDocument>().Ascending("voucher.date"))
+            .ToEnumerable().Select(b =>
+                {
+                    var bsonReader = new BsonDocumentReader(b);
+                    string read = null;
+                    bsonReader.ReadStartDocument();
+                    var (user, curr) = bsonReader.ReadDocument("_id", ref read, bR =>
+                        {
+                            // ReSharper disable AccessToModifiedClosure
+                            bR.ReadStartDocument();
+                            bR.ReadObjectId("id", ref read);
+                            var u = bR.ReadString("user", ref read);
+                            var c = bR.ReadString("currency", ref read);
+                            bR.ReadEndDocument();
+                            return (u, c);
+                            // ReSharper restore AccessToModifiedClosure
+                        });
+                    var v = bsonReader.ReadDouble("value", ref read)!.Value;
+                    var voucher = bsonReader.ReadArray("voucher", ref read, new VoucherSerializer().Deserialize)
+                        .Single();
+                    bsonReader.ReadEndDocument();
+                    return (voucher, user, curr, v);
+                });
+
+    public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+        => m_Vouchers.Aggregate().Match(query.Accept(new MongoDbNativeVoucher()))
+            .Group(new BsonDocument
+                {
+                    ["_id"] = new BsonDocument { ["date"] = "$date", ["detail"] = "$detail" },
+                    ["count"] = new BsonDocument { ["$sum"] = 1 },
+                    ["ids"] = new BsonDocument { ["$push"] = "$_id" },
+                })
+            .Match(new FilterDefinitionBuilder<BsonDocument>().Gt("count", 1))
+            .Sort(new SortDefinitionBuilder<BsonDocument>().Ascending("_id.date"))
+            .ToEnumerable().Select(b =>
+                {
+                    var bsonReader = new BsonDocumentReader(b);
+                    string read = null;
+                    bsonReader.ReadStartDocument();
+                    var v = bsonReader.ReadDocument("_id", ref read, new VoucherSerializer().Deserialize);
+                    bsonReader.ReadInt32("count", ref read);
+                    var ids = bsonReader.ReadArray("ids", ref read, bR => bR.ReadObjectId().ToString());
+                    bsonReader.ReadEndDocument();
+                    return (v, ids);
+                });
+
+    /// <inheritdoc />
+    public bool DeleteVoucher(string id)
+    {
+        var res = m_Vouchers.DeleteOne(GetNQuery<Voucher>(id));
+        return res.DeletedCount == 1;
+    }
+
+    /// <inheritdoc />
+    public long DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+    {
+        var res = m_Vouchers.DeleteMany(query.Accept(new MongoDbNativeVoucher()));
+        return res.DeletedCount;
+    }
+
+    /// <inheritdoc />
+    public bool Upsert(Voucher entity) => Upsert(m_Vouchers, entity, new VoucherSerializer());
+
+    /// <inheritdoc />
+    public long Upsert(IEnumerable<Voucher> entities) => Upsert(m_Vouchers, entities, new VoucherSerializer());
+
+    #endregion
+
+    #region Asset
+
+    /// <inheritdoc />
+    public Asset SelectAsset(Guid id) => m_Assets.FindSync(GetNQuery<Asset>(id)).FirstOrDefault();
+
+    /// <inheritdoc />
+    public IEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter) =>
+        m_Assets.FindSync(filter.Accept(new MongoDbNativeDistributed<Asset>()))
+            .ToEnumerable();
+
+    /// <inheritdoc />
+    public bool DeleteAsset(Guid id)
+    {
+        var res = m_Assets.DeleteOne(GetNQuery<Asset>(id));
+        return res.DeletedCount == 1;
+    }
+
+    /// <inheritdoc />
+    public bool Upsert(Asset entity)
+    {
+        var res = m_Assets.ReplaceOne(
+            Builders<Asset>.Filter.Eq("_id", entity.ID),
+            entity,
+            new ReplaceOptions { IsUpsert = true });
+        return res.ModifiedCount <= 1;
+    }
+
+    /// <inheritdoc />
+    public long DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
+    {
+        var res = m_Assets.DeleteMany(filter.Accept(new MongoDbNativeDistributed<Asset>()));
+        return res.DeletedCount;
+    }
+
+    #endregion
+
+    #region Amortization
+
+    /// <inheritdoc />
+    public Amortization SelectAmortization(Guid id) =>
+        m_Amortizations.FindSync(GetNQuery<Amortization>(id)).FirstOrDefault();
+
+    /// <inheritdoc />
+    public IEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter) =>
+        m_Amortizations.FindSync(filter.Accept(new MongoDbNativeDistributed<Amortization>()))
+            .ToEnumerable();
+
+    /// <inheritdoc />
+    public bool DeleteAmortization(Guid id)
+    {
+        var res = m_Amortizations.DeleteOne(GetNQuery<Amortization>(id));
+        return res.DeletedCount == 1;
+    }
+
+    /// <inheritdoc />
+    public bool Upsert(Amortization entity)
+    {
+        var res = m_Amortizations.ReplaceOne(
+            Builders<Amortization>.Filter.Eq("_id", entity.ID),
+            entity,
+            new ReplaceOptions { IsUpsert = true });
+        return res.ModifiedCount <= 1;
+    }
+
+    /// <inheritdoc />
+    public long DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
+    {
+        var res = m_Amortizations.DeleteMany(filter.Accept(new MongoDbNativeDistributed<Amortization>()));
+        return res.DeletedCount;
+    }
+
+    #endregion
+
+    #region ExchangeRecord
+
+    /// <inheritdoc />
+    public ExchangeRecord SelectExchangeRecord(ExchangeRecord record) =>
+        m_Records.Find(
+                Builders<ExchangeRecord>.Filter.Gte("_id.date", record.Time) &
+                Builders<ExchangeRecord>.Filter.Eq("_id.from", record.From) &
+                Builders<ExchangeRecord>.Filter.Eq("_id.to", record.To)
+            ).Sort(Builders<ExchangeRecord>.Sort.Ascending("_id.date"))
+            .Limit(1)
+            .SingleOrDefault();
+
+    /// <inheritdoc />
+    public bool Upsert(ExchangeRecord record)
+    {
+        try
+        {
+            m_Records.InsertOne(record);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    #endregion
 }

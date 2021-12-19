@@ -23,206 +23,205 @@ using AccountingServer.BLL.Util;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
 
-namespace AccountingServer.BLL
+namespace AccountingServer.BLL;
+
+public class DbSession : IHistoricalExchange
 {
-    public class DbSession : IHistoricalExchange
+    public DbSession(string uri = null, string db = null) => Db = Facade.Create(uri, db);
+
+    /// <summary>
+    ///     数据库访问
+    /// </summary>
+    public IDbAdapter Db { private get; init; }
+
+    /// <summary>
+    ///     返回结果数量上限
+    /// </summary>
+    public int Limit { private get; set; } = 0;
+
+    /// <summary>
+    ///     查询汇率
+    /// </summary>
+    /// <param name="date">日期</param>
+    /// <param name="from">购汇币种</param>
+    /// <param name="to">结汇币种</param>
+    /// <returns>汇率</returns>
+    private double LookupExchange(DateTime date, string from, string to)
     {
-        public DbSession(string uri = null, string db = null) => Db = Facade.Create(uri, db);
+        if (from == to)
+            return 1;
 
-        /// <summary>
-        ///     数据库访问
-        /// </summary>
-        public IDbAdapter Db { private get; init; }
+        var now = DateTime.UtcNow;
+        if (date > now)
+            date = now;
 
-        /// <summary>
-        ///     返回结果数量上限
-        /// </summary>
-        public int Limit { private get; set; } = 0;
+        var res = Db.SelectExchangeRecord(new ExchangeRecord { Time = date, From = from, To = to });
+        if (res != null)
+            return res.Value;
+        res = Db.SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = from });
+        if (res != null)
+            return 1D / res.Value;
 
-        /// <summary>
-        ///     查询汇率
-        /// </summary>
-        /// <param name="date">日期</param>
-        /// <param name="from">购汇币种</param>
-        /// <param name="to">结汇币种</param>
-        /// <returns>汇率</returns>
-        private double LookupExchange(DateTime date, string from, string to)
-        {
-            if (from == to)
-                return 1;
+        Console.WriteLine($"{now:o} Query: {date:o} {from}/{to}");
+        var value = ExchangeFactory.Instance.Query(from, to);
+        Db.Upsert(new ExchangeRecord
+            {
+                Time = now,
+                From = from,
+                To = to,
+                Value = value,
+            });
+        return value;
+    }
 
-            var now = DateTime.UtcNow;
-            if (date > now)
-                date = now;
+    /// <inheritdoc />
+    public double Query(DateTime? date, string from, string to)
+        => LookupExchange(date ?? DateTime.UtcNow, from, to);
 
-            var res = Db.SelectExchangeRecord(new ExchangeRecord { Time = date, From = from, To = to });
-            if (res != null)
-                return res.Value;
-            res = Db.SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = from });
-            if (res != null)
-                return 1D / res.Value;
+    private static int Compare<T>(T? lhs, T? rhs)
+        where T : struct, IComparable<T>
+    {
+        if (lhs.HasValue &&
+            rhs.HasValue)
+            return lhs.Value.CompareTo(rhs.Value);
 
-            Console.WriteLine($"{now:o} Query: {date:o} {from}/{to}");
-            var value = ExchangeFactory.Instance.Query(from, to);
-            Db.Upsert(new ExchangeRecord
-                {
-                    Time = now,
-                    From = from,
-                    To = to,
-                    Value = value,
-                });
-            return value;
-        }
+        if (lhs.HasValue)
+            return 1;
 
-        /// <inheritdoc />
-        public double Query(DateTime? date, string from, string to)
-            => LookupExchange(date ?? DateTime.UtcNow, from, to);
+        if (rhs.HasValue)
+            return -1;
 
-        private static int Compare<T>(T? lhs, T? rhs)
-            where T : struct, IComparable<T>
-        {
-            if (lhs.HasValue &&
-                rhs.HasValue)
-                return lhs.Value.CompareTo(rhs.Value);
+        return 0;
+    }
 
-            if (lhs.HasValue)
-                return 1;
+    [SuppressMessage("ReSharper", "PossibleInvalidOperationException")]
+    public static int TheComparison(VoucherDetail lhs, VoucherDetail rhs)
+    {
+        // ReSharper disable once JoinDeclarationAndInitializer
+        int res;
 
-            if (rhs.HasValue)
-                return -1;
+        res = string.Compare(lhs.User, rhs.User, StringComparison.Ordinal);
+        if (res != 0)
+            return res;
 
-            return 0;
-        }
+        res = string.Compare(lhs.Currency, rhs.Currency, StringComparison.Ordinal);
+        if (res != 0)
+            return res;
 
-        [SuppressMessage("ReSharper", "PossibleInvalidOperationException")]
-        public static int TheComparison(VoucherDetail lhs, VoucherDetail rhs)
-        {
-            // ReSharper disable once JoinDeclarationAndInitializer
-            int res;
+        res = Compare(lhs.Title, rhs.Title);
+        if (res != 0)
+            return res;
 
-            res = string.Compare(lhs.User, rhs.User, StringComparison.Ordinal);
-            if (res != 0)
-                return res;
+        res = Compare(lhs.SubTitle, rhs.SubTitle);
+        if (res != 0)
+            return res;
 
-            res = string.Compare(lhs.Currency, rhs.Currency, StringComparison.Ordinal);
-            if (res != 0)
-                return res;
+        res = string.Compare(lhs.Content, rhs.Content, StringComparison.Ordinal);
+        if (res != 0)
+            return res;
 
-            res = Compare(lhs.Title, rhs.Title);
-            if (res != 0)
-                return res;
+        res = string.Compare(lhs.Remark, rhs.Remark, StringComparison.Ordinal);
+        if (res != 0)
+            return res;
 
-            res = Compare(lhs.SubTitle, rhs.SubTitle);
-            if (res != 0)
-                return res;
+        res = lhs.Fund.Value.CompareTo(rhs.Fund.Value);
+        return res != 0 ? res : 0;
+    }
 
-            res = string.Compare(lhs.Content, rhs.Content, StringComparison.Ordinal);
-            if (res != 0)
-                return res;
+    public Voucher SelectVoucher(string id)
+        => Db.SelectVoucher(id);
 
-            res = string.Compare(lhs.Remark, rhs.Remark, StringComparison.Ordinal);
-            if (res != 0)
-                return res;
+    public IEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+        => Db.SelectVouchers(query);
 
-            res = lhs.Fund.Value.CompareTo(rhs.Fund.Value);
-            return res != 0 ? res : 0;
-        }
+    public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
+        => Db.SelectVoucherDetails(query);
 
-        public Voucher SelectVoucher(string id)
-            => Db.SelectVoucher(id);
+    public ISubtotalResult SelectVouchersGrouped(IVoucherGroupedQuery query)
+    {
+        var res = Db.SelectVouchersGrouped(query, Limit);
+        var conv = new SubtotalBuilder(query.Subtotal, this);
+        return conv.Build(res);
+    }
 
-        public IEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-            => Db.SelectVouchers(query);
+    public ISubtotalResult SelectVoucherDetailsGrouped(IGroupedQuery query)
+    {
+        var res = Db.SelectVoucherDetailsGrouped(query, Limit);
+        var conv = new SubtotalBuilder(query.Subtotal, this);
+        return conv.Build(res);
+    }
 
-        public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
-            => Db.SelectVoucherDetails(query);
+    public IEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+        => Db.SelectUnbalancedVouchers(query);
 
-        public ISubtotalResult SelectVouchersGrouped(IVoucherGroupedQuery query)
-        {
-            var res = Db.SelectVouchersGrouped(query, Limit);
-            var conv = new SubtotalBuilder(query.Subtotal, this);
-            return conv.Build(res);
-        }
+    public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+        => Db.SelectDuplicatedVouchers(query);
 
-        public ISubtotalResult SelectVoucherDetailsGrouped(IGroupedQuery query)
-        {
-            var res = Db.SelectVoucherDetailsGrouped(query, Limit);
-            var conv = new SubtotalBuilder(query.Subtotal, this);
-            return conv.Build(res);
-        }
+    public bool DeleteVoucher(string id)
+        => Db.DeleteVoucher(id);
 
-        public IEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-            => Db.SelectUnbalancedVouchers(query);
+    public long DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+        => Db.DeleteVouchers(query);
 
-        public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-            => Db.SelectDuplicatedVouchers(query);
+    public bool Upsert(Voucher entity)
+    {
+        Regularize(entity);
 
-        public bool DeleteVoucher(string id)
-            => Db.DeleteVoucher(id);
+        return Db.Upsert(entity);
+    }
 
-        public long DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-            => Db.DeleteVouchers(query);
-
-        public bool Upsert(Voucher entity)
-        {
+    public long Upsert(IReadOnlyCollection<Voucher> entities)
+    {
+        foreach (var entity in entities)
             Regularize(entity);
 
-            return Db.Upsert(entity);
-        }
+        return Db.Upsert(entities);
+    }
 
-        public long Upsert(IReadOnlyCollection<Voucher> entities)
+    public static void Regularize(Voucher entity)
+    {
+        entity.Details ??= new();
+
+        foreach (var d in entity.Details)
         {
-            foreach (var entity in entities)
-                Regularize(entity);
-
-            return Db.Upsert(entities);
+            d.User ??= ClientUser.Name;
+            d.Currency = d.Currency.ToUpperInvariant();
         }
 
-        public static void Regularize(Voucher entity)
-        {
-            entity.Details ??= new();
+        entity.Details.Sort(TheComparison);
+    }
 
-            foreach (var d in entity.Details)
-            {
-                d.User ??= ClientUser.Name;
-                d.Currency = d.Currency.ToUpperInvariant();
-            }
+    public Asset SelectAsset(Guid id)
+        => Db.SelectAsset(id);
 
-            entity.Details.Sort(TheComparison);
-        }
+    public IEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter)
+        => Db.SelectAssets(filter);
 
-        public Asset SelectAsset(Guid id)
-            => Db.SelectAsset(id);
+    public bool DeleteAsset(Guid id)
+        => Db.DeleteAsset(id);
 
-        public IEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter)
-            => Db.SelectAssets(filter);
+    public long DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
+        => Db.DeleteAssets(filter);
 
-        public bool DeleteAsset(Guid id)
-            => Db.DeleteAsset(id);
+    public bool Upsert(Asset entity)
+        => Db.Upsert(entity);
 
-        public long DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
-            => Db.DeleteAssets(filter);
+    public Amortization SelectAmortization(Guid id)
+        => Db.SelectAmortization(id);
 
-        public bool Upsert(Asset entity)
-            => Db.Upsert(entity);
+    public IEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
+        => Db.SelectAmortizations(filter);
 
-        public Amortization SelectAmortization(Guid id)
-            => Db.SelectAmortization(id);
+    public bool DeleteAmortization(Guid id)
+        => Db.DeleteAmortization(id);
 
-        public IEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
-            => Db.SelectAmortizations(filter);
+    public long DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
+        => Db.DeleteAmortizations(filter);
 
-        public bool DeleteAmortization(Guid id)
-            => Db.DeleteAmortization(id);
+    public bool Upsert(Amortization entity)
+    {
+        Regularize(entity.Template);
 
-        public long DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
-            => Db.DeleteAmortizations(filter);
-
-        public bool Upsert(Amortization entity)
-        {
-            Regularize(entity.Template);
-
-            return Db.Upsert(entity);
-        }
+        return Db.Upsert(entity);
     }
 }

@@ -28,192 +28,191 @@ using AccountingServer.Entities.Util;
 using Xunit;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
-namespace AccountingServer.Test.IntegrationTest.VoucherTest
+namespace AccountingServer.Test.IntegrationTest.VoucherTest;
+
+public abstract class QueryTestBase
 {
-    public abstract class QueryTestBase
+    protected QueryTestBase()
+        => ClientUser.Set("b1");
+
+    protected virtual void PrepareVoucher(Voucher voucher) { }
+    protected abstract bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query);
+    protected virtual void ResetVouchers() { }
+
+    public virtual void RunTestA(bool expected, string query)
     {
-        protected QueryTestBase()
-            => ClientUser.Set("b1");
+        var voucher = new Voucher
+            {
+                ID = "59278b516c2f021e80f51912",
+                Date = null,
+                Type = VoucherType.Uncertain,
+                Remark = "rmk1",
+                Details = new()
+                    {
+                        new()
+                            {
+                                User = "b1",
+                                Currency = "JPY",
+                                Title = 1001,
+                                SubTitle = 05,
+                                Content = "cont1",
+                                Fund = 123.45,
+                            },
+                        new()
+                            {
+                                User = "b1",
+                                Currency = "JPY",
+                                Title = 1234,
+                                Remark = "remk2",
+                                Fund = -123.45,
+                            },
+                        new()
+                            {
+                                User = "b1",
+                                Currency = "USD",
+                                Title = 2345,
+                                Content = "cont3",
+                                Fund = -77.66,
+                            },
+                        new()
+                            {
+                                User = "b1",
+                                Currency = "USD",
+                                Title = 3456,
+                                SubTitle = 05,
+                                Content = "cont4",
+                                Remark = "remk4",
+                                Fund = 77.66,
+                            },
+                        new()
+                            {
+                                User = "b1&b2",
+                                Currency = "EUR",
+                                Title = 1111,
+                                SubTitle = 22,
+                                Fund = 114514,
+                            },
+                    },
+            };
 
-        protected virtual void PrepareVoucher(Voucher voucher) { }
-        protected abstract bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query);
-        protected virtual void ResetVouchers() { }
-
-        public virtual void RunTestA(bool expected, string query)
-        {
-            var voucher = new Voucher
-                {
-                    ID = "59278b516c2f021e80f51912",
-                    Date = null,
-                    Type = VoucherType.Uncertain,
-                    Remark = "rmk1",
-                    Details = new()
-                        {
-                            new()
-                                {
-                                    User = "b1",
-                                    Currency = "JPY",
-                                    Title = 1001,
-                                    SubTitle = 05,
-                                    Content = "cont1",
-                                    Fund = 123.45,
-                                },
-                            new()
-                                {
-                                    User = "b1",
-                                    Currency = "JPY",
-                                    Title = 1234,
-                                    Remark = "remk2",
-                                    Fund = -123.45,
-                                },
-                            new()
-                                {
-                                    User = "b1",
-                                    Currency = "USD",
-                                    Title = 2345,
-                                    Content = "cont3",
-                                    Fund = -77.66,
-                                },
-                            new()
-                                {
-                                    User = "b1",
-                                    Currency = "USD",
-                                    Title = 3456,
-                                    SubTitle = 05,
-                                    Content = "cont4",
-                                    Remark = "remk4",
-                                    Fund = 77.66,
-                                },
-                            new()
-                                {
-                                    User = "b1&b2",
-                                    Currency = "EUR",
-                                    Title = 1111,
-                                    SubTitle = 22,
-                                    Fund = 114514,
-                                },
-                        },
-                };
-
-            ResetVouchers();
-            PrepareVoucher(voucher);
-            Assert.Equal(expected, RunQuery(ParsingF.VoucherQuery(query)));
-            ResetVouchers();
-        }
-
-        protected class DataProvider : IEnumerable<object[]>
-        {
-            private static readonly List<object[]> Data = new()
-                {
-                    new object[] { true, "" },
-                    new object[] { true, "^59278b516c2f021e80f51912^[null]Uncertain%rmk%" },
-                    new object[] { true, "{^59278b516c2f021e80f51912^}-{null}*{{Devalue}+{Amortization}}" },
-                    new object[] { true, "-{%rrr%}+{20170101}" },
-                    new object[] { false, "{^59278b516c2f021e80f51911^}+{G}*{%asdf%}" },
-                    new object[] { true, "@JPY T100105'cont1'>" },
-                    new object[] { true, "@JPY T123400\"remk2\"=-123.45" },
-                    new object[] { true, "@USD T2345'cont3'<" },
-                    new object[] { true, "@USD T3456'cont4'\"remk4\"=77.66" },
-                    new object[] { true, "{(T1234+T345605)*(''+'cont3')}-{Depreciation}-{Carry}" },
-                    new object[] { false, "T1002+'  '''+\" rmk\"+=77.66001" },
-                    new object[] { true, "(@USD+@JPY)*(=-123.45+>)+T2345+Ub1&b2@EUR A" },
-                    new object[] { false, "(@USD+@JPY)*=-123.45+T2345+Ub1&b2@EUR A" },
-                    new object[] { true, "{T1001+(T1234+(T2345)+T3456)+Ub1&b2@EUR A}-{AnnualCarry}" },
-                    new object[] { true, "+(T1001+(T1234+T2345))+T3456+Ub1&b2@EUR A" },
-                    new object[] { true, "{((<+>)*())+=1*=2+Ub1&b2@EUR A}-{Ordinary}" },
-                    new object[] { true, "U-=1*=2 A" },
-                    new object[] { true, "-=1*=2 A" },
-                    new object[] { true, "{T1001 null Uncertain}*{T2345 G}-{T3456 A}" },
-                    new object[] { false, "{20170101~20180101}+{~~20160101}" },
-                    new object[] { true, "{20170101~~20180101}*{~20160101}" },
-                    new object[] { true, "U-" },
-                    new object[] { true, "-" },
-                    new object[] { false, "U- A" },
-                    new object[] { false, "- A" },
-                    new object[] { true, "U@EUR\"\"" },
-                    new object[] { true, "U'b1&b2'" },
-                    new object[] { true, "Ub1+Ub1&b2 A" },
-                    new object[] { true, "U A" },
-                    new object[] { true, "@JPY Asset" },
-                    new object[] { true, "Liability cont3" },
-                    new object[] { true, "U @USD - U Asset - U Equity - U Revenue - U Expense" },
-                    new object[] { false, "%%" },
-                    new object[] { true, "U 'ConT'.**U\"rEMk\".*" },
-                    new object[] { false, "U 'cont\\'.*+U\"remk#\".*" },
-                };
-
-            public IEnumerator<object[]> GetEnumerator() => Data.GetEnumerator();
-            IEnumerator IEnumerable.GetEnumerator() => Data.GetEnumerator();
-        }
+        ResetVouchers();
+        PrepareVoucher(voucher);
+        Assert.Equal(expected, RunQuery(ParsingF.VoucherQuery(query)));
+        ResetVouchers();
     }
 
-    [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
-    public class MatchTest : QueryTestBase
+    protected class DataProvider : IEnumerable<object[]>
     {
-        private Voucher m_Voucher;
-        protected override void PrepareVoucher(Voucher voucher) => m_Voucher = voucher;
+        private static readonly List<object[]> Data = new()
+            {
+                new object[] { true, "" },
+                new object[] { true, "^59278b516c2f021e80f51912^[null]Uncertain%rmk%" },
+                new object[] { true, "{^59278b516c2f021e80f51912^}-{null}*{{Devalue}+{Amortization}}" },
+                new object[] { true, "-{%rrr%}+{20170101}" },
+                new object[] { false, "{^59278b516c2f021e80f51911^}+{G}*{%asdf%}" },
+                new object[] { true, "@JPY T100105'cont1'>" },
+                new object[] { true, "@JPY T123400\"remk2\"=-123.45" },
+                new object[] { true, "@USD T2345'cont3'<" },
+                new object[] { true, "@USD T3456'cont4'\"remk4\"=77.66" },
+                new object[] { true, "{(T1234+T345605)*(''+'cont3')}-{Depreciation}-{Carry}" },
+                new object[] { false, "T1002+'  '''+\" rmk\"+=77.66001" },
+                new object[] { true, "(@USD+@JPY)*(=-123.45+>)+T2345+Ub1&b2@EUR A" },
+                new object[] { false, "(@USD+@JPY)*=-123.45+T2345+Ub1&b2@EUR A" },
+                new object[] { true, "{T1001+(T1234+(T2345)+T3456)+Ub1&b2@EUR A}-{AnnualCarry}" },
+                new object[] { true, "+(T1001+(T1234+T2345))+T3456+Ub1&b2@EUR A" },
+                new object[] { true, "{((<+>)*())+=1*=2+Ub1&b2@EUR A}-{Ordinary}" },
+                new object[] { true, "U-=1*=2 A" },
+                new object[] { true, "-=1*=2 A" },
+                new object[] { true, "{T1001 null Uncertain}*{T2345 G}-{T3456 A}" },
+                new object[] { false, "{20170101~20180101}+{~~20160101}" },
+                new object[] { true, "{20170101~~20180101}*{~20160101}" },
+                new object[] { true, "U-" },
+                new object[] { true, "-" },
+                new object[] { false, "U- A" },
+                new object[] { false, "- A" },
+                new object[] { true, "U@EUR\"\"" },
+                new object[] { true, "U'b1&b2'" },
+                new object[] { true, "Ub1+Ub1&b2 A" },
+                new object[] { true, "U A" },
+                new object[] { true, "@JPY Asset" },
+                new object[] { true, "Liability cont3" },
+                new object[] { true, "U @USD - U Asset - U Equity - U Revenue - U Expense" },
+                new object[] { false, "%%" },
+                new object[] { true, "U 'ConT'.**U\"rEMk\".*" },
+                new object[] { false, "U 'cont\\'.*+U\"remk#\".*" },
+            };
 
-        protected override bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
-            => MatchHelper.IsMatch(m_Voucher, query);
+        public IEnumerator<object[]> GetEnumerator() => Data.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => Data.GetEnumerator();
+    }
+}
 
-        protected override void ResetVouchers() => m_Voucher = null;
+[SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
+public class MatchTest : QueryTestBase
+{
+    private Voucher m_Voucher;
+    protected override void PrepareVoucher(Voucher voucher) => m_Voucher = voucher;
 
-        [Theory]
-        [ClassData(typeof(DataProvider))]
-        public override void RunTestA(bool expected, string query) => base.RunTestA(expected, query);
+    protected override bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
+        => MatchHelper.IsMatch(m_Voucher, query);
+
+    protected override void ResetVouchers() => m_Voucher = null;
+
+    [Theory]
+    [ClassData(typeof(DataProvider))]
+    public override void RunTestA(bool expected, string query) => base.RunTestA(expected, query);
+}
+
+[Collection("DbTestCollection")]
+[SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
+public class DbQueryTest : QueryTestBase, IDisposable
+{
+    private readonly IDbAdapter m_Adapter;
+
+    public DbQueryTest()
+    {
+        m_Adapter = Facade.Create(db: "accounting-test");
+
+        m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
     }
 
-    [Collection("DbTestCollection")]
-    [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
-    public class DbQueryTest : QueryTestBase, IDisposable
+    public void Dispose() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+
+    protected override void PrepareVoucher(Voucher voucher) => m_Adapter.Upsert(voucher);
+
+    protected override bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
+        => m_Adapter.SelectVouchers(query).SingleOrDefault() != null;
+
+    protected override void ResetVouchers() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+
+    [Theory]
+    [ClassData(typeof(DataProvider))]
+    public override void RunTestA(bool expected, string query) => base.RunTestA(expected, query);
+}
+
+[Collection("DbTestCollection")]
+[SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
+public class BLLQueryTest : QueryTestBase, IDisposable
+{
+    private readonly Accountant m_Accountant;
+
+    public BLLQueryTest()
     {
-        private readonly IDbAdapter m_Adapter;
+        m_Accountant = new(db: "accounting-test");
 
-        public DbQueryTest()
-        {
-            m_Adapter = Facade.Create(db: "accounting-test");
-
-            m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
-        }
-
-        public void Dispose() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
-
-        protected override void PrepareVoucher(Voucher voucher) => m_Adapter.Upsert(voucher);
-
-        protected override bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
-            => m_Adapter.SelectVouchers(query).SingleOrDefault() != null;
-
-        protected override void ResetVouchers() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
-
-        [Theory]
-        [ClassData(typeof(DataProvider))]
-        public override void RunTestA(bool expected, string query) => base.RunTestA(expected, query);
+        m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
     }
 
-    [Collection("DbTestCollection")]
-    [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
-    public class BLLQueryTest : QueryTestBase, IDisposable
-    {
-        private readonly Accountant m_Accountant;
+    public void Dispose() => m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
 
-        public BLLQueryTest()
-        {
-            m_Accountant = new(db: "accounting-test");
+    protected override void PrepareVoucher(Voucher voucher) => m_Accountant.Upsert(voucher);
 
-            m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
-        }
+    protected override bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
+        => m_Accountant.SelectVouchers(query).SingleOrDefault() != null;
 
-        public void Dispose() => m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+    protected override void ResetVouchers() => m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
 
-        protected override void PrepareVoucher(Voucher voucher) => m_Accountant.Upsert(voucher);
-
-        protected override bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
-            => m_Accountant.SelectVouchers(query).SingleOrDefault() != null;
-
-        protected override void ResetVouchers() => m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
-
-        [Theory]
-        [ClassData(typeof(DataProvider))]
-        public override void RunTestA(bool expected, string query) => base.RunTestA(expected, query);
-    }
+    [Theory]
+    [ClassData(typeof(DataProvider))]
+    public override void RunTestA(bool expected, string query) => base.RunTestA(expected, query);
 }

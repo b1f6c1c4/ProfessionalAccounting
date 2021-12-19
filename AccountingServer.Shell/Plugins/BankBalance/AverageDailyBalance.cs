@@ -27,85 +27,84 @@ using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
-namespace AccountingServer.Shell.Plugins.BankBalance
+namespace AccountingServer.Shell.Plugins.BankBalance;
+
+/// <summary>
+///     计算日均余额
+/// </summary>
+internal class AverageDailyBalance : PluginBase
 {
-    /// <summary>
-    ///     计算日均余额
-    /// </summary>
-    internal class AverageDailyBalance : PluginBase
+    public AverageDailyBalance(Accountant accountant) : base(accountant) { }
+
+    /// <inheritdoc />
+    public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
     {
-        public AverageDailyBalance(Accountant accountant) : base(accountant) { }
+        var content = Parsing.Token(ref expr);
+        var avg = Parsing.DoubleF(ref expr);
+        Parsing.Eof(expr);
 
-        /// <inheritdoc />
-        public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+        var tdy = ClientDateTime.Today;
+        var ldom = AccountantHelper.LastDayOfMonth(tdy.Year, tdy.Month);
+        var srng = new DateFilter(new(tdy.Year, tdy.Month, 1, 0, 0, 0, DateTimeKind.Utc), tdy);
+        var balance = Accountant.RunGroupedQuery(
+            $"T1002 {content.Quotation('\'')} [~{tdy.AsDate()}]`vD{srng.AsDateRange()}");
+
+        var bal = 0D;
+        var btd = 0D;
+        foreach (var b in balance.Items.Cast<ISubtotalDate>())
+            if (b.Date == tdy)
+                btd += b.Fund;
+            else
+                bal += b.Fund;
+
+        var targ = ldom.Day * avg;
+
+        var sb = new StringBuilder();
+        sb.AppendLine($"Target: {targ.AsCurrency()}");
+        sb.AppendLine($"Balance until yesterday: {bal.AsCurrency()}");
+        if ((bal - targ).IsNonNegative())
         {
-            var content = Parsing.Token(ref expr);
-            var avg = Parsing.DoubleF(ref expr);
-            Parsing.Eof(expr);
+            sb.AppendLine("Achieved.");
+            sb.AppendLine();
 
-            var tdy = ClientDateTime.Today;
-            var ldom = AccountantHelper.LastDayOfMonth(tdy.Year, tdy.Month);
-            var srng = new DateFilter(new(tdy.Year, tdy.Month, 1, 0, 0, 0, DateTimeKind.Utc), tdy);
-            var balance = Accountant.RunGroupedQuery(
-                $"T1002 {content.Quotation('\'')} [~{tdy.AsDate()}]`vD{srng.AsDateRange()}");
-
-            var bal = 0D;
-            var btd = 0D;
-            foreach (var b in balance.Items.Cast<ISubtotalDate>())
-                if (b.Date == tdy)
-                    btd += b.Fund;
-                else
-                    bal += b.Fund;
-
-            var targ = ldom.Day * avg;
-
-            var sb = new StringBuilder();
-            sb.AppendLine($"Target: {targ.AsCurrency()}");
-            sb.AppendLine($"Balance until yesterday: {bal.AsCurrency()}");
-            if ((bal - targ).IsNonNegative())
+            sb.AppendLine(
+                (btd - avg).IsNonNegative()
+                    ? $"Plan A: Credit {(btd - avg).AsCurrency()}, Balance {avg.AsCurrency()}"
+                    : $"Plan A: Debit {(avg - btd).AsCurrency()}, Balance {avg.AsCurrency()}");
+            sb.AppendLine("Plan B: No Action");
+        }
+        else
+        {
+            var res = targ - bal;
+            var rsd = ldom.Day - tdy.Day + 1;
+            sb.AppendLine($"Deficiency: {res.AsCurrency()}");
+            var avx = res / rsd;
+            if ((rsd * avg - res).IsNonNegative())
             {
-                sb.AppendLine("Achieved.");
+                sb.AppendLine($"Average deficiency: {avx.AsCurrency()} <= {avg.AsCurrency()}");
                 sb.AppendLine();
 
                 sb.AppendLine(
+                    (btd - avx).IsNonNegative()
+                        ? $"Plan A: Credit {(btd - avx).AsCurrency()}, Balance {avx.AsCurrency()}"
+                        : $"Plan A: Debit {(avx - btd).AsCurrency()}, Balance {avx.AsCurrency()}");
+                sb.AppendLine(
                     (btd - avg).IsNonNegative()
-                        ? $"Plan A: Credit {(btd - avg).AsCurrency()}, Balance {avg.AsCurrency()}"
-                        : $"Plan A: Debit {(avg - btd).AsCurrency()}, Balance {avg.AsCurrency()}");
-                sb.AppendLine("Plan B: No Action");
+                        ? $"Plan B: Credit {(btd - avg).AsCurrency()}, Balance {avg.AsCurrency()}"
+                        : $"Plan B: Debit {(avg - btd).AsCurrency()}, Balance {avg.AsCurrency()}");
             }
             else
             {
-                var res = targ - bal;
-                var rsd = ldom.Day - tdy.Day + 1;
-                sb.AppendLine($"Deficiency: {res.AsCurrency()}");
-                var avx = res / rsd;
-                if ((rsd * avg - res).IsNonNegative())
-                {
-                    sb.AppendLine($"Average deficiency: {avx.AsCurrency()} <= {avg.AsCurrency()}");
-                    sb.AppendLine();
+                sb.AppendLine($"Average deficiency: {avx.AsCurrency()} > {avg.AsCurrency()}");
+                sb.AppendLine();
 
-                    sb.AppendLine(
-                        (btd - avx).IsNonNegative()
-                            ? $"Plan A: Credit {(btd - avx).AsCurrency()}, Balance {avx.AsCurrency()}"
-                            : $"Plan A: Debit {(avx - btd).AsCurrency()}, Balance {avx.AsCurrency()}");
-                    sb.AppendLine(
-                        (btd - avg).IsNonNegative()
-                            ? $"Plan B: Credit {(btd - avg).AsCurrency()}, Balance {avg.AsCurrency()}"
-                            : $"Plan B: Debit {(avg - btd).AsCurrency()}, Balance {avg.AsCurrency()}");
-                }
-                else
-                {
-                    sb.AppendLine($"Average deficiency: {avx.AsCurrency()} > {avg.AsCurrency()}");
-                    sb.AppendLine();
-
-                    sb.AppendLine(
-                        (btd - avx).IsNonNegative()
-                            ? $"Plan: Credit {(btd - avx).AsCurrency()}, Balance {avx.AsCurrency()}"
-                            : $"Plan: Debit {(avx - btd).AsCurrency()}, Balance {avx.AsCurrency()}");
-                }
+                sb.AppendLine(
+                    (btd - avx).IsNonNegative()
+                        ? $"Plan: Credit {(btd - avx).AsCurrency()}, Balance {avx.AsCurrency()}"
+                        : $"Plan: Debit {(avx - btd).AsCurrency()}, Balance {avx.AsCurrency()}");
             }
-
-            return new PlainText(sb.ToString());
         }
+
+        return new PlainText(sb.ToString());
     }
 }

@@ -29,255 +29,254 @@ using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
-namespace AccountingServer.Shell.Plugins.Statement
+namespace AccountingServer.Shell.Plugins.Statement;
+
+/// <summary>
+///     自动对账
+/// </summary>
+internal class Statement : PluginBase
 {
-    /// <summary>
-    ///     自动对账
-    /// </summary>
-    internal class Statement : PluginBase
+    public Statement(Accountant accountant) : base(accountant) { }
+
+    private IVoucherDetailQuery Regularize(IVoucherDetailQuery filt)
     {
-        public Statement(Accountant accountant) : base(accountant) { }
+        if (filt.DetailEmitFilter != null)
+            return filt;
 
-        private IVoucherDetailQuery Regularize(IVoucherDetailQuery filt)
+        if (filt.VoucherQuery is IVoucherQueryAtom dQuery)
+            return new StmtVoucherDetailQuery(filt.VoucherQuery, dQuery.DetailFilter);
+
+        throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(filt));
+    }
+
+    /// <inheritdoc />
+    public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+    {
+        var csv = expr;
+        expr = ParsingF.Line(ref csv);
+        var parsed = new CsvParser(ParsingF.Optional(ref expr, "-"));
+
+        var sb = new StringBuilder();
+        if (ParsingF.Optional(ref expr, "mark"))
         {
-            if (filt.DetailEmitFilter != null)
-                return filt;
+            var filt = Regularize(ParsingF.DetailQuery(ref expr));
+            ParsingF.Optional(ref expr, "as");
+            var marker = ParsingF.Token(ref expr);
+            ParsingF.Eof(expr);
+            if (string.IsNullOrWhiteSpace(marker))
+                throw new FormatException("格式错误");
 
-            if (filt.VoucherQuery is IVoucherQueryAtom dQuery)
-                return new StmtVoucherDetailQuery(filt.VoucherQuery, dQuery.DetailFilter);
+            parsed.Parse(csv);
+            sb.AppendLine($"{parsed.Items.Count} parsed");
+            RunMark(filt, parsed, marker, sb);
+        }
+        else if (ParsingF.Optional(ref expr, "unmark"))
+        {
+            var filt = Regularize(ParsingF.DetailQuery(ref expr));
+            ParsingF.Eof(expr);
+            RunUnmark(filt, sb);
+        }
+        else if (ParsingF.Optional(ref expr, "check"))
+        {
+            var filt = Regularize(ParsingF.DetailQuery(ref expr));
+            ParsingF.Eof(expr);
+            parsed.Parse(csv);
+            sb.AppendLine($"{parsed.Items.Count} parsed");
+            RunCheck(filt, parsed, sb);
+        }
+        else
+        {
+            ParsingF.Optional(ref expr, "auto");
+            var filt = Regularize(ParsingF.DetailQuery(ref expr));
+            ParsingF.Optional(ref expr, "as");
+            var marker = ParsingF.Token(ref expr);
+            ParsingF.Eof(expr);
+            if (string.IsNullOrWhiteSpace(marker))
+                throw new FormatException("格式错误");
 
-            throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(filt));
+            parsed.Parse(csv);
+            sb.AppendLine($"{parsed.Items.Count} parsed");
+            var markerFilt = new StmtVoucherDetailQuery(
+                filt.VoucherQuery,
+                new IntersectQueries<IDetailQueryAtom>(
+                    filt.DetailEmitFilter.DetailFilter,
+                    new StmtDetailQuery(marker)));
+            var nullFilt = new StmtVoucherDetailQuery(
+                filt.VoucherQuery,
+                new IntersectQueries<IDetailQueryAtom>(
+                    filt.DetailEmitFilter.DetailFilter,
+                    new StmtDetailQuery("")));
+            var nmFilt = new StmtVoucherDetailQuery(
+                filt.VoucherQuery,
+                new IntersectQueries<IDetailQueryAtom>(
+                    filt.DetailEmitFilter.DetailFilter,
+                    new UnionQueries<IDetailQueryAtom>(
+                        new StmtDetailQuery(""),
+                        new StmtDetailQuery(marker))));
+            RunUnmark(markerFilt, sb);
+            RunMark(nullFilt, parsed, marker, sb);
+            RunCheck(nmFilt, parsed, sb);
         }
 
-        /// <inheritdoc />
-        public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+        return new PlainText(sb.ToString());
+    }
+
+    private void RunMark(IVoucherDetailQuery filt, CsvParser parsed, string marker, StringBuilder sb)
+    {
+        if (filt.IsDangerous())
+            throw new SecurityException("检测到弱检索式");
+
+        var marked = 0;
+        var remarked = 0;
+        var converted = 0;
+        var res = Accountant.SelectVouchers(filt.VoucherQuery).ToList();
+        var ops = new List<Voucher>();
+        foreach (var b in parsed.Items)
         {
-            var csv = expr;
-            expr = ParsingF.Line(ref csv);
-            var parsed = new CsvParser(ParsingF.Optional(ref expr, "-"));
+            bool Trial(bool date)
+            {
+                var resx = date
+                    ? res.Where(v => v.Date == b.Date)
+                    : res.OrderBy(v => v.Date.HasValue
+                        ? Math.Abs((v.Date.Value - b.Date).TotalDays)
+                        : double.PositiveInfinity);
+                var voucher = resx
+                    .FirstOrDefault(v => v.Details.Any(d
+                        => (d.Fund!.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter)));
+                if (voucher == null)
+                    return false;
 
-            var sb = new StringBuilder();
-            if (ParsingF.Optional(ref expr, "mark"))
-            {
-                var filt = Regularize(ParsingF.DetailQuery(ref expr));
-                ParsingF.Optional(ref expr, "as");
-                var marker = ParsingF.Token(ref expr);
-                ParsingF.Eof(expr);
-                if (string.IsNullOrWhiteSpace(marker))
-                    throw new FormatException("格式错误");
+                var o = voucher.Details.First(d
+                    => (d.Fund!.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter));
+                if (o.Remark == null)
+                    marked++;
+                else if (o.Remark == marker)
+                    remarked++;
+                else
+                    converted++;
 
-                parsed.Parse(csv);
-                sb.AppendLine($"{parsed.Items.Count} parsed");
-                RunMark(filt, parsed, marker, sb);
-            }
-            else if (ParsingF.Optional(ref expr, "unmark"))
-            {
-                var filt = Regularize(ParsingF.DetailQuery(ref expr));
-                ParsingF.Eof(expr);
-                RunUnmark(filt, sb);
-            }
-            else if (ParsingF.Optional(ref expr, "check"))
-            {
-                var filt = Regularize(ParsingF.DetailQuery(ref expr));
-                ParsingF.Eof(expr);
-                parsed.Parse(csv);
-                sb.AppendLine($"{parsed.Items.Count} parsed");
-                RunCheck(filt, parsed, sb);
-            }
-            else
-            {
-                ParsingF.Optional(ref expr, "auto");
-                var filt = Regularize(ParsingF.DetailQuery(ref expr));
-                ParsingF.Optional(ref expr, "as");
-                var marker = ParsingF.Token(ref expr);
-                ParsingF.Eof(expr);
-                if (string.IsNullOrWhiteSpace(marker))
-                    throw new FormatException("格式错误");
-
-                parsed.Parse(csv);
-                sb.AppendLine($"{parsed.Items.Count} parsed");
-                var markerFilt = new StmtVoucherDetailQuery(
-                    filt.VoucherQuery,
-                    new IntersectQueries<IDetailQueryAtom>(
-                        filt.DetailEmitFilter.DetailFilter,
-                        new StmtDetailQuery(marker)));
-                var nullFilt = new StmtVoucherDetailQuery(
-                    filt.VoucherQuery,
-                    new IntersectQueries<IDetailQueryAtom>(
-                        filt.DetailEmitFilter.DetailFilter,
-                        new StmtDetailQuery("")));
-                var nmFilt = new StmtVoucherDetailQuery(
-                    filt.VoucherQuery,
-                    new IntersectQueries<IDetailQueryAtom>(
-                        filt.DetailEmitFilter.DetailFilter,
-                        new UnionQueries<IDetailQueryAtom>(
-                            new StmtDetailQuery(""),
-                            new StmtDetailQuery(marker))));
-                RunUnmark(markerFilt, sb);
-                RunMark(nullFilt, parsed, marker, sb);
-                RunCheck(nmFilt, parsed, sb);
+                o.Remark = marker;
+                ops.Add(voucher);
+                return true;
             }
 
-            return new PlainText(sb.ToString());
+            if (Trial(true) || Trial(false))
+                continue;
+
+            sb.AppendLine(b.Raw);
         }
 
-        private void RunMark(IVoucherDetailQuery filt, CsvParser parsed, string marker, StringBuilder sb)
+        Accountant.Upsert(ops);
+
+        sb.AppendLine($"{marked} marked");
+        sb.AppendLine($"{remarked} remarked");
+        sb.AppendLine($"{converted} converted");
+    }
+
+    private void RunUnmark(IVoucherDetailQuery filt, StringBuilder sb)
+    {
+        if (filt.IsDangerous())
+            throw new SecurityException("检测到弱检索式");
+
+        var cnt = 0;
+        var cntAll = 0;
+        var res = Accountant.SelectVouchers(filt.VoucherQuery);
+        var ops = new List<Voucher>();
+        foreach (var v in res)
         {
-            if (filt.IsDangerous())
-                throw new SecurityException("检测到弱检索式");
-
-            var marked = 0;
-            var remarked = 0;
-            var converted = 0;
-            var res = Accountant.SelectVouchers(filt.VoucherQuery).ToList();
-            var ops = new List<Voucher>();
-            foreach (var b in parsed.Items)
-            {
-                bool Trial(bool date)
-                {
-                    var resx = date
-                        ? res.Where(v => v.Date == b.Date)
-                        : res.OrderBy(v => v.Date.HasValue
-                            ? Math.Abs((v.Date.Value - b.Date).TotalDays)
-                            : double.PositiveInfinity);
-                    var voucher = resx
-                        .FirstOrDefault(v => v.Details.Any(d
-                            => (d.Fund!.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter)));
-                    if (voucher == null)
-                        return false;
-
-                    var o = voucher.Details.First(d
-                        => (d.Fund!.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter));
-                    if (o.Remark == null)
-                        marked++;
-                    else if (o.Remark == marker)
-                        remarked++;
-                    else
-                        converted++;
-
-                    o.Remark = marker;
-                    ops.Add(voucher);
-                    return true;
-                }
-
-                if (Trial(true) || Trial(false))
-                    continue;
-
-                sb.AppendLine(b.Raw);
-            }
-
-            Accountant.Upsert(ops);
-
-            sb.AppendLine($"{marked} marked");
-            sb.AppendLine($"{remarked} remarked");
-            sb.AppendLine($"{converted} converted");
-        }
-
-        private void RunUnmark(IVoucherDetailQuery filt, StringBuilder sb)
-        {
-            if (filt.IsDangerous())
-                throw new SecurityException("检测到弱检索式");
-
-            var cnt = 0;
-            var cntAll = 0;
-            var res = Accountant.SelectVouchers(filt.VoucherQuery);
-            var ops = new List<Voucher>();
-            foreach (var v in res)
-            {
-                foreach (var d in v.Details)
-                {
-                    if (!d.IsMatch(filt.DetailEmitFilter.DetailFilter))
-                        continue;
-
-                    cntAll++;
-                    if (d.Remark == null)
-                        continue;
-
-                    d.Remark = null;
-                    cnt++;
-                }
-
-                ops.Add(v);
-            }
-
-            Accountant.Upsert(ops);
-            sb.AppendLine($"{cntAll} selected");
-            sb.AppendLine($"{cnt} unmarked");
-        }
-
-        private void RunCheck(IVoucherDetailQuery filt, CsvParser parsed, StringBuilder sb)
-        {
-            if (filt.IsDangerous())
-                throw new SecurityException("检测到弱检索式");
-
-            var res = Accountant.SelectVouchers(filt.VoucherQuery);
-            var lst = new List<BankItem>(parsed.Items);
-            foreach (var v in res)
             foreach (var d in v.Details)
             {
                 if (!d.IsMatch(filt.DetailEmitFilter.DetailFilter))
                     continue;
 
-                var obj1 = lst.FirstOrDefault(b => (b.Fund - d.Fund!.Value).IsZero() && b.Date == v.Date);
-                if (obj1 != null)
-                {
-                    lst.Remove(obj1);
+                cntAll++;
+                if (d.Remark == null)
                     continue;
-                }
 
-                var obj2 = lst
-                    .Where(b => (b.Fund - d.Fund!.Value).IsZero())
-                    .OrderBy(b => Math.Abs((b.Date - v.Date!.Value).TotalDays))
-                    .FirstOrDefault();
-                if (obj2 != null)
-                {
-                    lst.Remove(obj2);
-                    continue;
-                }
-
-                sb.AppendLine($"{v.ID.Quotation('^')} {v.Date.AsDate()} {d.Content} {d.Fund.AsCurrency(d.Currency)}");
+                d.Remark = null;
+                cnt++;
             }
 
-            foreach (var b in lst)
-                sb.AppendLine(b.Raw);
+            ops.Add(v);
         }
 
-        private sealed class StmtVoucherDetailQuery : IVoucherDetailQuery
+        Accountant.Upsert(ops);
+        sb.AppendLine($"{cntAll} selected");
+        sb.AppendLine($"{cnt} unmarked");
+    }
+
+    private void RunCheck(IVoucherDetailQuery filt, CsvParser parsed, StringBuilder sb)
+    {
+        if (filt.IsDangerous())
+            throw new SecurityException("检测到弱检索式");
+
+        var res = Accountant.SelectVouchers(filt.VoucherQuery);
+        var lst = new List<BankItem>(parsed.Items);
+        foreach (var v in res)
+        foreach (var d in v.Details)
         {
-            public StmtVoucherDetailQuery(IQueryCompounded<IVoucherQueryAtom> v, IQueryCompounded<IDetailQueryAtom> d)
+            if (!d.IsMatch(filt.DetailEmitFilter.DetailFilter))
+                continue;
+
+            var obj1 = lst.FirstOrDefault(b => (b.Fund - d.Fund!.Value).IsZero() && b.Date == v.Date);
+            if (obj1 != null)
             {
-                VoucherQuery = v;
-                DetailEmitFilter = new StmtEmit { DetailFilter = d };
+                lst.Remove(obj1);
+                continue;
             }
 
-            public IQueryCompounded<IVoucherQueryAtom> VoucherQuery { get; }
+            var obj2 = lst
+                .Where(b => (b.Fund - d.Fund!.Value).IsZero())
+                .OrderBy(b => Math.Abs((b.Date - v.Date!.Value).TotalDays))
+                .FirstOrDefault();
+            if (obj2 != null)
+            {
+                lst.Remove(obj2);
+                continue;
+            }
 
-            public IEmit DetailEmitFilter { get; }
+            sb.AppendLine($"{v.ID.Quotation('^')} {v.Date.AsDate()} {d.Content} {d.Fund.AsCurrency(d.Currency)}");
         }
 
-        private class StmtEmit : IEmit
+        foreach (var b in lst)
+            sb.AppendLine(b.Raw);
+    }
+
+    private sealed class StmtVoucherDetailQuery : IVoucherDetailQuery
+    {
+        public StmtVoucherDetailQuery(IQueryCompounded<IVoucherQueryAtom> v, IQueryCompounded<IDetailQueryAtom> d)
         {
-            public IQueryCompounded<IDetailQueryAtom> DetailFilter { get; init; }
+            VoucherQuery = v;
+            DetailEmitFilter = new StmtEmit { DetailFilter = d };
         }
 
-        private sealed class StmtDetailQuery : IDetailQueryAtom
-        {
-            public StmtDetailQuery(string marker)
-                => Filter = new() { Remark = marker };
+        public IQueryCompounded<IVoucherQueryAtom> VoucherQuery { get; }
 
-            public TitleKind? Kind => null;
+        public IEmit DetailEmitFilter { get; }
+    }
 
-            public VoucherDetail Filter { get; }
+    private class StmtEmit : IEmit
+    {
+        public IQueryCompounded<IDetailQueryAtom> DetailFilter { get; init; }
+    }
 
-            public int Dir => 0;
+    private sealed class StmtDetailQuery : IDetailQueryAtom
+    {
+        public StmtDetailQuery(string marker)
+            => Filter = new() { Remark = marker };
 
-            public string ContentPrefix => null;
+        public TitleKind? Kind => null;
 
-            public string RemarkPrefix => null;
+        public VoucherDetail Filter { get; }
 
-            public bool IsDangerous() => Filter.IsDangerous();
+        public int Dir => 0;
 
-            public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
-        }
+        public string ContentPrefix => null;
+
+        public string RemarkPrefix => null;
+
+        public bool IsDangerous() => Filter.IsDangerous();
+
+        public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
     }
 }

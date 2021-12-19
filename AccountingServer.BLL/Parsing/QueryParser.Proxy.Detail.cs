@@ -21,214 +21,213 @@ using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 
-namespace AccountingServer.BLL.Parsing
+namespace AccountingServer.BLL.Parsing;
+
+internal partial class QueryParser
 {
-    internal partial class QueryParser
+    public partial class TitleContext : ITitle
     {
-        public partial class TitleContext : ITitle
+        public int Title
         {
-            public int Title
+            get
             {
-                get
-                {
-                    if (DetailTitle() != null)
-                        return int.Parse(DetailTitle().GetText().TrimStart('T'));
+                if (DetailTitle() != null)
+                    return int.Parse(DetailTitle().GetText().TrimStart('T'));
 
-                    if (DetailTitleSubTitle() != null)
-                        return int.Parse(DetailTitleSubTitle().GetText().TrimStart('T')) / 100;
+                if (DetailTitleSubTitle() != null)
+                    return int.Parse(DetailTitleSubTitle().GetText().TrimStart('T')) / 100;
 
-                    throw new MemberAccessException("表达式错误");
-                }
-            }
-
-            public int? SubTitle
-            {
-                get
-                {
-                    if (DetailTitle() != null)
-                        return null;
-
-                    if (DetailTitleSubTitle() != null)
-                        return int.Parse(DetailTitleSubTitle().GetText().TrimStart('T')) % 100;
-
-                    throw new MemberAccessException("表达式错误");
-                }
+                throw new MemberAccessException("表达式错误");
             }
         }
 
-        public partial class DetailQueryContext : IDetailQueryAtom
+        public int? SubTitle
         {
-            /// <inheritdoc />
-            public TitleKind? Kind
-                => TitleKind() switch
-                    {
-                        null => null,
-                        var x => (TitleKind?)Enum.Parse(typeof(TitleKind), x.GetText()),
-                    };
-
-            private string ContentText => token()?.GetPureText();
-
-            private string RemarkText => DoubleQuotedString()?.GetText().Dequotation();
-
-            private (bool, bool) DecideEtc()
+            get
             {
-                switch (Etc().Length)
-                {
-                    case 0:
-                        return (false, false);
-                    case 2:
-                        return (true, true);
-                }
-                if (ContentText == null)
-                    return (false, true);
-                if (RemarkText == null)
-                    return (true, false);
-                return Etc(0).SourceInterval.StartsBeforeDisjoint(DoubleQuotedString().SourceInterval)
-                    ? (true, false) : (false, true);
-            }
+                if (DetailTitle() != null)
+                    return null;
 
-            /// <inheritdoc />
-            public VoucherDetail Filter
+                if (DetailTitleSubTitle() != null)
+                    return int.Parse(DetailTitleSubTitle().GetText().TrimStart('T')) % 100;
+
+                throw new MemberAccessException("表达式错误");
+            }
+        }
+    }
+
+    public partial class DetailQueryContext : IDetailQueryAtom
+    {
+        /// <inheritdoc />
+        public TitleKind? Kind
+            => TitleKind() switch
+                {
+                    null => null,
+                    var x => (TitleKind?)Enum.Parse(typeof(TitleKind), x.GetText()),
+                };
+
+        private string ContentText => token()?.GetPureText();
+
+        private string RemarkText => DoubleQuotedString()?.GetText().Dequotation();
+
+        private (bool, bool) DecideEtc()
+        {
+            switch (Etc().Length)
             {
-                get
-                {
-                    var t = title();
-                    var filter = new VoucherDetail
-                        {
-                            User = (UserSpec()?.GetText()).ParseUserSpec(),
-                            Currency = VoucherCurrency()?.GetText().ParseCurrency(),
-                            Title = t?.Title,
-                            SubTitle = t?.SubTitle,
-                            Content = token()?.GetPureText(),
-                            Remark = DoubleQuotedString()?.GetText().Dequotation(),
-                        };
-
-                    var (cEtc, rEtc) = DecideEtc();
-                    if (cEtc)
-                        filter.Content = null;
-                    if (rEtc)
-                        filter.Remark = null;
-
-                    if (Floating() != null)
-                    {
-                        var f = Floating().GetText()[1..];
-                        filter.Fund = double.Parse(f);
-                    }
-
-                    return filter;
-                }
+                case 0:
+                    return (false, false);
+                case 2:
+                    return (true, true);
             }
-
-            /// <inheritdoc />
-            public int Dir
-                => Direction()?.GetText() switch
-                    {
-                        null => 0,
-                        ">" => 1,
-                        "<" => -1,
-                        _ => throw new MemberAccessException("表达式错误"),
-                    };
-
-            public string ContentPrefix
-                => DecideEtc().Item1 ? ContentText : null;
-
-            public string RemarkPrefix
-                => DecideEtc().Item2 ? RemarkText : null;
-
-            /// <inheritdoc />
-            public bool IsDangerous()
-                => Filter.IsDangerous()
-                    && string.IsNullOrEmpty(ContentPrefix) && string.IsNullOrEmpty(RemarkPrefix);
-
-            /// <inheritdoc />
-            public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
+            if (ContentText == null)
+                return (false, true);
+            if (RemarkText == null)
+                return (true, false);
+            return Etc(0).SourceInterval.StartsBeforeDisjoint(DoubleQuotedString().SourceInterval)
+                ? (true, false) : (false, true);
         }
 
-        public partial class DetailsContext : IQueryAry<IDetailQueryAtom>
+        /// <inheritdoc />
+        public VoucherDetail Filter
         {
-            /// <inheritdoc />
-            public OperatorType Operator
-                => Op switch
+            get
+            {
+                var t = title();
+                var filter = new VoucherDetail
                     {
-                        null => OperatorType.None,
+                        User = (UserSpec()?.GetText()).ParseUserSpec(),
+                        Currency = VoucherCurrency()?.GetText().ParseCurrency(),
+                        Title = t?.Title,
+                        SubTitle = t?.SubTitle,
+                        Content = token()?.GetPureText(),
+                        Remark = DoubleQuotedString()?.GetText().Dequotation(),
+                    };
+
+                var (cEtc, rEtc) = DecideEtc();
+                if (cEtc)
+                    filter.Content = null;
+                if (rEtc)
+                    filter.Remark = null;
+
+                if (Floating() != null)
+                {
+                    var f = Floating().GetText()[1..];
+                    filter.Fund = double.Parse(f);
+                }
+
+                return filter;
+            }
+        }
+
+        /// <inheritdoc />
+        public int Dir
+            => Direction()?.GetText() switch
+                {
+                    null => 0,
+                    ">" => 1,
+                    "<" => -1,
+                    _ => throw new MemberAccessException("表达式错误"),
+                };
+
+        public string ContentPrefix
+            => DecideEtc().Item1 ? ContentText : null;
+
+        public string RemarkPrefix
+            => DecideEtc().Item2 ? RemarkText : null;
+
+        /// <inheritdoc />
+        public bool IsDangerous()
+            => Filter.IsDangerous()
+                && string.IsNullOrEmpty(ContentPrefix) && string.IsNullOrEmpty(RemarkPrefix);
+
+        /// <inheritdoc />
+        public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
+    }
+
+    public partial class DetailsContext : IQueryAry<IDetailQueryAtom>
+    {
+        /// <inheritdoc />
+        public OperatorType Operator
+            => Op switch
+                {
+                    null => OperatorType.None,
                         { Text: var x } when details() == null => x switch
-                            {
-                                "+" => OperatorType.Identity,
-                                "-" => OperatorType.Complement,
-                                _ => throw new MemberAccessException("表达式错误"),
-                            },
+                        {
+                            "+" => OperatorType.Identity,
+                            "-" => OperatorType.Complement,
+                            _ => throw new MemberAccessException("表达式错误"),
+                        },
                         { Text: var x } => x switch
-                            {
-                                "+" => OperatorType.Union,
-                                "-" => OperatorType.Subtract,
-                                _ => throw new MemberAccessException("表达式错误"),
-                            },
-                    };
+                        {
+                            "+" => OperatorType.Union,
+                            "-" => OperatorType.Subtract,
+                            _ => throw new MemberAccessException("表达式错误"),
+                        },
+                };
 
-            /// <inheritdoc />
-            public IQueryCompounded<IDetailQueryAtom> Filter1
-                => (IQueryCompounded<IDetailQueryAtom>)details() ?? details1();
+        /// <inheritdoc />
+        public IQueryCompounded<IDetailQueryAtom> Filter1
+            => (IQueryCompounded<IDetailQueryAtom>)details() ?? details1();
 
-            /// <inheritdoc />
-            public IQueryCompounded<IDetailQueryAtom> Filter2 => details1();
+        /// <inheritdoc />
+        public IQueryCompounded<IDetailQueryAtom> Filter2 => details1();
 
-            /// <inheritdoc />
-            public bool IsDangerous()
-                => Operator switch
-                    {
-                        OperatorType.None => Filter1.IsDangerous(),
-                        OperatorType.Identity => Filter1.IsDangerous(),
-                        OperatorType.Complement => true,
-                        OperatorType.Union => Filter1.IsDangerous() || Filter2.IsDangerous(),
-                        OperatorType.Subtract => Filter1.IsDangerous(),
-                        _ => throw new ArgumentOutOfRangeException(),
-                    };
+        /// <inheritdoc />
+        public bool IsDangerous()
+            => Operator switch
+                {
+                    OperatorType.None => Filter1.IsDangerous(),
+                    OperatorType.Identity => Filter1.IsDangerous(),
+                    OperatorType.Complement => true,
+                    OperatorType.Union => Filter1.IsDangerous() || Filter2.IsDangerous(),
+                    OperatorType.Subtract => Filter1.IsDangerous(),
+                    _ => throw new ArgumentOutOfRangeException(),
+                };
 
-            /// <inheritdoc />
-            public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
-        }
+        /// <inheritdoc />
+        public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
+    }
 
-        public partial class Details1Context : IQueryAry<IDetailQueryAtom>
-        {
-            /// <inheritdoc />
-            public OperatorType Operator => Op == null ? OperatorType.None : OperatorType.Intersect;
+    public partial class Details1Context : IQueryAry<IDetailQueryAtom>
+    {
+        /// <inheritdoc />
+        public OperatorType Operator => Op == null ? OperatorType.None : OperatorType.Intersect;
 
-            /// <inheritdoc />
-            public IQueryCompounded<IDetailQueryAtom> Filter1 => details0();
+        /// <inheritdoc />
+        public IQueryCompounded<IDetailQueryAtom> Filter1 => details0();
 
-            /// <inheritdoc />
-            public IQueryCompounded<IDetailQueryAtom> Filter2 => details1();
+        /// <inheritdoc />
+        public IQueryCompounded<IDetailQueryAtom> Filter2 => details1();
 
-            /// <inheritdoc />
-            public bool IsDangerous() => Filter1.IsDangerous() && (Filter2?.IsDangerous() ?? true);
+        /// <inheritdoc />
+        public bool IsDangerous() => Filter1.IsDangerous() && (Filter2?.IsDangerous() ?? true);
 
-            /// <inheritdoc />
-            public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
-        }
+        /// <inheritdoc />
+        public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
+    }
 
-        public partial class Details0Context : IQueryAry<IDetailQueryAtom>
-        {
-            /// <inheritdoc />
-            public OperatorType Operator => OperatorType.None;
+    public partial class Details0Context : IQueryAry<IDetailQueryAtom>
+    {
+        /// <inheritdoc />
+        public OperatorType Operator => OperatorType.None;
 
-            /// <inheritdoc />
-            public IQueryCompounded<IDetailQueryAtom> Filter1
-                => detailQuery() ?? (IQueryCompounded<IDetailQueryAtom>)details();
+        /// <inheritdoc />
+        public IQueryCompounded<IDetailQueryAtom> Filter1
+            => detailQuery() ?? (IQueryCompounded<IDetailQueryAtom>)details();
 
-            /// <inheritdoc />
-            public IQueryCompounded<IDetailQueryAtom> Filter2 => null;
+        /// <inheritdoc />
+        public IQueryCompounded<IDetailQueryAtom> Filter2 => null;
 
-            /// <inheritdoc />
-            public bool IsDangerous() => Filter1.IsDangerous();
+        /// <inheritdoc />
+        public bool IsDangerous() => Filter1.IsDangerous();
 
-            /// <inheritdoc />
-            public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
-        }
+        /// <inheritdoc />
+        public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
+    }
 
-        public partial class TokenContext
-        {
-            public string GetPureText()
-                => SingleQuotedString()?.GetText().Dequotation() ?? GetText();
-        }
+    public partial class TokenContext
+    {
+        public string GetPureText()
+            => SingleQuotedString()?.GetText().Dequotation() ?? GetText();
     }
 }

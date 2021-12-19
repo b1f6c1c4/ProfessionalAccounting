@@ -23,239 +23,239 @@ using AccountingServer.Entities;
 using AccountingServer.Shell.Serializer;
 using Xunit;
 
-namespace AccountingServer.Test.UnitTest.Shell
+namespace AccountingServer.Test.UnitTest.Shell;
+
+[Collection("SerializerTestCollection")]
+public abstract class SerializerTest
 {
-    [Collection("SerializerTestCollection")]
-    public abstract class SerializerTest
+    protected SerializerTest()
     {
-        protected SerializerTest()
-        {
-            BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
-                new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
+        BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
+            new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
-            TitleManager.TitleInfos = new MockConfigManager<TitleInfos>(new() { Titles = new() });
+        TitleManager.TitleInfos = new MockConfigManager<TitleInfos>(new() { Titles = new() });
 
-            ClientUser.Set("b1");
-        }
-
-        protected abstract IEntitySerializer Serializer { get; }
-
-        public virtual void SimpleVoucherTest()
-        {
-            Assert.NotNull(Serializer.PresentVoucher(null));
-            Assert.Throws<FormatException>(() => Serializer.ParseVoucher(""));
-            Assert.Throws<FormatException>(() => Serializer.ParseVoucher("new Voucher {"));
-        }
-
-        public virtual void SimpleAssetAmortTest()
-        {
-            Assert.NotNull(Serializer.PresentAsset(null));
-            Assert.Throws<FormatException>(() => Serializer.ParseAsset(""));
-            Assert.Throws<FormatException>(() => Serializer.ParseAsset("new Asset {"));
-
-            Assert.NotNull(Serializer.PresentAmort(null));
-            Assert.Throws<FormatException>(() => Serializer.ParseAmort(""));
-            Assert.Throws<FormatException>(() => Serializer.ParseAmort("new Amortization {"));
-        }
-
-        public virtual void VoucherTest(string dt, VoucherType type)
-        {
-            var voucher1 = VoucherDataProvider.Create(dt, type);
-            var voucher2 = Serializer.ParseVoucher(Serializer.PresentVoucher(voucher1));
-            voucher2.Type ??= VoucherType.Ordinary;
-            Assert.Equal(voucher1, voucher2, new VoucherEqualityComparer());
-        }
-
-        public virtual void AssetTest(string dt, DepreciationMethod type)
-        {
-            var asset1 = AssetDataProvider.Create(dt, type);
-            var asset2 = Serializer.ParseAsset(Serializer.PresentAsset(asset1));
-            Assert.Equal(asset1, asset2, new AssetEqualityComparer());
-        }
-
-        public virtual void AmortTest(string dt, AmortizeInterval type)
-        {
-            var amort1 = AmortDataProvider.Create(dt, type);
-            var amort2 = Serializer.ParseAmort(Serializer.PresentAmort(amort1));
-            Assert.Equal(amort1, amort2, new AmortEqualityComparer());
-        }
+        ClientUser.Set("b1");
     }
 
-    [Collection("SerializerTestCollection")]
-    public class CSharpSerializerTest : SerializerTest
+    protected abstract IEntitySerializer Serializer { get; }
+
+    public virtual void SimpleVoucherTest()
     {
-        protected override IEntitySerializer Serializer { get; } = new CSharpSerializer();
-
-        [Theory]
-        [ClassData(typeof(VoucherDataProvider))]
-        public override void VoucherTest(string dt, VoucherType type) => base.VoucherTest(dt, type);
-
-        [Theory]
-        [ClassData(typeof(AssetDataProvider))]
-        public override void AssetTest(string dt, DepreciationMethod type) => base.AssetTest(dt, type);
-
-        [Theory]
-        [ClassData(typeof(AmortDataProvider))]
-        public override void AmortTest(string dt, AmortizeInterval type) => base.AmortTest(dt, type);
-
-        [Fact]
-        public override void SimpleAssetAmortTest() => base.SimpleAssetAmortTest();
-
-        [Fact]
-        public override void SimpleVoucherTest() => base.SimpleVoucherTest();
+        Assert.NotNull(Serializer.PresentVoucher(null));
+        Assert.Throws<FormatException>(() => Serializer.ParseVoucher(""));
+        Assert.Throws<FormatException>(() => Serializer.ParseVoucher("new Voucher {"));
     }
 
-    [Collection("SerializerTestCollection")]
-    public class ExprSerializerTest : SerializerTest
+    public virtual void SimpleAssetAmortTest()
     {
-        protected override IEntitySerializer Serializer { get; } = new ExprSerializer();
+        Assert.NotNull(Serializer.PresentAsset(null));
+        Assert.Throws<FormatException>(() => Serializer.ParseAsset(""));
+        Assert.Throws<FormatException>(() => Serializer.ParseAsset("new Asset {"));
 
-        [Theory]
-        [ClassData(typeof(VoucherDataProvider))]
-        public override void VoucherTest(string dt, VoucherType type) => base.VoucherTest(dt, type);
-
-        [Fact]
-        public void NotImplementedTest()
-        {
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseAsset(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentAmort(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseAmort(null));
-        }
-
-        [Fact]
-        public void OtherTest()
-            => Assert.Null(Serializer.ParseVoucher(@"new Voucher { T1001 null }").Details.Single().Fund);
-
-        [Fact]
-        public override void SimpleVoucherTest() => base.SimpleVoucherTest();
+        Assert.NotNull(Serializer.PresentAmort(null));
+        Assert.Throws<FormatException>(() => Serializer.ParseAmort(""));
+        Assert.Throws<FormatException>(() => Serializer.ParseAmort("new Amortization {"));
     }
 
-    [Collection("SerializerTestCollection")]
-    public class AbbrSerializerTest : SerializerTest
+    public virtual void VoucherTest(string dt, VoucherType type)
     {
-        public AbbrSerializerTest()
-            => AbbrSerializer.Abbrs =
-                new MockConfigManager<Abbreviations>(
-                    new()
-                        {
-                            Abbrs = new()
-                                {
-                                    new()
-                                        {
-                                            Abbr = "abbr1",
-                                            Title = 1234,
-                                            SubTitle = 04,
-                                            Content = "cnt",
-                                            Editable = false,
-                                        },
-                                    new() { Abbr = "abbr2", Title = 1234, Editable = true },
-                                },
-                        });
+        var voucher1 = VoucherDataProvider.Create(dt, type);
+        var voucher2 = Serializer.ParseVoucher(Serializer.PresentVoucher(voucher1));
+        voucher2.Type ??= VoucherType.Ordinary;
+        Assert.Equal(voucher1, voucher2, new VoucherEqualityComparer());
+    }
 
-        protected override IEntitySerializer Serializer => new AbbrSerializer();
+    public virtual void AssetTest(string dt, DepreciationMethod type)
+    {
+        var asset1 = AssetDataProvider.Create(dt, type);
+        var asset2 = Serializer.ParseAsset(Serializer.PresentAsset(asset1));
+        Assert.Equal(asset1, asset2, new AssetEqualityComparer());
+    }
 
-        [Theory]
-        [ClassData(typeof(VoucherDataProvider))]
-        public override void VoucherTest(string dt, VoucherType type) => base.VoucherTest(dt, type);
+    public virtual void AmortTest(string dt, AmortizeInterval type)
+    {
+        var amort1 = AmortDataProvider.Create(dt, type);
+        var amort2 = Serializer.ParseAmort(Serializer.PresentAmort(amort1));
+        Assert.Equal(amort1, amort2, new AmortEqualityComparer());
+    }
+}
 
-        [Fact]
-        public void NotImplementedTest()
-        {
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseAsset(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentAmort(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseAmort(null));
-        }
+[Collection("SerializerTestCollection")]
+public class CSharpSerializerTest : SerializerTest
+{
+    protected override IEntitySerializer Serializer { get; } = new CSharpSerializer();
 
-        [Fact]
-        public void OtherTest()
-        {
-            var voucher = Serializer.ParseVoucher(@"new Voucher { abbr1 123 abbr2 ""gg"" 765 }");
-            Assert.Equal(
-                new Voucher
+    [Theory]
+    [ClassData(typeof(VoucherDataProvider))]
+    public override void VoucherTest(string dt, VoucherType type) => base.VoucherTest(dt, type);
+
+    [Theory]
+    [ClassData(typeof(AssetDataProvider))]
+    public override void AssetTest(string dt, DepreciationMethod type) => base.AssetTest(dt, type);
+
+    [Theory]
+    [ClassData(typeof(AmortDataProvider))]
+    public override void AmortTest(string dt, AmortizeInterval type) => base.AmortTest(dt, type);
+
+    [Fact]
+    public override void SimpleAssetAmortTest() => base.SimpleAssetAmortTest();
+
+    [Fact]
+    public override void SimpleVoucherTest() => base.SimpleVoucherTest();
+}
+
+[Collection("SerializerTestCollection")]
+public class ExprSerializerTest : SerializerTest
+{
+    protected override IEntitySerializer Serializer { get; } = new ExprSerializer();
+
+    [Theory]
+    [ClassData(typeof(VoucherDataProvider))]
+    public override void VoucherTest(string dt, VoucherType type) => base.VoucherTest(dt, type);
+
+    [Fact]
+    public void NotImplementedTest()
+    {
+        Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseAsset(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.PresentAmort(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseAmort(null));
+    }
+
+    [Fact]
+    public void OtherTest()
+        => Assert.Null(Serializer.ParseVoucher(@"new Voucher { T1001 null }").Details.Single().Fund);
+
+    [Fact]
+    public override void SimpleVoucherTest() => base.SimpleVoucherTest();
+}
+
+[Collection("SerializerTestCollection")]
+public class AbbrSerializerTest : SerializerTest
+{
+    public AbbrSerializerTest()
+        => AbbrSerializer.Abbrs =
+            new MockConfigManager<Abbreviations>(
+                new()
                     {
-                        Date = ClientDateTime.Today,
-                        Details = new()
+                        Abbrs = new()
                             {
                                 new()
                                     {
-                                        User = "b1",
-                                        Currency = "CNY",
+                                        Abbr = "abbr1",
                                         Title = 1234,
                                         SubTitle = 04,
                                         Content = "cnt",
-                                        Remark = null,
-                                        Fund = 123,
+                                        Editable = false,
                                     },
-                                new()
-                                    {
-                                        User = "b1",
-                                        Currency = "CNY",
-                                        Title = 1234,
-                                        Content = "gg",
-                                        Fund = 765,
-                                    },
+                                new() { Abbr = "abbr2", Title = 1234, Editable = true },
                             },
-                    },
-                voucher,
-                new VoucherEqualityComparer());
-        }
+                    });
 
-        [Fact]
-        public override void SimpleVoucherTest() => base.SimpleVoucherTest();
+    protected override IEntitySerializer Serializer => new AbbrSerializer();
+
+    [Theory]
+    [ClassData(typeof(VoucherDataProvider))]
+    public override void VoucherTest(string dt, VoucherType type) => base.VoucherTest(dt, type);
+
+    [Fact]
+    public void NotImplementedTest()
+    {
+        Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseAsset(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.PresentAmort(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseAmort(null));
     }
 
-    [Collection("SerializerTestCollection")]
-    public class JsonSerializerTest : SerializerTest
+    [Fact]
+    public void OtherTest()
     {
-        protected override IEntitySerializer Serializer { get; } = new JsonSerializer();
-
-        [Theory]
-        [ClassData(typeof(VoucherDataProvider))]
-        public override void VoucherTest(string dt, VoucherType type) => base.VoucherTest(dt, type);
-
-        [Theory]
-        [ClassData(typeof(AssetDataProvider))]
-        public override void AssetTest(string dt, DepreciationMethod type) => base.AssetTest(dt, type);
-
-        [Theory]
-        [ClassData(typeof(AmortDataProvider))]
-        public override void AmortTest(string dt, AmortizeInterval type) => base.AmortTest(dt, type);
-
-        [Fact]
-        public override void SimpleAssetAmortTest() => base.SimpleAssetAmortTest();
-
-        [Fact]
-        public override void SimpleVoucherTest() => base.SimpleVoucherTest();
+        var voucher = Serializer.ParseVoucher(@"new Voucher { abbr1 123 abbr2 ""gg"" 765 }");
+        Assert.Equal(
+            new Voucher
+                {
+                    Date = ClientDateTime.Today,
+                    Details = new()
+                        {
+                            new()
+                                {
+                                    User = "b1",
+                                    Currency = "CNY",
+                                    Title = 1234,
+                                    SubTitle = 04,
+                                    Content = "cnt",
+                                    Remark = null,
+                                    Fund = 123,
+                                },
+                            new()
+                                {
+                                    User = "b1",
+                                    Currency = "CNY",
+                                    Title = 1234,
+                                    Content = "gg",
+                                    Fund = 765,
+                                },
+                        },
+                },
+            voucher,
+            new VoucherEqualityComparer());
     }
 
-    [Collection("SerializerTestCollection")]
-    public class DiscountSerializerTest
+    [Fact]
+    public override void SimpleVoucherTest() => base.SimpleVoucherTest();
+}
+
+[Collection("SerializerTestCollection")]
+public class JsonSerializerTest : SerializerTest
+{
+    protected override IEntitySerializer Serializer { get; } = new JsonSerializer();
+
+    [Theory]
+    [ClassData(typeof(VoucherDataProvider))]
+    public override void VoucherTest(string dt, VoucherType type) => base.VoucherTest(dt, type);
+
+    [Theory]
+    [ClassData(typeof(AssetDataProvider))]
+    public override void AssetTest(string dt, DepreciationMethod type) => base.AssetTest(dt, type);
+
+    [Theory]
+    [ClassData(typeof(AmortDataProvider))]
+    public override void AmortTest(string dt, AmortizeInterval type) => base.AmortTest(dt, type);
+
+    [Fact]
+    public override void SimpleAssetAmortTest() => base.SimpleAssetAmortTest();
+
+    [Fact]
+    public override void SimpleVoucherTest() => base.SimpleVoucherTest();
+}
+
+[Collection("SerializerTestCollection")]
+public class DiscountSerializerTest
+{
+    public DiscountSerializerTest()
     {
-        public DiscountSerializerTest()
-        {
-            BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
-                new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
+        BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
+            new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
-            TitleManager.TitleInfos =
-                new MockConfigManager<TitleInfos>(new() { Titles = new() });
+        TitleManager.TitleInfos =
+            new MockConfigManager<TitleInfos>(new() { Titles = new() });
 
-            AbbrSerializer.Abbrs =
-                new MockConfigManager<Abbreviations>(
-                    new() { Abbrs = new() { new() { Abbr = "aaa", Title = 1001, Editable = false } } });
+        AbbrSerializer.Abbrs =
+            new MockConfigManager<Abbreviations>(
+                new() { Abbrs = new() { new() { Abbr = "aaa", Title = 1001, Editable = false } } });
 
-            ClientUser.Set("b1");
-        }
+        ClientUser.Set("b1");
+    }
 
-        private static IEntitySerializer Serializer { get; } = new DiscountSerializer();
+    private static IEntitySerializer Serializer { get; } = new DiscountSerializer();
 
-        [Fact]
-        public void ManyNullTest()
-        {
-            Assert.Throws<ApplicationException>(
-                () => Serializer.ParseVoucher(
-                    @"new Voucher {
+    [Fact]
+    public void ManyNullTest()
+    {
+        Assert.Throws<ApplicationException>(
+            () => Serializer.ParseVoucher(
+                @"new Voucher {
 ! @usd
 aaa : 1 ;
 tnull
@@ -263,9 +263,9 @@ dnull
 
 @usd T1001 null
 }"));
-            Assert.Throws<ApplicationException>(
-                () => Serializer.ParseVoucher(
-                    @"new Voucher {
+        Assert.Throws<ApplicationException>(
+            () => Serializer.ParseVoucher(
+                @"new Voucher {
 ! @usd
 aaa : 1 ;
 tnull
@@ -273,31 +273,31 @@ dnull
 
 @usd T1001 -1
 }"));
-            Assert.Throws<ApplicationException>(
-                () => Serializer.ParseVoucher(
-                    @"new Voucher {
+        Assert.Throws<ApplicationException>(
+            () => Serializer.ParseVoucher(
+                @"new Voucher {
 ! @usd
 aaa : 1 ;
 dnull
 
 @usd T1001 null
 }"));
-            Assert.Throws<ApplicationException>(
-                () => Serializer.ParseVoucher(
-                    @"new Voucher {
+        Assert.Throws<ApplicationException>(
+            () => Serializer.ParseVoucher(
+                @"new Voucher {
 ! @usd
 aaa : 1 ;
 tnull
 
 @usd T1001 null
 }"));
-        }
+    }
 
-        [Fact]
-        public void MultUserDiscountTest()
-        {
-            var voucher = Serializer.ParseVoucher(
-                @"new Voucher {
+    [Fact]
+    public void MultUserDiscountTest()
+    {
+        var voucher = Serializer.ParseVoucher(
+            @"new Voucher {
 ! @usd
 Upn T1001 + ! T1002 : 1000-50 950+50 ;
 ! Upn aaa + T100366 hei ha : 1000 ;
@@ -306,74 +306,74 @@ d48
 
 @usd T1001 -29120
 }");
-            Assert.Equal(
-                new Voucher
-                    {
-                        Date = ClientDateTime.Today,
-                        Type = VoucherType.Ordinary,
-                        Details = new()
-                            {
-                                new()
-                                    {
-                                        User = "b1", Currency = "USD", Title = 1001, Fund = -29120,
-                                    },
-                                new()
-                                    {
-                                        User = "pn", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6 - 8,
-                                    },
-                                new()
-                                    {
-                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16,
-                                    },
-                                new()
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1003,
-                                        SubTitle = 66,
-                                        Content = "hei",
-                                        Remark = "ha",
-                                        Fund = 500 + 2,
-                                    },
-                                new()
-                                    {
-                                        User = "pn", Currency = "USD", Title = 6603, Fund = -50 - 16,
-                                    },
-                                new() { User = "b1", Currency = "USD", Title = 6603, Fund = -8 },
-                            },
-                    },
-                voucher,
-                new VoucherEqualityComparer());
-        }
+        Assert.Equal(
+            new Voucher
+                {
+                    Date = ClientDateTime.Today,
+                    Type = VoucherType.Ordinary,
+                    Details = new()
+                        {
+                            new()
+                                {
+                                    User = "b1", Currency = "USD", Title = 1001, Fund = -29120,
+                                },
+                            new()
+                                {
+                                    User = "pn", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6 - 8,
+                                },
+                            new()
+                                {
+                                    User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16,
+                                },
+                            new()
+                                {
+                                    User = "b1",
+                                    Currency = "USD",
+                                    Title = 1003,
+                                    SubTitle = 66,
+                                    Content = "hei",
+                                    Remark = "ha",
+                                    Fund = 500 + 2,
+                                },
+                            new()
+                                {
+                                    User = "pn", Currency = "USD", Title = 6603, Fund = -50 - 16,
+                                },
+                            new() { User = "b1", Currency = "USD", Title = 6603, Fund = -8 },
+                        },
+                },
+            voucher,
+            new VoucherEqualityComparer());
+    }
 
-        [Fact]
-        public void NotImplementedTest()
-        {
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentVoucher(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentVoucherDetail((VoucherDetail)null));
-            // ReSharper disable once RedundantCast
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentVoucherDetail((VoucherDetailR)null));
+    [Fact]
+    public void NotImplementedTest()
+    {
+        Assert.Throws<NotImplementedException>(() => Serializer.PresentVoucher(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.PresentVoucherDetail((VoucherDetail)null));
+        // ReSharper disable once RedundantCast
+        Assert.Throws<NotImplementedException>(() => Serializer.PresentVoucherDetail((VoucherDetailR)null));
 
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseAsset(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentAmort(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseAmort(null));
-        }
+        Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseAsset(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.PresentAmort(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseAmort(null));
+    }
 
-        [Fact]
-        public void SimpleTest()
-        {
-            Assert.Throws<FormatException>(() => Serializer.ParseVoucher(""));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher("new Voucher {"));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher("new Voucher { }"));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucherDetail("whatever"));
-        }
+    [Fact]
+    public void SimpleTest()
+    {
+        Assert.Throws<FormatException>(() => Serializer.ParseVoucher(""));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher("new Voucher {"));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher("new Voucher { }"));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucherDetail("whatever"));
+    }
 
-        [Fact]
-        public void TaxDiscountNullTest()
-        {
-            var voucher = Serializer.ParseVoucher(
-                @"new Voucher {
+    [Fact]
+    public void TaxDiscountNullTest()
+    {
+        var voucher = Serializer.ParseVoucher(
+            @"new Voucher {
 ! @usd
 T1001 + ! T1002 : 1000-50 950+5+45 ;
 ! aaa + T100366 hei ha : 100*10 ;
@@ -383,47 +383,47 @@ dnull
 
 @usd T1001 -2864
 }");
-            Assert.Equal(
-                new Voucher
-                    {
-                        Date = ClientDateTime.Today,
-                        Type = VoucherType.Ordinary,
-                        Details = new()
-                            {
-                                new() { User = "b1", Currency = "USD", Title = 1001, Fund = -2864 },
-                                new()
-                                    {
-                                        User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6 - 8,
-                                    },
-                                new()
-                                    {
-                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16,
-                                    },
-                                new()
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1003,
-                                        SubTitle = 66,
-                                        Content = "hei",
-                                        Remark = "ha",
-                                        Fund = 500 + 2,
-                                    },
-                                new()
-                                    {
-                                        User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8,
-                                    },
-                            },
-                    },
-                voucher,
-                new VoucherEqualityComparer());
-        }
+        Assert.Equal(
+            new Voucher
+                {
+                    Date = ClientDateTime.Today,
+                    Type = VoucherType.Ordinary,
+                    Details = new()
+                        {
+                            new() { User = "b1", Currency = "USD", Title = 1001, Fund = -2864 },
+                            new()
+                                {
+                                    User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6 - 8,
+                                },
+                            new()
+                                {
+                                    User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16,
+                                },
+                            new()
+                                {
+                                    User = "b1",
+                                    Currency = "USD",
+                                    Title = 1003,
+                                    SubTitle = 66,
+                                    Content = "hei",
+                                    Remark = "ha",
+                                    Fund = 500 + 2,
+                                },
+                            new()
+                                {
+                                    User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8,
+                                },
+                        },
+                },
+            voucher,
+            new VoucherEqualityComparer());
+    }
 
-        [Fact]
-        public void TaxDiscountTest()
-        {
-            var voucher = Serializer.ParseVoucher(
-                @"new Voucher {
+    [Fact]
+    public void TaxDiscountTest()
+    {
+        var voucher = Serializer.ParseVoucher(
+            @"new Voucher {
 ! @usd
 T1001 + ! T1002 : 1000-0.1-49.9 9500+500*0.1 ;
 ! aaa + T100366 hei ha : 1000 ;
@@ -434,50 +434,50 @@ d8
 
 @usd T1001 -29120
 }");
-            Assert.Equal(
-                new Voucher
-                    {
-                        Date = ClientDateTime.Today,
-                        Type = VoucherType.Ordinary,
-                        Details = new()
-                            {
-                                new()
-                                    {
-                                        User = "b1", Currency = "USD", Title = 1001, Fund = -29120,
-                                    },
-                                new()
-                                    {
-                                        User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6 - 8,
-                                    },
-                                new()
-                                    {
-                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16,
-                                    },
-                                new()
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1003,
-                                        SubTitle = 66,
-                                        Content = "hei",
-                                        Remark = "ha",
-                                        Fund = 500 + 2,
-                                    },
-                                new()
-                                    {
-                                        User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8,
-                                    },
-                            },
-                    },
-                voucher,
-                new VoucherEqualityComparer());
-        }
+        Assert.Equal(
+            new Voucher
+                {
+                    Date = ClientDateTime.Today,
+                    Type = VoucherType.Ordinary,
+                    Details = new()
+                        {
+                            new()
+                                {
+                                    User = "b1", Currency = "USD", Title = 1001, Fund = -29120,
+                                },
+                            new()
+                                {
+                                    User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6 - 8,
+                                },
+                            new()
+                                {
+                                    User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16,
+                                },
+                            new()
+                                {
+                                    User = "b1",
+                                    Currency = "USD",
+                                    Title = 1003,
+                                    SubTitle = 66,
+                                    Content = "hei",
+                                    Remark = "ha",
+                                    Fund = 500 + 2,
+                                },
+                            new()
+                                {
+                                    User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8,
+                                },
+                        },
+                },
+            voucher,
+            new VoucherEqualityComparer());
+    }
 
-        [Fact]
-        public void TaxNullDiscountTest()
-        {
-            var voucher = Serializer.ParseVoucher(
-                @"new Voucher {
+    [Fact]
+    public void TaxNullDiscountTest()
+    {
+        var voucher = Serializer.ParseVoucher(
+            @"new Voucher {
 ! @usd
 T1001 + ! T1002 : 1000=950 950+50 ;
 ! aaa + T100366 hei ha : 1000=1000 ;
@@ -486,47 +486,47 @@ tnull
 
 @usd T1001 -2864
 }");
-            Assert.Equal(
-                new Voucher
-                    {
-                        Date = ClientDateTime.Today,
-                        Type = VoucherType.Ordinary,
-                        Details = new()
-                            {
-                                new() { User = "b1", Currency = "USD", Title = 1001, Fund = -2864 },
-                                new()
-                                    {
-                                        User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6 - 8,
-                                    },
-                                new()
-                                    {
-                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16,
-                                    },
-                                new()
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1003,
-                                        SubTitle = 66,
-                                        Content = "hei",
-                                        Remark = "ha",
-                                        Fund = 500 + 2,
-                                    },
-                                new()
-                                    {
-                                        User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8,
-                                    },
-                            },
-                    },
-                voucher,
-                new VoucherEqualityComparer());
-        }
+        Assert.Equal(
+            new Voucher
+                {
+                    Date = ClientDateTime.Today,
+                    Type = VoucherType.Ordinary,
+                    Details = new()
+                        {
+                            new() { User = "b1", Currency = "USD", Title = 1001, Fund = -2864 },
+                            new()
+                                {
+                                    User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6 - 8,
+                                },
+                            new()
+                                {
+                                    User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4 - 16,
+                                },
+                            new()
+                                {
+                                    User = "b1",
+                                    Currency = "USD",
+                                    Title = 1003,
+                                    SubTitle = 66,
+                                    Content = "hei",
+                                    Remark = "ha",
+                                    Fund = 500 + 2,
+                                },
+                            new()
+                                {
+                                    User = "b1", Currency = "USD", Title = 6603, Fund = -50 - 16 - 8,
+                                },
+                        },
+                },
+            voucher,
+            new VoucherEqualityComparer());
+    }
 
-        [Fact]
-        public void TaxTest()
-        {
-            var voucher = Serializer.ParseVoucher(
-                @"new Voucher {
+    [Fact]
+    public void TaxTest()
+    {
+        var voucher = Serializer.ParseVoucher(
+            @"new Voucher {
 ! 20180101 @usd
 T1001 + ! T1002 : 1000-50 950+50 ;
 ! aaa + T100366 : 1000 ;
@@ -535,137 +535,136 @@ t2
 
 @cny T1001 -2912
 }");
-            Assert.Equal(
-                new Voucher
+        Assert.Equal(
+            new Voucher
+                {
+                    Date = new(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    Type = VoucherType.Ordinary,
+                    Details = new()
+                        {
+                            new() { User = "b1", Currency = "CNY", Title = 1001, Fund = -2912 },
+                            new()
+                                {
+                                    User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6,
+                                },
+                            new()
+                                {
+                                    User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4,
+                                },
+                            new()
+                                {
+                                    User = "b1",
+                                    Currency = "USD",
+                                    Title = 1003,
+                                    SubTitle = 66,
+                                    Fund = 500 + 2,
+                                },
+                            new() { User = "b1", Currency = "USD", Title = 6603, Fund = -50 },
+                        },
+                },
+            voucher,
+            new VoucherEqualityComparer());
+    }
+}
+
+[Collection("SerializerTestCollection")]
+public class CsvDefaultSerializerTest : SerializerTest
+{
+    protected override IEntitySerializer Serializer { get; } = new CsvSerializer("");
+
+    [Fact]
+    public void NotImplementedTest()
+    {
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucherDetail(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseAsset(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.PresentAmort(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseAmort(null));
+    }
+
+    [Fact]
+    public void OtherTest()
+    {
+        var r = Serializer.PresentVoucher(new()
+            {
+                ID = "hhh",
+                Date = ClientDateTime.Today,
+                Type = VoucherType.Carry,
+                Details = new()
                     {
-                        Date = new(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                        Type = VoucherType.Ordinary,
-                        Details = new()
+                        new()
                             {
-                                new() { User = "b1", Currency = "CNY", Title = 1001, Fund = -2912 },
-                                new()
-                                    {
-                                        User = "b1", Currency = "USD", Title = 1001, Fund = 1000 + 500 + 6,
-                                    },
-                                new()
-                                    {
-                                        User = "b1", Currency = "USD", Title = 1002, Fund = 950 + 4,
-                                    },
-                                new()
-                                    {
-                                        User = "b1",
-                                        Currency = "USD",
-                                        Title = 1003,
-                                        SubTitle = 66,
-                                        Fund = 500 + 2,
-                                    },
-                                new() { User = "b1", Currency = "USD", Title = 6603, Fund = -50 },
+                                User = "b1",
+                                Currency = "CNY",
+                                Title = 1234,
+                                SubTitle = 04,
+                                Content = "cnt",
+                                Remark = "rmk",
+                                Fund = 123,
                             },
                     },
-                voucher,
-                new VoucherEqualityComparer());
-        }
+            });
+
+        Assert.Contains("hhh", r);
+        Assert.DoesNotContain("Carry", r);
+        Assert.Contains("b1", r);
+        Assert.Contains("CNY", r);
+        Assert.Contains("1234", r);
+        Assert.Contains("04", r);
+        Assert.Contains("cnt", r);
+        Assert.Contains("rmk", r);
+        Assert.Contains("123", r);
+    }
+}
+
+[Collection("SerializerTestCollection")]
+public class CsvCustomSerializerTest : SerializerTest
+{
+    protected override IEntitySerializer Serializer { get; } = new CsvSerializer("type d C v r c s t id U s' t'");
+
+    [Fact]
+    public void NotImplementedTest()
+    {
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucherDetail(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseAsset(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.PresentAmort(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseAmort(null));
     }
 
-    [Collection("SerializerTestCollection")]
-    public class CsvDefaultSerializerTest : SerializerTest
+    [Fact]
+    public void OtherTest()
     {
-        protected override IEntitySerializer Serializer { get; } = new CsvSerializer("");
+        var r = Serializer.PresentVoucher(new Voucher
+            {
+                ID = "hhh",
+                Date = ClientDateTime.Today,
+                Type = VoucherType.Carry,
+                Details = new()
+                    {
+                        new()
+                            {
+                                User = "b1",
+                                Currency = "CNY",
+                                Title = 1234,
+                                SubTitle = 04,
+                                Content = "cnt",
+                                Remark = "rmk",
+                                Fund = 123,
+                            },
+                    },
+            });
 
-        [Fact]
-        public void NotImplementedTest()
-        {
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucherDetail(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseAsset(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentAmort(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseAmort(null));
-        }
-
-        [Fact]
-        public void OtherTest()
-        {
-            var r = Serializer.PresentVoucher(new()
-                {
-                    ID = "hhh",
-                    Date = ClientDateTime.Today,
-                    Type = VoucherType.Carry,
-                    Details = new()
-                        {
-                            new()
-                                {
-                                    User = "b1",
-                                    Currency = "CNY",
-                                    Title = 1234,
-                                    SubTitle = 04,
-                                    Content = "cnt",
-                                    Remark = "rmk",
-                                    Fund = 123,
-                                },
-                        },
-                });
-
-            Assert.Contains("hhh", r);
-            Assert.DoesNotContain("Carry", r);
-            Assert.Contains("b1", r);
-            Assert.Contains("CNY", r);
-            Assert.Contains("1234", r);
-            Assert.Contains("04", r);
-            Assert.Contains("cnt", r);
-            Assert.Contains("rmk", r);
-            Assert.Contains("123", r);
-        }
-    }
-
-    [Collection("SerializerTestCollection")]
-    public class CsvCustomSerializerTest : SerializerTest
-    {
-        protected override IEntitySerializer Serializer { get; } = new CsvSerializer("type d C v r c s t id U s' t'");
-
-        [Fact]
-        public void NotImplementedTest()
-        {
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucherDetail(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseAsset(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.PresentAmort(null));
-            Assert.Throws<NotImplementedException>(() => Serializer.ParseAmort(null));
-        }
-
-        [Fact]
-        public void OtherTest()
-        {
-            var r = Serializer.PresentVoucher(new Voucher
-                {
-                    ID = "hhh",
-                    Date = ClientDateTime.Today,
-                    Type = VoucherType.Carry,
-                    Details = new()
-                        {
-                            new()
-                                {
-                                    User = "b1",
-                                    Currency = "CNY",
-                                    Title = 1234,
-                                    SubTitle = 04,
-                                    Content = "cnt",
-                                    Remark = "rmk",
-                                    Fund = 123,
-                                },
-                        },
-                });
-
-            Assert.Contains("hhh", r);
-            Assert.Contains("Carry", r);
-            Assert.Contains("b1", r);
-            Assert.Contains("CNY", r);
-            Assert.Contains("1234", r);
-            Assert.Contains("04", r);
-            Assert.Contains("cnt", r);
-            Assert.Contains("rmk", r);
-            Assert.Contains("123", r);
-        }
+        Assert.Contains("hhh", r);
+        Assert.Contains("Carry", r);
+        Assert.Contains("b1", r);
+        Assert.Contains("CNY", r);
+        Assert.Contains("1234", r);
+        Assert.Contains("04", r);
+        Assert.Contains("cnt", r);
+        Assert.Contains("rmk", r);
+        Assert.Contains("123", r);
     }
 }

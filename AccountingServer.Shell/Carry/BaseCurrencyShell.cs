@@ -26,144 +26,143 @@ using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
-namespace AccountingServer.Shell.Carry
+namespace AccountingServer.Shell.Carry;
+
+/// <summary>
+///     所有者权益币种转换表达式解释器
+/// </summary>
+internal class BaseCurrencyShell : IShellComponent
 {
     /// <summary>
-    ///     所有者权益币种转换表达式解释器
+    ///     基本会计业务处理类
     /// </summary>
-    internal class BaseCurrencyShell : IShellComponent
+    private readonly Accountant m_Accountant;
+
+    public BaseCurrencyShell(Accountant helper) => m_Accountant = helper;
+
+    /// <inheritdoc />
+    public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
     {
-        /// <summary>
-        ///     基本会计业务处理类
-        /// </summary>
-        private readonly Accountant m_Accountant;
-
-        public BaseCurrencyShell(Accountant helper) => m_Accountant = helper;
-
-        /// <inheritdoc />
-        public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
-        {
-            expr = expr.Rest();
-            return expr?.Initial() switch
-                {
-                    "lst" => ListHistory(expr.Rest()),
-                    "ap" => DoConversion(expr.Rest()),
-                    "rst" => ResetConversion(expr.Rest()),
-                    _ => throw new InvalidOperationException("表达式无效"),
-                };
-        }
-
-        /// <inheritdoc />
-        public bool IsExecutable(string expr) => expr.Initial() == "bc";
-
-        /// <summary>
-        ///     列出记账本位币变更历史
-        /// </summary>
-        /// <param name="expr">表达式</param>
-        /// <returns>执行结果</returns>
-        private static IQueryResult ListHistory(string expr)
-        {
-            var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-            Parsing.Eof(expr);
-
-            var sb = new StringBuilder();
-
-            foreach (var info in BaseCurrency.History)
-                if (info.Date.Within(rng))
-                    sb.AppendLine($"{info.Date.AsDate().PadLeft(8)} @{info.Currency}");
-
-            return new PlainText(sb.ToString());
-        }
-
-        /// <summary>
-        ///     执行摊销
-        /// </summary>
-        /// <param name="expr">表达式</param>
-        /// <returns>执行结果</returns>
-        private IQueryResult DoConversion(string expr)
-        {
-            var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-            Parsing.Eof(expr);
-
-            var cnt = 0L;
-            foreach (var info in BaseCurrency.History)
+        expr = expr.Rest();
+        return expr?.Initial() switch
             {
-                if (!info.Date.HasValue)
-                    continue;
+                "lst" => ListHistory(expr.Rest()),
+                "ap" => DoConversion(expr.Rest()),
+                "rst" => ResetConversion(expr.Rest()),
+                _ => throw new InvalidOperationException("表达式无效"),
+            };
+    }
 
-                if (!info.Date.Within(rng))
-                    continue;
+    /// <inheritdoc />
+    public bool IsExecutable(string expr) => expr.Initial() == "bc";
 
-                cnt += ConvertEquity(info.Date.Value, info.Currency);
-            }
+    /// <summary>
+    ///     列出记账本位币变更历史
+    /// </summary>
+    /// <param name="expr">表达式</param>
+    /// <returns>执行结果</returns>
+    private static IQueryResult ListHistory(string expr)
+    {
+        var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+        Parsing.Eof(expr);
 
-            return new NumberAffected(cnt);
-        }
+        var sb = new StringBuilder();
 
-        /// <summary>
-        ///     取消摊销
-        /// </summary>
-        /// <param name="expr">表达式</param>
-        /// <returns>执行结果</returns>
-        private IQueryResult ResetConversion(string expr)
+        foreach (var info in BaseCurrency.History)
+            if (info.Date.Within(rng))
+                sb.AppendLine($"{info.Date.AsDate().PadLeft(8)} @{info.Currency}");
+
+        return new PlainText(sb.ToString());
+    }
+
+    /// <summary>
+    ///     执行摊销
+    /// </summary>
+    /// <param name="expr">表达式</param>
+    /// <returns>执行结果</returns>
+    private IQueryResult DoConversion(string expr)
+    {
+        var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+        Parsing.Eof(expr);
+
+        var cnt = 0L;
+        foreach (var info in BaseCurrency.History)
         {
-            var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-            Parsing.Eof(expr);
+            if (!info.Date.HasValue)
+                continue;
 
-            var cnt = m_Accountant.DeleteVouchers($"{rng.AsDateRange()} %equity conversion%");
-            return new NumberAffected(cnt);
+            if (!info.Date.Within(rng))
+                continue;
+
+            cnt += ConvertEquity(info.Date.Value, info.Currency);
         }
 
+        return new NumberAffected(cnt);
+    }
 
-        /// <summary>
-        ///     所有者权益币种转换
-        /// </summary>
-        /// <param name="dt">日期</param>
-        /// <param name="to">目标币种</param>
-        /// <returns>记账凭证数</returns>
-        private long ConvertEquity(DateTime dt, string to)
+    /// <summary>
+    ///     取消摊销
+    /// </summary>
+    /// <param name="expr">表达式</param>
+    /// <returns>执行结果</returns>
+    private IQueryResult ResetConversion(string expr)
+    {
+        var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+        Parsing.Eof(expr);
+
+        var cnt = m_Accountant.DeleteVouchers($"{rng.AsDateRange()} %equity conversion%");
+        return new NumberAffected(cnt);
+    }
+
+
+    /// <summary>
+    ///     所有者权益币种转换
+    /// </summary>
+    /// <param name="dt">日期</param>
+    /// <param name="to">目标币种</param>
+    /// <returns>记账凭证数</returns>
+    private long ConvertEquity(DateTime dt, string to)
+    {
+        var rst = m_Accountant.RunGroupedQuery($"T4101+T4103-@{to} [~{dt.AsDate()}]`Cts");
+
+        var cnt = 0L;
+
+        foreach (var grpC in rst.Items.Cast<ISubtotalCurrency>())
+        foreach (var grpT in grpC.Items.Cast<ISubtotalTitle>())
+        foreach (var grpS in grpT.Items.Cast<ISubtotalSubTitle>())
         {
-            var rst = m_Accountant.RunGroupedQuery($"T4101+T4103-@{to} [~{dt.AsDate()}]`Cts");
-
-            var cnt = 0L;
-
-            foreach (var grpC in rst.Items.Cast<ISubtotalCurrency>())
-            foreach (var grpT in grpC.Items.Cast<ISubtotalTitle>())
-            foreach (var grpS in grpT.Items.Cast<ISubtotalSubTitle>())
-            {
-                var oldb = grpS.Fund;
-                var newb = m_Accountant.Query(dt, grpC.Currency, to) * oldb;
-                m_Accountant.Upsert(
-                    new Voucher
-                        {
-                            Date = dt,
-                            Type = VoucherType.Ordinary,
-                            Remark = "equity conversion",
-                            Details =
-                                new()
-                                    {
-                                        new()
-                                            {
-                                                Title = grpT.Title,
-                                                SubTitle = grpS.SubTitle,
-                                                Currency = grpC.Currency,
-                                                Fund = -oldb,
-                                            },
-                                        new()
-                                            {
-                                                Title = grpT.Title,
-                                                SubTitle = grpS.SubTitle,
-                                                Currency = to,
-                                                Fund = newb,
-                                            },
-                                        new() { Title = 3999, Currency = grpC.Currency, Fund = oldb },
-                                        new() { Title = 3999, Currency = to, Fund = -newb },
-                                    },
-                        });
-                cnt++;
-            }
-
-            return cnt;
+            var oldb = grpS.Fund;
+            var newb = m_Accountant.Query(dt, grpC.Currency, to) * oldb;
+            m_Accountant.Upsert(
+                new Voucher
+                    {
+                        Date = dt,
+                        Type = VoucherType.Ordinary,
+                        Remark = "equity conversion",
+                        Details =
+                            new()
+                                {
+                                    new()
+                                        {
+                                            Title = grpT.Title,
+                                            SubTitle = grpS.SubTitle,
+                                            Currency = grpC.Currency,
+                                            Fund = -oldb,
+                                        },
+                                    new()
+                                        {
+                                            Title = grpT.Title,
+                                            SubTitle = grpS.SubTitle,
+                                            Currency = to,
+                                            Fund = newb,
+                                        },
+                                    new() { Title = 3999, Currency = grpC.Currency, Fund = oldb },
+                                    new() { Title = 3999, Currency = to, Fund = -newb },
+                                },
+                    });
+            cnt++;
         }
+
+        return cnt;
     }
 }

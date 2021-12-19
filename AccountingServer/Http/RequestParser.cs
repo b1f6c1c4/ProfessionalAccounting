@@ -23,171 +23,170 @@ using System.Linq;
 using System.Text;
 using System.Web;
 
-namespace AccountingServer.Http
-{
-    internal static class RequestParser
-    {
-        public static HttpRequest Parse(Stream stream)
-        {
-            var method = Parse(stream, ParsingState.Method);
-            var uri = Parse(stream, ParsingState.Uri);
-            Dictionary<string, string> par;
-            var baseUri = ParseUri(uri, out par);
-            var request = new HttpRequest
-                {
-                    Method = method,
-                    Uri = uri,
-                    BaseUri = baseUri,
-                    Parameters = par,
-                    Header = new(),
-                    RequestStream = stream,
-                };
-            while (true)
-            {
-                var key = Parse(stream, ParsingState.HeaderKey);
-                if (string.IsNullOrEmpty(key))
-                    break;
-                var value = Parse(stream, ParsingState.HeaderValue);
-                request.Header.Add(key, value);
-            }
+namespace AccountingServer.Http;
 
-            return request;
+internal static class RequestParser
+{
+    public static HttpRequest Parse(Stream stream)
+    {
+        var method = Parse(stream, ParsingState.Method);
+        var uri = Parse(stream, ParsingState.Uri);
+        Dictionary<string, string> par;
+        var baseUri = ParseUri(uri, out par);
+        var request = new HttpRequest
+            {
+                Method = method,
+                Uri = uri,
+                BaseUri = baseUri,
+                Parameters = par,
+                Header = new(),
+                RequestStream = stream,
+            };
+        while (true)
+        {
+            var key = Parse(stream, ParsingState.HeaderKey);
+            if (string.IsNullOrEmpty(key))
+                break;
+            var value = Parse(stream, ParsingState.HeaderValue);
+            request.Header.Add(key, value);
         }
 
-        private static string ParseUri(string uri, out Dictionary<string, string> par)
-        {
-            var sp = uri.Split(new[] { '?' }, 2);
-            if (sp.Length == 1)
-            {
-                par = null;
-                return sp[0];
-            }
+        return request;
+    }
 
-            var spp = sp[1].Split('&');
-            par = spp.ToDictionary(s => s[..s.IndexOf('=')], s => HttpUtility.UrlDecode(s[(s.IndexOf('=') + 1)..]));
+    private static string ParseUri(string uri, out Dictionary<string, string> par)
+    {
+        var sp = uri.Split(new[] { '?' }, 2);
+        if (sp.Length == 1)
+        {
+            par = null;
             return sp[0];
         }
 
-        private static string Parse(Stream stream, ParsingState st)
-            => st switch
-                {
-                    ParsingState.Method => ParseMethod(stream),
-                    ParsingState.Uri => ParseUri(stream),
-                    ParsingState.HeaderKey => ParseHeaderKey(stream),
-                    ParsingState.HeaderValue => ParseHeaderValue(stream),
-                    _ => throw new ApplicationException(),
-                };
+        var spp = sp[1].Split('&');
+        par = spp.ToDictionary(s => s[..s.IndexOf('=')], s => HttpUtility.UrlDecode(s[(s.IndexOf('=') + 1)..]));
+        return sp[0];
+    }
 
-        private static string ParseHeaderValue(Stream stream)
-        {
-            var sb = new StringBuilder();
-            while (true)
+    private static string Parse(Stream stream, ParsingState st)
+        => st switch
             {
-                var ch = stream.ReadByte();
-                if (ch is < 0 or > 255)
-                    throw new HttpException(400);
-                if (ch == ' ' &&
-                    sb.Length == 0)
-                    continue;
-                if (ch == '\r')
-                {
-                    ch = stream.ReadByte();
-                    if (ch != '\n')
-                        throw new HttpException(400);
-                    break;
-                }
+                ParsingState.Method => ParseMethod(stream),
+                ParsingState.Uri => ParseUri(stream),
+                ParsingState.HeaderKey => ParseHeaderKey(stream),
+                ParsingState.HeaderValue => ParseHeaderValue(stream),
+                _ => throw new ApplicationException(),
+            };
 
-                sb.Append((char)ch);
+    private static string ParseHeaderValue(Stream stream)
+    {
+        var sb = new StringBuilder();
+        while (true)
+        {
+            var ch = stream.ReadByte();
+            if (ch is < 0 or > 255)
+                throw new HttpException(400);
+            if (ch == ' ' &&
+                sb.Length == 0)
+                continue;
+            if (ch == '\r')
+            {
+                ch = stream.ReadByte();
+                if (ch != '\n')
+                    throw new HttpException(400);
+                break;
             }
 
-            return sb.ToString();
+            sb.Append((char)ch);
         }
 
-        private static string ParseHeaderKey(Stream stream)
-        {
-            var sb = new StringBuilder();
-            while (true)
-            {
-                var ch = stream.ReadByte();
-                if (ch is < 0 or > 255)
-                    throw new HttpException(400);
-                if (ch == ':')
-                    break;
-                if (ch == '\r')
-                {
-                    if (sb.Length != 0)
-                        throw new HttpException(400);
-                    ch = stream.ReadByte();
-                    if (ch != '\n')
-                        throw new HttpException(400);
-                    break;
-                }
+        return sb.ToString();
+    }
 
-                sb.Append((char)ch);
+    private static string ParseHeaderKey(Stream stream)
+    {
+        var sb = new StringBuilder();
+        while (true)
+        {
+            var ch = stream.ReadByte();
+            if (ch is < 0 or > 255)
+                throw new HttpException(400);
+            if (ch == ':')
+                break;
+            if (ch == '\r')
+            {
+                if (sb.Length != 0)
+                    throw new HttpException(400);
+                ch = stream.ReadByte();
+                if (ch != '\n')
+                    throw new HttpException(400);
+                break;
             }
 
-            return sb.ToString().ToLowerInvariant();
+            sb.Append((char)ch);
         }
 
-        private static string ParseUri(Stream stream)
-        {
-            var sb = new StringBuilder();
-            while (true)
-            {
-                var ch = stream.ReadByte();
-                if (ch is < 0 or > 255)
-                    throw new HttpException(400);
-                if (ch == '\r')
-                {
-                    ch = stream.ReadByte();
-                    if (ch != '\n')
-                        throw new HttpException(400);
-                    break;
-                }
+        return sb.ToString().ToLowerInvariant();
+    }
 
-                sb.Append((char)ch);
+    private static string ParseUri(Stream stream)
+    {
+        var sb = new StringBuilder();
+        while (true)
+        {
+            var ch = stream.ReadByte();
+            if (ch is < 0 or > 255)
+                throw new HttpException(400);
+            if (ch == '\r')
+            {
+                ch = stream.ReadByte();
+                if (ch != '\n')
+                    throw new HttpException(400);
+                break;
             }
 
-            if (sb.ToString(sb.Length - 8, 8) != "HTTP/1.1")
-                throw new HttpException(505);
-            return sb.ToString(0, sb.Length - 9);
+            sb.Append((char)ch);
         }
 
-        private static string ParseMethod(Stream stream)
+        if (sb.ToString(sb.Length - 8, 8) != "HTTP/1.1")
+            throw new HttpException(505);
+        return sb.ToString(0, sb.Length - 9);
+    }
+
+    private static string ParseMethod(Stream stream)
+    {
+        var sb = new StringBuilder();
+        while (true)
         {
-            var sb = new StringBuilder();
-            while (true)
-            {
-                var ch = stream.ReadByte();
-                if (ch is < 0 or > 255)
-                    throw new HttpException(400);
-                if (ch == ' ')
-                    break;
-                sb.Append((char)ch);
-            }
-
-            switch (sb.ToString())
-            {
-                case "OPTIONS":
-                case "GET":
-                case "HEAD":
-                case "POST":
-                case "PUT":
-                case "DELETE":
-                case "TRACE":
-                case "CONNECT":
-                    return sb.ToString();
-                default:
-                    throw new HttpException(400);
-            }
+            var ch = stream.ReadByte();
+            if (ch is < 0 or > 255)
+                throw new HttpException(400);
+            if (ch == ' ')
+                break;
+            sb.Append((char)ch);
         }
 
-        private enum ParsingState
+        switch (sb.ToString())
         {
-            Method,
-            Uri,
-            HeaderKey,
-            HeaderValue,
+            case "OPTIONS":
+            case "GET":
+            case "HEAD":
+            case "POST":
+            case "PUT":
+            case "DELETE":
+            case "TRACE":
+            case "CONNECT":
+                return sb.ToString();
+            default:
+                throw new HttpException(400);
         }
+    }
+
+    private enum ParsingState
+    {
+        Method,
+        Uri,
+        HeaderKey,
+        HeaderValue,
     }
 }

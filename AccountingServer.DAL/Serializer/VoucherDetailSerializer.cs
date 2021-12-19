@@ -19,44 +19,43 @@
 using AccountingServer.Entities;
 using MongoDB.Bson.IO;
 
-namespace AccountingServer.DAL.Serializer
+namespace AccountingServer.DAL.Serializer;
+
+/// <summary>
+///     细目序列化器
+/// </summary>
+internal class VoucherDetailSerializer : BaseSerializer<VoucherDetail>
 {
-    /// <summary>
-    ///     细目序列化器
-    /// </summary>
-    internal class VoucherDetailSerializer : BaseSerializer<VoucherDetail>
+    public override VoucherDetail Deserialize(IBsonReader bsonReader)
     {
-        public override VoucherDetail Deserialize(IBsonReader bsonReader)
-        {
-            string read = null;
+        string read = null;
 
-            bsonReader.ReadStartDocument();
-            var detail = new VoucherDetail
-                {
-                    User = bsonReader.ReadString("user", ref read),
-                    Currency = bsonReader.ReadString("currency", ref read),
-                    Title = bsonReader.ReadInt32("title", ref read),
-                    SubTitle = bsonReader.ReadInt32("subtitle", ref read),
-                    Content = bsonReader.ReadString("content", ref read),
-                    Fund = bsonReader.ReadDouble("fund", ref read),
-                    Remark = bsonReader.ReadString("remark", ref read),
-                };
-            bsonReader.ReadEndDocument();
+        bsonReader.ReadStartDocument();
+        var detail = new VoucherDetail
+            {
+                User = bsonReader.ReadString("user", ref read),
+                Currency = bsonReader.ReadString("currency", ref read),
+                Title = bsonReader.ReadInt32("title", ref read),
+                SubTitle = bsonReader.ReadInt32("subtitle", ref read),
+                Content = bsonReader.ReadString("content", ref read),
+                Fund = bsonReader.ReadDouble("fund", ref read),
+                Remark = bsonReader.ReadString("remark", ref read),
+            };
+        bsonReader.ReadEndDocument();
 
-            return detail;
-        }
+        return detail;
+    }
 
-        public override void Serialize(IBsonWriter bsonWriter, VoucherDetail detail)
-        {
-            bsonWriter.WriteStartDocument();
-            bsonWriter.WriteString("user", detail.User);
-            bsonWriter.WriteString("currency", detail.Currency);
-            bsonWriter.Write("title", detail.Title);
-            bsonWriter.Write("subtitle", detail.SubTitle);
-            bsonWriter.Write("content", detail.Content);
-            bsonWriter.Write("fund", detail.Fund);
-            bsonWriter.Write("remark", detail.Remark);
-            bsonWriter.WriteEndDocument();
-        }
+    public override void Serialize(IBsonWriter bsonWriter, VoucherDetail detail)
+    {
+        bsonWriter.WriteStartDocument();
+        bsonWriter.WriteString("user", detail.User);
+        bsonWriter.WriteString("currency", detail.Currency);
+        bsonWriter.Write("title", detail.Title);
+        bsonWriter.Write("subtitle", detail.SubTitle);
+        bsonWriter.Write("content", detail.Content);
+        bsonWriter.Write("fund", detail.Fund);
+        bsonWriter.Write("remark", detail.Remark);
+        bsonWriter.WriteEndDocument();
     }
 }

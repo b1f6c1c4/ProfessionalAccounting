@@ -34,82 +34,81 @@ using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
-namespace AccountingServer.Shell
+namespace AccountingServer.Shell;
+
+/// <summary>
+///     插件表达式解释器
+/// </summary>
+internal class PluginShell : IShellComponent
 {
-    /// <summary>
-    ///     插件表达式解释器
-    /// </summary>
-    internal class PluginShell : IShellComponent
+    private readonly Dictionary<string, PluginBase> m_Plugins;
+
+    public PluginShell(Accountant helper) => m_Plugins =
+        new Dictionary<string, PluginBase>
+            {
+                ["adb"] = new AverageDailyBalance(helper),
+                ["af"] = new AssetFactory(helper),
+                ["ad"] = new AssetDisposition(helper),
+                ["ir"] = new InterestRevenue(helper),
+                ["ie"] = new InterestExpense(helper),
+                ["cf"] = new CashFlow(helper),
+                ["c"] = new Composite(helper),
+                ["ccc"] = new CreditCardConvert(helper),
+                ["stmt"] = new Statement(helper),
+                ["u"] = new Utilities(helper),
+                ["yr"] = new YieldRate(helper),
+            };
+
+    /// <inheritdoc />
+    public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
     {
-        private readonly Dictionary<string, PluginBase> m_Plugins;
-
-        public PluginShell(Accountant helper) => m_Plugins =
-            new Dictionary<string, PluginBase>
-                {
-                    ["adb"] = new AverageDailyBalance(helper),
-                    ["af"] = new AssetFactory(helper),
-                    ["ad"] = new AssetDisposition(helper),
-                    ["ir"] = new InterestRevenue(helper),
-                    ["ie"] = new InterestExpense(helper),
-                    ["cf"] = new CashFlow(helper),
-                    ["c"] = new Composite(helper),
-                    ["ccc"] = new CreditCardConvert(helper),
-                    ["stmt"] = new Statement(helper),
-                    ["u"] = new Utilities(helper),
-                    ["yr"] = new YieldRate(helper),
-                };
-
-        /// <inheritdoc />
-        public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+        var help = false;
+        if (expr.StartsWith("?", StringComparison.Ordinal))
         {
-            var help = false;
-            if (expr.StartsWith("?", StringComparison.Ordinal))
-            {
-                expr = expr[1..];
-                help = true;
-            }
-
-            var plgName = Parsing.Quoted(ref expr, '$');
-
-            if (help)
-            {
-                Parsing.Eof(expr);
-                return plgName == "" ? new PlainText(ListPlugins()) : new(GetHelp(plgName));
-            }
-
-            return GetPlugin(plgName).Execute(expr, serializer);
+            expr = expr[1..];
+            help = true;
         }
 
-        /// <inheritdoc />
-        public bool IsExecutable(string expr)
-            => expr.StartsWith("$", StringComparison.Ordinal)
-                || expr.StartsWith("?$", StringComparison.Ordinal);
+        var plgName = Parsing.Quoted(ref expr, '$');
 
-        /// <summary>
-        ///     根据名称检索插件
-        /// </summary>
-        /// <param name="name">名称</param>
-        /// <returns>插件</returns>
-        private PluginBase GetPlugin(string name) => m_Plugins[name];
-
-        /// <summary>
-        ///     显示插件帮助
-        /// </summary>
-        /// <param name="name">名称</param>
-        /// <returns>帮助内容</returns>
-        private string GetHelp(string name) => GetPlugin(name).ListHelp();
-
-        /// <summary>
-        ///     列出所有插件
-        /// </summary>
-        /// <returns></returns>
-        private string ListPlugins()
+        if (help)
         {
-            var sb = new StringBuilder();
-            foreach (var (key, value) in m_Plugins)
-                sb.AppendLine($"{key,-8}{value.GetType().FullName}");
-
-            return sb.ToString();
+            Parsing.Eof(expr);
+            return plgName == "" ? new PlainText(ListPlugins()) : new(GetHelp(plgName));
         }
+
+        return GetPlugin(plgName).Execute(expr, serializer);
+    }
+
+    /// <inheritdoc />
+    public bool IsExecutable(string expr)
+        => expr.StartsWith("$", StringComparison.Ordinal)
+            || expr.StartsWith("?$", StringComparison.Ordinal);
+
+    /// <summary>
+    ///     根据名称检索插件
+    /// </summary>
+    /// <param name="name">名称</param>
+    /// <returns>插件</returns>
+    private PluginBase GetPlugin(string name) => m_Plugins[name];
+
+    /// <summary>
+    ///     显示插件帮助
+    /// </summary>
+    /// <param name="name">名称</param>
+    /// <returns>帮助内容</returns>
+    private string GetHelp(string name) => GetPlugin(name).ListHelp();
+
+    /// <summary>
+    ///     列出所有插件
+    /// </summary>
+    /// <returns></returns>
+    private string ListPlugins()
+    {
+        var sb = new StringBuilder();
+        foreach (var (key, value) in m_Plugins)
+            sb.AppendLine($"{key,-8}{value.GetType().FullName}");
+
+        return sb.ToString();
     }
 }

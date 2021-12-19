@@ -25,150 +25,149 @@ using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
-namespace AccountingServer.Shell.Carry
+namespace AccountingServer.Shell.Carry;
+
+/// <summary>
+///     年度结转表达式解释器
+/// </summary>
+internal class CarryYearShell : IShellComponent
 {
     /// <summary>
-    ///     年度结转表达式解释器
+    ///     基本会计业务处理类
     /// </summary>
-    internal class CarryYearShell : IShellComponent
+    private readonly Accountant m_Accountant;
+
+    public CarryYearShell(Accountant helper) => m_Accountant = helper;
+
+    /// <inheritdoc />
+    public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
     {
-        /// <summary>
-        ///     基本会计业务处理类
-        /// </summary>
-        private readonly Accountant m_Accountant;
-
-        public CarryYearShell(Accountant helper) => m_Accountant = helper;
-
-        /// <inheritdoc />
-        public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
-        {
-            expr = expr.Rest();
-            return expr?.Initial() switch
-                {
-                    "ap" => DoCarry(expr.Rest()),
-                    "rst" => ResetCarry(expr.Rest()),
-                    _ => throw new InvalidOperationException("表达式无效"),
-                };
-        }
-
-        /// <inheritdoc />
-        public bool IsExecutable(string expr) => expr.Initial() == "caa";
-
-        /// <summary>
-        ///     执行摊销
-        /// </summary>
-        /// <param name="expr">表达式</param>
-        /// <returns>执行结果</returns>
-        private IQueryResult DoCarry(string expr)
-        {
-            var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-            Parsing.Eof(expr);
-
-            var cnt = 0L;
-
-            if (rng.NullOnly)
+        expr = expr.Rest();
+        return expr?.Initial() switch
             {
-                cnt += CarryYear(null);
-                return new NumberAffected(cnt);
-            }
+                "ap" => DoCarry(expr.Rest()),
+                "rst" => ResetCarry(expr.Rest()),
+                _ => throw new InvalidOperationException("表达式无效"),
+            };
+    }
 
-            var ed = rng.EndDate ?? throw new ArgumentException("时间范围无后界", nameof(expr));
+    /// <inheritdoc />
+    public bool IsExecutable(string expr) => expr.Initial() == "caa";
 
-            var dt = new DateTime((rng.StartDate ?? ed).Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+    /// <summary>
+    ///     执行摊销
+    /// </summary>
+    /// <param name="expr">表达式</param>
+    /// <returns>执行结果</returns>
+    private IQueryResult DoCarry(string expr)
+    {
+        var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+        Parsing.Eof(expr);
 
-            while (dt <= ed)
-            {
-                cnt += CarryYear(dt, !rng.StartDate.HasValue);
-                dt = dt.AddYears(1);
-            }
+        var cnt = 0L;
 
+        if (rng.NullOnly)
+        {
+            cnt += CarryYear(null);
             return new NumberAffected(cnt);
         }
 
-        /// <summary>
-        ///     取消摊销
-        /// </summary>
-        /// <param name="expr">表达式</param>
-        /// <returns>执行结果</returns>
-        private IQueryResult ResetCarry(string expr)
-        {
-            var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-            Parsing.Eof(expr);
+        var ed = rng.EndDate ?? throw new ArgumentException("时间范围无后界", nameof(expr));
 
-            var cnt = m_Accountant.DeleteVouchers($"{rng.AsDateRange()} AnnualCarry");
-            return new NumberAffected(cnt);
+        var dt = new DateTime((rng.StartDate ?? ed).Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        while (dt <= ed)
+        {
+            cnt += CarryYear(dt, !rng.StartDate.HasValue);
+            dt = dt.AddYears(1);
         }
 
+        return new NumberAffected(cnt);
+    }
 
-        /// <summary>
-        ///     年末结转
-        /// </summary>
-        /// <param name="dt">年，若为<c>null</c>则表示对无日期进行结转</param>
-        /// <param name="includeNull">是否计入无日期</param>
-        /// <returns>记账凭证数</returns>
-        private long CarryYear(DateTime? dt, bool includeNull = false)
+    /// <summary>
+    ///     取消摊销
+    /// </summary>
+    /// <param name="expr">表达式</param>
+    /// <returns>执行结果</returns>
+    private IQueryResult ResetCarry(string expr)
+    {
+        var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+        Parsing.Eof(expr);
+
+        var cnt = m_Accountant.DeleteVouchers($"{rng.AsDateRange()} AnnualCarry");
+        return new NumberAffected(cnt);
+    }
+
+
+    /// <summary>
+    ///     年末结转
+    /// </summary>
+    /// <param name="dt">年，若为<c>null</c>则表示对无日期进行结转</param>
+    /// <param name="includeNull">是否计入无日期</param>
+    /// <returns>记账凭证数</returns>
+    private long CarryYear(DateTime? dt, bool includeNull = false)
+    {
+        DateTime? ed;
+        DateFilter rng;
+        if (dt.HasValue)
         {
-            DateTime? ed;
-            DateFilter rng;
-            if (dt.HasValue)
-            {
-                var sd = new DateTime(dt.Value.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-                ed = sd.AddYears(1).AddDays(-1);
-                rng = new(includeNull ? null : sd, ed);
-            }
-            else
-            {
-                ed = null;
-                rng = DateFilter.TheNullOnly;
-            }
-
-            var b00S = m_Accountant.RunGroupedQuery($"T410300 {rng.AsDateRange()}`C");
-            var b01S = m_Accountant.RunGroupedQuery($"T410301 {rng.AsDateRange()}`C");
-
-            var cnt = 0L;
-            foreach (var grpC in b00S.Items.Cast<ISubtotalCurrency>())
-            {
-                var b00 = grpC.Fund;
-                m_Accountant.Upsert(
-                    new Voucher
-                        {
-                            Date = ed,
-                            Type = VoucherType.AnnualCarry,
-                            Details =
-                                new()
-                                    {
-                                        new() { Title = 4101, Currency = grpC.Currency, Fund = b00 },
-                                        new() { Title = 4103, Currency = grpC.Currency, Fund = -b00 },
-                                    },
-                        });
-                cnt++;
-            }
-
-            foreach (var grpC in b01S.Items.Cast<ISubtotalCurrency>())
-            {
-                var b01 = grpC.Fund;
-                m_Accountant.Upsert(
-                    new Voucher
-                        {
-                            Date = ed,
-                            Type = VoucherType.AnnualCarry,
-                            Details =
-                                new()
-                                    {
-                                        new()
-                                            {
-                                                Title = 4101, SubTitle = 01, Currency = grpC.Currency, Fund = b01,
-                                            },
-                                        new()
-                                            {
-                                                Title = 4103, SubTitle = 01, Currency = grpC.Currency, Fund = -b01,
-                                            },
-                                    },
-                        });
-                cnt++;
-            }
-
-            return cnt;
+            var sd = new DateTime(dt.Value.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            ed = sd.AddYears(1).AddDays(-1);
+            rng = new(includeNull ? null : sd, ed);
         }
+        else
+        {
+            ed = null;
+            rng = DateFilter.TheNullOnly;
+        }
+
+        var b00S = m_Accountant.RunGroupedQuery($"T410300 {rng.AsDateRange()}`C");
+        var b01S = m_Accountant.RunGroupedQuery($"T410301 {rng.AsDateRange()}`C");
+
+        var cnt = 0L;
+        foreach (var grpC in b00S.Items.Cast<ISubtotalCurrency>())
+        {
+            var b00 = grpC.Fund;
+            m_Accountant.Upsert(
+                new Voucher
+                    {
+                        Date = ed,
+                        Type = VoucherType.AnnualCarry,
+                        Details =
+                            new()
+                                {
+                                    new() { Title = 4101, Currency = grpC.Currency, Fund = b00 },
+                                    new() { Title = 4103, Currency = grpC.Currency, Fund = -b00 },
+                                },
+                    });
+            cnt++;
+        }
+
+        foreach (var grpC in b01S.Items.Cast<ISubtotalCurrency>())
+        {
+            var b01 = grpC.Fund;
+            m_Accountant.Upsert(
+                new Voucher
+                    {
+                        Date = ed,
+                        Type = VoucherType.AnnualCarry,
+                        Details =
+                            new()
+                                {
+                                    new()
+                                        {
+                                            Title = 4101, SubTitle = 01, Currency = grpC.Currency, Fund = b01,
+                                        },
+                                    new()
+                                        {
+                                            Title = 4103, SubTitle = 01, Currency = grpC.Currency, Fund = -b01,
+                                        },
+                                },
+                    });
+            cnt++;
+        }
+
+        return cnt;
     }
 }

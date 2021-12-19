@@ -19,22 +19,21 @@
 using System;
 using System.Threading;
 
-namespace AccountingServer.Entities
+namespace AccountingServer.Entities;
+
+/// <summary>
+///     客户端用户
+/// </summary>
+public class ClientUser
 {
-    /// <summary>
-    ///     客户端用户
-    /// </summary>
-    public class ClientUser
-    {
-        private static readonly ThreadLocal<ClientUser> Instances = new();
+    private static readonly ThreadLocal<ClientUser> Instances = new();
 
-        private readonly string m_User;
+    private readonly string m_User;
 
-        private ClientUser(string user) => m_User = user;
+    private ClientUser(string user) => m_User = user;
 
-        public static string Name => Instances.Value?.m_User ?? throw new InvalidOperationException("必须有一个用户");
+    public static string Name => Instances.Value?.m_User ?? throw new InvalidOperationException("必须有一个用户");
 
-        public static void Set(string user)
-            => Instances.Value = new(user);
-    }
+    public static void Set(string user)
+        => Instances.Value = new(user);
 }

@@ -23,139 +23,138 @@ using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using static AccountingServer.Entities.Util.SecurityHelper;
 
-namespace AccountingServer.BLL.Parsing
+namespace AccountingServer.BLL.Parsing;
+
+internal partial class QueryParser
 {
-    internal partial class QueryParser
+    public partial class DistributedQAtomContext : IDistributedQueryAtom
     {
-        public partial class DistributedQAtomContext : IDistributedQueryAtom
+        /// <inheritdoc />
+        public IDistributed Filter
+            => new MyDistributedFilter
+                {
+                    ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : null,
+                    User = (UserSpec()?.GetText()).ParseUserSpec(),
+                    Name = RegexString()?.GetText().Dequotation().Replace(@"\/", "/"),
+                    Remark = PercentQuotedString()?.GetText().Dequotation(),
+                };
+
+        /// <inheritdoc />
+        public DateFilter Range => rangeCore()?.Range ?? DateFilter.Unconstrained;
+
+        /// <inheritdoc />
+        public bool IsDangerous() => Filter.IsDangerous() && Range.IsDangerous(true);
+
+        /// <inheritdoc />
+        public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
+
+        /// <summary>
+        ///     分期过滤器
+        /// </summary>
+        [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
+        private sealed class MyDistributedFilter : IDistributed
         {
             /// <inheritdoc />
-            public IDistributed Filter
-                => new MyDistributedFilter
-                    {
-                        ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : null,
-                        User = (UserSpec()?.GetText()).ParseUserSpec(),
-                        Name = RegexString()?.GetText().Dequotation().Replace(@"\/", "/"),
-                        Remark = PercentQuotedString()?.GetText().Dequotation(),
-                    };
+            public Guid? ID { get; init; }
 
             /// <inheritdoc />
-            public DateFilter Range => rangeCore()?.Range ?? DateFilter.Unconstrained;
+            public string User { get; init; }
 
             /// <inheritdoc />
-            public bool IsDangerous() => Filter.IsDangerous() && Range.IsDangerous(true);
+            public string Name { get; init; }
 
             /// <inheritdoc />
-            public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
+            public DateTime? Date { get; set; }
 
-            /// <summary>
-            ///     分期过滤器
-            /// </summary>
-            [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
-            private sealed class MyDistributedFilter : IDistributed
-            {
-                /// <inheritdoc />
-                public Guid? ID { get; init; }
+            /// <inheritdoc />
+            public double? Value { get; set; }
 
-                /// <inheritdoc />
-                public string User { get; init; }
+            /// <inheritdoc />
+            public string Remark { get; init; }
 
-                /// <inheritdoc />
-                public string Name { get; init; }
-
-                /// <inheritdoc />
-                public DateTime? Date { get; set; }
-
-                /// <inheritdoc />
-                public double? Value { get; set; }
-
-                /// <inheritdoc />
-                public string Remark { get; init; }
-
-                /// <inheritdoc />
-                public IEnumerable<IDistributedItem> TheSchedule { get; set; }
-            }
+            /// <inheritdoc />
+            public IEnumerable<IDistributedItem> TheSchedule { get; set; }
         }
+    }
 
-        public partial class DistributedQContext : IQueryAry<IDistributedQueryAtom>
-        {
-            /// <inheritdoc />
-            public OperatorType Operator
-                => Op switch
-                    {
-                        null => OperatorType.None,
+    public partial class DistributedQContext : IQueryAry<IDistributedQueryAtom>
+    {
+        /// <inheritdoc />
+        public OperatorType Operator
+            => Op switch
+                {
+                    null => OperatorType.None,
                         { Text: var x } when distributedQ() == null => x switch
-                            {
-                                "+" => OperatorType.Identity,
-                                "-" => OperatorType.Complement,
-                                _ => throw new MemberAccessException("表达式错误"),
-                            },
+                        {
+                            "+" => OperatorType.Identity,
+                            "-" => OperatorType.Complement,
+                            _ => throw new MemberAccessException("表达式错误"),
+                        },
                         { Text: var x } => x switch
-                            {
-                                "+" => OperatorType.Union,
-                                "-" => OperatorType.Subtract,
-                                _ => throw new MemberAccessException("表达式错误"),
-                            },
-                    };
+                        {
+                            "+" => OperatorType.Union,
+                            "-" => OperatorType.Subtract,
+                            _ => throw new MemberAccessException("表达式错误"),
+                        },
+                };
 
-            /// <inheritdoc />
-            public IQueryCompounded<IDistributedQueryAtom> Filter1
-                => (IQueryCompounded<IDistributedQueryAtom>)distributedQ() ?? distributedQ1();
+        /// <inheritdoc />
+        public IQueryCompounded<IDistributedQueryAtom> Filter1
+            => (IQueryCompounded<IDistributedQueryAtom>)distributedQ() ?? distributedQ1();
 
-            /// <inheritdoc />
-            public IQueryCompounded<IDistributedQueryAtom> Filter2 => distributedQ1();
+        /// <inheritdoc />
+        public IQueryCompounded<IDistributedQueryAtom> Filter2 => distributedQ1();
 
-            /// <inheritdoc />
-            public bool IsDangerous()
-                => Operator switch
-                    {
-                        OperatorType.None => Filter1.IsDangerous(),
-                        OperatorType.Identity => Filter1.IsDangerous(),
-                        OperatorType.Complement => true,
-                        OperatorType.Union => Filter1.IsDangerous() || Filter2.IsDangerous(),
-                        OperatorType.Subtract => Filter1.IsDangerous(),
-                        _ => throw new ArgumentOutOfRangeException(),
-                    };
+        /// <inheritdoc />
+        public bool IsDangerous()
+            => Operator switch
+                {
+                    OperatorType.None => Filter1.IsDangerous(),
+                    OperatorType.Identity => Filter1.IsDangerous(),
+                    OperatorType.Complement => true,
+                    OperatorType.Union => Filter1.IsDangerous() || Filter2.IsDangerous(),
+                    OperatorType.Subtract => Filter1.IsDangerous(),
+                    _ => throw new ArgumentOutOfRangeException(),
+                };
 
-            /// <inheritdoc />
-            public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
-        }
+        /// <inheritdoc />
+        public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
+    }
 
-        public partial class DistributedQ1Context : IQueryAry<IDistributedQueryAtom>
-        {
-            /// <inheritdoc />
-            public OperatorType Operator => Op == null ? OperatorType.None : OperatorType.Intersect;
+    public partial class DistributedQ1Context : IQueryAry<IDistributedQueryAtom>
+    {
+        /// <inheritdoc />
+        public OperatorType Operator => Op == null ? OperatorType.None : OperatorType.Intersect;
 
-            /// <inheritdoc />
-            public IQueryCompounded<IDistributedQueryAtom> Filter1 => distributedQ0();
+        /// <inheritdoc />
+        public IQueryCompounded<IDistributedQueryAtom> Filter1 => distributedQ0();
 
-            /// <inheritdoc />
-            public IQueryCompounded<IDistributedQueryAtom> Filter2 => distributedQ1();
+        /// <inheritdoc />
+        public IQueryCompounded<IDistributedQueryAtom> Filter2 => distributedQ1();
 
-            /// <inheritdoc />
-            public bool IsDangerous() => Filter1.IsDangerous() && (Filter2?.IsDangerous() ?? true);
+        /// <inheritdoc />
+        public bool IsDangerous() => Filter1.IsDangerous() && (Filter2?.IsDangerous() ?? true);
 
-            /// <inheritdoc />
-            public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
-        }
+        /// <inheritdoc />
+        public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
+    }
 
-        public partial class DistributedQ0Context : IQueryAry<IDistributedQueryAtom>
-        {
-            /// <inheritdoc />
-            public OperatorType Operator => OperatorType.None;
+    public partial class DistributedQ0Context : IQueryAry<IDistributedQueryAtom>
+    {
+        /// <inheritdoc />
+        public OperatorType Operator => OperatorType.None;
 
-            /// <inheritdoc />
-            public IQueryCompounded<IDistributedQueryAtom> Filter1
-                => (IQueryCompounded<IDistributedQueryAtom>)distributedQAtom() ?? distributedQ();
+        /// <inheritdoc />
+        public IQueryCompounded<IDistributedQueryAtom> Filter1
+            => (IQueryCompounded<IDistributedQueryAtom>)distributedQAtom() ?? distributedQ();
 
-            /// <inheritdoc />
-            public IQueryCompounded<IDistributedQueryAtom> Filter2 => null;
+        /// <inheritdoc />
+        public IQueryCompounded<IDistributedQueryAtom> Filter2 => null;
 
-            /// <inheritdoc />
-            public bool IsDangerous() => Filter1.IsDangerous();
+        /// <inheritdoc />
+        public bool IsDangerous() => Filter1.IsDangerous();
 
-            /// <inheritdoc />
-            public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
-        }
+        /// <inheritdoc />
+        public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
     }
 }

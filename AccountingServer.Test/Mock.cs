@@ -22,27 +22,26 @@ using System.Collections.Generic;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities.Util;
 
-namespace AccountingServer.Test
+namespace AccountingServer.Test;
+
+public class MockConfigManager<T> : IConfigManager<T>
 {
-    public class MockConfigManager<T> : IConfigManager<T>
-    {
-        public MockConfigManager(T config) => Config = config;
-        public T Config { get; }
+    public MockConfigManager(T config) => Config = config;
+    public T Config { get; }
 
-        public void Reload(bool throws) => throw new NotImplementedException();
-    }
+    public void Reload(bool throws) => throw new NotImplementedException();
+}
 
-    public class MockExchange : IHistoricalExchange, IEnumerable
-    {
-        private readonly Dictionary<Tuple<DateTime?, string>, double> m_Dic = new();
+public class MockExchange : IHistoricalExchange, IEnumerable
+{
+    private readonly Dictionary<Tuple<DateTime?, string>, double> m_Dic = new();
 
-        public IEnumerator GetEnumerator() => m_Dic.GetEnumerator();
+    public IEnumerator GetEnumerator() => m_Dic.GetEnumerator();
 
-        public double Query(DateTime? date, string from, string to)
-            => m_Dic[new(date, from)] / m_Dic[new(date, to)];
+    public double Query(DateTime? date, string from, string to)
+        => m_Dic[new(date, from)] / m_Dic[new(date, to)];
 
-        public void Add(DateTime date, string target, double val) => m_Dic.Add(
-            new(date, target),
-            val);
-    }
+    public void Add(DateTime date, string target, double val) => m_Dic.Add(
+        new(date, target),
+        val);
 }

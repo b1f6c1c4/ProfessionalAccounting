@@ -25,273 +25,272 @@ using AccountingServer.Entities;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace AccountingServer.DAL
+namespace AccountingServer.DAL;
+
+/// <summary>
+///     MongoDb数据库查询
+/// </summary>
+internal static class MongoDbNative
 {
     /// <summary>
-    ///     MongoDb数据库查询
+    ///     按编号查询<c>ObjectId</c>
     /// </summary>
-    internal static class MongoDbNative
-    {
-        /// <summary>
-        ///     按编号查询<c>ObjectId</c>
-        /// </summary>
-        /// <param name="id">编号</param>
-        /// <returns>Bson查询</returns>
-        public static FilterDefinition<T> GetNQuery<T>(string id) => Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
+    /// <param name="id">编号</param>
+    /// <returns>Bson查询</returns>
+    public static FilterDefinition<T> GetNQuery<T>(string id) => Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
 
-        /// <summary>
-        ///     按编号查询<c>Guid</c>
-        /// </summary>
-        /// <param name="id">编号</param>
-        /// <returns>Bson查询</returns>
-        public static FilterDefinition<T> GetNQuery<T>(Guid? id) =>
-            Builders<T>.Filter.Eq<BsonValue>("_id", id.HasValue ? id.Value.ToBsonValue() : BsonNull.Value);
-    }
+    /// <summary>
+    ///     按编号查询<c>Guid</c>
+    /// </summary>
+    /// <param name="id">编号</param>
+    /// <returns>Bson查询</returns>
+    public static FilterDefinition<T> GetNQuery<T>(Guid? id) =>
+        Builders<T>.Filter.Eq<BsonValue>("_id", id.HasValue ? id.Value.ToBsonValue() : BsonNull.Value);
+}
 
-    internal abstract class MongoDbNativeVisitor<T, TAtom> : IQueryVisitor<TAtom, FilterDefinition<T>>
-        where TAtom : class
-    {
-        public abstract FilterDefinition<T> Visit(TAtom query);
+internal abstract class MongoDbNativeVisitor<T, TAtom> : IQueryVisitor<TAtom, FilterDefinition<T>>
+    where TAtom : class
+{
+    public abstract FilterDefinition<T> Visit(TAtom query);
 
-        public FilterDefinition<T> Visit(IQueryAry<TAtom> query)
-            => query.Operator switch
-                {
-                    OperatorType.None => query.Filter1.Accept(this),
-                    OperatorType.Identity => query.Filter1.Accept(this),
-                    OperatorType.Complement => !query.Filter1.Accept(this),
-                    OperatorType.Union => query.Filter1.Accept(this) | query.Filter2.Accept(this),
-                    OperatorType.Intersect => query.Filter1.Accept(this) & query.Filter2.Accept(this),
-                    OperatorType.Subtract => query.Filter1.Accept(this) & !query.Filter2.Accept(this),
-                    _ => throw new ArgumentException("运算类型未知", nameof(query)),
-                };
-
-        protected static FilterDefinition<TX> And<TX>(IReadOnlyCollection<FilterDefinition<TX>> lst)
-            => lst.Count switch
-                {
-                    0 => Builders<TX>.Filter.Empty,
-                    1 => lst.First(),
-                    _ => Builders<TX>.Filter.And(lst),
-                };
-
-        /// <summary>
-        ///     日期过滤器的Native表示
-        /// </summary>
-        /// <param name="rng">日期过滤器</param>
-        /// <returns>Native表示</returns>
-        protected static FilterDefinition<T> GetNativeFilter(DateFilter rng)
-        {
-            if (rng == null)
-                return Builders<T>.Filter.Empty;
-
-            if (rng.NullOnly)
-                return Builders<T>.Filter.Exists("date", false);
-
-            var lst = new List<FilterDefinition<T>>();
-
-            if (rng.StartDate.HasValue)
-                lst.Add(Builders<T>.Filter.Gte("date", rng.StartDate));
-            if (rng.EndDate.HasValue)
-                lst.Add(Builders<T>.Filter.Lte("date", rng.EndDate));
-
-            if (lst.Count == 0)
-                return rng.Nullable
-                    ? Builders<T>.Filter.Empty
-                    : Builders<T>.Filter.Exists("date");
-
-            var gather = And(lst);
-            return rng.Nullable
-                ? Builders<T>.Filter.Exists("date", false) | gather
-                : Builders<T>.Filter.Exists("date") & gather;
-        }
-    }
-
-    internal abstract class MongoDbNativeDetail<T> : MongoDbNativeVisitor<T, IDetailQueryAtom>
-    {
-        protected MongoDbNativeDetail(bool unwinded = false) => Unwinded = unwinded;
-        private bool Unwinded { get; }
-
-        public override FilterDefinition<T> Visit(IDetailQueryAtom query)
-        {
-            var p = "";
-            if (Unwinded)
-                p = "detail.";
-
-            var lst = new List<FilterDefinition<T>>();
-            switch (query.Kind)
+    public FilterDefinition<T> Visit(IQueryAry<TAtom> query)
+        => query.Operator switch
             {
-                case TitleKind.Asset:
-                    lst.Add(Builders<T>.Filter.Gte(p + "title", 1000));
-                    lst.Add(Builders<T>.Filter.Lt(p + "title", 2000));
-                    break;
-                case TitleKind.Liability:
-                    lst.Add(Builders<T>.Filter.Gte(p + "title", 2000));
-                    lst.Add(Builders<T>.Filter.Lt(p + "title", 3000));
-                    break;
-                case TitleKind.Equity:
-                    lst.Add(Builders<T>.Filter.Gte(p + "title", 4000));
-                    lst.Add(Builders<T>.Filter.Lt(p + "title", 5000));
-                    break;
-                case TitleKind.Revenue:
-                    lst.Add(Builders<T>.Filter.Gte(p + "title", 6000));
-                    lst.Add(Builders<T>.Filter.Lt(p + "title", 6400));
-                    break;
-                case TitleKind.Expense:
-                    lst.Add(Builders<T>.Filter.Gte(p + "title", 6400));
-                    lst.Add(Builders<T>.Filter.Lt(p + "title", 7000));
-                    break;
-                case null:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                OperatorType.None => query.Filter1.Accept(this),
+                OperatorType.Identity => query.Filter1.Accept(this),
+                OperatorType.Complement => !query.Filter1.Accept(this),
+                OperatorType.Union => query.Filter1.Accept(this) | query.Filter2.Accept(this),
+                OperatorType.Intersect => query.Filter1.Accept(this) & query.Filter2.Accept(this),
+                OperatorType.Subtract => query.Filter1.Accept(this) & !query.Filter2.Accept(this),
+                _ => throw new ArgumentException("运算类型未知", nameof(query)),
+            };
 
-            if (query.Dir != 0)
-                lst.Add(
-                    query.Dir > 0
-                        ? Builders<T>.Filter.Gt(p + "fund", -VoucherDetail.Tolerance)
-                        : Builders<T>.Filter.Lt(p + "fund", +VoucherDetail.Tolerance));
-            if (query.ContentPrefix != null)
-                lst.Add(Builders<T>.Filter.Regex(p + "content", PrefixRegex(query.ContentPrefix)));
-            if (query.RemarkPrefix != null)
-                lst.Add(Builders<T>.Filter.Regex(p + "remark", PrefixRegex(query.RemarkPrefix)));
-            if (query.Filter?.User != null)
-                lst.Add(Builders<T>.Filter.Eq(p + "user", query.Filter?.User));
-            if (query.Filter?.Currency != null)
-                lst.Add(Builders<T>.Filter.Eq(p + "currency", query.Filter?.Currency));
-            if (query.Filter?.Title != null)
-                lst.Add(Builders<T>.Filter.Eq(p + "title", query.Filter.Title.Value));
-            if (query.Filter?.SubTitle != null)
-                lst.Add(query.Filter.SubTitle switch
-                    {
-                        00 => Builders<T>.Filter.Exists(p + "subtitle", false),
-                        var x => Builders<T>.Filter.Eq(p + "subtitle", x.Value),
-                    });
-            if (query.Filter?.Content != null)
-                lst.Add(query.Filter.Content switch
-                    {
-                        "" => Builders<T>.Filter.Exists(p + "content", false),
-                        var x => Builders<T>.Filter.Eq(p + "content", x),
-                    });
-            if (query.Filter?.Remark != null)
-                lst.Add(query.Filter.Remark switch
-                    {
-                        "" => Builders<T>.Filter.Exists(p + "remark", false),
-                        var x => Builders<T>.Filter.Eq(p + "remark", x),
-                    });
-            if (query.Filter?.Fund != null)
-                lst.Add(
-                    Builders<T>.Filter.Gte(p + "fund", query.Filter.Fund.Value - VoucherDetail.Tolerance) &
-                    Builders<T>.Filter.Lte(p + "fund", query.Filter.Fund.Value + VoucherDetail.Tolerance));
-            return And(lst);
+    protected static FilterDefinition<TX> And<TX>(IReadOnlyCollection<FilterDefinition<TX>> lst)
+        => lst.Count switch
+            {
+                0 => Builders<TX>.Filter.Empty,
+                1 => lst.First(),
+                _ => Builders<TX>.Filter.And(lst),
+            };
+
+    /// <summary>
+    ///     日期过滤器的Native表示
+    /// </summary>
+    /// <param name="rng">日期过滤器</param>
+    /// <returns>Native表示</returns>
+    protected static FilterDefinition<T> GetNativeFilter(DateFilter rng)
+    {
+        if (rng == null)
+            return Builders<T>.Filter.Empty;
+
+        if (rng.NullOnly)
+            return Builders<T>.Filter.Exists("date", false);
+
+        var lst = new List<FilterDefinition<T>>();
+
+        if (rng.StartDate.HasValue)
+            lst.Add(Builders<T>.Filter.Gte("date", rng.StartDate));
+        if (rng.EndDate.HasValue)
+            lst.Add(Builders<T>.Filter.Lte("date", rng.EndDate));
+
+        if (lst.Count == 0)
+            return rng.Nullable
+                ? Builders<T>.Filter.Empty
+                : Builders<T>.Filter.Exists("date");
+
+        var gather = And(lst);
+        return rng.Nullable
+            ? Builders<T>.Filter.Exists("date", false) | gather
+            : Builders<T>.Filter.Exists("date") & gather;
+    }
+}
+
+internal abstract class MongoDbNativeDetail<T> : MongoDbNativeVisitor<T, IDetailQueryAtom>
+{
+    protected MongoDbNativeDetail(bool unwinded = false) => Unwinded = unwinded;
+    private bool Unwinded { get; }
+
+    public override FilterDefinition<T> Visit(IDetailQueryAtom query)
+    {
+        var p = "";
+        if (Unwinded)
+            p = "detail.";
+
+        var lst = new List<FilterDefinition<T>>();
+        switch (query.Kind)
+        {
+            case TitleKind.Asset:
+                lst.Add(Builders<T>.Filter.Gte(p + "title", 1000));
+                lst.Add(Builders<T>.Filter.Lt(p + "title", 2000));
+                break;
+            case TitleKind.Liability:
+                lst.Add(Builders<T>.Filter.Gte(p + "title", 2000));
+                lst.Add(Builders<T>.Filter.Lt(p + "title", 3000));
+                break;
+            case TitleKind.Equity:
+                lst.Add(Builders<T>.Filter.Gte(p + "title", 4000));
+                lst.Add(Builders<T>.Filter.Lt(p + "title", 5000));
+                break;
+            case TitleKind.Revenue:
+                lst.Add(Builders<T>.Filter.Gte(p + "title", 6000));
+                lst.Add(Builders<T>.Filter.Lt(p + "title", 6400));
+                break;
+            case TitleKind.Expense:
+                lst.Add(Builders<T>.Filter.Gte(p + "title", 6400));
+                lst.Add(Builders<T>.Filter.Lt(p + "title", 7000));
+                break;
+            case null:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
 
-        /// <summary>
-        ///     获取前缀正则表达式
-        /// </summary>
-        /// <param name="s">前缀字符串</param>
-        /// <returns>前缀正则表达式</returns>
-        private static BsonRegularExpression PrefixRegex(string s)
-            => new("^" + Regex.Escape(s), "i");
-    }
-
-    internal class MongoDbNativeDetail : MongoDbNativeDetail<VoucherDetail> { }
-
-    internal class MongoDbNativeDetailUnwinded : MongoDbNativeDetail<BsonDocument>
-    {
-        public MongoDbNativeDetailUnwinded() : base(true) { }
-    }
-
-    internal class MongoDbNativeVoucher : MongoDbNativeVisitor<Voucher, IVoucherQueryAtom>
-    {
-        /// <summary>
-        ///     记账凭证过滤器的Native表示
-        /// </summary>
-        /// <param name="vfilter">记账凭证过滤器</param>
-        /// <returns>Native表示</returns>
-        private static FilterDefinition<Voucher> GetNativeFilter(Voucher vfilter)
-        {
-            if (vfilter == null)
-                return Builders<Voucher>.Filter.Empty;
-
-            var lst = new List<FilterDefinition<Voucher>>();
-
-            if (vfilter.ID != null)
-                lst.Add(Builders<Voucher>.Filter.Eq("_id", new ObjectId(vfilter.ID)));
-            if (vfilter.Date != null)
-                lst.Add(Builders<Voucher>.Filter.Eq("date", vfilter.Date));
-            if (vfilter.Type != null)
-                lst.Add(vfilter.Type switch
-                    {
-                        VoucherType.Ordinary => Builders<Voucher>.Filter.Exists("special", false),
-                        VoucherType.General =>
-                            Builders<Voucher>.Filter.Nin("special", new[] { "acarry", "carry" }),
-                        VoucherType.Amortization => Builders<Voucher>.Filter.Eq("special", "amorz"),
-                        VoucherType.AnnualCarry => Builders<Voucher>.Filter.Eq("special", "acarry"),
-                        VoucherType.Carry => Builders<Voucher>.Filter.Eq("special", "carry"),
-                        VoucherType.Depreciation => Builders<Voucher>.Filter.Eq("special", "dep"),
-                        VoucherType.Devalue => Builders<Voucher>.Filter.Eq("special", "dev"),
-                        VoucherType.Uncertain => Builders<Voucher>.Filter.Eq("special", "unc"),
-                        _ => throw new InvalidOperationException(),
-                    });
-
-            if (vfilter.Remark != null)
-                lst.Add(vfilter.Remark switch
-                    {
-                        "" => Builders<Voucher>.Filter.Exists("remark", false),
-                        var x => Builders<Voucher>.Filter.Eq("remark", x),
-                    });
-
-            return And(lst);
-        }
-
-        public override FilterDefinition<Voucher> Visit(IVoucherQueryAtom query)
-        {
-            var lst = new List<FilterDefinition<Voucher>>
+        if (query.Dir != 0)
+            lst.Add(
+                query.Dir > 0
+                    ? Builders<T>.Filter.Gt(p + "fund", -VoucherDetail.Tolerance)
+                    : Builders<T>.Filter.Lt(p + "fund", +VoucherDetail.Tolerance));
+        if (query.ContentPrefix != null)
+            lst.Add(Builders<T>.Filter.Regex(p + "content", PrefixRegex(query.ContentPrefix)));
+        if (query.RemarkPrefix != null)
+            lst.Add(Builders<T>.Filter.Regex(p + "remark", PrefixRegex(query.RemarkPrefix)));
+        if (query.Filter?.User != null)
+            lst.Add(Builders<T>.Filter.Eq(p + "user", query.Filter?.User));
+        if (query.Filter?.Currency != null)
+            lst.Add(Builders<T>.Filter.Eq(p + "currency", query.Filter?.Currency));
+        if (query.Filter?.Title != null)
+            lst.Add(Builders<T>.Filter.Eq(p + "title", query.Filter.Title.Value));
+        if (query.Filter?.SubTitle != null)
+            lst.Add(query.Filter.SubTitle switch
                 {
-                    GetNativeFilter(query.VoucherFilter),
-                    GetNativeFilter(query.Range),
-                };
-            var v = query.DetailFilter.Accept(new MongoDbNativeDetail());
-            if (query.ForAll)
-                lst.Add(!Builders<Voucher>.Filter.ElemMatch("detail", !v));
-            else
-                lst.Add(Builders<Voucher>.Filter.ElemMatch("detail", v));
-
-            return And(lst);
-        }
+                    00 => Builders<T>.Filter.Exists(p + "subtitle", false),
+                    var x => Builders<T>.Filter.Eq(p + "subtitle", x.Value),
+                });
+        if (query.Filter?.Content != null)
+            lst.Add(query.Filter.Content switch
+                {
+                    "" => Builders<T>.Filter.Exists(p + "content", false),
+                    var x => Builders<T>.Filter.Eq(p + "content", x),
+                });
+        if (query.Filter?.Remark != null)
+            lst.Add(query.Filter.Remark switch
+                {
+                    "" => Builders<T>.Filter.Exists(p + "remark", false),
+                    var x => Builders<T>.Filter.Eq(p + "remark", x),
+                });
+        if (query.Filter?.Fund != null)
+            lst.Add(
+                Builders<T>.Filter.Gte(p + "fund", query.Filter.Fund.Value - VoucherDetail.Tolerance) &
+                Builders<T>.Filter.Lte(p + "fund", query.Filter.Fund.Value + VoucherDetail.Tolerance));
+        return And(lst);
     }
 
-    internal class MongoDbNativeDistributed<T> : MongoDbNativeVisitor<T, IDistributedQueryAtom>
-        where T : IDistributed
+    /// <summary>
+    ///     获取前缀正则表达式
+    /// </summary>
+    /// <param name="s">前缀字符串</param>
+    /// <returns>前缀正则表达式</returns>
+    private static BsonRegularExpression PrefixRegex(string s)
+        => new("^" + Regex.Escape(s), "i");
+}
+
+internal class MongoDbNativeDetail : MongoDbNativeDetail<VoucherDetail> { }
+
+internal class MongoDbNativeDetailUnwinded : MongoDbNativeDetail<BsonDocument>
+{
+    public MongoDbNativeDetailUnwinded() : base(true) { }
+}
+
+internal class MongoDbNativeVoucher : MongoDbNativeVisitor<Voucher, IVoucherQueryAtom>
+{
+    /// <summary>
+    ///     记账凭证过滤器的Native表示
+    /// </summary>
+    /// <param name="vfilter">记账凭证过滤器</param>
+    /// <returns>Native表示</returns>
+    private static FilterDefinition<Voucher> GetNativeFilter(Voucher vfilter)
     {
-        public override FilterDefinition<T> Visit(IDistributedQueryAtom query)
-        {
-            if (query?.Filter == null)
-                return Builders<T>.Filter.Empty;
+        if (vfilter == null)
+            return Builders<Voucher>.Filter.Empty;
 
-            var lst = new List<FilterDefinition<T>>();
-            if (query.Filter.ID.HasValue)
-                lst.Add(Builders<T>.Filter.Eq("_id", query.Filter.ID.Value));
-            if (query.Filter.User != null)
-                lst.Add(Builders<T>.Filter.Eq("user", query.Filter.User));
-            if (query.Filter.Name != null)
-                lst.Add(query.Filter.Name switch
-                    {
-                        "" => Builders<T>.Filter.Exists("name", false),
-                        var x => Builders<T>.Filter.Regex("name", x),
-                    });
-            if (query.Filter.Remark != null)
-                lst.Add(query.Filter.Remark switch
-                    {
-                        "" => Builders<T>.Filter.Exists("remark", false),
-                        var x => Builders<T>.Filter.Eq("remark", x),
-                    });
-            if (query.Filter.User != null)
-                lst.Add(Builders<T>.Filter.Eq("user", query.Filter.User));
+        var lst = new List<FilterDefinition<Voucher>>();
 
-            lst.Add(GetNativeFilter(query.Range));
+        if (vfilter.ID != null)
+            lst.Add(Builders<Voucher>.Filter.Eq("_id", new ObjectId(vfilter.ID)));
+        if (vfilter.Date != null)
+            lst.Add(Builders<Voucher>.Filter.Eq("date", vfilter.Date));
+        if (vfilter.Type != null)
+            lst.Add(vfilter.Type switch
+                {
+                    VoucherType.Ordinary => Builders<Voucher>.Filter.Exists("special", false),
+                    VoucherType.General =>
+                        Builders<Voucher>.Filter.Nin("special", new[] { "acarry", "carry" }),
+                    VoucherType.Amortization => Builders<Voucher>.Filter.Eq("special", "amorz"),
+                    VoucherType.AnnualCarry => Builders<Voucher>.Filter.Eq("special", "acarry"),
+                    VoucherType.Carry => Builders<Voucher>.Filter.Eq("special", "carry"),
+                    VoucherType.Depreciation => Builders<Voucher>.Filter.Eq("special", "dep"),
+                    VoucherType.Devalue => Builders<Voucher>.Filter.Eq("special", "dev"),
+                    VoucherType.Uncertain => Builders<Voucher>.Filter.Eq("special", "unc"),
+                    _ => throw new InvalidOperationException(),
+                });
 
-            return And(lst);
-        }
+        if (vfilter.Remark != null)
+            lst.Add(vfilter.Remark switch
+                {
+                    "" => Builders<Voucher>.Filter.Exists("remark", false),
+                    var x => Builders<Voucher>.Filter.Eq("remark", x),
+                });
+
+        return And(lst);
+    }
+
+    public override FilterDefinition<Voucher> Visit(IVoucherQueryAtom query)
+    {
+        var lst = new List<FilterDefinition<Voucher>>
+            {
+                GetNativeFilter(query.VoucherFilter),
+                GetNativeFilter(query.Range),
+            };
+        var v = query.DetailFilter.Accept(new MongoDbNativeDetail());
+        if (query.ForAll)
+            lst.Add(!Builders<Voucher>.Filter.ElemMatch("detail", !v));
+        else
+            lst.Add(Builders<Voucher>.Filter.ElemMatch("detail", v));
+
+        return And(lst);
+    }
+}
+
+internal class MongoDbNativeDistributed<T> : MongoDbNativeVisitor<T, IDistributedQueryAtom>
+    where T : IDistributed
+{
+    public override FilterDefinition<T> Visit(IDistributedQueryAtom query)
+    {
+        if (query?.Filter == null)
+            return Builders<T>.Filter.Empty;
+
+        var lst = new List<FilterDefinition<T>>();
+        if (query.Filter.ID.HasValue)
+            lst.Add(Builders<T>.Filter.Eq("_id", query.Filter.ID.Value));
+        if (query.Filter.User != null)
+            lst.Add(Builders<T>.Filter.Eq("user", query.Filter.User));
+        if (query.Filter.Name != null)
+            lst.Add(query.Filter.Name switch
+                {
+                    "" => Builders<T>.Filter.Exists("name", false),
+                    var x => Builders<T>.Filter.Regex("name", x),
+                });
+        if (query.Filter.Remark != null)
+            lst.Add(query.Filter.Remark switch
+                {
+                    "" => Builders<T>.Filter.Exists("remark", false),
+                    var x => Builders<T>.Filter.Eq("remark", x),
+                });
+        if (query.Filter.User != null)
+            lst.Add(Builders<T>.Filter.Eq("user", query.Filter.User));
+
+        lst.Add(GetNativeFilter(query.Range));
+
+        return And(lst);
     }
 }

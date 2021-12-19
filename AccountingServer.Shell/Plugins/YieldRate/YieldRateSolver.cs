@@ -21,100 +21,99 @@ using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.Entities.Util;
 
-namespace AccountingServer.Shell.Plugins.YieldRate
+namespace AccountingServer.Shell.Plugins.YieldRate;
+
+/// <summary>
+///     收益率求解器
+/// </summary>
+internal class YieldRateSolver
 {
     /// <summary>
-    ///     收益率求解器
+    ///     日期
     /// </summary>
-    internal class YieldRateSolver
+    private readonly double[] m_Delta;
+
+    /// <summary>
+    ///     现金流
+    /// </summary>
+    private readonly double[] m_Fund;
+
+    /// <summary>
+    ///     期数
+    /// </summary>
+    private readonly int m_N;
+
+    public YieldRateSolver(IEnumerable<double> delta, IEnumerable<double> fund)
     {
-        /// <summary>
-        ///     日期
-        /// </summary>
-        private readonly double[] m_Delta;
+        m_Delta = delta.ToArray();
+        m_Fund = fund.ToArray();
+        m_N = m_Delta.Length;
+        if (m_Fund.Length != m_N)
+            throw new ArgumentException("数组大小不匹配");
+    }
 
-        /// <summary>
-        ///     现金流
-        /// </summary>
-        private readonly double[] m_Fund;
-
-        /// <summary>
-        ///     期数
-        /// </summary>
-        private readonly int m_N;
-
-        public YieldRateSolver(IEnumerable<double> delta, IEnumerable<double> fund)
+    /// <summary>
+    ///     试算净值
+    /// </summary>
+    /// <param name="b">收益率+1</param>
+    /// <param name="val">净值</param>
+    /// <param name="der">净值对收益率的偏导数</param>
+    private void Value(double b, out double val, out double der)
+    {
+        val = 0D;
+        der = 0D;
+        for (var i = 0; i < m_N; i++)
         {
-            m_Delta = delta.ToArray();
-            m_Fund = fund.ToArray();
-            m_N = m_Delta.Length;
-            if (m_Fund.Length != m_N)
-                throw new ArgumentException("数组大小不匹配");
+            var v = Math.Pow(b, m_Delta[i] - 1);
+            val += v * b * m_Fund[i];
+            der += v * m_Delta[i] * m_Fund[i];
         }
+    }
 
-        /// <summary>
-        ///     试算净值
-        /// </summary>
-        /// <param name="b">收益率+1</param>
-        /// <param name="val">净值</param>
-        /// <param name="der">净值对收益率的偏导数</param>
-        private void Value(double b, out double val, out double der)
+    /// <summary>
+    ///     采用牛顿下山迭代法求解收益率
+    /// </summary>
+    /// <returns>收益率</returns>
+    public double Solve()
+    {
+        var lambda = 1D;
+
+        while (true)
         {
-            val = 0D;
-            der = 0D;
-            for (var i = 0; i < m_N; i++)
-            {
-                var v = Math.Pow(b, m_Delta[i] - 1);
-                val += v * b * m_Fund[i];
-                der += v * m_Delta[i] * m_Fund[i];
-            }
-        }
+            var b = 1D;
 
-        /// <summary>
-        ///     采用牛顿下山迭代法求解收益率
-        /// </summary>
-        /// <returns>收益率</returns>
-        public double Solve()
-        {
-            var lambda = 1D;
-
+            var dir = 0;
+            var flag = false;
             while (true)
             {
-                var b = 1D;
-
-                var dir = 0;
-                var flag = false;
-                while (true)
+                Value(b, out var v, out var d);
+                if (v.IsZero())
                 {
-                    Value(b, out var v, out var d);
-                    if (v.IsZero())
-                    {
-                        flag = true;
-                        break;
-                    }
-
-                    var del = v / d;
-                    if (dir > 0)
-                    {
-                        if (del < 0)
-                            break;
-                    }
-                    else if (dir < 0)
-                    {
-                        if (del > 0)
-                            break;
-                    }
-                    else
-                        dir = del > 0 ? 1 : -1;
-
-                    b -= lambda * del;
+                    flag = true;
+                    break;
                 }
 
-                if (flag)
-                    return b - 1;
+                var del = v / d;
+                if (dir > 0)
+                {
+                    if (del < 0)
+                        break;
+                }
+                else if (dir < 0)
+                {
+                    if (del > 0)
+                        break;
+                }
+                else
+                    dir = del > 0 ? 1 : -1;
 
-                lambda /= 2;
+                b -= lambda * del;
             }
+
+            if (flag)
+                return b - 1;
+
+            lambda /= 2;
         }
     }
 }

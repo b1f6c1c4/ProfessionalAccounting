@@ -24,77 +24,76 @@ using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
-namespace AccountingServer.Shell.Plugins.AssetHelper
+namespace AccountingServer.Shell.Plugins.AssetHelper;
+
+/// <summary>
+///     创建资产
+/// </summary>
+internal class AssetFactory : PluginBase
 {
-    /// <summary>
-    ///     创建资产
-    /// </summary>
-    internal class AssetFactory : PluginBase
+    public AssetFactory(Accountant accountant) : base(accountant) { }
+
+    /// <inheritdoc />
+    public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
     {
-        public AssetFactory(Accountant accountant) : base(accountant) { }
+        var voucherID = Parsing.Token(ref expr);
+        Guid? guid = null;
+        var guidT = Guid.Empty;
+        // ReSharper disable once AccessToModifiedClosure
+        if (Parsing.Token(ref expr, true, s => Guid.TryParse(s, out guidT)) != null)
+            guid = guidT;
+        var name = Parsing.Token(ref expr);
+        var lifeT = Parsing.Double(ref expr);
+        Parsing.Eof(expr);
 
-        /// <inheritdoc />
-        public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
-        {
-            var voucherID = Parsing.Token(ref expr);
-            Guid? guid = null;
-            var guidT = Guid.Empty;
-            // ReSharper disable once AccessToModifiedClosure
-            if (Parsing.Token(ref expr, true, s => Guid.TryParse(s, out guidT)) != null)
-                guid = guidT;
-            var name = Parsing.Token(ref expr);
-            var lifeT = Parsing.Double(ref expr);
-            Parsing.Eof(expr);
+        var voucher = Accountant.SelectVoucher(voucherID);
+        if (voucher == null)
+            throw new ApplicationException("找不到记账凭证");
 
-            var voucher = Accountant.SelectVoucher(voucherID);
-            if (voucher == null)
-                throw new ApplicationException("找不到记账凭证");
+        var detail = voucher.Details.Single(
+            vd => vd.Title is 1601 or 1701 &&
+                (!guid.HasValue || string.Equals(
+                    vd.Content,
+                    guid.ToString(),
+                    StringComparison.OrdinalIgnoreCase)));
 
-            var detail = voucher.Details.Single(
-                vd => vd.Title is 1601 or 1701 &&
-                    (!guid.HasValue || string.Equals(
-                        vd.Content,
-                        guid.ToString(),
-                        StringComparison.OrdinalIgnoreCase)));
+        var isFixed = detail.Title == 1601;
+        var life = (int?)lifeT ?? (isFixed ? 3 : 0);
 
-            var isFixed = detail.Title == 1601;
-            var life = (int?)lifeT ?? (isFixed ? 3 : 0);
+        var asset = new Asset
+            {
+                StringID = detail.Content,
+                Name = name,
+                Date = voucher.Date,
+                User = detail.User,
+                Currency = detail.Currency,
+                Value = detail.Fund,
+                Salvage = life == 0 ? detail.Fund : isFixed ? detail.Fund * 0.05 : 0,
+                Life = life,
+                Title = detail.Title,
+                Method = life == 0 ? DepreciationMethod.None : DepreciationMethod.StraightLine,
+                DepreciationTitle = isFixed ? 1602 : 1702,
+                DepreciationExpenseTitle = 6602,
+                DepreciationExpenseSubTitle = isFixed ? 7 : 11,
+                DevaluationTitle = isFixed ? 1603 : 1703,
+                DevaluationExpenseTitle = 6701,
+                DevaluationExpenseSubTitle = isFixed ? 5 : 6,
+                Schedule = new()
+                    {
+                        new AcquisitionItem
+                            {
+                                Date = voucher.Date,
+                                VoucherID = voucher.ID,
+                                OrigValue = detail.Fund!.Value,
+                            },
+                    },
+            };
 
-            var asset = new Asset
-                {
-                    StringID = detail.Content,
-                    Name = name,
-                    Date = voucher.Date,
-                    User = detail.User,
-                    Currency = detail.Currency,
-                    Value = detail.Fund,
-                    Salvage = life == 0 ? detail.Fund : isFixed ? detail.Fund * 0.05 : 0,
-                    Life = life,
-                    Title = detail.Title,
-                    Method = life == 0 ? DepreciationMethod.None : DepreciationMethod.StraightLine,
-                    DepreciationTitle = isFixed ? 1602 : 1702,
-                    DepreciationExpenseTitle = 6602,
-                    DepreciationExpenseSubTitle = isFixed ? 7 : 11,
-                    DevaluationTitle = isFixed ? 1603 : 1703,
-                    DevaluationExpenseTitle = 6701,
-                    DevaluationExpenseSubTitle = isFixed ? 5 : 6,
-                    Schedule = new()
-                        {
-                            new AcquisitionItem
-                                {
-                                    Date = voucher.Date,
-                                    VoucherID = voucher.ID,
-                                    OrigValue = detail.Fund!.Value,
-                                },
-                        },
-                };
+        Accountant.Upsert(asset);
+        asset = Accountant.SelectAsset(asset.ID!.Value);
+        Accountant.Depreciate(asset);
+        Accountant.Upsert(asset);
 
-            Accountant.Upsert(asset);
-            asset = Accountant.SelectAsset(asset.ID!.Value);
-            Accountant.Depreciate(asset);
-            Accountant.Upsert(asset);
-
-            return new DirtyText(serializer.PresentAsset(asset).Wrap());
-        }
+        return new DirtyText(serializer.PresentAsset(asset).Wrap());
     }
 }

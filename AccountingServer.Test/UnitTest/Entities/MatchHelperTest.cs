@@ -22,283 +22,282 @@ using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using Xunit;
 
-namespace AccountingServer.Test.UnitTest.Entities
+namespace AccountingServer.Test.UnitTest.Entities;
+
+[SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
+public class MatchHelperTest
 {
-    [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
-    public class MatchHelperTest
+    private static void StringMatchTest(Func<string, string, bool> pred)
     {
-        private static void StringMatchTest(Func<string, string, bool> pred)
-        {
-            Assert.True(pred(null, null));
-            Assert.True(pred("", null));
-            Assert.True(pred("abc", null));
+        Assert.True(pred(null, null));
+        Assert.True(pred("", null));
+        Assert.True(pred("abc", null));
 
-            Assert.True(pred(null, ""));
-            Assert.True(pred("", ""));
-            Assert.False(pred("abc", ""));
+        Assert.True(pred(null, ""));
+        Assert.True(pred("", ""));
+        Assert.False(pred("abc", ""));
 
-            Assert.False(pred(null, "abc"));
-            Assert.False(pred("", "abc"));
-            Assert.True(pred("abc", "abc"));
-        }
-
-        private static void StringPrefixMatchTest(Func<string, string, bool> pred)
-        {
-            Assert.True(pred(null, null));
-            Assert.True(pred("", null));
-            Assert.True(pred("whatever", null));
-
-            Assert.False(pred(null, ""));
-            Assert.True(pred("", ""));
-            Assert.True(pred("whatever", ""));
-
-            Assert.False(pred(null, "W"));
-            Assert.False(pred("", "W"));
-            Assert.True(pred("w", "W"));
-            Assert.True(pred("whatever", "W"));
-            Assert.False(pred("hat", "W"));
-
-            Assert.False(pred("a", "[ab]"));
-            Assert.False(pred("ba", "[ab]"));
-            Assert.True(pred("[ab]", "[ab]"));
-        }
-
-        [Theory]
-        [InlineData(true, null, null)]
-        [InlineData(true, "", null)]
-        [InlineData(true, "test", null)]
-        [InlineData(false, null, "")]
-        [InlineData(true, "", "")]
-        [InlineData(false, "test", "")]
-        [InlineData(false, null, "test")]
-        [InlineData(false, "", "test")]
-        [InlineData(true, "test", "test")]
-        public void VoucherMatchTestID(bool expected, string value, string filter)
-            => Assert.Equal(expected, MatchHelper.IsMatch(new() { ID = value }, new Voucher { ID = filter }));
-
-        [Theory]
-        [InlineData(true, null, null)]
-        [InlineData(true, "2017-01-01", null)]
-        [InlineData(false, null, "2017-01-01")]
-        [InlineData(true, "2017-01-01", "2017-01-01")]
-        [InlineData(false, "2018-01-01", "2017-01-01")]
-        public void VoucherMatchTestDate(bool expected, string valueS, string filterS)
-        {
-            var value = valueS.ToDateTime();
-            var filter = filterS.ToDateTime();
-            Assert.Equal(expected, MatchHelper.IsMatch(new() { Date = value }, new Voucher { Date = filter }));
-        }
-
-        [Theory]
-        [InlineData(true, VoucherType.Ordinary, null)]
-        [InlineData(true, VoucherType.Uncertain, null)]
-        [InlineData(true, VoucherType.Carry, null)]
-        [InlineData(true, VoucherType.AnnualCarry, null)]
-        [InlineData(true, VoucherType.Ordinary, VoucherType.Ordinary)]
-        [InlineData(false, VoucherType.Uncertain, VoucherType.Ordinary)]
-        [InlineData(false, VoucherType.Carry, VoucherType.Ordinary)]
-        [InlineData(false, VoucherType.AnnualCarry, VoucherType.Ordinary)]
-        [InlineData(true, VoucherType.Ordinary, VoucherType.General)]
-        [InlineData(true, VoucherType.Uncertain, VoucherType.General)]
-        [InlineData(true, VoucherType.Amortization, VoucherType.General)]
-        [InlineData(true, VoucherType.Depreciation, VoucherType.General)]
-        [InlineData(true, VoucherType.Devalue, VoucherType.General)]
-        [InlineData(false, VoucherType.Carry, VoucherType.General)]
-        [InlineData(false, VoucherType.AnnualCarry, VoucherType.General)]
-        public void VoucherMatchTestType(bool expected, VoucherType? value, VoucherType? filter)
-            => Assert.Equal(expected, MatchHelper.IsMatch(new() { Type = value }, new Voucher { Type = filter }));
-
-        [Theory]
-        [InlineData(true, "b1", null)]
-        [InlineData(true, "b2", null)]
-        [InlineData(false, "b1", "")]
-        [InlineData(false, "b2", "")]
-        [InlineData(false, "b1", "b2")]
-        [InlineData(true, "b2", "b2")]
-        public void DetailMatchTestUser(bool expected, string value, string filter)
-            => Assert.Equal(
-                expected,
-                MatchHelper.IsMatch(new() { User = value }, new VoucherDetail { User = filter }));
-
-        [Theory]
-        [InlineData(true, null, null)]
-        [InlineData(true, "", null)]
-        [InlineData(true, "USD", null)]
-        [InlineData(false, null, "")]
-        [InlineData(true, "", "")]
-        [InlineData(false, "USD", "")]
-        [InlineData(false, null, "USD")]
-        [InlineData(false, "", "USD")]
-        [InlineData(true, "USD", "USD")]
-        public void DetailMatchTestCurrency(bool expected, string value, string filter)
-            => Assert.Equal(
-                expected,
-                MatchHelper.IsMatch(new() { Currency = value }, new VoucherDetail { Currency = filter }));
-
-        [Theory]
-        [InlineData(true, 1001, null)]
-        [InlineData(false, 1000, 1001)]
-        [InlineData(true, 1001, 1001)]
-        public void DetailMatchTestTitle(bool expected, int? value, int? filter)
-            => Assert.Equal(
-                expected,
-                MatchHelper.IsMatch(new() { Title = value }, new VoucherDetail { Title = filter }));
-
-        [Theory]
-        [InlineData(true, null, null)]
-        [InlineData(true, 99, null)]
-        [InlineData(true, null, 00)]
-        [InlineData(false, 01, 00)]
-        [InlineData(false, 99, 00)]
-        [InlineData(false, null, 99)]
-        [InlineData(false, 01, 99)]
-        [InlineData(true, 99, 99)]
-        public void DetailMatchTestSubTitle(bool expected, int? value, int? filter)
-            => Assert.Equal(
-                expected,
-                MatchHelper.IsMatch(new() { SubTitle = value }, new VoucherDetail { SubTitle = filter }));
-
-        [Theory]
-        [InlineData(true, null, null)]
-        [InlineData(true, 123.45, null)]
-        [InlineData(false, null, 123.45)]
-        [InlineData(false, 123.45 + 2 * VoucherDetail.Tolerance, 123.45)]
-        [InlineData(true, 123.45 + 0.5 * VoucherDetail.Tolerance, 123.45)]
-        public void DetailMatchTestFund(bool expected, double? value, double? filter)
-            => Assert.Equal(
-                expected,
-                MatchHelper.IsMatch(new() { Fund = value }, new VoucherDetail { Fund = filter }));
-
-        [Theory]
-        [InlineData(true, null, null)]
-        [InlineData(false, 500, TitleKind.Asset)]
-        [InlineData(true, 1500, TitleKind.Asset)]
-        [InlineData(false, 2000, TitleKind.Asset)]
-        [InlineData(false, 1500, TitleKind.Liability)]
-        [InlineData(true, 2500, TitleKind.Liability)]
-        [InlineData(false, 3000, TitleKind.Liability)]
-        [InlineData(false, 3500, TitleKind.Equity)]
-        [InlineData(true, 4500, TitleKind.Equity)]
-        [InlineData(false, 5000, TitleKind.Equity)]
-        [InlineData(false, 5800, TitleKind.Revenue)]
-        [InlineData(true, 6000, TitleKind.Revenue)]
-        [InlineData(false, 6400, TitleKind.Revenue)]
-        [InlineData(false, 6300, TitleKind.Expense)]
-        [InlineData(true, 6500, TitleKind.Expense)]
-        [InlineData(false, 7000, TitleKind.Expense)]
-        public void DetailMatchTestKind(bool expected, int? value, TitleKind? kind)
-            => Assert.Equal(expected,
-                MatchHelper.IsMatch(new() { Title = value }, new VoucherDetail(), kind: kind));
-
-        [Theory]
-        [InlineData(true, null, 0)]
-        [InlineData(true, 123.45, 0)]
-        [InlineData(false, null, +1)]
-        [InlineData(false, -2 * VoucherDetail.Tolerance, +1)]
-        [InlineData(true, -0.5 * VoucherDetail.Tolerance, +1)]
-        [InlineData(false, null, -1)]
-        [InlineData(false, +2 * VoucherDetail.Tolerance, -1)]
-        [InlineData(true, +0.5 * VoucherDetail.Tolerance, -1)]
-        public void DetailMatchTestDir(bool expected, double? value, int dir)
-            => Assert.Equal(expected,
-                MatchHelper.IsMatch(new() { Fund = value }, new VoucherDetail(), dir: dir));
-
-        [Fact]
-        public void DetailMatchTestContent()
-            => StringMatchTest(
-                (v, f) => MatchHelper.IsMatch(new() { Content = v }, new VoucherDetail { Content = f }));
-
-        [Fact]
-        public void DetailMatchTestContentPrefix()
-            => StringPrefixMatchTest(
-                (v, f) => MatchHelper.IsMatch(new() { Content = v }, new VoucherDetail(), contentPrefix: f));
-
-        [Fact]
-        public void DetailMatchTestNull()
-            => Assert.True(
-                MatchHelper.IsMatch(
-                    new() { Content = "cnt", Fund = 10, Remark = "rmk" },
-                    (VoucherDetail)null));
-
-        [Fact]
-        public void DetailMatchTestRemark()
-            => StringMatchTest(
-                (v, f) => MatchHelper.IsMatch(new() { Remark = v }, new VoucherDetail { Remark = f }));
-
-        [Fact]
-        public void VoucherMatchTest()
-        {
-            var filter = new Voucher
-                {
-                    ID = "abc",
-                    Date = new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                    Type = VoucherType.Ordinary,
-                    Remark = "abc",
-                };
-
-            Assert.False(
-                MatchHelper.IsMatch(
-                    new()
-                        {
-                            ID = "abc0",
-                            Date = new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                            Type = VoucherType.Ordinary,
-                            Remark = "abc",
-                        },
-                    filter));
-            Assert.False(
-                MatchHelper.IsMatch(
-                    new()
-                        {
-                            ID = "abc",
-                            Date = new(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                            Type = VoucherType.Ordinary,
-                            Remark = "abc",
-                        },
-                    filter));
-            Assert.False(
-                MatchHelper.IsMatch(
-                    new()
-                        {
-                            ID = "abc",
-                            Date = new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                            Type = VoucherType.Carry,
-                            Remark = "abc",
-                        },
-                    filter));
-            Assert.False(
-                MatchHelper.IsMatch(
-                    new()
-                        {
-                            ID = "abc",
-                            Date = new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                            Type = VoucherType.Ordinary,
-                            Remark = "abc0",
-                        },
-                    filter));
-            Assert.True(
-                MatchHelper.IsMatch(
-                    new()
-                        {
-                            ID = "abc",
-                            Date = new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                            Type = VoucherType.Ordinary,
-                            Remark = "abc",
-                        },
-                    filter));
-        }
-
-        [Fact]
-        public void VoucherMatchTestNull()
-            => Assert.True(MatchHelper.IsMatch(new() { ID = "id", Remark = "rmk" }, (Voucher)null));
-
-        [Fact]
-        public void VoucherMatchTestRemark()
-            => StringMatchTest((v, f) => MatchHelper.IsMatch(new() { Remark = v }, new Voucher { Remark = f }));
-
-        [Fact]
-        public void DetailMatchTestRemarkPrefix()
-            => StringPrefixMatchTest(
-                (v, f) => MatchHelper.IsMatch(new() { Remark = v }, new VoucherDetail(), remarkPrefix: f));
+        Assert.False(pred(null, "abc"));
+        Assert.False(pred("", "abc"));
+        Assert.True(pred("abc", "abc"));
     }
+
+    private static void StringPrefixMatchTest(Func<string, string, bool> pred)
+    {
+        Assert.True(pred(null, null));
+        Assert.True(pred("", null));
+        Assert.True(pred("whatever", null));
+
+        Assert.False(pred(null, ""));
+        Assert.True(pred("", ""));
+        Assert.True(pred("whatever", ""));
+
+        Assert.False(pred(null, "W"));
+        Assert.False(pred("", "W"));
+        Assert.True(pred("w", "W"));
+        Assert.True(pred("whatever", "W"));
+        Assert.False(pred("hat", "W"));
+
+        Assert.False(pred("a", "[ab]"));
+        Assert.False(pred("ba", "[ab]"));
+        Assert.True(pred("[ab]", "[ab]"));
+    }
+
+    [Theory]
+    [InlineData(true, null, null)]
+    [InlineData(true, "", null)]
+    [InlineData(true, "test", null)]
+    [InlineData(false, null, "")]
+    [InlineData(true, "", "")]
+    [InlineData(false, "test", "")]
+    [InlineData(false, null, "test")]
+    [InlineData(false, "", "test")]
+    [InlineData(true, "test", "test")]
+    public void VoucherMatchTestID(bool expected, string value, string filter)
+        => Assert.Equal(expected, MatchHelper.IsMatch(new() { ID = value }, new Voucher { ID = filter }));
+
+    [Theory]
+    [InlineData(true, null, null)]
+    [InlineData(true, "2017-01-01", null)]
+    [InlineData(false, null, "2017-01-01")]
+    [InlineData(true, "2017-01-01", "2017-01-01")]
+    [InlineData(false, "2018-01-01", "2017-01-01")]
+    public void VoucherMatchTestDate(bool expected, string valueS, string filterS)
+    {
+        var value = valueS.ToDateTime();
+        var filter = filterS.ToDateTime();
+        Assert.Equal(expected, MatchHelper.IsMatch(new() { Date = value }, new Voucher { Date = filter }));
+    }
+
+    [Theory]
+    [InlineData(true, VoucherType.Ordinary, null)]
+    [InlineData(true, VoucherType.Uncertain, null)]
+    [InlineData(true, VoucherType.Carry, null)]
+    [InlineData(true, VoucherType.AnnualCarry, null)]
+    [InlineData(true, VoucherType.Ordinary, VoucherType.Ordinary)]
+    [InlineData(false, VoucherType.Uncertain, VoucherType.Ordinary)]
+    [InlineData(false, VoucherType.Carry, VoucherType.Ordinary)]
+    [InlineData(false, VoucherType.AnnualCarry, VoucherType.Ordinary)]
+    [InlineData(true, VoucherType.Ordinary, VoucherType.General)]
+    [InlineData(true, VoucherType.Uncertain, VoucherType.General)]
+    [InlineData(true, VoucherType.Amortization, VoucherType.General)]
+    [InlineData(true, VoucherType.Depreciation, VoucherType.General)]
+    [InlineData(true, VoucherType.Devalue, VoucherType.General)]
+    [InlineData(false, VoucherType.Carry, VoucherType.General)]
+    [InlineData(false, VoucherType.AnnualCarry, VoucherType.General)]
+    public void VoucherMatchTestType(bool expected, VoucherType? value, VoucherType? filter)
+        => Assert.Equal(expected, MatchHelper.IsMatch(new() { Type = value }, new Voucher { Type = filter }));
+
+    [Theory]
+    [InlineData(true, "b1", null)]
+    [InlineData(true, "b2", null)]
+    [InlineData(false, "b1", "")]
+    [InlineData(false, "b2", "")]
+    [InlineData(false, "b1", "b2")]
+    [InlineData(true, "b2", "b2")]
+    public void DetailMatchTestUser(bool expected, string value, string filter)
+        => Assert.Equal(
+            expected,
+            MatchHelper.IsMatch(new() { User = value }, new VoucherDetail { User = filter }));
+
+    [Theory]
+    [InlineData(true, null, null)]
+    [InlineData(true, "", null)]
+    [InlineData(true, "USD", null)]
+    [InlineData(false, null, "")]
+    [InlineData(true, "", "")]
+    [InlineData(false, "USD", "")]
+    [InlineData(false, null, "USD")]
+    [InlineData(false, "", "USD")]
+    [InlineData(true, "USD", "USD")]
+    public void DetailMatchTestCurrency(bool expected, string value, string filter)
+        => Assert.Equal(
+            expected,
+            MatchHelper.IsMatch(new() { Currency = value }, new VoucherDetail { Currency = filter }));
+
+    [Theory]
+    [InlineData(true, 1001, null)]
+    [InlineData(false, 1000, 1001)]
+    [InlineData(true, 1001, 1001)]
+    public void DetailMatchTestTitle(bool expected, int? value, int? filter)
+        => Assert.Equal(
+            expected,
+            MatchHelper.IsMatch(new() { Title = value }, new VoucherDetail { Title = filter }));
+
+    [Theory]
+    [InlineData(true, null, null)]
+    [InlineData(true, 99, null)]
+    [InlineData(true, null, 00)]
+    [InlineData(false, 01, 00)]
+    [InlineData(false, 99, 00)]
+    [InlineData(false, null, 99)]
+    [InlineData(false, 01, 99)]
+    [InlineData(true, 99, 99)]
+    public void DetailMatchTestSubTitle(bool expected, int? value, int? filter)
+        => Assert.Equal(
+            expected,
+            MatchHelper.IsMatch(new() { SubTitle = value }, new VoucherDetail { SubTitle = filter }));
+
+    [Theory]
+    [InlineData(true, null, null)]
+    [InlineData(true, 123.45, null)]
+    [InlineData(false, null, 123.45)]
+    [InlineData(false, 123.45 + 2 * VoucherDetail.Tolerance, 123.45)]
+    [InlineData(true, 123.45 + 0.5 * VoucherDetail.Tolerance, 123.45)]
+    public void DetailMatchTestFund(bool expected, double? value, double? filter)
+        => Assert.Equal(
+            expected,
+            MatchHelper.IsMatch(new() { Fund = value }, new VoucherDetail { Fund = filter }));
+
+    [Theory]
+    [InlineData(true, null, null)]
+    [InlineData(false, 500, TitleKind.Asset)]
+    [InlineData(true, 1500, TitleKind.Asset)]
+    [InlineData(false, 2000, TitleKind.Asset)]
+    [InlineData(false, 1500, TitleKind.Liability)]
+    [InlineData(true, 2500, TitleKind.Liability)]
+    [InlineData(false, 3000, TitleKind.Liability)]
+    [InlineData(false, 3500, TitleKind.Equity)]
+    [InlineData(true, 4500, TitleKind.Equity)]
+    [InlineData(false, 5000, TitleKind.Equity)]
+    [InlineData(false, 5800, TitleKind.Revenue)]
+    [InlineData(true, 6000, TitleKind.Revenue)]
+    [InlineData(false, 6400, TitleKind.Revenue)]
+    [InlineData(false, 6300, TitleKind.Expense)]
+    [InlineData(true, 6500, TitleKind.Expense)]
+    [InlineData(false, 7000, TitleKind.Expense)]
+    public void DetailMatchTestKind(bool expected, int? value, TitleKind? kind)
+        => Assert.Equal(expected,
+            MatchHelper.IsMatch(new() { Title = value }, new VoucherDetail(), kind: kind));
+
+    [Theory]
+    [InlineData(true, null, 0)]
+    [InlineData(true, 123.45, 0)]
+    [InlineData(false, null, +1)]
+    [InlineData(false, -2 * VoucherDetail.Tolerance, +1)]
+    [InlineData(true, -0.5 * VoucherDetail.Tolerance, +1)]
+    [InlineData(false, null, -1)]
+    [InlineData(false, +2 * VoucherDetail.Tolerance, -1)]
+    [InlineData(true, +0.5 * VoucherDetail.Tolerance, -1)]
+    public void DetailMatchTestDir(bool expected, double? value, int dir)
+        => Assert.Equal(expected,
+            MatchHelper.IsMatch(new() { Fund = value }, new VoucherDetail(), dir: dir));
+
+    [Fact]
+    public void DetailMatchTestContent()
+        => StringMatchTest(
+            (v, f) => MatchHelper.IsMatch(new() { Content = v }, new VoucherDetail { Content = f }));
+
+    [Fact]
+    public void DetailMatchTestContentPrefix()
+        => StringPrefixMatchTest(
+            (v, f) => MatchHelper.IsMatch(new() { Content = v }, new VoucherDetail(), contentPrefix: f));
+
+    [Fact]
+    public void DetailMatchTestNull()
+        => Assert.True(
+            MatchHelper.IsMatch(
+                new() { Content = "cnt", Fund = 10, Remark = "rmk" },
+                (VoucherDetail)null));
+
+    [Fact]
+    public void DetailMatchTestRemark()
+        => StringMatchTest(
+            (v, f) => MatchHelper.IsMatch(new() { Remark = v }, new VoucherDetail { Remark = f }));
+
+    [Fact]
+    public void VoucherMatchTest()
+    {
+        var filter = new Voucher
+            {
+                ID = "abc",
+                Date = new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                Type = VoucherType.Ordinary,
+                Remark = "abc",
+            };
+
+        Assert.False(
+            MatchHelper.IsMatch(
+                new()
+                    {
+                        ID = "abc0",
+                        Date = new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                        Type = VoucherType.Ordinary,
+                        Remark = "abc",
+                    },
+                filter));
+        Assert.False(
+            MatchHelper.IsMatch(
+                new()
+                    {
+                        ID = "abc",
+                        Date = new(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                        Type = VoucherType.Ordinary,
+                        Remark = "abc",
+                    },
+                filter));
+        Assert.False(
+            MatchHelper.IsMatch(
+                new()
+                    {
+                        ID = "abc",
+                        Date = new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                        Type = VoucherType.Carry,
+                        Remark = "abc",
+                    },
+                filter));
+        Assert.False(
+            MatchHelper.IsMatch(
+                new()
+                    {
+                        ID = "abc",
+                        Date = new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                        Type = VoucherType.Ordinary,
+                        Remark = "abc0",
+                    },
+                filter));
+        Assert.True(
+            MatchHelper.IsMatch(
+                new()
+                    {
+                        ID = "abc",
+                        Date = new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                        Type = VoucherType.Ordinary,
+                        Remark = "abc",
+                    },
+                filter));
+    }
+
+    [Fact]
+    public void VoucherMatchTestNull()
+        => Assert.True(MatchHelper.IsMatch(new() { ID = "id", Remark = "rmk" }, (Voucher)null));
+
+    [Fact]
+    public void VoucherMatchTestRemark()
+        => StringMatchTest((v, f) => MatchHelper.IsMatch(new() { Remark = v }, new Voucher { Remark = f }));
+
+    [Fact]
+    public void DetailMatchTestRemarkPrefix()
+        => StringPrefixMatchTest(
+            (v, f) => MatchHelper.IsMatch(new() { Remark = v }, new VoucherDetail(), remarkPrefix: f));
 }

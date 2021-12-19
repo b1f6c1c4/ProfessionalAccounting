@@ -18,11 +18,10 @@
 
 using System;
 
-namespace AccountingServer.Http
+namespace AccountingServer.Http;
+
+public class HttpException : Exception
 {
-    public class HttpException : Exception
-    {
-        public HttpException(int code) => ResponseCode = code;
-        public int ResponseCode { get; }
-    }
+    public HttpException(int code) => ResponseCode = code;
+    public int ResponseCode { get; }
 }

@@ -19,22 +19,21 @@
 using System;
 using System.IO;
 
-namespace AccountingServer.DAL
+namespace AccountingServer.DAL;
+
+public static class Facade
 {
-    public static class Facade
+    public static IDbAdapter Create(string uri = null, string db = null, string x509 = null)
     {
-        public static IDbAdapter Create(string uri = null, string db = null, string x509 = null)
-        {
-            uri ??= Environment.GetEnvironmentVariable("MONGO_URI") ?? "mongodb://localhost";
-            x509 ??= Environment.GetEnvironmentVariable("MONGO_CERT");
+        uri ??= Environment.GetEnvironmentVariable("MONGO_URI") ?? "mongodb://localhost";
+        x509 ??= Environment.GetEnvironmentVariable("MONGO_CERT");
 
-            if (uri.StartsWith("/", StringComparison.Ordinal))
-                uri = File.ReadAllText(uri).Trim();
-            if (uri.StartsWith("mongodb://", StringComparison.Ordinal) ||
-                uri.StartsWith("mongodb+srv://", StringComparison.Ordinal))
-                return new MongoDbAdapter(uri, db, x509);
+        if (uri.StartsWith("/", StringComparison.Ordinal))
+            uri = File.ReadAllText(uri).Trim();
+        if (uri.StartsWith("mongodb://", StringComparison.Ordinal) ||
+            uri.StartsWith("mongodb+srv://", StringComparison.Ordinal))
+            return new MongoDbAdapter(uri, db, x509);
 
-            throw new NotSupportedException("Uri无效");
-        }
+        throw new NotSupportedException("Uri无效");
     }
 }
