@@ -234,6 +234,32 @@ namespace AccountingServer.Shell
                     voucher.Details.Add(
                         new() { User = grpUs.First().Key, Currency = grpC.Key, Title = 3999, Fund = -sum });
                 }
+            else if (voucher.Details.GroupBy(d => (d.User ?? ClientUser.Name, d.Currency ?? BaseCurrency.Now))
+                .Where(grp => !grp.Sum(d => d.Fund!.Value).IsZero()).ToList() is var grpUCs && grpUCs.Count == 2)
+            {
+                var p = grpUCs[0];
+                var ps = p.Sum(d => d.Fund!.Value);
+                var q = grpUCs[1];
+                var qs = q.Sum(d => d.Fund!.Value);
+                // UpCp -> UqCp -> UqCq
+                voucher.Details.Add(
+                    new() { User = p.Key.Item1, Currency = p.Key.Item2, Title = 3998, Fund = -ps / 2 });
+                voucher.Details.Add(
+                    new() { User = q.Key.Item1, Currency = p.Key.Item2, Title = 3998, Fund = +ps / 2 });
+                voucher.Details.Add(
+                    new() { User = q.Key.Item1, Currency = p.Key.Item2, Title = 3999, Fund = -ps / 2 });
+                voucher.Details.Add(
+                    new() { User = q.Key.Item1, Currency = q.Key.Item2, Title = 3999, Fund = -qs / 2 });
+                // UpCp -> UpCq -> UqCq
+                voucher.Details.Add(
+                    new() { User = p.Key.Item1, Currency = p.Key.Item2, Title = 3999, Fund = -ps / 2 });
+                voucher.Details.Add(
+                    new() { User = p.Key.Item1, Currency = q.Key.Item2, Title = 3999, Fund = -qs / 2 });
+                voucher.Details.Add(
+                    new() { User = p.Key.Item1, Currency = q.Key.Item2, Title = 3998, Fund = +qs / 2 });
+                voucher.Details.Add(
+                    new() { User = q.Key.Item1, Currency = q.Key.Item2, Title = 3998, Fund = -qs / 2 });
+            }
 
             if (!m_Accountant.Upsert(voucher))
                 throw new ApplicationException("更新或添加失败");
