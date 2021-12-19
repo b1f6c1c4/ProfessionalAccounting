@@ -12,6 +12,6 @@ docker run --rm --name mongo_dumper -v /data/accounting:/opt/accounting mongo \
     --ssl --sslPEMKeyFile /opt/accounting/atlas/cert.pem -o /opt/accounting/backup/
 
 F="$(date -I)"
-tar cJvf "/data/accounting/backup/$F.tar" -C /data/accounting/backup --owner=0 --group=0 accounting config.d
-chmod -w "/data/accounting/backup/$F.tar"
+tar cJvf "/data/accounting/backup/$F.tar.xz" -C /data/accounting/backup --owner=0 --group=0 accounting config.d
+chmod -w "/data/accounting/backup/$F.tar.xz"
 rm -rf /data/accounting/backup/{accounting,config.d}

@@ -8,6 +8,8 @@ services:
       - "18080:443/udp"
     volumes:
       - /data/accounting/certs:/opt/accounting/certs
+      - /data/accounting/nginx-cache:/var/cache/nginx
+      - /data/accounting/nginx-pid:/var/run
     networks:
       - prod
 
@@ -20,8 +22,6 @@ services:
     volumes:
       - /data/accounting/atlas:/opt/accounting/atlas
       - /data/accounting/config.d:/opt/accounting/config.d
-      - /data/accounting/nginx-cache:/var/cache/nginx
-      - /data/accounting/nginx-pid:/var/run
     networks:
       - prod
 
