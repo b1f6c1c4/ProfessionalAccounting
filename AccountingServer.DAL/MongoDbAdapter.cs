@@ -423,12 +423,14 @@ namespace AccountingServer.DAL
                         bsonReader.ReadStartDocument();
                         var (user, curr) = bsonReader.ReadDocument("_id", ref read, bR =>
                             {
+                                // ReSharper disable AccessToModifiedClosure
                                 bR.ReadStartDocument();
                                 bR.ReadObjectId("id", ref read);
                                 var u = bR.ReadString("user", ref read);
                                 var c = bR.ReadString("currency", ref read);
                                 bR.ReadEndDocument();
                                 return (u, c);
+                                // ReSharper restore AccessToModifiedClosure
                             });
                         var v = bsonReader.ReadDouble("value", ref read)!.Value;
                         var voucher = bsonReader.ReadArray("voucher", ref read, new VoucherSerializer().Deserialize)
