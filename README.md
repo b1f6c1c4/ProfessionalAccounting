@@ -11,13 +11,15 @@
 - C/S架构
 - 使用DSL（Domain Specfic Langauge）来增删改查
 - 后端
-    - 单体架构，业务逻辑使用`C# 9.0`编写
+    - 单体架构，业务逻辑使用`C# 10.0`编写
     - 数据库采用MongoDB
     - 使用`.NET 6.0`平台编译
+    - 使用nginx反向代理，支持TLSv1.3、HTTP/3
     - 使用docker部署
 - 前端
-    - 由于逻辑非常简单，前端部分没有采用任何框架
-    - （其实只有一个编辑器和一个命令框）
+    - 使用Redux状态管理
+    - 使用p5.js绘制UI
+    - 使用webpack打包
 
 ## 安装与配置
 
@@ -47,7 +49,7 @@
     - `Symbol.xml` - 货币符号表
     - `Titles.xml` - 记账科目列表
     - `Carry.xml` - 期末结转规则
-    - `Exchange.xml` - 汇率查询API（[fixer.io](https://fixer.io)）的配置
+    - `Exchange.xml` - 汇率查询API（[fixer.io](https://fixer.io)、[CoinMarketCap](https://coinmartketcap.com)）的配置
 1. 修改可选的配置文件：
     - `Abbr.xml` - 登记新记账凭证时使用的缩写列表
     - `Cash.xml` - 现金流插件相关配置
@@ -80,6 +82,14 @@
     ```
 1. 在客户端上安装证书：
     1. 恕不赘述，请自行Google `install p12 certificate on XXX`（`XXX`=Linux/FreeBSD/Windows/MacOS/iOS/iPadOS/...）
+
+### 启动
+
+直接使用docker-compose启动，将在18080端口侦听请求：
+
+```bash
+docker-compose up -d
+```
 
 ## 基本使用方法
 
@@ -176,7 +186,7 @@
 - `AccountingServer.QueryGeneration` - 基于Antlr4的DSL Parser
 - `AccountingServer.Test` - 单元测试和集成测试
 
-### 本地开发环境
+### 本地后端开发环境
 
 #### 在Linux上构建开发环境
 
@@ -191,12 +201,6 @@
     ```
 
 1. 启动Rider即可。
-1. 若在执行单元测试时，所有需要数据库的测试均卡死不动，
-    请在`Settings`/`Appearance & Behavior`中添加变量：
-    - Name: `MONGO_URI`
-    - Value: `mongodb://192.168.1.xx:27017`
-        - 其中`192.168.1.xx`为物理IP
-        - 此处填写`127.0.0.1`或者`localhost`不一定有效
 
 #### 在Windows上构建开发环境
 
@@ -206,6 +210,22 @@
     - [Mongo DB](https://www.mongodb.com/)
 1. 启动测试数据库：在`services.msc`中启动`MongoDB`服务。
 1. 启动Visual Studio即可。
+
+### 本地前端开发环境
+
+1. 请先安装以下工具：
+    - [nodejs](https://nodejs.org/)
+1. 下载所需npm包：
+
+    ```bash
+    cd nginx && npm install
+    ```
+
+1. 启动webpack开发环境：
+
+    ```bash
+    npm run serve
+    ```
 
 ## 许可
 
