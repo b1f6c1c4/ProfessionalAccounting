@@ -261,127 +261,97 @@ internal class AssetAccountant : DistributedAccountant
     /// <returns>是否成功</returns>
     private bool UpdateItem(Asset asset, AssetItem item, double bookValue, bool isCollapsed = false,
         bool editOnly = false)
-    {
-        if (item is AcquisitionItem acq)
-            return UpdateVoucher(
-                item,
-                isCollapsed,
-                editOnly,
-                VoucherType.Ordinary,
-                new VoucherDetail
-                    {
-                        User = asset.User,
-                        Currency = asset.Currency,
-                        Title = asset.Title,
-                        Content = asset.StringID,
-                        Fund = acq.OrigValue,
-                    });
-
-        if (item is DepreciateItem dep)
-            return UpdateVoucher(
-                item,
-                isCollapsed,
-                editOnly,
-                VoucherType.Depreciation,
-                new()
-                    {
-                        User = asset.User,
-                        Currency = asset.Currency,
-                        Title = asset.DepreciationExpenseTitle,
-                        SubTitle = asset.DepreciationExpenseSubTitle,
-                        Content = asset.StringID,
-                        Fund = dep.Amount,
-                    },
-                new()
-                    {
-                        User = asset.User,
-                        Currency = asset.Currency,
-                        Title = asset.DepreciationTitle,
-                        Content = asset.StringID,
-                        Fund = -dep.Amount,
-                    });
-
-        if (item is DevalueItem dev)
-            return UpdateVoucher(
-                item,
-                isCollapsed,
-                editOnly,
-                VoucherType.Devalue,
-                new()
-                    {
-                        User = asset.User,
-                        Currency = asset.Currency,
-                        Title = asset.DevaluationExpenseTitle,
-                        SubTitle = asset.DevaluationExpenseSubTitle,
-                        Content = asset.StringID,
-                        Fund = dev.Amount,
-                    },
-                new()
-                    {
-                        User = asset.User,
-                        Currency = asset.Currency,
-                        Title = asset.DevaluationTitle,
-                        Content = asset.StringID,
-                        Fund = -dev.Amount,
-                    });
-
-        if (item is DispositionItem)
-        {
-            var totalDep = asset.Schedule.Where(
-                    it =>
-                        DateHelper.CompareDate(it.Date, item.Date) < 0 &&
-                        it is DepreciateItem)
-                .Cast<DepreciateItem>()
-                .Aggregate(0D, (td, it) => td + it.Amount);
-            var totalDev = asset.Schedule.Where(
-                    it =>
-                        DateHelper.CompareDate(it.Date, item.Date) < 0 &&
-                        it is DevalueItem)
-                .Cast<DevalueItem>()
-                .Aggregate(0D, (td, it) => td + it.Amount);
-            return UpdateVoucher(
-                item,
-                isCollapsed,
-                editOnly,
-                VoucherType.Ordinary,
-                new()
-                    {
-                        User = asset.User,
-                        Currency = asset.Currency,
-                        Title = asset.Title,
-                        Content = asset.StringID,
-                        Fund = -asset.Value,
-                    },
-                new()
-                    {
-                        User = asset.User,
-                        Currency = asset.Currency,
-                        Title = asset.DepreciationTitle,
-                        Content = asset.StringID,
-                        Fund = totalDep,
-                    },
-                new()
-                    {
-                        User = asset.User,
-                        Currency = asset.Currency,
-                        Title = asset.DevaluationTitle,
-                        Content = asset.StringID,
-                        Fund = totalDev,
-                    },
-                new()
-                    {
-                        User = asset.User,
-                        Currency = asset.Currency,
-                        Title = DefaultDispositionTitle,
-                        Content = asset.StringID,
-                        Fund = bookValue,
-                        Remark = Asset.IgnoranceMark, // 不用于检索，只用于添加
-                    }
-            );
-        }
-
-        return false;
-    }
+        => item switch
+            {
+                AcquisitionItem acq =>
+                    UpdateVoucher(item, isCollapsed, editOnly, VoucherType.Ordinary,
+                        new VoucherDetail
+                            {
+                                User = asset.User,
+                                Currency = asset.Currency,
+                                Title = asset.Title,
+                                Content = asset.StringID,
+                                Fund = acq.OrigValue,
+                            }),
+                DepreciateItem dep =>
+                    UpdateVoucher(item, isCollapsed, editOnly, VoucherType.Depreciation,
+                        new()
+                            {
+                                User = asset.User,
+                                Currency = asset.Currency,
+                                Title = asset.DepreciationExpenseTitle,
+                                SubTitle = asset.DepreciationExpenseSubTitle,
+                                Content = asset.StringID,
+                                Fund = dep.Amount,
+                            },
+                        new()
+                            {
+                                User = asset.User,
+                                Currency = asset.Currency,
+                                Title = asset.DepreciationTitle,
+                                Content = asset.StringID,
+                                Fund = -dep.Amount,
+                            }),
+                DevalueItem dev =>
+                    UpdateVoucher(item, isCollapsed, editOnly, VoucherType.Devalue,
+                        new()
+                            {
+                                User = asset.User,
+                                Currency = asset.Currency,
+                                Title = asset.DevaluationExpenseTitle,
+                                SubTitle = asset.DevaluationExpenseSubTitle,
+                                Content = asset.StringID,
+                                Fund = dev.Amount,
+                            },
+                        new()
+                            {
+                                User = asset.User,
+                                Currency = asset.Currency,
+                                Title = asset.DevaluationTitle,
+                                Content = asset.StringID,
+                                Fund = -dev.Amount,
+                            }),
+                DispositionItem => UpdateVoucher(item, isCollapsed, editOnly, VoucherType.Ordinary,
+                    new()
+                        {
+                            User = asset.User,
+                            Currency = asset.Currency,
+                            Title = asset.Title,
+                            Content = asset.StringID,
+                            Fund = -asset.Value,
+                        },
+                    new()
+                        {
+                            User = asset.User,
+                            Currency = asset.Currency,
+                            Title = asset.DepreciationTitle,
+                            Content = asset.StringID,
+                            Fund = asset.Schedule.Where(it
+                                    => DateHelper.CompareDate(it.Date, item.Date) < 0 && it is DepreciateItem)
+                                .Cast<DepreciateItem>()
+                                .Aggregate(0D, (td, it) => td + it.Amount),
+                        },
+                    new()
+                        {
+                            User = asset.User,
+                            Currency = asset.Currency,
+                            Title = asset.DevaluationTitle,
+                            Content = asset.StringID,
+                            Fund = asset.Schedule.Where(it
+                                    => DateHelper.CompareDate(it.Date, item.Date) < 0 && it is DevalueItem)
+                                .Cast<DevalueItem>()
+                                .Aggregate(0D, (td, it) => td + it.Amount),
+                        }, new()
+                        {
+                            User = asset.User,
+                            Currency = asset.Currency,
+                            Title = DefaultDispositionTitle,
+                            Content = asset.StringID,
+                            Fund = bookValue,
+                            Remark = Asset.IgnoranceMark, // 不用于检索，只用于添加
+                        }),
+                _ => false,
+            };
 
     /// <summary>
     ///     生成记账凭证、插入数据库并注册

@@ -71,11 +71,14 @@ internal abstract class DistributedAccountant
         modified = false;
 
         var fund = expected.Fund ?? throw new ArgumentException("应填细目的金额为null", nameof(expected));
+        var user = expected.User;
+        expected.User = null;
         expected.Fund = null;
         var isEliminated = fund.IsZero();
 
         var ds = voucher.Details.Where(d => d.IsMatch(expected)).ToList();
 
+        expected.User = user;
         expected.Fund = fund;
 
         switch (ds.Count)
