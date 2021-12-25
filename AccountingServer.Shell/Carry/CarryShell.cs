@@ -30,7 +30,7 @@ using static AccountingServer.BLL.Parsing.Facade;
 namespace AccountingServer.Shell.Carry;
 
 /// <summary>
-///     结转表达式解释器
+///     结转/所有者权益币种转换表达式解释器
 /// </summary>
 internal partial class CarryShell : IShellComponent
 {
@@ -45,36 +45,60 @@ internal partial class CarryShell : IShellComponent
     public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
     {
         expr = expr.Rest();
-        var isRst = expr.Initial() == "rst";
-        if (isRst)
-            expr = expr.Rest();
-        var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-        Parsing.Eof(expr);
-
-        var sb = new StringBuilder();
-        if (!rng.NullOnly && !isRst)
+        DateFilter rng;
+        switch (expr.Initial())
         {
-            rng.EndDate = rng.EndDate.HasValue
-                ? new DateTime(rng.EndDate!.Value.Year, rng.EndDate!.Value.Month, 1, 0, 0, 0, DateTimeKind.Utc)
-                : new DateTime(ClientDateTime.Today.Year, ClientDateTime.Today.Month, 1, 0, 0, 0, DateTimeKind.Utc)
-                    .AddMonths(-1);
-            rng.EndDate = rng.EndDate!.Value.AddMonths(1).AddDays(-1);
-            if (!rng.StartDate.HasValue)
-            {
-                var st = m_Accountant.RunVoucherGroupedQuery("[~null] !!y").Items.Cast<ISubtotalDate>()
-                    .OrderBy(grpd => grpd.Date).FirstOrDefault()?.Date;
-                if (st.HasValue)
-                    rng.StartDate = st;
-                else
-                    rng = DateFilter.TheNullOnly;
-            }
-            else
-                rng.StartDate
-                    = new DateTime(rng.StartDate!.Value.Year, rng.StartDate!.Value.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+            case "lst":
+                expr = expr.Rest();
+                rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+                Parsing.Eof(expr);
+                return ListHistory(rng);
+            case "rst":
+                expr = expr.Rest();
+                rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+                Parsing.Eof(expr);
+                return PerformAction(rng, true);
+            default:
+                rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+                Parsing.Eof(expr);
+                return PerformAction(AutomaticRange(rng), false);
         }
+    }
+
+    private DateFilter AutomaticRange(DateFilter rng)
+    {
+        rng ??= DateFilter.Unconstrained;
+        if (rng.NullOnly)
+            return rng;
+
+        rng.EndDate = rng.EndDate.HasValue
+            ? new DateTime(rng.EndDate!.Value.Year, rng.EndDate!.Value.Month, 1, 0, 0, 0, DateTimeKind.Utc)
+            : new DateTime(ClientDateTime.Today.Year, ClientDateTime.Today.Month, 1, 0, 0, 0, DateTimeKind.Utc)
+                .AddMonths(-1);
+        rng.EndDate = rng.EndDate!.Value.AddMonths(1).AddDays(-1);
+        if (!rng.StartDate.HasValue)
+        {
+            var st = m_Accountant.RunVoucherGroupedQuery("[~null] !!y").Items.Cast<ISubtotalDate>()
+                .OrderBy(grpd => grpd.Date).FirstOrDefault()?.Date;
+            if (st.HasValue)
+                rng.StartDate = st;
+            else
+                rng = DateFilter.TheNullOnly;
+        }
+        else
+            rng.StartDate
+                = new DateTime(rng.StartDate!.Value.Year, rng.StartDate!.Value.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        return rng;
+    }
+
+    private IQueryResult PerformAction(DateFilter rng, bool isRst)
+    {
+        var sb = new StringBuilder();
 
         sb.AppendLine($"=== rm -rf Carry [null] ===> {ResetCarry(rng)} removed");
-        sb.AppendLine($"=== rm -rf AnnualCarry [null] ===> {ResetCarryYear(rng)} removed");
+        sb.AppendLine($"=== rm -rf CarryYear [null] ===> {ResetCarryYear(rng)} removed");
+        sb.AppendLine($"=== rm -rf Conversion [null] ===> {ResetConversion(rng)} removed");
         if (isRst)
             return new DirtyText(sb.ToString());
 
@@ -84,9 +108,13 @@ internal partial class CarryShell : IShellComponent
             lst.AddRange(Carry(sb, null));
             lst.AddRange(CarryYear(sb, null));
         }
+
         if (!rng.NullOnly)
             for (var dt = rng.StartDate!.Value; dt <= rng.EndDate!.Value; dt = dt.AddMonths(1))
             {
+                foreach (var info in BaseCurrency.History)
+                    if (info.Date >= dt && info.Date < dt.AddMonths(1))
+                        lst.AddRange(ConvertEquity(sb, info.Date!.Value, info.Currency));
                 lst.AddRange(Carry(sb, dt));
                 if (dt.Month == 12)
                     lst.AddRange(CarryYear(sb, dt));
