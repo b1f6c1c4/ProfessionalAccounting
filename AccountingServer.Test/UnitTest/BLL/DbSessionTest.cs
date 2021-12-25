@@ -243,6 +243,23 @@ public class DbSessionTest
                 rhs));
     }
 
+    [Theory]
+    [InlineData(null, null)]
+    [InlineData(+0.12345678_9999_5000, +0.12345679)]
+    [InlineData(-0.12345678_0000_4999, -0.12345678)]
+    [InlineData(+0.12345678_9998_9999, +0.12345678_9998_9999)]
+    [InlineData(+0.12345678_0001_0000, +0.12345678_0001_0000)]
+    [InlineData(+123456.12345678_999, +123456.12345679)]
+    [InlineData(-123456.12345678_000, -123456.12345678)]
+    [InlineData(+123456.12345678_998, +123456.12345678_998)]
+    [InlineData(+123456.12345678_001, +123456.12345678_001)]
+    [InlineData(+1234567890.1234999, +1234567890.1234999)]
+    [InlineData(-1234567890.1234000, -1234567890.1234000)]
+    [InlineData(+1234567890.1234997, +1234567890.1234997)]
+    [InlineData(+1234567890.1234001, +1234567890.1234001)]
+    public void FundRegularizeTest(double? from, double? to)
+        => Assert.Equal(to, DbSession.Regularize(from));
+
     [Fact]
     public void VoucherRegularizeTest()
     {
@@ -252,7 +269,7 @@ public class DbSessionTest
                     {
                         new() { User = "b1", Currency = "jPy" },
                         new() { User = "b2", Currency = "cnY" },
-                        new() { User = "b1", Currency = "Cny" },
+                        new() { User = "b1", Currency = "Cny", Fund = 0.30000000000000004 },
                     },
             };
 
@@ -261,6 +278,7 @@ public class DbSessionTest
         Assert.Equal(3, voucher.Details.Count);
         Assert.Equal("b1", voucher.Details[0].User);
         Assert.Equal("CNY", voucher.Details[0].Currency);
+        Assert.Equal(0.3, voucher.Details[0].Fund);
         Assert.Equal("b1", voucher.Details[1].User);
         Assert.Equal("JPY", voucher.Details[1].Currency);
         Assert.Equal("b2", voucher.Details[2].User);

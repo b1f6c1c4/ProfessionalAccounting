@@ -178,6 +178,18 @@ public class DbSession : IHistoricalExchange
         return Db.Upsert(entities);
     }
 
+    public static double? Regularize(double? fund)
+    {
+        const double coercionTolerance = 1e-12;
+
+        if (!fund.HasValue)
+            return null;
+
+        var t = Math.Round(fund.Value, -(int)Math.Log10(VoucherDetail.Tolerance));
+        var c = Math.Round(fund.Value, -(int)Math.Log10(coercionTolerance));
+        return Math.Abs(t - c) < coercionTolerance / 10 ? t : fund;
+    }
+
     public static void Regularize(Voucher entity)
     {
         entity.Details ??= new();
@@ -186,6 +198,7 @@ public class DbSession : IHistoricalExchange
         {
             d.User ??= ClientUser.Name;
             d.Currency = d.Currency.ToUpperInvariant();
+            d.Fund = Regularize(d.Fund);
         }
 
         entity.Details.Sort(TheComparison);
