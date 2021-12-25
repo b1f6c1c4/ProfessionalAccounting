@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AccountingServer.BLL.Util;
@@ -34,8 +35,8 @@ internal partial class CarryShell
     ///     年末结转
     /// </summary>
     /// <param name="dt">年，若为<c>null</c>则表示对无日期进行结转</param>
-    /// <returns>记账凭证数</returns>
-    private void CarryYear(StringBuilder sb, DateTime? dt)
+    /// <returns>记账凭证</returns>
+    private IEnumerable<Voucher> CarryYear(StringBuilder sb, DateTime? dt)
     {
         DateTime? ed;
         DateFilter rng;
@@ -54,32 +55,32 @@ internal partial class CarryShell
         foreach (var grpC in m_Accountant.RunGroupedQuery(
                      $"T410300 + T410301 {rng.AsDateRange()}`Cs").Items.Cast<ISubtotalCurrency>())
         {
-            sb.AppendLine($"{dt.AsDate(SubtotalLevel.Month)} CarryYear => @{grpC.Currency} {grpC.Fund.AsCurrency(grpC.Currency)}");
+            sb.AppendLine(
+                $"{dt.AsDate(SubtotalLevel.Month)} CarryYear => @{grpC.Currency} {grpC.Fund.AsCurrency(grpC.Currency)}");
             foreach (var grps in grpC.Items.Cast<ISubtotalSubTitle>())
-                m_Accountant.Upsert(
-                    new Voucher
-                        {
-                            Date = ed,
-                            Type = VoucherType.AnnualCarry,
-                            Details =
-                                new()
-                                    {
-                                        new()
-                                            {
-                                                Title = 4101,
-                                                SubTitle = grps.SubTitle,
-                                                Currency = grpC.Currency,
-                                                Fund = +grpC.Fund,
-                                            },
-                                        new()
-                                            {
-                                                Title = 4103,
-                                                SubTitle = grps.SubTitle,
-                                                Currency = grpC.Currency,
-                                                Fund = -grpC.Fund,
-                                            },
-                                    },
-                        });
+                yield return new Voucher
+                    {
+                        Date = ed,
+                        Type = VoucherType.AnnualCarry,
+                        Details =
+                            new()
+                                {
+                                    new()
+                                        {
+                                            Title = 4101,
+                                            SubTitle = grps.SubTitle,
+                                            Currency = grpC.Currency,
+                                            Fund = +grpC.Fund,
+                                        },
+                                    new()
+                                        {
+                                            Title = 4103,
+                                            SubTitle = grps.SubTitle,
+                                            Currency = grpC.Currency,
+                                            Fund = -grpC.Fund,
+                                        },
+                                },
+                    };
         }
     }
 }

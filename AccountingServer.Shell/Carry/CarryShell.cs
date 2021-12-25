@@ -23,7 +23,6 @@ using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
-using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
@@ -46,15 +45,20 @@ internal partial class CarryShell : IShellComponent
     public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
     {
         expr = expr.Rest();
+        var isRst = expr.Initial() == "rst";
+        if (isRst)
+            expr = expr.Rest();
         var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
         Parsing.Eof(expr);
 
-        if (!rng.NullOnly)
+        var sb = new StringBuilder();
+        if (!rng.NullOnly && !isRst)
         {
             rng.EndDate = rng.EndDate.HasValue
                 ? new DateTime(rng.EndDate!.Value.Year, rng.EndDate!.Value.Month, 1, 0, 0, 0, DateTimeKind.Utc)
                 : new DateTime(ClientDateTime.Today.Year, ClientDateTime.Today.Month, 1, 0, 0, 0, DateTimeKind.Utc)
                     .AddMonths(-1);
+            rng.EndDate = rng.EndDate!.Value.AddMonths(1).AddDays(-1);
             if (!rng.StartDate.HasValue)
             {
                 var st = m_Accountant.RunVoucherGroupedQuery("[~null] !!y").Items.Cast<ISubtotalDate>()
@@ -69,28 +73,27 @@ internal partial class CarryShell : IShellComponent
                     = new DateTime(rng.StartDate!.Value.Year, rng.StartDate!.Value.Month, 1, 0, 0, 0, DateTimeKind.Utc);
         }
 
-        var sb = new StringBuilder();
+        sb.AppendLine($"=== rm -rf Carry [null] ===> {ResetCarry(rng)} removed");
+        sb.AppendLine($"=== rm -rf AnnualCarry [null] ===> {ResetCarryYear(rng)} removed");
+        if (isRst)
+            return new DirtyText(sb.ToString());
 
+        var lst = new List<Voucher>();
         if (rng.NullOnly || rng.Nullable)
         {
-            sb.AppendLine($"=== rm -rf Carry [null] ===> {ResetCarry(DateFilter.TheNullOnly)} removed");
-            sb.AppendLine($"=== rm -rf AnnualCarry [null] ===> {ResetCarryYear(DateFilter.TheNullOnly)} removed");
-            Carry(sb, null);
-            CarryYear(sb, null);
+            lst.AddRange(Carry(sb, null));
+            lst.AddRange(CarryYear(sb, null));
         }
-
         if (!rng.NullOnly)
             for (var dt = rng.StartDate!.Value; dt <= rng.EndDate!.Value; dt = dt.AddMonths(1))
             {
-                sb.AppendLine(
-                    $"=== rm -rf Carry {dt.AsDate(SubtotalLevel.Month)} ===> {ResetCarry(new(dt, dt.AddMonths(1).AddDays(-1)))} removed");
-                Carry(sb, dt);
-                if (dt.Month != 12)
-                    continue;
-                sb.AppendLine(
-                    $"=== rm -rf AnnualCarry {dt.AsDate(SubtotalLevel.Year)} ===> {ResetCarryYear(new(dt, dt.AddYears(1).AddDays(-1)))} removed");
-                CarryYear(sb, dt);
+                lst.AddRange(Carry(sb, dt));
+                if (dt.Month == 12)
+                    lst.AddRange(CarryYear(sb, dt));
             }
+
+        sb.AppendLine($"=== Total vouchers: {lst.Count}");
+        m_Accountant.Upsert(lst);
 
         return new DirtyText(sb.ToString());
     }

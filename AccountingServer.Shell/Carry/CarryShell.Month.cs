@@ -40,8 +40,8 @@ internal partial class CarryShell
     ///     月末结转
     /// </summary>
     /// <param name="dt">月，若为<c>null</c>则表示对无日期进行结转</param>
-    /// <returns>记账凭证数</returns>
-    private void Carry(StringBuilder sb, DateTime? dt)
+    /// <returns>记账凭证</returns>
+    private IEnumerable<Voucher> Carry(StringBuilder sb, DateTime? dt)
     {
         DateTime? ed;
         DateFilter rng;
@@ -88,33 +88,35 @@ internal partial class CarryShell
                 sb.AppendLine(total < 0
                     ? $"{dt.AsDate(SubtotalLevel.Month)} CurrencyCarry Gain @{baseCur} {(-total).AsCurrency(baseCur)}"
                     : $"{dt.AsDate(SubtotalLevel.Month)} CurrencyCarry Lost @{baseCur} {(+total).AsCurrency(baseCur)}");
-                m_Accountant.Upsert(
-                    new Voucher
-                        {
-                            Date = ed,
-                            Type = VoucherType.Carry,
-                            Remark = "currency carry",
-                            Details = new()
-                                {
-                                    new() { Currency = baseCur, Title = 3999, Fund = -total },
-                                    new()
-                                        {
-                                            Currency = baseCur, Title = 6603, SubTitle = 03, Fund = total,
-                                        },
-                                },
-                        });
+                yield return new Voucher
+                    {
+                        Date = ed,
+                        Type = VoucherType.Carry,
+                        Remark = "currency carry",
+                        Details = new()
+                            {
+                                new() { Currency = baseCur, Title = 3999, Fund = -total },
+                                new()
+                                    {
+                                        Currency = baseCur, Title = 6603, SubTitle = 03, Fund = total,
+                                    },
+                            },
+                    };
             }
         }
 
         foreach (var task in tasks)
             PartialCarry(sb, task, rng, true);
 
-        var flag = false;
+        if (tasks.Any(t => !t.Value.IsZero()))
+        {
+            var grand = tasks.Sum(t => t.Value);
+            sb.AppendLine($"{dt.AsDate(SubtotalLevel.Month)} Carry => @@ {grand.AsCurrency(baseCur)}");
+        }
+
         foreach (var task in tasks)
         {
             if (!task.Value.IsZero())
-            {
-                flag = true;
                 task.Voucher.Details.Add(
                     new()
                         {
@@ -123,16 +125,9 @@ internal partial class CarryShell
                             SubTitle = task.Target.IsSpecial ? 01 : null,
                             Fund = task.Value,
                         });
-            }
 
             if (task.Voucher.Details.Any())
-                m_Accountant.Upsert(task.Voucher);
-        }
-
-        if (flag)
-        {
-            var grand = tasks.Sum(t => t.Value);
-            sb.AppendLine($"{dt.AsDate(SubtotalLevel.Month)} Carry => @@ {grand.AsCurrency(baseCur)}");
+                yield return task.Voucher;
         }
     }
 
