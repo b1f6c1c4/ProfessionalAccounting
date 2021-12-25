@@ -68,7 +68,6 @@ public class Facade
                 {
                     new CheckShell(m_Accountant),
                     new CarryShell(m_Accountant),
-                    new CarryYearShell(m_Accountant),
                     new ExchangeShell(m_Accountant),
                     new BaseCurrencyShell(m_Accountant),
                     new AssetShell(m_Accountant),

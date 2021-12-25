@@ -66,6 +66,13 @@ public static class ParseHelper
         return acc.SelectVoucherDetailsGrouped(res);
     }
 
+    public static ISubtotalResult RunVoucherGroupedQuery(this Accountant acc, string str)
+    {
+        var res = FacadeF.ParsingF.VoucherGroupedQuery(ref str);
+        FacadeF.ParsingF.Eof(str);
+        return acc.SelectVouchersGrouped(res);
+    }
+
     /// <summary>
     ///     忽略空白和注释
     /// </summary>

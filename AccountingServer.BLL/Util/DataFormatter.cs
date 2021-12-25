@@ -168,6 +168,23 @@ public static class DataFormatter
     ///     格式化日期
     /// </summary>
     /// <param name="value">日期</param>
+    /// <param name="level">分类层次</param>
+    /// <returns>格式化后的日期</returns>
+    public static string AsDate(this DateTime value, SubtotalLevel level)
+        => (level & SubtotalLevel.Subtotal) switch
+            {
+                SubtotalLevel.None => value.AsDate(),
+                SubtotalLevel.Day => value.AsDate(),
+                SubtotalLevel.Week => value.AsDate(),
+                SubtotalLevel.Month => $"{value.Year:D4}{value.Month:D2}",
+                SubtotalLevel.Year => $"{value.Year:D4}",
+                _ => throw new ArgumentException("分类层次并非基于日期", nameof(level)),
+            };
+
+    /// <summary>
+    ///     格式化日期
+    /// </summary>
+    /// <param name="value">日期</param>
     /// <returns>格式化后的日期</returns>
     public static string AsDate(this DateTime? value) => value.HasValue ? AsDate(value.Value) : "[null]";
 
@@ -178,17 +195,7 @@ public static class DataFormatter
     /// <param name="level">分类层次</param>
     /// <returns>格式化后的日期</returns>
     public static string AsDate(this DateTime? value, SubtotalLevel level)
-        => !value.HasValue
-            ? "[null]"
-            : (level & SubtotalLevel.Subtotal) switch
-                {
-                    SubtotalLevel.None => value.AsDate(),
-                    SubtotalLevel.Day => value.AsDate(),
-                    SubtotalLevel.Week => value.AsDate(),
-                    SubtotalLevel.Month => $"{value.Value.Year:D4}{value.Value.Month:D2}",
-                    SubtotalLevel.Year => $"{value.Value.Year:D4}",
-                    _ => throw new ArgumentException("分类层次并非基于日期", nameof(level)),
-                };
+        => !value.HasValue ? "[null]" : value.Value.AsDate(level);
 
     /// <summary>
     ///     格式化日期过滤器
