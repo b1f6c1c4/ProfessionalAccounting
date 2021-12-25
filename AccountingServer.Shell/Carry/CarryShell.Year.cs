@@ -34,6 +34,7 @@ internal partial class CarryShell
     /// <summary>
     ///     年末结转
     /// </summary>
+    /// <param name="sb">日志记录</param>
     /// <param name="dt">年，若为<c>null</c>则表示对无日期进行结转</param>
     /// <returns>记账凭证</returns>
     private IEnumerable<Voucher> CarryYear(StringBuilder sb, DateTime? dt)

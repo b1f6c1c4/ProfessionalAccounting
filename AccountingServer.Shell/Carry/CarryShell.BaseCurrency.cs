@@ -20,12 +20,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
-using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
-using static AccountingServer.BLL.Parsing.Facade;
 
 namespace AccountingServer.Shell.Carry;
 
@@ -34,7 +31,7 @@ internal partial class CarryShell
     /// <summary>
     ///     列出记账本位币变更历史
     /// </summary>
-    /// <param name="expr">表达式</param>
+    /// <param name="rng">过滤器</param>
     /// <returns>执行结果</returns>
     private static IQueryResult ListHistory(DateFilter rng)
     {
@@ -50,7 +47,7 @@ internal partial class CarryShell
     /// <summary>
     ///     取消摊销
     /// </summary>
-    /// <param name="expr">表达式</param>
+    /// <param name="rng">过滤器</param>
     /// <returns>执行结果</returns>
     private long ResetConversion(DateFilter rng)
         => m_Accountant.DeleteVouchers($"{rng.AsDateRange()} %equity conversion%");
@@ -58,9 +55,10 @@ internal partial class CarryShell
     /// <summary>
     ///     所有者权益币种转换
     /// </summary>
+    /// <param name="sb">日志记录</param>
     /// <param name="dt">日期</param>
     /// <param name="to">目标币种</param>
-    /// <returns>记账凭证数</returns>
+    /// <returns>记账凭证</returns>
     private IEnumerable<Voucher> ConvertEquity(StringBuilder sb, DateTime dt, string to)
     {
         var rst = m_Accountant.RunGroupedQuery($"T4101+T4103-@{to} [~{dt.AsDate()}]`Cts");

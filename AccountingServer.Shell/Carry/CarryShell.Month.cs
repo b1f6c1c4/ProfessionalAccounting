@@ -39,6 +39,7 @@ internal partial class CarryShell
     /// <summary>
     ///     月末结转
     /// </summary>
+    /// <param name="sb">日志记录</param>
     /// <param name="dt">月，若为<c>null</c>则表示对无日期进行结转</param>
     /// <returns>记账凭证</returns>
     private IEnumerable<Voucher> Carry(StringBuilder sb, DateTime? dt)
@@ -134,6 +135,7 @@ internal partial class CarryShell
     /// <summary>
     ///     按目标月末结转
     /// </summary>
+    /// <param name="sb">日志记录</param>
     /// <param name="task">任务</param>
     /// <param name="rng">范围</param>
     /// <param name="baseCurrency">是否为基准</param>
