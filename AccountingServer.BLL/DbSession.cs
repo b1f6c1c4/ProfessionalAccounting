@@ -66,11 +66,22 @@ public class DbSession : IHistoricalExchange
         var value = ExchangeFactory.Instance.Query(from, to);
         Db.Upsert(new ExchangeRecord
             {
-                Time = now,
-                From = from,
-                To = to,
-                Value = value,
+                Time = now, From = from, To = to, Value = value,
             });
+        return value;
+    }
+
+    public double SaveHistoricalRate(DateTime date, string from, string to)
+    {
+        var res = Db.SelectExchangeRecord(new ExchangeRecord { Time = date, From = from, To = to });
+        if (res != null && res.Time == date)
+            return res.Value;
+        res = Db.SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = from });
+        if (res != null && res.Time == date)
+            return 1D / res.Value;
+
+        var value = ExchangeFactory.HistoricalInstance.Query(date, from, to);
+        Db.Upsert(new ExchangeRecord { Time = date, From = from, To = to, Value = value });
         return value;
     }
 
@@ -151,7 +162,8 @@ public class DbSession : IHistoricalExchange
         return conv.Build(res);
     }
 
-    public IEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+    public IEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
+        IQueryCompounded<IVoucherQueryAtom> query)
         => Db.SelectUnbalancedVouchers(query);
 
     public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)

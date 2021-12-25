@@ -155,5 +155,7 @@ public class Accountant : IHistoricalExchange
 
     public double Query(DateTime? date, string from, string to) => m_Db.Query(date, from, to);
 
+    public double SaveHistoricalRate(DateTime date, string from, string to) => m_Db.SaveHistoricalRate(date, from, to);
+
     #endregion
 }

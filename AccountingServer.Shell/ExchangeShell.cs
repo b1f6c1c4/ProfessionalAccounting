@@ -40,6 +40,7 @@ internal class ExchangeShell : IShellComponent
     public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
     {
         expr = expr.Rest();
+        var isAccurate = Parsing.Token(ref expr, false, t => t == "acc") != null;
         var rev = true;
         var val = Parsing.Double(ref expr);
         var curr = Parsing.Token(ref expr).ToUpperInvariant();
@@ -51,9 +52,15 @@ internal class ExchangeShell : IShellComponent
 
         var date = Parsing.UniqueTime(ref expr) ?? DateTime.UtcNow.Subtract(new TimeSpan(0, 30, 0));
         Parsing.Eof(expr);
-        var res = rev
-            ? m_Accountant.Query(date, BaseCurrency.Now, curr)
-            : m_Accountant.Query(date, curr, BaseCurrency.Now);
+        double res;
+        if (isAccurate)
+            res = rev
+                ? m_Accountant.SaveHistoricalRate(date, BaseCurrency.Now, curr)
+                : m_Accountant.SaveHistoricalRate(date, curr, BaseCurrency.Now);
+        else
+            res = rev
+                ? m_Accountant.Query(date, BaseCurrency.Now, curr)
+                : m_Accountant.Query(date, curr, BaseCurrency.Now);
 
         return new PlainText((res * val.Value).ToString("R"));
     }

@@ -30,6 +30,8 @@ namespace AccountingServer.BLL.Util;
 
 internal static class ExchangeFactory
 {
+    public static IHistoricalExchange HistoricalInstance { get; set; } = new FixerIoExchange();
+
     public static IExchange Instance { get; set; } =
         new CoinMarketCapExchange { Successor = new FixerIoExchange() };
 }
@@ -124,7 +126,7 @@ internal abstract class ExchangeApi : IExchange
         }
         catch (Exception e)
         {
-            var ne = err.Append(e);
+            var ne = err.Prepend(e);
             if (Successor != null)
                 return Successor.Query(from, to, ne);
 
@@ -138,19 +140,19 @@ internal abstract class ExchangeApi : IExchange
 /// <summary>
 ///     利用fixer.io查询汇率
 /// </summary>
-internal class FixerIoExchange : ExchangeApi
+internal class FixerIoExchange : ExchangeApi, IHistoricalExchange
 {
     protected override double Invoke(string from, string to)
     {
         foreach (var key in ExchangeInfo.Config.FixerAccessKey)
-            return PartialInvoke(from, to, key);
-        throw new UnauthorizedAccessException();
+            return PartialInvoke(from, to, key, "latest");
+        throw new UnauthorizedAccessException("No more access keys");
     }
 
-    private static double PartialInvoke(string from, string to, string key)
+    private static double PartialInvoke(string from, string to, string key, string endpoint)
     {
         var url =
-            $"http://data.fixer.io/api/latest?access_key={key}&symbols={from},{to}";
+            $"http://data.fixer.io/api/{endpoint}?access_key={key}&symbols={from},{to}";
         var req = WebRequest.CreateHttp(url);
         req.KeepAlive = true;
         var res = req.GetResponse();
@@ -158,6 +160,16 @@ internal class FixerIoExchange : ExchangeApi
         var reader = new StreamReader(stream ?? throw new NetworkInformationException());
         var json = JObject.Parse(reader.ReadToEnd());
         return json["rates"]![to]!.Value<double>() / json["rates"]![from]!.Value<double>();
+    }
+
+    public double Query(DateTime? date, string from, string to)
+    {
+        if (!date.HasValue)
+            return Invoke(from, to);
+
+        foreach (var key in ExchangeInfo.Config.FixerAccessKey)
+            return PartialInvoke(from, to, key, date!.Value.ToString("yyyy-MM-dd"));
+        throw new UnauthorizedAccessException("No more access keys");
     }
 }
 
@@ -196,10 +208,10 @@ internal class CoinMarketCapExchange : ExchangeApi
             }
 
         if (!fromId.HasValue || !toId.HasValue || !isCrypto)
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Not a cryptocurrency");
         foreach (var key in ExchangeInfo.Config.CoinAccessKey)
             return PartialInvoke(fromId.Value, toId.Value, key);
-        throw new UnauthorizedAccessException();
+        throw new UnauthorizedAccessException("No more access keys");
     }
 
     private static double PartialInvoke(int fromId, int toId, string key)
