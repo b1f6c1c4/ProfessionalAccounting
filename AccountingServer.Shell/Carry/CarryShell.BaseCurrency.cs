@@ -82,16 +82,16 @@ internal partial class CarryShell
                                 {
                                     new()
                                         {
+                                            Currency = grpC.Currency,
                                             Title = grpt.Title,
                                             SubTitle = grps.SubTitle,
-                                            Currency = grpC.Currency,
                                             Fund = -grps.Fund,
                                         },
                                     new()
                                         {
+                                            Currency = to,
                                             Title = grpt.Title,
                                             SubTitle = grps.SubTitle,
-                                            Currency = to,
                                             Fund = grps.Fund * rate,
                                         },
                                     new() { Title = 3999, Currency = grpC.Currency, Fund = grps.Fund },

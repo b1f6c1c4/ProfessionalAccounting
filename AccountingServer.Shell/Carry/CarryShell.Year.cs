@@ -54,7 +54,7 @@ internal partial class CarryShell
         }
 
         foreach (var grpC in m_Accountant.RunGroupedQuery(
-                     $"T410300 + T410301 {rng.AsDateRange()}`Cs").Items.Cast<ISubtotalCurrency>())
+                     $"T4103 {rng.AsDateRange()}`Cs").Items.Cast<ISubtotalCurrency>())
         {
             sb.AppendLine(
                 $"{dt.AsDate(SubtotalLevel.Month)} CarryYear => @{grpC.Currency} {grpC.Fund.AsCurrency(grpC.Currency)}");
@@ -68,17 +68,17 @@ internal partial class CarryShell
                                 {
                                     new()
                                         {
+                                            Currency = grpC.Currency,
                                             Title = 4101,
                                             SubTitle = grps.SubTitle,
-                                            Currency = grpC.Currency,
-                                            Fund = +grpC.Fund,
+                                            Fund = +grps.Fund,
                                         },
                                     new()
                                         {
+                                            Currency = grpC.Currency,
                                             Title = 4103,
                                             SubTitle = grps.SubTitle,
-                                            Currency = grpC.Currency,
-                                            Fund = -grpC.Fund,
+                                            Fund = -grps.Fund,
                                         },
                                 },
                     };

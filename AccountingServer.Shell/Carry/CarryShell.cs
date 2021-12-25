@@ -96,16 +96,26 @@ internal partial class CarryShell : IShellComponent
     {
         var sb = new StringBuilder();
 
-        sb.AppendLine($"=== rm -rf Carry [null] ===> {ResetCarry(rng)} removed");
-        sb.AppendLine($"=== rm -rf CarryYear [null] ===> {ResetCarryYear(rng)} removed");
-        sb.AppendLine($"=== rm -rf Conversion [null] ===> {ResetConversion(rng)} removed");
+        sb.AppendLine($"=== rm -rf Carry {rng.AsDateRange()} ===> {ResetCarry(rng)} removed");
+        sb.AppendLine($"=== rm -rf CarryYear {rng.AsDateRange()} ===> {ResetCarryYear(rng)} removed");
+        sb.AppendLine($"=== rm -rf Conversion {rng.AsDateRange()} ===> {ResetConversion(rng)} removed");
         if (isRst)
             return new DirtyText(sb.ToString());
 
         var lst = new List<Voucher>();
+        var cnt = 0L;
+
+        void Exec()
+        {
+            m_Accountant.Upsert(lst);
+            cnt += lst.Count;
+            lst.Clear();
+        }
+
         if (rng.NullOnly || rng.Nullable)
         {
             lst.AddRange(Carry(sb, null));
+            Exec();
             lst.AddRange(CarryYear(sb, null));
         }
 
@@ -114,14 +124,21 @@ internal partial class CarryShell : IShellComponent
             {
                 foreach (var info in BaseCurrency.History)
                     if (info.Date >= dt && info.Date < dt.AddMonths(1))
+                    {
+                        Exec();
                         lst.AddRange(ConvertEquity(sb, info.Date!.Value, info.Currency));
+                    }
+
                 lst.AddRange(Carry(sb, dt));
                 if (dt.Month == 12)
+                {
+                    Exec();
                     lst.AddRange(CarryYear(sb, dt));
+                }
             }
 
-        sb.AppendLine($"=== Total vouchers: {lst.Count}");
-        m_Accountant.Upsert(lst);
+        Exec();
+        sb.AppendLine($"=== Total vouchers: {cnt}");
 
         return new DirtyText(sb.ToString());
     }
