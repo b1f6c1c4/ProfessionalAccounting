@@ -17,8 +17,10 @@
  */
 
 using System;
+using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
+using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
@@ -40,29 +42,32 @@ internal class ExchangeShell : IShellComponent
     public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
     {
         expr = expr.Rest();
-        var isAccurate = Parsing.Token(ref expr, false, t => t == "acc") != null;
-        var rev = true;
-        var val = Parsing.Double(ref expr);
-        var curr = Parsing.Token(ref expr).ToUpperInvariant();
-        if (!val.HasValue)
-        {
-            rev = false;
-            val = Parsing.DoubleF(ref expr);
-        }
-
-        var date = Parsing.UniqueTime(ref expr) ?? DateTime.UtcNow.Subtract(new TimeSpan(0, 30, 0));
-        Parsing.Eof(expr);
-        double res;
+        var isAccurate = expr.Initial() == "acc";
         if (isAccurate)
-            res = rev
-                ? m_Accountant.SaveHistoricalRate(date, BaseCurrency.Now, curr)
-                : m_Accountant.SaveHistoricalRate(date, curr, BaseCurrency.Now);
-        else
-            res = rev
-                ? m_Accountant.Query(date, BaseCurrency.Now, curr)
-                : m_Accountant.Query(date, curr, BaseCurrency.Now);
+            expr = expr.Rest();
+        var from = Parsing.Token(ref expr).ToUpperInvariant();
+        var val = Parsing.DoubleF(ref expr);
+        var to = Parsing.Token(ref expr)?.ToUpperInvariant() ?? BaseCurrency.Now;
 
-        return new PlainText((res * val.Value).ToString("R"));
+        var sb = new StringBuilder();
+
+        if (Parsing.UniqueTime(ref expr) is var date && date.HasValue)
+            Inquiry(sb, date.Value, from, to, val, isAccurate);
+        else if (Parsing.Range(ref expr) is var rng && rng != null)
+            for (var dt = rng.StartDate!.Value; dt <= rng.EndDate; dt = dt.AddMonths(1))
+                Inquiry(sb, AccountantHelper.LastDayOfMonth(dt.Year, dt.Month), from, to, val, isAccurate);
+        else
+            Inquiry(sb, null, from, to, val, isAccurate);
+        Parsing.Eof(expr);
+
+        return new PlainText(sb.ToString());
+    }
+
+    private void Inquiry(StringBuilder sb, DateTime? dt, string from, string to, double value, bool isAccurate)
+    {
+        var rate = isAccurate ? m_Accountant.SaveHistoricalRate(dt!.Value, from, to) : m_Accountant.Query(dt, from, to);
+        var v = value * rate;
+        sb.AppendLine($"{dt.AsDate()} @{from} {value.AsCurrency(from)} = @{to} {v.AsCurrency(to)} ({v:R})");
     }
 
     public bool IsExecutable(string expr) => expr.Initial() == "?e";
