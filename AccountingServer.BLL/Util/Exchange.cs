@@ -22,6 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Threading;
 using System.Xml.Serialization;
 using AccountingServer.Entities.Util;
 using Newtonsoft.Json.Linq;
@@ -105,6 +106,25 @@ public class CryptoCurrency : Currency
     public string Symbol { get; set; }
 }
 
+internal class RoundRobinApiKeys
+{
+    private long m_CurrentId;
+    private long GetCurrentId() => Interlocked.Increment(ref m_CurrentId);
+
+    public TOut Execute<TOut>(IList<string> keys, Func<string, TOut?> func) where TOut : struct
+    {
+        if (keys.Count == 0)
+            throw new UnauthorizedAccessException("No access key found");
+
+        var count = keys.Count;
+        var st = (int)(GetCurrentId() % count);
+        for (var i = 0; i < count; i++)
+            if (func(keys[(i + st) % count]) is var res && res.HasValue)
+                return res.Value;
+        throw new UnauthorizedAccessException("No more access keys");
+    }
+}
+
 internal abstract class ExchangeApi : IExchange
 {
     /// <summary>
@@ -142,14 +162,13 @@ internal abstract class ExchangeApi : IExchange
 /// </summary>
 internal class FixerIoExchange : ExchangeApi, IHistoricalExchange
 {
-    protected override double Invoke(string from, string to)
-    {
-        foreach (var key in ExchangeInfo.Config.FixerAccessKey)
-            return PartialInvoke(from, to, key, "latest");
-        throw new UnauthorizedAccessException("No more access keys");
-    }
+    private readonly RoundRobinApiKeys m_ApiKeys = new();
 
-    private static double PartialInvoke(string from, string to, string key, string endpoint)
+    protected override double Invoke(string from, string to)
+        => m_ApiKeys.Execute(ExchangeInfo.Config.FixerAccessKey,
+            key => PartialInvoke(from, to, key, "latest"));
+
+    private static double? PartialInvoke(string from, string to, string key, string endpoint)
     {
         var url =
             $"http://data.fixer.io/api/{endpoint}?access_key={key}&symbols={from},{to}";
@@ -159,7 +178,9 @@ internal class FixerIoExchange : ExchangeApi, IHistoricalExchange
         using var stream = res.GetResponseStream();
         var reader = new StreamReader(stream ?? throw new NetworkInformationException());
         var json = JObject.Parse(reader.ReadToEnd());
-        return json["rates"]![to]!.Value<double>() / json["rates"]![from]!.Value<double>();
+        if (json["success"]!.Value<bool>())
+            return json["rates"]![to]!.Value<double>() / json["rates"]![from]!.Value<double>();
+        return null;
     }
 
     public double Query(DateTime? date, string from, string to)
@@ -167,9 +188,8 @@ internal class FixerIoExchange : ExchangeApi, IHistoricalExchange
         if (!date.HasValue)
             return Invoke(from, to);
 
-        foreach (var key in ExchangeInfo.Config.FixerAccessKey)
-            return PartialInvoke(from, to, key, date!.Value.ToString("yyyy-MM-dd"));
-        throw new UnauthorizedAccessException("No more access keys");
+        return m_ApiKeys.Execute(ExchangeInfo.Config.FixerAccessKey,
+            key => PartialInvoke(from, to, key, date!.Value.ToString("yyyy-MM-dd")));
     }
 }
 
@@ -178,6 +198,8 @@ internal class FixerIoExchange : ExchangeApi, IHistoricalExchange
 /// </summary>
 internal class CoinMarketCapExchange : ExchangeApi
 {
+    private readonly RoundRobinApiKeys m_ApiKeys = new();
+
     protected override double Invoke(string from, string to)
     {
         int? fromId = null, toId = null;
@@ -209,12 +231,11 @@ internal class CoinMarketCapExchange : ExchangeApi
 
         if (!fromId.HasValue || !toId.HasValue || !isCrypto)
             throw new InvalidOperationException("Not a cryptocurrency");
-        foreach (var key in ExchangeInfo.Config.CoinAccessKey)
-            return PartialInvoke(fromId.Value, toId.Value, key);
-        throw new UnauthorizedAccessException("No more access keys");
+        return m_ApiKeys.Execute(ExchangeInfo.Config.CoinAccessKey,
+            key => PartialInvoke(fromId.Value, toId.Value, key));
     }
 
-    private static double PartialInvoke(int fromId, int toId, string key)
+    private static double? PartialInvoke(int fromId, int toId, string key)
     {
         var url =
             $"https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id={fromId}&convert_id={toId}";
@@ -226,6 +247,6 @@ internal class CoinMarketCapExchange : ExchangeApi
         using var stream = res.GetResponseStream();
         var reader = new StreamReader(stream ?? throw new NetworkInformationException());
         var json = JObject.Parse(reader.ReadToEnd());
-        return json["data"]![fromId.ToString()]!["quote"]![toId.ToString()]!["price"]!.Value<double>();
+        return json["data"]?[fromId.ToString()]?["quote"]?[toId.ToString()]?["price"]?.Value<double>();
     }
 }
