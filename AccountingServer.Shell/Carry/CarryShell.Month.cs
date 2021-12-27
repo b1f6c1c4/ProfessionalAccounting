@@ -41,8 +41,7 @@ internal partial class CarryShell
     /// </summary>
     /// <param name="sb">日志记录</param>
     /// <param name="dt">月，若为<c>null</c>则表示对无日期进行结转</param>
-    /// <returns>记账凭证</returns>
-    private IEnumerable<Voucher> Carry(StringBuilder sb, DateTime? dt)
+    private void Carry(StringBuilder sb, DateTime? dt)
     {
         DateTime? ed;
         DateFilter rng;
@@ -89,7 +88,7 @@ internal partial class CarryShell
                 sb.AppendLine(total < 0
                     ? $"{dt.AsDate(SubtotalLevel.Month)} CurrencyCarry Gain @{baseCur} {(-total).AsCurrency(baseCur)}"
                     : $"{dt.AsDate(SubtotalLevel.Month)} CurrencyCarry Lost @{baseCur} {(+total).AsCurrency(baseCur)}");
-                yield return new Voucher
+                m_Accountant.Upsert(new Voucher
                     {
                         Date = ed,
                         Type = VoucherType.Carry,
@@ -102,7 +101,7 @@ internal partial class CarryShell
                                         Currency = baseCur, Title = 6603, SubTitle = 03, Fund = total,
                                     },
                             },
-                    };
+                    });
             }
         }
 
@@ -128,7 +127,7 @@ internal partial class CarryShell
                         });
 
             if (task.Voucher.Details.Any())
-                yield return task.Voucher;
+                m_Accountant.Upsert(task.Voucher);
         }
     }
 

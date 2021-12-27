@@ -44,6 +44,9 @@ public class Accountant : IHistoricalExchange
     public void AdjustLimit(int limit)
         => m_Db.Limit = limit;
 
+    public DbSession.VirtualizeLock Virtualize()
+        => m_Db.Virtualize();
+
     #region Voucher
 
     public Voucher SelectVoucher(string id)

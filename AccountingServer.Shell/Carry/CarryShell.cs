@@ -102,21 +102,12 @@ internal partial class CarryShell : IShellComponent
         if (isRst)
             return new DirtyText(sb.ToString());
 
-        var lst = new List<Voucher>();
-        var cnt = 0L;
-
-        void Exec()
-        {
-            m_Accountant.Upsert(lst);
-            cnt += lst.Count;
-            lst.Clear();
-        }
+        using var vir = m_Accountant.Virtualize();
 
         if (rng.NullOnly || rng.Nullable)
         {
-            lst.AddRange(Carry(sb, null));
-            Exec();
-            lst.AddRange(CarryYear(sb, null));
+            Carry(sb, null);
+            CarryYear(sb, null);
         }
 
         if (!rng.NullOnly)
@@ -124,21 +115,14 @@ internal partial class CarryShell : IShellComponent
             {
                 foreach (var info in BaseCurrency.History)
                     if (info.Date >= dt && info.Date < dt.AddMonths(1))
-                    {
-                        Exec();
-                        lst.AddRange(ConvertEquity(sb, info.Date!.Value, info.Currency));
-                    }
+                        ConvertEquity(sb, info.Date!.Value, info.Currency);
 
-                lst.AddRange(Carry(sb, dt));
+                Carry(sb, dt);
                 if (dt.Month == 12)
-                {
-                    Exec();
-                    lst.AddRange(CarryYear(sb, dt));
-                }
+                    CarryYear(sb, dt);
             }
 
-        Exec();
-        sb.AppendLine($"=== Total vouchers: {cnt}");
+        sb.AppendLine($"=== Total vouchers: {vir.CachedVouchers}");
 
         return new DirtyText(sb.ToString());
     }

@@ -36,8 +36,7 @@ internal partial class CarryShell
     /// </summary>
     /// <param name="sb">日志记录</param>
     /// <param name="dt">年，若为<c>null</c>则表示对无日期进行结转</param>
-    /// <returns>记账凭证</returns>
-    private IEnumerable<Voucher> CarryYear(StringBuilder sb, DateTime? dt)
+    private void CarryYear(StringBuilder sb, DateTime? dt)
     {
         DateTime? ed;
         DateFilter rng;
@@ -59,7 +58,7 @@ internal partial class CarryShell
             sb.AppendLine(
                 $"{dt.AsDate(SubtotalLevel.Month)} CarryYear => @{grpC.Currency} {grpC.Fund.AsCurrency(grpC.Currency)}");
             foreach (var grps in grpC.Items.Cast<ISubtotalSubTitle>())
-                yield return new Voucher
+                m_Accountant.Upsert(new Voucher
                     {
                         Date = ed,
                         Type = VoucherType.AnnualCarry,
@@ -81,7 +80,7 @@ internal partial class CarryShell
                                             Fund = -grps.Fund,
                                         },
                                 },
-                    };
+                    });
         }
     }
 }

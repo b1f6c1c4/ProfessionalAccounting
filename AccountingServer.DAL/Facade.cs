@@ -36,4 +36,14 @@ public static class Facade
 
         throw new NotSupportedException("Uri无效");
     }
+
+    public static IDbAdapter Virtualize(IDbAdapter db)
+        => new Virtualizer(db);
+
+    public static IDbAdapter UnVirtualize(IDbAdapter db)
+    {
+        var vir = db as Virtualizer ?? throw new InvalidOperationException("Not virtualized");
+        vir.Dispose();
+        return vir.Db;
+    }
 }

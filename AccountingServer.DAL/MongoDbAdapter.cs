@@ -281,28 +281,7 @@ internal class MongoDbAdapter : IDbAdapter
     /// <inheritdoc />
     public IEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit = 0)
     {
-        if (query.Subtotal.GatherType != GatheringType.VoucherCount)
-            throw new InvalidOperationException("记账凭证分类汇总只能计数");
-        if (query.Subtotal.EquivalentDate.HasValue)
-            throw new InvalidOperationException("记账凭证分类汇总不能等值");
-
-        var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
-        if (query.Subtotal.AggrType != AggregationType.None)
-            level |= query.Subtotal.AggrInterval;
-
-        if (level.HasFlag(SubtotalLevel.User))
-            throw new InvalidOperationException("记账凭证不能按用户分类汇总");
-        if (level.HasFlag(SubtotalLevel.Currency))
-            throw new InvalidOperationException("记账凭证不能按币种分类汇总");
-        if (level.HasFlag(SubtotalLevel.Title))
-            throw new InvalidOperationException("记账凭证不能按一级科目分类汇总");
-        if (level.HasFlag(SubtotalLevel.SubTitle))
-            throw new InvalidOperationException("记账凭证不能按二级科目分类汇总");
-        if (level.HasFlag(SubtotalLevel.Content))
-            throw new InvalidOperationException("记账凭证不能按内容分类汇总");
-        if (level.HasFlag(SubtotalLevel.Remark))
-            throw new InvalidOperationException("记账凭证不能按备注分类汇总");
-
+        var level = query.Preprocess();
         var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher());
 
         BsonDocument pprj;
@@ -332,12 +311,7 @@ internal class MongoDbAdapter : IDbAdapter
     /// <inheritdoc />
     public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit = 0)
     {
-        var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
-        if (query.Subtotal.AggrType != AggregationType.None)
-            level |= query.Subtotal.AggrInterval;
-        if (query.Subtotal.EquivalentDate.HasValue)
-            level |= SubtotalLevel.Currency;
-
+        var level = query.Preprocess();
         var preF = query.VoucherEmitQuery.VoucherQuery.Accept(new MongoDbNativeVoucher());
         var chk = GetChk(query.VoucherEmitQuery);
 
@@ -376,8 +350,7 @@ internal class MongoDbAdapter : IDbAdapter
             grp = new BsonDocument { ["_id"] = prj, ["total"] = new BsonDocument { ["$sum"] = "$detail.fund" } };
 
         var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Unwind("detail").Match(chk).Group(grp);
-        if (query.Subtotal.AggrType != AggregationType.ChangedDay &&
-            query.Subtotal.Levels.LastOrDefault().HasFlag(SubtotalLevel.NonZero))
+        if (query.ShouldAvoidZero())
             fluent = fluent.Match(FilterNonZero);
         if (limit > 0)
             fluent = fluent.Sort(new SortDefinitionBuilder<BsonDocument>().Descending("count")).Limit(limit);

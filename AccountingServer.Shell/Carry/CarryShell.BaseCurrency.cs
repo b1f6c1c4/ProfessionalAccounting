@@ -58,8 +58,7 @@ internal partial class CarryShell
     /// <param name="sb">日志记录</param>
     /// <param name="dt">日期</param>
     /// <param name="to">目标币种</param>
-    /// <returns>记账凭证</returns>
-    private IEnumerable<Voucher> ConvertEquity(StringBuilder sb, DateTime dt, string to)
+    private void ConvertEquity(StringBuilder sb, DateTime dt, string to)
     {
         var rst = m_Accountant.RunGroupedQuery($"T4101+T4103-@{to} [~{dt.AsDate()}]`Cts");
 
@@ -72,7 +71,7 @@ internal partial class CarryShell
 
             foreach (var grpt in grpC.Items.Cast<ISubtotalTitle>())
             foreach (var grps in grpt.Items.Cast<ISubtotalSubTitle>())
-                yield return new Voucher
+                m_Accountant.Upsert(new Voucher
                     {
                         Date = dt,
                         Type = VoucherType.Ordinary,
@@ -97,7 +96,7 @@ internal partial class CarryShell
                                     new() { Title = 3999, Currency = grpC.Currency, Fund = grps.Fund },
                                     new() { Title = 3999, Currency = to, Fund = -grps.Fund * rate },
                                 },
-                    };
+                    });
         }
     }
 }
