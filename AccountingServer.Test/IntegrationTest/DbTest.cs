@@ -48,11 +48,11 @@ public class DbTest : IDisposable
     {
         var voucher1 = VoucherDataProvider.Create(dt, type);
 
-        Assert.True(m_Adapter.Upsert(voucher1));
+        Assert.True(m_Adapter.Upsert(voucher1).Result);
         Assert.NotNull(voucher1.ID);
 
         voucher1.Remark = "whatever";
-        Assert.True(m_Adapter.Upsert(voucher1));
+        Assert.True(m_Adapter.Upsert(voucher1).Result);
 
         var voucher2 = m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).Single();
         Assert.Equal(voucher1, voucher2, new VoucherEqualityComparer());
@@ -60,8 +60,8 @@ public class DbTest : IDisposable
         var voucher3 = m_Adapter.SelectVoucher(voucher1.ID).Result;
         Assert.Equal(voucher1, voucher3, new VoucherEqualityComparer());
 
-        Assert.True(m_Adapter.DeleteVoucher(voucher1.ID));
-        Assert.False(m_Adapter.DeleteVoucher(voucher1.ID));
+        Assert.True(m_Adapter.DeleteVoucher(voucher1.ID).Result);
+        Assert.False(m_Adapter.DeleteVoucher(voucher1.ID).Result);
 
         Assert.False(m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).Any());
     }
@@ -73,19 +73,19 @@ public class DbTest : IDisposable
             => VoucherDataProvider.Create((string)pars[0], (VoucherType)pars[1])).ToList();
         var cnt = vouchers.Count;
 
-        Assert.Equal(cnt, m_Adapter.Upsert(vouchers));
+        Assert.Equal(cnt, m_Adapter.Upsert(vouchers).Result);
         foreach (var voucher in vouchers)
             Assert.NotNull(voucher.ID);
 
         vouchers.AddRange(new VoucherDataProvider().Select(pars
             => VoucherDataProvider.Create((string)pars[0], (VoucherType)pars[1])));
-        Assert.Equal(cnt * 2, m_Adapter.Upsert(vouchers));
+        Assert.Equal(cnt * 2, m_Adapter.Upsert(vouchers).Result);
         foreach (var voucher in vouchers)
             Assert.NotNull(voucher.ID);
 
         Assert.Equal(cnt * 2, m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).Count());
 
-        Assert.Equal(cnt * 2, m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance));
+        Assert.Equal(cnt * 2, m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance).Result);
 
         Assert.False(m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).Any());
     }
@@ -102,22 +102,22 @@ public class DbTest : IDisposable
                 dev.Amount = 0;
         }
 
-        Assert.True(m_Adapter.Upsert(asset1));
+        Assert.True(m_Adapter.Upsert(asset1).Result);
         Assert.NotNull(asset1.ID);
 
         asset1.Remark = "whatever";
-        Assert.True(m_Adapter.Upsert(asset1));
+        Assert.True(m_Adapter.Upsert(asset1).Result);
 
         var asset2 = m_Adapter.SelectAssets(DistributedQueryUnconstrained.Instance).Single();
         Assert.Equal(asset1, asset2, new AssetEqualityComparer());
 
-        var asset3 = m_Adapter.SelectAsset(asset1.ID.Value);
+        var asset3 = m_Adapter.SelectAsset(asset1.ID.Value).Result;
         Assert.Equal(asset1, asset3, new AssetEqualityComparer());
 
-        Assert.True(m_Adapter.DeleteAsset(asset1.ID.Value));
-        Assert.False(m_Adapter.DeleteAsset(asset1.ID.Value));
+        Assert.True(m_Adapter.DeleteAsset(asset1.ID.Value).Result);
+        Assert.False(m_Adapter.DeleteAsset(asset1.ID.Value).Result);
 
-        Assert.Equal(0, m_Adapter.DeleteAssets(DistributedQueryUnconstrained.Instance));
+        Assert.Equal(0, m_Adapter.DeleteAssets(DistributedQueryUnconstrained.Instance).Result);
 
         Assert.False(m_Adapter.SelectAssets(DistributedQueryUnconstrained.Instance).Any());
     }
@@ -130,22 +130,22 @@ public class DbTest : IDisposable
         foreach (var item in amort1.Schedule)
             item.Value = 0;
 
-        Assert.True(m_Adapter.Upsert(amort1));
+        Assert.True(m_Adapter.Upsert(amort1).Result);
         Assert.NotNull(amort1.ID);
 
         amort1.Remark = "whatever";
-        Assert.True(m_Adapter.Upsert(amort1));
+        Assert.True(m_Adapter.Upsert(amort1).Result);
 
         var amort2 = m_Adapter.SelectAmortizations(DistributedQueryUnconstrained.Instance).Single();
         Assert.Equal(amort1, amort2, new AmortEqualityComparer());
 
-        var amort3 = m_Adapter.SelectAmortization(amort1.ID.Value);
+        var amort3 = m_Adapter.SelectAmortization(amort1.ID.Value).Result;
         Assert.Equal(amort1, amort3, new AmortEqualityComparer());
 
-        Assert.True(m_Adapter.DeleteAmortization(amort1.ID.Value));
-        Assert.False(m_Adapter.DeleteAmortization(amort1.ID.Value));
+        Assert.True(m_Adapter.DeleteAmortization(amort1.ID.Value).Result);
+        Assert.False(m_Adapter.DeleteAmortization(amort1.ID.Value).Result);
 
-        Assert.Equal(0, m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance));
+        Assert.Equal(0, m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance).Result);
 
         Assert.False(m_Adapter.SelectAmortizations(DistributedQueryUnconstrained.Instance).Any());
     }

@@ -74,12 +74,12 @@ internal partial class CarryShell
             var totalG =
                 m_Accountant.RunGroupedQuery($"T3999 [~{ed.AsDate()}]`C")
                     .Items.Cast<ISubtotalCurrency>().Sum(
-                        bal => m_Accountant.Query(ed.Value, bal.Currency, baseCur)
+                        bal => m_Accountant.Query(ed.Value, bal.Currency, baseCur).Result // TODO
                             * bal.Fund);
             var totalC =
                 tasks.SelectMany(t => t.Voucher.Details)
                     .Where(d => d.Title == 3999).Sum(
-                        d => m_Accountant.Query(ed.Value, d.Currency, baseCur)
+                        d => m_Accountant.Query(ed.Value, d.Currency, baseCur).Result // TODO
                             * d.Fund!.Value);
 
             var total = totalG + totalC;
@@ -183,7 +183,7 @@ internal partial class CarryShell
             if (!ed.HasValue)
                 throw new InvalidOperationException("无穷长时间以前不存在汇率");
 
-            var cob = m_Accountant.Query(ed.Value, grpC.Currency, baseCur) * b;
+            var cob = m_Accountant.Query(ed.Value, grpC.Currency, baseCur).Result * b; // TODO
 
             voucher.Details.Add(new() { Currency = grpC.Currency, Title = 3999, Fund = b });
             voucher.Details.Add(new() { Currency = baseCur, Title = 3999, Remark = voucher.ID, Fund = -cob });

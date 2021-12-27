@@ -19,6 +19,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities.Util;
 
@@ -38,8 +39,8 @@ public class MockExchange : IHistoricalExchange, IEnumerable
 
     public IEnumerator GetEnumerator() => m_Dic.GetEnumerator();
 
-    public double Query(DateTime? date, string from, string to)
-        => m_Dic[new(date, from)] / m_Dic[new(date, to)];
+    public Task<double> Query(DateTime? date, string from, string to)
+        => Task.FromResult(m_Dic[new(date, from)] / m_Dic[new(date, to)]);
 
     public void Add(DateTime date, string target, double val) => m_Dic.Add(
         new(date, target),

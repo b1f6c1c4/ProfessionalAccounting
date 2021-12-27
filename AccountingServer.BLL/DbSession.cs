@@ -68,7 +68,7 @@ public class DbSession : IHistoricalExchange
     /// <param name="from">购汇币种</param>
     /// <param name="to">结汇币种</param>
     /// <returns>汇率</returns>
-    private double LookupExchange(DateTime date, string from, string to)
+    private async Task<double> LookupExchange(DateTime date, string from, string to)
     {
         if (from == to)
             return 1;
@@ -77,38 +77,38 @@ public class DbSession : IHistoricalExchange
         if (date > now)
             date = now;
 
-        var res = Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = @from, To = to });
+        var res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = from, To = to });
         if (res != null)
             return res.Value;
-        res = Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = @from });
+        res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = from });
         if (res != null)
             return 1D / res.Value;
 
-        Console.WriteLine($"{now:o} Query: {date:o} {@from}/{to}");
-        var value = ExchangeFactory.Instance.Query(@from, to);
-        Db.Get().Upsert(new ExchangeRecord
+        Console.WriteLine($"{now:o} Query: {date:o} {from}/{to}");
+        var value = ExchangeFactory.Instance.Query(from, to).Result;
+        await Db.Get().Upsert(new ExchangeRecord
             {
-                Time = now, From = @from, To = to, Value = value,
+                Time = now, From = from, To = to, Value = value,
             });
         return value;
     }
 
-    public double SaveHistoricalRate(DateTime date, string from, string to)
+    public async Task<double> SaveHistoricalRate(DateTime date, string from, string to)
     {
-        var res = Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = @from, To = to });
+        var res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = from, To = to });
         if (res != null && res.Time == date)
             return res.Value;
-        res = Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = @from });
+        res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = from });
         if (res != null && res.Time == date)
             return 1D / res.Value;
 
-        var value = ExchangeFactory.HistoricalInstance.Query(date, @from, to);
-        Db.Get().Upsert(new ExchangeRecord { Time = date, From = @from, To = to, Value = value });
+        var value = await ExchangeFactory.HistoricalInstance.Query(date, from, to);
+        await Db.Get().Upsert(new ExchangeRecord { Time = date, From = from, To = to, Value = value });
         return value;
     }
 
     /// <inheritdoc />
-    public double Query(DateTime? date, string from, string to)
+    public Task<double> Query(DateTime? date, string from, string to)
         => LookupExchange(date ?? DateTime.UtcNow, from, to);
 
     private static int Compare<T>(T? lhs, T? rhs)
@@ -161,9 +161,7 @@ public class DbSession : IHistoricalExchange
         return res != 0 ? res : 0;
     }
 
-    public Voucher SelectVoucher(string id) => SelectVoucherAsync(id).Result;
-
-    public async Task<Voucher> SelectVoucherAsync(string id)
+    public async Task<Voucher> SelectVoucher(string id)
         => await Db.Get().SelectVoucher(id);
 
     public IEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
@@ -193,20 +191,20 @@ public class DbSession : IHistoricalExchange
     public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => Db.Get().SelectDuplicatedVouchers(query);
 
-    public bool DeleteVoucher(string id)
+    public Task<bool> DeleteVoucher(string id)
         => Db.Get().DeleteVoucher(id);
 
-    public long DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+    public Task<long> DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => Db.Get().DeleteVouchers(query);
 
-    public bool Upsert(Voucher entity)
+    public Task<bool> Upsert(Voucher entity)
     {
         Regularize(entity);
 
         return Db.Get().Upsert(entity);
     }
 
-    public long Upsert(IReadOnlyCollection<Voucher> entities)
+    public Task<long> Upsert(IReadOnlyCollection<Voucher> entities)
     {
         foreach (var entity in entities)
             Regularize(entity);
@@ -240,34 +238,34 @@ public class DbSession : IHistoricalExchange
         entity.Details.Sort(TheComparison);
     }
 
-    public Asset SelectAsset(Guid id)
+    public Task<Asset> SelectAsset(Guid id)
         => Db.Get().SelectAsset(id);
 
     public IEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter)
         => Db.Get().SelectAssets(filter);
 
-    public bool DeleteAsset(Guid id)
+    public Task<bool> DeleteAsset(Guid id)
         => Db.Get().DeleteAsset(id);
 
-    public long DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
+    public Task<long> DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
         => Db.Get().DeleteAssets(filter);
 
-    public bool Upsert(Asset entity)
+    public Task<bool> Upsert(Asset entity)
         => Db.Get().Upsert(entity);
 
-    public Amortization SelectAmortization(Guid id)
+    public Task<Amortization> SelectAmortization(Guid id)
         => Db.Get().SelectAmortization(id);
 
     public IEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
         => Db.Get().SelectAmortizations(filter);
 
-    public bool DeleteAmortization(Guid id)
+    public Task<bool> DeleteAmortization(Guid id)
         => Db.Get().DeleteAmortization(id);
 
-    public long DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
+    public Task<long> DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
         => Db.Get().DeleteAmortizations(filter);
 
-    public bool Upsert(Amortization entity)
+    public Task<bool> Upsert(Amortization entity)
     {
         Regularize(entity.Template);
 

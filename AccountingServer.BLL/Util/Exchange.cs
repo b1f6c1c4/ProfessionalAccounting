@@ -23,6 +23,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 using AccountingServer.Entities.Util;
 using Newtonsoft.Json.Linq;
@@ -52,7 +53,7 @@ internal interface IExchange
     /// <param name="from">购汇币种</param>
     /// <param name="to">结汇币种</param>
     /// <returns>汇率</returns>
-    double Query(string from, string to);
+    Task<double> Query(string from, string to);
 }
 
 /// <summary>
@@ -67,7 +68,7 @@ public interface IHistoricalExchange
     /// <param name="from">购汇币种</param>
     /// <param name="to">结汇币种</param>
     /// <returns>汇率</returns>
-    double Query(DateTime? date, string from, string to);
+    Task<double> Query(DateTime? date, string from, string to);
 }
 
 [Serializable]
@@ -111,7 +112,7 @@ internal class RoundRobinApiKeys
     private long m_CurrentId;
     private long GetCurrentId() => Interlocked.Increment(ref m_CurrentId);
 
-    public TOut Execute<TOut>(IList<string> keys, Func<string, TOut?> func) where TOut : struct
+    public async Task<TOut> Execute<TOut>(IList<string> keys, Func<string, Task<TOut?>> func) where TOut : struct
     {
         if (keys.Count == 0)
             throw new UnauthorizedAccessException("No access key found");
@@ -119,7 +120,7 @@ internal class RoundRobinApiKeys
         var count = keys.Count;
         var st = (int)(GetCurrentId() % count);
         for (var i = 0; i < count; i++)
-            if (func(keys[(i + st) % count]) is var res && res.HasValue)
+            if (await func(keys[(i + st) % count]) is var res && res.HasValue)
                 return res.Value;
         throw new UnauthorizedAccessException("No more access keys");
     }
@@ -135,10 +136,10 @@ internal abstract class ExchangeApi : IExchange
 
     internal ExchangeApi Successor { private get; init; }
 
-    public double Query(string from, string to)
+    public Task<double> Query(string from, string to)
         => Query(from, to, Enumerable.Empty<Exception>());
 
-    private double Query(string from, string to, IEnumerable<Exception> err)
+    private Task<double> Query(string from, string to, IEnumerable<Exception> err)
     {
         try
         {
@@ -154,7 +155,7 @@ internal abstract class ExchangeApi : IExchange
         }
     }
 
-    protected abstract double Invoke(string from, string to);
+    protected abstract Task<double> Invoke(string from, string to);
 }
 
 /// <summary>
@@ -164,26 +165,26 @@ internal class FixerIoExchange : ExchangeApi, IHistoricalExchange
 {
     private readonly RoundRobinApiKeys m_ApiKeys = new();
 
-    protected override double Invoke(string from, string to)
+    protected override Task<double> Invoke(string from, string to)
         => m_ApiKeys.Execute(ExchangeInfo.Config.FixerAccessKey,
             key => PartialInvoke(from, to, key, "latest"));
 
-    private static double? PartialInvoke(string from, string to, string key, string endpoint)
+    private static Task<double?> PartialInvoke(string from, string to, string key, string endpoint)
     {
         var url =
             $"http://data.fixer.io/api/{endpoint}?access_key={key}&symbols={from},{to}";
-        var req = WebRequest.CreateHttp(url);
+        var req = WebRequest.CreateHttp(url); // TODO
         req.KeepAlive = true;
         var res = req.GetResponse();
         using var stream = res.GetResponseStream();
         var reader = new StreamReader(stream ?? throw new NetworkInformationException());
         var json = JObject.Parse(reader.ReadToEnd());
         if (json["success"]!.Value<bool>())
-            return json["rates"]![to]!.Value<double>() / json["rates"]![from]!.Value<double>();
-        return null;
+            return Task.FromResult<double?>(json["rates"]![to]!.Value<double>() / json["rates"]![from]!.Value<double>());
+        return Task.FromResult<double?>(null);
     }
 
-    public double Query(DateTime? date, string from, string to)
+    public Task<double> Query(DateTime? date, string from, string to)
     {
         if (!date.HasValue)
             return Invoke(from, to);
@@ -200,7 +201,7 @@ internal class CoinMarketCapExchange : ExchangeApi
 {
     private readonly RoundRobinApiKeys m_ApiKeys = new();
 
-    protected override double Invoke(string from, string to)
+    protected override Task<double> Invoke(string from, string to)
     {
         int? fromId = null, toId = null;
         var isCrypto = false;
@@ -235,11 +236,11 @@ internal class CoinMarketCapExchange : ExchangeApi
             key => PartialInvoke(fromId.Value, toId.Value, key));
     }
 
-    private static double? PartialInvoke(int fromId, int toId, string key)
+    private static Task<double?> PartialInvoke(int fromId, int toId, string key)
     {
         var url =
             $"https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id={fromId}&convert_id={toId}";
-        var req = WebRequest.CreateHttp(url);
+        var req = WebRequest.CreateHttp(url); // TODO
         req.KeepAlive = true;
         req.Headers.Add("X-CMC_PRO_API_KEY", key);
         req.Accept = "application/json";
@@ -247,6 +248,6 @@ internal class CoinMarketCapExchange : ExchangeApi
         using var stream = res.GetResponseStream();
         var reader = new StreamReader(stream ?? throw new NetworkInformationException());
         var json = JObject.Parse(reader.ReadToEnd());
-        return json["data"]?[fromId.ToString()]?["quote"]?[toId.ToString()]?["price"]?.Value<double>();
+        return Task.FromResult(json["data"]?[fromId.ToString()]?["quote"]?[toId.ToString()]?["price"]?.Value<double>());
     }
 }

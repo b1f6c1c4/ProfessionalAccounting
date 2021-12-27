@@ -191,22 +191,22 @@ internal class MongoDbAdapter : IDbAdapter
         m_Records = m_Db.GetCollection<ExchangeRecord>("exchangeRecord");
     }
 
-    private static bool Upsert<T, TId>(IMongoCollection<T> collection, T entity, BaseSerializer<T, TId> idProvider)
+    private static async Task<bool> Upsert<T, TId>(IMongoCollection<T> collection, T entity, BaseSerializer<T, TId> idProvider)
     {
         if (idProvider.FillId(collection, entity))
         {
-            collection.InsertOne(entity);
+            await collection.InsertOneAsync(entity);
             return true;
         }
 
-        var res = collection.ReplaceOne(
+        var res = await collection.ReplaceOneAsync(
             Builders<T>.Filter.Eq("_id", idProvider.GetId(entity)),
             entity,
             new ReplaceOptions { IsUpsert = true });
         return res.ModifiedCount <= 1;
     }
 
-    private static long Upsert<T, TId>(IMongoCollection<T> collection, IEnumerable<T> entities, BaseSerializer<T, TId> idProvider)
+    private static async Task<long> Upsert<T, TId>(IMongoCollection<T> collection, IEnumerable<T> entities, BaseSerializer<T, TId> idProvider)
     {
         var ops = new List<WriteModel<T>>();
         foreach (var entity in entities)
@@ -217,7 +217,7 @@ internal class MongoDbAdapter : IDbAdapter
                     {
                         IsUpsert = true,
                     });
-        var res = collection.BulkWrite(ops, new() { IsOrdered = false });
+        var res = await collection.BulkWriteAsync(ops, new() { IsOrdered = false });
         return res.ProcessedRequests.Count;
     }
 
@@ -429,31 +429,31 @@ internal class MongoDbAdapter : IDbAdapter
                 });
 
     /// <inheritdoc />
-    public bool DeleteVoucher(string id)
+    public async Task<bool> DeleteVoucher(string id)
     {
-        var res = m_Vouchers.DeleteOne(GetNQuery<Voucher>(id));
+        var res = await m_Vouchers.DeleteOneAsync(GetNQuery<Voucher>(id));
         return res.DeletedCount == 1;
     }
 
     /// <inheritdoc />
-    public long DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+    public async Task<long> DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
     {
-        var res = m_Vouchers.DeleteMany(query.Accept(new MongoDbNativeVoucher()));
+        var res = await m_Vouchers.DeleteManyAsync(query.Accept(new MongoDbNativeVoucher()));
         return res.DeletedCount;
     }
 
     /// <inheritdoc />
-    public bool Upsert(Voucher entity) => Upsert(m_Vouchers, entity, new VoucherSerializer());
+    public Task<bool> Upsert(Voucher entity) => Upsert(m_Vouchers, entity, new VoucherSerializer());
 
     /// <inheritdoc />
-    public long Upsert(IEnumerable<Voucher> entities) => Upsert(m_Vouchers, entities, new VoucherSerializer());
+    public Task<long> Upsert(IEnumerable<Voucher> entities) => Upsert(m_Vouchers, entities, new VoucherSerializer());
 
     #endregion
 
     #region Asset
 
     /// <inheritdoc />
-    public Asset SelectAsset(Guid id) => m_Assets.FindSync(GetNQuery<Asset>(id)).FirstOrDefault();
+    public async Task<Asset> SelectAsset(Guid id) => (await m_Assets.FindAsync(GetNQuery<Asset>(id))).FirstOrDefault();
 
     /// <inheritdoc />
     public IEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter) =>
@@ -461,16 +461,16 @@ internal class MongoDbAdapter : IDbAdapter
             .ToEnumerable();
 
     /// <inheritdoc />
-    public bool DeleteAsset(Guid id)
+    public async Task<bool> DeleteAsset(Guid id)
     {
-        var res = m_Assets.DeleteOne(GetNQuery<Asset>(id));
+        var res = await m_Assets.DeleteOneAsync(GetNQuery<Asset>(id));
         return res.DeletedCount == 1;
     }
 
     /// <inheritdoc />
-    public bool Upsert(Asset entity)
+    public async Task<bool> Upsert(Asset entity)
     {
-        var res = m_Assets.ReplaceOne(
+        var res = await m_Assets.ReplaceOneAsync(
             Builders<Asset>.Filter.Eq("_id", entity.ID),
             entity,
             new ReplaceOptions { IsUpsert = true });
@@ -478,9 +478,9 @@ internal class MongoDbAdapter : IDbAdapter
     }
 
     /// <inheritdoc />
-    public long DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
+    public async Task<long> DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
     {
-        var res = m_Assets.DeleteMany(filter.Accept(new MongoDbNativeDistributed<Asset>()));
+        var res = await m_Assets.DeleteManyAsync(filter.Accept(new MongoDbNativeDistributed<Asset>()));
         return res.DeletedCount;
     }
 
@@ -489,8 +489,8 @@ internal class MongoDbAdapter : IDbAdapter
     #region Amortization
 
     /// <inheritdoc />
-    public Amortization SelectAmortization(Guid id) =>
-        m_Amortizations.FindSync(GetNQuery<Amortization>(id)).FirstOrDefault();
+    public async Task<Amortization> SelectAmortization(Guid id) =>
+        (await m_Amortizations.FindAsync(GetNQuery<Amortization>(id))).FirstOrDefault();
 
     /// <inheritdoc />
     public IEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter) =>
@@ -498,16 +498,16 @@ internal class MongoDbAdapter : IDbAdapter
             .ToEnumerable();
 
     /// <inheritdoc />
-    public bool DeleteAmortization(Guid id)
+    public async Task<bool> DeleteAmortization(Guid id)
     {
-        var res = m_Amortizations.DeleteOne(GetNQuery<Amortization>(id));
+        var res = await m_Amortizations.DeleteOneAsync(GetNQuery<Amortization>(id));
         return res.DeletedCount == 1;
     }
 
     /// <inheritdoc />
-    public bool Upsert(Amortization entity)
+    public async Task<bool> Upsert(Amortization entity)
     {
-        var res = m_Amortizations.ReplaceOne(
+        var res = await m_Amortizations.ReplaceOneAsync(
             Builders<Amortization>.Filter.Eq("_id", entity.ID),
             entity,
             new ReplaceOptions { IsUpsert = true });
@@ -515,9 +515,9 @@ internal class MongoDbAdapter : IDbAdapter
     }
 
     /// <inheritdoc />
-    public long DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
+    public async Task<long> DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
     {
-        var res = m_Amortizations.DeleteMany(filter.Accept(new MongoDbNativeDistributed<Amortization>()));
+        var res = await m_Amortizations.DeleteManyAsync(filter.Accept(new MongoDbNativeDistributed<Amortization>()));
         return res.DeletedCount;
     }
 
@@ -526,21 +526,22 @@ internal class MongoDbAdapter : IDbAdapter
     #region ExchangeRecord
 
     /// <inheritdoc />
-    public ExchangeRecord SelectExchangeRecord(ExchangeRecord record) =>
-        m_Records.Find(
+    public async Task<ExchangeRecord> SelectExchangeRecord(ExchangeRecord record) =>
+        (await m_Records.Find(
                 Builders<ExchangeRecord>.Filter.Gte("_id.date", record.Time) &
                 Builders<ExchangeRecord>.Filter.Eq("_id.from", record.From) &
                 Builders<ExchangeRecord>.Filter.Eq("_id.to", record.To)
             ).Sort(Builders<ExchangeRecord>.Sort.Ascending("_id.date"))
             .Limit(1)
-            .SingleOrDefault();
+            .ToCursorAsync()
+        ).SingleOrDefault();
 
     /// <inheritdoc />
-    public bool Upsert(ExchangeRecord record)
+    public async Task<bool> Upsert(ExchangeRecord record)
     {
         try
         {
-            m_Records.InsertOne(record);
+            await m_Records.InsertOneAsync(record);
             return true;
         }
         catch (Exception)

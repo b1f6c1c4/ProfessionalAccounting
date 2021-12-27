@@ -79,13 +79,13 @@ internal class AmortAccountant : DistributedAccountant
     ///     调整摊销计算表
     /// </summary>
     /// <param name="amort">摊销</param>
-    public static void InternalRegular(Amortization amort)
+    public static Amortization InternalRegular(Amortization amort)
     {
         if (amort.Remark == Amortization.IgnoranceMark)
-            return;
+            return amort;
         if (!amort.Date.HasValue ||
             !amort.Value.HasValue)
-            return;
+            return amort;
 
         var lst = amort.Schedule?.ToList() ?? new();
 
@@ -96,6 +96,8 @@ internal class AmortAccountant : DistributedAccountant
             item.Value = resiValue -= item.Amount;
 
         amort.Schedule = lst;
+
+        return amort;
     }
 
     /// <summary>
@@ -171,7 +173,7 @@ internal class AmortAccountant : DistributedAccountant
         if (item.VoucherID == null)
             return !editOnly && GenerateVoucher(item, isCollapsed, template);
 
-        var voucher = Db.SelectVoucher(item.VoucherID);
+        var voucher = Db.SelectVoucher(item.VoucherID).Result;
         if (voucher == null)
             return !editOnly && GenerateVoucher(item, isCollapsed, template);
 
@@ -239,7 +241,7 @@ internal class AmortAccountant : DistributedAccountant
                 Remark = template.Remark ?? "automatically generated",
                 Details = lst,
             };
-        var res = Db.Upsert(voucher);
+        var res = Db.Upsert(voucher).Result;
         item.VoucherID = voucher.ID;
         return res;
     }

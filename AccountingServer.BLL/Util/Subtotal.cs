@@ -344,6 +344,6 @@ public class SubtotalBuilder
     private double BuildEquiPhase(IEnumerable<Balance> raw) => m_Par.EquivalentDate.HasValue
         ? raw.Sum(
             b => b.Fund
-                * m_Exchange.Query(m_Par.EquivalentDate.Value, b.Currency, m_Par.EquivalentCurrency))
+                * m_Exchange.Query(m_Par.EquivalentDate.Value, b.Currency, m_Par.EquivalentCurrency).Result) // TODO
         : raw.Sum(b => b.Fund);
 }

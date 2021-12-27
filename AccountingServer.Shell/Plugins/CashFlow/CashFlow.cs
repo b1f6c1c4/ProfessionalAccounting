@@ -100,7 +100,7 @@ internal class CashFlow : PluginBase
             var sum = 0D;
             for (var i = 0; i < n; i++)
             {
-                sum += aggs[i] * Accountant.Query(ClientDateTime.Today, accts[i].Currency, BaseCurrency.Now);
+                sum += aggs[i] * Accountant.Query(ClientDateTime.Today, accts[i].Currency, BaseCurrency.Now).Result; // TODO
 
                 sb.Append("".PadLeft(15));
                 sb.Append("".PadLeft(15));
@@ -120,7 +120,7 @@ internal class CashFlow : PluginBase
             {
                 aggs[i] += kvp.Value[i, 0] + kvp.Value[i, 1];
 
-                sum += aggs[i] * Accountant.Query(kvp.Key, accts[i].Currency, BaseCurrency.Now);
+                sum += aggs[i] * Accountant.Query(kvp.Key, accts[i].Currency, BaseCurrency.Now).Result; // TODO
 
                 if (!kvp.Value[i, 0].IsZero())
                     sb.Append(kvp.Value[i, 0].AsCurrency(accts[i].Currency).PadLeft(15));
@@ -217,7 +217,7 @@ internal class CashFlow : PluginBase
                     foreach (var b in grpC.Items.Cast<ISubtotalDate>())
                     {
                         var mo = NextDate(cc.RepaymentDay, NextDate(cc.BillDay, b.Date.Value), true);
-                        var cob = Accountant.Query(mo, grpC.Currency, account.Currency)
+                        var cob = Accountant.Query(mo, grpC.Currency, account.Currency).Result // TODO
                             * b.Fund;
                         if (mos.ContainsKey(mo))
                             mos[mo] += cob;

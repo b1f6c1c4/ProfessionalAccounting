@@ -63,7 +63,7 @@ internal partial class CarryShell
 
         foreach (var grpC in rst.Items.Cast<ISubtotalCurrency>())
         {
-            var rate = m_Accountant.Query(dt, grpC.Currency, to);
+            var rate = m_Accountant.Query(dt, grpC.Currency, to).Result; // TODO
             var dst = rate * grpC.Fund;
             sb.AppendLine(
                 $"=== {dt.AsDate()} @{grpC.Currency} {grpC.Fund.AsCurrency(grpC.Currency)} => @{to} {dst.AsCurrency(to)}");

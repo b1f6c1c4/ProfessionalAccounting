@@ -185,7 +185,7 @@ internal class InquiriesVisitor : IInquiryVisitor<double>
             foreach (var grp in gq.Items.Cast<ISubtotalCurrency>())
             {
                 var curr = grp.Currency;
-                var ratio = m_Accountant.Query(m_Rng.EndDate!.Value, curr, m_BaseCurrency);
+                var ratio = m_Accountant.Query(m_Rng.EndDate!.Value, curr, m_BaseCurrency).Result; // TODO
 
                 var theFmt = new CurrencyDecorator(fmt, curr, ratio);
 

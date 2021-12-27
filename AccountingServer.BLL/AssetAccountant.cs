@@ -371,7 +371,7 @@ internal class AssetAccountant : DistributedAccountant
                 Remark = "automatically generated",
                 Details = details.ToList(),
             };
-        var res = Db.Upsert(voucher);
+        var res = Db.Upsert(voucher).Result;
         item.VoucherID = voucher.ID;
         return res;
     }
@@ -391,7 +391,7 @@ internal class AssetAccountant : DistributedAccountant
         if (item.VoucherID == null)
             return !editOnly && GenerateVoucher(item, isCollapsed, voucherType, expectedDetails);
 
-        var voucher = Db.SelectVoucher(item.VoucherID);
+        var voucher = Db.SelectVoucher(item.VoucherID).Result;
         if (voucher == null)
             return !editOnly && GenerateVoucher(item, isCollapsed, voucherType, expectedDetails);
 

@@ -86,14 +86,14 @@ public interface IDbAdapter
     /// </summary>
     /// <param name="id">编号</param>
     /// <returns>是否成功</returns>
-    bool DeleteVoucher(string id);
+    Task<bool> DeleteVoucher(string id);
 
     /// <summary>
     ///     按检索式删除记账凭证
     /// </summary>
     /// <param name="query">检索式</param>
     /// <returns>已删除的细目总数</returns>
-    long DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query);
+    Task<long> DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query);
 
     /// <summary>
     ///     添加或替换记账凭证
@@ -101,7 +101,7 @@ public interface IDbAdapter
     /// </summary>
     /// <param name="entity">新记账凭证</param>
     /// <returns>是否成功</returns>
-    bool Upsert(Voucher entity);
+    Task<bool> Upsert(Voucher entity);
 
     /// <summary>
     ///     添加或替换多个记账凭证
@@ -109,7 +109,7 @@ public interface IDbAdapter
     /// </summary>
     /// <param name="entities">新记账凭证</param>
     /// <returns>成功个数</returns>
-    long Upsert(IEnumerable<Voucher> entities);
+    Task<long> Upsert(IEnumerable<Voucher> entities);
 
     #endregion
 
@@ -120,7 +120,7 @@ public interface IDbAdapter
     /// </summary>
     /// <param name="id">编号</param>
     /// <returns>资产，如果没有则为<c>null</c></returns>
-    Asset SelectAsset(Guid id);
+    Task<Asset> SelectAsset(Guid id);
 
     /// <summary>
     ///     按记账凭证过滤器查找资产
@@ -134,14 +134,14 @@ public interface IDbAdapter
     /// </summary>
     /// <param name="id">编号</param>
     /// <returns>是否成功</returns>
-    bool DeleteAsset(Guid id);
+    Task<bool> DeleteAsset(Guid id);
 
     /// <summary>
     ///     按记账凭证过滤器删除资产
     /// </summary>
     /// <param name="filter">记账凭证过滤器</param>
     /// <returns>已删除的资产总数</returns>
-    long DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter);
+    Task<long> DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter);
 
     /// <summary>
     ///     添加或替换资产
@@ -149,7 +149,7 @@ public interface IDbAdapter
     /// </summary>
     /// <param name="entity">新资产</param>
     /// <returns>是否成功</returns>
-    bool Upsert(Asset entity);
+    Task<bool> Upsert(Asset entity);
 
     #endregion
 
@@ -160,7 +160,7 @@ public interface IDbAdapter
     /// </summary>
     /// <param name="id">编号</param>
     /// <returns>摊销，如果没有则为<c>null</c></returns>
-    Amortization SelectAmortization(Guid id);
+    Task<Amortization> SelectAmortization(Guid id);
 
     /// <summary>
     ///     按记账凭证过滤器查找摊销
@@ -174,14 +174,14 @@ public interface IDbAdapter
     /// </summary>
     /// <param name="id">编号</param>
     /// <returns>是否成功</returns>
-    bool DeleteAmortization(Guid id);
+    Task<bool> DeleteAmortization(Guid id);
 
     /// <summary>
     ///     按记账凭证过滤器删除摊销
     /// </summary>
     /// <param name="filter">记账凭证过滤器</param>
     /// <returns>已删除的摊销总数</returns>
-    long DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter);
+    Task<long> DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter);
 
     /// <summary>
     ///     添加或替换摊销
@@ -189,7 +189,7 @@ public interface IDbAdapter
     /// </summary>
     /// <param name="entity">新摊销</param>
     /// <returns>是否成功</returns>
-    bool Upsert(Amortization entity);
+    Task<bool> Upsert(Amortization entity);
 
     #endregion
 
@@ -200,14 +200,14 @@ public interface IDbAdapter
     /// </summary>
     /// <param name="record">过滤器</param>
     /// <returns>汇率，如果没有则为<c>null</c></returns>
-    ExchangeRecord SelectExchangeRecord(ExchangeRecord record);
+    Task<ExchangeRecord> SelectExchangeRecord(ExchangeRecord record);
 
     /// <summary>
     ///     添加或替换
     /// </summary>
     /// <param name="record">汇率</param>
     /// <returns>是否成功</returns>
-    bool Upsert(ExchangeRecord record);
+    Task<bool> Upsert(ExchangeRecord record);
 
     #endregion
 }

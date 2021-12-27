@@ -79,7 +79,7 @@ internal class ExchangeShell : IShellComponent
 
     private void Inquiry(StringBuilder sb, DateTime? dt, string from, string to, double value, bool isAccurate)
     {
-        var rate = isAccurate ? m_Accountant.SaveHistoricalRate(dt!.Value, from, to) : m_Accountant.Query(dt, from, to);
+        var rate = isAccurate ? m_Accountant.SaveHistoricalRate(dt!.Value, from, to).Result : m_Accountant.Query(dt, from, to).Result; // TODO
         var v = value * rate;
         sb.AppendLine($"{dt.AsDate()} @{from} {value.AsCurrency(from)} = @{to} {v.AsCurrency(to)} ({v:R})");
     }
