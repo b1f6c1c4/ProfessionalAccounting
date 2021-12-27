@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AccountingServer.Entities;
 
 namespace AccountingServer.DAL;
@@ -34,7 +35,7 @@ public interface IDbAdapter
     /// </summary>
     /// <param name="id">编号</param>
     /// <returns>记账凭证，如果没有则为<c>null</c></returns>
-    Voucher SelectVoucher(string id);
+    Task<Voucher> SelectVoucher(string id);
 
     /// <summary>
     ///     按检索式查找记账凭证

@@ -19,8 +19,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+// ReSharper disable UnusedMember.Global
 
 namespace AccountingServer.BLL;
 
@@ -51,6 +53,9 @@ public class Accountant : IHistoricalExchange
 
     public Voucher SelectVoucher(string id)
         => m_Db.SelectVoucher(id);
+
+    public Task<Voucher> SelectVoucherAsync(string id)
+        => m_Db.SelectVoucherAsync(id);
 
     public IEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => m_Db.SelectVouchers(query);

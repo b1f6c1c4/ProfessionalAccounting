@@ -57,7 +57,7 @@ public class DbTest : IDisposable
         var voucher2 = m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).Single();
         Assert.Equal(voucher1, voucher2, new VoucherEqualityComparer());
 
-        var voucher3 = m_Adapter.SelectVoucher(voucher1.ID);
+        var voucher3 = m_Adapter.SelectVoucher(voucher1.ID).Result;
         Assert.Equal(voucher1, voucher3, new VoucherEqualityComparer());
 
         Assert.True(m_Adapter.DeleteVoucher(voucher1.ID));

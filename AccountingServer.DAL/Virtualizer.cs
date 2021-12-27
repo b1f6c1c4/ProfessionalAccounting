@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 
@@ -51,7 +52,7 @@ public class Virtualizer : IDbAdapter, IDisposable
         m_Vouchers.Clear();
     }
 
-    public Voucher SelectVoucher(string id)
+    public Task<Voucher> SelectVoucher(string id)
         => Db.SelectVoucher(id);
 
     public IEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)

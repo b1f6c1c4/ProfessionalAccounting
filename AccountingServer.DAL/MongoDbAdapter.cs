@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using AccountingServer.DAL.Serializer;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -257,8 +258,8 @@ internal class MongoDbAdapter : IDbAdapter
     #region Voucher
 
     /// <inheritdoc />
-    public Voucher SelectVoucher(string id) =>
-        m_Vouchers.FindSync(GetNQuery<Voucher>(id)).FirstOrDefault();
+    public async Task<Voucher> SelectVoucher(string id) =>
+        (await m_Vouchers.FindAsync(GetNQuery<Voucher>(id))).FirstOrDefault();
 
     /// <inheritdoc />
     public IEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query) =>

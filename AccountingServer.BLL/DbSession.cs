@@ -19,23 +19,23 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
+using Antlr4.Runtime.Sharpen;
+
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace AccountingServer.BLL;
 
 public class DbSession : IHistoricalExchange
 {
-    public DbSession(string uri = null, string db = null) => Db = Facade.Create(uri, db);
-
-    private readonly ReaderWriterLockSlim m_Lock = new(LockRecursionPolicy.SupportsRecursion);
+    public DbSession(string uri = null, string db = null) => Db = new(Facade.Create(uri, db));
 
     public VirtualizeLock Virtualize()
     {
-        m_Lock.EnterWriteLock();
-        Db = Facade.Virtualize(Db);
+        Db.Set(Facade.Virtualize(Db.Get()));
         return new VirtualizeLock(this);
     }
 
@@ -45,19 +45,16 @@ public class DbSession : IHistoricalExchange
 
         private DbSession Db { get; }
 
-        public int CachedVouchers => (Db.Db as Virtualizer)!.CachedVouchers;
+        public int CachedVouchers => (Db.Db.Get() as Virtualizer)!.CachedVouchers;
 
         public void Dispose()
-        {
-            Db.Db = Facade.UnVirtualize(Db.Db);
-            Db.m_Lock.ExitWriteLock();
-        }
+            => Db.Db.Set(Facade.UnVirtualize(Db.Db.Get()));
     }
 
     /// <summary>
     ///     数据库访问
     /// </summary>
-    public IDbAdapter Db { private get; set; }
+    public AtomicReference<IDbAdapter> Db { private get; set; }
 
     /// <summary>
     ///     返回结果数量上限
@@ -80,50 +77,34 @@ public class DbSession : IHistoricalExchange
         if (date > now)
             date = now;
 
-        m_Lock.EnterReadLock();
-        try
-        {
-            var res = Db.SelectExchangeRecord(new ExchangeRecord { Time = date, From = from, To = to });
-            if (res != null)
-                return res.Value;
-            res = Db.SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = from });
-            if (res != null)
-                return 1D / res.Value;
+        var res = Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = @from, To = to });
+        if (res != null)
+            return res.Value;
+        res = Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = @from });
+        if (res != null)
+            return 1D / res.Value;
 
-            Console.WriteLine($"{now:o} Query: {date:o} {from}/{to}");
-            var value = ExchangeFactory.Instance.Query(from, to);
-            Db.Upsert(new ExchangeRecord
-                {
-                    Time = now, From = from, To = to, Value = value,
-                });
-            return value;
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
+        Console.WriteLine($"{now:o} Query: {date:o} {@from}/{to}");
+        var value = ExchangeFactory.Instance.Query(@from, to);
+        Db.Get().Upsert(new ExchangeRecord
+            {
+                Time = now, From = @from, To = to, Value = value,
+            });
+        return value;
     }
 
     public double SaveHistoricalRate(DateTime date, string from, string to)
     {
-        m_Lock.EnterReadLock();
-        try
-        {
-            var res = Db.SelectExchangeRecord(new ExchangeRecord { Time = date, From = from, To = to });
-            if (res != null && res.Time == date)
-                return res.Value;
-            res = Db.SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = from });
-            if (res != null && res.Time == date)
-                return 1D / res.Value;
+        var res = Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = @from, To = to });
+        if (res != null && res.Time == date)
+            return res.Value;
+        res = Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = @from });
+        if (res != null && res.Time == date)
+            return 1D / res.Value;
 
-            var value = ExchangeFactory.HistoricalInstance.Query(date, from, to);
-            Db.Upsert(new ExchangeRecord { Time = date, From = from, To = to, Value = value });
-            return value;
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
+        var value = ExchangeFactory.HistoricalInstance.Query(date, @from, to);
+        Db.Get().Upsert(new ExchangeRecord { Time = date, From = @from, To = to, Value = value });
+        return value;
     }
 
     /// <inheritdoc />
@@ -180,141 +161,49 @@ public class DbSession : IHistoricalExchange
         return res != 0 ? res : 0;
     }
 
-    public Voucher SelectVoucher(string id)
-    {
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.SelectVoucher(id);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
-    }
+    public Voucher SelectVoucher(string id) => SelectVoucherAsync(id).Result;
+
+    public async Task<Voucher> SelectVoucherAsync(string id)
+        => await Db.Get().SelectVoucher(id);
 
     public IEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-    {
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.SelectVouchers(query);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
-    }
+        => Db.Get().SelectVouchers(query);
 
     public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
-    {
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.SelectVoucherDetails(query);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
-    }
+        => Db.Get().SelectVoucherDetails(query);
 
     public ISubtotalResult SelectVouchersGrouped(IVoucherGroupedQuery query)
     {
-        m_Lock.EnterReadLock();
-        try
-        {
-            var res = Db.SelectVouchersGrouped(query, Limit);
-            var conv = new SubtotalBuilder(query.Subtotal, this);
-            return conv.Build(res);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
+        var res = Db.Get().SelectVouchersGrouped(query, Limit);
+        var conv = new SubtotalBuilder(query.Subtotal, this);
+        return conv.Build(res);
     }
 
     public ISubtotalResult SelectVoucherDetailsGrouped(IGroupedQuery query)
     {
-        m_Lock.EnterReadLock();
-        try
-        {
-            var res = Db.SelectVoucherDetailsGrouped(query, Limit);
-            var conv = new SubtotalBuilder(query.Subtotal, this);
-            return conv.Build(res);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
+        var res = Db.Get().SelectVoucherDetailsGrouped(query, Limit);
+        var conv = new SubtotalBuilder(query.Subtotal, this);
+        return conv.Build(res);
     }
 
     public IEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
         IQueryCompounded<IVoucherQueryAtom> query)
-    {
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.SelectUnbalancedVouchers(query);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
-    }
+        => Db.Get().SelectUnbalancedVouchers(query);
 
     public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-    {
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.SelectDuplicatedVouchers(query);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
-    }
+        => Db.Get().SelectDuplicatedVouchers(query);
 
     public bool DeleteVoucher(string id)
-    {
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.DeleteVoucher(id);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
-    }
+        => Db.Get().DeleteVoucher(id);
 
     public long DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-    {
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.DeleteVouchers(query);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
-    }
+        => Db.Get().DeleteVouchers(query);
 
     public bool Upsert(Voucher entity)
     {
         Regularize(entity);
 
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.Upsert(entity);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
+        return Db.Get().Upsert(entity);
     }
 
     public long Upsert(IReadOnlyCollection<Voucher> entities)
@@ -322,15 +211,7 @@ public class DbSession : IHistoricalExchange
         foreach (var entity in entities)
             Regularize(entity);
 
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.Upsert(entities);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
+        return Db.Get().Upsert(entities);
     }
 
     public static double? Regularize(double? fund)
@@ -360,134 +241,36 @@ public class DbSession : IHistoricalExchange
     }
 
     public Asset SelectAsset(Guid id)
-    {
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.SelectAsset(id);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
-    }
+        => Db.Get().SelectAsset(id);
 
     public IEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter)
-    {
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.SelectAssets(filter);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
-    }
+        => Db.Get().SelectAssets(filter);
 
     public bool DeleteAsset(Guid id)
-    {
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.DeleteAsset(id);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
-    }
+        => Db.Get().DeleteAsset(id);
 
     public long DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
-    {
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.DeleteAssets(filter);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
-    }
+        => Db.Get().DeleteAssets(filter);
 
     public bool Upsert(Asset entity)
-    {
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.Upsert(entity);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
-    }
+        => Db.Get().Upsert(entity);
 
     public Amortization SelectAmortization(Guid id)
-    {
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.SelectAmortization(id);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
-    }
+        => Db.Get().SelectAmortization(id);
 
     public IEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
-    {
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.SelectAmortizations(filter);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
-    }
+        => Db.Get().SelectAmortizations(filter);
 
     public bool DeleteAmortization(Guid id)
-    {
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.DeleteAmortization(id);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
-    }
+        => Db.Get().DeleteAmortization(id);
 
     public long DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
-    {
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.DeleteAmortizations(filter);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
-    }
+        => Db.Get().DeleteAmortizations(filter);
 
     public bool Upsert(Amortization entity)
     {
         Regularize(entity.Template);
 
-        m_Lock.EnterReadLock();
-        try
-        {
-            return Db.Upsert(entity);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
+        return Db.Get().Upsert(entity);
     }
 }
