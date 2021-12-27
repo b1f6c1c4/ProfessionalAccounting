@@ -42,6 +42,9 @@ public class Virtualizer : IDbAdapter, IDisposable
 
     public void Dispose()
     {
+        if (m_Vouchers.Count == 0)
+            return;
+
         if (Db.Upsert(m_Vouchers) != m_Vouchers.Count)
             throw new ApplicationException("Cannot write-back voucher cache");
 
@@ -62,13 +65,9 @@ public class Virtualizer : IDbAdapter, IDisposable
     {
         public bool Equals(Balance x, Balance y)
         {
-            if (ReferenceEquals(x, y))
+            if (x == y)
                 return true;
-            if (ReferenceEquals(x, null))
-                return false;
-            if (ReferenceEquals(y, null))
-                return false;
-            if (x.GetType() != y.GetType())
+            if (x == null || y == null)
                 return false;
             return Nullable.Equals(x.Date, y.Date) && x.Title == y.Title && x.SubTitle == y.SubTitle &&
                 x.Content == y.Content && x.Remark == y.Remark && x.Currency == y.Currency && x.User == y.User;
@@ -95,9 +94,9 @@ public class Virtualizer : IDbAdapter, IDisposable
         if (!level.HasFlag(SubtotalLevel.Week))
             return dt;
         if (level.HasFlag(SubtotalLevel.Year))
-            return new(dt!.Value.Year, 0, 0);
+            return new(dt!.Value.Year, 1, 1);
         if (level.HasFlag(SubtotalLevel.Month))
-            return new(dt!.Value.Year, dt!.Value.Month, 0);
+            return new(dt!.Value.Year, dt!.Value.Month, 1);
         // if (level.HasFlag(SubtotalLevel.Week))
         return dt.Value.DayOfWeek switch
             {
@@ -117,9 +116,9 @@ public class Virtualizer : IDbAdapter, IDisposable
         if (limit != 0)
             throw new NotSupportedException();
         var level = query.Preprocess();
-        return Merge(Db.SelectVouchersGrouped(query, 0)).Concat(
+        return Merge(Db.SelectVouchersGrouped(query).Concat(
             m_Vouchers.Where(v => v.IsMatch(query.VoucherQuery))
-                .Select(v => new Balance { Date = ProjectDate(v.Date, level), Fund = 1 }));
+                .Select(v => new Balance { Date = ProjectDate(v.Date, level), Fund = 1 })));
     }
 
     public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit)
@@ -127,7 +126,7 @@ public class Virtualizer : IDbAdapter, IDisposable
         if (limit != 0)
             throw new NotSupportedException();
         var level = query.Preprocess();
-        var fluent = Merge(Db.SelectVoucherDetailsGrouped(query, 0)).Concat(
+        var fluent = Merge(Db.SelectVoucherDetailsGrouped(query).Concat(
             m_Vouchers.Where(v => v.IsMatch(query.VoucherEmitQuery.VoucherQuery))
                 .SelectMany(v => v.Details.Select(d => new VoucherDetailR(v, d)))
                 .Where(d => d.IsMatch(query.VoucherEmitQuery.ActualDetailFilter()))
@@ -141,7 +140,7 @@ public class Virtualizer : IDbAdapter, IDisposable
                         Content = level.HasFlag(SubtotalLevel.Content) ? d.Content : null,
                         Remark = level.HasFlag(SubtotalLevel.Remark) ? d.Remark : null,
                         Fund = query.Subtotal.GatherType == GatheringType.Count ? 1 : d.Fund!.Value,
-                    }));
+                    })));
         return query.ShouldAvoidZero() ? fluent.Where(b => !b.Fund.IsZero()) : fluent;
     }
 

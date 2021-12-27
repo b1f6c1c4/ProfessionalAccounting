@@ -31,7 +31,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest;
 [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
 public class SubtotalTest : IDisposable
 {
-    private readonly IDbAdapter m_Adapter;
+    private IDbAdapter m_Adapter;
 
     public SubtotalTest()
     {
@@ -39,9 +39,12 @@ public class SubtotalTest : IDisposable
 
         m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
 
-        m_Adapter.Upsert(new Voucher[] {
-                new ()
+        m_Adapter = Facade.Virtualize(m_Adapter);
+        m_Adapter.Upsert(new Voucher[]
+            {
+                new()
                     {
+                        ID = "59278b516c2f021e80f51912",
                         Date = new(2016, 12, 31, 0, 0, 0, DateTimeKind.Utc),
                         Remark = "xrmk1",
                         Details = new()
@@ -68,7 +71,7 @@ public class SubtotalTest : IDisposable
                                     },
                             },
                     },
-                new ()
+                new()
                     {
                         Date = new(2017, 02, 01, 0, 0, 0, DateTimeKind.Utc),
                         Remark = "xrmk2",
@@ -125,7 +128,15 @@ public class SubtotalTest : IDisposable
         ClientUser.Set("b1");
     }
 
-    public void Dispose() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+    public void Dispose()
+    {
+        m_Adapter = Facade.UnVirtualize(m_Adapter);
+        m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+    }
+
+    [Fact]
+    public void CachedTest()
+        => Assert.Equal(1, (m_Adapter as Virtualizer)?.CachedVouchers);
 
     [Theory]
     [InlineData(6, "")]

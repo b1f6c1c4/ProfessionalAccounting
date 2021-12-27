@@ -43,7 +43,7 @@ public abstract class QueryTestBase
     {
         var voucher = new Voucher
             {
-                ID = "59278b516c2f021e80f51912",
+                ID = null,
                 Date = null,
                 Type = VoucherType.Uncertain,
                 Remark = "rmk1",
@@ -106,8 +106,8 @@ public abstract class QueryTestBase
         private static readonly List<object[]> Data = new()
             {
                 new object[] { true, "" },
-                new object[] { true, "^59278b516c2f021e80f51912^[null]Uncertain%rmk%" },
-                new object[] { true, "{^59278b516c2f021e80f51912^}-{null}*{{Devalue}+{Amortization}}" },
+                new object[] { true, "[null]Uncertain%rmk%" },
+                new object[] { true, "{}-{null}*{{Devalue}+{Amortization}}" },
                 new object[] { true, "-{%rrr%}+{20170101}" },
                 new object[] { false, "{^59278b516c2f021e80f51911^}+{G}*{%asdf%}" },
                 new object[] { true, "@JPY T100105'cont1'>" },
@@ -204,6 +204,39 @@ public class BLLQueryTest : QueryTestBase, IDisposable
     }
 
     public void Dispose() => m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+
+    protected override void PrepareVoucher(Voucher voucher) => m_Accountant.Upsert(voucher);
+
+    protected override bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
+        => m_Accountant.SelectVouchers(query).SingleOrDefault() != null;
+
+    protected override void ResetVouchers() => m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+
+    [Theory]
+    [ClassData(typeof(DataProvider))]
+    public override void RunTestA(bool expected, string query) => base.RunTestA(expected, query);
+}
+
+[Collection("DbTestCollection")]
+[SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
+public class VirtualizedQueryTest : QueryTestBase, IDisposable
+{
+    private readonly Accountant m_Accountant;
+    private readonly DbSession.VirtualizeLock m_Lock;
+
+    public VirtualizedQueryTest()
+    {
+        m_Accountant = new(db: "accounting-test");
+
+        m_Lock = m_Accountant.Virtualize();
+        m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+    }
+
+    public void Dispose()
+    {
+        m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+        m_Lock.Dispose();
+    }
 
     protected override void PrepareVoucher(Voucher voucher) => m_Accountant.Upsert(voucher);
 
