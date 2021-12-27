@@ -17,9 +17,12 @@
  */
 
 using System;
+using System.Linq;
 using System.Text;
+using System.Timers;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
+using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
@@ -37,7 +40,16 @@ internal class ExchangeShell : IShellComponent
     /// </summary>
     private readonly Accountant m_Accountant;
 
-    public ExchangeShell(Accountant helper) => m_Accountant = helper;
+    /// <summary>
+    ///     定时登记汇率
+    /// </summary>
+    private readonly Timer m_Timer = new(60 * 60 * 1000) { AutoReset = true }; // hourly
+
+    public ExchangeShell(Accountant helper)
+    {
+        m_Accountant = helper;
+        m_Timer.Elapsed += OnTimedEvent;
+    }
 
     public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
     {
@@ -56,8 +68,10 @@ internal class ExchangeShell : IShellComponent
         else if (Parsing.Range(ref expr) is var rng && rng != null)
             for (var dt = rng.StartDate!.Value; dt <= rng.EndDate; dt = dt.AddMonths(1))
                 Inquiry(sb, AccountantHelper.LastDayOfMonth(dt.Year, dt.Month), from, to, val, isAccurate);
+        else if (isAccurate)
+            Inquiry(sb, null, from, to, val, true);
         else
-            Inquiry(sb, null, from, to, val, isAccurate);
+            Inquiry(sb, DateTime.UtcNow.AddMinutes(-30), from, to, val, false);
         Parsing.Eof(expr);
 
         return new PlainText(sb.ToString());
@@ -71,4 +85,48 @@ internal class ExchangeShell : IShellComponent
     }
 
     public bool IsExecutable(string expr) => expr.Initial() == "?e";
+
+    /// <summary>
+    ///     启动定时登记汇率
+    /// </summary>
+    public void EnableTimer()
+    {
+        OnTimedEvent(null, null);
+        m_Timer.Enabled = true;
+    }
+
+    private static DateTime CriticalTime(DateTime now)
+    {
+        // every T00:00:00+Z of base currency change day
+        if (BaseCurrency.History.Any(bci => bci.Date == now.Date))
+            return now.Date.AddMinutes(-5);
+
+        // every T00:00:00+Z of early Sunday
+        if (now.DayOfWeek == DayOfWeek.Sunday)
+            return now.Date.AddMinutes(-5);
+
+        // every T00:00:00+Z of last day of month (year)
+        if (now.AddDays(1).Month != now.Month)
+            return now.Date.AddMinutes(-5);
+
+        // every 3.5 days
+        return now.AddDays(-3.5).AddMinutes(-35);
+    }
+
+    private void OnTimedEvent(object source, ElapsedEventArgs e)
+    {
+        var date = CriticalTime(DateTime.UtcNow);
+        Console.WriteLine($"{DateTime.UtcNow:o} Ensuring exchange rates exist since {date:o}");
+        try
+        {
+            foreach (var grpC in m_Accountant.RunGroupedQuery("U - U Revenue - U Expense !C").Items.Cast<ISubtotalCurrency>())
+                m_Accountant.Query(date, grpC.Currency, BaseCurrency.Now);
+            foreach (var grpC in m_Accountant.RunGroupedQuery("U Revenue + U Expense 0 !C").Items.Cast<ISubtotalCurrency>())
+                m_Accountant.Query(date, grpC.Currency, BaseCurrency.Now);
+        }
+        catch (Exception err)
+        {
+            Console.WriteLine(err);
+        }
+    }
 }

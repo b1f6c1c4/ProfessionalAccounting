@@ -21,14 +21,12 @@ using System.IO;
 using System.Linq;
 using System.Resources;
 using System.Text;
-using System.Timers;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Carry;
 using AccountingServer.Shell.Serializer;
-using AccountingServer.Shell.Util;
 
 namespace AccountingServer.Shell;
 
@@ -54,6 +52,8 @@ public class Facade
 
     private readonly AccountingShell m_AccountingShell;
 
+    private readonly ExchangeShell m_ExchangeShell;
+
     /// <summary>
     ///     复合表达式解释器
     /// </summary>
@@ -63,18 +63,18 @@ public class Facade
     {
         m_Accountant = new(uri, db);
         m_AccountingShell = new(m_Accountant);
+        m_ExchangeShell = new(m_Accountant);
         m_Composer =
             new()
                 {
                     new CheckShell(m_Accountant),
                     new CarryShell(m_Accountant),
-                    new ExchangeShell(m_Accountant),
+                    m_ExchangeShell,
                     new AssetShell(m_Accountant),
                     new AmortizationShell(m_Accountant),
                     new PluginShell(m_Accountant),
                     m_AccountingShell,
                 };
-        m_Timer.Elapsed += OnTimedEvent;
     }
 
     /// <summary>
@@ -359,34 +359,8 @@ public class Facade
 
     #region Exchange
 
-    /// <summary>
-    ///     定时登记汇率
-    /// </summary>
-    private readonly Timer m_Timer = new(60 * 60 * 1000) { AutoReset = true };
-
-    /// <summary>
-    ///     启动定时登记汇率
-    /// </summary>
-    public void EnableTimer()
-    {
-        OnTimedEvent(null, null);
-        m_Timer.Enabled = true;
-    }
-
-    private void OnTimedEvent(object source, ElapsedEventArgs e)
-    {
-        var date = DateTime.UtcNow.Subtract(new TimeSpan(23, 0, 0));
-        Console.WriteLine($"{DateTime.UtcNow:o} Ensuring exchange rates exist since {date:o}");
-        try
-        {
-            foreach (var grpC in m_Accountant.RunGroupedQuery("U!C").Items.Cast<ISubtotalCurrency>())
-                m_Accountant.Query(date, grpC.Currency, BaseCurrency.Now);
-        }
-        catch (Exception err)
-        {
-            Console.WriteLine(err);
-        }
-    }
+    // ReSharper disable once UnusedMember.Global
+    public void EnableTimer() => m_ExchangeShell.EnableTimer();
 
     #endregion
 }
