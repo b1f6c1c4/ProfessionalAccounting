@@ -43,7 +43,7 @@ internal class CreditCardConvert : PluginBase
     {
         var content = Parsing.Token(ref expr);
 
-        return ParsingF.Optional(ref expr, "q") ? Query(content, ref expr) : Create(content, ref expr, serializer);
+        return ParsingF.Optional(ref expr, "q") ? Query(content, ref expr) : Create(content, ref expr);
     }
 
     private IQueryResult Query(string content, ref string expr)
@@ -178,12 +178,12 @@ internal class CreditCardConvert : PluginBase
         return new PlainText(sb.ToString());
     }
 
-    private IQueryResult Create(string content, ref string expr, IEntitiesSerializer serializer)
+    private IQueryResult Create(string content, ref string expr)
     {
         var currency = Parsing.Token(ref expr, false);
         var baseCurrency = Parsing.Token(ref expr, false);
 
-        var lst = new List<Voucher>();
+        using var vir = Accountant.Virtualize();
         while (!string.IsNullOrWhiteSpace(expr))
         {
             var date = Parsing.UniqueTime(ref expr);
@@ -202,7 +202,7 @@ internal class CreditCardConvert : PluginBase
 
             var from = ParsingF.DoubleF(ref expr);
             var to = ParsingF.DoubleF(ref expr);
-            var voucher = new Voucher
+            Accountant.Upsert(new Voucher
                 {
                     Date = date.Value,
                     Details = new()
@@ -228,15 +228,10 @@ internal class CreditCardConvert : PluginBase
                                     }
                                 : new() { Currency = currency, Title = 6603, Fund = from },
                         },
-                };
-            lst.Add(voucher);
+                });
         }
 
-        if (!lst.Any())
-            return new PlainSucceed();
-
-        Accountant.Upsert(lst);
-        return new DirtyText(serializer.PresentVouchers(lst));
+        return new NumberAffected(vir.CachedVouchers);
     }
 
     private class Trans

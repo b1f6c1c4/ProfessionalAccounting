@@ -86,6 +86,7 @@ internal abstract class InterestBase : PluginBase
                 Rate = rate,
             };
 
+        using var vir = Accountant.Virtualize();
         if (!all && !endDate.HasValue ||
             endDate.HasValue)
         {

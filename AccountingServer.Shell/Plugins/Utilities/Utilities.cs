@@ -42,18 +42,17 @@ internal class Utilities : PluginBase
     /// <inheritdoc />
     public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
     {
-        var count = 0;
+        using var vir = Accountant.Virtualize();
         while (!string.IsNullOrWhiteSpace(expr))
         {
             var voucher = GenerateVoucher(ref expr);
             if (voucher == null)
                 continue;
 
-            if (Accountant.Upsert(voucher))
-                count++;
+            Accountant.Upsert(voucher);
         }
 
-        return new NumberAffected(count);
+        return new NumberAffected(vir.CachedVouchers);
     }
 
     /// <inheritdoc />
