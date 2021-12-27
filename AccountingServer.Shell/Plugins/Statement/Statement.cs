@@ -38,17 +38,6 @@ internal class Statement : PluginBase
 {
     public Statement(Accountant accountant) : base(accountant) { }
 
-    private IVoucherDetailQuery Regularize(IVoucherDetailQuery filt)
-    {
-        if (filt.DetailEmitFilter != null)
-            return filt;
-
-        if (filt.VoucherQuery is IVoucherQueryAtom dQuery)
-            return new StmtVoucherDetailQuery(filt.VoucherQuery, dQuery.DetailFilter);
-
-        throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(filt));
-    }
-
     /// <inheritdoc />
     public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
     {
@@ -59,7 +48,7 @@ internal class Statement : PluginBase
         var sb = new StringBuilder();
         if (ParsingF.Optional(ref expr, "mark"))
         {
-            var filt = Regularize(ParsingF.DetailQuery(ref expr));
+            var filt = ParsingF.DetailQuery(ref expr);
             ParsingF.Optional(ref expr, "as");
             var marker = ParsingF.Token(ref expr);
             ParsingF.Eof(expr);
@@ -72,13 +61,13 @@ internal class Statement : PluginBase
         }
         else if (ParsingF.Optional(ref expr, "unmark"))
         {
-            var filt = Regularize(ParsingF.DetailQuery(ref expr));
+            var filt = ParsingF.DetailQuery(ref expr);
             ParsingF.Eof(expr);
             RunUnmark(filt, sb);
         }
         else if (ParsingF.Optional(ref expr, "check"))
         {
-            var filt = Regularize(ParsingF.DetailQuery(ref expr));
+            var filt = ParsingF.DetailQuery(ref expr);
             ParsingF.Eof(expr);
             parsed.Parse(csv);
             sb.AppendLine($"{parsed.Items.Count} parsed");
@@ -87,7 +76,7 @@ internal class Statement : PluginBase
         else
         {
             ParsingF.Optional(ref expr, "auto");
-            var filt = Regularize(ParsingF.DetailQuery(ref expr));
+            var filt = ParsingF.DetailQuery(ref expr);
             ParsingF.Optional(ref expr, "as");
             var marker = ParsingF.Token(ref expr);
             ParsingF.Eof(expr);
@@ -99,17 +88,17 @@ internal class Statement : PluginBase
             var markerFilt = new StmtVoucherDetailQuery(
                 filt.VoucherQuery,
                 new IntersectQueries<IDetailQueryAtom>(
-                    filt.DetailEmitFilter.DetailFilter,
+                    filt.ActualDetailFilter(),
                     new StmtDetailQuery(marker)));
             var nullFilt = new StmtVoucherDetailQuery(
                 filt.VoucherQuery,
                 new IntersectQueries<IDetailQueryAtom>(
-                    filt.DetailEmitFilter.DetailFilter,
+                    filt.ActualDetailFilter(),
                     new StmtDetailQuery("")));
             var nmFilt = new StmtVoucherDetailQuery(
                 filt.VoucherQuery,
                 new IntersectQueries<IDetailQueryAtom>(
-                    filt.DetailEmitFilter.DetailFilter,
+                    filt.ActualDetailFilter(),
                     new UnionQueries<IDetailQueryAtom>(
                         new StmtDetailQuery(""),
                         new StmtDetailQuery(marker))));
@@ -142,12 +131,12 @@ internal class Statement : PluginBase
                         : double.PositiveInfinity);
                 var voucher = resx
                     .FirstOrDefault(v => v.Details.Any(d
-                        => (d.Fund!.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter)));
+                        => (d.Fund!.Value - b.Fund).IsZero() && d.IsMatch(filt.ActualDetailFilter())));
                 if (voucher == null)
                     return false;
 
                 var o = voucher.Details.First(d
-                    => (d.Fund!.Value - b.Fund).IsZero() && d.IsMatch(filt.DetailEmitFilter.DetailFilter));
+                    => (d.Fund!.Value - b.Fund).IsZero() && d.IsMatch(filt.ActualDetailFilter()));
                 if (o.Remark == null)
                     marked++;
                 else if (o.Remark == marker)
@@ -186,7 +175,7 @@ internal class Statement : PluginBase
         {
             foreach (var d in v.Details)
             {
-                if (!d.IsMatch(filt.DetailEmitFilter.DetailFilter))
+                if (!d.IsMatch(filt.ActualDetailFilter()))
                     continue;
 
                 cntAll++;
@@ -215,7 +204,7 @@ internal class Statement : PluginBase
         foreach (var v in res)
         foreach (var d in v.Details)
         {
-            if (!d.IsMatch(filt.DetailEmitFilter.DetailFilter))
+            if (!d.IsMatch(filt.ActualDetailFilter()))
                 continue;
 
             var obj1 = lst.FirstOrDefault(b => (b.Fund - d.Fund!.Value).IsZero() && b.Date == v.Date);

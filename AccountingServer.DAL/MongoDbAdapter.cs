@@ -23,6 +23,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using AccountingServer.DAL.Serializer;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
@@ -265,14 +266,7 @@ internal class MongoDbAdapter : IDbAdapter
             .ToEnumerable();
 
     private static FilterDefinition<BsonDocument> GetChk(IVoucherDetailQuery query)
-    {
-        var visitor = new MongoDbNativeDetailUnwinded();
-        return query.DetailEmitFilter != null
-            ? query.DetailEmitFilter.DetailFilter.Accept(visitor)
-            : query.VoucherQuery is IVoucherQueryAtom dQuery
-                ? dQuery.DetailFilter.Accept(visitor)
-                : throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query));
-    }
+        => query.ActualDetailFilter().Accept(new MongoDbNativeDetailUnwinded());
 
     /// <inheritdoc />
     public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)

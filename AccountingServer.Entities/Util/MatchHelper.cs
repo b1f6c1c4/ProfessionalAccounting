@@ -197,6 +197,18 @@ public static class MatchHelper
     public static bool IsMatch<TAtom>(IQueryCompounded<TAtom> query, Func<TAtom, bool> atomPredictor)
         where TAtom : class => query?.Accept(new MatchHelperVisitor<TAtom>(atomPredictor)) ?? true;
 
+    /// <summary>
+    ///     获取记账凭证细目映射检索式中的实际细目检索式
+    /// </summary>
+    /// <param name="query">记账凭证细目映射检索式</param>
+    /// <returns>细目检索式</returns>
+    public static IQueryCompounded<IDetailQueryAtom> ActualDetailFilter(this IVoucherDetailQuery query)
+        => query.DetailEmitFilter != null
+            ? query.DetailEmitFilter.DetailFilter
+            : query.VoucherQuery is IVoucherQueryAtom dQuery
+                ? dQuery.DetailFilter
+                : throw new ArgumentException("不指定细目映射检索式时记账凭证检索式为复合检索式", nameof(query));
+
     private sealed class MatchHelperVisitor<TAtom> : IQueryVisitor<TAtom, bool> where TAtom : class
     {
         private readonly Func<TAtom, bool> m_AtomPredictor;
