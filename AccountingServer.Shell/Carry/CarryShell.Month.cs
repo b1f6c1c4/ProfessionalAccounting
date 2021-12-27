@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
+using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -58,7 +59,7 @@ internal partial class CarryShell
         }
 
         var tasks = CarrySettings.Config.UserSettings
-            .Single(us => us.User == ClientUser.Name).Targets
+            .Single(us => us.User == m_Accountant.Client.ClientUser.Name).Targets
             .Select(t => new CarryTask
                 {
                     Target = t,

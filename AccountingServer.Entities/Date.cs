@@ -18,8 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Threading;
 
 namespace AccountingServer.Entities;
 
@@ -149,49 +147,4 @@ public static class DateHelper
 
         return !(dt > rng.EndDate);
     }
-}
-
-/// <summary>
-///     客户端时间
-/// </summary>
-public class ClientDateTime
-{
-    private static readonly ThreadLocal<ClientDateTime> Instances = new();
-
-    private readonly DateTime m_Today;
-
-    private ClientDateTime(DateTime timestamp) => m_Today = timestamp.Date;
-
-    public static DateTime Today => Instances.Value?.m_Today ?? DateTime.Today;
-
-    // ReSharper disable once UnusedMember.Global
-    public static DateTime Parse(string str) => DateTime.Parse(
-        str,
-        null,
-        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
-
-    // ReSharper disable once UnusedMember.Global
-    public static DateTime ParseExact(string str, string format) => DateTime.ParseExact(
-        str,
-        format,
-        null,
-        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
-
-    // ReSharper disable once UnusedMember.Global
-    public static bool TryParse(string str, out DateTime result) => DateTime.TryParse(
-        str,
-        null,
-        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal,
-        out result);
-
-    // ReSharper disable once UnusedMember.Global
-    public static bool TryParseExact(string str, string format, out DateTime result) => DateTime.TryParseExact(
-        str,
-        format,
-        null,
-        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal,
-        out result);
-
-    public static void Set(DateTime timestamp)
-        => Instances.Value = new(timestamp);
 }

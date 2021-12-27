@@ -72,7 +72,7 @@ internal class CheckShell : IShellComponent
                 old = voucher;
             else if (voucher.ID != old.ID)
             {
-                sb.Append(serializer.PresentVoucher(old).Wrap());
+                sb.Append(serializer.PresentVoucher(old, m_Accountant.Client).Wrap());
                 sb.AppendLine();
             }
 
@@ -80,7 +80,7 @@ internal class CheckShell : IShellComponent
         }
 
         if (old != null)
-            sb.Append(serializer.PresentVoucher(old).Wrap());
+            sb.Append(serializer.PresentVoucher(old, m_Accountant.Client).Wrap());
 
         if (sb.Length > 0)
             return new PlainText(sb.ToString());
@@ -174,14 +174,14 @@ internal class CheckShell : IShellComponent
     private IQueryResult DuplicationCheck(IEntitiesSerializer serializer, string expr)
     {
         var sb = new StringBuilder();
-        var query = Parsing.VoucherQuery(ref expr);
+        var query = Parsing.VoucherQuery(ref expr, m_Accountant.Client);
         Parsing.Eof(expr);
         foreach (var (v, ids) in m_Accountant.SelectDuplicatedVouchers(query))
         {
             sb.AppendLine($"// Date = {v.Date.AsDate()} Duplication = {ids.Count}");
             foreach (var id in ids)
                 sb.AppendLine($"//   ^{id}^");
-            sb.AppendLine(serializer.PresentVoucher(v).Wrap());
+            sb.AppendLine(serializer.PresentVoucher(v, m_Accountant.Client).Wrap());
         }
 
         if (sb.Length > 0)

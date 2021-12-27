@@ -63,9 +63,9 @@ internal class ExchangeShell : IShellComponent
 
         var sb = new StringBuilder();
 
-        if (Parsing.UniqueTime(ref expr) is var date && date.HasValue)
+        if (Parsing.UniqueTime(ref expr, m_Accountant.Client) is var date && date.HasValue)
             Inquiry(sb, date.Value, from, to, val, isAccurate);
-        else if (Parsing.Range(ref expr) is var rng && rng != null)
+        else if (Parsing.Range(ref expr, m_Accountant.Client) is var rng && rng != null)
             for (var dt = rng.StartDate!.Value; dt <= rng.EndDate; dt = dt.AddMonths(1))
                 Inquiry(sb, AccountantHelper.LastDayOfMonth(dt.Year, dt.Month), from, to, val, isAccurate);
         else if (isAccurate)

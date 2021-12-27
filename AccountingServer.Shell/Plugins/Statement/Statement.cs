@@ -48,7 +48,7 @@ internal class Statement : PluginBase
         var sb = new StringBuilder();
         if (ParsingF.Optional(ref expr, "mark"))
         {
-            var filt = ParsingF.DetailQuery(ref expr);
+            var filt = ParsingF.DetailQuery(ref expr, Accountant.Client);
             ParsingF.Optional(ref expr, "as");
             var marker = ParsingF.Token(ref expr);
             ParsingF.Eof(expr);
@@ -61,13 +61,13 @@ internal class Statement : PluginBase
         }
         else if (ParsingF.Optional(ref expr, "unmark"))
         {
-            var filt = ParsingF.DetailQuery(ref expr);
+            var filt = ParsingF.DetailQuery(ref expr, Accountant.Client);
             ParsingF.Eof(expr);
             RunUnmark(filt, sb);
         }
         else if (ParsingF.Optional(ref expr, "check"))
         {
-            var filt = ParsingF.DetailQuery(ref expr);
+            var filt = ParsingF.DetailQuery(ref expr, Accountant.Client);
             ParsingF.Eof(expr);
             parsed.Parse(csv);
             sb.AppendLine($"{parsed.Items.Count} parsed");
@@ -76,7 +76,7 @@ internal class Statement : PluginBase
         else
         {
             ParsingF.Optional(ref expr, "auto");
-            var filt = ParsingF.DetailQuery(ref expr);
+            var filt = ParsingF.DetailQuery(ref expr, Accountant.Client);
             ParsingF.Optional(ref expr, "as");
             var marker = ParsingF.Token(ref expr);
             ParsingF.Eof(expr);

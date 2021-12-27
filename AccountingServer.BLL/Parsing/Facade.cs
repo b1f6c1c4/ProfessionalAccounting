@@ -80,45 +80,57 @@ public abstract class FacadeBase
     public ITitle Title(ref string s)
         => QueryParse(ref s, p => p.title());
 
-    public DateTime? UniqueTime(string s)
-        => UniqueTime(ref s);
+    public DateTime? UniqueTime(string s, Client client)
+        => UniqueTime(ref s, client);
 
-    public DateTime? UniqueTime(ref string s)
-        => QueryParse(ref s, p => p.uniqueTime());
+    public DateTime? UniqueTime(ref string s, Client client)
+    {
+        var ctx = QueryParse(ref s, p => p.uniqueTime());
+        ctx.Client = () => client;
+        return ctx.AsDate();
+    }
 
-    public DateFilter Range(string s)
-        => Range(ref s);
+    public DateFilter Range(string s, Client client)
+        => Range(ref s, client);
 
-    public DateFilter Range(ref string s)
-        => QueryParse(ref s, p => p.range())?.Range;
+    public DateFilter Range(ref string s, Client client)
+    {
+        var ctx = QueryParse(ref s, p => p.range());
+        ctx.Client = () => client;
+        return ctx.Range;
+    }
 
-    public IQueryCompounded<IVoucherQueryAtom> VoucherQuery(string s)
-        => VoucherQuery(ref s);
+    public IQueryCompounded<IVoucherQueryAtom> VoucherQuery(string s, Client client)
+        => VoucherQuery(ref s, client);
 
-    public IQueryCompounded<IVoucherQueryAtom> VoucherQuery(ref string s)
-        => (IQueryCompounded<IVoucherQueryAtom>)QueryParse(ref s, p => p.vouchers()) ??
+    public IQueryCompounded<IVoucherQueryAtom> VoucherQuery(ref string s, Client client)
+    {
+        var ctx = QueryParse(ref s, p => p.vouchers());
+        ctx.Client = () => client;
+        return (IQueryCompounded<IVoucherQueryAtom>)QueryParse(ref s, p => p.vouchers()) ??
             VoucherQueryUnconstrained.Instance;
+    }
 
-    public IVoucherDetailQuery DetailQuery(string s)
-        => DetailQuery(ref s);
+    public IVoucherDetailQuery DetailQuery(string s, Client client)
+        => DetailQuery(ref s, client);
 
-    public IVoucherDetailQuery DetailQuery(ref string s)
+    public IVoucherDetailQuery DetailQuery(ref string s, Client client)
         => QueryParse(ref s, p => p.voucherDetailQuery());
 
-    public ISubtotal Subtotal(string s)
-        => Subtotal(ref s);
+    public ISubtotal Subtotal(string s, Client client)
+        => Subtotal(ref s, client);
 
-    public ISubtotal Subtotal(ref string s)
+    public ISubtotal Subtotal(ref string s, Client client)
         => SubtotalParse(ref s, p => p.subtotal());
 
-    public IVoucherGroupedQuery VoucherGroupedQuery(string s)
-        => VoucherGroupedQuery(ref s);
+    public IVoucherGroupedQuery VoucherGroupedQuery(string s, Client client)
+        => VoucherGroupedQuery(ref s, client);
 
-    public virtual IVoucherGroupedQuery VoucherGroupedQuery(ref string s)
+    public virtual IVoucherGroupedQuery VoucherGroupedQuery(ref string s, Client client)
     {
         var raw = s;
-        var query = VoucherQuery(ref s);
-        var subtotal = Subtotal(ref s);
+        var query = VoucherQuery(ref s, client);
+        var subtotal = Subtotal(ref s, client);
         if (subtotal.GatherType != GatheringType.VoucherCount)
         {
             s = raw;
@@ -128,14 +140,14 @@ public abstract class FacadeBase
         return new VoucherGroupedQueryStub { VoucherQuery = query, Subtotal = subtotal };
     }
 
-    public IGroupedQuery GroupedQuery(string s)
-        => GroupedQuery(ref s);
+    public IGroupedQuery GroupedQuery(string s, Client client)
+        => GroupedQuery(ref s, client);
 
-    public virtual IGroupedQuery GroupedQuery(ref string s)
+    public virtual IGroupedQuery GroupedQuery(ref string s, Client client)
     {
         var raw = s;
-        var query = DetailQuery(ref s);
-        var subtotal = Subtotal(ref s);
+        var query = DetailQuery(ref s, client);
+        var subtotal = Subtotal(ref s, client);
         if (subtotal.GatherType == GatheringType.VoucherCount)
         {
             s = raw;
@@ -145,10 +157,10 @@ public abstract class FacadeBase
         return new GroupedQueryStub { VoucherEmitQuery = query, Subtotal = subtotal };
     }
 
-    public IQueryCompounded<IDistributedQueryAtom> DistributedQuery(string s)
-        => DistributedQuery(ref s);
+    public IQueryCompounded<IDistributedQueryAtom> DistributedQuery(string s, Client client)
+        => DistributedQuery(ref s, client);
 
-    public IQueryCompounded<IDistributedQueryAtom> DistributedQuery(ref string s)
+    public IQueryCompounded<IDistributedQueryAtom> DistributedQuery(ref string s, Client client)
         => (IQueryCompounded<IDistributedQueryAtom>)QueryParse(ref s, p => p.distributedQ()) ??
             DistributedQueryUnconstrained.Instance;
 
@@ -210,11 +222,11 @@ public sealed class Facade : FacadeBase
         }
     }
 
-    public override IVoucherGroupedQuery VoucherGroupedQuery(ref string s)
+    public override IVoucherGroupedQuery VoucherGroupedQuery(ref string s, Client client)
     {
         try
         {
-            return base.VoucherGroupedQuery(ref s);
+            return base.VoucherGroupedQuery(ref s, client);
         }
         catch (Exception)
         {
@@ -222,11 +234,11 @@ public sealed class Facade : FacadeBase
         }
     }
 
-    public override IGroupedQuery GroupedQuery(ref string s)
+    public override IGroupedQuery GroupedQuery(ref string s, Client client)
     {
         try
         {
-            return base.GroupedQuery(ref s);
+            return base.GroupedQuery(ref s, client);
         }
         catch (Exception)
         {

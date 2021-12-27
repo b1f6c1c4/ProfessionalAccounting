@@ -16,7 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-using AccountingServer.Entities;
+using AccountingServer.BLL;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Util;
 using Xunit;

@@ -32,8 +32,13 @@ internal abstract class DistributedAccountant
     ///     数据库访问
     /// </summary>
     protected readonly DbSession Db;
+    protected readonly Client m_Client;
 
-    protected DistributedAccountant(DbSession db) => Db = db;
+    protected DistributedAccountant(DbSession db, Client client)
+    {
+        Db = db;
+        m_Client = client;
+    }
 
     /// <summary>
     ///     获取分期的剩余

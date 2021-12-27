@@ -56,10 +56,10 @@ internal class Composite : PluginBase
 
         DateFilter the;
         if (string.IsNullOrWhiteSpace(expr))
-            the = DateRange(temp.Day);
+            the = DateRange(temp.Day, Accountant.Client.ClientDateTime.Today);
         else
         {
-            the = ParsingF.Range(ref expr) ?? throw new ArgumentException("语法错误", nameof(expr));
+            the = ParsingF.Range(ref expr, Accountant.Client) ?? throw new ArgumentException("语法错误", nameof(expr));
             ParsingF.Eof(expr);
         }
 
@@ -69,10 +69,9 @@ internal class Composite : PluginBase
     public static Template GetTemplate(string name) => Templates.Config.Templates.SingleOrDefault(
         p => p.Name == name);
 
-    public static DateFilter DateRange(int day)
+    public static DateFilter DateRange(int day, DateTime now)
     {
         DateFilter the;
-        var now = ClientDateTime.Today;
         if (day == 0)
             return new(
                 new(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc),
@@ -179,7 +178,7 @@ internal class InquiriesVisitor : IInquiryVisitor<double>
         var o =
             $"[{(inq.IsLeftExtended ? "" : m_Rng.StartDate.AsDate())}~{m_Rng.EndDate.AsDate()}] {(inq.General ? "G" : "")}";
         var query = ParsingF.GroupedQuery(
-            $"{gen(o)}`{(inq.ByCurrency ? "C" : "")}{(inq.ByTitle ? "t" : "")}{(inq.BySubTitle ? "s" : "")}{(inq.ByContent ? "c" : "")}{(inq.ByRemark ? "r" : "")}{(inq.ByCurrency || inq.ByTitle || inq.BySubTitle || inq.ByContent || inq.ByRemark ? "" : "v")}{(!inq.ByCurrency ? "X" : "")}");
+            $"{gen(o)}`{(inq.ByCurrency ? "C" : "")}{(inq.ByTitle ? "t" : "")}{(inq.BySubTitle ? "s" : "")}{(inq.ByContent ? "c" : "")}{(inq.ByRemark ? "r" : "")}{(inq.ByCurrency || inq.ByTitle || inq.BySubTitle || inq.ByContent || inq.ByRemark ? "" : "v")}{(!inq.ByCurrency ? "X" : "")}", m_Accountant.Client);
         var gq = m_Accountant.SelectVoucherDetailsGrouped(query);
         if (inq.ByCurrency)
             foreach (var grp in gq.Items.Cast<ISubtotalCurrency>())
@@ -193,7 +192,7 @@ internal class InquiriesVisitor : IInquiryVisitor<double>
 
                 m_Sb.Append(
                     new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), theFmt, inq.HideContent)
-                        .PresentSubtotal(grp, query.Subtotal, m_Serializer));
+                        .PresentSubtotal(grp, query.Subtotal, m_Serializer, m_Accountant.Client));
             }
         else
         {
@@ -201,7 +200,7 @@ internal class InquiriesVisitor : IInquiryVisitor<double>
 
             m_Sb.Append(
                 new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), fmt, inq.HideContent)
-                    .PresentSubtotal(gq, query.Subtotal, m_Serializer));
+                    .PresentSubtotal(gq, query.Subtotal, m_Serializer, m_Accountant.Client));
         }
 
         return val;

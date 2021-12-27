@@ -25,6 +25,7 @@ using System.Reflection;
 using System.Runtime;
 using System.Runtime.Loader;
 using System.Text;
+using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using Microsoft.CodeAnalysis;
@@ -124,7 +125,7 @@ public class CSharpSerializer : IEntitySerializer
     #region Voucher
 
     /// <inheritdoc />
-    public string PresentVoucherDetail(VoucherDetail detail)
+    public string PresentVoucherDetail(VoucherDetail detail, Client client)
     {
         if (detail == null)
             return string.Empty;
@@ -152,11 +153,11 @@ public class CSharpSerializer : IEntitySerializer
     }
 
     /// <inheritdoc />
-    public string PresentVoucherDetail(VoucherDetailR detail)
-        => PresentVoucherDetail((VoucherDetail)detail);
+    public string PresentVoucherDetail(VoucherDetailR detail, Client client)
+        => PresentVoucherDetail((VoucherDetail)detail, client);
 
     /// <inheritdoc />
-    public string PresentVoucher(Voucher voucher)
+    public string PresentVoucher(Voucher voucher, Client client)
     {
         if (voucher == null)
             return "new Voucher {\n\n}";
@@ -172,14 +173,14 @@ public class CSharpSerializer : IEntitySerializer
             sb.AppendLine($"    Remark = {ProcessString(voucher.Remark)},");
         sb.AppendLine("    Details = new() {");
         foreach (var detail in voucher.Details)
-            sb.Append(PresentVoucherDetail(detail));
+            sb.Append(PresentVoucherDetail(detail, client));
 
         sb.Append("} }");
         return sb.ToString();
     }
 
     /// <inheritdoc />
-    public Voucher ParseVoucher(string str)
+    public Voucher ParseVoucher(string str, Client client)
     {
         try
         {
@@ -192,7 +193,7 @@ public class CSharpSerializer : IEntitySerializer
     }
 
     /// <inheritdoc />
-    public VoucherDetail ParseVoucherDetail(string str)
+    public VoucherDetail ParseVoucherDetail(string str, Client client)
     {
         try
         {
@@ -209,7 +210,7 @@ public class CSharpSerializer : IEntitySerializer
     #region Asset
 
     /// <inheritdoc />
-    public string PresentAsset(Asset asset)
+    public string PresentAsset(Asset asset, Client client)
     {
         if (asset == null)
             return "null";
@@ -267,7 +268,7 @@ public class CSharpSerializer : IEntitySerializer
     }
 
     /// <inheritdoc />
-    public Asset ParseAsset(string str)
+    public Asset ParseAsset(string str, Client client)
     {
         try
         {
@@ -284,7 +285,7 @@ public class CSharpSerializer : IEntitySerializer
     #region Amort
 
     /// <inheritdoc />
-    public string PresentAmort(Amortization amort)
+    public string PresentAmort(Amortization amort, Client client)
     {
         if (amort == null)
             return "null";
@@ -305,7 +306,7 @@ public class CSharpSerializer : IEntitySerializer
         sb.AppendLine($"    Value = {amort.Value}, ");
         sb.AppendLine($"    TotalDays = {amort.TotalDays}, Interval = AmortizeInterval.{amort.Interval},");
         sb.Append("Template = ");
-        sb.Append(PresentVoucher(amort.Template));
+        sb.Append(PresentVoucher(amort.Template, client));
         sb.AppendLine(",");
         if (amort.Remark != null)
             sb.AppendLine($"    Remark = {ProcessString(amort.Remark)},");
@@ -341,7 +342,7 @@ public class CSharpSerializer : IEntitySerializer
     }
 
     /// <inheritdoc />
-    public Amortization ParseAmort(string str)
+    public Amortization ParseAmort(string str, Client client)
     {
         try
         {

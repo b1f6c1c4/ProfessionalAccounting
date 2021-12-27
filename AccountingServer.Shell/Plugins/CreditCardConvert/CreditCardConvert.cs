@@ -48,7 +48,7 @@ internal class CreditCardConvert : PluginBase
 
     private IQueryResult Query(string content, ref string expr)
     {
-        var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+        var rng = Parsing.Range(ref expr, Accountant.Client) ?? DateFilter.Unconstrained;
 
         var trans = new List<Trans>();
         var rebates = new List<Rebate>();
@@ -186,7 +186,7 @@ internal class CreditCardConvert : PluginBase
         using var vir = Accountant.Virtualize();
         while (!string.IsNullOrWhiteSpace(expr))
         {
-            var date = Parsing.UniqueTime(ref expr);
+            var date = Parsing.UniqueTime(ref expr, Accountant.Client);
             if (!date.HasValue)
             {
                 var dayF = ParsingF.DoubleF(ref expr);
@@ -195,9 +195,10 @@ internal class CreditCardConvert : PluginBase
                 if (day != dayF)
                     throw new ApplicationException("非整数日期");
 
-                date = ClientDateTime.Today.Day < day
-                    ? ClientDateTime.Today.AddMonths(-1).AddDays(day - ClientDateTime.Today.Day)
-                    : ClientDateTime.Today.AddDays(day - ClientDateTime.Today.Day);
+                var today = Accountant.Client.ClientDateTime.Today;
+                date = today.Day < day
+                    ?  today.AddMonths(-1).AddDays(day - today.Day)
+                    :  today.AddDays(day - today.Day);
             }
 
             var from = ParsingF.DoubleF(ref expr);

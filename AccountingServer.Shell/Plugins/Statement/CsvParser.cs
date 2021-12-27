@@ -19,7 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using AccountingServer.Entities;
+using AccountingServer.BLL;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.FacadeF;
 

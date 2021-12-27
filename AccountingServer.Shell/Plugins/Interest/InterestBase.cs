@@ -60,7 +60,7 @@ internal abstract class InterestBase : PluginBase
         var remark = Parsing.Token(ref expr);
         var rate = Parsing.DoubleF(ref expr) / 10000D;
         var all = Parsing.Optional(ref expr, "all");
-        var endDate = !all ? Parsing.UniqueTime(ref expr) : null;
+        var endDate = !all ? Parsing.UniqueTime(ref expr, Accountant.Client) : null;
         Parsing.Eof(expr);
 
         var loans = Accountant.RunGroupedQuery($"({MajorFilter()})-\"\" ``rtcC").Items
@@ -107,7 +107,7 @@ internal abstract class InterestBase : PluginBase
                 ref capitalIntegral,
                 ref interestIntegral,
                 lastD,
-                endDate ?? ClientDateTime.Today);
+                endDate ?? Accountant.Client.ClientDateTime.Today);
         }
         else
         {
@@ -118,7 +118,7 @@ internal abstract class InterestBase : PluginBase
                 ref capitalIntegral,
                 ref interestIntegral,
                 null,
-                ClientDateTime.Today);
+                Accountant.Client.ClientDateTime.Today);
         }
 
         return new DirtySucceed();

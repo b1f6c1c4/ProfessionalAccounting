@@ -25,7 +25,7 @@ namespace AccountingServer.BLL.Parsing;
 
 internal partial class QueryParser
 {
-    public partial class VoucherQueryContext : IVoucherQueryAtom
+    public partial class VoucherQueryContext : IClientDependable, IVoucherQueryAtom
     {
         /// <inheritdoc />
         public bool ForAll => MatchAllMark() != null;
@@ -56,10 +56,24 @@ internal partial class QueryParser
         }
 
         /// <inheritdoc />
-        public DateFilter Range => range().TheRange();
+        public DateFilter Range
+        {
+            get
+            {
+                range().Client = Client;
+                return range().Range;
+            }
+        }
 
         /// <inheritdoc />
-        public IQueryCompounded<IDetailQueryAtom> DetailFilter => details();
+        public IQueryCompounded<IDetailQueryAtom> DetailFilter
+        {
+            get
+            {
+                details().Client = Client;
+                return details();
+            }
+        }
 
         /// <inheritdoc />
         public bool IsDangerous()
@@ -67,16 +81,30 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class VouchersContext : IQueryAry<IVoucherQueryAtom>
+    public partial class VouchersContext : IClientDependable, IQueryAry<IVoucherQueryAtom>
     {
         /// <inheritdoc />
         public OperatorType Operator => OperatorType.None;
 
         /// <inheritdoc />
         public IQueryCompounded<IVoucherQueryAtom> Filter1
-            => (IQueryCompounded<IVoucherQueryAtom>)voucherQuery() ?? vouchers2();
+        {
+            get
+            {
+                if (voucherQuery() != null)
+                {
+                    voucherQuery().Client = Client;
+                    return voucherQuery();
+                }
+
+                vouchers2().Client = Client;
+                return vouchers2();
+            }
+        }
 
         /// <inheritdoc />
         public IQueryCompounded<IVoucherQueryAtom> Filter2 => throw new MemberAccessException("表达式错误");
@@ -86,9 +114,11 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class Vouchers2Context : IQueryAry<IVoucherQueryAtom>
+    public partial class Vouchers2Context : IClientDependable, IQueryAry<IVoucherQueryAtom>
     {
         /// <inheritdoc />
         public OperatorType Operator
@@ -117,10 +147,29 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public IQueryCompounded<IVoucherQueryAtom> Filter1
-            => (IQueryCompounded<IVoucherQueryAtom>)vouchers2() ?? vouchers1();
+        {
+            get
+            {
+                if (vouchers2() != null)
+                {
+                    vouchers2().Client = Client;
+                    return vouchers2();
+                }
+
+                vouchers1().Client = Client;
+                return vouchers1();
+            }
+        }
 
         /// <inheritdoc />
-        public IQueryCompounded<IVoucherQueryAtom> Filter2 => vouchers1();
+        public IQueryCompounded<IVoucherQueryAtom> Filter2
+        {
+            get
+            {
+                vouchers1().Client = Client;
+                return vouchers1();
+            }
+        }
 
         /// <inheritdoc />
         public bool IsDangerous()
@@ -136,34 +185,64 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class Vouchers1Context : IQueryAry<IVoucherQueryAtom>
+    public partial class Vouchers1Context : IClientDependable, IQueryAry<IVoucherQueryAtom>
     {
         /// <inheritdoc />
         public OperatorType Operator => Op == null ? OperatorType.None : OperatorType.Intersect;
 
         /// <inheritdoc />
-        public IQueryCompounded<IVoucherQueryAtom> Filter1 => vouchers0();
+        public IQueryCompounded<IVoucherQueryAtom> Filter1
+        {
+            get
+            {
+                vouchers0().Client = Client;
+                return vouchers0();
+            }
+        }
 
         /// <inheritdoc />
-        public IQueryCompounded<IVoucherQueryAtom> Filter2 => vouchers1();
+        public IQueryCompounded<IVoucherQueryAtom> Filter2
+        {
+            get
+            {
+                vouchers1().Client = Client;
+                return vouchers1();
+            }
+        }
 
         /// <inheritdoc />
         public bool IsDangerous() => Filter1.IsDangerous() && (Filter2?.IsDangerous() ?? true);
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class Vouchers0Context : IQueryAry<IVoucherQueryAtom>
+    public partial class Vouchers0Context : IClientDependable, IQueryAry<IVoucherQueryAtom>
     {
         /// <inheritdoc />
         public OperatorType Operator => OperatorType.None;
 
         /// <inheritdoc />
-        public IQueryCompounded<IVoucherQueryAtom> Filter1 => voucherQuery() ??
-            (IQueryCompounded<IVoucherQueryAtom>)vouchers2();
+        public IQueryCompounded<IVoucherQueryAtom> Filter1
+        {
+            get
+            {
+                if (voucherQuery() != null)
+                {
+                    voucherQuery().Client = Client;
+                    return voucherQuery();
+                }
+
+                vouchers2().Client = Client;
+                return vouchers2();
+            }
+        }
 
         /// <inheritdoc />
         public IQueryCompounded<IVoucherQueryAtom> Filter2 => null;
@@ -173,21 +252,46 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class EmitContext : IEmit
+    public partial class EmitContext : IClientDependable, IEmit
     {
         /// <inheritdoc />
-        public IQueryCompounded<IDetailQueryAtom> DetailFilter => details();
+        public IQueryCompounded<IDetailQueryAtom> DetailFilter
+        {
+            get
+            {
+                details().Client = Client;
+                return details();
+            }
+        }
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class VoucherDetailQueryContext : IVoucherDetailQuery
+    public partial class VoucherDetailQueryContext : IClientDependable, IVoucherDetailQuery
     {
         /// <inheritdoc />
         public IQueryCompounded<IVoucherQueryAtom> VoucherQuery
-            => (IQueryCompounded<IVoucherQueryAtom>)voucherQuery() ?? vouchers();
+        {
+            get
+            {
+                if (voucherQuery() != null)
+                {
+                    voucherQuery().Client = Client;
+                    return voucherQuery();
+                }
+
+                vouchers().Client = Client;
+                return vouchers();
+            }
+        }
 
         /// <inheritdoc />
         public IEmit DetailEmitFilter => emit();
+
+        public Func<Client> Client { private get; set; }
     }
 }

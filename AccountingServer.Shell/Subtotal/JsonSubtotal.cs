@@ -18,6 +18,7 @@
 
 using System;
 using System.Linq;
+using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Serializer;
@@ -35,7 +36,7 @@ internal class JsonSubtotal : ISubtotalVisitor<JProperty>, ISubtotalStringify
     private ISubtotal m_Par;
 
     /// <inheritdoc />
-    public string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer)
+    public string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer, Client client)
     {
         m_Par = par;
         m_Depth = 0;

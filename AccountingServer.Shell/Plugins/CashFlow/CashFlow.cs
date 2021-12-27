@@ -48,9 +48,9 @@ internal class CashFlow : PluginBase
         Parsing.Eof(expr);
 
         var accts = Templates.Config.Accounts
-            .Where(a => string.IsNullOrWhiteSpace(a.User) || ClientUser.Name == a.User).ToList();
+            .Where(a => string.IsNullOrWhiteSpace(a.User) || Accountant.Client.ClientUser.Name == a.User).ToList();
         var n = accts.Count;
-        var until = ClientDateTime.Today.AddMonths(extraMonths);
+        var until = Accountant.Client.ClientDateTime.Today.AddMonths(extraMonths);
 
         var aggs = new double[n];
         var rst = new Dictionary<DateTime, double[,]>();
@@ -63,7 +63,7 @@ internal class CashFlow : PluginBase
 
             foreach (var (date, value) in GetItems(accts[i], serializer, until))
             {
-                if (date <= ClientDateTime.Today)
+                if (date <= Accountant.Client.ClientDateTime.Today)
                     continue;
                 if (date > until)
                     continue;
@@ -100,7 +100,7 @@ internal class CashFlow : PluginBase
             var sum = 0D;
             for (var i = 0; i < n; i++)
             {
-                sum += aggs[i] * Accountant.Query(ClientDateTime.Today, accts[i].Currency, BaseCurrency.Now).Result; // TODO
+                sum += aggs[i] * Accountant.Query(Accountant.Client.ClientDateTime.Today, accts[i].Currency, BaseCurrency.Now).Result; // TODO
 
                 sb.Append("".PadLeft(15));
                 sb.Append("".PadLeft(15));
@@ -143,7 +143,7 @@ internal class CashFlow : PluginBase
 
     private DateTime NextDate(int day, DateTime? reference = null, bool inclusive = false)
     {
-        var d = reference ?? ClientDateTime.Today;
+        var d = reference ?? Accountant.Client.ClientDateTime.Today;
         var v = new DateTime(d.Year, d.Month, 1, 0, 0, 0, DateTimeKind.Utc);
         var last = v.AddMonths(1).AddDays(-1).Day;
         var targ = day <= last ? day : last;
@@ -174,7 +174,7 @@ internal class CashFlow : PluginBase
         {
             var rb = new Composite.Composite(Accountant);
             var tmp = Composite.Composite.GetTemplate(account.Reimburse);
-            var rng = Composite.Composite.DateRange(tmp.Day);
+            var rng = Composite.Composite.DateRange(tmp.Day, Accountant.Client.ClientDateTime.Today);
             rb.DoInquiry(rng, tmp, out var rbVal, BaseCurrency.Now, serializer);
             var rbF = rng.EndDate!.Value;
             yield return (rbF, rbVal);
@@ -207,7 +207,7 @@ internal class CashFlow : PluginBase
                     break;
 
                 case SimpleCreditCard cc:
-                    var rng = $"[{ClientDateTime.Today.AddMonths(-3).AsDate()}~]";
+                    var rng = $"[{Accountant.Client.ClientDateTime.Today.AddMonths(-3).AsDate()}~]";
                     var mv = $"{{({user}*{cc.Query})+{user} T3999+{user} T6603 A {rng}}}";
                     var mos = new Dictionary<DateTime, double>();
                     foreach (var grpC in Accountant.RunGroupedQuery(
@@ -238,7 +238,7 @@ internal class CashFlow : PluginBase
                             mos[mo] = b.Fund;
                     }
 
-                    for (var d = ClientDateTime.Today; d <= until; d = NextDate(cc.BillDay, d))
+                    for (var d = Accountant.Client.ClientDateTime.Today; d <= until; d = NextDate(cc.BillDay, d))
                     {
                         var mo = NextDate(cc.RepaymentDay, NextDate(cc.BillDay, d), true);
                         var cob = -(NextDate(cc.BillDay, d) - d).TotalDays * cc.MonthlyFee / (365.2425 / 12);
@@ -267,7 +267,7 @@ internal class CashFlow : PluginBase
                     else
                         nxt -= pmt - stmt; // Paid too much
 
-                    for (var d = ClientDateTime.Today; d <= until; d = NextDate(cc.BillDay, d))
+                    for (var d = Accountant.Client.ClientDateTime.Today; d <= until; d = NextDate(cc.BillDay, d))
                     {
                         nxt += (NextDate(cc.BillDay, d) - d).TotalDays * cc.MonthlyFee / (365.2425 / 12);
                         if (cc.MaximumUtility >= 0 && cc.MaximumUtility < nxt)

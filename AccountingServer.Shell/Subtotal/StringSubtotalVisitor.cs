@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Serializer;
@@ -38,13 +39,15 @@ internal abstract class StringSubtotalVisitor : ISubtotalVisitor<Nothing>, ISubt
     protected GatheringType Ga;
 
     private ISubtotal m_Par;
+    protected Client m_Client;
     protected StringBuilder Sb;
     protected IEntitiesSerializer Serializer;
 
     /// <inheritdoc />
-    public string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer)
+    public string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer, Client client)
     {
         m_Par = par;
+        m_Client = client;
         Ga = par.GatherType;
         Cu = par.EquivalentCurrency;
         Serializer = serializer;
@@ -85,7 +88,7 @@ internal abstract class StringSubtotalVisitor : ISubtotalVisitor<Nothing>, ISubt
                     SubtotalLevel.Content => sub.Items.Cast<ISubtotalContent>().OrderBy(s => s.Content, comparer),
                     SubtotalLevel.Remark => sub.Items.Cast<ISubtotalRemark>().OrderBy(s => s.Remark, comparer),
                     SubtotalLevel.User => sub.Items.Cast<ISubtotalUser>()
-                        .OrderBy(s => s.User == ClientUser.Name ? null : s.User),
+                        .OrderBy(s => s.User == m_Client.ClientUser.Name ? null : s.User),
                     SubtotalLevel.Currency => sub.Items.Cast<ISubtotalCurrency>()
                         .OrderBy(s => s.Currency == BaseCurrency.Now ? null : s.Currency),
                     SubtotalLevel.Day => sub.Items.Cast<ISubtotalDate>().OrderBy(s => s.Date),

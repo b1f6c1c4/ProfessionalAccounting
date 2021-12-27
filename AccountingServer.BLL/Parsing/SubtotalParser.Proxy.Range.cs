@@ -23,25 +23,27 @@ namespace AccountingServer.BLL.Parsing;
 
 internal partial class SubtotalParser
 {
-    public partial class RangeDayContext : IDateRange
+    public partial class RangeDayContext : IClientDependable, IDate, IDateRange
     {
         /// <inheritdoc />
         public DateFilter Range
         {
             get
             {
-                var dt = (DateTime)this;
+                var dt = AsDate();
                 return new(dt, dt);
             }
         }
 
-        public static implicit operator DateTime(RangeDayContext context)
-            => context.RangeDeltaDay() != null
-                ? ClientDateTime.Today.AddDays(1 - context.RangeDeltaDay().GetText().Length)
-                : ClientDateTime.ParseExact(context.RangeADay().GetText(), "yyyyMMdd");
+        public DateTime? AsDate() =>
+            RangeDeltaDay() != null
+                ? Client().ClientDateTime.Today.AddDays(1 - RangeDeltaDay().GetText().Length)
+                : ClientDateTime.ParseExact(RangeADay().GetText(), "yyyyMMdd");
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class RangeWeekContext : IDateRange
+    public partial class RangeWeekContext : IClientDependable, IDateRange
     {
         /// <inheritdoc />
         public DateFilter Range
@@ -49,15 +51,17 @@ internal partial class SubtotalParser
             get
             {
                 var delta = 1 - RangeDeltaWeek().GetText().Length;
-                var dt = ClientDateTime.Today;
+                var dt = Client().ClientDateTime.Today;
                 dt = dt.AddDays(dt.DayOfWeek == DayOfWeek.Sunday ? -6 : 1 - (int)dt.DayOfWeek);
                 dt = dt.AddDays(delta * 7);
                 return new(dt, dt.AddDays(6));
             }
         }
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class RangeMonthContext : IDateRange
+    public partial class RangeMonthContext : IClientDependable, IDateRange
     {
         /// <inheritdoc />
         public DateFilter Range
@@ -69,8 +73,8 @@ internal partial class SubtotalParser
                 {
                     var delta = int.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
                     dt = new(
-                        ClientDateTime.Today.Year,
-                        ClientDateTime.Today.Month,
+                        Client().ClientDateTime.Today.Year,
+                        Client().ClientDateTime.Today.Month,
                         1,
                         0,
                         0,
@@ -84,6 +88,8 @@ internal partial class SubtotalParser
                 return new(dt, dt.AddMonths(1).AddDays(-1));
             }
         }
+
+        public Func<Client> Client { private get; set; }
     }
 
     public partial class RangeYearContext : IDateRange
@@ -101,7 +107,7 @@ internal partial class SubtotalParser
         }
     }
 
-    public partial class RangeCertainPointContext : IDateRange
+    public partial class RangeCertainPointContext : IClientDependable, IDateRange
     {
         /// <inheritdoc />
         public DateFilter Range
@@ -109,20 +115,34 @@ internal partial class SubtotalParser
             get
             {
                 if (rangeDay() != null)
+                {
+                    rangeDay().Client = Client;
                     return rangeDay().Range;
+                }
+
                 if (rangeWeek() != null)
+                {
+                    rangeWeek().Client = Client;
                     return rangeWeek().Range;
+                }
+
                 if (rangeMonth() != null)
+                {
+                    rangeMonth().Client = Client;
                     return rangeMonth().Range;
+                }
+
                 if (rangeYear() != null)
                     return rangeYear().Range;
 
                 throw new MemberAccessException("表达式错误");
             }
         }
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class RangeCoreContext : IDateRange
+    public partial class RangeCoreContext : IClientDependable, IDateRange
     {
         /// <inheritdoc />
         public DateFilter Range
@@ -134,18 +154,31 @@ internal partial class SubtotalParser
                 if (RangeAllNotNull() != null)
                     return DateFilter.TheNotNull;
                 if (Certain != null)
+                {
+                    Certain.Client = Client;
                     return Certain.Range;
+                }
 
                 DateTime? s = null, e = null;
                 if (Begin != null)
+                {
+                    Begin.Client = Client;
                     s = Begin.Range.StartDate;
+                }
+
                 if (End != null)
+                {
+                    End.Client = Client;
                     e = End.Range.EndDate;
+                }
+
                 var f = new DateFilter(s, e);
                 if (Tilde().GetText() == "~~")
                     f.Nullable ^= true;
                 return f;
             }
         }
+
+        public Func<Client> Client { private get; set; }
     }
 }

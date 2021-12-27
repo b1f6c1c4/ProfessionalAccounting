@@ -30,7 +30,7 @@ namespace AccountingServer.BLL;
 /// </summary>
 internal class AmortAccountant : DistributedAccountant
 {
-    public AmortAccountant(DbSession db) : base(db) { }
+    public AmortAccountant(DbSession db, Client client) : base(db, client) { }
 
     /// <summary>
     ///     获取本次摊销日期

@@ -18,6 +18,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using AccountingServer.BLL;
 using AccountingServer.Entities;
 using Xunit;
 

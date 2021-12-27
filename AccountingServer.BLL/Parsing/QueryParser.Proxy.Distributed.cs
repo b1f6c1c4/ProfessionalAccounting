@@ -27,20 +27,30 @@ namespace AccountingServer.BLL.Parsing;
 
 internal partial class QueryParser
 {
-    public partial class DistributedQAtomContext : IDistributedQueryAtom
+    public partial class DistributedQAtomContext : IClientDependable, IDistributedQueryAtom
     {
         /// <inheritdoc />
         public IDistributed Filter
             => new MyDistributedFilter
                 {
                     ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : null,
-                    User = (UserSpec()?.GetText()).ParseUserSpec(),
+                    User = (UserSpec()?.GetText()).ParseUserSpec(Client().ClientUser),
                     Name = RegexString()?.GetText().Dequotation().Replace(@"\/", "/"),
                     Remark = PercentQuotedString()?.GetText().Dequotation(),
                 };
 
         /// <inheritdoc />
-        public DateFilter Range => rangeCore()?.Range ?? DateFilter.Unconstrained;
+        public DateFilter Range
+        {
+            get
+            {
+                if (rangeCore() == null)
+                    return DateFilter.Unconstrained;
+
+                rangeCore().Client = Client;
+                return rangeCore().Range;
+            }
+        }
 
         /// <inheritdoc />
         public bool IsDangerous() => Filter.IsDangerous() && Range.IsDangerous(true);
@@ -75,9 +85,11 @@ internal partial class QueryParser
             /// <inheritdoc />
             public IEnumerable<IDistributedItem> TheSchedule { get; set; }
         }
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class DistributedQContext : IQueryAry<IDistributedQueryAtom>
+    public partial class DistributedQContext : IClientDependable, IQueryAry<IDistributedQueryAtom>
     {
         /// <inheritdoc />
         public OperatorType Operator
@@ -100,10 +112,29 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public IQueryCompounded<IDistributedQueryAtom> Filter1
-            => (IQueryCompounded<IDistributedQueryAtom>)distributedQ() ?? distributedQ1();
+        {
+            get
+            {
+                if (distributedQ() != null)
+                {
+                    distributedQ().Client = Client;
+                    return distributedQ();
+                }
+
+                distributedQ1().Client = Client;
+                return distributedQ1();
+            }
+        }
 
         /// <inheritdoc />
-        public IQueryCompounded<IDistributedQueryAtom> Filter2 => distributedQ1();
+        public IQueryCompounded<IDistributedQueryAtom> Filter2
+        {
+            get
+            {
+                distributedQ1().Client = Client;
+                return distributedQ1();
+            }
+        }
 
         /// <inheritdoc />
         public bool IsDangerous()
@@ -119,34 +150,64 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class DistributedQ1Context : IQueryAry<IDistributedQueryAtom>
+    public partial class DistributedQ1Context : IClientDependable, IQueryAry<IDistributedQueryAtom>
     {
         /// <inheritdoc />
         public OperatorType Operator => Op == null ? OperatorType.None : OperatorType.Intersect;
 
         /// <inheritdoc />
-        public IQueryCompounded<IDistributedQueryAtom> Filter1 => distributedQ0();
+        public IQueryCompounded<IDistributedQueryAtom> Filter1
+        {
+            get
+            {
+                distributedQ0().Client = Client;
+                return distributedQ0();
+            }
+        }
 
         /// <inheritdoc />
-        public IQueryCompounded<IDistributedQueryAtom> Filter2 => distributedQ1();
+        public IQueryCompounded<IDistributedQueryAtom> Filter2
+        {
+            get
+            {
+                distributedQ1().Client = Client;
+                return distributedQ1();
+            }
+        }
 
         /// <inheritdoc />
         public bool IsDangerous() => Filter1.IsDangerous() && (Filter2?.IsDangerous() ?? true);
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class DistributedQ0Context : IQueryAry<IDistributedQueryAtom>
+    public partial class DistributedQ0Context : IClientDependable, IQueryAry<IDistributedQueryAtom>
     {
         /// <inheritdoc />
         public OperatorType Operator => OperatorType.None;
 
         /// <inheritdoc />
         public IQueryCompounded<IDistributedQueryAtom> Filter1
-            => (IQueryCompounded<IDistributedQueryAtom>)distributedQAtom() ?? distributedQ();
+        {
+            get
+            {
+                if (distributedQAtom() != null)
+                {
+                    distributedQAtom().Client = Client;
+                    return distributedQAtom();
+                }
+
+                distributedQ().Client = Client;
+                return distributedQ();
+            }
+        }
 
         /// <inheritdoc />
         public IQueryCompounded<IDistributedQueryAtom> Filter2 => null;
@@ -156,5 +217,7 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
+
+        public Func<Client> Client { private get; set; }
     }
 }

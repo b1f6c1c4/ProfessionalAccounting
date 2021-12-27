@@ -230,7 +230,7 @@ public class DbSession : IHistoricalExchange
 
         foreach (var d in entity.Details)
         {
-            d.User ??= ClientUser.Name;
+            d.User ??= "anonymous";
             d.Currency = d.Currency.ToUpperInvariant();
             d.Fund = Regularize(d.Fund);
         }

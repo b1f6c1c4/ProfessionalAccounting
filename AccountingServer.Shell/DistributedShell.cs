@@ -51,8 +51,8 @@ internal abstract class DistributedShell : IShellComponent
                         "soft",
                         (expr, _) =>
                             {
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+                                var dist = Parsing.DistributedQuery(ref expr, Accountant.Client);
+                                var rng = Parsing.Range(ref expr, Accountant.Client) ?? DateFilter.Unconstrained;
                                 Parsing.Eof(expr);
                                 return ExecuteResetSoft(dist, rng);
                             }),
@@ -60,8 +60,8 @@ internal abstract class DistributedShell : IShellComponent
                         "mixed",
                         (expr, _) =>
                             {
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+                                var dist = Parsing.DistributedQuery(ref expr, Accountant.Client);
+                                var rng = Parsing.Range(ref expr, Accountant.Client) ?? DateFilter.Unconstrained;
                                 Parsing.Eof(expr);
                                 return ExecuteResetMixed(dist, rng);
                             }),
@@ -69,8 +69,8 @@ internal abstract class DistributedShell : IShellComponent
                         "hard",
                         (expr, _) =>
                             {
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var vouchers = Parsing.OptColVouchers(ref expr);
+                                var dist = Parsing.DistributedQuery(ref expr, Accountant.Client);
+                                var vouchers = Parsing.OptColVouchers(ref expr, Accountant.Client);
                                 Parsing.Eof(expr);
                                 return ExecuteResetHard(dist, vouchers);
                             }),
@@ -83,7 +83,7 @@ internal abstract class DistributedShell : IShellComponent
                         (expr, serializer) =>
                             {
                                 var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
-                                var dist = Parsing.DistributedQuery(ref expr);
+                                var dist = Parsing.DistributedQuery(ref expr, Accountant.Client);
                                 Parsing.Eof(expr);
                                 if (dist.IsDangerous() && safe)
                                     throw new SecurityException("检测到弱检索式");
@@ -95,8 +95,8 @@ internal abstract class DistributedShell : IShellComponent
                         (expr, serializer) =>
                             {
                                 var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
-                                var dt = Parsing.UniqueTime(ref expr) ?? ClientDateTime.Today;
-                                var dist = Parsing.DistributedQuery(ref expr);
+                                var dt = Parsing.UniqueTime(ref expr, Accountant.Client) ?? Accountant.Client.ClientDateTime.Today;
+                                var dist = Parsing.DistributedQuery(ref expr, Accountant.Client);
                                 Parsing.Eof(expr);
                                 if (dist.IsDangerous() && safe)
                                     throw new SecurityException("检测到弱检索式");
@@ -108,7 +108,7 @@ internal abstract class DistributedShell : IShellComponent
                         (expr, serializer) =>
                             {
                                 var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
-                                var dist = Parsing.DistributedQuery(ref expr);
+                                var dist = Parsing.DistributedQuery(ref expr, Accountant.Client);
                                 Parsing.Eof(expr);
                                 if (dist.IsDangerous() && safe)
                                     throw new SecurityException("检测到弱检索式");
@@ -119,9 +119,9 @@ internal abstract class DistributedShell : IShellComponent
                         "reg",
                         (expr, serializer) =>
                             {
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-                                var vouchers = Parsing.OptColVouchers(ref expr);
+                                var dist = Parsing.DistributedQuery(ref expr, Accountant.Client);
+                                var rng = Parsing.Range(ref expr, Accountant.Client) ?? DateFilter.Unconstrained;
+                                var vouchers = Parsing.OptColVouchers(ref expr, Accountant.Client);
                                 Parsing.Eof(expr);
                                 return ExecuteRegister(dist, rng, vouchers, serializer);
                             }),
@@ -129,9 +129,9 @@ internal abstract class DistributedShell : IShellComponent
                         "unreg",
                         (expr, serializer) =>
                             {
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
-                                var vouchers = Parsing.OptColVouchers(ref expr);
+                                var dist = Parsing.DistributedQuery(ref expr, Accountant.Client);
+                                var rng = Parsing.Range(ref expr, Accountant.Client) ?? DateFilter.Unconstrained;
+                                var vouchers = Parsing.OptColVouchers(ref expr, Accountant.Client);
                                 Parsing.Eof(expr);
                                 return ExecuteUnregister(dist, rng, vouchers, serializer);
                             }),
@@ -139,7 +139,7 @@ internal abstract class DistributedShell : IShellComponent
                         "recal",
                         (expr, serializer) =>
                             {
-                                var dist = Parsing.DistributedQuery(ref expr);
+                                var dist = Parsing.DistributedQuery(ref expr, Accountant.Client);
                                 Parsing.Eof(expr);
                                 return ExecuteRecal(dist, serializer);
                             }),
@@ -149,8 +149,8 @@ internal abstract class DistributedShell : IShellComponent
                         (expr, _) =>
                             {
                                 var collapse = Parsing.Optional(ref expr, "col");
-                                var dist = Parsing.DistributedQuery(ref expr);
-                                var rng = Parsing.Range(ref expr) ?? DateFilter.Unconstrained;
+                                var dist = Parsing.DistributedQuery(ref expr, Accountant.Client);
+                                var rng = Parsing.Range(ref expr, Accountant.Client) ?? DateFilter.Unconstrained;
                                 Parsing.Eof(expr);
                                 return ExecuteApply(dist, rng, collapse);
                             }),
@@ -158,16 +158,16 @@ internal abstract class DistributedShell : IShellComponent
                         "chk",
                         (expr, serializer) =>
                             {
-                                var dist = Parsing.DistributedQuery(ref expr);
+                                var dist = Parsing.DistributedQuery(ref expr, Accountant.Client);
                                 Parsing.Eof(expr);
-                                return ExecuteCheck(dist, new(null, ClientDateTime.Today), serializer);
+                                return ExecuteCheck(dist, new(null, Accountant.Client.ClientDateTime.Today), serializer);
                             }),
                     new ShellComponent(
                         null,
                         (expr, serializer) =>
                             {
-                                var dt = Parsing.UniqueTime(ref expr) ?? ClientDateTime.Today;
-                                var dist = Parsing.DistributedQuery(ref expr);
+                                var dt = Parsing.UniqueTime(ref expr, Accountant.Client) ?? Accountant.Client.ClientDateTime.Today;
+                                var dist = Parsing.DistributedQuery(ref expr, Accountant.Client);
                                 Parsing.Eof(expr);
                                 return ExecuteList(dist, dt, false, serializer);
                             }),

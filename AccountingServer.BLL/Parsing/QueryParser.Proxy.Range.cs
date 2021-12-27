@@ -23,25 +23,27 @@ namespace AccountingServer.BLL.Parsing;
 
 internal partial class QueryParser
 {
-    public partial class RangeDayContext : IDateRange
+    public partial class RangeDayContext : IClientDependable, IDate, IDateRange
     {
         /// <inheritdoc />
         public DateFilter Range
         {
             get
             {
-                var dt = (DateTime)this;
+                var dt = AsDate();
                 return new(dt, dt);
             }
         }
 
-        public static implicit operator DateTime(RangeDayContext context) =>
-            context.RangeDeltaDay() != null
-                ? ClientDateTime.Today.AddDays(1 - context.RangeDeltaDay().GetText().Length)
-                : ClientDateTime.ParseExact(context.RangeADay().GetText(), "yyyyMMdd");
+        public DateTime? AsDate() =>
+            RangeDeltaDay() != null
+                ? Client().ClientDateTime.Today.AddDays(1 - RangeDeltaDay().GetText().Length)
+                : ClientDateTime.ParseExact(RangeADay().GetText(), "yyyyMMdd");
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class RangeWeekContext : IDateRange
+    public partial class RangeWeekContext : IClientDependable, IDateRange
     {
         /// <inheritdoc />
         public DateFilter Range
@@ -49,15 +51,17 @@ internal partial class QueryParser
             get
             {
                 var delta = 1 - RangeDeltaWeek().GetText().Length;
-                var dt = ClientDateTime.Today;
+                var dt = Client().ClientDateTime.Today;
                 dt = dt.AddDays(dt.DayOfWeek == DayOfWeek.Sunday ? -6 : 1 - (int)dt.DayOfWeek);
                 dt = dt.AddDays(delta * 7);
                 return new(dt, dt.AddDays(6));
             }
         }
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class RangeMonthContext : IDateRange
+    public partial class RangeMonthContext : IClientDependable, IDateRange
     {
         /// <inheritdoc />
         public DateFilter Range
@@ -69,8 +73,8 @@ internal partial class QueryParser
                 {
                     var delta = int.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
                     dt = new(
-                        ClientDateTime.Today.Year,
-                        ClientDateTime.Today.Month,
+                        Client().ClientDateTime.Today.Year,
+                        Client().ClientDateTime.Today.Month,
                         1,
                         0,
                         0,
@@ -84,6 +88,8 @@ internal partial class QueryParser
                 return new(dt, dt.AddMonths(1).AddDays(-1));
             }
         }
+
+        public Func<Client> Client { private get; set; }
     }
 
     public partial class RangeYearContext : IDateRange
@@ -101,7 +107,7 @@ internal partial class QueryParser
         }
     }
 
-    public partial class RangeCertainPointContext : IDateRange
+    public partial class RangeCertainPointContext : IClientDependable, IDateRange
     {
         /// <inheritdoc />
         public DateFilter Range
@@ -109,17 +115,31 @@ internal partial class QueryParser
             get
             {
                 if (rangeDay() != null)
+                {
+                    rangeDay().Client = Client;
                     return rangeDay().Range;
+                }
+
                 if (rangeWeek() != null)
+                {
+                    rangeWeek().Client = Client;
                     return rangeWeek().Range;
+                }
+
                 if (rangeMonth() != null)
+                {
+                    rangeMonth().Client = Client;
                     return rangeMonth().Range;
+                }
+
                 if (rangeYear() != null)
                     return rangeYear().Range;
 
                 throw new MemberAccessException("表达式错误");
             }
         }
+
+        public Func<Client> Client { private get; set; }
     }
 
     public partial class RangePointContext : IDateRange
@@ -139,22 +159,21 @@ internal partial class QueryParser
         }
     }
 
-    public partial class UniqueTimeCoreContext
+    public partial class UniqueTimeCoreContext : IClientDependable, IDate
     {
-        public static implicit operator DateTime?(UniqueTimeCoreContext context)
-            => context switch
-                {
-                    // The case is necessary because, without that, the switch expression
-                    // will be of type RangeDayContext (given by the third clause) and
-                    // an implicit conversion from RangeDayContext to DateTime? will occur. 
-                    // ReSharper disable once RedundantCast
-                    null => (DateTime?)null,
-                    var x when x.RangeNull() != null => null,
-                        { Day: var x } => x,
-                };
+        public DateTime? AsDate()
+        {
+            if (RangeNull() != null)
+                return null;
+
+            rangeDay().Client = Client;
+            return rangeDay().AsDate();
+        }
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class RangeCoreContext : IDateRange
+    public partial class RangeCoreContext : IClientDependable, IDateRange
     {
         /// <inheritdoc />
         public DateFilter Range
@@ -166,29 +185,60 @@ internal partial class QueryParser
                 if (RangeAllNotNull() != null)
                     return DateFilter.TheNotNull;
                 if (Certain != null)
+                {
+                    Certain.Client = Client;
                     return Certain.Range;
+                }
 
                 DateTime? s = null, e = null;
                 if (Begin != null)
+                {
+                    Begin.Client = Client;
                     s = Begin.Range.StartDate;
+                }
+
                 if (End != null)
+                {
+                    End.Client = Client;
                     e = End.Range.EndDate;
+                }
+
                 var f = new DateFilter(s, e);
                 if (Tilde().GetText() == "~~")
                     f.Nullable ^= true;
                 return f;
             }
         }
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class UniqueTimeContext
+    public partial class UniqueTimeContext : IClientDependable, IDate
     {
-        public static implicit operator DateTime?(UniqueTimeContext context) => context?.Core;
+        public DateTime? AsDate()
+        {
+            Core.Client = Client;
+            return Core.AsDate();
+        }
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class RangeContext : IDateRange
+    public partial class RangeContext : IClientDependable, IDateRange
     {
         /// <inheritdoc />
-        public DateFilter Range => rangeCore().TheRange();
+        public DateFilter Range
+        {
+            get
+            {
+                if (rangeCore() == null)
+                    return DateFilter.Unconstrained;
+
+                rangeCore().Client = Client;
+                return rangeCore().Range;
+            }
+        }
+
+        public Func<Client> Client { private get; set; }
     }
 }

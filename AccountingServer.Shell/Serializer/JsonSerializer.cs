@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AccountingServer.BLL;
 using AccountingServer.Entities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -35,21 +36,21 @@ public class JsonSerializer : IEntitiesSerializer
     private const string AmortToken = "new Amortization";
 
     /// <inheritdoc />
-    public string PresentVoucher(Voucher voucher)
+    public string PresentVoucher(Voucher voucher, Client client)
         => voucher == null
             ? $"{VoucherToken}{{\n\n}}"
             : VoucherToken + PresentJson(voucher).ToString(Formatting.Indented);
 
     /// <inheritdoc />
-    public string PresentVoucherDetail(VoucherDetail detail)
+    public string PresentVoucherDetail(VoucherDetail detail, Client client)
         => PresentJson(detail).ToString(Formatting.Indented);
 
     /// <inheritdoc />
-    public string PresentVoucherDetail(VoucherDetailR detail)
-        => PresentVoucherDetail((VoucherDetail)detail);
+    public string PresentVoucherDetail(VoucherDetailR detail, Client client)
+        => PresentVoucherDetail((VoucherDetail)detail, client);
 
     /// <inheritdoc />
-    public Voucher ParseVoucher(string str)
+    public Voucher ParseVoucher(string str, Client client)
     {
         if (str.StartsWith(VoucherToken, StringComparison.OrdinalIgnoreCase))
             str = str[VoucherToken.Length..];
@@ -58,14 +59,14 @@ public class JsonSerializer : IEntitiesSerializer
     }
 
     /// <inheritdoc />
-    public VoucherDetail ParseVoucherDetail(string str) => ParseVoucherDetail(ParseJson(str));
+    public VoucherDetail ParseVoucherDetail(string str, Client client) => ParseVoucherDetail(ParseJson(str));
 
     /// <inheritdoc />
-    public string PresentAsset(Asset asset)
+    public string PresentAsset(Asset asset, Client client)
         => asset == null ? "null" : AssetToken + PresentJson(asset).ToString(Formatting.Indented);
 
     /// <inheritdoc />
-    public Asset ParseAsset(string str)
+    public Asset ParseAsset(string str, Client client)
     {
         if (str.StartsWith(AssetToken, StringComparison.OrdinalIgnoreCase))
             str = str[AssetToken.Length..];
@@ -105,11 +106,11 @@ public class JsonSerializer : IEntitiesSerializer
     }
 
     /// <inheritdoc />
-    public string PresentAmort(Amortization amort)
+    public string PresentAmort(Amortization amort, Client client)
         => amort == null ? "null" : AmortToken + PresentJson(amort).ToString(Formatting.Indented);
 
     /// <inheritdoc />
-    public Amortization ParseAmort(string str)
+    public Amortization ParseAmort(string str, Client client)
     {
         if (str.StartsWith(AmortToken, StringComparison.OrdinalIgnoreCase))
             str = str[AmortToken.Length..];
@@ -140,19 +141,19 @@ public class JsonSerializer : IEntitiesSerializer
             };
     }
 
-    public string PresentVouchers(IEnumerable<Voucher> vouchers)
+    public string PresentVouchers(IEnumerable<Voucher> vouchers, Client client)
         => new JArray(vouchers.Select(PresentJson)).ToString(Formatting.Indented);
 
-    public string PresentVoucherDetails(IEnumerable<VoucherDetail> details)
+    public string PresentVoucherDetails(IEnumerable<VoucherDetail> details, Client client)
         => new JArray(details.Select(PresentJson)).ToString(Formatting.Indented);
 
-    public string PresentVoucherDetails(IEnumerable<VoucherDetailR> details)
-        => PresentVoucherDetails(details.Cast<VoucherDetail>());
+    public string PresentVoucherDetails(IEnumerable<VoucherDetailR> details, Client client)
+        => PresentVoucherDetails(details.Cast<VoucherDetail>(), client);
 
-    public string PresentAssets(IEnumerable<Asset> assets)
+    public string PresentAssets(IEnumerable<Asset> assets, Client client)
         => new JArray(assets.Select(PresentJson)).ToString(Formatting.Indented);
 
-    public string PresentAmorts(IEnumerable<Amortization> amorts)
+    public string PresentAmorts(IEnumerable<Amortization> amorts, Client client)
         => new JArray(amorts.Select(PresentJson)).ToString(Formatting.Indented);
 
     private static JObject ParseJson(string str)

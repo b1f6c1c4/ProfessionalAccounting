@@ -36,7 +36,7 @@ public class ExprSerializer : IEntitySerializer
     private const string TheToken = "new Voucher {";
 
     /// <inheritdoc />
-    public string PresentVoucher(Voucher voucher)
+    public string PresentVoucher(Voucher voucher, Client client)
     {
         var sb = new StringBuilder();
         sb.Append(TheToken);
@@ -56,7 +56,7 @@ public class ExprSerializer : IEntitySerializer
                 sb.AppendLine(voucher.Type.ToString());
 
             foreach (var d in voucher.Details)
-                sb.Append(PresentVoucherDetail(d));
+                sb.Append(PresentVoucherDetail(d, client));
         }
 
         sb.Append('}');
@@ -64,7 +64,7 @@ public class ExprSerializer : IEntitySerializer
     }
 
     /// <inheritdoc />
-    public string PresentVoucherDetail(VoucherDetail detail)
+    public string PresentVoucherDetail(VoucherDetail detail, Client client)
     {
         var sb = new StringBuilder();
         var t = TitleManager.GetTitleName(detail.Title);
@@ -72,7 +72,7 @@ public class ExprSerializer : IEntitySerializer
             detail.SubTitle.HasValue
                 ? $"// {t}-{TitleManager.GetTitleName(detail.Title, detail.SubTitle)}"
                 : $"// {t}");
-        if (detail.User != ClientUser.Name)
+        if (detail.User != client.ClientUser.Name)
             sb.Append($"U{detail.User.AsUser()} ");
         if (detail.Currency != BaseCurrency.Now)
             sb.Append($"@{detail.Currency} ");
@@ -87,17 +87,17 @@ public class ExprSerializer : IEntitySerializer
     }
 
     /// <inheritdoc />
-    public string PresentVoucherDetail(VoucherDetailR detail)
-        => $"{detail.Voucher.Date.AsDate()} {PresentVoucherDetail((VoucherDetail)detail)}";
+    public string PresentVoucherDetail(VoucherDetailR detail, Client client)
+        => $"{detail.Voucher.Date.AsDate()} {PresentVoucherDetail((VoucherDetail)detail, client)}";
 
     /// <inheritdoc />
-    public Voucher ParseVoucher(string expr)
+    public Voucher ParseVoucher(string expr, Client client)
     {
         if (!expr.StartsWith(TheToken, StringComparison.Ordinal))
             throw new FormatException("格式错误");
 
         expr = expr[TheToken.Length..];
-        var v = GetVoucher(ref expr);
+        var v = GetVoucher(ref expr, client);
         Parsing.TrimStartComment(ref expr);
         if (Parsing.Token(ref expr, false) != "}")
             throw new FormatException("格式错误" + expr);
@@ -107,32 +107,33 @@ public class ExprSerializer : IEntitySerializer
     }
 
     /// <inheritdoc />
-    public virtual VoucherDetail ParseVoucherDetail(string expr)
+    public virtual VoucherDetail ParseVoucherDetail(string expr, Client client)
     {
-        var res = ParseVoucherDetail(ref expr);
+        var res = ParseVoucherDetail(ref expr, client);
         Parsing.Eof(expr);
         return res;
     }
 
-    public string PresentAsset(Asset asset) => throw new NotImplementedException();
-    public Asset ParseAsset(string str) => throw new NotImplementedException();
-    public string PresentAmort(Amortization amort) => throw new NotImplementedException();
-    public Amortization ParseAmort(string str) => throw new NotImplementedException();
+    public string PresentAsset(Asset asset, Client client) => throw new NotImplementedException();
+    public Asset ParseAsset(string str, Client client) => throw new NotImplementedException();
+    public string PresentAmort(Amortization amort, Client client) => throw new NotImplementedException();
+    public Amortization ParseAmort(string str, Client client) => throw new NotImplementedException();
 
     /// <summary>
     ///     解析记账凭证表达式
     /// </summary>
     /// <param name="expr">表达式</param>
+    /// <param name="client"></param>
     /// <returns>记账凭证</returns>
-    private Voucher GetVoucher(ref string expr)
+    private Voucher GetVoucher(ref string expr, Client client)
     {
         Parsing.TrimStartComment(ref expr);
         var id = Parsing.Quoted(ref expr, '^');
         Parsing.TrimStartComment(ref expr);
-        DateTime? date = ClientDateTime.Today;
+        DateTime? date = client.ClientDateTime.Today;
         try
         {
-            date = ParsingF.UniqueTime(ref expr);
+            date = ParsingF.UniqueTime(ref expr, client);
         }
         catch (Exception)
         {
@@ -148,7 +149,7 @@ public class ExprSerializer : IEntitySerializer
 
         var lst = new List<VoucherDetail>();
         VoucherDetail d;
-        while ((d = ParseVoucherDetail(ref expr)) != null)
+        while ((d = ParseVoucherDetail(ref expr, client)) != null)
             lst.Add(d);
 
         return new()
@@ -200,12 +201,12 @@ public class ExprSerializer : IEntitySerializer
         }
     }
 
-    public VoucherDetail ParseVoucherDetail(ref string expr)
+    public VoucherDetail ParseVoucherDetail(ref string expr, Client client)
     {
         var lst = new List<string>();
 
         Parsing.TrimStartComment(ref expr);
-        var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal)).ParseUserSpec();
+        var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal)).ParseUserSpec(client.ClientUser);
         var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))?[1..]
                 .ToUpperInvariant()
             ?? BaseCurrency.Now;

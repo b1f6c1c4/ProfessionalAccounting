@@ -73,7 +73,7 @@ internal class Utilities : PluginBase
     /// <returns>记账凭证</returns>
     private Voucher GenerateVoucher(ref string expr)
     {
-        var time = Parsing.UniqueTime(ref expr) ?? ClientDateTime.Today;
+        var time = Parsing.UniqueTime(ref expr, Accountant.Client) ?? Accountant.Client.ClientDateTime.Today;
         var abbr = Parsing.Token(ref expr);
 
         var template = Templates.Config.Templates.FirstOrDefault(t => t.Name == abbr) ??

@@ -67,12 +67,12 @@ internal class YieldRate : PluginBase
     /// <param name="lst">现金流</param>
     /// <param name="pv">现值</param>
     /// <returns>实际收益率</returns>
-    private static double GetRate(IReadOnlyList<ISubtotalDate> lst, double pv)
+    private double GetRate(IReadOnlyList<ISubtotalDate> lst, double pv)
     {
         if (!pv.IsZero())
             return
                 new YieldRateSolver(
-                    lst.Select(b => ClientDateTime.Today.Subtract(b.Date!.Value).TotalDays).Concat(new[] { 0D }),
+                    lst.Select(b => Accountant.Client.ClientDateTime.Today.Subtract(b.Date!.Value).TotalDays).Concat(new[] { 0D }),
                     lst.Select(b => b.Fund).Concat(new[] { -pv })).Solve();
 
         return

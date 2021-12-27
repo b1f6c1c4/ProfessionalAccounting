@@ -26,7 +26,7 @@ namespace AccountingServer.BLL.Parsing;
 
 internal partial class SubtotalParser
 {
-    public partial class SubtotalContext : ISubtotal
+    public partial class SubtotalContext : IClientDependable, ISubtotal
     {
         /// <inheritdoc />
         public GatheringType GatherType
@@ -120,11 +120,15 @@ internal partial class SubtotalParser
 
         /// <inheritdoc />
         public IDateRange EveryDayRange
-            => subtotalAggr() switch
-                {
-                    var x when x.AllDate() != null => DateFilter.Unconstrained,
-                    _ => subtotalAggr().rangeCore(),
-                };
+        {
+            get
+            {
+                if (subtotalAggr() is var x && x.AllDate() != null)
+                    return DateFilter.Unconstrained;
+                subtotalAggr().rangeCore().Client = Client;
+                return subtotalAggr().rangeCore();
+            }
+        }
 
         /// <inheritdoc />
         public string EquivalentCurrency
@@ -136,10 +140,16 @@ internal partial class SubtotalParser
 
         /// <inheritdoc />
         public DateTime? EquivalentDate
-            => subtotalEqui() switch
-                {
-                    null => null,
-                    var x => x.rangeDay() ?? ClientDateTime.Today,
-                };
+        {
+            get
+            {
+                if (subtotalEqui() == null)
+                    return null;
+                subtotalEqui().rangeDay().Client = Client;
+                return subtotalEqui().rangeDay().AsDate() ?? Client().ClientDateTime.Today;
+            }
+        }
+
+        public Func<Client> Client { private get; set; }
     }
 }

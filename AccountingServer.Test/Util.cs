@@ -17,7 +17,7 @@
  */
 
 using System;
-using AccountingServer.Entities;
+using AccountingServer.BLL;
 
 namespace AccountingServer.Test;
 

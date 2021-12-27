@@ -23,7 +23,6 @@ using System.Resources;
 using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
-using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Carry;
 using AccountingServer.Shell.Serializer;
@@ -202,9 +201,9 @@ public class Facade
     {
         var serializer = GetSerializer(spec);
 
-        var voucher = serializer.ParseVoucher(str);
+        var voucher = serializer.ParseVoucher(str, TODO);
         var grpCs = voucher.Details.GroupBy(d => d.Currency ?? BaseCurrency.Now).ToList();
-        var grpUs = voucher.Details.GroupBy(d => d.User ?? ClientUser.Name).ToList();
+        var grpUs = voucher.Details.GroupBy(d => d.User ?? m_Accountant.Client.ClientUser.Name).ToList();
         foreach (var grpC in grpCs)
         {
             var unc = grpC.SingleOrDefault(d => !d.Fund.HasValue);
@@ -232,7 +231,7 @@ public class Facade
                 voucher.Details.Add(
                     new() { User = grpUs.First().Key, Currency = grpC.Key, Title = 3999, Fund = -sum });
             }
-        else if (voucher.Details.GroupBy(d => (d.User ?? ClientUser.Name, d.Currency ?? BaseCurrency.Now))
+        else if (voucher.Details.GroupBy(d => (d.User ?? m_Accountant.Client.ClientUser.Name, d.Currency ?? BaseCurrency.Now))
                      .Where(grp => !grp.Sum(d => d.Fund!.Value).IsZero()).ToList() is var grpUCs &&
                  grpUCs.Count == 2)
         {
@@ -313,7 +312,7 @@ public class Facade
     public bool ExecuteVoucherRemoval(string str, string spec)
     {
         var serializer = GetSerializer(spec);
-        var voucher = serializer.ParseVoucher(str);
+        var voucher = serializer.ParseVoucher(str, TODO);
 
         if (voucher.ID == null)
             throw new ApplicationException("编号未知");

@@ -19,7 +19,7 @@
 using System;
 using System.IO;
 using System.Net;
-using AccountingServer.Entities;
+using AccountingServer.BLL;
 using AccountingServer.Http;
 using AccountingServer.Shell;
 using static AccountingServer.Http.HttpUtil;

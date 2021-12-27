@@ -36,12 +36,15 @@ public class Accountant : IHistoricalExchange
 
     private readonly AssetAccountant m_AssetAccountant;
     private readonly DbSession m_Db;
+    public readonly Client Client;
 
-    public Accountant(string uri = null, string db = null)
+    public Accountant(DbSession db, string user, DateTime dt)
     {
-        m_Db = new(uri, db);
-        m_AssetAccountant = new(m_Db);
-        m_AmortAccountant = new(m_Db);
+        m_Db = db;
+        Client = new() { ClientUser = new(user), ClientDateTime = new(dt) };
+
+        m_AssetAccountant = new(m_Db, Client);
+        m_AmortAccountant = new(m_Db, Client);
     }
 
     public void AdjustLimit(int limit)

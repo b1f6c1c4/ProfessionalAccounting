@@ -35,16 +35,16 @@ public class DiscountSerializer : IEntitySerializer
     private const string TheToken = "new Voucher {";
 
     /// <inheritdoc />
-    public string PresentVoucher(Voucher voucher) => throw new NotImplementedException();
+    public string PresentVoucher(Voucher voucher, Client client) => throw new NotImplementedException();
 
     /// <inheritdoc />
-    public string PresentVoucherDetail(VoucherDetail detail) => throw new NotImplementedException();
+    public string PresentVoucherDetail(VoucherDetail detail, Client client) => throw new NotImplementedException();
 
     /// <inheritdoc />
-    public string PresentVoucherDetail(VoucherDetailR detail) => throw new NotImplementedException();
+    public string PresentVoucherDetail(VoucherDetailR detail, Client client) => throw new NotImplementedException();
 
     /// <inheritdoc />
-    public Voucher ParseVoucher(string expr)
+    public Voucher ParseVoucher(string expr, Client client)
     {
         if (!expr.StartsWith(TheToken, StringComparison.Ordinal))
             throw new FormatException("格式错误");
@@ -53,7 +53,7 @@ public class DiscountSerializer : IEntitySerializer
         if (ParsingF.Token(ref expr, false, s => s == "!") == null)
             throw new NotImplementedException();
 
-        var v = GetVoucher(ref expr);
+        var v = GetVoucher(ref expr, client);
         Parsing.TrimStartComment(ref expr);
         if (Parsing.Token(ref expr, false) != "}")
             throw new FormatException("格式错误" + expr);
@@ -63,25 +63,26 @@ public class DiscountSerializer : IEntitySerializer
     }
 
     /// <inheritdoc />
-    public VoucherDetail ParseVoucherDetail(string expr) => throw new NotImplementedException();
+    public VoucherDetail ParseVoucherDetail(string expr, Client client) => throw new NotImplementedException();
 
-    public string PresentAsset(Asset asset) => throw new NotImplementedException();
-    public Asset ParseAsset(string str) => throw new NotImplementedException();
-    public string PresentAmort(Amortization amort) => throw new NotImplementedException();
-    public Amortization ParseAmort(string str) => throw new NotImplementedException();
+    public string PresentAsset(Asset asset, Client client) => throw new NotImplementedException();
+    public Asset ParseAsset(string str, Client client) => throw new NotImplementedException();
+    public string PresentAmort(Amortization amort, Client client) => throw new NotImplementedException();
+    public Amortization ParseAmort(string str, Client client) => throw new NotImplementedException();
 
     /// <summary>
     ///     解析记账凭证表达式
     /// </summary>
     /// <param name="expr">表达式</param>
+    /// <param name="client"></param>
     /// <returns>记账凭证</returns>
-    private Voucher GetVoucher(ref string expr)
+    private Voucher GetVoucher(ref string expr, Client client)
     {
         Parsing.TrimStartComment(ref expr);
-        DateTime? date = ClientDateTime.Today;
+        DateTime? date = client.ClientDateTime.Today;
         try
         {
-            date = ParsingF.UniqueTime(ref expr);
+            date = ParsingF.UniqueTime(ref expr, client);
         }
         catch (Exception)
         {
@@ -94,7 +95,7 @@ public class DiscountSerializer : IEntitySerializer
 
         var lst = new List<Item>();
         List<Item> ds;
-        while ((ds = ParseItem(currency, ref expr))?.Any() == true)
+        while ((ds = ParseItem(currency, ref expr, client))?.Any() == true)
             lst.AddRange(ds);
 
         var d = (double?)0D;
@@ -120,7 +121,7 @@ public class DiscountSerializer : IEntitySerializer
         var resLst = new List<VoucherDetail>();
         VoucherDetail vd;
         var exprS = new AbbrSerializer();
-        while ((vd = exprS.ParseVoucherDetail(ref expr)) != null)
+        while ((vd = exprS.ParseVoucherDetail(ref expr, client)) != null)
             resLst.Add(vd);
 
         // Don't use Enumerable.Sum, it ignores null values
@@ -186,12 +187,12 @@ public class DiscountSerializer : IEntitySerializer
         return new() { Type = VoucherType.Ordinary, Date = date, Details = resLst };
     }
 
-    private VoucherDetail ParseVoucherDetail(string currency, ref string expr)
+    private VoucherDetail ParseVoucherDetail(string currency, ref string expr, Client client)
     {
         var lst = new List<string>();
 
         Parsing.TrimStartComment(ref expr);
-        var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal)).ParseUserSpec();
+        var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal)).ParseUserSpec(client.ClientUser);
         var title = Parsing.Title(ref expr);
         if (title == null)
             if (!AlternativeTitle(ref expr, lst, ref title))
@@ -237,14 +238,14 @@ public class DiscountSerializer : IEntitySerializer
             };
     }
 
-    private List<Item> ParseItem(string currency, ref string expr)
+    private List<Item> ParseItem(string currency, ref string expr, Client client)
     {
         var lst = new List<(VoucherDetail Detail, bool Actual)>();
 
         while (true)
         {
             var actual = Parsing.Optional(ref expr, "!");
-            var vd = ParseVoucherDetail(currency, ref expr);
+            var vd = ParseVoucherDetail(currency, ref expr, client);
             if (vd == null)
                 break;
 

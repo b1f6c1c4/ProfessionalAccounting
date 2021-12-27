@@ -18,6 +18,7 @@
 
 using System;
 using System.Linq;
+using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Serializer;
@@ -43,8 +44,8 @@ public abstract class SerializerTest
     public virtual void SimpleVoucherTest()
     {
         Assert.NotNull(Serializer.PresentVoucher(null));
-        Assert.Throws<FormatException>(() => Serializer.ParseVoucher(""));
-        Assert.Throws<FormatException>(() => Serializer.ParseVoucher("new Voucher {"));
+        Assert.Throws<FormatException>(() => Serializer.ParseVoucher("", TODO));
+        Assert.Throws<FormatException>(() => Serializer.ParseVoucher("new Voucher {", TODO));
     }
 
     public virtual void SimpleAssetAmortTest()
@@ -61,7 +62,7 @@ public abstract class SerializerTest
     public virtual void VoucherTest(string dt, VoucherType type)
     {
         var voucher1 = VoucherDataProvider.Create(dt, type);
-        var voucher2 = Serializer.ParseVoucher(Serializer.PresentVoucher(voucher1));
+        var voucher2 = Serializer.ParseVoucher(Serializer.PresentVoucher(voucher1), TODO);
         voucher2.Type ??= VoucherType.Ordinary;
         Assert.Equal(voucher1, voucher2, new VoucherEqualityComparer());
     }
@@ -125,7 +126,7 @@ public class ExprSerializerTest : SerializerTest
 
     [Fact]
     public void OtherTest()
-        => Assert.Null(Serializer.ParseVoucher(@"new Voucher { T1001 null }").Details.Single().Fund);
+        => Assert.Null(Serializer.ParseVoucher(@"new Voucher { T1001 null }", TODO).Details.Single().Fund);
 
     [Fact]
     public override void SimpleVoucherTest() => base.SimpleVoucherTest();
@@ -171,7 +172,7 @@ public class AbbrSerializerTest : SerializerTest
     [Fact]
     public void OtherTest()
     {
-        var voucher = Serializer.ParseVoucher(@"new Voucher { abbr1 123 abbr2 ""gg"" 765 }");
+        var voucher = Serializer.ParseVoucher(@"new Voucher { abbr1 123 abbr2 ""gg"" 765 }", TODO);
         Assert.Equal(
             new Voucher
                 {
@@ -262,7 +263,7 @@ tnull
 dnull
 
 @usd T1001 null
-}"));
+}", TODO));
         Assert.Throws<ApplicationException>(
             () => Serializer.ParseVoucher(
                 @"new Voucher {
@@ -272,7 +273,7 @@ tnull
 dnull
 
 @usd T1001 -1
-}"));
+}", TODO));
         Assert.Throws<ApplicationException>(
             () => Serializer.ParseVoucher(
                 @"new Voucher {
@@ -281,7 +282,7 @@ aaa : 1 ;
 dnull
 
 @usd T1001 null
-}"));
+}", TODO));
         Assert.Throws<ApplicationException>(
             () => Serializer.ParseVoucher(
                 @"new Voucher {
@@ -290,7 +291,7 @@ aaa : 1 ;
 tnull
 
 @usd T1001 null
-}"));
+}", TODO));
     }
 
     [Fact]
@@ -305,7 +306,7 @@ t12
 d48
 
 @usd T1001 -29120
-}");
+}", TODO);
         Assert.Equal(
             new Voucher
                 {
@@ -363,9 +364,9 @@ d48
     [Fact]
     public void SimpleTest()
     {
-        Assert.Throws<FormatException>(() => Serializer.ParseVoucher(""));
-        Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher("new Voucher {"));
-        Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher("new Voucher { }"));
+        Assert.Throws<FormatException>(() => Serializer.ParseVoucher("", TODO));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher("new Voucher {", TODO));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher("new Voucher { }", TODO));
         Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucherDetail("whatever"));
     }
 
@@ -382,7 +383,7 @@ t10
 dnull
 
 @usd T1001 -2864
-}");
+}", TODO);
         Assert.Equal(
             new Voucher
                 {
@@ -433,7 +434,7 @@ t10
 d8
 
 @usd T1001 -29120
-}");
+}", TODO);
         Assert.Equal(
             new Voucher
                 {
@@ -485,7 +486,7 @@ d48
 tnull
 
 @usd T1001 -2864
-}");
+}", TODO);
         Assert.Equal(
             new Voucher
                 {
@@ -534,7 +535,7 @@ t10
 t2
 
 @cny T1001 -2912
-}");
+}", TODO);
         Assert.Equal(
             new Voucher
                 {
@@ -575,7 +576,7 @@ public class CsvDefaultSerializerTest : SerializerTest
     [Fact]
     public void NotImplementedTest()
     {
-        Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher(null, TODO));
         Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucherDetail(null));
         Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
         Assert.Throws<NotImplementedException>(() => Serializer.ParseAsset(null));
@@ -626,7 +627,7 @@ public class CsvCustomSerializerTest : SerializerTest
     [Fact]
     public void NotImplementedTest()
     {
-        Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher(null));
+        Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucher(null, TODO));
         Assert.Throws<NotImplementedException>(() => Serializer.ParseVoucherDetail(null));
         Assert.Throws<NotImplementedException>(() => Serializer.PresentAsset(null));
         Assert.Throws<NotImplementedException>(() => Serializer.ParseAsset(null));

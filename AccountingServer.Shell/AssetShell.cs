@@ -53,7 +53,7 @@ internal class AssetShell : DistributedShell
     /// <inheritdoc />
     protected override IQueryResult ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
         IEntitiesSerializer serializer)
-        => new PlainText(serializer.PresentAssets(Sort(Accountant.SelectAssets(distQuery))));
+        => new PlainText(serializer.PresentAssets(Sort(Accountant.SelectAssets(distQuery)), Accountant.Client));
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
@@ -63,7 +63,7 @@ internal class AssetShell : DistributedShell
         var sb = new StringBuilder();
         foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
         {
-            sb.Append(serializer.PresentVouchers(Accountant.RegisterVouchers(a, rng, query)));
+            sb.Append(serializer.PresentVouchers(Accountant.RegisterVouchers(a, rng, query), Accountant.Client));
             Accountant.Upsert(a);
         }
 
@@ -119,7 +119,7 @@ internal class AssetShell : DistributedShell
             lst.Add(a);
         }
 
-        return new DirtyText(serializer.PresentAssets(lst));
+        return new DirtyText(serializer.PresentAssets(lst, Accountant.Client));
     }
 
     /// <inheritdoc />
@@ -193,7 +193,7 @@ internal class AssetShell : DistributedShell
                     new IntersectQueries<IVoucherQueryAtom>(
                         query ?? VoucherQueryUnconstrained.Instance,
                         ParsingF.VoucherQuery(
-                            $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}")))));
+                            $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}", Accountant.Client)))));
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
@@ -285,7 +285,7 @@ internal class AssetShell : DistributedShell
             {
                 sb.AppendLine(ListAssetItem(assetItem));
                 if (assetItem.VoucherID != null)
-                    sb.AppendLine(serializer.PresentVoucher(Accountant.SelectVoucher(assetItem.VoucherID)).Wrap());
+                    sb.AppendLine(serializer.PresentVoucher(Accountant.SelectVoucher(assetItem.VoucherID), Accountant.Client).Wrap());
             }
 
         return sb.ToString();

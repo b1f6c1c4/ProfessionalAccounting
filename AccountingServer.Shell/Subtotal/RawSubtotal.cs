@@ -38,7 +38,7 @@ internal class RawSubtotal : StringSubtotalVisitor
         {
             m_Path.Fund = sub.Fund;
             if (m_Separate)
-                Sb.Append(Serializer.PresentVoucherDetail(m_Path));
+                Sb.Append(Serializer.PresentVoucherDetail(m_Path, m_Client));
             else
                 m_History.Add(new(m_Path));
         }
@@ -48,7 +48,7 @@ internal class RawSubtotal : StringSubtotalVisitor
 
     protected override void Pre() => m_History = new();
 
-    protected override void Post() => Sb.Append(Serializer.PresentVoucherDetails(m_History));
+    protected override void Post() => Sb.Append(Serializer.PresentVoucherDetails(m_History, m_Client));
 
     public override Nothing Visit(ISubtotalRoot sub)
     {

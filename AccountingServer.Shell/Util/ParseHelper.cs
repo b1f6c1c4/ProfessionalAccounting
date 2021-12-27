@@ -47,28 +47,28 @@ public static class ParseHelper
 
     public static IEnumerable<Voucher> RunVoucherQuery(this Accountant acc, string str)
     {
-        var res = FacadeF.ParsingF.VoucherQuery(ref str);
+        var res = FacadeF.ParsingF.VoucherQuery(ref str, acc.Client);
         FacadeF.ParsingF.Eof(str);
         return acc.SelectVouchers(res);
     }
 
     public static long DeleteVouchers(this Accountant acc, string str)
     {
-        var res = FacadeF.ParsingF.VoucherQuery(ref str);
+        var res = FacadeF.ParsingF.VoucherQuery(ref str, acc.Client);
         FacadeF.ParsingF.Eof(str);
         return acc.DeleteVouchers(res);
     }
 
     public static ISubtotalResult RunGroupedQuery(this Accountant acc, string str)
     {
-        var res = FacadeF.ParsingF.GroupedQuery(ref str);
+        var res = FacadeF.ParsingF.GroupedQuery(ref str, acc.Client);
         FacadeF.ParsingF.Eof(str);
         return acc.SelectVoucherDetailsGrouped(res);
     }
 
     public static ISubtotalResult RunVoucherGroupedQuery(this Accountant acc, string str)
     {
-        var res = FacadeF.ParsingF.VoucherGroupedQuery(ref str);
+        var res = FacadeF.ParsingF.VoucherGroupedQuery(ref str, acc.Client);
         FacadeF.ParsingF.Eof(str);
         return acc.SelectVouchersGrouped(res);
     }
@@ -248,6 +248,6 @@ public static class ParseHelper
     /// <param name="facade">占位符</param>
     /// <param name="expr">表达式</param>
     /// <returns>记账凭证检索式</returns>
-    public static IQueryCompounded<IVoucherQueryAtom> OptColVouchers(this FacadeBase facade, ref string expr)
-        => Optional(facade, ref expr, ":") ? facade.VoucherQuery(ref expr) : null;
+    public static IQueryCompounded<IVoucherQueryAtom> OptColVouchers(this FacadeBase facade, ref string expr, Client client)
+        => Optional(facade, ref expr, ":") ? facade.VoucherQuery(ref expr, client) : null;
 }

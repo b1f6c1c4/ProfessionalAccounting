@@ -60,7 +60,7 @@ internal class AmortizationShell : DistributedShell
     /// <inheritdoc />
     protected override IQueryResult ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
         IEntitiesSerializer serializer)
-        => new PlainText(serializer.PresentAmorts(Sort(Accountant.SelectAmortizations(distQuery))));
+        => new PlainText(serializer.PresentAmorts(Sort(Accountant.SelectAmortizations(distQuery)), Accountant.Client));
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
@@ -70,7 +70,7 @@ internal class AmortizationShell : DistributedShell
         var sb = new StringBuilder();
         foreach (var a in Sort(Accountant.SelectAmortizations(distQuery)))
         {
-            sb.Append(serializer.PresentVouchers(Accountant.RegisterVouchers(a, rng, query)));
+            sb.Append(serializer.PresentVouchers(Accountant.RegisterVouchers(a, rng, query), Accountant.Client));
             Accountant.Upsert(a);
         }
 
@@ -126,7 +126,7 @@ internal class AmortizationShell : DistributedShell
             lst.Add(a);
         }
 
-        return new DirtyText(serializer.PresentAmorts(lst));
+        return new DirtyText(serializer.PresentAmorts(lst, Accountant.Client));
     }
 
     /// <inheritdoc />
@@ -269,7 +269,7 @@ internal class AmortizationShell : DistributedShell
             {
                 sb.AppendLine(ListAmortItem(amortItem));
                 if (amortItem.VoucherID != null)
-                    sb.AppendLine(serializer.PresentVoucher(Accountant.SelectVoucher(amortItem.VoucherID)).Wrap());
+                    sb.AppendLine(serializer.PresentVoucher(Accountant.SelectVoucher(amortItem.VoucherID), Accountant.Client).Wrap());
             }
 
         return sb.ToString();

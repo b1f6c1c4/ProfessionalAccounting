@@ -56,7 +56,7 @@ internal partial class QueryParser
         }
     }
 
-    public partial class DetailQueryContext : IDetailQueryAtom
+    public partial class DetailQueryContext : IClientDependable, IDetailQueryAtom
     {
         /// <inheritdoc />
         public TitleKind? Kind
@@ -79,12 +79,14 @@ internal partial class QueryParser
                 case 2:
                     return (true, true);
             }
+
             if (ContentText == null)
                 return (false, true);
             if (RemarkText == null)
                 return (true, false);
             return Etc(0).SourceInterval.StartsBeforeDisjoint(DoubleQuotedString().SourceInterval)
-                ? (true, false) : (false, true);
+                ? (true, false)
+                : (false, true);
         }
 
         /// <inheritdoc />
@@ -95,7 +97,7 @@ internal partial class QueryParser
                 var t = title();
                 var filter = new VoucherDetail
                     {
-                        User = (UserSpec()?.GetText()).ParseUserSpec(),
+                        User = (UserSpec()?.GetText()).ParseUserSpec(Client().ClientUser),
                         Currency = VoucherCurrency()?.GetText().ParseCurrency(),
                         Title = t?.Title,
                         SubTitle = t?.SubTitle,
@@ -142,9 +144,11 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class DetailsContext : IQueryAry<IDetailQueryAtom>
+    public partial class DetailsContext : IClientDependable, IQueryAry<IDetailQueryAtom>
     {
         /// <inheritdoc />
         public OperatorType Operator
@@ -167,10 +171,29 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public IQueryCompounded<IDetailQueryAtom> Filter1
-            => (IQueryCompounded<IDetailQueryAtom>)details() ?? details1();
+        {
+            get
+            {
+                if (details() != null)
+                {
+                    details().Client = Client;
+                    return details();
+                }
+
+                details1().Client = Client;
+                return details1();
+            }
+        }
 
         /// <inheritdoc />
-        public IQueryCompounded<IDetailQueryAtom> Filter2 => details1();
+        public IQueryCompounded<IDetailQueryAtom> Filter2
+        {
+            get
+            {
+                details1().Client = Client;
+                return details1();
+            }
+        }
 
         /// <inheritdoc />
         public bool IsDangerous()
@@ -186,34 +209,64 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class Details1Context : IQueryAry<IDetailQueryAtom>
+    public partial class Details1Context : IClientDependable, IQueryAry<IDetailQueryAtom>
     {
         /// <inheritdoc />
         public OperatorType Operator => Op == null ? OperatorType.None : OperatorType.Intersect;
 
         /// <inheritdoc />
-        public IQueryCompounded<IDetailQueryAtom> Filter1 => details0();
+        public IQueryCompounded<IDetailQueryAtom> Filter1
+        {
+            get
+            {
+                details0().Client = Client;
+                return details0();
+            }
+        }
 
         /// <inheritdoc />
-        public IQueryCompounded<IDetailQueryAtom> Filter2 => details1();
+        public IQueryCompounded<IDetailQueryAtom> Filter2
+        {
+            get
+            {
+                details1().Client = Client;
+                return details1();
+            }
+        }
 
         /// <inheritdoc />
         public bool IsDangerous() => Filter1.IsDangerous() && (Filter2?.IsDangerous() ?? true);
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
+
+        public Func<Client> Client { private get; set; }
     }
 
-    public partial class Details0Context : IQueryAry<IDetailQueryAtom>
+    public partial class Details0Context : IClientDependable, IQueryAry<IDetailQueryAtom>
     {
         /// <inheritdoc />
         public OperatorType Operator => OperatorType.None;
 
         /// <inheritdoc />
         public IQueryCompounded<IDetailQueryAtom> Filter1
-            => detailQuery() ?? (IQueryCompounded<IDetailQueryAtom>)details();
+        {
+            get
+            {
+                if (detailQuery() != null)
+                {
+                    detailQuery().Client = Client;
+                    return detailQuery();
+                }
+
+                details().Client = Client;
+                return details();
+            }
+        }
 
         /// <inheritdoc />
         public IQueryCompounded<IDetailQueryAtom> Filter2 => null;
@@ -223,6 +276,8 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
+
+        public Func<Client> Client { private get; set; }
     }
 
     public partial class TokenContext
