@@ -262,25 +262,25 @@ internal class MongoDbAdapter : IDbAdapter
         (await m_Vouchers.FindAsync(GetNQuery<Voucher>(id))).FirstOrDefault();
 
     /// <inheritdoc />
-    public IEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query) =>
+    public IAsyncEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query) =>
         m_Vouchers.Find(query.Accept(new MongoDbNativeVoucher())).Sort(Builders<Voucher>.Sort.Ascending("date"))
-            .ToEnumerable();
+            .ToAsyncEnumerable();
 
     private static FilterDefinition<BsonDocument> GetChk(IVoucherDetailQuery query)
         => query.ActualDetailFilter().Accept(new MongoDbNativeDetailUnwinded());
 
     /// <inheritdoc />
-    public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
+    public IAsyncEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
     {
         var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher());
         var chk = GetChk(query);
         var srt = Builders<Voucher>.Sort.Ascending("date");
         return m_Vouchers.Aggregate().Match(preF).Sort(srt).Project(ProjectDetails).Unwind("detail").Match(chk)
-            .Project(ProjectDetail).ToEnumerable().Select(b => BsonSerializer.Deserialize<VoucherDetail>(b));
+            .Project(ProjectDetail).ToAsyncEnumerable().Select(b => BsonSerializer.Deserialize<VoucherDetail>(b));
     }
 
     /// <inheritdoc />
-    public IEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit = 0)
+    public IAsyncEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit = 0)
     {
         var level = query.Preprocess();
         var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher());
@@ -306,11 +306,11 @@ internal class MongoDbAdapter : IDbAdapter
         var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Group(grp);
         if (limit > 0)
             fluent = fluent.Sort(new SortDefinitionBuilder<BsonDocument>().Descending("count")).Limit(limit);
-        return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
+        return fluent.ToAsyncEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
     }
 
     /// <inheritdoc />
-    public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit = 0)
+    public IAsyncEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit = 0)
     {
         var level = query.Preprocess();
         var preF = query.VoucherEmitQuery.VoucherQuery.Accept(new MongoDbNativeVoucher());
@@ -355,10 +355,10 @@ internal class MongoDbAdapter : IDbAdapter
             fluent = fluent.Match(FilterNonZero);
         if (limit > 0)
             fluent = fluent.Sort(new SortDefinitionBuilder<BsonDocument>().Descending("count")).Limit(limit);
-        return fluent.ToEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
+        return fluent.ToAsyncEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
     }
 
-    public IEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => m_Vouchers.Aggregate().Match(query.Accept(new MongoDbNativeVoucher()))
             .Unwind("detail").Group(new BsonDocument
                 {
@@ -383,7 +383,7 @@ internal class MongoDbAdapter : IDbAdapter
                 })
             .Lookup("voucher", "_id.id", "_id", "voucher")
             .Sort(new SortDefinitionBuilder<BsonDocument>().Ascending("voucher.date"))
-            .ToEnumerable().Select(b =>
+            .ToAsyncEnumerable().Select(b =>
                 {
                     var bsonReader = new BsonDocumentReader(b);
                     string read = null;
@@ -406,7 +406,7 @@ internal class MongoDbAdapter : IDbAdapter
                     return (voucher, user, curr, v);
                 });
 
-    public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+    public IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => m_Vouchers.Aggregate().Match(query.Accept(new MongoDbNativeVoucher()))
             .Group(new BsonDocument
                 {
@@ -416,7 +416,7 @@ internal class MongoDbAdapter : IDbAdapter
                 })
             .Match(new FilterDefinitionBuilder<BsonDocument>().Gt("count", 1))
             .Sort(new SortDefinitionBuilder<BsonDocument>().Ascending("_id.date"))
-            .ToEnumerable().Select(b =>
+            .ToAsyncEnumerable().Select(b =>
                 {
                     var bsonReader = new BsonDocumentReader(b);
                     string read = null;
@@ -456,9 +456,9 @@ internal class MongoDbAdapter : IDbAdapter
     public async Task<Asset> SelectAsset(Guid id) => (await m_Assets.FindAsync(GetNQuery<Asset>(id))).FirstOrDefault();
 
     /// <inheritdoc />
-    public IEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter) =>
-        m_Assets.FindSync(filter.Accept(new MongoDbNativeDistributed<Asset>()))
-            .ToEnumerable();
+    public IAsyncEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter) =>
+        m_Assets.Find(filter.Accept(new MongoDbNativeDistributed<Asset>()))
+            .ToAsyncEnumerable();
 
     /// <inheritdoc />
     public async Task<bool> DeleteAsset(Guid id)
@@ -493,9 +493,9 @@ internal class MongoDbAdapter : IDbAdapter
         (await m_Amortizations.FindAsync(GetNQuery<Amortization>(id))).FirstOrDefault();
 
     /// <inheritdoc />
-    public IEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter) =>
-        m_Amortizations.FindSync(filter.Accept(new MongoDbNativeDistributed<Amortization>()))
-            .ToEnumerable();
+    public IAsyncEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter) =>
+        m_Amortizations.Find(filter.Accept(new MongoDbNativeDistributed<Amortization>()))
+            .ToAsyncEnumerable();
 
     /// <inheritdoc />
     public async Task<bool> DeleteAmortization(Guid id)

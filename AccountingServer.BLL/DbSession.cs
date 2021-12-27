@@ -164,31 +164,31 @@ public class DbSession : IHistoricalExchange
     public async Task<Voucher> SelectVoucher(string id)
         => await Db.Get().SelectVoucher(id);
 
-    public IEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+    public IAsyncEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => Db.Get().SelectVouchers(query);
 
-    public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
+    public IAsyncEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
         => Db.Get().SelectVoucherDetails(query);
 
-    public ISubtotalResult SelectVouchersGrouped(IVoucherGroupedQuery query)
+    public Task<ISubtotalResult> SelectVouchersGrouped(IVoucherGroupedQuery query)
     {
         var res = Db.Get().SelectVouchersGrouped(query, Limit);
         var conv = new SubtotalBuilder(query.Subtotal, this);
         return conv.Build(res);
     }
 
-    public ISubtotalResult SelectVoucherDetailsGrouped(IGroupedQuery query)
+    public Task<ISubtotalResult> SelectVoucherDetailsGrouped(IGroupedQuery query)
     {
         var res = Db.Get().SelectVoucherDetailsGrouped(query, Limit);
         var conv = new SubtotalBuilder(query.Subtotal, this);
         return conv.Build(res);
     }
 
-    public IEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
+    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
         IQueryCompounded<IVoucherQueryAtom> query)
         => Db.Get().SelectUnbalancedVouchers(query);
 
-    public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+    public IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => Db.Get().SelectDuplicatedVouchers(query);
 
     public Task<bool> DeleteVoucher(string id)
@@ -241,7 +241,7 @@ public class DbSession : IHistoricalExchange
     public Task<Asset> SelectAsset(Guid id)
         => Db.Get().SelectAsset(id);
 
-    public IEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter)
+    public IAsyncEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter)
         => Db.Get().SelectAssets(filter);
 
     public Task<bool> DeleteAsset(Guid id)
@@ -256,7 +256,7 @@ public class DbSession : IHistoricalExchange
     public Task<Amortization> SelectAmortization(Guid id)
         => Db.Get().SelectAmortization(id);
 
-    public IEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
+    public IAsyncEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
         => Db.Get().SelectAmortizations(filter);
 
     public Task<bool> DeleteAmortization(Guid id)

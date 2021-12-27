@@ -106,10 +106,10 @@ public class DbQueryTest : QueryTestBase, IDisposable
     protected override void PrepareAmort(Amortization amort) => m_Adapter.Upsert(amort);
 
     protected override bool RunAssetQuery(IQueryCompounded<IDistributedQueryAtom> query)
-        => m_Adapter.SelectAssets(query).SingleOrDefault() != null;
+        => m_Adapter.SelectAssets(query).ToEnumerable().SingleOrDefault() != null;
 
     protected override bool RunAmortQuery(IQueryCompounded<IDistributedQueryAtom> query)
-        => m_Adapter.SelectAmortizations(query).SingleOrDefault() != null;
+        => m_Adapter.SelectAmortizations(query).ToEnumerable().SingleOrDefault() != null;
 
     protected override void ResetAssets() => m_Adapter.DeleteAssets(DistributedQueryUnconstrained.Instance);
     protected override void ResetAmorts() => m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance);

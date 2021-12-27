@@ -59,22 +59,41 @@ public class Accountant : IHistoricalExchange
         => m_Db.SelectVoucher(id);
 
     public IEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+        => m_Db.SelectVouchers(query).ToEnumerable();
+
+    public IAsyncEnumerable<Voucher> SelectVouchersAsync(IQueryCompounded<IVoucherQueryAtom> query)
         => m_Db.SelectVouchers(query);
 
     public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
+        => m_Db.SelectVoucherDetails(query).ToEnumerable();
+
+    public IAsyncEnumerable<VoucherDetail> SelectVoucherDetailsAsync(IVoucherDetailQuery query)
         => m_Db.SelectVoucherDetails(query);
 
     public ISubtotalResult SelectVoucherDetailsGrouped(IGroupedQuery query)
+        => m_Db.SelectVoucherDetailsGrouped(query).Result;
+
+    public Task<ISubtotalResult> SelectVoucherDetailsGroupedAsync(IGroupedQuery query)
         => m_Db.SelectVoucherDetailsGrouped(query);
 
     public ISubtotalResult SelectVouchersGrouped(IVoucherGroupedQuery query)
+        => m_Db.SelectVouchersGrouped(query).Result;
+
+    public Task<ISubtotalResult> SelectVouchersGroupedAsync(IVoucherGroupedQuery query)
         => m_Db.SelectVouchersGrouped(query);
 
     public IEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
         IQueryCompounded<IVoucherQueryAtom> query)
+        => m_Db.SelectUnbalancedVouchers(query).ToEnumerable();
+
+    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchersAsync(
+        IQueryCompounded<IVoucherQueryAtom> query)
         => m_Db.SelectUnbalancedVouchers(query);
 
     public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+        => m_Db.SelectDuplicatedVouchers(query).ToEnumerable();
+
+    public IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchersAsync(IQueryCompounded<IVoucherQueryAtom> query)
         => m_Db.SelectDuplicatedVouchers(query);
 
     public bool DeleteVoucher(string id)
@@ -112,6 +131,9 @@ public class Accountant : IHistoricalExchange
         => AssetAccountant.InternalRegular(await m_Db.SelectAsset(id));
 
     public IEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter)
+        => m_Db.SelectAssets(filter).Select(AssetAccountant.InternalRegular).ToEnumerable();
+
+    public IAsyncEnumerable<Asset> SelectAssetsAsync(IQueryCompounded<IDistributedQueryAtom> filter)
         => m_Db.SelectAssets(filter).Select(AssetAccountant.InternalRegular);
 
     public bool DeleteAsset(Guid id)
@@ -153,13 +175,10 @@ public class Accountant : IHistoricalExchange
         => AmortAccountant.InternalRegular(await m_Db.SelectAmortization(id));
 
     public IEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
-    {
-        foreach (var amort in m_Db.SelectAmortizations(filter))
-        {
-            AmortAccountant.InternalRegular(amort);
-            yield return amort;
-        }
-    }
+        => m_Db.SelectAmortizations(filter).Select(AmortAccountant.InternalRegular).ToEnumerable();
+
+    public IAsyncEnumerable<Amortization> SelectAmortizationsAsync(IQueryCompounded<IDistributedQueryAtom> filter)
+        => m_Db.SelectAmortizations(filter).Select(AmortAccountant.InternalRegular);
 
     public bool DeleteAmortization(Guid id)
         => m_Db.DeleteAmortization(id).Result;

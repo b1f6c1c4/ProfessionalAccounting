@@ -181,7 +181,7 @@ public class DbQueryTest : QueryTestBase, IDisposable
     protected override void PrepareVoucher(Voucher voucher) => m_Adapter.Upsert(voucher);
 
     protected override bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
-        => m_Adapter.SelectVouchers(query).SingleOrDefault() != null;
+        => m_Adapter.SelectVouchers(query).ToEnumerable().SingleOrDefault() != null;
 
     protected override void ResetVouchers() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
 

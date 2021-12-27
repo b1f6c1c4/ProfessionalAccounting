@@ -54,7 +54,7 @@ public class DbTest : IDisposable
         voucher1.Remark = "whatever";
         Assert.True(m_Adapter.Upsert(voucher1).Result);
 
-        var voucher2 = m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).Single();
+        var voucher2 = m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).SingleAsync().Result;
         Assert.Equal(voucher1, voucher2, new VoucherEqualityComparer());
 
         var voucher3 = m_Adapter.SelectVoucher(voucher1.ID).Result;
@@ -63,7 +63,7 @@ public class DbTest : IDisposable
         Assert.True(m_Adapter.DeleteVoucher(voucher1.ID).Result);
         Assert.False(m_Adapter.DeleteVoucher(voucher1.ID).Result);
 
-        Assert.False(m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).Any());
+        Assert.False(m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).AnyAsync().Result);
     }
 
     [Fact]
@@ -83,11 +83,11 @@ public class DbTest : IDisposable
         foreach (var voucher in vouchers)
             Assert.NotNull(voucher.ID);
 
-        Assert.Equal(cnt * 2, m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).Count());
+        Assert.Equal(cnt * 2, m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).CountAsync().Result);
 
         Assert.Equal(cnt * 2, m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance).Result);
 
-        Assert.False(m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).Any());
+        Assert.False(m_Adapter.SelectVouchers(VoucherQueryUnconstrained.Instance).AnyAsync().Result);
     }
 
     [Theory]
@@ -108,7 +108,7 @@ public class DbTest : IDisposable
         asset1.Remark = "whatever";
         Assert.True(m_Adapter.Upsert(asset1).Result);
 
-        var asset2 = m_Adapter.SelectAssets(DistributedQueryUnconstrained.Instance).Single();
+        var asset2 = m_Adapter.SelectAssets(DistributedQueryUnconstrained.Instance).SingleAsync().Result;
         Assert.Equal(asset1, asset2, new AssetEqualityComparer());
 
         var asset3 = m_Adapter.SelectAsset(asset1.ID.Value).Result;
@@ -119,7 +119,7 @@ public class DbTest : IDisposable
 
         Assert.Equal(0, m_Adapter.DeleteAssets(DistributedQueryUnconstrained.Instance).Result);
 
-        Assert.False(m_Adapter.SelectAssets(DistributedQueryUnconstrained.Instance).Any());
+        Assert.False(m_Adapter.SelectAssets(DistributedQueryUnconstrained.Instance).AnyAsync().Result);
     }
 
     [Theory]
@@ -136,7 +136,7 @@ public class DbTest : IDisposable
         amort1.Remark = "whatever";
         Assert.True(m_Adapter.Upsert(amort1).Result);
 
-        var amort2 = m_Adapter.SelectAmortizations(DistributedQueryUnconstrained.Instance).Single();
+        var amort2 = m_Adapter.SelectAmortizations(DistributedQueryUnconstrained.Instance).SingleAsync().Result;
         Assert.Equal(amort1, amort2, new AmortEqualityComparer());
 
         var amort3 = m_Adapter.SelectAmortization(amort1.ID.Value).Result;
@@ -147,7 +147,7 @@ public class DbTest : IDisposable
 
         Assert.Equal(0, m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance).Result);
 
-        Assert.False(m_Adapter.SelectAmortizations(DistributedQueryUnconstrained.Instance).Any());
+        Assert.False(m_Adapter.SelectAmortizations(DistributedQueryUnconstrained.Instance).AnyAsync().Result);
     }
 
     [Fact]

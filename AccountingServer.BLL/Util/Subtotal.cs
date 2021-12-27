@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 
@@ -37,7 +38,7 @@ internal abstract class SubtotalResult : ISubtotalResult
 internal abstract class SubtotalResultFactory<T>
 {
     public abstract T Selector(Balance b);
-    public abstract SubtotalResult Create(IGrouping<T, Balance> grp);
+    public abstract SubtotalResult Create(IAsyncGrouping<T, Balance> grp);
 }
 
 internal class SubtotalRoot : SubtotalResult, ISubtotalRoot
@@ -66,7 +67,7 @@ internal class SubtotalDateFactory : SubtotalResultFactory<DateTime?>
     public SubtotalDateFactory(SubtotalLevel level) => m_Level = level;
 
     public override DateTime? Selector(Balance b) => b.Date;
-    public override SubtotalResult Create(IGrouping<DateTime?, Balance> grp) => new SubtotalDate(grp.Key, m_Level);
+    public override SubtotalResult Create(IAsyncGrouping<DateTime?, Balance> grp) => new SubtotalDate(grp.Key, m_Level);
 }
 
 internal class SubtotalUser : SubtotalResult, ISubtotalUser
@@ -80,7 +81,7 @@ internal class SubtotalUser : SubtotalResult, ISubtotalUser
 internal class SubtotalUserFactory : SubtotalResultFactory<string>
 {
     public override string Selector(Balance b) => b.User;
-    public override SubtotalResult Create(IGrouping<string, Balance> grp) => new SubtotalUser(grp.Key);
+    public override SubtotalResult Create(IAsyncGrouping<string, Balance> grp) => new SubtotalUser(grp.Key);
 }
 
 internal class SubtotalCurrency : SubtotalResult, ISubtotalCurrency
@@ -94,7 +95,7 @@ internal class SubtotalCurrency : SubtotalResult, ISubtotalCurrency
 internal class SubtotalCurrencyFactory : SubtotalResultFactory<string>
 {
     public override string Selector(Balance b) => b.Currency;
-    public override SubtotalResult Create(IGrouping<string, Balance> grp) => new SubtotalCurrency(grp.Key);
+    public override SubtotalResult Create(IAsyncGrouping<string, Balance> grp) => new SubtotalCurrency(grp.Key);
 }
 
 internal class SubtotalTitle : SubtotalResult, ISubtotalTitle
@@ -108,7 +109,7 @@ internal class SubtotalTitle : SubtotalResult, ISubtotalTitle
 internal class SubtotalTitleFactory : SubtotalResultFactory<int?>
 {
     public override int? Selector(Balance b) => b.Title;
-    public override SubtotalResult Create(IGrouping<int?, Balance> grp) => new SubtotalTitle(grp.Key);
+    public override SubtotalResult Create(IAsyncGrouping<int?, Balance> grp) => new SubtotalTitle(grp.Key);
 }
 
 internal class SubtotalSubTitle : SubtotalResult, ISubtotalSubTitle
@@ -122,7 +123,7 @@ internal class SubtotalSubTitle : SubtotalResult, ISubtotalSubTitle
 internal class SubtotalSubTitleFactory : SubtotalResultFactory<int?>
 {
     public override int? Selector(Balance b) => b.SubTitle;
-    public override SubtotalResult Create(IGrouping<int?, Balance> grp) => new SubtotalSubTitle(grp.Key);
+    public override SubtotalResult Create(IAsyncGrouping<int?, Balance> grp) => new SubtotalSubTitle(grp.Key);
 }
 
 internal class SubtotalContent : SubtotalResult, ISubtotalContent
@@ -136,7 +137,7 @@ internal class SubtotalContent : SubtotalResult, ISubtotalContent
 internal class SubtotalContentFactory : SubtotalResultFactory<string>
 {
     public override string Selector(Balance b) => b.Content;
-    public override SubtotalResult Create(IGrouping<string, Balance> grp) => new SubtotalContent(grp.Key);
+    public override SubtotalResult Create(IAsyncGrouping<string, Balance> grp) => new SubtotalContent(grp.Key);
 }
 
 internal class SubtotalRemark : SubtotalResult, ISubtotalRemark
@@ -150,7 +151,7 @@ internal class SubtotalRemark : SubtotalResult, ISubtotalRemark
 internal class SubtotalRemarkFactory : SubtotalResultFactory<string>
 {
     public override string Selector(Balance b) => b.Remark;
-    public override SubtotalResult Create(IGrouping<string, Balance> grp) => new SubtotalRemark(grp.Key);
+    public override SubtotalResult Create(IAsyncGrouping<string, Balance> grp) => new SubtotalRemark(grp.Key);
 }
 
 /// <summary>
@@ -174,21 +175,21 @@ public class SubtotalBuilder
     /// </summary>
     /// <param name="raw">原始数据</param>
     /// <returns>分类汇总结果</returns>
-    public ISubtotalResult Build(IEnumerable<Balance> raw)
+    public Task<ISubtotalResult> Build(IAsyncEnumerable<Balance> raw)
     {
         m_Depth = 0;
         m_Flags = SubtotalLevel.None;
-        return Build(new SubtotalRoot(), raw);
+        return Build(new SubtotalRoot(), raw).AsTask();
     }
 
-    private ISubtotalResult Build(SubtotalResult sub, IEnumerable<Balance> raw)
+    private async ValueTask<ISubtotalResult> Build(SubtotalResult sub, IAsyncEnumerable<Balance> raw)
     {
         if (m_Par.Levels.Count == m_Depth)
-            return BuildAggrPhase(sub, raw);
+            return await BuildAggrPhase(sub, raw);
 
         var level = m_Par.Levels[m_Depth];
         m_Depth++;
-        BuildChildren(sub, raw, level);
+        await BuildChildren(sub, raw, level);
         m_Depth--;
         if (!sub.TheItems.Any() &&
             sub is not ISubtotalRoot)
@@ -198,13 +199,13 @@ public class SubtotalBuilder
         return sub;
     }
 
-    private void BuildChildren(SubtotalResult sub, IEnumerable<Balance> raw, SubtotalLevel level)
+    private async Task BuildChildren(SubtotalResult sub, IAsyncEnumerable<Balance> raw, SubtotalLevel level)
     {
-        List<ISubtotalResult> Invoke<T>(SubtotalResultFactory<T> f) =>
-            raw.GroupBy(f.Selector).Select(g => Build(f.Create(g), g)).Where(g => g != null).ToList();
+        ValueTask<List<ISubtotalResult>> Invoke<T>(SubtotalResultFactory<T> f) =>
+            raw.GroupBy(f.Selector).SelectAwait(g => Build(f.Create(g), g)).Where(g => g != null).ToListAsync();
 
         m_Flags = level & SubtotalLevel.Flags;
-        sub.TheItems = (level & SubtotalLevel.Subtotal) switch
+        sub.TheItems = await ((level & SubtotalLevel.Subtotal) switch
             {
                 SubtotalLevel.Title => Invoke(new SubtotalTitleFactory()),
                 SubtotalLevel.SubTitle => Invoke(new SubtotalSubTitleFactory()),
@@ -217,15 +218,15 @@ public class SubtotalBuilder
                 SubtotalLevel.Month => Invoke(new SubtotalDateFactory(level)),
                 SubtotalLevel.Year => Invoke(new SubtotalDateFactory(level)),
                 _ => throw new ArgumentOutOfRangeException(),
-            };
+            });
     }
 
-    private ISubtotalResult BuildAggrPhase(SubtotalResult sub, IEnumerable<Balance> raw)
+    private async ValueTask<ISubtotalResult> BuildAggrPhase(SubtotalResult sub, IAsyncEnumerable<Balance> raw)
     {
         switch (m_Par.AggrType)
         {
             case AggregationType.None:
-                sub.Fund = BuildEquiPhase(raw);
+                sub.Fund = await BuildEquiPhase(raw);
                 if (m_Flags.HasFlag(SubtotalLevel.NonZero) &&
                     sub.Fund.IsZero() &&
                     sub is not ISubtotalRoot)
@@ -233,12 +234,12 @@ public class SubtotalBuilder
 
                 return sub;
             case AggregationType.ChangedDay:
-                sub.TheItems = raw.GroupBy(b => b.Date).OrderBy(grp => grp.Key)
-                    .Select(
-                        grp => new SubtotalDate(grp.Key, m_Par.AggrInterval)
+                sub.TheItems = await raw.GroupBy(b => b.Date).OrderBy(grp => grp.Key)
+                    .SelectAwait(
+                        async grp => new SubtotalDate(grp.Key, m_Par.AggrInterval)
                             {
-                                Fund = sub.Fund += BuildEquiPhase(grp),
-                            }).Cast<ISubtotalResult>().ToList();
+                                Fund = sub.Fund += await BuildEquiPhase(grp),
+                            }).Cast<ISubtotalResult>().ToListAsync();
                 return sub;
             case AggregationType.EveryDay:
                 sub.TheItems = new();
@@ -272,7 +273,7 @@ public class SubtotalBuilder
                 var forcedNull =
                     (m_Par.EveryDayRange.Range.StartDate.HasValue || m_Par.EveryDayRange.Range.NullOnly) &&
                     m_Par.EveryDayRange.Range.Nullable;
-                foreach (var grp in raw.GroupBy(b => b.Date).OrderBy(grp => grp.Key))
+                foreach (var grp in raw.GroupBy(b => b.Date).OrderBy(grp => grp.Key).ToEnumerable())
                 {
                     if (flag &&
                         grp.Key != null &&
@@ -282,7 +283,7 @@ public class SubtotalBuilder
                     flag = false;
 
                     var tmp = sub.Fund;
-                    sub.Fund += BuildEquiPhase(grp);
+                    sub.Fund += await BuildEquiPhase(grp);
 
                     if (DateHelper.CompareDate(grp.Key, ed) <= 0)
                         tmp0 = sub.Fund;
@@ -341,9 +342,9 @@ public class SubtotalBuilder
             };
     }
 
-    private double BuildEquiPhase(IEnumerable<Balance> raw) => m_Par.EquivalentDate.HasValue
-        ? raw.Sum(
-            b => b.Fund
-                * m_Exchange.Query(m_Par.EquivalentDate.Value, b.Currency, m_Par.EquivalentCurrency).Result) // TODO
-        : raw.Sum(b => b.Fund);
+    private ValueTask<double> BuildEquiPhase(IAsyncEnumerable<Balance> raw) => m_Par.EquivalentDate.HasValue
+        ? raw.SumAwaitAsync(
+            async b => b.Fund
+                * await m_Exchange.Query(m_Par.EquivalentDate.Value, b.Currency, m_Par.EquivalentCurrency))
+        : raw.SumAsync(b => b.Fund);
 }

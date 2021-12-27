@@ -55,12 +55,12 @@ public class Virtualizer : IDbAdapter, IDisposable
     public Task<Voucher> SelectVoucher(string id)
         => Db.SelectVoucher(id);
 
-    public IEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-        => Db.SelectVouchers(query).Concat(m_Vouchers.Where(v => v.IsMatch(query)));
+    public IAsyncEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+        => Db.SelectVouchers(query).Concat(m_Vouchers.Where(v => v.IsMatch(query)).ToAsyncEnumerable());
 
-    public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
+    public IAsyncEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
         => Db.SelectVoucherDetails(query).Concat(m_Vouchers.Where(v => v.IsMatch(query.VoucherQuery))
-            .SelectMany(v => v.Details).Where(d => d.IsMatch(query.ActualDetailFilter())));
+            .SelectMany(v => v.Details).Where(d => d.IsMatch(query.ActualDetailFilter())).ToAsyncEnumerable());
 
     private class BalanceComparer : IEqualityComparer<Balance>
     {
@@ -78,11 +78,11 @@ public class Virtualizer : IDbAdapter, IDisposable
             => HashCode.Combine(obj.Date, obj.Title, obj.SubTitle, obj.Content, obj.Remark, obj.Currency, obj.User);
     }
 
-    private static IEnumerable<Balance> Merge(IEnumerable<Balance> balances)
-        => balances.GroupBy(b => b, b => b.Fund,
-            (b, fs) =>
+    private static IAsyncEnumerable<Balance> Merge(IAsyncEnumerable<Balance> balances)
+        => balances.GroupByAwait(b => new ValueTask<Balance>(b), b => new ValueTask<double>(b.Fund),
+            async (b, fs) =>
                 {
-                    b.Fund = fs.Sum();
+                    b.Fund = await fs.SumAsync(f => f);
                     return b;
                 }, new BalanceComparer());
 
@@ -112,17 +112,17 @@ public class Virtualizer : IDbAdapter, IDisposable
             };
     }
 
-    public IEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit)
+    public IAsyncEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit)
     {
         if (limit != 0)
             throw new NotSupportedException();
         var level = query.Preprocess();
         return Merge(Db.SelectVouchersGrouped(query).Concat(
             m_Vouchers.Where(v => v.IsMatch(query.VoucherQuery))
-                .Select(v => new Balance { Date = ProjectDate(v.Date, level), Fund = 1 })));
+                .Select(v => new Balance { Date = ProjectDate(v.Date, level), Fund = 1 }).ToAsyncEnumerable()));
     }
 
-    public IEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit)
+    public IAsyncEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit)
     {
         if (limit != 0)
             throw new NotSupportedException();
@@ -141,15 +141,15 @@ public class Virtualizer : IDbAdapter, IDisposable
                         Content = level.HasFlag(SubtotalLevel.Content) ? d.Content : null,
                         Remark = level.HasFlag(SubtotalLevel.Remark) ? d.Remark : null,
                         Fund = query.Subtotal.GatherType == GatheringType.Count ? 1 : d.Fund!.Value,
-                    })));
+                    }).ToAsyncEnumerable()));
         return query.ShouldAvoidZero() ? fluent.Where(b => !b.Fund.IsZero()) : fluent;
     }
 
-    public IEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
+    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
         IQueryCompounded<IVoucherQueryAtom> query)
         => throw new NotSupportedException();
 
-    public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+    public IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => throw new NotSupportedException();
 
     public Task<bool> DeleteVoucher(string id)
@@ -186,7 +186,7 @@ public class Virtualizer : IDbAdapter, IDisposable
     public Task<Asset> SelectAsset(Guid id)
         => Db.SelectAsset(id);
 
-    public IEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter)
+    public IAsyncEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter)
         => Db.SelectAssets(filter);
 
     public Task<bool> DeleteAsset(Guid id)
@@ -201,7 +201,7 @@ public class Virtualizer : IDbAdapter, IDisposable
     public Task<Amortization> SelectAmortization(Guid id)
         => Db.SelectAmortization(id);
 
-    public IEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
+    public IAsyncEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
         => Db.SelectAmortizations(filter);
 
     public Task<bool> DeleteAmortization(Guid id)

@@ -92,7 +92,7 @@ public class SubtotalTest
                 new() { Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
             };
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -176,7 +176,7 @@ public class SubtotalTest
                 new() { Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
             };
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -240,7 +240,7 @@ public class SubtotalTest
 
         var bal = Array.Empty<Balance>();
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -345,7 +345,7 @@ public class SubtotalTest
                     },
             };
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -409,7 +409,7 @@ public class SubtotalTest
 
         var bal = Array.Empty<Balance>();
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -450,7 +450,7 @@ public class SubtotalTest
                 new() { Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
             };
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -490,7 +490,7 @@ public class SubtotalTest
                 new() { Currency = "CNY", Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
             };
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -532,7 +532,7 @@ public class SubtotalTest
                 new() { Content = "CNY", Fund = 2 },
             };
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -571,7 +571,7 @@ public class SubtotalTest
                 new() { Currency = "CNY", Fund = 2 },
             };
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -609,7 +609,7 @@ public class SubtotalTest
                 new() { Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
             };
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -640,7 +640,7 @@ public class SubtotalTest
                 new() { Currency = "CNY", Fund = 2 },
             };
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         Assert.Null(res.Items);
         Assert.Equal((8 * 456 + 1 + 4 * 789 + 2) / 456D, res.Fund, 14);
@@ -659,7 +659,7 @@ public class SubtotalTest
                 new() { Date = new(2017, 04, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
             };
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -690,7 +690,7 @@ public class SubtotalTest
                 new() { Remark = "CNY", Fund = 2 },
             };
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -728,7 +728,7 @@ public class SubtotalTest
                 new() { Title = 1234, Fund = 2 },
             };
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -770,7 +770,7 @@ public class SubtotalTest
                 new() { Title = 1234, SubTitle = 08, Fund = 32 },
             };
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -817,7 +817,7 @@ public class SubtotalTest
                 new() { User = "CNY", Fund = 2 },
             };
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -855,7 +855,7 @@ public class SubtotalTest
                 new() { Date = new(2017, 01, 23, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
             };
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -886,7 +886,7 @@ public class SubtotalTest
                 new() { Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
             };
 
-        var res = builder.Build(bal);
+        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 

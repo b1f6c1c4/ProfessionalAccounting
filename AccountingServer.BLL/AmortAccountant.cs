@@ -114,7 +114,7 @@ internal class AmortAccountant : DistributedAccountant
             yield break;
 
         var queryT = new RegisteringQuery(amort);
-        foreach (var voucher in Db.SelectVouchers(new IntersectQueries<IVoucherQueryAtom>(query, queryT)))
+        foreach (var voucher in Db.SelectVouchers(new IntersectQueries<IVoucherQueryAtom>(query, queryT)).ToEnumerable()) // TODO
         {
             if (voucher.Remark == Amortization.IgnoranceMark)
                 continue;
