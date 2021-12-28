@@ -121,38 +121,38 @@ public class CsvSerializer : IEntitiesSerializer
     }
 
     /// <inheritdoc />
-    public string PresentVoucher(Voucher voucher, Client client)
-        => voucher == null ? "" : PresentVouchers(new[] { voucher }, client);
+    public string PresentVoucher(Voucher voucher)
+        => voucher == null ? "" : PresentVouchers(new[] { voucher });
 
     /// <inheritdoc />
-    public string PresentVoucherDetail(VoucherDetail detail, Client client) => PresentVoucherDetails(new[] { detail }, client);
+    public string PresentVoucherDetail(VoucherDetail detail) => PresentVoucherDetails(new[] { detail });
 
     /// <inheritdoc />
-    public string PresentVoucherDetail(VoucherDetailR detail, Client client) => PresentVoucherDetails(new[] { detail }, client);
+    public string PresentVoucherDetail(VoucherDetailR detail) => PresentVoucherDetails(new[] { detail });
 
     /// <inheritdoc />
-    public string PresentVouchers(IEnumerable<Voucher> vouchers, Client client)
-        => PresentVoucherDetails(vouchers.SelectMany(v => v.Details.Select(d => new VoucherDetailR(v, d))), client);
+    public string PresentVouchers(IEnumerable<Voucher> vouchers)
+        => PresentVoucherDetails(vouchers.SelectMany(v => v.Details.Select(d => new VoucherDetailR(v, d))));
 
     /// <inheritdoc />
-    public string PresentVoucherDetails(IEnumerable<VoucherDetail> details, Client client)
+    public string PresentVoucherDetails(IEnumerable<VoucherDetail> details)
         => Present(
             details.Select(d => new VoucherDetailR(null, d)),
             m_Specs.Where(s => !s.HasFlag(ColumnSpec.Voucher)).ToList());
 
     /// <inheritdoc />
-    public string PresentVoucherDetails(IEnumerable<VoucherDetailR> details, Client client)
+    public string PresentVoucherDetails(IEnumerable<VoucherDetailR> details)
         => Present(details, m_Specs);
 
-    public Voucher ParseVoucher(string str, Client client) => throw new NotImplementedException();
-    public VoucherDetail ParseVoucherDetail(string str, Client client) => throw new NotImplementedException();
-    public string PresentAsset(Asset asset, Client client) => throw new NotImplementedException();
-    public Asset ParseAsset(string str, Client client) => throw new NotImplementedException();
-    public string PresentAmort(Amortization amort, Client client) => throw new NotImplementedException();
-    public Amortization ParseAmort(string str, Client client) => throw new NotImplementedException();
+    public Voucher ParseVoucher(string str) => throw new NotImplementedException();
+    public VoucherDetail ParseVoucherDetail(string str) => throw new NotImplementedException();
+    public string PresentAsset(Asset asset) => throw new NotImplementedException();
+    public Asset ParseAsset(string str) => throw new NotImplementedException();
+    public string PresentAmort(Amortization amort) => throw new NotImplementedException();
+    public Amortization ParseAmort(string str) => throw new NotImplementedException();
 
-    public string PresentAssets(IEnumerable<Asset> assets, Client client) => throw new NotImplementedException();
-    public string PresentAmorts(IEnumerable<Amortization> amorts, Client client) => throw new NotImplementedException();
+    public string PresentAssets(IEnumerable<Asset> assets) => throw new NotImplementedException();
+    public string PresentAmorts(IEnumerable<Amortization> amorts) => throw new NotImplementedException();
 
     /// <summary>
     ///     将带记账凭证的细目转换为Csv表示
@@ -221,4 +221,6 @@ public class CsvSerializer : IEntitiesSerializer
         Remark = 0xa,
         Fund = 0xb,
     }
+
+    public Func<Client> Client { private get; set; }
 }

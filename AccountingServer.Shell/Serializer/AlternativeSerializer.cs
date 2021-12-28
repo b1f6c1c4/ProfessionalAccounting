@@ -41,15 +41,15 @@ internal class AlternativeSerializer : IEntitySerializer
         m_Secondary = secondary;
     }
 
-    public string PresentVoucher(Voucher voucher, Client client) => Run(s => s.PresentVoucher(voucher, client));
-    public Voucher ParseVoucher(string str, Client client) => Run(s => s.ParseVoucher(str, client));
-    public string PresentVoucherDetail(VoucherDetail detail, Client client) => Run(s => s.PresentVoucherDetail(detail, client));
-    public string PresentVoucherDetail(VoucherDetailR detail, Client client) => Run(s => s.PresentVoucherDetail(detail, client));
-    public VoucherDetail ParseVoucherDetail(string str, Client client) => Run(s => s.ParseVoucherDetail(str, client));
-    public string PresentAsset(Asset asset, Client client) => Run(s => s.PresentAsset(asset, client));
-    public Asset ParseAsset(string str, Client client) => Run(s => s.ParseAsset(str, client));
-    public string PresentAmort(Amortization amort, Client client) => Run(s => s.PresentAmort(amort, client));
-    public Amortization ParseAmort(string str, Client client) => Run(s => s.ParseAmort(str, client));
+    public string PresentVoucher(Voucher voucher) => Run(s => s.PresentVoucher(voucher));
+    public Voucher ParseVoucher(string str) => Run(s => s.ParseVoucher(str));
+    public string PresentVoucherDetail(VoucherDetail detail) => Run(s => s.PresentVoucherDetail(detail));
+    public string PresentVoucherDetail(VoucherDetailR detail) => Run(s => s.PresentVoucherDetail(detail));
+    public VoucherDetail ParseVoucherDetail(string str) => Run(s => s.ParseVoucherDetail(str));
+    public string PresentAsset(Asset asset) => Run(s => s.PresentAsset(asset));
+    public Asset ParseAsset(string str) => Run(s => s.ParseAsset(str));
+    public string PresentAmort(Amortization amort) => Run(s => s.PresentAmort(amort));
+    public Amortization ParseAmort(string str) => Run(s => s.ParseAmort(str));
 
     public static IEntitySerializer Compose(params IEntitySerializer[] serializers)
         => serializers.Aggregate((p, s) => new AlternativeSerializer(p, s));
@@ -65,4 +65,6 @@ internal class AlternativeSerializer : IEntitySerializer
             return func(m_Secondary);
         }
     }
+
+    public Func<Client> Client { private get; set; }
 }

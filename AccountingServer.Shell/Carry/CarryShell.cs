@@ -41,7 +41,7 @@ internal partial class CarryShell : IShellComponent
     public CarryShell(Accountant helper) => m_Accountant = helper;
 
     /// <inheritdoc />
-    public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+    public IQueryResult Execute(string expr, Accountant accountant, IEntitiesSerializer serializer)
     {
         expr = expr.Rest();
         DateFilter rng;

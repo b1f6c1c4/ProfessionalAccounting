@@ -36,21 +36,21 @@ public class JsonSerializer : IEntitiesSerializer
     private const string AmortToken = "new Amortization";
 
     /// <inheritdoc />
-    public string PresentVoucher(Voucher voucher, Client client)
+    public string PresentVoucher(Voucher voucher)
         => voucher == null
             ? $"{VoucherToken}{{\n\n}}"
             : VoucherToken + PresentJson(voucher).ToString(Formatting.Indented);
 
     /// <inheritdoc />
-    public string PresentVoucherDetail(VoucherDetail detail, Client client)
+    public string PresentVoucherDetail(VoucherDetail detail)
         => PresentJson(detail).ToString(Formatting.Indented);
 
     /// <inheritdoc />
-    public string PresentVoucherDetail(VoucherDetailR detail, Client client)
-        => PresentVoucherDetail((VoucherDetail)detail, client);
+    public string PresentVoucherDetail(VoucherDetailR detail)
+        => PresentVoucherDetail((VoucherDetail)detail);
 
     /// <inheritdoc />
-    public Voucher ParseVoucher(string str, Client client)
+    public Voucher ParseVoucher(string str)
     {
         if (str.StartsWith(VoucherToken, StringComparison.OrdinalIgnoreCase))
             str = str[VoucherToken.Length..];
@@ -59,14 +59,14 @@ public class JsonSerializer : IEntitiesSerializer
     }
 
     /// <inheritdoc />
-    public VoucherDetail ParseVoucherDetail(string str, Client client) => ParseVoucherDetail(ParseJson(str));
+    public VoucherDetail ParseVoucherDetail(string str) => ParseVoucherDetail(ParseJson(str));
 
     /// <inheritdoc />
-    public string PresentAsset(Asset asset, Client client)
+    public string PresentAsset(Asset asset)
         => asset == null ? "null" : AssetToken + PresentJson(asset).ToString(Formatting.Indented);
 
     /// <inheritdoc />
-    public Asset ParseAsset(string str, Client client)
+    public Asset ParseAsset(string str)
     {
         if (str.StartsWith(AssetToken, StringComparison.OrdinalIgnoreCase))
             str = str[AssetToken.Length..];
@@ -106,11 +106,11 @@ public class JsonSerializer : IEntitiesSerializer
     }
 
     /// <inheritdoc />
-    public string PresentAmort(Amortization amort, Client client)
+    public string PresentAmort(Amortization amort)
         => amort == null ? "null" : AmortToken + PresentJson(amort).ToString(Formatting.Indented);
 
     /// <inheritdoc />
-    public Amortization ParseAmort(string str, Client client)
+    public Amortization ParseAmort(string str)
     {
         if (str.StartsWith(AmortToken, StringComparison.OrdinalIgnoreCase))
             str = str[AmortToken.Length..];
@@ -141,19 +141,19 @@ public class JsonSerializer : IEntitiesSerializer
             };
     }
 
-    public string PresentVouchers(IEnumerable<Voucher> vouchers, Client client)
+    public string PresentVouchers(IEnumerable<Voucher> vouchers)
         => new JArray(vouchers.Select(PresentJson)).ToString(Formatting.Indented);
 
-    public string PresentVoucherDetails(IEnumerable<VoucherDetail> details, Client client)
+    public string PresentVoucherDetails(IEnumerable<VoucherDetail> details)
         => new JArray(details.Select(PresentJson)).ToString(Formatting.Indented);
 
-    public string PresentVoucherDetails(IEnumerable<VoucherDetailR> details, Client client)
-        => PresentVoucherDetails(details.Cast<VoucherDetail>(), client);
+    public string PresentVoucherDetails(IEnumerable<VoucherDetailR> details)
+        => PresentVoucherDetails(details.Cast<VoucherDetail>());
 
-    public string PresentAssets(IEnumerable<Asset> assets, Client client)
+    public string PresentAssets(IEnumerable<Asset> assets)
         => new JArray(assets.Select(PresentJson)).ToString(Formatting.Indented);
 
-    public string PresentAmorts(IEnumerable<Amortization> amorts, Client client)
+    public string PresentAmorts(IEnumerable<Amortization> amorts)
         => new JArray(amorts.Select(PresentJson)).ToString(Formatting.Indented);
 
     private static JObject ParseJson(string str)
@@ -390,4 +390,6 @@ public class JsonSerializer : IEntitiesSerializer
                 { "value", item.Value },
                 { "remark", item.Remark },
             };
+
+    public Func<Client> Client { private get; set; }
 }

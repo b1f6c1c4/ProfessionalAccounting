@@ -60,7 +60,7 @@ internal class PluginShell : IShellComponent
             };
 
     /// <inheritdoc />
-    public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+    public IQueryResult Execute(string expr, Accountant accountant, IEntitiesSerializer serializer)
     {
         var help = false;
         if (expr.StartsWith("?", StringComparison.Ordinal))

@@ -33,73 +33,64 @@ public interface IEntitySerializer
     ///     将记账凭证表示
     /// </summary>
     /// <param name="voucher">记账凭证</param>
-    /// <param name="client"></param>
     /// <returns>表示</returns>
-    string PresentVoucher(Voucher voucher, Client client);
+    string PresentVoucher(Voucher voucher);
 
     /// <summary>
     ///     从表示中取得记账凭证
     /// </summary>
     /// <param name="str">表示</param>
-    /// <param name="client"></param>
     /// <returns>记账凭证</returns>
-    Voucher ParseVoucher(string str, Client client);
+    Voucher ParseVoucher(string str);
 
     /// <summary>
     ///     将细目表示
     /// </summary>
     /// <param name="detail">细目</param>
-    /// <param name="client"></param>
     /// <returns>表示</returns>
-    string PresentVoucherDetail(VoucherDetail detail, Client client);
+    string PresentVoucherDetail(VoucherDetail detail);
 
     /// <summary>
     ///     将带记账凭证的细目表示
     /// </summary>
     /// <param name="detail">细目</param>
-    /// <param name="client"></param>
     /// <returns>表示</returns>
-    string PresentVoucherDetail(VoucherDetailR detail, Client client);
+    string PresentVoucherDetail(VoucherDetailR detail);
 
     /// <summary>
     ///     从表示中取得记账凭证细目
     /// </summary>
     /// <param name="str">表达</param>
-    /// <param name="client"></param>
     /// <returns>细目</returns>
-    VoucherDetail ParseVoucherDetail(string str, Client client);
+    VoucherDetail ParseVoucherDetail(string str);
 
     /// <summary>
     ///     将资产表示
     /// </summary>
     /// <param name="asset">资产</param>
-    /// <param name="client"></param>
     /// <returns>表示</returns>
-    string PresentAsset(Asset asset, Client client);
+    string PresentAsset(Asset asset);
 
     /// <summary>
     ///     从表示中取得资产
     /// </summary>
     /// <param name="str">表示</param>
-    /// <param name="client"></param>
     /// <returns>资产</returns>
-    Asset ParseAsset(string str, Client client);
+    Asset ParseAsset(string str);
 
     /// <summary>
     ///     将摊销表示
     /// </summary>
     /// <param name="amort">摊销</param>
-    /// <param name="client"></param>
     /// <returns>表示</returns>
-    string PresentAmort(Amortization amort, Client client);
+    string PresentAmort(Amortization amort);
 
     /// <summary>
     ///     从表示中取得摊销
     /// </summary>
     /// <param name="str">表示</param>
-    /// <param name="client"></param>
     /// <returns>摊销</returns>
-    Amortization ParseAmort(string str, Client client);
+    Amortization ParseAmort(string str);
 }
 
 internal interface IEntitiesSerializer : IEntitySerializer
@@ -108,41 +99,36 @@ internal interface IEntitiesSerializer : IEntitySerializer
     ///     将多个记账凭证表示
     /// </summary>
     /// <param name="vouchers">记账凭证</param>
-    /// <param name="client"></param>
     /// <returns>表示</returns>
-    string PresentVouchers(IEnumerable<Voucher> vouchers, Client client);
+    string PresentVouchers(IEnumerable<Voucher> vouchers);
 
     /// <summary>
     ///     将多个细目表示
     /// </summary>
     /// <param name="details">细目</param>
-    /// <param name="client"></param>
     /// <returns>表示</returns>
-    string PresentVoucherDetails(IEnumerable<VoucherDetail> details, Client client);
+    string PresentVoucherDetails(IEnumerable<VoucherDetail> details);
 
     /// <summary>
     ///     将多个带记账凭证的细目表示
     /// </summary>
     /// <param name="details">细目</param>
-    /// <param name="client"></param>
     /// <returns>表示</returns>
-    string PresentVoucherDetails(IEnumerable<VoucherDetailR> details, Client client);
+    string PresentVoucherDetails(IEnumerable<VoucherDetailR> details);
 
     /// <summary>
     ///     将多个资产表示
     /// </summary>
     /// <param name="assets">资产</param>
-    /// <param name="client"></param>
     /// <returns>表示</returns>
-    string PresentAssets(IEnumerable<Asset> assets, Client client);
+    string PresentAssets(IEnumerable<Asset> assets);
 
     /// <summary>
     ///     将多个摊销表示
     /// </summary>
     /// <param name="amorts">摊销</param>
-    /// <param name="client"></param>
     /// <returns>表示</returns>
-    string PresentAmorts(IEnumerable<Amortization> amorts, Client client);
+    string PresentAmorts(IEnumerable<Amortization> amorts);
 }
 
 internal static class SerializerHelper
@@ -155,53 +141,53 @@ internal class TrivialEntitiesSerializer : IEntitiesSerializer
     private readonly IEntitySerializer m_Serializer;
     public TrivialEntitiesSerializer(IEntitySerializer serializer) => m_Serializer = serializer;
 
-    public string PresentVouchers(IEnumerable<Voucher> vouchers, Client client)
+    public string PresentVouchers(IEnumerable<Voucher> vouchers)
     {
         var sb = new StringBuilder();
         foreach (var voucher in vouchers)
-            sb.Append(m_Serializer.PresentVoucher(voucher, client).Wrap());
+            sb.Append(m_Serializer.PresentVoucher(voucher).Wrap());
         return sb.ToString();
     }
 
-    public string PresentVoucherDetails(IEnumerable<VoucherDetail> details, Client client)
+    public string PresentVoucherDetails(IEnumerable<VoucherDetail> details)
     {
         var sb = new StringBuilder();
         foreach (var detail in details)
-            sb.Append(m_Serializer.PresentVoucherDetail(detail, client));
+            sb.Append(m_Serializer.PresentVoucherDetail(detail));
         return sb.ToString();
     }
 
-    public string PresentVoucherDetails(IEnumerable<VoucherDetailR> details, Client client)
+    public string PresentVoucherDetails(IEnumerable<VoucherDetailR> details)
     {
         var sb = new StringBuilder();
         foreach (var detail in details)
-            sb.Append(m_Serializer.PresentVoucherDetail(detail, client));
+            sb.Append(m_Serializer.PresentVoucherDetail(detail));
         return sb.ToString();
     }
 
-    public string PresentAssets(IEnumerable<Asset> assets, Client client)
+    public string PresentAssets(IEnumerable<Asset> assets)
     {
         var sb = new StringBuilder();
         foreach (var asset in assets)
-            sb.Append(m_Serializer.PresentAsset(asset, client).Wrap());
+            sb.Append(m_Serializer.PresentAsset(asset).Wrap());
         return sb.ToString();
     }
 
-    public string PresentAmorts(IEnumerable<Amortization> amorts, Client client)
+    public string PresentAmorts(IEnumerable<Amortization> amorts)
     {
         var sb = new StringBuilder();
         foreach (var amort in amorts)
-            sb.Append(m_Serializer.PresentAmort(amort, client).Wrap());
+            sb.Append(m_Serializer.PresentAmort(amort).Wrap());
         return sb.ToString();
     }
 
-    public string PresentVoucher(Voucher voucher, Client client) => m_Serializer.PresentVoucher(voucher, client);
-    public Voucher ParseVoucher(string str, Client client) => m_Serializer.ParseVoucher(str, client);
-    public string PresentVoucherDetail(VoucherDetail detail, Client client) => m_Serializer.PresentVoucherDetail(detail, client);
-    public string PresentVoucherDetail(VoucherDetailR detail, Client client) => m_Serializer.PresentVoucherDetail(detail, client);
-    public VoucherDetail ParseVoucherDetail(string str, Client client) => m_Serializer.ParseVoucherDetail(str, client);
-    public string PresentAsset(Asset asset, Client client) => m_Serializer.PresentAsset(asset, client);
-    public Asset ParseAsset(string str, Client client) => m_Serializer.ParseAsset(str, client);
-    public string PresentAmort(Amortization amort, Client client) => m_Serializer.PresentAmort(amort, client);
-    public Amortization ParseAmort(string str, Client client) => m_Serializer.ParseAmort(str, client);
+    public string PresentVoucher(Voucher voucher) => m_Serializer.PresentVoucher(voucher);
+    public Voucher ParseVoucher(string str) => m_Serializer.ParseVoucher(str);
+    public string PresentVoucherDetail(VoucherDetail detail) => m_Serializer.PresentVoucherDetail(detail);
+    public string PresentVoucherDetail(VoucherDetailR detail) => m_Serializer.PresentVoucherDetail(detail);
+    public VoucherDetail ParseVoucherDetail(string str) => m_Serializer.ParseVoucherDetail(str);
+    public string PresentAsset(Asset asset) => m_Serializer.PresentAsset(asset);
+    public Asset ParseAsset(string str) => m_Serializer.ParseAsset(str);
+    public string PresentAmort(Amortization amort) => m_Serializer.PresentAmort(amort);
+    public Amortization ParseAmort(string str) => m_Serializer.ParseAmort(str);
 }

@@ -247,6 +247,7 @@ public static class ParseHelper
     /// </summary>
     /// <param name="facade">占位符</param>
     /// <param name="expr">表达式</param>
+    /// <param name="client">客户端</param>
     /// <returns>记账凭证检索式</returns>
     public static IQueryCompounded<IVoucherQueryAtom> OptColVouchers(this FacadeBase facade, ref string expr, Client client)
         => Optional(facade, ref expr, ":") ? facade.VoucherQuery(ref expr, client) : null;

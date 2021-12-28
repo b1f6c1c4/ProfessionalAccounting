@@ -201,7 +201,7 @@ public class Facade
     {
         var serializer = GetSerializer(spec);
 
-        var voucher = serializer.ParseVoucher(str, TODO);
+        var voucher = serializer.ParseVoucher(str);
         var grpCs = voucher.Details.GroupBy(d => d.Currency ?? BaseCurrency.Now).ToList();
         var grpUs = voucher.Details.GroupBy(d => d.User ?? m_Accountant.Client.ClientUser.Name).ToList();
         foreach (var grpC in grpCs)
@@ -312,7 +312,7 @@ public class Facade
     public bool ExecuteVoucherRemoval(string str, string spec)
     {
         var serializer = GetSerializer(spec);
-        var voucher = serializer.ParseVoucher(str, TODO);
+        var voucher = serializer.ParseVoucher(str);
 
         if (voucher.ID == null)
             throw new ApplicationException("编号未知");

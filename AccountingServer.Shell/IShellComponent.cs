@@ -20,6 +20,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using AccountingServer.BLL;
 using AccountingServer.Shell.Serializer;
 
 namespace AccountingServer.Shell;
@@ -33,9 +34,10 @@ internal interface IShellComponent
     ///     执行表达式
     /// </summary>
     /// <param name="expr">表达式</param>
+    /// <param name="accountant"></param>
     /// <param name="serializer">表示器代号</param>
     /// <returns>执行结果</returns>
-    IQueryResult Execute(string expr, IEntitiesSerializer serializer);
+    IQueryResult Execute(string expr, Accountant accountant, IEntitiesSerializer serializer);
 
     /// <summary>
     ///     粗略判断表达式是否可执行
@@ -53,22 +55,22 @@ internal class ShellComponent : IShellComponent
     /// <summary>
     ///     操作
     /// </summary>
-    private readonly Func<string, IEntitiesSerializer, IQueryResult> m_Action;
+    private readonly Func<string, Accountant, IEntitiesSerializer, IQueryResult> m_Action;
 
     /// <summary>
     ///     首段字符串
     /// </summary>
     private readonly string m_Initial;
 
-    public ShellComponent(string initial, Func<string, IEntitiesSerializer, IQueryResult> action)
+    public ShellComponent(string initial, Func<string, Accountant, IEntitiesSerializer, IQueryResult> action)
     {
         m_Initial = initial;
         m_Action = action;
     }
 
     /// <inheritdoc />
-    public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
-        => m_Action(m_Initial == null ? expr : expr.Rest(), serializer);
+    public IQueryResult Execute(string expr, Accountant accountant, IEntitiesSerializer serializer)
+        => m_Action(m_Initial == null ? expr : expr.Rest(), accountant, serializer);
 
     /// <inheritdoc />
     public bool IsExecutable(string expr) => m_Initial == null || expr.Initial() == m_Initial;
@@ -85,8 +87,8 @@ internal sealed class ShellComposer : IShellComponent, IEnumerable
     public IEnumerator GetEnumerator() => m_Components.GetEnumerator();
 
     /// <inheritdoc />
-    public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
-        => FirstExecutable(expr).Execute(expr, serializer);
+    public IQueryResult Execute(string expr, Accountant accountant, IEntitiesSerializer serializer)
+        => FirstExecutable(expr).Execute(expr, accountant, serializer);
 
     /// <inheritdoc />
     public bool IsExecutable(string expr) => m_Components.Any(s => s.IsExecutable(expr));

@@ -31,7 +31,7 @@ namespace AccountingServer.Shell.Subtotal;
 /// <summary>
 ///     分类汇总结果处理器
 /// </summary>
-internal abstract class StringSubtotalVisitor : ISubtotalVisitor<Nothing>, ISubtotalStringify
+internal abstract class StringSubtotalVisitor : IClientDependable, ISubtotalVisitor<Nothing>, ISubtotalStringify
 {
     protected string Cu;
     protected int Depth;
@@ -39,15 +39,13 @@ internal abstract class StringSubtotalVisitor : ISubtotalVisitor<Nothing>, ISubt
     protected GatheringType Ga;
 
     private ISubtotal m_Par;
-    protected Client m_Client;
     protected StringBuilder Sb;
     protected IEntitiesSerializer Serializer;
 
     /// <inheritdoc />
-    public string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer, Client client)
+    public string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer)
     {
         m_Par = par;
-        m_Client = client;
         Ga = par.GatherType;
         Cu = par.EquivalentCurrency;
         Serializer = serializer;
@@ -88,7 +86,7 @@ internal abstract class StringSubtotalVisitor : ISubtotalVisitor<Nothing>, ISubt
                     SubtotalLevel.Content => sub.Items.Cast<ISubtotalContent>().OrderBy(s => s.Content, comparer),
                     SubtotalLevel.Remark => sub.Items.Cast<ISubtotalRemark>().OrderBy(s => s.Remark, comparer),
                     SubtotalLevel.User => sub.Items.Cast<ISubtotalUser>()
-                        .OrderBy(s => s.User == m_Client.ClientUser.Name ? null : s.User),
+                        .OrderBy(s => s.User == Client().ClientUser.Name ? null : s.User),
                     SubtotalLevel.Currency => sub.Items.Cast<ISubtotalCurrency>()
                         .OrderBy(s => s.Currency == BaseCurrency.Now ? null : s.Currency),
                     SubtotalLevel.Day => sub.Items.Cast<ISubtotalDate>().OrderBy(s => s.Date),
@@ -107,4 +105,6 @@ internal abstract class StringSubtotalVisitor : ISubtotalVisitor<Nothing>, ISubt
 
         Depth--;
     }
+
+    public Func<Client> Client { private get; set; }
 }

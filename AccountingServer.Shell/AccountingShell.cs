@@ -42,7 +42,7 @@ internal class AccountingShell : IShellComponent
     public AccountingShell(Accountant helper) => m_Accountant = helper;
 
     /// <inheritdoc />
-    public IQueryResult Execute(string expr, IEntitiesSerializer serializer) => Parse(expr)(serializer);
+    public IQueryResult Execute(string expr, Accountant accountant, IEntitiesSerializer serializer) => Parse(expr)(serializer);
 
     /// <inheritdoc />
     public bool IsExecutable(string expr) => true;
@@ -176,7 +176,7 @@ internal class AccountingShell : IShellComponent
     /// <returns>记账凭证表达式</returns>
     private IQueryResult PresentVoucherQuery(IQueryCompounded<IVoucherQueryAtom> query,
         IEntitiesSerializer serializer)
-        => new PlainText(serializer.PresentVouchers(m_Accountant.SelectVouchers(query), m_Accountant.Client));
+        => new PlainText(serializer.PresentVouchers(m_Accountant.SelectVouchers(query)));
 
     /// <summary>
     ///     按细目检索式解析
@@ -191,7 +191,7 @@ internal class AccountingShell : IShellComponent
         if (res.IsDangerous() && safe)
             throw new SecurityException("检测到弱检索式");
 
-        return serializer => PresentDetailQuery(res, serializer, m_Accountant.Client);
+        return serializer => PresentDetailQuery(res, serializer);
     }
 
     /// <summary>
@@ -199,10 +199,9 @@ internal class AccountingShell : IShellComponent
     /// </summary>
     /// <param name="query">细目检索式</param>
     /// <param name="serializer">表示器</param>
-    /// <param name="client"></param>
     /// <returns>执行结果</returns>
-    private IQueryResult PresentDetailQuery(IVoucherDetailQuery query, IEntitiesSerializer serializer, Client client)
-        => new PlainText(serializer.PresentVoucherDetails(m_Accountant.SelectVoucherDetails(query), client));
+    private IQueryResult PresentDetailQuery(IVoucherDetailQuery query, IEntitiesSerializer serializer)
+        => new PlainText(serializer.PresentVoucherDetails(m_Accountant.SelectVoucherDetails(query)));
 
     /// <summary>
     ///     按带记账凭证的细目检索式解析
@@ -231,7 +230,7 @@ internal class AccountingShell : IShellComponent
             serializer.PresentVoucherDetails(
                 m_Accountant.SelectVouchers(query.VoucherQuery).SelectMany(
                     v => v.Details.Where(d => d.IsMatch(query.ActualDetailFilter()))
-                        .Select(d => new VoucherDetailR(v, d))), m_Accountant.Client));
+                        .Select(d => new VoucherDetailR(v, d)))));
 
     /// <summary>
     ///     按记账凭证检索式解析，但仅保留部分细目
@@ -262,7 +261,7 @@ internal class AccountingShell : IShellComponent
                     {
                         v.Details.RemoveAll(d => !d.IsMatch(query.ActualDetailFilter()));
                         return v;
-                    }), m_Accountant.Client));
+                    })));
 
     /// <summary>
     ///     执行记账凭证分类汇总检索式并呈现结果
@@ -275,7 +274,7 @@ internal class AccountingShell : IShellComponent
         IEntitiesSerializer serializer)
     {
         var result = m_Accountant.SelectVouchersGrouped(query);
-        return new PlainText(trav.PresentSubtotal(result, query.Subtotal, serializer, m_Accountant.Client));
+        return new PlainText(trav.PresentSubtotal(result, query.Subtotal, serializer));
     }
 
     /// <summary>
@@ -289,7 +288,7 @@ internal class AccountingShell : IShellComponent
         IEntitiesSerializer serializer)
     {
         var result = m_Accountant.SelectVoucherDetailsGrouped(query);
-        return new PlainText(trav.PresentSubtotal(result, query.Subtotal, serializer, m_Accountant.Client));
+        return new PlainText(trav.PresentSubtotal(result, query.Subtotal, serializer));
     }
 
     [Flags]

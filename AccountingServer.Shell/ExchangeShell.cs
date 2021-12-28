@@ -51,7 +51,7 @@ internal class ExchangeShell : IShellComponent
         m_Timer.Elapsed += OnTimedEvent;
     }
 
-    public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+    public IQueryResult Execute(string expr, Accountant accountant, IEntitiesSerializer serializer)
     {
         expr = expr.Rest();
         var isAccurate = expr.Initial() == "acc";

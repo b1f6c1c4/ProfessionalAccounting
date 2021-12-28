@@ -192,7 +192,7 @@ internal class InquiriesVisitor : IInquiryVisitor<double>
 
                 m_Sb.Append(
                     new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), theFmt, inq.HideContent)
-                        .PresentSubtotal(grp, query.Subtotal, m_Serializer, m_Accountant.Client));
+                        .PresentSubtotal(grp, query.Subtotal, m_Serializer));
             }
         else
         {
@@ -200,7 +200,7 @@ internal class InquiriesVisitor : IInquiryVisitor<double>
 
             m_Sb.Append(
                 new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), fmt, inq.HideContent)
-                    .PresentSubtotal(gq, query.Subtotal, m_Serializer, m_Accountant.Client));
+                    .PresentSubtotal(gq, query.Subtotal, m_Serializer));
         }
 
         return val;

@@ -80,7 +80,7 @@ internal class AssetDisposition : PluginBase
                 asset.Schedule.RemoveRange(id, asset.Schedule.Count - id);
 
             asset.Schedule.Add(new DispositionItem { Date = voucher.Date, VoucherID = voucher.ID });
-            sb.Append(serializer.PresentAsset(asset, Accountant.Client).Wrap());
+            sb.Append(serializer.PresentAsset(asset).Wrap());
             Accountant.Upsert(asset);
         }
 

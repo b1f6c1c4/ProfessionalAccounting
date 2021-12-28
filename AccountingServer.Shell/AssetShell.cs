@@ -34,37 +34,36 @@ namespace AccountingServer.Shell;
 /// </summary>
 internal class AssetShell : DistributedShell
 {
-    public AssetShell(Accountant helper) : base(helper) { }
-
     /// <inheritdoc />
     protected override string Initial => "a";
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery, DateTime? dt,
-        bool showSchedule, IEntitiesSerializer serializer)
+        bool showSchedule, Accountant accountant, IEntitiesSerializer serializer)
     {
         var sb = new StringBuilder();
-        foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
-            sb.Append(ListAsset(a, serializer, dt, showSchedule));
+        foreach (var a in Sort(accountant.SelectAssets(distQuery)))
+            sb.Append(ListAsset(a, accountant, serializer, dt, showSchedule));
 
         return new PlainText(sb.ToString());
     }
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        Accountant accountant,
         IEntitiesSerializer serializer)
-        => new PlainText(serializer.PresentAssets(Sort(Accountant.SelectAssets(distQuery)), Accountant.Client));
+        => new PlainText(serializer.PresentAssets(Sort(accountant.SelectAssets(distQuery))));
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateFilter rng,
-        IQueryCompounded<IVoucherQueryAtom> query, IEntitiesSerializer serializer)
+        IQueryCompounded<IVoucherQueryAtom> query, Accountant accountant, IEntitiesSerializer serializer)
     {
         var sb = new StringBuilder();
-        foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
+        foreach (var a in Sort(accountant.SelectAssets(distQuery)))
         {
-            sb.Append(serializer.PresentVouchers(Accountant.RegisterVouchers(a, rng, query), Accountant.Client));
-            Accountant.Upsert(a);
+            sb.Append(serializer.PresentVouchers(accountant.RegisterVouchers(a, rng, query)));
+            accountant.Upsert(a);
         }
 
         if (sb.Length > 0)
@@ -76,10 +75,10 @@ internal class AssetShell : DistributedShell
     /// <inheritdoc />
     protected override IQueryResult ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateFilter rng,
-        IQueryCompounded<IVoucherQueryAtom> query, IEntitiesSerializer serializer)
+        IQueryCompounded<IVoucherQueryAtom> query, Accountant accountant, IEntitiesSerializer serializer)
     {
         var sb = new StringBuilder();
-        foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
+        foreach (var a in Sort(accountant.SelectAssets(distQuery)))
         {
             foreach (var item in a.Schedule.Where(item => item.Date.Within(rng)))
             {
@@ -88,7 +87,7 @@ internal class AssetShell : DistributedShell
                     if (item.VoucherID == null)
                         continue;
 
-                    var voucher = Accountant.SelectVoucher(item.VoucherID);
+                    var voucher = accountant.SelectVoucher(item.VoucherID);
                     if (voucher != null)
                         if (!MatchHelper.IsMatch(query, voucher.IsMatch))
                             continue;
@@ -97,8 +96,8 @@ internal class AssetShell : DistributedShell
                 item.VoucherID = null;
             }
 
-            sb.Append(ListAsset(a, serializer));
-            Accountant.Upsert(a);
+            sb.Append(ListAsset(a, accountant, serializer));
+            accountant.Upsert(a);
         }
 
         if (sb.Length > 0)
@@ -109,25 +108,26 @@ internal class AssetShell : DistributedShell
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        Accountant accountant,
         IEntitiesSerializer serializer)
     {
         var lst = new List<Asset>();
-        foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
+        foreach (var a in Sort(accountant.SelectAssets(distQuery)))
         {
             Accountant.Depreciate(a);
-            Accountant.Upsert(a);
+            accountant.Upsert(a);
             lst.Add(a);
         }
 
-        return new DirtyText(serializer.PresentAssets(lst, Accountant.Client));
+        return new DirtyText(serializer.PresentAssets(lst));
     }
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng)
+        DateFilter rng, Accountant accountant)
     {
         var cnt = 0L;
-        foreach (var a in Accountant.SelectAssets(distQuery))
+        foreach (var a in accountant.SelectAssets(distQuery))
         {
             if (a.Schedule == null)
                 continue;
@@ -135,7 +135,7 @@ internal class AssetShell : DistributedShell
             var flag = false;
             foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
                          .Where(item => item.VoucherID != null)
-                         .Where(item => Accountant.SelectVoucher(item.VoucherID) == null))
+                         .Where(item => accountant.SelectVoucher(item.VoucherID) == null))
             {
                 item.VoucherID = null;
                 cnt++;
@@ -143,7 +143,7 @@ internal class AssetShell : DistributedShell
             }
 
             if (flag)
-                Accountant.Upsert(a);
+                accountant.Upsert(a);
         }
 
         return new NumberAffected(cnt);
@@ -151,10 +151,10 @@ internal class AssetShell : DistributedShell
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng)
+        DateFilter rng, Accountant accountant)
     {
         var cnt = 0L;
-        foreach (var a in Accountant.SelectAssets(distQuery))
+        foreach (var a in accountant.SelectAssets(distQuery))
         {
             if (a.Schedule == null)
                 continue;
@@ -163,14 +163,14 @@ internal class AssetShell : DistributedShell
             foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
                          .Where(item => item.VoucherID != null))
             {
-                var voucher = Accountant.SelectVoucher(item.VoucherID);
+                var voucher = accountant.SelectVoucher(item.VoucherID);
                 if (voucher == null)
                 {
                     item.VoucherID = null;
                     cnt++;
                     flag = true;
                 }
-                else if (Accountant.DeleteVoucher(voucher.ID))
+                else if (accountant.DeleteVoucher(voucher.ID))
                 {
                     item.VoucherID = null;
                     cnt++;
@@ -179,33 +179,33 @@ internal class AssetShell : DistributedShell
             }
 
             if (flag)
-                Accountant.Upsert(a);
+                accountant.Upsert(a);
         }
 
         return new NumberAffected(cnt);
     }
 
     protected override IQueryResult ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        IQueryCompounded<IVoucherQueryAtom> query) => new NumberAffected(
-        Accountant.SelectAssets(distQuery)
+        IQueryCompounded<IVoucherQueryAtom> query, Accountant accountant) => new NumberAffected(
+        accountant.SelectAssets(distQuery)
             .Sum(
-                a => Accountant.DeleteVouchers(
+                a => accountant.DeleteVouchers(
                     new IntersectQueries<IVoucherQueryAtom>(
                         query ?? VoucherQueryUnconstrained.Instance,
                         ParsingF.VoucherQuery(
-                            $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}", Accountant.Client)))));
+                            $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}", accountant.Client)))));
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
-        bool isCollapsed)
+        bool isCollapsed, Accountant accountant)
     {
         var sb = new StringBuilder();
-        foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
+        foreach (var a in Sort(accountant.SelectAssets(distQuery)))
         {
-            foreach (var item in Accountant.Update(a, rng, isCollapsed))
+            foreach (var item in accountant.Update(a, rng, isCollapsed))
                 sb.AppendLine(ListAssetItem(item));
 
-            Accountant.Upsert(a);
+            accountant.Upsert(a);
         }
 
         if (sb.Length > 0)
@@ -219,25 +219,27 @@ internal class AssetShell : DistributedShell
     /// </summary>
     /// <param name="distQuery">分期检索式</param>
     /// <param name="rng">日期过滤器</param>
+    /// <param name="accountant"></param>
     /// <param name="serializer">表示器</param>
     /// <returns>执行结果</returns>
     protected override IQueryResult ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+        Accountant accountant,
         IEntitiesSerializer serializer)
     {
         var sb = new StringBuilder();
-        foreach (var a in Sort(Accountant.SelectAssets(distQuery)))
+        foreach (var a in Sort(accountant.SelectAssets(distQuery)))
         {
             var sbi = new StringBuilder();
-            foreach (var item in Accountant.Update(a, rng, false, true))
+            foreach (var item in accountant.Update(a, rng, false, true))
                 sbi.AppendLine(ListAssetItem(item));
 
             if (sbi.Length != 0)
             {
-                sb.AppendLine(ListAsset(a, serializer, null, false));
+                sb.AppendLine(ListAsset(a, accountant, serializer, null, false));
                 sb.AppendLine(sbi.ToString());
             }
 
-            Accountant.Upsert(a);
+            accountant.Upsert(a);
         }
 
         if (sb.Length > 0)
@@ -250,11 +252,12 @@ internal class AssetShell : DistributedShell
     ///     显示资产及其折旧计算表
     /// </summary>
     /// <param name="asset">资产</param>
+    /// <param name="accountant"></param>
     /// <param name="serializer">表示器</param>
     /// <param name="dt">计算账面价值的时间</param>
     /// <param name="showSchedule">是否显示折旧计算表</param>
     /// <returns>格式化的信息</returns>
-    private string ListAsset(Asset asset, IEntitySerializer serializer, DateTime? dt = null,
+    private string ListAsset(Asset asset, Accountant accountant, IEntitySerializer serializer, DateTime? dt = null,
         bool showSchedule = true)
     {
         var sb = new StringBuilder();
@@ -285,7 +288,7 @@ internal class AssetShell : DistributedShell
             {
                 sb.AppendLine(ListAssetItem(assetItem));
                 if (assetItem.VoucherID != null)
-                    sb.AppendLine(serializer.PresentVoucher(Accountant.SelectVoucher(assetItem.VoucherID), Accountant.Client).Wrap());
+                    sb.AppendLine(serializer.PresentVoucher(accountant.SelectVoucher(assetItem.VoucherID)).Wrap());
             }
 
         return sb.ToString();

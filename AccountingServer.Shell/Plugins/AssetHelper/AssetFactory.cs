@@ -94,6 +94,6 @@ internal class AssetFactory : PluginBase
         Accountant.Depreciate(asset);
         Accountant.Upsert(asset);
 
-        return new DirtyText(serializer.PresentAsset(asset, Accountant.Client).Wrap());
+        return new DirtyText(serializer.PresentAsset(asset).Wrap());
     }
 }

@@ -36,7 +36,7 @@ internal class JsonSubtotal : ISubtotalVisitor<JProperty>, ISubtotalStringify
     private ISubtotal m_Par;
 
     /// <inheritdoc />
-    public string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer, Client client)
+    public string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer)
     {
         m_Par = par;
         m_Depth = 0;

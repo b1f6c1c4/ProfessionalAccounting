@@ -43,7 +43,7 @@ internal class CheckShell : IShellComponent
     public CheckShell(Accountant helper) => m_Accountant = helper;
 
     /// <inheritdoc />
-    public IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+    public IQueryResult Execute(string expr, Accountant accountant, IEntitiesSerializer serializer)
         => expr.Rest() switch
             {
                 "1" => BasicCheck(serializer),
@@ -72,7 +72,7 @@ internal class CheckShell : IShellComponent
                 old = voucher;
             else if (voucher.ID != old.ID)
             {
-                sb.Append(serializer.PresentVoucher(old, m_Accountant.Client).Wrap());
+                sb.Append(serializer.PresentVoucher(old).Wrap());
                 sb.AppendLine();
             }
 
@@ -80,7 +80,7 @@ internal class CheckShell : IShellComponent
         }
 
         if (old != null)
-            sb.Append(serializer.PresentVoucher(old, m_Accountant.Client).Wrap());
+            sb.Append(serializer.PresentVoucher(old).Wrap());
 
         if (sb.Length > 0)
             return new PlainText(sb.ToString());
@@ -181,7 +181,7 @@ internal class CheckShell : IShellComponent
             sb.AppendLine($"// Date = {v.Date.AsDate()} Duplication = {ids.Count}");
             foreach (var id in ids)
                 sb.AppendLine($"//   ^{id}^");
-            sb.AppendLine(serializer.PresentVoucher(v, m_Accountant.Client).Wrap());
+            sb.AppendLine(serializer.PresentVoucher(v).Wrap());
         }
 
         if (sb.Length > 0)

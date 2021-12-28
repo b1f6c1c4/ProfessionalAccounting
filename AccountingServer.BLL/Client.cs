@@ -27,7 +27,7 @@ public class Client
     public ClientDateTime ClientDateTime { get; set; }
 }
 
-internal interface IClientDependable
+public interface IClientDependable
 {
     Func<Client> Client { set; }
 }

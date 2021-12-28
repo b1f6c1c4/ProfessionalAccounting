@@ -33,7 +33,6 @@ internal interface ISubtotalStringify
     /// <param name="raw">分类汇总结果</param>
     /// <param name="par">参数</param>
     /// <param name="serializer">表示器</param>
-    /// <param name="client">客户端</param>
     /// <returns>分类汇总结果</returns>
-    string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer, Client client);
+    string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer);
 }
