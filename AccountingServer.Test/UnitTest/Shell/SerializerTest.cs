@@ -109,7 +109,9 @@ public class CSharpSerializerTest : SerializerTest
 [Collection("SerializerTestCollection")]
 public class ExprSerializerTest : SerializerTest
 {
-    protected override IEntitySerializer Serializer { get; } = new ExprSerializer();
+    public ExprSerializerTest() => Serializer = new ExprSerializer { Client = Client };
+
+    protected override IEntitySerializer Serializer { get; }
 
     [Theory]
     [ClassData(typeof(VoucherDataProvider))]
@@ -136,7 +138,9 @@ public class ExprSerializerTest : SerializerTest
 public class AbbrSerializerTest : SerializerTest
 {
     public AbbrSerializerTest()
-        => AbbrSerializer.Abbrs =
+    {
+        Serializer = new AbbrSerializer { Client = Client };
+        AbbrSerializer.Abbrs =
             new MockConfigManager<Abbreviations>(
                 new()
                     {
@@ -153,8 +157,9 @@ public class AbbrSerializerTest : SerializerTest
                                 new() { Abbr = "abbr2", Title = 1234, Editable = true },
                             },
                     });
+    }
 
-    protected override IEntitySerializer Serializer => new AbbrSerializer();
+    protected override IEntitySerializer Serializer { get; }
 
     [Theory]
     [ClassData(typeof(VoucherDataProvider))]
@@ -238,6 +243,8 @@ public class DiscountSerializerTest
 
     public DiscountSerializerTest()
     {
+        Serializer = new DiscountSerializer { Client = m_Client };
+
         BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
             new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
@@ -249,7 +256,7 @@ public class DiscountSerializerTest
                 new() { Abbrs = new() { new() { Abbr = "aaa", Title = 1001, Editable = false } } });
     }
 
-    private static IEntitySerializer Serializer { get; } = new DiscountSerializer();
+    private IEntitySerializer Serializer { get; }
 
     [Fact]
     public void ManyNullTest()

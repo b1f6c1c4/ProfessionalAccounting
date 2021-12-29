@@ -119,7 +119,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
 
         var resLst = new List<VoucherDetail>();
         VoucherDetail vd;
-        var exprS = new AbbrSerializer();
+        var exprS = new AbbrSerializer { Client = Client };
         while ((vd = exprS.ParseVoucherDetail(ref expr)) != null)
             resLst.Add(vd);
 

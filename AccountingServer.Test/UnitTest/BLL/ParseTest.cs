@@ -38,29 +38,31 @@ public class ParseTest
         pred ??= r => Assert.NotNull(r);
 
         {
-            var m = typeof(FacadeBase).GetMethod(name, new[] { typeof(string) });
-            Assert.NotNull(m);
-            var par = new object[] { s };
-            var r = m.Invoke(ParsingF, par);
+            var m1 = typeof(FacadeBase).GetMethod(name, new[] { typeof(string) });
+            var m2 = typeof(FacadeBase).GetMethod(name, new[] { typeof(string), typeof(Client) });
+            Assert.True((m1 != null) ^ (m2 != null));
+            var par = m1 != null ? new object[] { s } : new object[] { s, m_Client };
+            var r = (m1 ?? m2).Invoke(ParsingF, par);
             if (r != null || Nullable.GetUnderlyingType(typeof(TR)) == null)
                 Assert.IsAssignableFrom<TR>(r);
             pred((TR)r);
-            r = m.Invoke(Parsing, par);
+            r = (m1 ?? m2).Invoke(Parsing, par);
             if (r != null || Nullable.GetUnderlyingType(typeof(TR)) == null)
                 Assert.IsAssignableFrom<TR>(r);
             pred((TR)r);
         }
         {
-            var m = typeof(FacadeBase).GetMethod(name, new[] { typeof(string).MakeByRefType() });
-            Assert.NotNull(m);
-            var par = new object[] { s };
-            var r = m.Invoke(ParsingF, par);
+            var m1 = typeof(FacadeBase).GetMethod(name, new[] { typeof(string).MakeByRefType() });
+            var m2 = typeof(FacadeBase).GetMethod(name, new[] { typeof(string).MakeByRefType(), typeof(Client) });
+            Assert.True((m1 != null) ^ (m2 != null));
+            var par = m1 != null ? new object[] { s } : new object[] { s, m_Client };
+            var r = (m1 ?? m2).Invoke(ParsingF, par);
             if (r != null || Nullable.GetUnderlyingType(typeof(TR)) == null)
                 Assert.IsAssignableFrom<TR>(r);
             pred((TR)r);
             Assert.Equal("", par[0]);
             par[0] = s;
-            r = m.Invoke(Parsing, par);
+            r = (m1 ?? m2).Invoke(Parsing, par);
             if (r != null || Nullable.GetUnderlyingType(typeof(TR)) == null)
                 Assert.IsAssignableFrom<TR>(r);
             pred((TR)r);
@@ -71,12 +73,13 @@ public class ParseTest
     private void PairedFail(string name, string s, object def = null)
     {
         {
-            var m = typeof(FacadeBase).GetMethod(name, new[] { typeof(string) });
-            Assert.NotNull(m);
-            var par = new object[] { s };
+            var m1 = typeof(FacadeBase).GetMethod(name, new[] { typeof(string) });
+            var m2 = typeof(FacadeBase).GetMethod(name, new[] { typeof(string), typeof(Client) });
+            Assert.True((m1 != null) ^ (m2 != null));
+            var par = m1 != null ? new object[] { s } : new object[] { s, m_Client };
             try
             {
-                m.Invoke(ParsingF, par);
+                (m1 ?? m2).Invoke(ParsingF, par);
                 Assert.True(false);
             }
             catch (TargetInvocationException e)
@@ -84,15 +87,16 @@ public class ParseTest
                 Assert.IsAssignableFrom<Exception>(e.InnerException);
             }
 
-            Assert.Equal(def, m.Invoke(Parsing, par));
+            Assert.Equal(def, (m1 ?? m2).Invoke(Parsing, par));
         }
         {
-            var m = typeof(FacadeBase).GetMethod(name, new[] { typeof(string).MakeByRefType() });
-            Assert.NotNull(m);
-            var par = new object[] { s };
+            var m1 = typeof(FacadeBase).GetMethod(name, new[] { typeof(string).MakeByRefType() });
+            var m2 = typeof(FacadeBase).GetMethod(name, new[] { typeof(string).MakeByRefType(), typeof(Client) });
+            Assert.True((m1 != null) ^ (m2 != null));
+            var par = m1 != null ? new object[] { s } : new object[] { s, m_Client };
             try
             {
-                m.Invoke(ParsingF, par);
+                (m1 ?? m2).Invoke(ParsingF, par);
                 Assert.True(false);
             }
             catch (TargetInvocationException e)
@@ -102,7 +106,7 @@ public class ParseTest
 
             Assert.Equal(s, par[0]);
 
-            Assert.Equal(def, m.Invoke(Parsing, par));
+            Assert.Equal(def, (m1 ?? m2).Invoke(Parsing, par));
             Assert.Equal(s, par[0]);
         }
     }

@@ -127,7 +127,7 @@ public class BLLQueryTest : QueryTestBase, IDisposable
 
     public BLLQueryTest()
     {
-        m_Accountant = new(new("accounting-test"), "b1", DateTime.UtcNow.Date);
+        m_Accountant = new(new(db: "accounting-test"), "b1", DateTime.UtcNow.Date);
 
         m_Accountant.DeleteAssets(DistributedQueryUnconstrained.Instance);
         m_Accountant.DeleteAmortizations(DistributedQueryUnconstrained.Instance);

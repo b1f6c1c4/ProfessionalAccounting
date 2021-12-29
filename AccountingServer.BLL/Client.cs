@@ -40,3 +40,13 @@ public interface IClientDependable
 {
     Client Client { set; }
 }
+
+public static class ClientHelper
+{
+    public static T Assign<T>(this T value, Client client) where T : IClientDependable
+    {
+        if (value != null)
+            value.Client = client;
+        return value;
+    }
+}

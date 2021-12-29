@@ -34,23 +34,14 @@ internal partial class QueryParser
             => new MyDistributedFilter
                 {
                     ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : null,
-                    User = (UserSpec()?.GetText()).ParseUserSpec(Client),
+                    User = (UserSpec()?.GetText()).ParseUserSpec(Client ?? new()), // workaround IsDangerous
                     Name = RegexString()?.GetText().Dequotation().Replace(@"\/", "/"),
                     Remark = PercentQuotedString()?.GetText().Dequotation(),
                 };
 
         /// <inheritdoc />
         public DateFilter Range
-        {
-            get
-            {
-                if (rangeCore() == null)
-                    return DateFilter.Unconstrained;
-
-                rangeCore().Client = Client;
-                return rangeCore().Range;
-            }
-        }
+            => rangeCore().Assign(Client)?.Range ?? DateFilter.Unconstrained;
 
         /// <inheritdoc />
         public bool IsDangerous() => Filter.IsDangerous() && Range.IsDangerous(true);
@@ -112,29 +103,11 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public IQueryCompounded<IDistributedQueryAtom> Filter1
-        {
-            get
-            {
-                if (distributedQ() != null)
-                {
-                    distributedQ().Client = Client;
-                    return distributedQ();
-                }
-
-                distributedQ1().Client = Client;
-                return distributedQ1();
-            }
-        }
+            => (IQueryCompounded<IDistributedQueryAtom>)distributedQ().Assign(Client) ?? distributedQ1().Assign(Client);
 
         /// <inheritdoc />
         public IQueryCompounded<IDistributedQueryAtom> Filter2
-        {
-            get
-            {
-                distributedQ1().Client = Client;
-                return distributedQ1();
-            }
-        }
+            => distributedQ1().Assign(Client);
 
         /// <inheritdoc />
         public bool IsDangerous()
@@ -161,23 +134,11 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public IQueryCompounded<IDistributedQueryAtom> Filter1
-        {
-            get
-            {
-                distributedQ0().Client = Client;
-                return distributedQ0();
-            }
-        }
+            => distributedQ0().Assign(Client);
 
         /// <inheritdoc />
         public IQueryCompounded<IDistributedQueryAtom> Filter2
-        {
-            get
-            {
-                distributedQ1().Client = Client;
-                return distributedQ1();
-            }
-        }
+            => distributedQ1().Assign(Client);
 
         /// <inheritdoc />
         public bool IsDangerous() => Filter1.IsDangerous() && (Filter2?.IsDangerous() ?? true);
@@ -195,19 +156,8 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public IQueryCompounded<IDistributedQueryAtom> Filter1
-        {
-            get
-            {
-                if (distributedQAtom() != null)
-                {
-                    distributedQAtom().Client = Client;
-                    return distributedQAtom();
-                }
-
-                distributedQ().Client = Client;
-                return distributedQ();
-            }
-        }
+            => (IQueryCompounded<IDistributedQueryAtom>)distributedQAtom().Assign(Client) ??
+                distributedQ().Assign(Client);
 
         /// <inheritdoc />
         public IQueryCompounded<IDistributedQueryAtom> Filter2 => null;

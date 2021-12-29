@@ -115,23 +115,11 @@ internal partial class QueryParser
             get
             {
                 if (rangeDay() != null)
-                {
-                    rangeDay().Client = Client;
-                    return rangeDay().Range;
-                }
-
+                    return rangeDay().Assign(Client).Range;
                 if (rangeWeek() != null)
-                {
-                    rangeWeek().Client = Client;
-                    return rangeWeek().Range;
-                }
-
+                    return rangeWeek().Assign(Client).Range;
                 if (rangeMonth() != null)
-                {
-                    rangeMonth().Client = Client;
-                    return rangeMonth().Range;
-                }
-
+                    return rangeMonth().Assign(Client).Range;
                 if (rangeYear() != null)
                     return rangeYear().Range;
 
@@ -166,8 +154,7 @@ internal partial class QueryParser
             if (RangeNull() != null)
                 return null;
 
-            rangeDay().Client = Client;
-            return rangeDay().AsDate();
+            return rangeDay().Assign(Client).AsDate();
         }
 
         public Client Client { private get; set; }
@@ -185,23 +172,13 @@ internal partial class QueryParser
                 if (RangeAllNotNull() != null)
                     return DateFilter.TheNotNull;
                 if (Certain != null)
-                {
-                    Certain.Client = Client;
-                    return Certain.Range;
-                }
+                    return Certain.Assign(Client).Range;
 
                 DateTime? s = null, e = null;
                 if (Begin != null)
-                {
-                    Begin.Client = Client;
-                    s = Begin.Range.StartDate;
-                }
-
+                    s = Begin.Assign(Client).Range.StartDate;
                 if (End != null)
-                {
-                    End.Client = Client;
-                    e = End.Range.EndDate;
-                }
+                    e = End.Assign(Client).Range.EndDate;
 
                 var f = new DateFilter(s, e);
                 if (Tilde().GetText() == "~~")
@@ -216,10 +193,7 @@ internal partial class QueryParser
     public partial class UniqueTimeContext : IClientDependable, IDate
     {
         public DateTime? AsDate()
-        {
-            Core.Client = Client;
-            return Core.AsDate();
-        }
+            => Core.Assign(Client).AsDate();
 
         public Client Client { private get; set; }
     }
@@ -228,16 +202,7 @@ internal partial class QueryParser
     {
         /// <inheritdoc />
         public DateFilter Range
-        {
-            get
-            {
-                if (rangeCore() == null)
-                    return DateFilter.Unconstrained;
-
-                rangeCore().Client = Client;
-                return rangeCore().Range;
-            }
-        }
+            => rangeCore().Assign(Client)?.Range ?? DateFilter.Unconstrained;
 
         public Client Client { private get; set; }
     }

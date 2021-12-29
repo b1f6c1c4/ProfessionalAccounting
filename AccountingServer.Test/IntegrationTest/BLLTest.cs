@@ -116,7 +116,7 @@ public class BLLTest : IDisposable
         var asset2 = m_Accountant.SelectAssets(DistributedQueryUnconstrained.Instance).Single();
         Assert.Equal(asset1, asset2, new AssetEqualityComparer());
 
-        var asset3 = m_Accountant.SelectAsset(asset1.ID.Value);
+        var asset3 = m_Accountant.SelectAsset(asset1.ID!.Value);
         Assert.Equal(asset1, asset3, new AssetEqualityComparer());
 
         Assert.True(m_Accountant.DeleteAsset(asset1.ID.Value));
@@ -150,7 +150,7 @@ public class BLLTest : IDisposable
         var amort2 = m_Accountant.SelectAmortizations(DistributedQueryUnconstrained.Instance).Single();
         Assert.Equal(amort1, amort2, new AmortEqualityComparer());
 
-        var amort3 = m_Accountant.SelectAmortization(amort1.ID.Value);
+        var amort3 = m_Accountant.SelectAmortization(amort1.ID!.Value);
         Assert.Equal(amort1, amort3, new AmortEqualityComparer());
 
         Assert.True(m_Accountant.DeleteAmortization(amort1.ID.Value));
@@ -163,5 +163,5 @@ public class BLLTest : IDisposable
 
     [Fact]
     public void UriInvalidTest()
-        => Assert.Throws<NotSupportedException>(() => Facade.Create("http:///"));
+        => Assert.Throws<NotSupportedException>(() => Facade.Create("https:///"));
 }

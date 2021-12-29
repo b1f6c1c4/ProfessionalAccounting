@@ -55,7 +55,7 @@ public abstract class FacadeBase
         return res;
     }
 
-    internal virtual T QueryParse<T>(ref string s, Func<QueryParser, T> func)
+    internal virtual T QueryParse<T>(ref string s, Func<QueryParser, T> func, Client client)
         where T : RuleContext
     {
         var stream = new AntlrInputStream(s);
@@ -64,10 +64,12 @@ public abstract class FacadeBase
         var tokens = new CommonTokenStream(lexer);
         var parser = new QueryParser(tokens) { ErrorHandler = new BailErrorStrategy() };
         parser.RemoveErrorListeners();
-        return Check(ref s, func(parser));
+        var ctx = Check(ref s, func(parser));
+        (ctx as IClientDependable).Assign(client);
+        return ctx;
     }
 
-    internal virtual T SubtotalParse<T>(ref string s, Func<SubtotalParser, T> func)
+    internal virtual T SubtotalParse<T>(ref string s, Func<SubtotalParser, T> func, Client client)
         where T : RuleContext
     {
         var stream = new AntlrInputStream(s);
@@ -76,57 +78,47 @@ public abstract class FacadeBase
         var tokens = new CommonTokenStream(lexer);
         var parser = new SubtotalParser(tokens) { ErrorHandler = new BailErrorStrategy() };
         parser.RemoveErrorListeners();
-        return Check(ref s, func(parser));
+        var ctx = Check(ref s, func(parser));
+        (ctx as IClientDependable).Assign(client);
+        return ctx;
     }
 
     public ITitle Title(string s)
         => Title(ref s);
 
     public ITitle Title(ref string s)
-        => QueryParse(ref s, p => p.title());
+        => QueryParse(ref s, p => p.title(), null);
 
     public DateTime? UniqueTime(string s, Client client)
         => UniqueTime(ref s, client);
 
     public DateTime? UniqueTime(ref string s, Client client)
-    {
-        var ctx = QueryParse(ref s, p => p.uniqueTime());
-        ctx.Client = client;
-        return ctx.AsDate();
-    }
+        => QueryParse(ref s, p => p.uniqueTime(), client)?.AsDate();
 
     public DateFilter Range(string s, Client client)
         => Range(ref s, client);
 
     public DateFilter Range(ref string s, Client client)
-    {
-        var ctx = QueryParse(ref s, p => p.range());
-        ctx.Client = client;
-        return ctx.Range;
-    }
+        => QueryParse(ref s, p => p.range(), client)?.Range;
 
     public IQueryCompounded<IVoucherQueryAtom> VoucherQuery(string s, Client client)
         => VoucherQuery(ref s, client);
 
     public IQueryCompounded<IVoucherQueryAtom> VoucherQuery(ref string s, Client client)
-    {
-        var ctx = QueryParse(ref s, p => p.vouchers());
-        ctx.Client = client;
-        return (IQueryCompounded<IVoucherQueryAtom>)QueryParse(ref s, p => p.vouchers()) ??
+        => (IQueryCompounded<IVoucherQueryAtom>)QueryParse(ref s, p => p.vouchers(), client) ??
             VoucherQueryUnconstrained.Instance;
-    }
 
     public IVoucherDetailQuery DetailQuery(string s, Client client)
         => DetailQuery(ref s, client);
 
     public IVoucherDetailQuery DetailQuery(ref string s, Client client)
-        => QueryParse(ref s, p => p.voucherDetailQuery());
+        => QueryParse(ref s, p => p.voucherDetailQuery(), client);
 
     public ISubtotal Subtotal(string s, Client client)
         => Subtotal(ref s, client);
 
     public ISubtotal Subtotal(ref string s, Client client)
-        => SubtotalParse(ref s, p => p.subtotal());
+        => SubtotalParse(ref s, p => p.subtotal(), client);
 
     public IVoucherGroupedQuery VoucherGroupedQuery(string s, Client client)
         => VoucherGroupedQuery(ref s, client);
@@ -166,7 +158,7 @@ public abstract class FacadeBase
         => DistributedQuery(ref s, client);
 
     public IQueryCompounded<IDistributedQueryAtom> DistributedQuery(ref string s, Client client)
-        => (IQueryCompounded<IDistributedQueryAtom>)QueryParse(ref s, p => p.distributedQ()) ??
+        => (IQueryCompounded<IDistributedQueryAtom>)QueryParse(ref s, p => p.distributedQ(), client) ??
             DistributedQueryUnconstrained.Instance;
 
     private sealed class VoucherGroupedQueryStub : IVoucherGroupedQuery
@@ -197,14 +189,14 @@ public sealed class Facade : FacadeBase
 
     public static FacadeBase Parsing { get; } = new Facade();
 
-    internal override T QueryParse<T>(ref string s, Func<QueryParser, T> func)
+    internal override T QueryParse<T>(ref string s, Func<QueryParser, T> func, Client client)
     {
         if (s == null)
             return null;
 
         try
         {
-            return base.QueryParse(ref s, func);
+            return base.QueryParse(ref s, func, client);
         }
         catch (Exception)
         {
@@ -212,14 +204,14 @@ public sealed class Facade : FacadeBase
         }
     }
 
-    internal override T SubtotalParse<T>(ref string s, Func<SubtotalParser, T> func)
+    internal override T SubtotalParse<T>(ref string s, Func<SubtotalParser, T> func, Client client)
     {
         if (s == null)
             return null;
 
         try
         {
-            return base.SubtotalParse(ref s, func);
+            return base.SubtotalParse(ref s, func, client);
         }
         catch (Exception)
         {

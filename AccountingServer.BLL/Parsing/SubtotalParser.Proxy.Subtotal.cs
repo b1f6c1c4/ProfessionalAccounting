@@ -125,8 +125,7 @@ internal partial class SubtotalParser
             {
                 if (subtotalAggr() is var x && x.AllDate() != null)
                     return DateFilter.Unconstrained;
-                subtotalAggr().rangeCore().Client = Client;
-                return subtotalAggr().rangeCore();
+                return subtotalAggr().rangeCore().Assign(Client);
             }
         }
 
@@ -145,8 +144,7 @@ internal partial class SubtotalParser
             {
                 if (subtotalEqui() == null)
                     return null;
-                subtotalEqui().rangeDay().Client = Client;
-                return subtotalEqui().rangeDay().AsDate() ?? Client.Today;
+                return subtotalEqui().rangeDay().Assign(Client)?.AsDate() ?? Client.Today;
             }
         }
 

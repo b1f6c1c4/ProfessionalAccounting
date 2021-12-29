@@ -97,7 +97,7 @@ internal partial class QueryParser
                 var t = title();
                 var filter = new VoucherDetail
                     {
-                        User = (UserSpec()?.GetText()).ParseUserSpec(Client),
+                        User = (UserSpec()?.GetText()).ParseUserSpec(Client ?? new()), // workaround IsDangerous
                         Currency = VoucherCurrency()?.GetText().ParseCurrency(),
                         Title = t?.Title,
                         SubTitle = t?.SubTitle,
@@ -171,29 +171,11 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public IQueryCompounded<IDetailQueryAtom> Filter1
-        {
-            get
-            {
-                if (details() != null)
-                {
-                    details().Client = Client;
-                    return details();
-                }
-
-                details1().Client = Client;
-                return details1();
-            }
-        }
+            => (IQueryCompounded<IDetailQueryAtom>)details().Assign(Client) ?? details1().Assign(Client);
 
         /// <inheritdoc />
         public IQueryCompounded<IDetailQueryAtom> Filter2
-        {
-            get
-            {
-                details1().Client = Client;
-                return details1();
-            }
-        }
+            => details1().Assign(Client);
 
         /// <inheritdoc />
         public bool IsDangerous()
@@ -220,23 +202,11 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public IQueryCompounded<IDetailQueryAtom> Filter1
-        {
-            get
-            {
-                details0().Client = Client;
-                return details0();
-            }
-        }
+            => details0().Assign(Client);
 
         /// <inheritdoc />
         public IQueryCompounded<IDetailQueryAtom> Filter2
-        {
-            get
-            {
-                details1().Client = Client;
-                return details1();
-            }
-        }
+            => details1().Assign(Client);
 
         /// <inheritdoc />
         public bool IsDangerous() => Filter1.IsDangerous() && (Filter2?.IsDangerous() ?? true);
@@ -254,19 +224,7 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public IQueryCompounded<IDetailQueryAtom> Filter1
-        {
-            get
-            {
-                if (detailQuery() != null)
-                {
-                    detailQuery().Client = Client;
-                    return detailQuery();
-                }
-
-                details().Client = Client;
-                return details();
-            }
-        }
+            => (IQueryCompounded<IDetailQueryAtom>)detailQuery().Assign(Client) ?? details().Assign(Client);
 
         /// <inheritdoc />
         public IQueryCompounded<IDetailQueryAtom> Filter2 => null;

@@ -57,23 +57,11 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public DateFilter Range
-        {
-            get
-            {
-                range().Client = Client;
-                return range().Range;
-            }
-        }
+            => range().Assign(Client)?.Range ?? DateFilter.Unconstrained;
 
         /// <inheritdoc />
         public IQueryCompounded<IDetailQueryAtom> DetailFilter
-        {
-            get
-            {
-                details().Client = Client;
-                return details();
-            }
-        }
+            => details().Assign(Client);
 
         /// <inheritdoc />
         public bool IsDangerous()
@@ -92,19 +80,7 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public IQueryCompounded<IVoucherQueryAtom> Filter1
-        {
-            get
-            {
-                if (voucherQuery() != null)
-                {
-                    voucherQuery().Client = Client;
-                    return voucherQuery();
-                }
-
-                vouchers2().Client = Client;
-                return vouchers2();
-            }
-        }
+            => (IQueryCompounded<IVoucherQueryAtom>)voucherQuery().Assign(Client) ?? vouchers2().Assign(Client);
 
         /// <inheritdoc />
         public IQueryCompounded<IVoucherQueryAtom> Filter2 => throw new MemberAccessException("表达式错误");
@@ -147,29 +123,11 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public IQueryCompounded<IVoucherQueryAtom> Filter1
-        {
-            get
-            {
-                if (vouchers2() != null)
-                {
-                    vouchers2().Client = Client;
-                    return vouchers2();
-                }
-
-                vouchers1().Client = Client;
-                return vouchers1();
-            }
-        }
+            => (IQueryCompounded<IVoucherQueryAtom>)vouchers2().Assign(Client) ?? vouchers1().Assign(Client);
 
         /// <inheritdoc />
         public IQueryCompounded<IVoucherQueryAtom> Filter2
-        {
-            get
-            {
-                vouchers1().Client = Client;
-                return vouchers1();
-            }
-        }
+            => vouchers1().Assign(Client);
 
         /// <inheritdoc />
         public bool IsDangerous()
@@ -196,23 +154,11 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public IQueryCompounded<IVoucherQueryAtom> Filter1
-        {
-            get
-            {
-                vouchers0().Client = Client;
-                return vouchers0();
-            }
-        }
+            => vouchers0().Assign(Client);
 
         /// <inheritdoc />
         public IQueryCompounded<IVoucherQueryAtom> Filter2
-        {
-            get
-            {
-                vouchers1().Client = Client;
-                return vouchers1();
-            }
-        }
+            => vouchers1().Assign(Client);
 
         /// <inheritdoc />
         public bool IsDangerous() => Filter1.IsDangerous() && (Filter2?.IsDangerous() ?? true);
@@ -230,19 +176,7 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public IQueryCompounded<IVoucherQueryAtom> Filter1
-        {
-            get
-            {
-                if (voucherQuery() != null)
-                {
-                    voucherQuery().Client = Client;
-                    return voucherQuery();
-                }
-
-                vouchers2().Client = Client;
-                return vouchers2();
-            }
-        }
+            => (IQueryCompounded<IVoucherQueryAtom>)voucherQuery().Assign(Client) ?? vouchers2().Assign(Client);
 
         /// <inheritdoc />
         public IQueryCompounded<IVoucherQueryAtom> Filter2 => null;
@@ -260,13 +194,7 @@ internal partial class QueryParser
     {
         /// <inheritdoc />
         public IQueryCompounded<IDetailQueryAtom> DetailFilter
-        {
-            get
-            {
-                details().Client = Client;
-                return details();
-            }
-        }
+            => details().Assign(Client);
 
         public Client Client { private get; set; }
     }
@@ -275,22 +203,10 @@ internal partial class QueryParser
     {
         /// <inheritdoc />
         public IQueryCompounded<IVoucherQueryAtom> VoucherQuery
-        {
-            get
-            {
-                if (voucherQuery() != null)
-                {
-                    voucherQuery().Client = Client;
-                    return voucherQuery();
-                }
-
-                vouchers().Client = Client;
-                return vouchers();
-            }
-        }
+            => (IQueryCompounded<IVoucherQueryAtom>)voucherQuery().Assign(Client) ?? vouchers().Assign(Client);
 
         /// <inheritdoc />
-        public IEmit DetailEmitFilter => emit();
+        public IEmit DetailEmitFilter => emit().Assign(Client);
 
         public Client Client { private get; set; }
     }
