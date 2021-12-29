@@ -60,7 +60,7 @@ internal partial class CarryShell : IShellComponent
         }
 
         await foreach (var e in iae)
-            yield return e;
+            yield return e + "\n";
     }
 
     private async ValueTask<DateFilter> AutomaticRange(Session session, DateFilter rng)
@@ -99,7 +99,7 @@ internal partial class CarryShell : IShellComponent
         if (isRst)
             yield break;
 
-        using var vir = session.Accountant.Virtualize();
+        await using var vir = session.Accountant.Virtualize();
 
         if (rng.NullOnly || rng.Nullable)
         {

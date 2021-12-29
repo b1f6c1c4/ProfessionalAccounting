@@ -74,7 +74,7 @@ public static class HttpUtil
             {
                 ResponseCode = 200,
                 Header =
-                    new() { { "Content-Type", contentType }, },
+                    new() { { "Content-Type", contentType } },
                 ResponseAsyncEnumerable = iae.Select(s => s.GetBytes()),
             };
 }

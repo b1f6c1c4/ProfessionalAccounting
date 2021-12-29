@@ -186,7 +186,7 @@ internal class InquiriesVisitor : IInquiryVisitor<ValueTask<double>>
                 m_Sb.Append(
                     new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), theFmt, inq.HideContent)
                             {
-                                Client = m_Session.Client
+                                Client = m_Session.Client,
                             }
                         .PresentSubtotal(grp, query.Subtotal, m_Session.Serializer));
             }
@@ -197,7 +197,7 @@ internal class InquiriesVisitor : IInquiryVisitor<ValueTask<double>>
             m_Sb.Append(
                 new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), fmt, inq.HideContent)
                         {
-                            Client = m_Session.Client
+                            Client = m_Session.Client,
                         }
                     .PresentSubtotal(gq, query.Subtotal, m_Session.Serializer));
         }

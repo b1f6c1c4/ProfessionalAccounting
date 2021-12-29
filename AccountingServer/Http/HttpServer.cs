@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -55,9 +56,11 @@ public class HttpServer
 
     private async ValueTask Process(TcpClient tcp)
     {
+        tcp.NoDelay = true;
         try
         {
-            await using var stream = tcp.GetStream();
+            await using var ns = tcp.GetStream();
+            await using var stream = new BufferedStream(ns);
 
             HttpResponse response;
             try

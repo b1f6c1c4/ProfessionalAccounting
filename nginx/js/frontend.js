@@ -63,15 +63,17 @@ const finalize = (answer, success, insert) => {
   }
   const original = editor.selection.getCursor();
   editor.insert(answer);
-  editor.selection.setSelectionRange({
-    start: original,
-    end: original,
-  }, false);
-  freeze(false);
-  if (success) {
-    cmdLine.selectAll();
-  } else {
-    console.error(answer);
+  if (success != null) {
+    editor.selection.setSelectionRange({
+      start: original,
+      end: original,
+    }, false);
+    freeze(false);
+    if (success === true) {
+      cmdLine.selectAll();
+    } else {
+      console.error(answer);
+    }
   }
 };
 
@@ -212,13 +214,18 @@ const doExecuteFactory = (app) => () => {
     return;
   }
   freeze(true);
-  execute(command).then((res) => {
-    finalize(res, true, app);
-    editor.focus();
-    editor.renderer.scrollCursorIntoView();
-  }).catch((err) => {
-    finalize(err, false, app);
-    editor.renderer.scrollCursorIntoView();
+  execute(command, (res, err, done) => {
+    if (err) {
+      finalize(err, false, app);
+      editor.renderer.scrollCursorIntoView();
+    } else if (done) {
+      finalize(res, true, app);
+      editor.focus();
+      editor.renderer.scrollCursorIntoView();
+    } else if (!app) {
+      finalize(res, null, app);
+      editor.renderer.scrollCursorIntoView();
+    }
   });
 };
 

@@ -24,17 +24,7 @@ const login = (u) => {
   window.localStorage.setItem('user', u);
 };
 
-const xhr = (method, url, spec, payload) => new Promise((resolve, reject) => {
-  const xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function () {
-    if (this.readyState === 4) {
-      if (this.status === 200 || this.status === 204) {
-        resolve(this.responseText);
-      } else {
-        reject('HTTP ' + this.status + '\n' + this.responseText);
-      }
-    }
-  };
+const send = (xhr) => (method, url, spec, payload) => {
   xhr.open(method, url, true);
   const d = new Date();
   const ld = new Date(+d - 1000*60*d.getTimezoneOffset());
@@ -44,9 +34,40 @@ const xhr = (method, url, spec, payload) => new Promise((resolve, reject) => {
   if (spec)
     xhr.setRequestHeader('X-Serializer', spec);
   xhr.send(payload);
+};
+
+const fancyxhr = (cb) => {
+  const xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function () {
+    if (this.readyState === XMLHttpRequest.DONE) {
+      if (this.status === 200 || this.status === 204) {
+        cb(this.responseText, undefined, true);
+      } else {
+        cb(undefined, 'HTTP ' + this.status + '\n' + this.responseText);
+      }
+    }
+  };
+  xhr.addEventListener('progress', function (e) {
+    cb(this.responseText, undefined, false);
+  });
+  return send(xhr);
+};
+
+const xhr = (...args) => new Promise((resolve, reject) => {
+  const xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function () {
+    if (this.readyState === XMLHttpRequest.DONE) {
+      if (this.status === 200 || this.status === 204) {
+        resolve(this.responseText);
+      } else {
+        reject('HTTP ' + this.status + '\n' + this.responseText);
+      }
+    }
+  };
+  send(xhr)(...args);
 });
 
-const execute = (cmd) => {
+const execute = (cmd, cb) => {
   if (cmd === '') {
     return xhr('GET', '/api/emptyVoucher');
   }
@@ -69,7 +90,7 @@ SPEC -- ...                 临时选择序列化器
   const expr = m ? m[2] : cmd;
   const spec = m ? m[1] : null;
 
-  return xhr('POST', '/api/execute', spec, expr);
+  return (cb ? fancyxhr(cb) : xhr)('POST', '/api/execute', spec, expr);
 };
 
 const sanitize = (raw) => {

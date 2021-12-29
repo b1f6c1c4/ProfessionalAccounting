@@ -18,6 +18,7 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace AccountingServer.DAL;
 
@@ -40,10 +41,10 @@ public static class Facade
     public static IDbAdapter Virtualize(IDbAdapter db)
         => new Virtualizer(db);
 
-    public static IDbAdapter UnVirtualize(IDbAdapter db)
+    public static async ValueTask<IDbAdapter> UnVirtualize(IDbAdapter db)
     {
         var vir = db as Virtualizer ?? throw new InvalidOperationException("Not virtualized");
-        vir.Dispose();
+        await vir.DisposeAsync();
         return vir.Db;
     }
 }

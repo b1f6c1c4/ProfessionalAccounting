@@ -39,7 +39,7 @@ public class DbSession : IHistoricalExchange
         return new(this);
     }
 
-    public class VirtualizeLock : IDisposable
+    public class VirtualizeLock : IAsyncDisposable
     {
         public VirtualizeLock(DbSession db) => Db = db;
 
@@ -47,8 +47,8 @@ public class DbSession : IHistoricalExchange
 
         public int CachedVouchers => (Db.Db.Get() as Virtualizer)!.CachedVouchers;
 
-        public void Dispose()
-            => Db.Db.Set(Facade.UnVirtualize(Db.Db.Get()));
+        public async ValueTask DisposeAsync()
+            => Db.Db.Set(await Facade.UnVirtualize(Db.Db.Get()));
     }
 
     /// <summary>

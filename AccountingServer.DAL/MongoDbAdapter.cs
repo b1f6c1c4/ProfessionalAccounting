@@ -41,7 +41,7 @@ internal class MongoDbAdapter : IDbAdapter
 {
     private static readonly BsonDocument ProjectDetails = new() { ["_id"] = false, ["detail"] = true };
 
-    private static readonly BsonDocument ProjectDate = new() { ["_id"] = false, ["detail"] = true, ["date"] = true, };
+    private static readonly BsonDocument ProjectDate = new() { ["_id"] = false, ["detail"] = true, ["date"] = true };
 
     private static readonly BsonDocument ProjectNothing = new() { ["_id"] = false };
 

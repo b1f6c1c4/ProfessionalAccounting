@@ -38,7 +38,7 @@ internal class Utilities : PluginBase
     /// <inheritdoc />
     public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
-        using var vir = session.Accountant.Virtualize();
+        await using var vir = session.Accountant.Virtualize();
         while (!string.IsNullOrWhiteSpace(expr))
         {
             var (voucher, ee) = await GenerateVoucher(session, expr);

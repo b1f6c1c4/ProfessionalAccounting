@@ -26,10 +26,7 @@ using AccountingServer.Entities.Util;
 
 namespace AccountingServer.DAL;
 
-/// <summary>
-///
-/// </summary>
-public class Virtualizer : IDbAdapter, IDisposable
+public class Virtualizer : IDbAdapter, IAsyncDisposable
 {
     /// <summary>
     ///     数据库访问
@@ -69,18 +66,24 @@ public class Virtualizer : IDbAdapter, IDisposable
 
     public int CachedVouchers => ReadLocked(_ => _.Count);
 
-    public void Dispose()
-        => WriteLocked(_ =>
-            {
-                if (_.Count == 0)
-                    return Nothing.AtAll;
+    public async ValueTask DisposeAsync()
+    {
+        m_Lock.EnterWriteLock();
+        try
+        {
+            if (m_Vouchers.Count == 0)
+                return;
 
-                if (Db.Upsert(_).AsTask().Result != _.Count)
-                    throw new ApplicationException("Cannot write-back voucher cache");
+            if (await Db.Upsert(m_Vouchers) != m_Vouchers.Count)
+                throw new ApplicationException("Cannot write-back voucher cache");
 
-                _.Clear();
-                return Nothing.AtAll;
-            });
+            m_Vouchers.Clear();
+        }
+        finally
+        {
+            m_Lock.ExitWriteLock();
+        }
+    }
 
     public ValueTask<Voucher> SelectVoucher(string id)
         => Db.SelectVoucher(id);

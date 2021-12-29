@@ -19,6 +19,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading.Tasks;
 using AccountingServer.BLL;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
@@ -30,7 +31,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest;
 
 [Collection("DbTestCollection")]
 [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
-public class SubtotalTest : IDisposable
+public class SubtotalTest : IAsyncDisposable
 {
     private readonly Client m_Client = new() { User = "b1", Today = DateTime.UtcNow.Date };
 
@@ -129,9 +130,9 @@ public class SubtotalTest : IDisposable
             }).AsTask().Wait();
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        m_Adapter = Facade.UnVirtualize(m_Adapter);
+        m_Adapter = await Facade.UnVirtualize(m_Adapter);
         m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance).AsTask().Wait();
     }
 

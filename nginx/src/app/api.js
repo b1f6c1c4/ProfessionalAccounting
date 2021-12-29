@@ -38,10 +38,7 @@ export async function safeApi(expr, user) {
         params: { q: expr },
         headers: createHeaders(user),
     });
-    const type = headers['X-Type'];
-    const autoReturn = headers['X-AutoReturn'] === 'true';
-    const dirty = headers['X-Dirty'] === 'true';
-    return { data, type, autoReturn, dirty };
+    return { data };
 }
 
 export async function executeApi(expr, user) {
@@ -50,10 +47,7 @@ export async function executeApi(expr, user) {
         data: expr,
         headers: createHeaders(user),
     });
-    const type = headers['X-Type'];
-    const autoReturn = headers['X-AutoReturn'] === 'true';
-    const dirty = headers['X-Dirty'] === 'true';
-    return { data, type, autoReturn, dirty };
+    return { data };
 }
 
 export async function voucherUpsertApi(code, user) {

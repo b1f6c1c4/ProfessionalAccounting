@@ -32,12 +32,11 @@ internal static class StreamHelper
         return encoding.GetBytes(str);
     }
 
-    internal static async Task WriteLineAsync(this Stream stream, string str = null, Encoding encoding = null)
+    internal static async ValueTask WriteLineAsync(this Stream stream, string str = null, Encoding encoding = null)
     {
         encoding ??= Encoding.UTF8;
         var data = encoding.GetBytes(str ?? "");
-        await stream.WriteAsync(data, 0, data.Length);
-
-        await stream.WriteAsync(CrLf, 0, CrLf.Length);
+        await stream.WriteAsync(data);
+        await stream.WriteAsync(CrLf);
     }
 }

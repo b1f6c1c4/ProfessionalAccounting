@@ -182,7 +182,7 @@ internal class CreditCardConvert : PluginBase
         var currency = Parsing.Token(ref expr, false);
         var baseCurrency = Parsing.Token(ref expr, false);
 
-        using var vir = session.Accountant.Virtualize();
+        await using var vir = session.Accountant.Virtualize();
         while (!string.IsNullOrWhiteSpace(expr))
         {
             var date = Parsing.UniqueTime(ref expr, session.Client);

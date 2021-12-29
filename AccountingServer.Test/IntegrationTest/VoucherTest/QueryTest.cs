@@ -235,7 +235,7 @@ public class BLLQueryTest : QueryTestBase, IDisposable
 
 [Collection("DbTestCollection")]
 [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
-public class VirtualizedQueryTest : QueryTestBase, IDisposable
+public class VirtualizedQueryTest : QueryTestBase, IAsyncDisposable
 {
     private readonly Accountant m_Accountant;
     protected override Client Client => m_Accountant.Client;
@@ -249,10 +249,10 @@ public class VirtualizedQueryTest : QueryTestBase, IDisposable
         m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance).AsTask().Wait();
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance).AsTask().Wait();
-        m_Lock.Dispose();
+        await m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance);
+        await m_Lock.DisposeAsync();
     }
 
     protected override async ValueTask PrepareVoucher(Voucher voucher) => await m_Accountant.UpsertAsync(voucher);
