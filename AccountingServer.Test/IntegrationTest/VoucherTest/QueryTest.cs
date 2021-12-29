@@ -32,8 +32,7 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest;
 
 public abstract class QueryTestBase
 {
-    protected QueryTestBase()
-        => ClientUser.Set("b1");
+    protected abstract Client Client { get; }
 
     protected virtual void PrepareVoucher(Voucher voucher) { }
     protected abstract bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query);
@@ -97,7 +96,7 @@ public abstract class QueryTestBase
 
         ResetVouchers();
         PrepareVoucher(voucher);
-        Assert.Equal(expected, RunQuery(ParsingF.VoucherQuery(query)));
+        Assert.Equal(expected, RunQuery(ParsingF.VoucherQuery(query, Client)));
         ResetVouchers();
     }
 
@@ -150,6 +149,8 @@ public abstract class QueryTestBase
 [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
 public class MatchTest : QueryTestBase
 {
+    protected override Client Client { get; } = new() { User = "b1", Today = DateTime.UtcNow.Date };
+
     private Voucher m_Voucher;
     protected override void PrepareVoucher(Voucher voucher) => m_Voucher = voucher;
 
@@ -167,6 +168,8 @@ public class MatchTest : QueryTestBase
 [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
 public class DbQueryTest : QueryTestBase, IDisposable
 {
+    protected override Client Client { get; } = new() { User = "b1", Today = DateTime.UtcNow.Date };
+
     private readonly IDbAdapter m_Adapter;
 
     public DbQueryTest()
@@ -195,10 +198,11 @@ public class DbQueryTest : QueryTestBase, IDisposable
 public class BLLQueryTest : QueryTestBase, IDisposable
 {
     private readonly Accountant m_Accountant;
+    protected override Client Client => m_Accountant.Client;
 
     public BLLQueryTest()
     {
-        m_Accountant = new(db: "accounting-test");
+        m_Accountant = new(new("accounting-test"), "b1", DateTime.UtcNow.Date);
 
         m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
     }
@@ -222,11 +226,12 @@ public class BLLQueryTest : QueryTestBase, IDisposable
 public class VirtualizedQueryTest : QueryTestBase, IDisposable
 {
     private readonly Accountant m_Accountant;
+    protected override Client Client => m_Accountant.Client;
     private readonly DbSession.VirtualizeLock m_Lock;
 
     public VirtualizedQueryTest()
     {
-        m_Accountant = new(db: "accounting-test");
+        m_Accountant = new(new("accounting-test"), "b1", DateTime.UtcNow.Date);
 
         m_Lock = m_Accountant.Virtualize();
         m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);

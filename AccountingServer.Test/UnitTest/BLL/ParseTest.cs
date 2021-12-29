@@ -31,6 +31,8 @@ namespace AccountingServer.Test.UnitTest.BLL;
 
 public class ParseTest
 {
+    private readonly Client m_Client = new() { User = "b1", Today = DateTime.UtcNow.Date };
+
     private void PairedSucc<TR>(string name, string s, Action<TR> pred = null)
     {
         pred ??= r => Assert.NotNull(r);
@@ -149,7 +151,7 @@ public class ParseTest
     [InlineData("[...]", 2)]
     public void UniqueTimeRelTest(string s, int d)
         => PairedSucc<DateTime?>(nameof(ParsingF.UniqueTime), s,
-            r => { Assert.Equal(ClientDateTime.Today.AddDays(-d), r); });
+            r => { Assert.Equal(m_Client.Today.AddDays(-d), r); });
 
     [Theory]
     [InlineData(null)]

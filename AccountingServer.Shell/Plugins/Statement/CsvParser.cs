@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using AccountingServer.Entities;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
@@ -116,7 +117,7 @@ internal class CsvParser
             {
                 var f = Next(ref l);
                 if (i == dateId)
-                    item.Date = ClientDateTime.Parse(f);
+                    item.Date = DateTimeParser.Parse(f);
                 else if (i == fundId)
                     item.Fund = m_Dir * Convert.ToDouble(f);
             }

@@ -32,6 +32,8 @@ namespace AccountingServer.Test.IntegrationTest.VoucherTest;
 [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
 public class SubtotalTest : IDisposable
 {
+    private readonly Client m_Client = new() { User = "b1", Today = DateTime.UtcNow.Date };
+
     private IDbAdapter m_Adapter;
 
     public SubtotalTest()
@@ -125,8 +127,6 @@ public class SubtotalTest : IDisposable
                             },
                     },
             });
-
-        ClientUser.Set("b1");
     }
 
     public void Dispose()
@@ -154,10 +154,10 @@ public class SubtotalTest : IDisposable
     [InlineData(3, "%xrmk2% : 'cnt1'+\"rmk1\"")]
     public void RunTestQuery(int number, string query)
     {
-        Assert.Equal(number, m_Adapter.SelectVoucherDetails(ParsingF.DetailQuery(query)).ToEnumerable().Count());
+        Assert.Equal(number, m_Adapter.SelectVoucherDetails(ParsingF.DetailQuery(query, m_Client)).ToEnumerable().Count());
         Assert.Equal(
             number,
-            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query + "!v")).ToEnumerable().SingleOrDefault()?.Fund ??
+            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query + "!v", m_Client)).ToEnumerable().SingleOrDefault()?.Fund ??
             0);
     }
 
@@ -172,7 +172,7 @@ public class SubtotalTest : IDisposable
     public void RunTestValue(double? value, string query)
         => Assert.Equal(
             value,
-            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query)).ToEnumerable().SingleOrDefault()?.Fund);
+            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query, m_Client)).ToEnumerable().SingleOrDefault()?.Fund);
 
     [Theory]
     [InlineData("b2", null, "``U")]
@@ -187,7 +187,7 @@ public class SubtotalTest : IDisposable
     public void RunTestUser(string user, double? value, string query)
         => Assert.Equal(
             value,
-            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query)).ToEnumerable()
+            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query, m_Client)).ToEnumerable()
                 .SingleOrDefault(b => b.User == user)?.Fund);
 
     [Theory]
@@ -200,7 +200,7 @@ public class SubtotalTest : IDisposable
     public void RunTestCurrency(string currency, double? value, string query)
         => Assert.Equal(
             value,
-            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query)).ToEnumerable()
+            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query, m_Client)).ToEnumerable()
                 .SingleOrDefault(b => b.Currency == currency)?.Fund);
 
     [Theory]
@@ -213,7 +213,7 @@ public class SubtotalTest : IDisposable
     public void RunTestContent(string content, double? value, string query)
         => Assert.Equal(
             value,
-            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query)).ToEnumerable()
+            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query, m_Client)).ToEnumerable()
                 .SingleOrDefault(b => b.Content == content)?.Fund);
 
     [Theory]
@@ -226,7 +226,7 @@ public class SubtotalTest : IDisposable
     public void RunTestRemark(string remark, double? value, string query)
         => Assert.Equal(
             value,
-            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query)).ToEnumerable()
+            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query, m_Client)).ToEnumerable()
                 .SingleOrDefault(b => b.Remark == remark)?.Fund);
 
     [Theory]
@@ -239,7 +239,7 @@ public class SubtotalTest : IDisposable
     public void RunTestTitle(int? title, double? value, string query)
         => Assert.Equal(
             value,
-            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query)).ToEnumerable()
+            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query, m_Client)).ToEnumerable()
                 .SingleOrDefault(b => b.Title == title)?.Fund);
 
     [Theory]
@@ -252,7 +252,7 @@ public class SubtotalTest : IDisposable
     public void RunTestTitleSubTitle(int? title, int? subTitle, double? value, string query)
         => Assert.Equal(
             value,
-            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query)).ToEnumerable()
+            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query, m_Client)).ToEnumerable()
                 .SingleOrDefault(b => b.Title == title && b.SubTitle == subTitle)?.Fund);
 
     [Theory]
@@ -267,7 +267,7 @@ public class SubtotalTest : IDisposable
     public void RunTestDay(string dt, double? value, string query)
         => Assert.Equal(
             value,
-            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query)).ToEnumerable()
+            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query, m_Client)).ToEnumerable()
                 .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
 
     [Theory]
@@ -280,7 +280,7 @@ public class SubtotalTest : IDisposable
     public void RunTestWeek(string dt, double? value, string query)
         => Assert.Equal(
             value,
-            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query)).ToEnumerable()
+            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query, m_Client)).ToEnumerable()
                 .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
 
     [Theory]
@@ -292,7 +292,7 @@ public class SubtotalTest : IDisposable
     public void RunTestMonth(string dt, double? value, string query)
         => Assert.Equal(
             value,
-            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query)).ToEnumerable()
+            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query, m_Client)).ToEnumerable()
                 .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
 
     [Theory]
@@ -303,7 +303,7 @@ public class SubtotalTest : IDisposable
     public void RunTestYear(string dt, double? value, string query)
         => Assert.Equal(
             value,
-            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query)).ToEnumerable()
+            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query, m_Client)).ToEnumerable()
                 .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
 
     [Theory]
@@ -316,7 +316,7 @@ public class SubtotalTest : IDisposable
     public void RunVTestErr(string query)
         => Assert.Throws<InvalidOperationException>(() =>
             {
-                m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query));
+                m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query, m_Client));
             });
 
     [Theory]
@@ -324,7 +324,7 @@ public class SubtotalTest : IDisposable
     public void RunVTestValue(long? value, string query)
         => Assert.Equal(
             value,
-            m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query)).ToEnumerable().SingleOrDefault()?.Fund);
+            m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query, m_Client)).ToEnumerable().SingleOrDefault()?.Fund);
 
     [Theory]
     [InlineData(null, null, "!!d")]
@@ -338,7 +338,7 @@ public class SubtotalTest : IDisposable
     public void RunVTestDay(string dt, long? value, string query)
         => Assert.Equal(
             value,
-            m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query)).ToEnumerable()
+            m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query, m_Client)).ToEnumerable()
                 .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
 
     [Theory]
@@ -351,7 +351,7 @@ public class SubtotalTest : IDisposable
     public void RunVTestWeek(string dt, long? value, string query)
         => Assert.Equal(
             value,
-            m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query)).ToEnumerable()
+            m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query, m_Client)).ToEnumerable()
                 .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
 
     [Theory]
@@ -363,7 +363,7 @@ public class SubtotalTest : IDisposable
     public void RunVTestMonth(string dt, long? value, string query)
         => Assert.Equal(
             value,
-            m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query)).ToEnumerable()
+            m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query, m_Client)).ToEnumerable()
                 .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
 
     [Theory]
@@ -374,6 +374,6 @@ public class SubtotalTest : IDisposable
     public void RunVTestYear(string dt, long? value, string query)
         => Assert.Equal(
             value,
-            m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query)).ToEnumerable()
+            m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query, m_Client)).ToEnumerable()
                 .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
 }

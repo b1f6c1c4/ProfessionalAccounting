@@ -63,7 +63,7 @@ public class Facade
                 };
     }
 
-    public Session CreateSession(string user, DateTime dt, string spec, int limit)
+    public Session CreateSession(string user, DateTime dt, string spec = null, int limit = 0)
         => new(m_Db, user, dt, spec, limit);
 
     /// <summary>

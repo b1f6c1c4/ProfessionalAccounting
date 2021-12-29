@@ -16,6 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using AccountingServer.BLL;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Util;
@@ -27,8 +28,7 @@ namespace AccountingServer.Test.IntegrationTest;
 [Collection("SecurityTestCollection")]
 public class SecurityTest
 {
-    public SecurityTest()
-        => ClientUser.Set("b1");
+    private readonly Client m_Client = new() { User = "b1", Today = DateTime.UtcNow.Date };
 
     [Theory]
     [InlineData(true, "")]
@@ -66,7 +66,7 @@ public class SecurityTest
     [InlineData(false, "{=114}*{=514}")]
     public void VoucherQueryTest(bool dangerous, string expr)
     {
-        var query = ParsingF.VoucherQuery(ref expr);
+        var query = ParsingF.VoucherQuery(ref expr, m_Client);
         ParsingF.Eof(expr);
         Assert.Equal(dangerous, query.IsDangerous());
     }
@@ -116,7 +116,7 @@ public class SecurityTest
     [InlineData(false, "\"a\".*")]
     public void DetailQueryTest(bool dangerous, string expr)
     {
-        var query = ParsingF.DetailQuery(ref expr);
+        var query = ParsingF.DetailQuery(ref expr, m_Client);
         ParsingF.Eof(expr);
         Assert.Equal(dangerous, query.IsDangerous());
     }
@@ -147,7 +147,7 @@ public class SecurityTest
     [InlineData(false, "{/114/}*{/114/}")]
     public void DistributedQueryTest(bool dangerous, string expr)
     {
-        var query = ParsingF.DistributedQuery(ref expr);
+        var query = ParsingF.DistributedQuery(ref expr, m_Client);
         ParsingF.Eof(expr);
         Assert.Equal(dangerous, query.IsDangerous());
     }

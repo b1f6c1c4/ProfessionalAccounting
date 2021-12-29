@@ -18,7 +18,6 @@
 
 using System;
 using System.Linq;
-using AccountingServer.BLL;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -36,8 +35,6 @@ public class DbTest : IDisposable
         m_Adapter = Facade.Create(db: "accounting-test");
 
         m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
-
-        ClientUser.Set("b1");
     }
 
     public void Dispose()

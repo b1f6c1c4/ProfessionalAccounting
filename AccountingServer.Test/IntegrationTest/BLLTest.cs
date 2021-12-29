@@ -18,7 +18,6 @@
 
 using System;
 using System.Linq;
-using System.Runtime.Intrinsics.X86;
 using AccountingServer.BLL;
 using AccountingServer.DAL;
 using AccountingServer.Entities;

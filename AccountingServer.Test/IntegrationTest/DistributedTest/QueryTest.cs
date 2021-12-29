@@ -32,8 +32,7 @@ namespace AccountingServer.Test.IntegrationTest.DistributedTest;
 
 public abstract class QueryTestBase
 {
-    protected QueryTestBase()
-        => ClientUser.Set("b1");
+    private readonly Client m_Client = new() { User = "b1", Today = DateTime.UtcNow.Date };
 
     protected virtual void PrepareAsset(Asset asset) { }
     protected virtual void PrepareAmort(Amortization amort) { }
@@ -57,8 +56,8 @@ public abstract class QueryTestBase
         ResetAmorts();
         PrepareAsset(asset);
         PrepareAmort(amort);
-        Assert.Equal(expectedA, RunAssetQuery(ParsingF.DistributedQuery(query)));
-        Assert.Equal(expectedB, RunAmortQuery(ParsingF.DistributedQuery(query)));
+        Assert.Equal(expectedA, RunAssetQuery(ParsingF.DistributedQuery(query, m_Client)));
+        Assert.Equal(expectedB, RunAmortQuery(ParsingF.DistributedQuery(query, m_Client)));
         ResetAssets();
         ResetAmorts();
     }
@@ -128,7 +127,7 @@ public class BLLQueryTest : QueryTestBase, IDisposable
 
     public BLLQueryTest()
     {
-        m_Accountant = new(db: "accounting-test");
+        m_Accountant = new(new("accounting-test"), "b1", DateTime.UtcNow.Date);
 
         m_Accountant.DeleteAssets(DistributedQueryUnconstrained.Instance);
         m_Accountant.DeleteAmortizations(DistributedQueryUnconstrained.Instance);

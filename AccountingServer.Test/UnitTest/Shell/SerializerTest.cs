@@ -29,14 +29,14 @@ namespace AccountingServer.Test.UnitTest.Shell;
 [Collection("SerializerTestCollection")]
 public abstract class SerializerTest
 {
+    protected readonly Client Client = new() { User = "b1", Today = DateTime.UtcNow.Date };
+
     protected SerializerTest()
     {
         BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
             new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
         TitleManager.TitleInfos = new MockConfigManager<TitleInfos>(new() { Titles = new() });
-
-        ClientUser.Set("b1");
     }
 
     protected abstract IEntitySerializer Serializer { get; }
@@ -176,7 +176,7 @@ public class AbbrSerializerTest : SerializerTest
         Assert.Equal(
             new Voucher
                 {
-                    Date = ClientDateTime.Today,
+                    Date = Client.Today,
                     Details = new()
                         {
                             new()
@@ -234,6 +234,8 @@ public class JsonSerializerTest : SerializerTest
 [Collection("SerializerTestCollection")]
 public class DiscountSerializerTest
 {
+    private readonly Client m_Client = new() { User = "b1", Today = DateTime.UtcNow.Date };
+
     public DiscountSerializerTest()
     {
         BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
@@ -245,8 +247,6 @@ public class DiscountSerializerTest
         AbbrSerializer.Abbrs =
             new MockConfigManager<Abbreviations>(
                 new() { Abbrs = new() { new() { Abbr = "aaa", Title = 1001, Editable = false } } });
-
-        ClientUser.Set("b1");
     }
 
     private static IEntitySerializer Serializer { get; } = new DiscountSerializer();
@@ -310,7 +310,7 @@ d48
         Assert.Equal(
             new Voucher
                 {
-                    Date = ClientDateTime.Today,
+                    Date = m_Client.Today,
                     Type = VoucherType.Ordinary,
                     Details = new()
                         {
@@ -387,7 +387,7 @@ dnull
         Assert.Equal(
             new Voucher
                 {
-                    Date = ClientDateTime.Today,
+                    Date = m_Client.Today,
                     Type = VoucherType.Ordinary,
                     Details = new()
                         {
@@ -438,7 +438,7 @@ d8
         Assert.Equal(
             new Voucher
                 {
-                    Date = ClientDateTime.Today,
+                    Date = m_Client.Today,
                     Type = VoucherType.Ordinary,
                     Details = new()
                         {
@@ -490,7 +490,7 @@ tnull
         Assert.Equal(
             new Voucher
                 {
-                    Date = ClientDateTime.Today,
+                    Date = m_Client.Today,
                     Type = VoucherType.Ordinary,
                     Details = new()
                         {
@@ -590,7 +590,7 @@ public class CsvDefaultSerializerTest : SerializerTest
         var r = Serializer.PresentVoucher(new()
             {
                 ID = "hhh",
-                Date = ClientDateTime.Today,
+                Date = Client.Today,
                 Type = VoucherType.Carry,
                 Details = new()
                     {
@@ -641,7 +641,7 @@ public class CsvCustomSerializerTest : SerializerTest
         var r = Serializer.PresentVoucher(new Voucher
             {
                 ID = "hhh",
-                Date = ClientDateTime.Today,
+                Date = Client.Today,
                 Type = VoucherType.Carry,
                 Details = new()
                     {

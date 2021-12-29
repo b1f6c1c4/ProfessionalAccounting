@@ -16,6 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
@@ -26,13 +27,14 @@ namespace AccountingServer.Test.UnitTest.BLL;
 
 public class DataFormatterTest
 {
+    private readonly Client m_Client = new() { User = "b1", Today = DateTime.UtcNow.Date };
+
     public DataFormatterTest()
     {
         BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
             new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
         DataFormatter.CurrencySymbols = new MockConfigManager<CurrencySymbols>(
             new() { Symbols = new() { new() { Currency = "DOGE", Symbol = "#" } } });
-        ClientUser.Set("b1");
     }
 
     [Theory]
@@ -42,7 +44,7 @@ public class DataFormatterTest
     [InlineData("Ub0", "b0")]
     [InlineData("U'b-1'", "b-1")]
     public void ParseUserSpecTest(string value, string fmt)
-        => Assert.Equal(fmt, value.ParseUserSpec());
+        => Assert.Equal(fmt, value.ParseUserSpec(m_Client));
 
     [Theory]
     [InlineData(null, "")]
@@ -89,5 +91,5 @@ public class DataFormatterTest
     [InlineData("202002~", "[20200201~]")]
     [InlineData("202002~~", "[20200201~~]")]
     public void AsDateRangeTest(string value, string fmt)
-        => Assert.Equal(fmt, ParsingF.Range(value).AsDateRange());
+        => Assert.Equal(fmt, ParsingF.Range(value, m_Client).AsDateRange());
 }

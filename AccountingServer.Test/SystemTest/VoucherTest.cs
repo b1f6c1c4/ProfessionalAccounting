@@ -18,7 +18,6 @@
 
 using System;
 using System.Text.RegularExpressions;
-using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell;
@@ -31,6 +30,7 @@ namespace AccountingServer.Test.SystemTest;
 public class VoucherTest
 {
     private readonly Facade m_Facade;
+    private readonly Session m_Session;
 
     public VoucherTest()
     {
@@ -61,11 +61,10 @@ public class VoucherTest
                 Abbrs = new() { new() { Abbr = "aaa", Title = 5678, Editable = false } },
             });
 
-        ClientUser.Set("b1");
-
         m_Facade = new(db: "accounting-test");
+        m_Session = m_Facade.CreateSession("b1", DateTime.UtcNow.Date);
 
-        var res = m_Facade.ExecuteVoucherUpsert("new Voucher { Ub2 T123401 whatever / aaa huh 10 }", null);
+        var res = m_Facade.ExecuteVoucherUpsert(m_Session, "new Voucher { Ub2 T123401 whatever / aaa huh 10 }");
         Assert.Matches(@"@new Voucher {\^[0-9a-f]{24}\^
 [0-9]{8}
 // kyh
@@ -85,12 +84,12 @@ Ub2 T3998\s+10
 
     [Fact]
     public void EmptyTest()
-        => Assert.Equal("@new Voucher {\n\n}@\n", m_Facade.EmptyVoucher(null));
+        => Assert.Equal("@new Voucher {\n\n}@\n", m_Facade.EmptyVoucher(m_Session));
 
     [Fact]
     public void SimpleTest()
     {
-        var res = m_Facade.Execute("\"huh\"", null);
+        var res = m_Facade.Execute(m_Session, "\"huh\"");
         Assert.False(res.Dirty);
         Assert.False(res.AutoReturn);
         Assert.Matches(@"@new Voucher {\^[0-9a-f]{24}\^
@@ -109,12 +108,12 @@ Ub2 T3998\s+10
 
     [Fact]
     public void SafeSrawTest()
-        => Assert.ThrowsAny<Exception>(() => m_Facade.Execute("sraw Ub2", null));
+        => Assert.ThrowsAny<Exception>(() => m_Facade.Execute(m_Session, "sraw Ub2"));
 
     [Fact]
     public void UnsafeSrawTest()
     {
-        var res = m_Facade.Execute("unsafe sraw Ub2", null);
+        var res = m_Facade.Execute(m_Session, "unsafe sraw Ub2");
         Assert.False(res.Dirty);
         Assert.False(res.AutoReturn);
         Assert.Matches(@"[0-9]{8} // sth-obj
@@ -126,12 +125,12 @@ Ub2 T3998\s+10
 
     [Fact]
     public void InvalidTest()
-        => Assert.ThrowsAny<Exception>(() => m_Facade.Execute("invalid command", null));
+        => Assert.ThrowsAny<Exception>(() => m_Facade.Execute(m_Session, "invalid command"));
 
     [Fact]
     public void SubtotalTest()
     {
-        var res = m_Facade.Execute("json U > `t", null);
+        var res = m_Facade.Execute(m_Session, "json U > `t");
         Assert.False(res.Dirty);
         Assert.False(res.AutoReturn);
         Assert.Matches(@"{
@@ -150,7 +149,7 @@ Ub2 T3998\s+10
     [Fact]
     public void FancyTest()
     {
-        var res = m_Facade.Execute("unsafe fancy U T3998", null);
+        var res = m_Facade.Execute(m_Session, "unsafe fancy U T3998");
         Assert.False(res.Dirty);
         Assert.False(res.AutoReturn);
         Assert.Matches(@"@new Voucher {\^[0-9a-f]{24}\^
@@ -166,7 +165,7 @@ Ub2 T3998\s+10
     [Fact]
     public void ChkTest()
     {
-        var res = m_Facade.Execute("chk-1", null);
+        var res = m_Facade.Execute(m_Session, "chk-1");
         Assert.False(res.Dirty);
         Assert.True(res.AutoReturn);
         Assert.Equal("OK", res.ToString()!);
@@ -175,7 +174,7 @@ Ub2 T3998\s+10
     [Fact]
     public void RemoveTest()
     {
-        Assert.True(m_Facade.ExecuteVoucherRemoval($"new Voucher {{ {m_ID} }}", null));
-        Assert.False(m_Facade.ExecuteVoucherRemoval($"new Voucher {{ {m_ID} }}", null));
+        Assert.True(m_Facade.ExecuteVoucherRemoval(m_Session, $"new Voucher {{ {m_ID} }}"));
+        Assert.False(m_Facade.ExecuteVoucherRemoval(m_Session, $"new Voucher {{ {m_ID} }}"));
     }
 }
