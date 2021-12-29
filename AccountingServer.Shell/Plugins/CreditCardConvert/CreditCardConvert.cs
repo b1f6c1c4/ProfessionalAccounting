@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -36,24 +35,25 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert;
 internal class CreditCardConvert : PluginBase
 {
     /// <inheritdoc />
-    public override ValueTask<IQueryResult> Execute(string expr, Session session)
+    public override IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         var content = Parsing.Token(ref expr);
 
-        return ValueTask.FromResult(ParsingF.Optional(ref expr, "q")
-            ? Query(content, ref expr, session)
-            : Create(content, ref expr, session));
+        return ParsingF.Optional(ref expr, "q")
+            ? Query(content, expr, session)
+            : Create(content, expr, session);
     }
 
-    private IQueryResult Query(string content, ref string expr, Session session)
+    private async IAsyncEnumerable<string> Query(string content, string expr, Session session)
     {
         var rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
 
         var trans = new List<Trans>();
         var rebates = new List<Rebate>();
         var convs = new List<Conversion>();
-        foreach (var voucher in
-                 session.Accountant.RunVoucherQuery($"T224101 {content.Quotation('\'')} {rng.AsDateRange()}"))
+        await foreach (var voucher in
+                       session.Accountant.RunVoucherQueryAsync(
+                           $"T224101 {content.Quotation('\'')} {rng.AsDateRange()}"))
         {
             var ds = voucher.Details.Where(d => d.Title == 2241 && d.SubTitle == 01 && d.Content == content)
                 .ToList();
@@ -103,9 +103,8 @@ internal class CreditCardConvert : PluginBase
         }
 
 
-        foreach (var voucher in session.Accountant.RunVoucherQuery(
-                     $"{{T224101 {content.Quotation('\'')}}}*{{T660300}}*{{T224101 {content.Quotation('\'')} +T3999+T660300 A {rng.AsDateRange()}}}")
-                )
+        await foreach (var voucher in session.Accountant.RunVoucherQueryAsync(
+                           $"{{T224101 {content.Quotation('\'')}}}*{{T660300}}*{{T224101 {content.Quotation('\'')} +T3999+T660300 A {rng.AsDateRange()}}}"))
         {
             // Assume proper ordering here
             var d0 = voucher.Details.Single(d => d.Title == 2241);
@@ -141,9 +140,9 @@ internal class CreditCardConvert : PluginBase
 
         foreach (var tran in trans)
         {
-            var conv = convs.FirstOrDefault(
-                c => c.Date >= tran.Date && c.OriginCurrency == tran.RawCurrency &&
-                    (c.OriginFund - tran.RawFund).IsZero());
+            var conv = convs.FirstOrDefault(c
+                => c.Date >= tran.Date && c.OriginCurrency == tran.RawCurrency &&
+                (c.OriginFund - tran.RawFund).IsZero());
             if (conv == null)
                 continue;
 
@@ -158,10 +157,11 @@ internal class CreditCardConvert : PluginBase
             sb.Append($" @{conv.OriginCurrency} {conv.OriginFund.AsCurrency().CPadLeft(15)}");
             sb.AppendLine(
                 $" {conv.Date.AsDate()} @{conv.TargetCurrency} {conv.TargetFund.AsCurrency().CPadLeft(15)} !!!");
+            yield return sb.ToString();
+            sb.Clear();
         }
 
-        if (sb.Length != 0)
-            sb.AppendLine("===========================================================");
+        yield return "===========================================================";
 
         foreach (var tran in trans.Concat(rebates).OrderByDescending(t => t.Date))
         {
@@ -172,12 +172,12 @@ internal class CreditCardConvert : PluginBase
                     $" {tran.TheConversion.Date.AsDate()} @{tran.TheConversion.TargetCurrency} {tran.TheConversion.TargetFund.AsCurrency().CPadLeft(15)}");
             else
                 sb.AppendLine();
+            yield return sb.ToString();
+            sb.Clear();
         }
-
-        return new PlainText(sb.ToString());
     }
 
-    private IQueryResult Create(string content, ref string expr, Session session)
+    private async IAsyncEnumerable<string> Create(string content, string expr, Session session)
     {
         var currency = Parsing.Token(ref expr, false);
         var baseCurrency = Parsing.Token(ref expr, false);
@@ -202,7 +202,7 @@ internal class CreditCardConvert : PluginBase
 
             var from = ParsingF.DoubleF(ref expr);
             var to = ParsingF.DoubleF(ref expr);
-            session.Accountant.Upsert(new Voucher
+            await session.Accountant.UpsertAsync(new Voucher
                 {
                     Date = date.Value,
                     Details = new()
@@ -231,7 +231,7 @@ internal class CreditCardConvert : PluginBase
                 });
         }
 
-        return new NumberAffected(vir.CachedVouchers);
+        yield return $"{vir.CachedVouchers}";
     }
 
     private class Trans

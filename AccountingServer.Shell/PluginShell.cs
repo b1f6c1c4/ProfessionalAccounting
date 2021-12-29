@@ -18,8 +18,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq;
 using AccountingServer.Shell.Plugins;
 using AccountingServer.Shell.Plugins.AssetHelper;
 using AccountingServer.Shell.Plugins.BankBalance;
@@ -74,7 +73,7 @@ internal class PluginShell : IShellComponent
         {
             Parsing.Eof(expr);
             if (plgName == "")
-                return ListPlugins();
+                return ListPlugins().ToAsyncEnumerable();
             return GetHelp(plgName);
         }
 
@@ -104,7 +103,7 @@ internal class PluginShell : IShellComponent
     ///     列出所有插件
     /// </summary>
     /// <returns>插件</returns>
-    private async IAsyncEnumerable<string> ListPlugins()
+    private IEnumerable<string> ListPlugins()
     {
         foreach (var (key, value) in m_Plugins)
             yield return $"{key,-8}{value.GetType().FullName}";

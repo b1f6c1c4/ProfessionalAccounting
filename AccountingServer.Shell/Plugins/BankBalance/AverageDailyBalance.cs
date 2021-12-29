@@ -17,9 +17,9 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -34,7 +34,7 @@ namespace AccountingServer.Shell.Plugins.BankBalance;
 internal class AverageDailyBalance : PluginBase
 {
     /// <inheritdoc />
-    public override ValueTask<IQueryResult> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         var content = Parsing.Token(ref expr);
         var avg = Parsing.DoubleF(ref expr);
@@ -43,7 +43,7 @@ internal class AverageDailyBalance : PluginBase
         var tdy = session.Client.Today;
         var ldom = DateHelper.LastDayOfMonth(tdy.Year, tdy.Month);
         var srng = new DateFilter(new(tdy.Year, tdy.Month, 1, 0, 0, 0, DateTimeKind.Utc), tdy);
-        var balance = session.Accountant.RunGroupedQuery(
+        var balance = await session.Accountant.RunGroupedQueryAsync(
             $"T1002 {content.Quotation('\'')} [~{tdy.AsDate()}]`vD{srng.AsDateRange()}");
 
         var bal = 0D;
@@ -102,6 +102,6 @@ internal class AverageDailyBalance : PluginBase
             }
         }
 
-        return ValueTask.FromResult<IQueryResult>(new PlainText(sb.ToString()));
+        yield return sb.ToString();
     }
 }

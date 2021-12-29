@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -37,30 +36,30 @@ internal class Utilities : PluginBase
         new ConfigManager<UtilTemplates>("Util.xml");
 
     /// <inheritdoc />
-    public override ValueTask<IQueryResult> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         using var vir = session.Accountant.Virtualize();
         while (!string.IsNullOrWhiteSpace(expr))
         {
-            var voucher = GenerateVoucher(session, ref expr);
+            var (voucher, ee) = await GenerateVoucher(session, expr);
+            expr = ee;
             if (voucher == null)
                 continue;
 
-            session.Accountant.Upsert(voucher);
+            await session.Accountant.UpsertAsync(voucher);
         }
 
-        return new ValueTask<IQueryResult>(new NumberAffected(vir.CachedVouchers));
+        yield return $"{vir.CachedVouchers}";
     }
 
     /// <inheritdoc />
-    public override string ListHelp()
+    public override async IAsyncEnumerable<string> ListHelp()
     {
-        var sb = new StringBuilder();
-        sb.Append(base.ListHelp());
-        foreach (var util in Templates.Config.Templates)
-            sb.AppendLine($"{util.Name,20}{util.Description}");
+        await foreach (var s in base.ListHelp())
+            yield return s;
 
-        return sb.ToString();
+        foreach (var util in Templates.Config.Templates)
+            yield return $"{util.Name,20}{util.Description}";
     }
 
     /// <summary>
@@ -69,7 +68,7 @@ internal class Utilities : PluginBase
     /// <param name="session">客户端会话</param>
     /// <param name="expr">表达式</param>
     /// <returns>记账凭证</returns>
-    private Voucher GenerateVoucher(Session session, ref string expr)
+    private async ValueTask<(Voucher, string)> GenerateVoucher(Session session, string expr)
     {
         var time = Parsing.UniqueTime(ref expr, session.Client) ?? session.Client.Today;
         var abbr = Parsing.Token(ref expr);
@@ -87,12 +86,12 @@ internal class Utilities : PluginBase
                 num = val;
             else
             {
-                var arr = session.Accountant.RunGroupedQuery($"{template.Query} [~{time:yyyyMMdd}] ``v").Fund;
+                var arr = (await session.Accountant.RunGroupedQueryAsync($"{template.Query} [~{time:yyyyMMdd}] ``v")).Fund;
                 num = arr - val;
             }
         }
 
-        return num.IsZero() ? null : MakeVoucher(template, num, time);
+        return (num.IsZero() ? null : MakeVoucher(template, num, time), expr);
     }
 
     /// <summary>

@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -38,7 +37,7 @@ internal class CashFlow : PluginBase
         new ConfigManager<CashTemplates>("Cash.xml");
 
     /// <inheritdoc />
-    public override async ValueTask<IQueryResult> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         var extraMonths = (int)(Parsing.Double(ref expr) ?? 6);
         var prefix = Parsing.Token(ref expr);
@@ -54,9 +53,8 @@ internal class CashFlow : PluginBase
 
         for (var i = 0; i < n; i++)
         {
-            aggs[i] = session.Accountant
-                .RunGroupedQuery($"U{accts[i].User.AsUser()} @{accts[i].Currency}*({accts[i].QuickAsset}) [~.]``v")
-                .Fund;
+            aggs[i] = (await session.Accountant.RunGroupedQueryAsync(
+                $"U{accts[i].User.AsUser()} @{accts[i].Currency}*({accts[i].QuickAsset}) [~.]``v")).Fund;
 
             foreach (var (date, value) in GetItems(accts[i], session, until).ToEnumerable())
             {
@@ -89,6 +87,8 @@ internal class CashFlow : PluginBase
         }
 
         sb.AppendLine("@@@@ All @@@@".PadLeft(15));
+        yield return sb.ToString();
+        sb.Clear();
 
         {
             sb.Append(prefix);
@@ -97,7 +97,8 @@ internal class CashFlow : PluginBase
             var sum = 0D;
             for (var i = 0; i < n; i++)
             {
-                sum += aggs[i] * await session.Accountant.Query(session.Client.Today, accts[i].Currency, BaseCurrency.Now);
+                sum += aggs[i] *
+                    await session.Accountant.Query(session.Client.Today, accts[i].Currency, BaseCurrency.Now);
 
                 sb.Append("".PadLeft(15));
                 sb.Append("".PadLeft(15));
@@ -105,6 +106,8 @@ internal class CashFlow : PluginBase
             }
 
             sb.AppendLine(sum.AsCurrency(BaseCurrency.Now).PadLeft(15));
+            yield return sb.ToString();
+            sb.Clear();
         }
 
         foreach (var kvp in rst.OrderBy(kvp => kvp.Key))
@@ -133,9 +136,9 @@ internal class CashFlow : PluginBase
             }
 
             sb.AppendLine(sum.AsCurrency(BaseCurrency.Now).PadLeft(15));
+            yield return sb.ToString();
+            sb.Clear();
         }
-
-        return new PlainText(sb.ToString());
     }
 
     private DateTime NextDate(Session session, int day, DateTime? reference = null, bool inclusive = false)
@@ -161,7 +164,8 @@ internal class CashFlow : PluginBase
         return v.AddDays(targ - 1);
     }
 
-    private async IAsyncEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account, Session session, DateTime until)
+    private async IAsyncEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account, Session session,
+        DateTime until)
     {
         var user = $"U{account.User.AsUser()}";
         var curr = $"@{account.Currency}";
@@ -185,7 +189,7 @@ internal class CashFlow : PluginBase
                     break;
 
                 case OnceQueryItem oqi:
-                    yield return (oqi.Date, session.Accountant.RunGroupedQuery($"{user} {curr}*({oqi.Query})``v").Fund);
+                    yield return (oqi.Date, (await session.Accountant.RunGroupedQueryAsync($"{user} {curr}*({oqi.Query})``v")).Fund);
 
                     break;
 
@@ -206,8 +210,8 @@ internal class CashFlow : PluginBase
                     var rng = $"[{session.Client.Today.AddMonths(-3).AsDate()}~]";
                     var mv = $"{{({user}*{cc.Query})+{user} T3999+{user} T6603 A {rng}}}";
                     var mos = new Dictionary<DateTime, double>();
-                    foreach (var grpC in session.Accountant.RunGroupedQuery(
-                                     $"{{{user}*({cc.Query})*({user} <+(-{user} {curr})) {rng}}}+{mv}:{user}*({cc.Query})`Cd")
+                    foreach (var grpC in (await session.Accountant.RunGroupedQueryAsync(
+                                 $"{{{user}*({cc.Query})*({user} <+(-{user} {curr})) {rng}}}+{mv}:{user}*({cc.Query})`Cd"))
                                  .Items
                                  .Cast<ISubtotalCurrency>())
                     foreach (var b in grpC.Items.Cast<ISubtotalDate>())
@@ -220,9 +224,9 @@ internal class CashFlow : PluginBase
                             mos[mo] = cob;
                     }
 
-                    foreach (var b in session.Accountant
-                                 .RunGroupedQuery(
-                                     $"{{{user}*({cc.Query})*({user} {curr}>) {rng}}}-{mv}:{user}*({cc.Query})`d")
+                    foreach (var b in (await session.Accountant
+                                 .RunGroupedQueryAsync(
+                                     $"{{{user}*({cc.Query})*({user} {curr}>) {rng}}}-{mv}:{user}*({cc.Query})`d"))
                                  .Items
                                  .Cast<ISubtotalDate>())
                     {
@@ -249,12 +253,13 @@ internal class CashFlow : PluginBase
                     break;
 
                 case ComplexCreditCard cc:
-                    var stmt = -session.Accountant.RunGroupedQuery($"({cc.Query})*({user} {curr})-{user} \"\"``v").Fund;
-                    var pmt = session.Accountant.RunGroupedQuery($"({cc.Query})*({user} {curr} \"\" >)``v").Fund;
-                    var nxt = -session.Accountant.RunGroupedQuery($"({cc.Query})*({user} {curr} \"\" <)``v").Fund;
+                    var stmt = -(await session.Accountant.RunGroupedQueryAsync($"({cc.Query})*({user} {curr})-{user} \"\"``v")).Fund;
+                    var pmt = (await session.Accountant.RunGroupedQueryAsync($"({cc.Query})*({user} {curr} \"\" >)``v")).Fund;
+                    var nxt = -(await session.Accountant.RunGroupedQueryAsync($"({cc.Query})*({user} {curr} \"\" <)``v")).Fund;
                     if (pmt < stmt)
                     {
-                        if (NextDate(session, cc.BillDay, NextDate(session, cc.RepaymentDay)) == NextDate(session, cc.BillDay))
+                        if (NextDate(session, cc.BillDay, NextDate(session, cc.RepaymentDay)) ==
+                            NextDate(session, cc.BillDay))
                             yield return (NextDate(session, cc.RepaymentDay), pmt - stmt);
                         else
                             nxt += stmt - pmt; // Not paid in full

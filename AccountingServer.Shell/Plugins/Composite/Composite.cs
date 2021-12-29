@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -40,7 +41,7 @@ internal class Composite : PluginBase
         new ConfigManager<CompositeTemplates>("Composite.xml");
 
     /// <inheritdoc />
-    public override async ValueTask<IQueryResult> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         Template temp = null;
         if (ParsingF.Token(ref expr, true, t => (temp = GetTemplate(t)) != null) == null)
@@ -60,7 +61,7 @@ internal class Composite : PluginBase
             ParsingF.Eof(expr);
         }
 
-        return (await DoInquiry(the, temp, currency, session)).Item1;
+        yield return (await DoInquiry(the, temp, currency, session)).Item1;
     }
 
     public static Template GetTemplate(string name) => Templates.Config.Templates.SingleOrDefault(
@@ -86,14 +87,12 @@ internal class Composite : PluginBase
     }
 
     /// <inheritdoc />
-    public override string ListHelp()
+    public override async IAsyncEnumerable<string> ListHelp()
     {
-        var sb = new StringBuilder();
-        sb.AppendLine(base.ListHelp());
+        await foreach (var s in base.ListHelp())
+            yield return s;
         foreach (var tmp in Templates.Config.Templates)
-            sb.AppendLine(tmp.Name);
-
-        return sb.ToString();
+            yield return tmp.Name;
     }
 
     /// <summary>
@@ -104,12 +103,12 @@ internal class Composite : PluginBase
     /// <param name="baseCurrency">记账本位币</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    public async ValueTask<(IQueryResult, double)> DoInquiry(DateFilter rng, BaseInquiry inq, string baseCurrency,
+    public async ValueTask<(string, double)> DoInquiry(DateFilter rng, BaseInquiry inq, string baseCurrency,
         Session session)
     {
         var visitor = new InquiriesVisitor(session, rng, baseCurrency);
         var val = await inq.Accept(visitor);
-        return (new PlainText(visitor.Result), val);
+        return (visitor.Result, val);
     }
 
     /// <summary>

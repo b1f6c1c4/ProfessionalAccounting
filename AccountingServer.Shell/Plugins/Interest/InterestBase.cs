@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -52,7 +51,7 @@ internal abstract class InterestBase : PluginBase
     protected abstract int MinorSubTitle();
 
     /// <inheritdoc />
-    public override ValueTask<IQueryResult> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         var remark = Parsing.Token(ref expr);
         var rate = Parsing.DoubleF(ref expr) / 10000D;
@@ -60,7 +59,7 @@ internal abstract class InterestBase : PluginBase
         var endDate = !all ? Parsing.UniqueTime(ref expr, session.Client) : null;
         Parsing.Eof(expr);
 
-        var loans = session.Accountant.RunGroupedQuery($"({MajorFilter()})-\"\" ``rtcC").Items
+        var loans = (await session.Accountant.RunGroupedQueryAsync($"({MajorFilter()})-\"\" ``rtcC")).Items
             .Cast<ISubtotalRemark>()
             .ToList();
         var rmkObj =
@@ -87,18 +86,18 @@ internal abstract class InterestBase : PluginBase
         if (!all && !endDate.HasValue ||
             endDate.HasValue)
         {
-            var lastD = session.Accountant.RunVoucherQuery(info.QueryInterest())
+            var lastD = (await session.Accountant.RunVoucherQueryAsync(info.QueryInterest())
                     .OrderByDescending(v => v.Date, new DateComparer())
-                    .FirstOrDefault()
+                    .FirstOrDefaultAsync())
                     ?.Date ??
-                session.Accountant.RunVoucherQuery(info.QueryCapital())
+                (await session.Accountant.RunVoucherQueryAsync(info.QueryCapital())
                     .OrderBy(v => v.Date, new DateComparer())
-                    .First()
+                    .FirstAsync())
                     .Date!.Value;
             var capQuery = $"{info.QueryCapital()} [~{lastD.AsDate()}]``v";
             var intQuery = $"{info.QueryInterest()} [~{lastD.AsDate()}]``v";
-            var capitalIntegral = session.Accountant.RunGroupedQuery(capQuery).Fund;
-            var interestIntegral = session.Accountant.RunGroupedQuery(intQuery).Fund;
+            var capitalIntegral = (await session.Accountant.RunGroupedQueryAsync(capQuery)).Fund;
+            var interestIntegral = (await session.Accountant.RunGroupedQueryAsync(intQuery)).Fund;
             Regularize(session, info,
                 ref capitalIntegral,
                 ref interestIntegral,
@@ -116,7 +115,7 @@ internal abstract class InterestBase : PluginBase
                 session.Client.Today);
         }
 
-        return new ValueTask<IQueryResult>(new DirtySucceed());
+        yield return "done";
     }
 
     /// <summary>

@@ -19,8 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
@@ -34,7 +32,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper;
 internal class AssetDisposition : PluginBase
 {
     /// <inheritdoc />
-    public override ValueTask<IQueryResult> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         var voucherID = Parsing.Token(ref expr);
         var guids = new List<string>();
@@ -44,18 +42,17 @@ internal class AssetDisposition : PluginBase
             guids.Add(guidT.ToString());
         Parsing.Eof(expr);
 
-        var voucher = session.Accountant.SelectVoucher(voucherID);
+        var voucher = await session.Accountant.SelectVoucherAsync(voucherID);
         if (voucher == null)
             throw new ApplicationException("找不到记账凭证");
 
-        var sb = new StringBuilder();
         foreach (var detail in voucher.Details.Where(vd => vd.Title is 1601 or 1701))
         {
             if (guids.Count != 0 &&
                 !guids.Contains(detail.Content))
                 continue;
 
-            var asset = session.Accountant.SelectAsset(Guid.Parse(detail.Content));
+            var asset = await session.Accountant.SelectAssetAsync(Guid.Parse(detail.Content));
             foreach (var item in asset.Schedule)
             {
                 if (item is DispositionItem)
@@ -78,13 +75,8 @@ internal class AssetDisposition : PluginBase
                 asset.Schedule.RemoveRange(id, asset.Schedule.Count - id);
 
             asset.Schedule.Add(new DispositionItem { Date = voucher.Date, VoucherID = voucher.ID });
-            sb.Append(session.Serializer.PresentAsset(asset).Wrap());
-            session.Accountant.Upsert(asset);
+            yield return session.Serializer.PresentAsset(asset).Wrap();
+            await session.Accountant.UpsertAsync(asset);
         }
-
-        if (sb.Length > 0)
-            return new(new DirtyText(sb.ToString()));
-
-        return new(new PlainSucceed());
     }
 }

@@ -18,8 +18,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
@@ -34,13 +32,12 @@ namespace AccountingServer.Shell.Plugins.YieldRate;
 internal class YieldRate : PluginBase
 {
     /// <inheritdoc />
-    public override ValueTask<IQueryResult> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         FacadeF.ParsingF.Eof(expr);
 
-        var result = session.Accountant.RunGroupedQuery("T1101+T611102+T1501+T611106 G``cd");
-        var resx = session.Accountant.RunGroupedQuery("T1101+T1501``c");
-        var sb = new StringBuilder();
+        var result = await session.Accountant.RunGroupedQueryAsync("T1101+T611102+T1501+T611106 G``cd");
+        var resx = await session.Accountant.RunGroupedQueryAsync("T1101+T1501``c");
         foreach (
             var (grp, rte) in
             result.Items.Cast<ISubtotalContent>()
@@ -52,9 +49,7 @@ internal class YieldRate : PluginBase
                         Rate: GetRate(session, grp.Items.Cast<ISubtotalDate>().OrderBy(b => b.Date, new DateComparer()).ToList(),
                             bal.Fund)))
                 .OrderByDescending(kvp => kvp.Rate))
-            sb.AppendLine($"{grp.Content.CPadRight(30)} {$"{rte * 360:P2}".PadLeft(7)}");
-
-        return new ValueTask<IQueryResult>(new PlainText(sb.ToString()));
+            yield return $"{grp.Content.CPadRight(30)} {$"{rte * 360:P2}",7}";
     }
 
     /// <summary>

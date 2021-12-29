@@ -20,8 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security;
-using System.Text;
-using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -36,13 +34,12 @@ namespace AccountingServer.Shell.Plugins.Statement;
 internal class Statement : PluginBase
 {
     /// <inheritdoc />
-    public override ValueTask<IQueryResult> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         var csv = expr;
         expr = ParsingF.Line(ref csv);
         var parsed = new CsvParser(ParsingF.Optional(ref expr, "-"));
 
-        var sb = new StringBuilder();
         if (ParsingF.Optional(ref expr, "mark"))
         {
             var filt = ParsingF.DetailQuery(ref expr, session.Client);
@@ -53,22 +50,25 @@ internal class Statement : PluginBase
                 throw new FormatException("格式错误");
 
             parsed.Parse(csv);
-            sb.AppendLine($"{parsed.Items.Count} parsed");
-            RunMark(session, filt, parsed, marker, sb);
+            yield return $"{parsed.Items.Count} parsed";
+            await foreach (var s in RunMark(session, filt, parsed, marker))
+                yield return s;
         }
         else if (ParsingF.Optional(ref expr, "unmark"))
         {
             var filt = ParsingF.DetailQuery(ref expr, session.Client);
             ParsingF.Eof(expr);
-            RunUnmark(session, filt, sb);
+            await foreach (var s in RunUnmark(session, filt))
+                yield return s;
         }
         else if (ParsingF.Optional(ref expr, "check"))
         {
             var filt = ParsingF.DetailQuery(ref expr, session.Client);
             ParsingF.Eof(expr);
             parsed.Parse(csv);
-            sb.AppendLine($"{parsed.Items.Count} parsed");
-            RunCheck(session, filt, parsed, sb);
+            yield return $"{parsed.Items.Count} parsed";
+            await foreach (var s in RunCheck(session, filt, parsed))
+                yield return s;
         }
         else
         {
@@ -81,7 +81,7 @@ internal class Statement : PluginBase
                 throw new FormatException("格式错误");
 
             parsed.Parse(csv);
-            sb.AppendLine($"{parsed.Items.Count} parsed");
+            yield return $"{parsed.Items.Count} parsed";
             var markerFilt = new StmtVoucherDetailQuery(
                 filt.VoucherQuery,
                 new IntersectQueries<IDetailQueryAtom>(
@@ -99,15 +99,17 @@ internal class Statement : PluginBase
                     new UnionQueries<IDetailQueryAtom>(
                         new StmtDetailQuery(""),
                         new StmtDetailQuery(marker))));
-            RunUnmark(session, markerFilt, sb);
-            RunMark(session, nullFilt, parsed, marker, sb);
-            RunCheck(session, nmFilt, parsed, sb);
+            await foreach (var s in RunUnmark(session, markerFilt))
+                yield return s;
+            await foreach (var s in RunMark(session, nullFilt, parsed, marker))
+                yield return s;
+            await foreach (var s in RunCheck(session, nmFilt, parsed))
+                yield return s;
         }
-
-        return new ValueTask<IQueryResult>(new PlainText(sb.ToString()));
     }
 
-    private void RunMark(Session session, IVoucherDetailQuery filt, CsvParser parsed, string marker, StringBuilder sb)
+    private async IAsyncEnumerable<string> RunMark(Session session, IVoucherDetailQuery filt, CsvParser parsed,
+        string marker)
     {
         if (filt.IsDangerous())
             throw new SecurityException("检测到弱检索式");
@@ -115,7 +117,7 @@ internal class Statement : PluginBase
         var marked = 0;
         var remarked = 0;
         var converted = 0;
-        var res = session.Accountant.SelectVouchers(filt.VoucherQuery).ToList();
+        var res = await session.Accountant.SelectVouchersAsync(filt.VoucherQuery).ToListAsync();
         var ops = new List<Voucher>();
         foreach (var b in parsed.Items)
         {
@@ -149,26 +151,26 @@ internal class Statement : PluginBase
             if (Trial(true) || Trial(false))
                 continue;
 
-            sb.AppendLine(b.Raw);
+            yield return b.Raw;
         }
 
-        session.Accountant.Upsert(ops);
+        await session.Accountant.UpsertAsync(ops);
 
-        sb.AppendLine($"{marked} marked");
-        sb.AppendLine($"{remarked} remarked");
-        sb.AppendLine($"{converted} converted");
+        yield return $"{marked} marked";
+        yield return $"{remarked} remarked";
+        yield return $"{converted} converted";
     }
 
-    private void RunUnmark(Session session, IVoucherDetailQuery filt, StringBuilder sb)
+    private async IAsyncEnumerable<string> RunUnmark(Session session, IVoucherDetailQuery filt)
     {
         if (filt.IsDangerous())
             throw new SecurityException("检测到弱检索式");
 
         var cnt = 0;
         var cntAll = 0;
-        var res = session.Accountant.SelectVouchers(filt.VoucherQuery);
+        var res = session.Accountant.SelectVouchersAsync(filt.VoucherQuery);
         var ops = new List<Voucher>();
-        foreach (var v in res)
+        await foreach (var v in res)
         {
             foreach (var d in v.Details)
             {
@@ -186,19 +188,19 @@ internal class Statement : PluginBase
             ops.Add(v);
         }
 
-        session.Accountant.Upsert(ops);
-        sb.AppendLine($"{cntAll} selected");
-        sb.AppendLine($"{cnt} unmarked");
+        await session.Accountant.UpsertAsync(ops);
+        yield return $"{cntAll} selected";
+        yield return $"{cnt} unmarked";
     }
 
-    private void RunCheck(Session session, IVoucherDetailQuery filt, CsvParser parsed, StringBuilder sb)
+    private async IAsyncEnumerable<string> RunCheck(Session session, IVoucherDetailQuery filt, CsvParser parsed)
     {
         if (filt.IsDangerous())
             throw new SecurityException("检测到弱检索式");
 
-        var res = session.Accountant.SelectVouchers(filt.VoucherQuery);
+        var res = session.Accountant.SelectVouchersAsync(filt.VoucherQuery);
         var lst = new List<BankItem>(parsed.Items);
-        foreach (var v in res)
+        await foreach (var v in res)
         foreach (var d in v.Details)
         {
             if (!d.IsMatch(filt.ActualDetailFilter()))
@@ -221,11 +223,11 @@ internal class Statement : PluginBase
                 continue;
             }
 
-            sb.AppendLine($"{v.ID.Quotation('^')} {v.Date.AsDate()} {d.Content} {d.Fund.AsCurrency(d.Currency)}");
+            yield return $"{v.ID.Quotation('^')} {v.Date.AsDate()} {d.Content} {d.Fund.AsCurrency(d.Currency)}";
         }
 
         foreach (var b in lst)
-            sb.AppendLine(b.Raw);
+            yield return b.Raw;
     }
 
     private sealed class StmtVoucherDetailQuery : IVoucherDetailQuery

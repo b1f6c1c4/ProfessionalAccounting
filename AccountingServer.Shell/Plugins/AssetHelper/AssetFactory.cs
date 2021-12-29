@@ -17,8 +17,8 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Serializer;
@@ -33,7 +33,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper;
 internal class AssetFactory : PluginBase
 {
     /// <inheritdoc />
-    public override async ValueTask<IQueryResult> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         var voucherID = Parsing.Token(ref expr);
         Guid? guid = null;
@@ -93,6 +93,6 @@ internal class AssetFactory : PluginBase
         Accountant.Depreciate(asset);
         await session.Accountant.UpsertAsync(asset);
 
-        return new DirtyText(session.Serializer.PresentAsset(asset).Wrap());
+        yield return session.Serializer.PresentAsset(asset).Wrap();
     }
 }
