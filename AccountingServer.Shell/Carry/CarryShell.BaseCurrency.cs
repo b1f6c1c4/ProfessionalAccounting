@@ -19,6 +19,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Util;
@@ -59,20 +60,20 @@ internal partial class CarryShell
     /// <param name="sb">日志记录</param>
     /// <param name="dt">日期</param>
     /// <param name="to">目标币种</param>
-    private void ConvertEquity(Session session, StringBuilder sb, DateTime dt, string to)
+    private async Task ConvertEquity(Session session, StringBuilder sb, DateTime dt, string to)
     {
         var rst = session.Accountant.RunGroupedQuery($"T4101+T4103-@{to} [~{dt.AsDate()}]`Cts");
 
         foreach (var grpC in rst.Items.Cast<ISubtotalCurrency>())
         {
-            var rate = session.Accountant.Query(dt, grpC.Currency, to).Result; // TODO
+            var rate = await session.Accountant.Query(dt, grpC.Currency, to);
             var dst = rate * grpC.Fund;
             sb.AppendLine(
                 $"=== {dt.AsDate()} @{grpC.Currency} {grpC.Fund.AsCurrency(grpC.Currency)} => @{to} {dst.AsCurrency(to)}");
 
             foreach (var grpt in grpC.Items.Cast<ISubtotalTitle>())
             foreach (var grps in grpt.Items.Cast<ISubtotalSubTitle>())
-                session.Accountant.Upsert(new Voucher
+                await session.Accountant.UpsertAsync(new Voucher
                     {
                         Date = dt,
                         Type = VoucherType.Ordinary,

@@ -198,7 +198,7 @@ internal class AmortizationShell : DistributedShell
         var sb = new StringBuilder();
         foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
         {
-            foreach (var item in session.Accountant.Update(a, rng, isCollapsed))
+            foreach (var item in session.Accountant.Update(a, rng, isCollapsed).ToEnumerable())
                 sb.AppendLine(ListAmortItem(item));
 
             session.Accountant.Upsert(a);
@@ -218,7 +218,7 @@ internal class AmortizationShell : DistributedShell
         foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
         {
             var sbi = new StringBuilder();
-            foreach (var item in session.Accountant.Update(a, rng, false, true))
+            foreach (var item in session.Accountant.Update(a, rng, false, true).ToEnumerable())
                 sbi.AppendLine(ListAmortItem(item));
 
             if (sbi.Length != 0)

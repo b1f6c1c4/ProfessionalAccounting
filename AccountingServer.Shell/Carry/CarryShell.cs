@@ -97,7 +97,7 @@ internal partial class CarryShell : IShellComponent
 
         if (rng.NullOnly || rng.Nullable)
         {
-            Carry(session, sb, null);
+            Carry(session, sb, null).Wait();
             CarryYear(session, sb, null);
         }
 
@@ -106,9 +106,9 @@ internal partial class CarryShell : IShellComponent
             {
                 foreach (var info in BaseCurrency.History)
                     if (info.Date >= dt && info.Date < dt.AddMonths(1))
-                        ConvertEquity(session, sb, info.Date!.Value, info.Currency);
+                        ConvertEquity(session, sb, info.Date!.Value, info.Currency).Wait();
 
-                Carry(session, sb, dt);
+                Carry(session, sb, dt).Wait();
                 if (dt.Month == 12)
                     CarryYear(session, sb, dt);
             }

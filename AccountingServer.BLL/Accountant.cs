@@ -58,7 +58,7 @@ public class Accountant : IHistoricalExchange
     #region Voucher
 
     public Voucher SelectVoucher(string id)
-        => m_Db.SelectVoucher(id).Result;
+        => m_Db.SelectVoucher(id).AsTask().Result;
 
     public ValueTask<Voucher> SelectVoucherAsync(string id)
         => m_Db.SelectVoucher(id);
@@ -76,13 +76,13 @@ public class Accountant : IHistoricalExchange
         => m_Db.SelectVoucherDetails(query);
 
     public ISubtotalResult SelectVoucherDetailsGrouped(IGroupedQuery query)
-        => m_Db.SelectVoucherDetailsGrouped(query, Limit).Result;
+        => m_Db.SelectVoucherDetailsGrouped(query, Limit).AsTask().Result;
 
     public ValueTask<ISubtotalResult> SelectVoucherDetailsGroupedAsync(IGroupedQuery query)
         => m_Db.SelectVoucherDetailsGrouped(query, Limit);
 
     public ISubtotalResult SelectVouchersGrouped(IVoucherGroupedQuery query)
-        => m_Db.SelectVouchersGrouped(query, Limit).Result;
+        => m_Db.SelectVouchersGrouped(query, Limit).AsTask().Result;
 
     public ValueTask<ISubtotalResult> SelectVouchersGroupedAsync(IVoucherGroupedQuery query)
         => m_Db.SelectVouchersGrouped(query, Limit);
@@ -98,29 +98,30 @@ public class Accountant : IHistoricalExchange
     public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => m_Db.SelectDuplicatedVouchers(query).ToEnumerable();
 
-    public IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchersAsync(IQueryCompounded<IVoucherQueryAtom> query)
+    public IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchersAsync(
+        IQueryCompounded<IVoucherQueryAtom> query)
         => m_Db.SelectDuplicatedVouchers(query);
 
     public bool DeleteVoucher(string id)
-        => m_Db.DeleteVoucher(id).Result;
+        => m_Db.DeleteVoucher(id).AsTask().Result;
 
     public ValueTask<bool> DeleteVoucherAsync(string id)
         => m_Db.DeleteVoucher(id);
 
     public long DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-        => m_Db.DeleteVouchers(query).Result;
+        => m_Db.DeleteVouchers(query).AsTask().Result;
 
     public ValueTask<long> DeleteVouchersAsync(IQueryCompounded<IVoucherQueryAtom> query)
         => m_Db.DeleteVouchers(query);
 
     public bool Upsert(Voucher entity)
-        => m_Db.Upsert(entity).Result;
+        => m_Db.Upsert(entity).AsTask().Result;
 
     public ValueTask<bool> UpsertAsync(Voucher entity)
         => m_Db.Upsert(entity);
 
     public long Upsert(IReadOnlyCollection<Voucher> entities)
-        => m_Db.Upsert(entities).Result;
+        => m_Db.Upsert(entities).AsTask().Result;
 
     public ValueTask<long> UpsertAsync(IReadOnlyCollection<Voucher> entities)
         => m_Db.Upsert(entities);
@@ -130,7 +131,7 @@ public class Accountant : IHistoricalExchange
     #region Asset
 
     public Asset SelectAsset(Guid id)
-        => AssetAccountant.InternalRegular(m_Db.SelectAsset(id).Result);
+        => AssetAccountant.InternalRegular(m_Db.SelectAsset(id).AsTask().Result);
 
     public async ValueTask<Asset> SelectAssetAsync(Guid id)
         => AssetAccountant.InternalRegular(await m_Db.SelectAsset(id));
@@ -142,19 +143,19 @@ public class Accountant : IHistoricalExchange
         => m_Db.SelectAssets(filter).Select(AssetAccountant.InternalRegular);
 
     public bool DeleteAsset(Guid id)
-        => m_Db.DeleteAsset(id).Result;
+        => m_Db.DeleteAsset(id).AsTask().Result;
 
     public ValueTask<bool> DeleteAssetAsync(Guid id)
         => m_Db.DeleteAsset(id);
 
     public long DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
-        => m_Db.DeleteAssets(filter).Result;
+        => m_Db.DeleteAssets(filter).AsTask().Result;
 
     public ValueTask<long> DeleteAssetsAsync(IQueryCompounded<IDistributedQueryAtom> filter)
         => m_Db.DeleteAssets(filter);
 
     public bool Upsert(Asset entity)
-        => m_Db.Upsert(entity).Result;
+        => m_Db.Upsert(entity).AsTask().Result;
 
     public ValueTask<bool> UpsertAsync(Asset entity)
         => m_Db.Upsert(entity);
@@ -165,7 +166,7 @@ public class Accountant : IHistoricalExchange
 
     public static void Depreciate(Asset asset) => AssetAccountant.Depreciate(asset);
 
-    public IEnumerable<AssetItem> Update(Asset asset, DateFilter rng, bool isCollapsed = false,
+    public IAsyncEnumerable<AssetItem> Update(Asset asset, DateFilter rng, bool isCollapsed = false,
         bool editOnly = false)
         => m_AssetAccountant.Update(asset, rng, isCollapsed, editOnly);
 
@@ -174,7 +175,7 @@ public class Accountant : IHistoricalExchange
     #region Amort
 
     public Amortization SelectAmortization(Guid id)
-        => AmortAccountant.InternalRegular(m_Db.SelectAmortization(id).Result);
+        => AmortAccountant.InternalRegular(m_Db.SelectAmortization(id).AsTask().Result);
 
     public async ValueTask<Amortization> SelectAmortizationAsync(Guid id)
         => AmortAccountant.InternalRegular(await m_Db.SelectAmortization(id));
@@ -186,19 +187,19 @@ public class Accountant : IHistoricalExchange
         => m_Db.SelectAmortizations(filter).Select(AmortAccountant.InternalRegular);
 
     public bool DeleteAmortization(Guid id)
-        => m_Db.DeleteAmortization(id).Result;
+        => m_Db.DeleteAmortization(id).AsTask().Result;
 
     public ValueTask<bool> DeleteAmortizationAsync(Guid id)
         => m_Db.DeleteAmortization(id);
 
     public long DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
-        => m_Db.DeleteAmortizations(filter).Result;
+        => m_Db.DeleteAmortizations(filter).AsTask().Result;
 
     public ValueTask<long> DeleteAmortizationsAsync(IQueryCompounded<IDistributedQueryAtom> filter)
         => m_Db.DeleteAmortizations(filter);
 
     public bool Upsert(Amortization entity)
-        => m_Db.Upsert(entity).Result;
+        => m_Db.Upsert(entity).AsTask().Result;
 
     public ValueTask<bool> UpsertAsync(Amortization entity)
         => m_Db.Upsert(entity);
@@ -209,8 +210,8 @@ public class Accountant : IHistoricalExchange
 
     public static void Amortize(Amortization amort) => AmortAccountant.Amortize(amort);
 
-    public IEnumerable<AmortItem> Update(Amortization amort, DateFilter rng,
-        bool isCollapsed = false, bool editOnly = false)
+    public IAsyncEnumerable<AmortItem> Update(Amortization amort, DateFilter rng, bool isCollapsed = false,
+        bool editOnly = false)
         => m_AmortAccountant.Update(amort, rng, isCollapsed, editOnly);
 
     public static double? GetBookValueOn(IDistributed dist, DateTime? dt)

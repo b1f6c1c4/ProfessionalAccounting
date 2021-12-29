@@ -243,8 +243,8 @@ public class SubtotalBuilder
                 return sub;
             case AggregationType.EveryDay:
                 sub.TheItems = new();
-                var initial = Prev(m_Par.EveryDayRange.Range.StartDate);
-                var ed = Next(Prev(m_Par.EveryDayRange.Range.EndDate));
+                var initial = Prev(m_Par.EveryDayRange.StartDate);
+                var ed = Next(Prev(m_Par.EveryDayRange.EndDate));
                 var last = initial;
 
                 void Append(DateTime? curr, double oldFund, double fund)
@@ -271,8 +271,8 @@ public class SubtotalBuilder
                 var flag = true;
                 var tmp0 = 0D;
                 var forcedNull =
-                    (m_Par.EveryDayRange.Range.StartDate.HasValue || m_Par.EveryDayRange.Range.NullOnly) &&
-                    m_Par.EveryDayRange.Range.Nullable;
+                    (m_Par.EveryDayRange.StartDate.HasValue || m_Par.EveryDayRange.NullOnly) &&
+                    m_Par.EveryDayRange.Nullable;
                 foreach (var grp in raw.GroupBy(b => b.Date).OrderBy(grp => grp.Key).ToEnumerable())
                 {
                     if (flag &&
@@ -287,7 +287,7 @@ public class SubtotalBuilder
 
                     if (DateHelper.CompareDate(grp.Key, ed) <= 0)
                         tmp0 = sub.Fund;
-                    if (grp.Key.Within(m_Par.EveryDayRange.Range))
+                    if (grp.Key.Within(m_Par.EveryDayRange))
                         Append(grp.Key, tmp, sub.Fund);
                 }
 

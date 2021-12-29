@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -35,31 +36,60 @@ public class Virtualizer : IDbAdapter, IDisposable
     /// </summary>
     internal IDbAdapter Db { get; init; }
 
+    private readonly ReaderWriterLockSlim m_Lock = new();
     private readonly List<Voucher> m_Vouchers = new();
 
     internal Virtualizer(IDbAdapter db) => Db = db;
 
-    public int CachedVouchers => m_Vouchers.Count;
+    private T ReadLocked<T>(Func<List<Voucher>, T> func)
+    {
+        m_Lock.EnterReadLock();
+        try
+        {
+            return func(m_Vouchers);
+        }
+        finally
+        {
+            m_Lock.ExitReadLock();
+        }
+    }
+
+    private T WriteLocked<T>(Func<List<Voucher>, T> func)
+    {
+        m_Lock.EnterWriteLock();
+        try
+        {
+            return func(m_Vouchers);
+        }
+        finally
+        {
+            m_Lock.ExitWriteLock();
+        }
+    }
+
+    public int CachedVouchers => ReadLocked(_ => _.Count);
 
     public void Dispose()
-    {
-        if (m_Vouchers.Count == 0)
-            return;
+        => WriteLocked(_ =>
+            {
+                if (_.Count == 0)
+                    return Nothing.AtAll;
 
-        if (Db.Upsert(m_Vouchers).Result != m_Vouchers.Count)
-            throw new ApplicationException("Cannot write-back voucher cache");
+                if (Db.Upsert(_).AsTask().Result != _.Count)
+                    throw new ApplicationException("Cannot write-back voucher cache");
 
-        m_Vouchers.Clear();
-    }
+                _.Clear();
+                return Nothing.AtAll;
+            });
 
     public ValueTask<Voucher> SelectVoucher(string id)
         => Db.SelectVoucher(id);
 
     public IAsyncEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-        => Db.SelectVouchers(query).Concat(m_Vouchers.Where(v => v.IsMatch(query)).ToAsyncEnumerable());
+        => Db.SelectVouchers(query).Concat(ReadLocked(_ => _.Where(v => v.IsMatch(query))).ToAsyncEnumerable());
 
     public IAsyncEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
-        => Db.SelectVoucherDetails(query).Concat(m_Vouchers.Where(v => v.IsMatch(query.VoucherQuery))
+        => Db.SelectVoucherDetails(query).Concat(ReadLocked(_ => _.Where(v => v.IsMatch(query.VoucherQuery)))
             .SelectMany(v => v.Details).Where(d => d.IsMatch(query.ActualDetailFilter())).ToAsyncEnumerable());
 
     private class BalanceComparer : IEqualityComparer<Balance>
@@ -117,9 +147,8 @@ public class Virtualizer : IDbAdapter, IDisposable
         if (limit != 0)
             throw new NotSupportedException();
         var level = query.Preprocess();
-        return Merge(Db.SelectVouchersGrouped(query).Concat(
-            m_Vouchers.Where(v => v.IsMatch(query.VoucherQuery))
-                .Select(v => new Balance { Date = ProjectDate(v.Date, level), Fund = 1 }).ToAsyncEnumerable()));
+        return Merge(Db.SelectVouchersGrouped(query).Concat(ReadLocked(_ => _.Where(v => v.IsMatch(query.VoucherQuery)))
+            .Select(v => new Balance { Date = ProjectDate(v.Date, level), Fund = 1 }).ToAsyncEnumerable()));
     }
 
     public IAsyncEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit)
@@ -128,7 +157,7 @@ public class Virtualizer : IDbAdapter, IDisposable
             throw new NotSupportedException();
         var level = query.Preprocess();
         var fluent = Merge(Db.SelectVoucherDetailsGrouped(query).Concat(
-            m_Vouchers.Where(v => v.IsMatch(query.VoucherEmitQuery.VoucherQuery))
+            ReadLocked(_ => _.Where(v => v.IsMatch(query.VoucherEmitQuery.VoucherQuery)))
                 .SelectMany(v => v.Details.Select(d => new VoucherDetailR(v, d)))
                 .Where(d => d.IsMatch(query.VoucherEmitQuery.ActualDetailFilter()))
                 .Select(d => new Balance
@@ -156,14 +185,18 @@ public class Virtualizer : IDbAdapter, IDisposable
         => Db.DeleteVoucher(id);
 
     public async ValueTask<long> DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-        => await Db.DeleteVouchers(query) + m_Vouchers.RemoveAll(v => v.IsMatch(query));
+        => await Db.DeleteVouchers(query) + WriteLocked(_ => _.RemoveAll(v => v.IsMatch(query)));
 
     public async ValueTask<bool> Upsert(Voucher entity)
     {
         if (entity.ID != null)
             return await Db.Upsert(entity);
 
-        m_Vouchers.Add(entity);
+        WriteLocked(_ =>
+            {
+                _.Add(entity);
+                return Nothing.AtAll;
+            });
         return true;
     }
 
@@ -178,7 +211,11 @@ public class Virtualizer : IDbAdapter, IDisposable
                 cnt++;
             }
             else
-                m_Vouchers.Add(voucher);
+                WriteLocked(_ =>
+                    {
+                        _.Add(voucher);
+                        return Nothing.AtAll;
+                    });
 
         return cnt + await Db.Upsert(lst);
     }

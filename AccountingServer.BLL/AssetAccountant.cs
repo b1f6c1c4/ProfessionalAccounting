@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -57,7 +58,7 @@ internal class AssetAccountant : DistributedAccountant
             if (assetItem is DepreciateItem ||
                 assetItem is DevalueItem)
                 if (assetItem.Date.HasValue)
-                    assetItem.Date = AccountantHelper.LastDayOfMonth(
+                    assetItem.Date = DateHelper.LastDayOfMonth(
                         assetItem.Date.Value.Year,
                         assetItem.Date.Value.Month);
 
@@ -178,7 +179,8 @@ internal class AssetAccountant : DistributedAccountant
             var voucher in
             Db.SelectVouchers(
                 ParsingF.VoucherQuery(
-                    $"U{asset.User.AsUser()} T{asset.DepreciationTitle.AsTitle()} {asset.StringID.Quotation('\'')}", Client)).ToEnumerable() // TODO
+                    $"U{asset.User.AsUser()} T{asset.DepreciationTitle.AsTitle()} {asset.StringID.Quotation('\'')}",
+                    Client)).ToEnumerable() // TODO
         )
         {
             if (voucher.Remark == Asset.IgnoranceMark)
@@ -203,7 +205,8 @@ internal class AssetAccountant : DistributedAccountant
             var voucher in
             Db.SelectVouchers(
                 ParsingF.VoucherQuery(
-                    $"U{asset.User.AsUser()} T{asset.DevaluationTitle.AsTitle()} {asset.StringID.Quotation('\'')}", Client)).ToEnumerable() // TODO
+                    $"U{asset.User.AsUser()} T{asset.DevaluationTitle.AsTitle()} {asset.StringID.Quotation('\'')}",
+                    Client)).ToEnumerable() // TODO
         )
         {
             if (voucher.Remark == Asset.IgnoranceMark)
@@ -233,7 +236,7 @@ internal class AssetAccountant : DistributedAccountant
     /// <param name="isCollapsed">是否压缩</param>
     /// <param name="editOnly">是否只允许更新</param>
     /// <returns>无法更新的条目</returns>
-    public IEnumerable<AssetItem> Update(Asset asset, DateFilter rng,
+    public async IAsyncEnumerable<AssetItem> Update(Asset asset, DateFilter rng,
         bool isCollapsed = false, bool editOnly = false)
     {
         if (asset.Schedule == null)
@@ -243,7 +246,7 @@ internal class AssetAccountant : DistributedAccountant
         foreach (var item in asset.Schedule)
         {
             if (item.Date.Within(rng))
-                if (!UpdateItem(asset, item, bookValue, isCollapsed, editOnly))
+                if (!await UpdateItem(asset, item, bookValue, isCollapsed, editOnly))
                     yield return item;
 
             bookValue = item.Value;
@@ -259,12 +262,12 @@ internal class AssetAccountant : DistributedAccountant
     /// <param name="isCollapsed">是否压缩</param>
     /// <param name="editOnly">是否只允许更新</param>
     /// <returns>是否成功</returns>
-    private bool UpdateItem(Asset asset, AssetItem item, double bookValue, bool isCollapsed = false,
+    private async ValueTask<bool> UpdateItem(Asset asset, AssetItem item, double bookValue, bool isCollapsed = false,
         bool editOnly = false)
         => item switch
             {
                 AcquisitionItem acq =>
-                    UpdateVoucher(item, isCollapsed, editOnly, VoucherType.Ordinary,
+                    await UpdateVoucher(item, isCollapsed, editOnly, VoucherType.Ordinary,
                         new VoucherDetail
                             {
                                 User = asset.User,
@@ -274,7 +277,7 @@ internal class AssetAccountant : DistributedAccountant
                                 Fund = acq.OrigValue,
                             }),
                 DepreciateItem dep =>
-                    UpdateVoucher(item, isCollapsed, editOnly, VoucherType.Depreciation,
+                    await UpdateVoucher(item, isCollapsed, editOnly, VoucherType.Depreciation,
                         new()
                             {
                                 User = asset.User,
@@ -293,7 +296,7 @@ internal class AssetAccountant : DistributedAccountant
                                 Fund = -dep.Amount,
                             }),
                 DevalueItem dev =>
-                    UpdateVoucher(item, isCollapsed, editOnly, VoucherType.Devalue,
+                    await UpdateVoucher(item, isCollapsed, editOnly, VoucherType.Devalue,
                         new()
                             {
                                 User = asset.User,
@@ -311,45 +314,46 @@ internal class AssetAccountant : DistributedAccountant
                                 Content = asset.StringID,
                                 Fund = -dev.Amount,
                             }),
-                DispositionItem => UpdateVoucher(item, isCollapsed, editOnly, VoucherType.Ordinary,
-                    new()
-                        {
-                            User = asset.User,
-                            Currency = asset.Currency,
-                            Title = asset.Title,
-                            Content = asset.StringID,
-                            Fund = -asset.Value,
-                        },
-                    new()
-                        {
-                            User = asset.User,
-                            Currency = asset.Currency,
-                            Title = asset.DepreciationTitle,
-                            Content = asset.StringID,
-                            Fund = asset.Schedule.Where(it
-                                    => DateHelper.CompareDate(it.Date, item.Date) < 0 && it is DepreciateItem)
-                                .Cast<DepreciateItem>()
-                                .Aggregate(0D, (td, it) => td + it.Amount),
-                        },
-                    new()
-                        {
-                            User = asset.User,
-                            Currency = asset.Currency,
-                            Title = asset.DevaluationTitle,
-                            Content = asset.StringID,
-                            Fund = asset.Schedule.Where(it
-                                    => DateHelper.CompareDate(it.Date, item.Date) < 0 && it is DevalueItem)
-                                .Cast<DevalueItem>()
-                                .Aggregate(0D, (td, it) => td + it.Amount),
-                        }, new()
-                        {
-                            User = asset.User,
-                            Currency = asset.Currency,
-                            Title = DefaultDispositionTitle,
-                            Content = asset.StringID,
-                            Fund = bookValue,
-                            Remark = Asset.IgnoranceMark, // 不用于检索，只用于添加
-                        }),
+                DispositionItem =>
+                    await UpdateVoucher(item, isCollapsed, editOnly, VoucherType.Ordinary,
+                        new()
+                            {
+                                User = asset.User,
+                                Currency = asset.Currency,
+                                Title = asset.Title,
+                                Content = asset.StringID,
+                                Fund = -asset.Value,
+                            },
+                        new()
+                            {
+                                User = asset.User,
+                                Currency = asset.Currency,
+                                Title = asset.DepreciationTitle,
+                                Content = asset.StringID,
+                                Fund = asset.Schedule.Where(it
+                                        => DateHelper.CompareDate(it.Date, item.Date) < 0 && it is DepreciateItem)
+                                    .Cast<DepreciateItem>()
+                                    .Aggregate(0D, (td, it) => td + it.Amount),
+                            },
+                        new()
+                            {
+                                User = asset.User,
+                                Currency = asset.Currency,
+                                Title = asset.DevaluationTitle,
+                                Content = asset.StringID,
+                                Fund = asset.Schedule.Where(it
+                                        => DateHelper.CompareDate(it.Date, item.Date) < 0 && it is DevalueItem)
+                                    .Cast<DevalueItem>()
+                                    .Aggregate(0D, (td, it) => td + it.Amount),
+                            }, new()
+                            {
+                                User = asset.User,
+                                Currency = asset.Currency,
+                                Title = DefaultDispositionTitle,
+                                Content = asset.StringID,
+                                Fund = bookValue,
+                                Remark = Asset.IgnoranceMark, // 不用于检索，只用于添加
+                            }),
                 _ => false,
             };
 
@@ -361,7 +365,7 @@ internal class AssetAccountant : DistributedAccountant
     /// <param name="voucherType">记账凭证类型</param>
     /// <param name="details">细目</param>
     /// <returns>是否成功</returns>
-    private bool GenerateVoucher(AssetItem item, bool isCollapsed, VoucherType voucherType,
+    private async ValueTask<bool> GenerateVoucher(AssetItem item, bool isCollapsed, VoucherType voucherType,
         params VoucherDetail[] details)
     {
         var voucher = new Voucher
@@ -371,7 +375,7 @@ internal class AssetAccountant : DistributedAccountant
                 Remark = "automatically generated",
                 Details = details.ToList(),
             };
-        var res = Db.Upsert(voucher).Result;
+        var res = await Db.Upsert(voucher);
         item.VoucherID = voucher.ID;
         return res;
     }
@@ -385,15 +389,16 @@ internal class AssetAccountant : DistributedAccountant
     /// <param name="voucherType">记账凭证类型</param>
     /// <param name="expectedDetails">应填细目</param>
     /// <returns>是否成功</returns>
-    private bool UpdateVoucher(AssetItem item, bool isCollapsed, bool editOnly, VoucherType voucherType,
+    private async ValueTask<bool> UpdateVoucher(AssetItem item, bool isCollapsed, bool editOnly,
+        VoucherType voucherType,
         params VoucherDetail[] expectedDetails)
     {
         if (item.VoucherID == null)
-            return !editOnly && GenerateVoucher(item, isCollapsed, voucherType, expectedDetails);
+            return !editOnly && await GenerateVoucher(item, isCollapsed, voucherType, expectedDetails);
 
-        var voucher = Db.SelectVoucher(item.VoucherID).Result;
+        var voucher = await Db.SelectVoucher(item.VoucherID);
         if (voucher == null)
-            return !editOnly && GenerateVoucher(item, isCollapsed, voucherType, expectedDetails);
+            return !editOnly && await GenerateVoucher(item, isCollapsed, voucherType, expectedDetails);
 
         if (voucher.Date != (isCollapsed ? null : item.Date) &&
             !editOnly)
@@ -421,7 +426,7 @@ internal class AssetAccountant : DistributedAccountant
         }
 
         if (modified)
-            Db.Upsert(voucher);
+            await Db.Upsert(voucher);
 
         return true;
     }
@@ -484,7 +489,7 @@ internal class AssetAccountant : DistributedAccountant
                         if (dt.Year == asset.Date.Value.Year &&
                             dt.Month == asset.Date.Value.Month)
                         {
-                            dt = AccountantHelper.LastDayOfMonth(dt.Year, dt.Month + 1);
+                            dt = DateHelper.LastDayOfMonth(dt.Year, dt.Month + 1);
                             if (i == items.Count)
                                 i--;
                             continue;
@@ -511,7 +516,7 @@ internal class AssetAccountant : DistributedAccountant
                                     Value = items[i - 1].Value - amount / (months + 1),
                                 });
 
-                        dt = AccountantHelper.LastDayOfMonth(dt.Year, dt.Month + 1);
+                        dt = DateHelper.LastDayOfMonth(dt.Year, dt.Month + 1);
                     }
                 }
                 //if (mo < 12)
@@ -562,8 +567,7 @@ internal class AssetAccountant : DistributedAccountant
                             items.Add(
                                 new DepreciateItem
                                     {
-                                        Date = AccountantHelper.LastDayOfMonth(yr, mon),
-                                        Amount = a / (12 - mo),
+                                        Date = DateHelper.LastDayOfMonth(yr, mon), Amount = a / (12 - mo),
                                     });
                     }
 
@@ -572,7 +576,7 @@ internal class AssetAccountant : DistributedAccountant
                         items.Add(
                             new DepreciateItem
                                 {
-                                    Date = AccountantHelper.LastDayOfMonth(yr + year, mon),
+                                    Date = DateHelper.LastDayOfMonth(yr + year, mon),
                                     Amount = amount * (nstar - year + 1) / zstar / 12,
                                 });
                     // if (mo > 0)
@@ -581,7 +585,7 @@ internal class AssetAccountant : DistributedAccountant
                             items.Add(
                                 new DepreciateItem
                                     {
-                                        Date = AccountantHelper.LastDayOfMonth(yr + n, mon),
+                                        Date = DateHelper.LastDayOfMonth(yr + n, mon),
                                         Amount = amount * (nstar - (n + 1) + 2) / zstar / 12,
                                     });
                     }

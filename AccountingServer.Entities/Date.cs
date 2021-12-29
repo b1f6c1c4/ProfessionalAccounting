@@ -18,14 +18,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 
 namespace AccountingServer.Entities;
 
 /// <summary>
 ///     日期过滤器
 /// </summary>
-public class DateFilter : IDateRange
+public class DateFilter
 {
     /// <summary>
     ///     截止日期（含）
@@ -69,9 +68,6 @@ public class DateFilter : IDateRange
     ///     非无日期
     /// </summary>
     public static DateFilter TheNotNull { get; } = new(null, null) { Nullable = false };
-
-    /// <inheritdoc />
-    public DateFilter Range => this;
 
     /// <summary>
     ///     是否包含弱检索式
@@ -148,35 +144,27 @@ public static class DateHelper
 
         return !(dt > rng.EndDate);
     }
-}
 
-public static class DateTimeParser
-{
-    // ReSharper disable once UnusedMember.Global
-    public static DateTime Parse(string str) => DateTime.Parse(
-        str,
-        null,
-        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
+    /// <summary>
+    ///     获取指定月的最后一天
+    /// </summary>
+    /// <param name="year">年</param>
+    /// <param name="month">月</param>
+    /// <returns>此月最后一天</returns>
+    public static DateTime LastDayOfMonth(int year, int month)
+    {
+        while (month > 12)
+        {
+            month -= 12;
+            year++;
+        }
 
-    // ReSharper disable once UnusedMember.Global
-    public static DateTime ParseExact(string str, string format) => DateTime.ParseExact(
-        str,
-        format,
-        null,
-        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
+        while (month < 1)
+        {
+            month += 12;
+            year--;
+        }
 
-    // ReSharper disable once UnusedMember.Global
-    public static bool TryParse(string str, out DateTime result) => DateTime.TryParse(
-        str,
-        null,
-        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal,
-        out result);
-
-    // ReSharper disable once UnusedMember.Global
-    public static bool TryParseExact(string str, string format, out DateTime result) => DateTime.TryParseExact(
-        str,
-        format,
-        null,
-        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal,
-        out result);
+        return new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(1).AddDays(-1);
+    }
 }

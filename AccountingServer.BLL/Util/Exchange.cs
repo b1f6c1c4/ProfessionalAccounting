@@ -176,7 +176,7 @@ internal class FixerIoExchange : ExchangeApi, IHistoricalExchange
         response.EnsureSuccessStatusCode();
         var json = JObject.Parse(await response.Content.ReadAsStringAsync());
         if (json["success"]!.Value<bool>())
-            return json["rates"]![to]!.Value<double>() / json["rates"]![@from]!.Value<double>();
+            return json["rates"]![to]!.Value<double>() / json["rates"]![from]!.Value<double>();
         return null;
     }
 

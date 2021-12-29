@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 
 namespace AccountingServer.Shell.Subtotal;
 

@@ -45,7 +45,7 @@ public class AccountantHelperTest
     public void LastDayOfMonthTest(string expectedS, int year, int month)
     {
         var expected = expectedS.ToDateTime();
-        Assert.Equal(expected, AccountantHelper.LastDayOfMonth(year, month));
+        Assert.Equal(expected, DateHelper.LastDayOfMonth(year, month));
     }
 
     [Theory]
@@ -54,7 +54,7 @@ public class AccountantHelperTest
     [InlineData(true, -VoucherDetail.Tolerance * 0.999)]
     [InlineData(false, -VoucherDetail.Tolerance * 1.001)]
     public void IsNonNegativeTest(bool expected, double value)
-        => Assert.Equal(expected, AccountantHelper.IsNonNegative(value));
+        => Assert.Equal(expected, NumericHelper.IsNonNegative(value));
 
     [Theory]
     [InlineData(true, 0)]
@@ -62,5 +62,5 @@ public class AccountantHelperTest
     [InlineData(true, +VoucherDetail.Tolerance * 0.999)]
     [InlineData(false, +VoucherDetail.Tolerance * 1.001)]
     public void IsNonPositiveTest(bool expected, double value)
-        => Assert.Equal(expected, AccountantHelper.IsNonPositive(value));
+        => Assert.Equal(expected, NumericHelper.IsNonPositive(value));
 }

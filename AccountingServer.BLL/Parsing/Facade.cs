@@ -24,9 +24,9 @@ using Antlr4.Runtime;
 
 namespace AccountingServer.BLL.Parsing;
 
-internal interface IDate
+internal interface IDateRange
 {
-    DateTime? AsDate();
+    DateFilter Range { get; }
 }
 
 [SuppressMessage("ReSharper", "UnusedMember.Global")]

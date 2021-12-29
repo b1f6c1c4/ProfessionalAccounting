@@ -19,11 +19,11 @@
 using System;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Timers;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
-using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
@@ -57,22 +57,25 @@ internal class ExchangeShell : IShellComponent
         var sb = new StringBuilder();
 
         if (Parsing.UniqueTime(ref expr, session.Client) is var date && date.HasValue)
-            Inquiry(session, sb, date.Value, from, to, val, isAccurate);
+            Inquiry(session, sb, date.Value, from, to, val, isAccurate).Wait();
         else if (Parsing.Range(ref expr, session.Client) is var rng && rng != null)
             for (var dt = rng.StartDate!.Value; dt <= rng.EndDate; dt = dt.AddMonths(1))
-                Inquiry(session, sb, AccountantHelper.LastDayOfMonth(dt.Year, dt.Month), from, to, val, isAccurate);
+                Inquiry(session, sb, DateHelper.LastDayOfMonth(dt.Year, dt.Month), from, to, val, isAccurate).Wait();
         else if (isAccurate)
-            Inquiry(session, sb, null, from, to, val, true);
+            Inquiry(session, sb, null, from, to, val, true).Wait();
         else
-            Inquiry(session, sb, DateTime.UtcNow.AddMinutes(-30), from, to, val, false);
+            Inquiry(session, sb, DateTime.UtcNow.AddMinutes(-30), from, to, val, false).Wait();
         Parsing.Eof(expr);
 
         return new PlainText(sb.ToString());
     }
 
-    private void Inquiry(Session session, StringBuilder sb, DateTime? dt, string from, string to, double value, bool isAccurate)
+    private async Task Inquiry(Session session, StringBuilder sb, DateTime? dt, string from, string to, double value,
+        bool isAccurate)
     {
-        var rate = isAccurate ? session.Accountant.SaveHistoricalRate(dt!.Value, from, to).Result : session.Accountant.Query(dt, from, to).Result; // TODO
+        var rate = isAccurate
+            ? await session.Accountant.SaveHistoricalRate(dt!.Value, from, to)
+            : await session.Accountant.Query(dt, from, to);
         var v = value * rate;
         sb.AppendLine($"{dt.AsDate()} @{from} {value.AsCurrency(from)} = @{to} {v.AsCurrency(to)} ({v:R})");
     }
@@ -114,10 +117,12 @@ internal class ExchangeShell : IShellComponent
         var session = new Session(m_TimerSession);
         try
         {
-            foreach (var grpC in session.Accountant.RunGroupedQuery("U - U Revenue - U Expense !C").Items.Cast<ISubtotalCurrency>())
-                session.Accountant.Query(date, grpC.Currency, BaseCurrency.Now);
-            foreach (var grpC in session.Accountant.RunGroupedQuery("U Revenue + U Expense 0 !C").Items.Cast<ISubtotalCurrency>())
-                session.Accountant.Query(date, grpC.Currency, BaseCurrency.Now);
+            Task.WhenAll(session.Accountant.RunGroupedQuery("U - U Revenue - U Expense !C")
+                .Items.Cast<ISubtotalCurrency>()
+                .Concat(session.Accountant.RunGroupedQuery("U Revenue + U Expense 0 !C")
+                    .Items.Cast<ISubtotalCurrency>())
+                .Select(grpC =>
+                    session.Accountant.Query(date, grpC.Currency, BaseCurrency.Now).AsTask())).Wait();
         }
         catch (Exception err)
         {

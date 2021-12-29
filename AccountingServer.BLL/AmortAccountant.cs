@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -47,7 +48,7 @@ internal class AmortAccountant : DistributedAccountant
                 AmortizeInterval.SameDayOfMonth => the.Day > 28 ? the.AddDays(1 - the.Day).AddMonths(1) : the,
                 AmortizeInterval.LastDayOfWeek =>
                     the.DayOfWeek == DayOfWeek.Sunday ? the : the.AddDays(7 - (int)the.DayOfWeek),
-                AmortizeInterval.LastDayOfMonth => AccountantHelper.LastDayOfMonth(the.Year, the.Month),
+                AmortizeInterval.LastDayOfMonth => DateHelper.LastDayOfMonth(the.Year, the.Month),
                 AmortizeInterval.LastDayOfYear => new DateTime(the.Year + 1, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                     .AddDays(-1),
                 _ => throw new ArgumentException("间隔类型未知", nameof(interval)),
@@ -68,7 +69,7 @@ internal class AmortAccountant : DistributedAccountant
                     ? last.AddDays(7)
                     : last.AddDays(14 - (int)last.DayOfWeek),
                 AmortizeInterval.SameDayOfMonth => last.AddMonths(1),
-                AmortizeInterval.LastDayOfMonth => AccountantHelper.LastDayOfMonth(last.Year, last.Month + 1),
+                AmortizeInterval.LastDayOfMonth => DateHelper.LastDayOfMonth(last.Year, last.Month + 1),
                 AmortizeInterval.SameDayOfYear => last.AddYears(1),
                 AmortizeInterval.LastDayOfYear => new DateTime(last.Year + 2, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                     .AddDays(-1),
@@ -114,7 +115,8 @@ internal class AmortAccountant : DistributedAccountant
             yield break;
 
         var queryT = new RegisteringQuery(amort);
-        foreach (var voucher in Db.SelectVouchers(new IntersectQueries<IVoucherQueryAtom>(query, queryT)).ToEnumerable()) // TODO
+        foreach (var voucher in Db.SelectVouchers(new IntersectQueries<IVoucherQueryAtom>(query, queryT))
+                     .ToEnumerable()) // TODO
         {
             if (voucher.Remark == Amortization.IgnoranceMark)
                 continue;
@@ -147,17 +149,15 @@ internal class AmortAccountant : DistributedAccountant
     /// <param name="isCollapsed">是否压缩</param>
     /// <param name="editOnly">是否只允许更新</param>
     /// <returns>无法更新的条目</returns>
-    public IEnumerable<AmortItem> Update(Amortization amort, DateFilter rng,
+    public async IAsyncEnumerable<AmortItem> Update(Amortization amort, DateFilter rng,
         bool isCollapsed = false, bool editOnly = false)
     {
         if (amort.Schedule == null)
             yield break;
 
-        foreach (
-            var item in
-            amort.Schedule.Where(item => item.Date.Within(rng))
-                .Where(item => !UpdateVoucher(item, isCollapsed, editOnly, amort.Template)))
-            yield return item;
+        foreach (var item in amort.Schedule.Where(item => item.Date.Within(rng)))
+            if (!await UpdateVoucher(item, isCollapsed, editOnly, amort.Template))
+                yield return item;
     }
 
     /// <summary>
@@ -168,14 +168,14 @@ internal class AmortAccountant : DistributedAccountant
     /// <param name="editOnly">是否只允许更新</param>
     /// <param name="template">记账凭证模板</param>
     /// <returns>是否成功</returns>
-    private bool UpdateVoucher(AmortItem item, bool isCollapsed, bool editOnly, Voucher template)
+    private async ValueTask<bool> UpdateVoucher(AmortItem item, bool isCollapsed, bool editOnly, Voucher template)
     {
         if (item.VoucherID == null)
-            return !editOnly && GenerateVoucher(item, isCollapsed, template);
+            return !editOnly && await GenerateVoucher(item, isCollapsed, template);
 
-        var voucher = Db.SelectVoucher(item.VoucherID).Result;
+        var voucher = await Db.SelectVoucher(item.VoucherID);
         if (voucher == null)
-            return !editOnly && GenerateVoucher(item, isCollapsed, template);
+            return !editOnly && await GenerateVoucher(item, isCollapsed, template);
 
         if (voucher.Date != (isCollapsed ? null : item.Date) &&
             !editOnly)
@@ -190,7 +190,7 @@ internal class AmortAccountant : DistributedAccountant
         }
 
         if (template.Details.Count != voucher.Details.Count)
-            return !editOnly && GenerateVoucher(item, isCollapsed, template);
+            return !editOnly && await GenerateVoucher(item, isCollapsed, template);
 
         foreach (var d in template.Details)
         {
@@ -205,7 +205,7 @@ internal class AmortAccountant : DistributedAccountant
         }
 
         if (modified)
-            Db.Upsert(voucher);
+            await Db.Upsert(voucher);
 
         return true;
     }
@@ -217,7 +217,7 @@ internal class AmortAccountant : DistributedAccountant
     /// <param name="isCollapsed">是否压缩</param>
     /// <param name="template">记账凭证模板</param>
     /// <returns>是否成功</returns>
-    private bool GenerateVoucher(AmortItem item, bool isCollapsed, Voucher template)
+    private async ValueTask<bool> GenerateVoucher(AmortItem item, bool isCollapsed, Voucher template)
     {
         var lst = template.Details.Select(
                 detail => new VoucherDetail
@@ -241,7 +241,7 @@ internal class AmortAccountant : DistributedAccountant
                 Remark = template.Remark ?? "automatically generated",
                 Details = lst,
             };
-        var res = Db.Upsert(voucher).Result;
+        var res = await Db.Upsert(voucher);
         item.VoucherID = voucher.ID;
         return res;
     }

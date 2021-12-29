@@ -119,15 +119,12 @@ internal partial class SubtotalParser
                 };
 
         /// <inheritdoc />
-        public IDateRange EveryDayRange
-        {
-            get
-            {
-                if (subtotalAggr() is var x && x.AllDate() != null)
-                    return DateFilter.Unconstrained;
-                return subtotalAggr().rangeCore().Assign(Client);
-            }
-        }
+        public DateFilter EveryDayRange
+            => subtotalAggr() switch
+                {
+                    var x when x.AllDate() != null => DateFilter.Unconstrained,
+                    var x => x.rangeCore().Assign(Client).Range,
+                };
 
         /// <inheritdoc />
         public string EquivalentCurrency
@@ -139,14 +136,11 @@ internal partial class SubtotalParser
 
         /// <inheritdoc />
         public DateTime? EquivalentDate
-        {
-            get
-            {
-                if (subtotalEqui() == null)
-                    return null;
-                return subtotalEqui().rangeDay().Assign(Client)?.AsDate() ?? Client.Today;
-            }
-        }
+            => subtotalEqui() switch
+                {
+                    null => null,
+                    var x => x.rangeDay().Assign(Client)?.AsDate() ?? Client.Today,
+                };
 
         public Client Client { private get; set; }
     }

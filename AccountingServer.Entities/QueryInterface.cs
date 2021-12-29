@@ -21,15 +21,6 @@ using System.Collections.Generic;
 
 namespace AccountingServer.Entities;
 
-// ReSharper disable once ClassNeverInstantiated.Global
-// ReSharper disable once ConvertToStaticClass
-public sealed class Nothing
-{
-    private Nothing() { }
-
-    public static Nothing AtAll => null;
-}
-
 /// <summary>
 ///     运算符类型
 /// </summary>
@@ -184,17 +175,6 @@ public interface IDetailQueryAtom : IQueryCompounded<IDetailQueryAtom>
 }
 
 /// <summary>
-///     日期检索式
-/// </summary>
-public interface IDateRange
-{
-    /// <summary>
-    ///     日期过滤器
-    /// </summary>
-    DateFilter Range { get; }
-}
-
-/// <summary>
 ///     原子记账凭证检索式
 /// </summary>
 public interface IVoucherQueryAtom : IQueryCompounded<IVoucherQueryAtom>
@@ -317,7 +297,7 @@ public interface ISubtotal
     /// <summary>
     ///     日期累加的范围
     /// </summary>
-    IDateRange EveryDayRange { get; }
+    DateFilter EveryDayRange { get; }
 
     /// <summary>
     ///     币种等值币种

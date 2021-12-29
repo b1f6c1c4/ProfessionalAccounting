@@ -72,33 +72,33 @@ public class DbSession : IHistoricalExchange
         if (date > now)
             date = now;
 
-        var res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = @from, To = to });
+        var res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = from, To = to });
         if (res != null)
             return res.Value;
-        res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = @from });
+        res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = from });
         if (res != null)
             return 1D / res.Value;
 
         Console.WriteLine($"{now:o} Query: {date:o} {from}/{to}");
-        var value = ExchangeFactory.Instance.Query(from, to).Result;
+        var value = await ExchangeFactory.Instance.Query(from, to);
         await Db.Get().Upsert(new ExchangeRecord
             {
-                Time = now, From = @from, To = to, Value = value,
+                Time = now, From = from, To = to, Value = value,
             });
         return value;
     }
 
     public async ValueTask<double> SaveHistoricalRate(DateTime date, string from, string to)
     {
-        var res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = @from, To = to });
+        var res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = from, To = to });
         if (res != null && res.Time == date)
             return res.Value;
-        res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = @from });
+        res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = from });
         if (res != null && res.Time == date)
             return 1D / res.Value;
 
         var value = await ExchangeFactory.HistoricalInstance.Query(date, from, to);
-        await Db.Get().Upsert(new ExchangeRecord { Time = date, From = @from, To = to, Value = value });
+        await Db.Get().Upsert(new ExchangeRecord { Time = date, From = from, To = to, Value = value });
         return value;
     }
 

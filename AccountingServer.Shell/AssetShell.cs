@@ -198,7 +198,7 @@ internal class AssetShell : DistributedShell
         var sb = new StringBuilder();
         foreach (var a in Sort(session.Accountant.SelectAssets(distQuery)))
         {
-            foreach (var item in session.Accountant.Update(a, rng, isCollapsed))
+            foreach (var item in session.Accountant.Update(a, rng, isCollapsed).ToEnumerable())
                 sb.AppendLine(ListAssetItem(item));
 
             session.Accountant.Upsert(a);
@@ -224,7 +224,7 @@ internal class AssetShell : DistributedShell
         foreach (var a in Sort(session.Accountant.SelectAssets(distQuery)))
         {
             var sbi = new StringBuilder();
-            foreach (var item in session.Accountant.Update(a, rng, false, true))
+            foreach (var item in session.Accountant.Update(a, rng, false, true).ToEnumerable())
                 sbi.AppendLine(ListAssetItem(item));
 
             if (sbi.Length != 0)

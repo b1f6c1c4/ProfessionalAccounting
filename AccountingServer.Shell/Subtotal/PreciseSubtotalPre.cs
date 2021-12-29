@@ -18,6 +18,7 @@
 
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 
 namespace AccountingServer.Shell.Subtotal;
 

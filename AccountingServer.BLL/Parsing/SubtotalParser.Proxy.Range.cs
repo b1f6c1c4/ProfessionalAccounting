@@ -23,7 +23,7 @@ namespace AccountingServer.BLL.Parsing;
 
 internal partial class SubtotalParser
 {
-    public partial class RangeDayContext : IClientDependable, IDate, IDateRange
+    public partial class RangeDayContext : IClientDependable, IDateRange
     {
         /// <inheritdoc />
         public DateFilter Range

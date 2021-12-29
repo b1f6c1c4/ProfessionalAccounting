@@ -23,7 +23,7 @@ namespace AccountingServer.BLL.Parsing;
 
 internal partial class QueryParser
 {
-    public partial class RangeDayContext : IClientDependable, IDate, IDateRange
+    public partial class RangeDayContext : IClientDependable, IDateRange
     {
         /// <inheritdoc />
         public DateFilter Range
@@ -147,7 +147,7 @@ internal partial class QueryParser
         }
     }
 
-    public partial class UniqueTimeCoreContext : IClientDependable, IDate
+    public partial class UniqueTimeCoreContext : IClientDependable
     {
         public DateTime? AsDate()
         {
@@ -190,7 +190,7 @@ internal partial class QueryParser
         public Client Client { private get; set; }
     }
 
-    public partial class UniqueTimeContext : IClientDependable, IDate
+    public partial class UniqueTimeContext : IClientDependable
     {
         public DateTime? AsDate()
             => Core.Assign(Client).AsDate();
