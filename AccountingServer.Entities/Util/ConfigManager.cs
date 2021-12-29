@@ -54,7 +54,7 @@ public static class MetaConfigManager
     /// <summary>
     ///     重新读取配置文件
     /// </summary>
-    public static async IAsyncEnumerable<string> ReloadAll()
+    public static IEnumerable<string> ReloadAll()
     {
         foreach (var manager in ConfigManagers)
         {

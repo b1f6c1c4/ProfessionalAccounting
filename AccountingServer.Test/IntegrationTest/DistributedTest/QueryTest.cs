@@ -21,6 +21,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading.Tasks;
 using AccountingServer.BLL;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
@@ -34,14 +35,14 @@ public abstract class QueryTestBase
 {
     private readonly Client m_Client = new() { User = "b1", Today = DateTime.UtcNow.Date };
 
-    protected virtual void PrepareAsset(Asset asset) { }
-    protected virtual void PrepareAmort(Amortization amort) { }
-    protected abstract bool RunAssetQuery(IQueryCompounded<IDistributedQueryAtom> query);
-    protected abstract bool RunAmortQuery(IQueryCompounded<IDistributedQueryAtom> query);
-    protected virtual void ResetAssets() { }
-    protected virtual void ResetAmorts() { }
+    protected abstract ValueTask PrepareAsset(Asset asset);
+    protected abstract ValueTask PrepareAmort(Amortization amort);
+    protected abstract ValueTask<bool> RunAssetQuery(IQueryCompounded<IDistributedQueryAtom> query);
+    protected abstract ValueTask<bool> RunAmortQuery(IQueryCompounded<IDistributedQueryAtom> query);
+    protected abstract ValueTask ResetAssets();
+    protected abstract ValueTask ResetAmorts();
 
-    public virtual void RunTestA(bool expectedA, bool expectedB, string query)
+    public virtual async Task RunTestA(bool expectedA, bool expectedB, string query)
     {
         var asset = AssetDataProvider.Create("2017-02-03", DepreciationMethod.StraightLine);
         asset.Name = "a nm";
@@ -52,14 +53,14 @@ public abstract class QueryTestBase
         amort.User = "b2";
         amort.Remark = null;
 
-        ResetAssets();
-        ResetAmorts();
-        PrepareAsset(asset);
-        PrepareAmort(amort);
-        Assert.Equal(expectedA, RunAssetQuery(ParsingF.DistributedQuery(query, m_Client)));
-        Assert.Equal(expectedB, RunAmortQuery(ParsingF.DistributedQuery(query, m_Client)));
-        ResetAssets();
-        ResetAmorts();
+        await ResetAssets();
+        await ResetAmorts();
+        await PrepareAsset(asset);
+        await PrepareAmort(amort);
+        Assert.Equal(expectedA, await RunAssetQuery(ParsingF.DistributedQuery(query, m_Client)));
+        Assert.Equal(expectedB, await RunAmortQuery(ParsingF.DistributedQuery(query, m_Client)));
+        await ResetAssets();
+        await ResetAmorts();
     }
 
     protected class DataProvider : IEnumerable<object[]>
@@ -101,21 +102,24 @@ public class DbQueryTest : QueryTestBase, IDisposable
         m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance).AsTask().Wait();
     }
 
-    protected override void PrepareAsset(Asset asset) => m_Adapter.Upsert(asset).AsTask().Wait();
-    protected override void PrepareAmort(Amortization amort) => m_Adapter.Upsert(amort).AsTask().Wait();
+    protected override async ValueTask PrepareAsset(Asset asset) => await m_Adapter.Upsert(asset);
+    protected override async ValueTask PrepareAmort(Amortization amort) => await m_Adapter.Upsert(amort);
 
-    protected override bool RunAssetQuery(IQueryCompounded<IDistributedQueryAtom> query)
-        => m_Adapter.SelectAssets(query).ToEnumerable().SingleOrDefault() != null;
+    protected override async ValueTask<bool> RunAssetQuery(IQueryCompounded<IDistributedQueryAtom> query)
+        => await m_Adapter.SelectAssets(query).SingleOrDefaultAsync() != null;
 
-    protected override bool RunAmortQuery(IQueryCompounded<IDistributedQueryAtom> query)
-        => m_Adapter.SelectAmortizations(query).ToEnumerable().SingleOrDefault() != null;
+    protected override async ValueTask<bool> RunAmortQuery(IQueryCompounded<IDistributedQueryAtom> query)
+        => await m_Adapter.SelectAmortizations(query).SingleOrDefaultAsync() != null;
 
-    protected override void ResetAssets() => m_Adapter.DeleteAssets(DistributedQueryUnconstrained.Instance).AsTask().Wait();
-    protected override void ResetAmorts() => m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance).AsTask().Wait();
+    protected override async ValueTask ResetAssets()
+        => await m_Adapter.DeleteAssets(DistributedQueryUnconstrained.Instance);
+
+    protected override async ValueTask ResetAmorts()
+        => await m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance);
 
     [Theory]
     [ClassData(typeof(DataProvider))]
-    public override void RunTestA(bool expectedA, bool expectedB, string query)
+    public override Task RunTestA(bool expectedA, bool expectedB, string query)
         => base.RunTestA(expectedA, expectedB, query);
 }
 
@@ -129,29 +133,33 @@ public class BLLQueryTest : QueryTestBase, IDisposable
     {
         m_Accountant = new(new(db: "accounting-test"), "b1", DateTime.UtcNow.Date);
 
-        m_Accountant.DeleteAssets(DistributedQueryUnconstrained.Instance);
-        m_Accountant.DeleteAmortizations(DistributedQueryUnconstrained.Instance);
+        m_Accountant.DeleteAssetsAsync(DistributedQueryUnconstrained.Instance).AsTask().Wait();
+        m_Accountant.DeleteAmortizationsAsync(DistributedQueryUnconstrained.Instance).AsTask().Wait();
     }
 
     public void Dispose()
     {
-        m_Accountant.DeleteAssets(DistributedQueryUnconstrained.Instance);
-        m_Accountant.DeleteAmortizations(DistributedQueryUnconstrained.Instance);
+        m_Accountant.DeleteAssetsAsync(DistributedQueryUnconstrained.Instance).AsTask().Wait();
+        m_Accountant.DeleteAmortizationsAsync(DistributedQueryUnconstrained.Instance).AsTask().Wait();
     }
 
-    protected override void PrepareAsset(Asset asset) => m_Accountant.Upsert(asset);
-    protected override void PrepareAmort(Amortization amort) => m_Accountant.Upsert(amort);
+    protected override async ValueTask PrepareAsset(Asset asset) => await m_Accountant.UpsertAsync(asset);
+    protected override async ValueTask PrepareAmort(Amortization amort) => await m_Accountant.UpsertAsync(amort);
 
-    protected override bool RunAssetQuery(IQueryCompounded<IDistributedQueryAtom> query)
-        => m_Accountant.SelectAssets(query).SingleOrDefault() != null;
-    protected override bool RunAmortQuery(IQueryCompounded<IDistributedQueryAtom> query)
-        => m_Accountant.SelectAmortizations(query).SingleOrDefault() != null;
+    protected override async ValueTask<bool> RunAssetQuery(IQueryCompounded<IDistributedQueryAtom> query)
+        => await m_Accountant.SelectAssetsAsync(query).SingleOrDefaultAsync() != null;
 
-    protected override void ResetAssets() => m_Accountant.DeleteAssets(DistributedQueryUnconstrained.Instance);
-    protected override void ResetAmorts() => m_Accountant.DeleteAmortizations(DistributedQueryUnconstrained.Instance);
+    protected override async ValueTask<bool> RunAmortQuery(IQueryCompounded<IDistributedQueryAtom> query)
+        => await m_Accountant.SelectAmortizationsAsync(query).SingleOrDefaultAsync() != null;
+
+    protected override async ValueTask ResetAssets()
+        => await m_Accountant.DeleteAssetsAsync(DistributedQueryUnconstrained.Instance);
+
+    protected override async ValueTask ResetAmorts()
+        => await m_Accountant.DeleteAmortizationsAsync(DistributedQueryUnconstrained.Instance);
 
     [Theory]
     [ClassData(typeof(DataProvider))]
-    public override void RunTestA(bool expectedA, bool expectedB, string query)
+    public override Task RunTestA(bool expectedA, bool expectedB, string query)
         => base.RunTestA(expectedA, expectedB, query);
 }

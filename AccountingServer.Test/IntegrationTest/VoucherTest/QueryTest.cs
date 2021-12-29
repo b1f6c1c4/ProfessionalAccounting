@@ -21,6 +21,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading.Tasks;
 using AccountingServer.BLL;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
@@ -34,11 +35,11 @@ public abstract class QueryTestBase
 {
     protected abstract Client Client { get; }
 
-    protected virtual void PrepareVoucher(Voucher voucher) { }
-    protected abstract bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query);
-    protected virtual void ResetVouchers() { }
+    protected abstract ValueTask PrepareVoucher(Voucher voucher);
+    protected abstract ValueTask<bool> RunQuery(IQueryCompounded<IVoucherQueryAtom> query);
+    protected abstract ValueTask ResetVouchers();
 
-    public virtual void RunTestA(bool expected, string query)
+    public virtual async Task RunTestA(bool expected, string query)
     {
         var voucher = new Voucher
             {
@@ -94,10 +95,10 @@ public abstract class QueryTestBase
                     },
             };
 
-        ResetVouchers();
-        PrepareVoucher(voucher);
-        Assert.Equal(expected, RunQuery(ParsingF.VoucherQuery(query, Client)));
-        ResetVouchers();
+        await ResetVouchers();
+        await PrepareVoucher(voucher);
+        Assert.Equal(expected, await RunQuery(ParsingF.VoucherQuery(query, Client)));
+        await ResetVouchers();
     }
 
     protected class DataProvider : IEnumerable<object[]>
@@ -152,16 +153,25 @@ public class MatchTest : QueryTestBase
     protected override Client Client { get; } = new() { User = "b1", Today = DateTime.UtcNow.Date };
 
     private Voucher m_Voucher;
-    protected override void PrepareVoucher(Voucher voucher) => m_Voucher = voucher;
 
-    protected override bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
-        => MatchHelper.IsMatch(m_Voucher, query);
+    protected override ValueTask PrepareVoucher(Voucher voucher)
+    {
+        m_Voucher = voucher;
+        return new();
+    }
 
-    protected override void ResetVouchers() => m_Voucher = null;
+    protected override ValueTask<bool> RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
+        => ValueTask.FromResult(MatchHelper.IsMatch(m_Voucher, query));
+
+    protected override ValueTask ResetVouchers()
+    {
+        m_Voucher = null;
+        return new();
+    }
 
     [Theory]
     [ClassData(typeof(DataProvider))]
-    public override void RunTestA(bool expected, string query) => base.RunTestA(expected, query);
+    public override Task RunTestA(bool expected, string query) => base.RunTestA(expected, query);
 }
 
 [Collection("DbTestCollection")]
@@ -181,16 +191,17 @@ public class DbQueryTest : QueryTestBase, IDisposable
 
     public void Dispose() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance).AsTask().Wait();
 
-    protected override void PrepareVoucher(Voucher voucher) => m_Adapter.Upsert(voucher).AsTask().Wait();
+    protected override async ValueTask PrepareVoucher(Voucher voucher) => await m_Adapter.Upsert(voucher);
 
-    protected override bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
-        => m_Adapter.SelectVouchers(query).ToEnumerable().SingleOrDefault() != null;
+    protected override async ValueTask<bool> RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
+        => await m_Adapter.SelectVouchers(query).SingleOrDefaultAsync() != null;
 
-    protected override void ResetVouchers() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance).AsTask().Wait();
+    protected override async ValueTask ResetVouchers()
+        => await m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
 
     [Theory]
     [ClassData(typeof(DataProvider))]
-    public override void RunTestA(bool expected, string query) => base.RunTestA(expected, query);
+    public override Task RunTestA(bool expected, string query) => base.RunTestA(expected, query);
 }
 
 [Collection("DbTestCollection")]
@@ -204,21 +215,22 @@ public class BLLQueryTest : QueryTestBase, IDisposable
     {
         m_Accountant = new(new(db: "accounting-test"), "b1", DateTime.UtcNow.Date);
 
-        m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+        m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance).AsTask().Wait();
     }
 
-    public void Dispose() => m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+    public void Dispose() => m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance).AsTask().Wait();
 
-    protected override void PrepareVoucher(Voucher voucher) => m_Accountant.Upsert(voucher);
+    protected override async ValueTask PrepareVoucher(Voucher voucher) => await m_Accountant.UpsertAsync(voucher);
 
-    protected override bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
-        => m_Accountant.SelectVouchers(query).SingleOrDefault() != null;
+    protected override async ValueTask<bool> RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
+        => await m_Accountant.SelectVouchersAsync(query).SingleOrDefaultAsync() != null;
 
-    protected override void ResetVouchers() => m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+    protected override async ValueTask ResetVouchers()
+        => await m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance);
 
     [Theory]
     [ClassData(typeof(DataProvider))]
-    public override void RunTestA(bool expected, string query) => base.RunTestA(expected, query);
+    public override Task RunTestA(bool expected, string query) => base.RunTestA(expected, query);
 }
 
 [Collection("DbTestCollection")]
@@ -234,23 +246,24 @@ public class VirtualizedQueryTest : QueryTestBase, IDisposable
         m_Accountant = new(new(db: "accounting-test"), "b1", DateTime.UtcNow.Date);
 
         m_Lock = m_Accountant.Virtualize();
-        m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+        m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance).AsTask().Wait();
     }
 
     public void Dispose()
     {
-        m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+        m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance).AsTask().Wait();
         m_Lock.Dispose();
     }
 
-    protected override void PrepareVoucher(Voucher voucher) => m_Accountant.Upsert(voucher);
+    protected override async ValueTask PrepareVoucher(Voucher voucher) => await m_Accountant.UpsertAsync(voucher);
 
-    protected override bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
-        => m_Accountant.SelectVouchers(query).SingleOrDefault() != null;
+    protected override async ValueTask<bool> RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
+        => await m_Accountant.SelectVouchersAsync(query).SingleOrDefaultAsync() != null;
 
-    protected override void ResetVouchers() => m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+    protected override async ValueTask ResetVouchers()
+        => await m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance);
 
     [Theory]
     [ClassData(typeof(DataProvider))]
-    public override void RunTestA(bool expected, string query) => base.RunTestA(expected, query);
+    public override Task RunTestA(bool expected, string query) => base.RunTestA(expected, query);
 }

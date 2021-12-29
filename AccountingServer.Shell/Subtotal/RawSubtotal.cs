@@ -17,6 +17,7 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 
@@ -49,7 +50,7 @@ internal class RawSubtotal : StringSubtotalVisitor
 
     protected override void Pre() => m_History = new();
 
-    protected override void Post() => Sb.Append(Serializer.PresentVoucherDetails((IAsyncEnumerable<VoucherDetailR>)m_History));
+    protected override void Post() => Sb.Append(Serializer.PresentVoucherDetails(m_History.ToAsyncEnumerable()));
 
     public override Nothing Visit(ISubtotalRoot sub)
     {

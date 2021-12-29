@@ -36,11 +36,11 @@ public class BLLTest : IDisposable
     {
         m_Accountant = new(new(db: "accounting-test"), "b1", DateTime.UtcNow.Date);
 
-        m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+        m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance).AsTask().Wait();
     }
 
     public void Dispose()
-        => m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+        => m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance).AsTask().Wait();
 
     [Theory]
     [ClassData(typeof(VoucherDataProvider))]

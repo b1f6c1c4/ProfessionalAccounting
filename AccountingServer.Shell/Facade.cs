@@ -87,7 +87,7 @@ public class Facade
             case "?":
                 return ListHelp();
             case "reload":
-                return MetaConfigManager.ReloadAll();
+                return MetaConfigManager.ReloadAll().ToAsyncEnumerable();
             case "die":
                 Environment.Exit(0);
                 break;
