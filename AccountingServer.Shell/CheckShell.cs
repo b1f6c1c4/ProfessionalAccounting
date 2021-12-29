@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -35,15 +36,15 @@ namespace AccountingServer.Shell;
 internal class CheckShell : IShellComponent
 {
     /// <inheritdoc />
-    public IQueryResult Execute(string expr, Session session)
-        => expr.Rest() switch
+    public ValueTask<IQueryResult> Execute(string expr, Session session)
+        => ValueTask.FromResult(expr.Rest() switch
             {
                 "1" => BasicCheck(session),
                 "2" => AdvancedCheck(session),
                 "3" => new NumberAffected(session.Accountant.Upsert(session.Accountant.RunVoucherQuery("U A").ToList())),
                 var x when x.StartsWith("4") => DuplicationCheck(session, x.Rest()),
                 _ => throw new InvalidOperationException("表达式无效"),
-            };
+            });
 
     /// <inheritdoc />
     public bool IsExecutable(string expr) => expr.Initial() == "chk";

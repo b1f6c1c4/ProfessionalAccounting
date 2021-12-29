@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
@@ -38,22 +39,24 @@ internal class AssetShell : DistributedShell
     protected override string Initial => "a";
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery, DateTime? dt,
+    protected override ValueTask<IQueryResult> ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateTime? dt,
         bool showSchedule, Session session)
     {
         var sb = new StringBuilder();
         foreach (var a in Sort(session.Accountant.SelectAssets(distQuery)))
             sb.Append(ListAsset(a, session, dt, showSchedule));
 
-        return new PlainText(sb.ToString());
+        return ValueTask.FromResult<IQueryResult>(new PlainText(sb.ToString()));
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery, Session session)
-        => new PlainText(session.Serializer.PresentAssets(Sort(session.Accountant.SelectAssets(distQuery))));
+    protected override ValueTask<IQueryResult> ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        Session session)
+        => ValueTask.FromResult<IQueryResult>(new PlainText(session.Serializer.PresentAssets(Sort(session.Accountant.SelectAssets(distQuery)))));
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected override async ValueTask<IQueryResult> ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateFilter rng,
         IQueryCompounded<IVoucherQueryAtom> query, Session session)
     {
@@ -61,7 +64,7 @@ internal class AssetShell : DistributedShell
         foreach (var a in Sort(session.Accountant.SelectAssets(distQuery)))
         {
             sb.Append(session.Serializer.PresentVouchers(session.Accountant.RegisterVouchers(a, rng, query)));
-            session.Accountant.Upsert(a);
+            await session.Accountant.UpsertAsync(a);
         }
 
         if (sb.Length > 0)
@@ -71,7 +74,7 @@ internal class AssetShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+    protected override async ValueTask<IQueryResult> ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
         IQueryCompounded<IVoucherQueryAtom> query, Session session)
     {
         var sb = new StringBuilder();
@@ -84,7 +87,7 @@ internal class AssetShell : DistributedShell
                     if (item.VoucherID == null)
                         continue;
 
-                    var voucher = session.Accountant.SelectVoucher(item.VoucherID);
+                    var voucher = await session.Accountant.SelectVoucherAsync(item.VoucherID);
                     if (voucher != null)
                         if (!MatchHelper.IsMatch(query, voucher.IsMatch))
                             continue;
@@ -94,7 +97,7 @@ internal class AssetShell : DistributedShell
             }
 
             sb.Append(ListAsset(a, session));
-            session.Accountant.Upsert(a);
+            await session.Accountant.UpsertAsync(a);
         }
 
         if (sb.Length > 0)
@@ -104,13 +107,14 @@ internal class AssetShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery, Session session)
+    protected override async ValueTask<IQueryResult> ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        Session session)
     {
         var lst = new List<Asset>();
         foreach (var a in Sort(session.Accountant.SelectAssets(distQuery)))
         {
             Accountant.Depreciate(a);
-            session.Accountant.Upsert(a);
+            await session.Accountant.UpsertAsync(a);
             lst.Add(a);
         }
 
@@ -118,7 +122,8 @@ internal class AssetShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+    protected override async ValueTask<IQueryResult> ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateFilter rng,
         Session session)
     {
         var cnt = 0L;
@@ -138,14 +143,15 @@ internal class AssetShell : DistributedShell
             }
 
             if (flag)
-                session.Accountant.Upsert(a);
+                await session.Accountant.UpsertAsync(a);
         }
 
         return new NumberAffected(cnt);
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+    protected override async ValueTask<IQueryResult> ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateFilter rng,
         Session session)
     {
         var cnt = 0L;
@@ -158,14 +164,14 @@ internal class AssetShell : DistributedShell
             foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
                          .Where(item => item.VoucherID != null))
             {
-                var voucher = session.Accountant.SelectVoucher(item.VoucherID);
+                var voucher = await session.Accountant.SelectVoucherAsync(item.VoucherID);
                 if (voucher == null)
                 {
                     item.VoucherID = null;
                     cnt++;
                     flag = true;
                 }
-                else if (session.Accountant.DeleteVoucher(voucher.ID))
+                else if (await session.Accountant.DeleteVoucherAsync(voucher.ID))
                 {
                     item.VoucherID = null;
                     cnt++;
@@ -174,14 +180,14 @@ internal class AssetShell : DistributedShell
             }
 
             if (flag)
-                session.Accountant.Upsert(a);
+                await session.Accountant.UpsertAsync(a);
         }
 
         return new NumberAffected(cnt);
     }
 
-    protected override IQueryResult ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        IQueryCompounded<IVoucherQueryAtom> query, Session session) => new NumberAffected(
+    protected override ValueTask<IQueryResult> ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        IQueryCompounded<IVoucherQueryAtom> query, Session session) => ValueTask.FromResult<IQueryResult>(new NumberAffected(
         session.Accountant.SelectAssets(distQuery)
             .Sum(
                 a => session.Accountant.DeleteVouchers(
@@ -189,10 +195,11 @@ internal class AssetShell : DistributedShell
                         query ?? VoucherQueryUnconstrained.Instance,
                         ParsingF.VoucherQuery(
                             $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}",
-                            session.Client)))));
+                            session.Client))))));
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+    protected override async ValueTask<IQueryResult> ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateFilter rng,
         bool isCollapsed, Session session)
     {
         var sb = new StringBuilder();
@@ -201,7 +208,7 @@ internal class AssetShell : DistributedShell
             foreach (var item in session.Accountant.Update(a, rng, isCollapsed).ToEnumerable())
                 sb.AppendLine(ListAssetItem(item));
 
-            session.Accountant.Upsert(a);
+            await session.Accountant.UpsertAsync(a);
         }
 
         if (sb.Length > 0)
@@ -217,7 +224,8 @@ internal class AssetShell : DistributedShell
     /// <param name="rng">日期过滤器</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected override IQueryResult ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+    protected override async ValueTask<IQueryResult> ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateFilter rng,
         Session session)
     {
         var sb = new StringBuilder();
@@ -233,7 +241,7 @@ internal class AssetShell : DistributedShell
                 sb.AppendLine(sbi.ToString());
             }
 
-            session.Accountant.Upsert(a);
+            await session.Accountant.UpsertAsync(a);
         }
 
         if (sb.Length > 0)

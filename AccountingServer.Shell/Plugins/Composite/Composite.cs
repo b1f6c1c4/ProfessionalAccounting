@@ -20,6 +20,7 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -39,7 +40,7 @@ internal class Composite : PluginBase
         new ConfigManager<CompositeTemplates>("Composite.xml");
 
     /// <inheritdoc />
-    public override IQueryResult Execute(string expr, Session session)
+    public override async ValueTask<IQueryResult> Execute(string expr, Session session)
     {
         Template temp = null;
         if (ParsingF.Token(ref expr, true, t => (temp = GetTemplate(t)) != null) == null)
@@ -59,7 +60,7 @@ internal class Composite : PluginBase
             ParsingF.Eof(expr);
         }
 
-        return DoInquiry(the, temp, out _, currency, session);
+        return (await DoInquiry(the, temp, currency, session)).Item1;
     }
 
     public static Template GetTemplate(string name) => Templates.Config.Templates.SingleOrDefault(
@@ -100,16 +101,15 @@ internal class Composite : PluginBase
     /// </summary>
     /// <param name="rng">日期过滤器</param>
     /// <param name="inq">查询</param>
-    /// <param name="val">金额</param>
     /// <param name="baseCurrency">记账本位币</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    public IQueryResult DoInquiry(DateFilter rng, BaseInquiry inq, out double val, string baseCurrency,
+    public async ValueTask<(IQueryResult, double)> DoInquiry(DateFilter rng, BaseInquiry inq, string baseCurrency,
         Session session)
     {
         var visitor = new InquiriesVisitor(session, rng, baseCurrency);
-        val = inq.Accept(visitor);
-        return new PlainText(visitor.Result);
+        var val = await inq.Accept(visitor);
+        return (new PlainText(visitor.Result), val);
     }
 
     /// <summary>
@@ -128,7 +128,7 @@ internal class Composite : PluginBase
     }
 }
 
-internal class InquiriesVisitor : IInquiryVisitor<double>
+internal class InquiriesVisitor : IInquiryVisitor<ValueTask<double>>
 {
     private readonly Session m_Session;
     private readonly string m_BaseCurrency;
@@ -146,22 +146,22 @@ internal class InquiriesVisitor : IInquiryVisitor<double>
 
     public string Result => m_Sb.ToString();
 
-    public double Visit(InquiriesHub inq)
+    public async ValueTask<double> Visit(InquiriesHub inq)
     {
         var tmp = m_Path;
         m_Path = Composite.Merge(m_Path, inq.Name);
-        var res = inq.Inquiries.Sum(q => q.Accept(this));
+        var res = await inq.Inquiries.ToAsyncEnumerable().SumAwaitAsync(q => q.Accept(this));
         m_Path = tmp;
         return res;
     }
 
-    public double Visit(SimpleInquiry inq)
-        => VisitImpl(inq, o => $"{inq.Query} {o}");
+    public async ValueTask<double> Visit(SimpleInquiry inq)
+        => await VisitImpl(inq, o => $"{inq.Query} {o}");
 
-    public double Visit(ComplexInquiry inq)
-        => VisitImpl(inq, o => $"{{{inq.VoucherQuery}}}*{{U A {o}}} : {inq.Emit}");
+    public async ValueTask<double> Visit(ComplexInquiry inq)
+        => await VisitImpl(inq, o => $"{{{inq.VoucherQuery}}}*{{U A {o}}} : {inq.Emit}");
 
-    private double VisitImpl(Inquiry inq, Func<string, string> gen)
+    private async ValueTask<double> VisitImpl(Inquiry inq, Func<string, string> gen)
     {
         var val = 0D;
         IFundFormatter fmt = new BaseFundFormatter();
@@ -172,12 +172,12 @@ internal class InquiriesVisitor : IInquiryVisitor<double>
             $"[{(inq.IsLeftExtended ? "" : m_Rng.StartDate.AsDate())}~{m_Rng.EndDate.AsDate()}] {(inq.General ? "G" : "")}";
         var query = ParsingF.GroupedQuery(
             $"{gen(o)}`{(inq.ByCurrency ? "C" : "")}{(inq.ByTitle ? "t" : "")}{(inq.BySubTitle ? "s" : "")}{(inq.ByContent ? "c" : "")}{(inq.ByRemark ? "r" : "")}{(inq.ByCurrency || inq.ByTitle || inq.BySubTitle || inq.ByContent || inq.ByRemark ? "" : "v")}{(!inq.ByCurrency ? "X" : "")}", m_Session.Client);
-        var gq = m_Session.Accountant.SelectVoucherDetailsGrouped(query);
+        var gq = await m_Session.Accountant.SelectVoucherDetailsGroupedAsync(query);
         if (inq.ByCurrency)
             foreach (var grp in gq.Items.Cast<ISubtotalCurrency>())
             {
                 var curr = grp.Currency;
-                var ratio = m_Session.Accountant.Query(m_Rng.EndDate!.Value, curr, m_BaseCurrency).Result; // TODO
+                var ratio = await m_Session.Accountant.Query(m_Rng.EndDate!.Value, curr, m_BaseCurrency);
 
                 var theFmt = new CurrencyDecorator(fmt, curr, ratio);
 

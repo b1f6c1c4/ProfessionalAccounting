@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using AccountingServer.Shell.Plugins;
 using AccountingServer.Shell.Plugins.AssetHelper;
 using AccountingServer.Shell.Plugins.BankBalance;
@@ -58,7 +59,7 @@ internal class PluginShell : IShellComponent
             };
 
     /// <inheritdoc />
-    public IQueryResult Execute(string expr, Session session)
+    public ValueTask<IQueryResult> Execute(string expr, Session session)
     {
         var help = false;
         if (expr.StartsWith("?", StringComparison.Ordinal))
@@ -72,7 +73,7 @@ internal class PluginShell : IShellComponent
         if (help)
         {
             Parsing.Eof(expr);
-            return plgName == "" ? new PlainText(ListPlugins()) : new(GetHelp(plgName));
+            return new ValueTask<IQueryResult>(plgName == "" ? new PlainText(ListPlugins()) : new(GetHelp(plgName)));
         }
 
         return GetPlugin(plgName).Execute(expr, session);

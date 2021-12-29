@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Util;
@@ -36,7 +37,7 @@ internal class Utilities : PluginBase
         new ConfigManager<UtilTemplates>("Util.xml");
 
     /// <inheritdoc />
-    public override IQueryResult Execute(string expr, Session session)
+    public override ValueTask<IQueryResult> Execute(string expr, Session session)
     {
         using var vir = session.Accountant.Virtualize();
         while (!string.IsNullOrWhiteSpace(expr))
@@ -48,7 +49,7 @@ internal class Utilities : PluginBase
             session.Accountant.Upsert(voucher);
         }
 
-        return new NumberAffected(vir.CachedVouchers);
+        return new ValueTask<IQueryResult>(new NumberAffected(vir.CachedVouchers));
     }
 
     /// <inheritdoc />

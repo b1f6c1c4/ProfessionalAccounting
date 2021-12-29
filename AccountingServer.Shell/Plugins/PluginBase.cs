@@ -18,6 +18,7 @@
 
 using System.IO;
 using System.Resources;
+using System.Threading.Tasks;
 
 namespace AccountingServer.Shell.Plugins;
 
@@ -32,7 +33,7 @@ internal abstract class PluginBase
     /// <param name="expr">表达式</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    public abstract IQueryResult Execute(string expr, Session session);
+    public abstract ValueTask<IQueryResult> Execute(string expr, Session session);
 
     /// <summary>
     ///     显示插件帮助

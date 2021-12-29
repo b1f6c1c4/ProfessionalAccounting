@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -51,7 +52,7 @@ internal abstract class InterestBase : PluginBase
     protected abstract int MinorSubTitle();
 
     /// <inheritdoc />
-    public override IQueryResult Execute(string expr, Session session)
+    public override ValueTask<IQueryResult> Execute(string expr, Session session)
     {
         var remark = Parsing.Token(ref expr);
         var rate = Parsing.DoubleF(ref expr) / 10000D;
@@ -115,7 +116,7 @@ internal abstract class InterestBase : PluginBase
                 session.Client.Today);
         }
 
-        return new DirtySucceed();
+        return new ValueTask<IQueryResult>(new DirtySucceed());
     }
 
     /// <summary>

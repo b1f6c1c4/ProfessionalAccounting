@@ -18,6 +18,7 @@
 
 using System;
 using System.Security;
+using System.Threading.Tasks;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
@@ -172,7 +173,7 @@ internal abstract class DistributedShell : IShellComponent
     protected abstract string Initial { get; }
 
     /// <inheritdoc />
-    public IQueryResult Execute(string expr, Session session)
+    public ValueTask<IQueryResult> Execute(string expr, Session session)
         => m_Composer.Execute(expr.Rest(), session);
 
     /// <inheritdoc />
@@ -186,8 +187,8 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="showSchedule">是否显示折旧计算表</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract IQueryResult ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery, DateTime? dt,
-        bool showSchedule, Session session);
+    protected abstract ValueTask<IQueryResult> ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateTime? dt, bool showSchedule, Session session);
 
     /// <summary>
     ///     执行查询表达式
@@ -195,7 +196,8 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="distQuery">分期检索式</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract IQueryResult ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery, Session session);
+    protected abstract ValueTask<IQueryResult> ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        Session session);
 
     /// <summary>
     ///     执行注册表达式
@@ -205,8 +207,8 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="query">记账凭证检索式</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract IQueryResult ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
-        IQueryCompounded<IVoucherQueryAtom> query, Session session);
+    protected abstract ValueTask<IQueryResult> ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateFilter rng, IQueryCompounded<IVoucherQueryAtom> query, Session session);
 
     /// <summary>
     ///     执行解除注册表达式
@@ -216,8 +218,8 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="query">记账凭证检索式</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract IQueryResult ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
-        IQueryCompounded<IVoucherQueryAtom> query, Session session);
+    protected abstract ValueTask<IQueryResult> ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateFilter rng, IQueryCompounded<IVoucherQueryAtom> query, Session session);
 
     /// <summary>
     ///     执行重新计算表达式
@@ -225,7 +227,8 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="distQuery">分期检索式</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract IQueryResult ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery, Session session);
+    protected abstract ValueTask<IQueryResult> ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        Session session);
 
     /// <summary>
     ///     执行软重置表达式
@@ -234,8 +237,8 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="rng">日期过滤器</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract IQueryResult ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
-        Session session);
+    protected abstract ValueTask<IQueryResult> ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateFilter rng, Session session);
 
     /// <summary>
     ///     执行混合重置表达式
@@ -244,8 +247,8 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="rng">日期过滤器</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract IQueryResult ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
-        Session session);
+    protected abstract ValueTask<IQueryResult> ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateFilter rng, Session session);
 
     /// <summary>
     ///     执行硬重置表达式
@@ -254,7 +257,7 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="query">记账凭证检索式</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract IQueryResult ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected abstract ValueTask<IQueryResult> ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery,
         IQueryCompounded<IVoucherQueryAtom> query, Session session);
 
     /// <summary>
@@ -265,8 +268,8 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="isCollapsed">是否压缩</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract IQueryResult ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
-        bool isCollapsed, Session session);
+    protected abstract ValueTask<IQueryResult> ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateFilter rng, bool isCollapsed, Session session);
 
     /// <summary>
     ///     执行检查表达式
@@ -275,6 +278,6 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="rng">日期过滤器</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract IQueryResult ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
-        Session session);
+    protected abstract ValueTask<IQueryResult> ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateFilter rng, Session session);
 }

@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -35,11 +36,13 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert;
 internal class CreditCardConvert : PluginBase
 {
     /// <inheritdoc />
-    public override IQueryResult Execute(string expr, Session session)
+    public override ValueTask<IQueryResult> Execute(string expr, Session session)
     {
         var content = Parsing.Token(ref expr);
 
-        return ParsingF.Optional(ref expr, "q") ? Query(content, ref expr, session) : Create(content, ref expr, session);
+        return ValueTask.FromResult(ParsingF.Optional(ref expr, "q")
+            ? Query(content, ref expr, session)
+            : Create(content, ref expr, session));
     }
 
     private IQueryResult Query(string content, ref string expr, Session session)
@@ -49,8 +52,8 @@ internal class CreditCardConvert : PluginBase
         var trans = new List<Trans>();
         var rebates = new List<Rebate>();
         var convs = new List<Conversion>();
-        foreach (var voucher in session.Accountant.RunVoucherQuery($"T224101 {content.Quotation('\'')} {rng.AsDateRange()}")
-                )
+        foreach (var voucher in
+                 session.Accountant.RunVoucherQuery($"T224101 {content.Quotation('\'')} {rng.AsDateRange()}"))
         {
             var ds = voucher.Details.Where(d => d.Title == 2241 && d.SubTitle == 01 && d.Content == content)
                 .ToList();
@@ -193,8 +196,8 @@ internal class CreditCardConvert : PluginBase
 
                 var today = session.Client.Today;
                 date = today.Day < day
-                    ?  today.AddMonths(-1).AddDays(day - today.Day)
-                    :  today.AddDays(day - today.Day);
+                    ? today.AddMonths(-1).AddDays(day - today.Day)
+                    : today.AddDays(day - today.Day);
             }
 
             var from = ParsingF.DoubleF(ref expr);

@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security;
 using System.Text;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -35,7 +36,7 @@ namespace AccountingServer.Shell.Plugins.Statement;
 internal class Statement : PluginBase
 {
     /// <inheritdoc />
-    public override IQueryResult Execute(string expr, Session session)
+    public override ValueTask<IQueryResult> Execute(string expr, Session session)
     {
         var csv = expr;
         expr = ParsingF.Line(ref csv);
@@ -103,7 +104,7 @@ internal class Statement : PluginBase
             RunCheck(session, nmFilt, parsed, sb);
         }
 
-        return new PlainText(sb.ToString());
+        return new ValueTask<IQueryResult>(new PlainText(sb.ToString()));
     }
 
     private void RunMark(Session session, IVoucherDetailQuery filt, CsvParser parsed, string marker, StringBuilder sb)

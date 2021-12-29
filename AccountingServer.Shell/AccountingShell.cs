@@ -19,6 +19,7 @@
 using System;
 using System.Linq;
 using System.Security;
+using System.Threading.Tasks;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -34,7 +35,7 @@ namespace AccountingServer.Shell;
 internal class AccountingShell : IShellComponent
 {
     /// <inheritdoc />
-    public IQueryResult Execute(string expr, Session session) => Parse(expr, session.Client)(session);
+    public ValueTask<IQueryResult> Execute(string expr, Session session) => new(Parse(expr, session.Client)(session));
 
     /// <inheritdoc />
     public bool IsExecutable(string expr) => true;

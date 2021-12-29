@@ -93,7 +93,7 @@ public class Facade
                 break;
         }
 
-        return m_Composer.Execute(expr, session);
+        return m_Composer.Execute(expr, session).AsTask().Result;
     }
 
     /// <summary>
@@ -112,7 +112,7 @@ public class Facade
                 return ListHelp();
         }
 
-        return m_AccountingShell.Execute(expr, session);
+        return m_AccountingShell.Execute(expr, session).AsTask().Result;
     }
 
     #region Miscellaneous

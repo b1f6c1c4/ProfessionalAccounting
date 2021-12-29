@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
@@ -45,22 +46,24 @@ internal class AmortizationShell : DistributedShell
     /// <param name="showSchedule">是否显示折旧计算表</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected override IQueryResult ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery, DateTime? dt,
+    protected override ValueTask<IQueryResult> ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateTime? dt,
         bool showSchedule, Session session)
     {
         var sb = new StringBuilder();
         foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
             sb.Append(ListAmort(a, session, dt, showSchedule));
 
-        return new PlainText(sb.ToString());
+        return ValueTask.FromResult<IQueryResult>(new PlainText(sb.ToString()));
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery, Session session)
-        => new PlainText(session.Serializer.PresentAmorts(Sort(session.Accountant.SelectAmortizations(distQuery))));
+    protected override ValueTask<IQueryResult> ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        Session session)
+        => new(new PlainText(session.Serializer.PresentAmorts(Sort(session.Accountant.SelectAmortizations(distQuery)))));
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected override async ValueTask<IQueryResult> ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateFilter rng,
         IQueryCompounded<IVoucherQueryAtom> query, Session session)
     {
@@ -68,7 +71,7 @@ internal class AmortizationShell : DistributedShell
         foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
         {
             sb.Append(session.Serializer.PresentVouchers(session.Accountant.RegisterVouchers(a, rng, query)));
-            session.Accountant.Upsert(a);
+            await session.Accountant.UpsertAsync(a);
         }
 
         if (sb.Length > 0)
@@ -78,7 +81,7 @@ internal class AmortizationShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+    protected override async ValueTask<IQueryResult> ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
         IQueryCompounded<IVoucherQueryAtom> query, Session session)
     {
         var sb = new StringBuilder();
@@ -91,7 +94,7 @@ internal class AmortizationShell : DistributedShell
                     if (item.VoucherID == null)
                         continue;
 
-                    var voucher = session.Accountant.SelectVoucher(item.VoucherID);
+                    var voucher = await session.Accountant.SelectVoucherAsync(item.VoucherID);
                     if (voucher != null)
                         if (!MatchHelper.IsMatch(query, voucher.IsMatch))
                             continue;
@@ -101,7 +104,7 @@ internal class AmortizationShell : DistributedShell
             }
 
             sb.Append(ListAmort(a, session));
-            session.Accountant.Upsert(a);
+            await session.Accountant.UpsertAsync(a);
         }
 
         if (sb.Length > 0)
@@ -111,13 +114,14 @@ internal class AmortizationShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery, Session session)
+    protected override async ValueTask<IQueryResult> ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        Session session)
     {
         var lst = new List<Amortization>();
         foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
         {
             Accountant.Amortize(a);
-            session.Accountant.Upsert(a);
+            await session.Accountant.UpsertAsync(a);
             lst.Add(a);
         }
 
@@ -125,7 +129,8 @@ internal class AmortizationShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+    protected override async ValueTask<IQueryResult> ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateFilter rng,
         Session session)
     {
         var cnt = 0L;
@@ -145,14 +150,15 @@ internal class AmortizationShell : DistributedShell
             }
 
             if (flag)
-                session.Accountant.Upsert(a);
+                await session.Accountant.UpsertAsync(a);
         }
 
         return new NumberAffected(cnt);
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+    protected override async ValueTask<IQueryResult> ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateFilter rng,
         Session session)
     {
         var cnt = 0L;
@@ -165,14 +171,14 @@ internal class AmortizationShell : DistributedShell
             foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
                          .Where(item => item.VoucherID != null))
             {
-                var voucher = session.Accountant.SelectVoucher(item.VoucherID);
+                var voucher = await session.Accountant.SelectVoucherAsync(item.VoucherID);
                 if (voucher == null)
                 {
                     item.VoucherID = null;
                     cnt++;
                     flag = true;
                 }
-                else if (session.Accountant.DeleteVoucher(voucher.ID))
+                else if (await session.Accountant.DeleteVoucherAsync(voucher.ID))
                 {
                     item.VoucherID = null;
                     cnt++;
@@ -181,18 +187,19 @@ internal class AmortizationShell : DistributedShell
             }
 
             if (flag)
-                session.Accountant.Upsert(a);
+                await session.Accountant.UpsertAsync(a);
         }
 
         return new NumberAffected(cnt);
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected override ValueTask<IQueryResult> ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery,
         IQueryCompounded<IVoucherQueryAtom> query, Session session) => throw new InvalidOperationException();
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+    protected override async ValueTask<IQueryResult> ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateFilter rng,
         bool isCollapsed, Session session)
     {
         var sb = new StringBuilder();
@@ -201,7 +208,7 @@ internal class AmortizationShell : DistributedShell
             foreach (var item in session.Accountant.Update(a, rng, isCollapsed).ToEnumerable())
                 sb.AppendLine(ListAmortItem(item));
 
-            session.Accountant.Upsert(a);
+            await session.Accountant.UpsertAsync(a);
         }
 
         if (sb.Length > 0)
@@ -211,7 +218,8 @@ internal class AmortizationShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+    protected override async ValueTask<IQueryResult> ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateFilter rng,
         Session session)
     {
         var sb = new StringBuilder();
@@ -227,7 +235,7 @@ internal class AmortizationShell : DistributedShell
                 sb.AppendLine(sbi.ToString());
             }
 
-            session.Accountant.Upsert(a);
+            await session.Accountant.UpsertAsync(a);
         }
 
         if (sb.Length > 0)

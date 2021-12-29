@@ -44,7 +44,7 @@ internal class ExchangeShell : IShellComponent
     public ExchangeShell()
         => m_Timer.Elapsed += OnTimedEvent;
 
-    public IQueryResult Execute(string expr, Session session)
+    public ValueTask<IQueryResult> Execute(string expr, Session session)
     {
         expr = expr.Rest();
         var isAccurate = expr.Initial() == "acc";
@@ -67,7 +67,7 @@ internal class ExchangeShell : IShellComponent
             Inquiry(session, sb, DateTime.UtcNow.AddMinutes(-30), from, to, val, false).Wait();
         Parsing.Eof(expr);
 
-        return new PlainText(sb.ToString());
+        return new(new PlainText(sb.ToString()));
     }
 
     private async Task Inquiry(Session session, StringBuilder sb, DateTime? dt, string from, string to, double value,

@@ -19,6 +19,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -33,7 +34,7 @@ namespace AccountingServer.Shell.Plugins.BankBalance;
 internal class AverageDailyBalance : PluginBase
 {
     /// <inheritdoc />
-    public override IQueryResult Execute(string expr, Session session)
+    public override ValueTask<IQueryResult> Execute(string expr, Session session)
     {
         var content = Parsing.Token(ref expr);
         var avg = Parsing.DoubleF(ref expr);
@@ -101,6 +102,6 @@ internal class AverageDailyBalance : PluginBase
             }
         }
 
-        return new PlainText(sb.ToString());
+        return ValueTask.FromResult<IQueryResult>(new PlainText(sb.ToString()));
     }
 }

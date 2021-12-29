@@ -19,6 +19,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Util;
@@ -32,7 +33,7 @@ namespace AccountingServer.Shell.Carry;
 internal partial class CarryShell : IShellComponent
 {
     /// <inheritdoc />
-    public IQueryResult Execute(string expr, Session session)
+    public async ValueTask<IQueryResult> Execute(string expr, Session session)
     {
         expr = expr.Rest();
         DateFilter rng;
@@ -47,11 +48,11 @@ internal partial class CarryShell : IShellComponent
                 expr = expr.Rest();
                 rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
                 Parsing.Eof(expr);
-                return PerformAction(session, rng, true);
+                return await PerformAction(session, rng, true);
             default:
                 rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
                 Parsing.Eof(expr);
-                return PerformAction(session, AutomaticRange(session, rng), false);
+                return await PerformAction(session, AutomaticRange(session, rng), false);
         }
     }
 
@@ -83,7 +84,7 @@ internal partial class CarryShell : IShellComponent
         return rng;
     }
 
-    private IQueryResult PerformAction(Session session, DateFilter rng, bool isRst)
+    private async ValueTask<IQueryResult> PerformAction(Session session, DateFilter rng, bool isRst)
     {
         var sb = new StringBuilder();
 
@@ -97,7 +98,7 @@ internal partial class CarryShell : IShellComponent
 
         if (rng.NullOnly || rng.Nullable)
         {
-            Carry(session, sb, null).Wait();
+            await Carry(session, sb, null);
             CarryYear(session, sb, null);
         }
 
@@ -106,9 +107,9 @@ internal partial class CarryShell : IShellComponent
             {
                 foreach (var info in BaseCurrency.History)
                     if (info.Date >= dt && info.Date < dt.AddMonths(1))
-                        ConvertEquity(session, sb, info.Date!.Value, info.Currency).Wait();
+                        await ConvertEquity(session, sb, info.Date!.Value, info.Currency);
 
-                Carry(session, sb, dt).Wait();
+                await Carry(session, sb, dt);
                 if (dt.Month == 12)
                     CarryYear(session, sb, dt);
             }

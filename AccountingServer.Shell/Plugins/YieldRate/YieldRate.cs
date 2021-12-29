@@ -19,6 +19,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
@@ -33,7 +34,7 @@ namespace AccountingServer.Shell.Plugins.YieldRate;
 internal class YieldRate : PluginBase
 {
     /// <inheritdoc />
-    public override IQueryResult Execute(string expr, Session session)
+    public override ValueTask<IQueryResult> Execute(string expr, Session session)
     {
         FacadeF.ParsingF.Eof(expr);
 
@@ -53,7 +54,7 @@ internal class YieldRate : PluginBase
                 .OrderByDescending(kvp => kvp.Rate))
             sb.AppendLine($"{grp.Content.CPadRight(30)} {$"{rte * 360:P2}".PadLeft(7)}");
 
-        return new PlainText(sb.ToString());
+        return new ValueTask<IQueryResult>(new PlainText(sb.ToString()));
     }
 
     /// <summary>

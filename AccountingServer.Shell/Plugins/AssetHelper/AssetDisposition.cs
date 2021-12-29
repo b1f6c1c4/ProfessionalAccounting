@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
@@ -33,7 +34,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper;
 internal class AssetDisposition : PluginBase
 {
     /// <inheritdoc />
-    public override IQueryResult Execute(string expr, Session session)
+    public override ValueTask<IQueryResult> Execute(string expr, Session session)
     {
         var voucherID = Parsing.Token(ref expr);
         var guids = new List<string>();
@@ -82,8 +83,8 @@ internal class AssetDisposition : PluginBase
         }
 
         if (sb.Length > 0)
-            return new DirtyText(sb.ToString());
+            return new(new DirtyText(sb.ToString()));
 
-        return new PlainSucceed();
+        return new(new PlainSucceed());
     }
 }

@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -37,7 +38,7 @@ internal class CashFlow : PluginBase
         new ConfigManager<CashTemplates>("Cash.xml");
 
     /// <inheritdoc />
-    public override IQueryResult Execute(string expr, Session session)
+    public override async ValueTask<IQueryResult> Execute(string expr, Session session)
     {
         var extraMonths = (int)(Parsing.Double(ref expr) ?? 6);
         var prefix = Parsing.Token(ref expr);
@@ -57,7 +58,7 @@ internal class CashFlow : PluginBase
                 .RunGroupedQuery($"U{accts[i].User.AsUser()} @{accts[i].Currency}*({accts[i].QuickAsset}) [~.]``v")
                 .Fund;
 
-            foreach (var (date, value) in GetItems(accts[i], session, until))
+            foreach (var (date, value) in GetItems(accts[i], session, until).ToEnumerable())
             {
                 if (date <= session.Client.Today)
                     continue;
@@ -96,7 +97,7 @@ internal class CashFlow : PluginBase
             var sum = 0D;
             for (var i = 0; i < n; i++)
             {
-                sum += aggs[i] * session.Accountant.Query(session.Client.Today, accts[i].Currency, BaseCurrency.Now).Result; // TODO
+                sum += aggs[i] * await session.Accountant.Query(session.Client.Today, accts[i].Currency, BaseCurrency.Now);
 
                 sb.Append("".PadLeft(15));
                 sb.Append("".PadLeft(15));
@@ -116,7 +117,7 @@ internal class CashFlow : PluginBase
             {
                 aggs[i] += kvp.Value[i, 0] + kvp.Value[i, 1];
 
-                sum += aggs[i] * session.Accountant.Query(kvp.Key, accts[i].Currency, BaseCurrency.Now).Result; // TODO
+                sum += aggs[i] * await session.Accountant.Query(kvp.Key, accts[i].Currency, BaseCurrency.Now);
 
                 if (!kvp.Value[i, 0].IsZero())
                     sb.Append(kvp.Value[i, 0].AsCurrency(accts[i].Currency).PadLeft(15));
@@ -160,7 +161,7 @@ internal class CashFlow : PluginBase
         return v.AddDays(targ - 1);
     }
 
-    private IEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account, Session session, DateTime until)
+    private async IAsyncEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account, Session session, DateTime until)
     {
         var user = $"U{account.User.AsUser()}";
         var curr = $"@{account.Currency}";
@@ -170,7 +171,7 @@ internal class CashFlow : PluginBase
             var rb = new Composite.Composite();
             var tmp = Composite.Composite.GetTemplate(account.Reimburse);
             var rng = Composite.Composite.DateRange(tmp.Day, session.Client.Today);
-            rb.DoInquiry(rng, tmp, out var rbVal, BaseCurrency.Now, session);
+            var (_, rbVal) = await rb.DoInquiry(rng, tmp, BaseCurrency.Now, session);
             var rbF = rng.EndDate!.Value;
             yield return (rbF, rbVal);
         }
@@ -212,8 +213,7 @@ internal class CashFlow : PluginBase
                     foreach (var b in grpC.Items.Cast<ISubtotalDate>())
                     {
                         var mo = NextDate(session, cc.RepaymentDay, NextDate(session, cc.BillDay, b.Date.Value), true);
-                        var cob = session.Accountant.Query(mo, grpC.Currency, account.Currency).Result // TODO
-                            * b.Fund;
+                        var cob = await session.Accountant.Query(mo, grpC.Currency, account.Currency) * b.Fund;
                         if (mos.ContainsKey(mo))
                             mos[mo] += cob;
                         else

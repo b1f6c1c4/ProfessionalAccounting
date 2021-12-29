@@ -43,7 +43,7 @@ internal partial class CarryShell
     /// <param name="session">客户端会话</param>
     /// <param name="sb">日志记录</param>
     /// <param name="dt">月，若为<c>null</c>则表示对无日期进行结转</param>
-    private async Task Carry(Session session, StringBuilder sb, DateTime? dt)
+    private async ValueTask Carry(Session session, StringBuilder sb, DateTime? dt)
     {
         DateTime? ed;
         DateFilter rng;
