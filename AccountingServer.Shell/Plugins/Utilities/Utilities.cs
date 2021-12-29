@@ -86,7 +86,8 @@ internal class Utilities : PluginBase
                 num = val;
             else
             {
-                var arr = (await session.Accountant.RunGroupedQueryAsync($"{template.Query} [~{time:yyyyMMdd}] ``v")).Fund;
+                var arr = (await session.Accountant.RunGroupedQueryAsync($"{template.Query} [~{time:yyyyMMdd}] ``v"))
+                    .Fund;
                 num = arr - val;
             }
         }

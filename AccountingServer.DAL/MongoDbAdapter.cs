@@ -41,10 +41,7 @@ internal class MongoDbAdapter : IDbAdapter
 {
     private static readonly BsonDocument ProjectDetails = new() { ["_id"] = false, ["detail"] = true };
 
-    private static readonly BsonDocument ProjectDate = new()
-        {
-            ["_id"] = false, ["detail"] = true, ["date"] = true,
-        };
+    private static readonly BsonDocument ProjectDate = new() { ["_id"] = false, ["detail"] = true, ["date"] = true, };
 
     private static readonly BsonDocument ProjectNothing = new() { ["_id"] = false };
 
@@ -191,7 +188,8 @@ internal class MongoDbAdapter : IDbAdapter
         m_Records = m_Db.GetCollection<ExchangeRecord>("exchangeRecord");
     }
 
-    private static async ValueTask<bool> Upsert<T, TId>(IMongoCollection<T> collection, T entity, BaseSerializer<T, TId> idProvider)
+    private static async ValueTask<bool> Upsert<T, TId>(IMongoCollection<T> collection, T entity,
+        BaseSerializer<T, TId> idProvider)
     {
         if (idProvider.FillId(collection, entity))
         {
@@ -206,7 +204,8 @@ internal class MongoDbAdapter : IDbAdapter
         return res.ModifiedCount <= 1;
     }
 
-    private static async ValueTask<long> Upsert<T, TId>(IMongoCollection<T> collection, IEnumerable<T> entities, BaseSerializer<T, TId> idProvider)
+    private static async ValueTask<long> Upsert<T, TId>(IMongoCollection<T> collection, IEnumerable<T> entities,
+        BaseSerializer<T, TId> idProvider)
     {
         var ops = new List<WriteModel<T>>();
         foreach (var entity in entities)
@@ -358,15 +357,14 @@ internal class MongoDbAdapter : IDbAdapter
         return fluent.ToAsyncEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
     }
 
-    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
+        IQueryCompounded<IVoucherQueryAtom> query)
         => m_Vouchers.Aggregate().Match(query.Accept(new MongoDbNativeVoucher()))
             .Unwind("detail").Group(new BsonDocument
                 {
                     ["_id"] = new BsonDocument
                         {
-                            ["id"] = "$_id",
-                            ["user"] = "$detail.user",
-                            ["currency"] = "$detail.currency",
+                            ["id"] = "$_id", ["user"] = "$detail.user", ["currency"] = "$detail.currency",
                         },
                     ["value"] = new BsonDocument { ["$sum"] = "$detail.fund" },
                 })
@@ -376,8 +374,7 @@ internal class MongoDbAdapter : IDbAdapter
                         {
                             ["$gt"] = new BsonArray
                                 {
-                                    new BsonDocument{ ["$abs"] = "$value" },
-                                    VoucherDetail.Tolerance,
+                                    new BsonDocument { ["$abs"] = "$value" }, VoucherDetail.Tolerance,
                                 },
                         },
                 })
@@ -446,14 +443,16 @@ internal class MongoDbAdapter : IDbAdapter
     public ValueTask<bool> Upsert(Voucher entity) => Upsert(m_Vouchers, entity, new VoucherSerializer());
 
     /// <inheritdoc />
-    public ValueTask<long> Upsert(IEnumerable<Voucher> entities) => Upsert(m_Vouchers, entities, new VoucherSerializer());
+    public ValueTask<long> Upsert(IEnumerable<Voucher> entities)
+        => Upsert(m_Vouchers, entities, new VoucherSerializer());
 
     #endregion
 
     #region Asset
 
     /// <inheritdoc />
-    public async ValueTask<Asset> SelectAsset(Guid id) => (await m_Assets.FindAsync(GetNQuery<Asset>(id))).FirstOrDefault();
+    public async ValueTask<Asset> SelectAsset(Guid id)
+        => (await m_Assets.FindAsync(GetNQuery<Asset>(id))).FirstOrDefault();
 
     /// <inheritdoc />
     public IAsyncEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter) =>

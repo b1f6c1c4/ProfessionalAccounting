@@ -317,7 +317,8 @@ public class SubtotalTest
     [InlineData("20170102~20170105", "001111")]
     public async Task TestAggrEveryEqui(string rng, string incl)
     {
-        var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]X[20170101]", m_Client).Subtotal, m_Exchange);
+        var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]X[20170101]", m_Client).Subtotal,
+            m_Exchange);
 
         var bal = new Balance[]
             {
@@ -409,7 +410,8 @@ public class SubtotalTest
     [InlineData("20170102~20170103", "0011")]
     public async Task TestAggrEveryNullEqui(string rng, string incl)
     {
-        var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]X[20170101]", m_Client).Subtotal, m_Exchange);
+        var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]X[20170101]", m_Client).Subtotal,
+            m_Exchange);
 
         var bal = Array.Empty<Balance>();
 

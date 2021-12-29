@@ -75,6 +75,7 @@ internal static class ResponseWriter
             if (sz == 0)
                 break;
         }
+
         await stream.WriteLineAsync($"{0:x}");
         await stream.WriteLineAsync();
     }
@@ -105,6 +106,7 @@ internal static class ResponseWriter
             await stream.WriteLineAsync();
             await stream.FlushAsync();
         }
+
         await stream.WriteLineAsync($"{0:x}");
         await stream.WriteLineAsync();
     }

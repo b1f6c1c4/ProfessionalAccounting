@@ -109,9 +109,28 @@ internal class AssetDataProvider : IEnumerable<object[]>
             DevaluationExpenseSubTitle = 06,
             Schedule = new()
                 {
-                    new AcquisitionItem { Date = "2017-01-01".ToDateTime(), Value = 5553, OrigValue = 5553, Remark = "\\\t@#$%^&*(%" },
-                    new DepreciateItem { Date = "2017-02-28".ToDateTime(), Value = 2141, Amount = 3412, Remark = "\\qw\ter%@!@#$%^&*(%" },
-                    new DevalueItem { Date = "2017-02-28".ToDateTime(), Value = 2140, FairValue = 2140, Amount = 1, Remark = "  7')^ Q23'4" },
+                    new AcquisitionItem
+                        {
+                            Date = "2017-01-01".ToDateTime(),
+                            Value = 5553,
+                            OrigValue = 5553,
+                            Remark = "\\\t@#$%^&*(%"
+                        },
+                    new DepreciateItem
+                        {
+                            Date = "2017-02-28".ToDateTime(),
+                            Value = 2141,
+                            Amount = 3412,
+                            Remark = "\\qw\ter%@!@#$%^&*(%"
+                        },
+                    new DevalueItem
+                        {
+                            Date = "2017-02-28".ToDateTime(),
+                            Value = 2140,
+                            FairValue = 2140,
+                            Amount = 1,
+                            Remark = "  7')^ Q23'4"
+                        },
                     new DispositionItem { Date = "2017-03-10".ToDateTime(), Value = 0, Remark = "\\\t@#$%^&*(%" },
                 },
         };
@@ -162,8 +181,20 @@ internal class AmortDataProvider : IEnumerable<object[]>
                 },
             Schedule = new()
                 {
-                    new() { Date = "2001-02-03".ToDateTime(), Amount = 123, Value = 33344 - 123, Remark = "\\\t@#$%^&*(%" },
-                    new() { Date = "2011-03-04".ToDateTime(), Amount = 974, Value = 33344 - 123 - 974, Remark = "*(%" },
+                    new()
+                        {
+                            Date = "2001-02-03".ToDateTime(),
+                            Amount = 123,
+                            Value = 33344 - 123,
+                            Remark = "\\\t@#$%^&*(%"
+                        },
+                    new()
+                        {
+                            Date = "2011-03-04".ToDateTime(),
+                            Amount = 974,
+                            Value = 33344 - 123 - 974,
+                            Remark = "*(%"
+                        },
                 },
         };
 }

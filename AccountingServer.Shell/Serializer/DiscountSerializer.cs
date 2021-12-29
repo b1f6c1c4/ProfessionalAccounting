@@ -191,7 +191,8 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
         var lst = new List<string>();
 
         Parsing.TrimStartComment(ref expr);
-        var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal)).ParseUserSpec(Client);
+        var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal))
+            .ParseUserSpec(Client);
         var title = Parsing.Title(ref expr);
         if (title == null)
             if (!AlternativeTitle(ref expr, lst, ref title))

@@ -58,7 +58,8 @@ internal class ExchangeShell : IShellComponent
             yield return await Inquiry(session, date.Value, from, to, val, isAccurate);
         else if (Parsing.Range(ref expr, session.Client) is var rng && rng != null)
             for (var dt = rng.StartDate!.Value; dt <= rng.EndDate; dt = dt.AddMonths(1))
-                yield return await Inquiry(session, DateHelper.LastDayOfMonth(dt.Year, dt.Month), from, to, val, isAccurate);
+                yield return await Inquiry(session, DateHelper.LastDayOfMonth(dt.Year, dt.Month), from, to, val,
+                    isAccurate);
         else if (isAccurate)
             yield return await Inquiry(session, null, from, to, val, true);
         else
@@ -66,7 +67,8 @@ internal class ExchangeShell : IShellComponent
         Parsing.Eof(expr);
     }
 
-    private async ValueTask<string> Inquiry(Session session, DateTime? dt, string from, string to, double value, bool isAccurate)
+    private async ValueTask<string> Inquiry(Session session, DateTime? dt, string from, string to, double value,
+        bool isAccurate)
     {
         var rate = isAccurate
             ? await session.Accountant.SaveHistoricalRate(dt!.Value, from, to)

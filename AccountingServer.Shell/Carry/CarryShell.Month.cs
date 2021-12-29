@@ -142,7 +142,8 @@ internal partial class CarryShell
     /// <param name="rng">范围</param>
     /// <param name="baseCurrency">是否为基准</param>
     /// <returns>结转记账凭证</returns>
-    private async IAsyncEnumerable<string> PartialCarry(Session session, CarryTask task, DateFilter rng, bool baseCurrency)
+    private async IAsyncEnumerable<string> PartialCarry(Session session, CarryTask task, DateFilter rng,
+        bool baseCurrency)
     {
         var total = 0D;
         var ed = rng.NullOnly ? null : rng.EndDate;

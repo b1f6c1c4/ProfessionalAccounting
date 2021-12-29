@@ -170,7 +170,8 @@ internal class InquiriesVisitor : IInquiryVisitor<ValueTask<double>>
         var o =
             $"[{(inq.IsLeftExtended ? "" : m_Rng.StartDate.AsDate())}~{m_Rng.EndDate.AsDate()}] {(inq.General ? "G" : "")}";
         var query = ParsingF.GroupedQuery(
-            $"{gen(o)}`{(inq.ByCurrency ? "C" : "")}{(inq.ByTitle ? "t" : "")}{(inq.BySubTitle ? "s" : "")}{(inq.ByContent ? "c" : "")}{(inq.ByRemark ? "r" : "")}{(inq.ByCurrency || inq.ByTitle || inq.BySubTitle || inq.ByContent || inq.ByRemark ? "" : "v")}{(!inq.ByCurrency ? "X" : "")}", m_Session.Client);
+            $"{gen(o)}`{(inq.ByCurrency ? "C" : "")}{(inq.ByTitle ? "t" : "")}{(inq.BySubTitle ? "s" : "")}{(inq.ByContent ? "c" : "")}{(inq.ByRemark ? "r" : "")}{(inq.ByCurrency || inq.ByTitle || inq.BySubTitle || inq.ByContent || inq.ByRemark ? "" : "v")}{(!inq.ByCurrency ? "X" : "")}",
+            m_Session.Client);
         var gq = await m_Session.Accountant.SelectVoucherDetailsGroupedAsync(query);
         if (inq.ByCurrency)
             foreach (var grp in gq.Items.Cast<ISubtotalCurrency>())
@@ -183,7 +184,10 @@ internal class InquiriesVisitor : IInquiryVisitor<ValueTask<double>>
                 val += theFmt.GetFund(grp.Fund);
 
                 m_Sb.Append(
-                    new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), theFmt, inq.HideContent) { Client = m_Session.Client }
+                    new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), theFmt, inq.HideContent)
+                            {
+                                Client = m_Session.Client
+                            }
                         .PresentSubtotal(grp, query.Subtotal, m_Session.Serializer));
             }
         else
@@ -191,7 +195,10 @@ internal class InquiriesVisitor : IInquiryVisitor<ValueTask<double>>
             val += fmt.GetFund(gq.Fund);
 
             m_Sb.Append(
-                new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), fmt, inq.HideContent) { Client = m_Session.Client }
+                new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), fmt, inq.HideContent)
+                        {
+                            Client = m_Session.Client
+                        }
                     .PresentSubtotal(gq, query.Subtotal, m_Session.Serializer));
         }
 

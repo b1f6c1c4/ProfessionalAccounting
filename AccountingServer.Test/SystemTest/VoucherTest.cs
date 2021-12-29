@@ -65,7 +65,8 @@ public class VoucherTest
         m_Facade = new(db: "accounting-test");
         m_Session = m_Facade.CreateSession("b1", DateTime.UtcNow.Date);
 
-        var res = m_Facade.ExecuteVoucherUpsert(m_Session, "new Voucher { Ub2 T123401 whatever / aaa huh 10 }").AsTask().Result;
+        var res = m_Facade.ExecuteVoucherUpsert(m_Session, "new Voucher { Ub2 T123401 whatever / aaa huh 10 }").AsTask()
+            .Result;
         Assert.Matches(@"@new Voucher {\^[0-9a-f]{24}\^
 [0-9]{8}
 // kyh

@@ -111,7 +111,8 @@ internal class RoundRobinApiKeys
     private long m_CurrentId;
     private long GetCurrentId() => Interlocked.Increment(ref m_CurrentId);
 
-    public async ValueTask<TOut> Execute<TOut>(IList<string> keys, Func<string, ValueTask<TOut?>> func) where TOut : struct
+    public async ValueTask<TOut> Execute<TOut>(IList<string> keys, Func<string, ValueTask<TOut?>> func)
+        where TOut : struct
     {
         if (keys.Count == 0)
             throw new UnauthorizedAccessException("No access key found");

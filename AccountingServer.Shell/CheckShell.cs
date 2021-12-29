@@ -92,9 +92,9 @@ internal class CheckShell : IShellComponent
                         yield return s;
                 else if (Math.Abs(title.Direction) == 2)
                     foreach (var s in DoCheck(
-                                       title.Direction,
-                                       await session.Accountant.RunGroupedQueryAsync($"T{title.Id.AsTitle()}00 G`CcD"),
-                                       $"T{title.Id.AsTitle()}00"))
+                                 title.Direction,
+                                 await session.Accountant.RunGroupedQueryAsync($"T{title.Id.AsTitle()}00 G`CcD"),
+                                 $"T{title.Id.AsTitle()}00"))
                         yield return s;
 
             foreach (var subTitle in title.SubTitles)
@@ -109,10 +109,10 @@ internal class CheckShell : IShellComponent
                         yield return s;
                 else if (Math.Abs(subTitle.Direction) == 2)
                     foreach (var s in DoCheck(
-                                       subTitle.Direction,
-                                       await session.Accountant.RunGroupedQueryAsync(
-                                           $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} G`CcD"),
-                                       $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}"))
+                                 subTitle.Direction,
+                                 await session.Accountant.RunGroupedQueryAsync(
+                                     $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} G`CcD"),
+                                 $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}"))
                         yield return s;
         }
     }

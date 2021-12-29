@@ -255,10 +255,7 @@ public class SubtotalBuilder
                         {
                             last = Next(last.Value);
                             sub.TheItems.Add(
-                                new SubtotalDate(last, m_Par.AggrInterval)
-                                    {
-                                        Fund = last == curr ? fund : oldFund,
-                                    });
+                                new SubtotalDate(last, m_Par.AggrInterval) { Fund = last == curr ? fund : oldFund, });
                         }
                     else
                         sub.TheItems.Add(

@@ -189,7 +189,8 @@ internal class CashFlow : PluginBase
                     break;
 
                 case OnceQueryItem oqi:
-                    yield return (oqi.Date, (await session.Accountant.RunGroupedQueryAsync($"{user} {curr}*({oqi.Query})``v")).Fund);
+                    yield return (oqi.Date,
+                        (await session.Accountant.RunGroupedQueryAsync($"{user} {curr}*({oqi.Query})``v")).Fund);
 
                     break;
 
@@ -212,8 +213,8 @@ internal class CashFlow : PluginBase
                     var mos = new Dictionary<DateTime, double>();
                     foreach (var grpC in (await session.Accountant.RunGroupedQueryAsync(
                                  $"{{{user}*({cc.Query})*({user} <+(-{user} {curr})) {rng}}}+{mv}:{user}*({cc.Query})`Cd"))
-                                 .Items
-                                 .Cast<ISubtotalCurrency>())
+                             .Items
+                             .Cast<ISubtotalCurrency>())
                     foreach (var b in grpC.Items.Cast<ISubtotalDate>())
                     {
                         var mo = NextDate(session, cc.RepaymentDay, NextDate(session, cc.BillDay, b.Date.Value), true);
@@ -227,8 +228,8 @@ internal class CashFlow : PluginBase
                     foreach (var b in (await session.Accountant
                                  .RunGroupedQueryAsync(
                                      $"{{{user}*({cc.Query})*({user} {curr}>) {rng}}}-{mv}:{user}*({cc.Query})`d"))
-                                 .Items
-                                 .Cast<ISubtotalDate>())
+                             .Items
+                             .Cast<ISubtotalDate>())
                     {
                         var mo = NextDate(session, cc.RepaymentDay, b.Date.Value, true);
                         if (mos.ContainsKey(mo))
@@ -253,9 +254,13 @@ internal class CashFlow : PluginBase
                     break;
 
                 case ComplexCreditCard cc:
-                    var stmt = -(await session.Accountant.RunGroupedQueryAsync($"({cc.Query})*({user} {curr})-{user} \"\"``v")).Fund;
-                    var pmt = (await session.Accountant.RunGroupedQueryAsync($"({cc.Query})*({user} {curr} \"\" >)``v")).Fund;
-                    var nxt = -(await session.Accountant.RunGroupedQueryAsync($"({cc.Query})*({user} {curr} \"\" <)``v")).Fund;
+                    var stmt = -(await session.Accountant.RunGroupedQueryAsync(
+                        $"({cc.Query})*({user} {curr})-{user} \"\"``v")).Fund;
+                    var pmt = (await session.Accountant.RunGroupedQueryAsync($"({cc.Query})*({user} {curr} \"\" >)``v"))
+                        .Fund;
+                    var nxt =
+                        -(await session.Accountant.RunGroupedQueryAsync($"({cc.Query})*({user} {curr} \"\" <)``v"))
+                            .Fund;
                     if (pmt < stmt)
                     {
                         if (NextDate(session, cc.BillDay, NextDate(session, cc.RepaymentDay)) ==

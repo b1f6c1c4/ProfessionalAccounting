@@ -81,9 +81,7 @@ internal class AssetFactory : PluginBase
                     {
                         new AcquisitionItem
                             {
-                                Date = voucher.Date,
-                                VoucherID = voucher.ID,
-                                OrigValue = detail.Fund!.Value,
+                                Date = voucher.Date, VoucherID = voucher.ID, OrigValue = detail.Fund!.Value,
                             },
                     },
             };

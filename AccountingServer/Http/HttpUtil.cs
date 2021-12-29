@@ -68,15 +68,13 @@ public static class HttpUtil
             };
     }
 
-    public static HttpResponse GenerateHttpResponse(IAsyncEnumerable<string> iae, string contentType = "application/json")
+    public static HttpResponse GenerateHttpResponse(IAsyncEnumerable<string> iae,
+        string contentType = "application/json")
         => new()
             {
                 ResponseCode = 200,
                 Header =
-                    new()
-                        {
-                            { "Content-Type", contentType },
-                        },
+                    new() { { "Content-Type", contentType }, },
                 ResponseAsyncEnumerable = iae.Select(s => s.GetBytes()),
             };
 }

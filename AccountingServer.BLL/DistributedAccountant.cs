@@ -32,6 +32,7 @@ internal abstract class DistributedAccountant
     ///     数据库访问
     /// </summary>
     protected readonly DbSession Db;
+
     protected readonly Client Client;
 
     protected DistributedAccountant(DbSession db, Client client)

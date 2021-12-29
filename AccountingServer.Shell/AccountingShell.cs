@@ -158,7 +158,8 @@ internal class AccountingShell : IShellComponent
     /// <param name="trav">呈现器</param>
     /// <param name="client">客户端</param>
     /// <returns>执行结果</returns>
-    private Func<Session, IAsyncEnumerable<string>> TryVoucherGroupedQuery(string expr, ISubtotalStringify trav, Client client)
+    private Func<Session, IAsyncEnumerable<string>> TryVoucherGroupedQuery(string expr, ISubtotalStringify trav,
+        Client client)
     {
         var res = ParsingF.VoucherGroupedQuery(ref expr, client);
         ParsingF.Eof(expr);
@@ -267,7 +268,8 @@ internal class AccountingShell : IShellComponent
     /// <param name="trav">呈现器</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    private async IAsyncEnumerable<string> PresentSubtotal(IVoucherGroupedQuery query, ISubtotalStringify trav, Session session)
+    private async IAsyncEnumerable<string> PresentSubtotal(IVoucherGroupedQuery query, ISubtotalStringify trav,
+        Session session)
     {
         var result = await session.Accountant.SelectVouchersGroupedAsync(query);
         yield return trav.PresentSubtotal(result, query.Subtotal, session.Serializer);
@@ -280,7 +282,8 @@ internal class AccountingShell : IShellComponent
     /// <param name="trav">呈现器</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    private async IAsyncEnumerable<string> PresentSubtotal(IGroupedQuery query, ISubtotalStringify trav, Session session)
+    private async IAsyncEnumerable<string> PresentSubtotal(IGroupedQuery query, ISubtotalStringify trav,
+        Session session)
     {
         var result = await session.Accountant.SelectVoucherDetailsGroupedAsync(query);
         yield return trav.PresentSubtotal(result, query.Subtotal, session.Serializer);
