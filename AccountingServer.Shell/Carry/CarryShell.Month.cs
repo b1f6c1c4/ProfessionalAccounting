@@ -34,15 +34,16 @@ internal partial class CarryShell
     public static IConfigManager<CarrySettings> CarrySettings { private get; set; } =
         new ConfigManager<CarrySettings>("Carry.xml");
 
-    private long ResetCarry(DateFilter rng)
-        => m_Accountant.DeleteVouchers($"{rng.AsDateRange()} Carry");
+    private long ResetCarry(Session session, DateFilter rng)
+        => session.Accountant.DeleteVouchers($"{rng.AsDateRange()} Carry");
 
     /// <summary>
     ///     月末结转
     /// </summary>
+    /// <param name="session"></param>
     /// <param name="sb">日志记录</param>
     /// <param name="dt">月，若为<c>null</c>则表示对无日期进行结转</param>
-    private void Carry(StringBuilder sb, DateTime? dt)
+    private void Carry(Session session, StringBuilder sb, DateTime? dt)
     {
         DateTime? ed;
         DateFilter rng;
@@ -59,7 +60,7 @@ internal partial class CarryShell
         }
 
         var tasks = CarrySettings.Config.UserSettings
-            .Single(us => us.User == m_Accountant.Client.ClientUser.Name).Targets
+            .Single(us => us.User == session.Accountant.Client.ClientUser.Name).Targets
             .Select(t => new CarryTask
                 {
                     Target = t,
@@ -67,20 +68,20 @@ internal partial class CarryShell
                     Voucher = new() { Date = ed, Type = VoucherType.Carry, Details = new() },
                 }).ToList();
         foreach (var task in tasks)
-            PartialCarry(sb, task, rng, false);
+            PartialCarry(session, sb, task, rng, false);
 
         var baseCur = BaseCurrency.At(ed);
         if (ed.HasValue)
         {
             var totalG =
-                m_Accountant.RunGroupedQuery($"T3999 [~{ed.AsDate()}]`C")
+                session.Accountant.RunGroupedQuery($"T3999 [~{ed.AsDate()}]`C")
                     .Items.Cast<ISubtotalCurrency>().Sum(
-                        bal => m_Accountant.Query(ed.Value, bal.Currency, baseCur).Result // TODO
+                        bal => session.Accountant.Query(ed.Value, bal.Currency, baseCur).Result // TODO
                             * bal.Fund);
             var totalC =
                 tasks.SelectMany(t => t.Voucher.Details)
                     .Where(d => d.Title == 3999).Sum(
-                        d => m_Accountant.Query(ed.Value, d.Currency, baseCur).Result // TODO
+                        d => session.Accountant.Query(ed.Value, d.Currency, baseCur).Result // TODO
                             * d.Fund!.Value);
 
             var total = totalG + totalC;
@@ -89,7 +90,7 @@ internal partial class CarryShell
                 sb.AppendLine(total < 0
                     ? $"{dt.AsDate(SubtotalLevel.Month)} CurrencyCarry Gain @{baseCur} {(-total).AsCurrency(baseCur)}"
                     : $"{dt.AsDate(SubtotalLevel.Month)} CurrencyCarry Lost @{baseCur} {(+total).AsCurrency(baseCur)}");
-                m_Accountant.Upsert(new Voucher
+                session.Accountant.Upsert(new Voucher
                     {
                         Date = ed,
                         Type = VoucherType.Carry,
@@ -107,7 +108,7 @@ internal partial class CarryShell
         }
 
         foreach (var task in tasks)
-            PartialCarry(sb, task, rng, true);
+            PartialCarry(session, sb, task, rng, true);
 
         if (tasks.Any(t => !t.Value.IsZero()))
         {
@@ -128,19 +129,20 @@ internal partial class CarryShell
                         });
 
             if (task.Voucher.Details.Any())
-                m_Accountant.Upsert(task.Voucher);
+                session.Accountant.Upsert(task.Voucher);
         }
     }
 
     /// <summary>
     ///     按目标月末结转
     /// </summary>
+    /// <param name="session"></param>
     /// <param name="sb">日志记录</param>
     /// <param name="task">任务</param>
     /// <param name="rng">范围</param>
     /// <param name="baseCurrency">是否为基准</param>
     /// <returns>结转记账凭证</returns>
-    private void PartialCarry(StringBuilder sb, CarryTask task, DateFilter rng, bool baseCurrency)
+    private void PartialCarry(Session session, StringBuilder sb, CarryTask task, DateFilter rng, bool baseCurrency)
     {
         var total = 0D;
         var ed = rng.NullOnly ? null : rng.EndDate;
@@ -148,7 +150,7 @@ internal partial class CarryShell
         var voucher = task.Voucher;
         var baseCur = BaseCurrency.At(ed);
         var res =
-            m_Accountant.RunGroupedQuery(
+            session.Accountant.RunGroupedQuery(
                 $"({target.Query}) {(baseCurrency ? '*' : '-')}@{baseCur} {rng.AsDateRange()}`Ctscr");
         var flag = 0;
         foreach (var grpC in res.Items.Cast<ISubtotalCurrency>())
@@ -184,7 +186,7 @@ internal partial class CarryShell
             if (!ed.HasValue)
                 throw new InvalidOperationException("无穷长时间以前不存在汇率");
 
-            var cob = m_Accountant.Query(ed.Value, grpC.Currency, baseCur).Result * b; // TODO
+            var cob = session.Accountant.Query(ed.Value, grpC.Currency, baseCur).Result * b; // TODO
 
             voucher.Details.Add(new() { Currency = grpC.Currency, Title = 3999, Fund = b });
             voucher.Details.Add(new() { Currency = baseCur, Title = 3999, Remark = voucher.ID, Fund = -cob });

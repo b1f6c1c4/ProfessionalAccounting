@@ -78,10 +78,10 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
     private Voucher GetVoucher(ref string expr)
     {
         Parsing.TrimStartComment(ref expr);
-        DateTime? date = Client().ClientDateTime.Today;
+        DateTime? date = Client.ClientDateTime.Today;
         try
         {
-            date = ParsingF.UniqueTime(ref expr, Client());
+            date = ParsingF.UniqueTime(ref expr, Client);
         }
         catch (Exception)
         {
@@ -191,7 +191,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
         var lst = new List<string>();
 
         Parsing.TrimStartComment(ref expr);
-        var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal)).ParseUserSpec(Client().ClientUser);
+        var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal)).ParseUserSpec(Client.ClientUser);
         var title = Parsing.Title(ref expr);
         if (title == null)
             if (!AlternativeTitle(ref expr, lst, ref title))
@@ -356,5 +356,5 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
             obj.Remark?.GetHashCode() ?? 0;
     }
 
-    public Func<Client> Client { private get; set; }
+    public Client Client { private get; set; }
 }

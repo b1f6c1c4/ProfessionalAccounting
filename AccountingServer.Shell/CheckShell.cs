@@ -35,21 +35,14 @@ namespace AccountingServer.Shell;
 /// </summary>
 internal class CheckShell : IShellComponent
 {
-    /// <summary>
-    ///     基本会计业务处理类
-    /// </summary>
-    private readonly Accountant m_Accountant;
-
-    public CheckShell(Accountant helper) => m_Accountant = helper;
-
     /// <inheritdoc />
-    public IQueryResult Execute(string expr, Accountant accountant, IEntitiesSerializer serializer)
+    public IQueryResult Execute(string expr, Session session)
         => expr.Rest() switch
             {
-                "1" => BasicCheck(serializer),
-                "2" => AdvancedCheck(),
-                "3" => new NumberAffected(m_Accountant.Upsert(m_Accountant.RunVoucherQuery("U A").ToList())),
-                var x when x.StartsWith("4") => DuplicationCheck(serializer, x.Rest()),
+                "1" => BasicCheck(session),
+                "2" => AdvancedCheck(session),
+                "3" => new NumberAffected(session.Accountant.Upsert(session.Accountant.RunVoucherQuery("U A").ToList())),
+                var x when x.StartsWith("4") => DuplicationCheck(session, x.Rest()),
                 _ => throw new InvalidOperationException("表达式无效"),
             };
 
@@ -59,20 +52,20 @@ internal class CheckShell : IShellComponent
     /// <summary>
     ///     检查每张会计记账凭证借贷方是否相等
     /// </summary>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session"></param>
     /// <returns>有误的会计记账凭证表达式</returns>
-    private IQueryResult BasicCheck(IEntitySerializer serializer)
+    private IQueryResult BasicCheck(Session session)
     {
         var sb = new StringBuilder();
         Voucher old = null;
         foreach (var (voucher, user, curr, v) in
-                 m_Accountant.SelectUnbalancedVouchers(VoucherQueryUnconstrained.Instance))
+                 session.Accountant.SelectUnbalancedVouchers(VoucherQueryUnconstrained.Instance))
         {
             if (old == null)
                 old = voucher;
             else if (voucher.ID != old.ID)
             {
-                sb.Append(serializer.PresentVoucher(old).Wrap());
+                sb.Append(session.Serializer.PresentVoucher(old).Wrap());
                 sb.AppendLine();
             }
 
@@ -80,7 +73,7 @@ internal class CheckShell : IShellComponent
         }
 
         if (old != null)
-            sb.Append(serializer.PresentVoucher(old).Wrap());
+            sb.Append(session.Serializer.PresentVoucher(old).Wrap());
 
         if (sb.Length > 0)
             return new PlainText(sb.ToString());
@@ -91,8 +84,9 @@ internal class CheckShell : IShellComponent
     /// <summary>
     ///     检查每科目每内容借贷方向
     /// </summary>
+    /// <param name="session"></param>
     /// <returns>发生错误的信息</returns>
-    private IQueryResult AdvancedCheck()
+    private IQueryResult AdvancedCheck(Session session)
     {
         var sb = new StringBuilder();
         foreach (var title in TitleManager.Titles)
@@ -100,7 +94,7 @@ internal class CheckShell : IShellComponent
             if (!title.IsVirtual)
                 if (Math.Abs(title.Direction) == 1)
                     DoCheck(
-                        m_Accountant.RunVoucherQuery(
+                        session.Accountant.RunVoucherQuery(
                                 $"T{title.Id.AsTitle()}00 {(title.Direction < 0 ? ">" : "<")} G")
                             .SelectMany(
                                 v => v.Details.Where(d => d.Title == title.Id)
@@ -110,14 +104,14 @@ internal class CheckShell : IShellComponent
                 else if (Math.Abs(title.Direction) == 2)
                     DoCheck(
                         title.Direction,
-                        m_Accountant.RunGroupedQuery($"T{title.Id.AsTitle()}00 G`CcD"),
+                        session.Accountant.RunGroupedQuery($"T{title.Id.AsTitle()}00 G`CcD"),
                         $"T{title.Id.AsTitle()}00",
                         sb);
 
             foreach (var subTitle in title.SubTitles)
                 if (Math.Abs(subTitle.Direction) == 1)
                     DoCheck(
-                        m_Accountant.RunVoucherQuery(
+                        session.Accountant.RunVoucherQuery(
                                 $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} {(subTitle.Direction < 0 ? ">" : "<")} G")
                             .SelectMany(
                                 v =>
@@ -130,7 +124,7 @@ internal class CheckShell : IShellComponent
                 else if (Math.Abs(subTitle.Direction) == 2)
                     DoCheck(
                         subTitle.Direction,
-                        m_Accountant.RunGroupedQuery($"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} G`CcD"),
+                        session.Accountant.RunGroupedQuery($"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} G`CcD"),
                         $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}",
                         sb);
         }
@@ -171,17 +165,17 @@ internal class CheckShell : IShellComponent
         }
     }
 
-    private IQueryResult DuplicationCheck(IEntitiesSerializer serializer, string expr)
+    private IQueryResult DuplicationCheck(Session session, string expr)
     {
         var sb = new StringBuilder();
-        var query = Parsing.VoucherQuery(ref expr, m_Accountant.Client);
+        var query = Parsing.VoucherQuery(ref expr, session.Accountant.Client);
         Parsing.Eof(expr);
-        foreach (var (v, ids) in m_Accountant.SelectDuplicatedVouchers(query))
+        foreach (var (v, ids) in session.Accountant.SelectDuplicatedVouchers(query))
         {
             sb.AppendLine($"// Date = {v.Date.AsDate()} Duplication = {ids.Count}");
             foreach (var id in ids)
                 sb.AppendLine($"//   ^{id}^");
-            sb.AppendLine(serializer.PresentVoucher(v).Wrap());
+            sb.AppendLine(session.Serializer.PresentVoucher(v).Wrap());
         }
 
         if (sb.Length > 0)

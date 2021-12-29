@@ -27,15 +27,16 @@ namespace AccountingServer.Shell.Carry;
 
 internal partial class CarryShell
 {
-    private long ResetCarryYear(DateFilter rng)
-        => m_Accountant.DeleteVouchers($"{rng.AsDateRange()} AnnualCarry");
+    private long ResetCarryYear(Session session, DateFilter rng)
+        => session.Accountant.DeleteVouchers($"{rng.AsDateRange()} AnnualCarry");
 
     /// <summary>
     ///     年末结转
     /// </summary>
+    /// <param name="session"></param>
     /// <param name="sb">日志记录</param>
     /// <param name="dt">年，若为<c>null</c>则表示对无日期进行结转</param>
-    private void CarryYear(StringBuilder sb, DateTime? dt)
+    private void CarryYear(Session session, StringBuilder sb, DateTime? dt)
     {
         DateTime? ed;
         DateFilter rng;
@@ -51,13 +52,13 @@ internal partial class CarryShell
             rng = DateFilter.TheNullOnly;
         }
 
-        foreach (var grpC in m_Accountant.RunGroupedQuery(
+        foreach (var grpC in session.Accountant.RunGroupedQuery(
                      $"T4103 {rng.AsDateRange()}`Cs").Items.Cast<ISubtotalCurrency>())
         {
             sb.AppendLine(
                 $"{dt.AsDate(SubtotalLevel.Month)} CarryYear => @{grpC.Currency} {grpC.Fund.AsCurrency(grpC.Currency)}");
             foreach (var grps in grpC.Items.Cast<ISubtotalSubTitle>())
-                m_Accountant.Upsert(new Voucher
+                session.Accountant.Upsert(new Voucher
                     {
                         Date = ed,
                         Type = VoucherType.AnnualCarry,

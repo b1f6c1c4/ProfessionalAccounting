@@ -355,6 +355,4 @@ public class CSharpSerializer : IEntitySerializer
     }
 
     #endregion
-
-    public Func<Client> Client { private get; set; }
 }

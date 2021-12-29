@@ -97,7 +97,7 @@ internal partial class QueryParser
                 var t = title();
                 var filter = new VoucherDetail
                     {
-                        User = (UserSpec()?.GetText()).ParseUserSpec(Client().ClientUser),
+                        User = (UserSpec()?.GetText()).ParseUserSpec(Client.ClientUser),
                         Currency = VoucherCurrency()?.GetText().ParseCurrency(),
                         Title = t?.Title,
                         SubTitle = t?.SubTitle,
@@ -145,7 +145,7 @@ internal partial class QueryParser
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 
     public partial class DetailsContext : IClientDependable, IQueryAry<IDetailQueryAtom>
@@ -210,7 +210,7 @@ internal partial class QueryParser
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 
     public partial class Details1Context : IClientDependable, IQueryAry<IDetailQueryAtom>
@@ -244,7 +244,7 @@ internal partial class QueryParser
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 
     public partial class Details0Context : IClientDependable, IQueryAry<IDetailQueryAtom>
@@ -277,7 +277,7 @@ internal partial class QueryParser
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 
     public partial class TokenContext

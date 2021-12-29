@@ -65,6 +65,4 @@ internal class AlternativeSerializer : IEntitySerializer
             return func(m_Secondary);
         }
     }
-
-    public Func<Client> Client { private get; set; }
 }

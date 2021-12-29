@@ -390,6 +390,4 @@ public class JsonSerializer : IEntitiesSerializer
                 { "value", item.Value },
                 { "remark", item.Remark },
             };
-
-    public Func<Client> Client { private get; set; }
 }

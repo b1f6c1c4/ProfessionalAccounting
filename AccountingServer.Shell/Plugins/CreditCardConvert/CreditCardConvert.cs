@@ -36,24 +36,22 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert;
 /// </summary>
 internal class CreditCardConvert : PluginBase
 {
-    public CreditCardConvert(Accountant accountant) : base(accountant) { }
-
     /// <inheritdoc />
-    public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+    public override IQueryResult Execute(string expr, Session session)
     {
         var content = Parsing.Token(ref expr);
 
-        return ParsingF.Optional(ref expr, "q") ? Query(content, ref expr) : Create(content, ref expr);
+        return ParsingF.Optional(ref expr, "q") ? Query(content, ref expr, session) : Create(content, ref expr, session);
     }
 
-    private IQueryResult Query(string content, ref string expr)
+    private IQueryResult Query(string content, ref string expr, Session session)
     {
-        var rng = Parsing.Range(ref expr, Accountant.Client) ?? DateFilter.Unconstrained;
+        var rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
 
         var trans = new List<Trans>();
         var rebates = new List<Rebate>();
         var convs = new List<Conversion>();
-        foreach (var voucher in Accountant.RunVoucherQuery($"T224101 {content.Quotation('\'')} {rng.AsDateRange()}")
+        foreach (var voucher in session.Accountant.RunVoucherQuery($"T224101 {content.Quotation('\'')} {rng.AsDateRange()}")
                 )
         {
             var ds = voucher.Details.Where(d => d.Title == 2241 && d.SubTitle == 01 && d.Content == content)
@@ -104,7 +102,7 @@ internal class CreditCardConvert : PluginBase
         }
 
 
-        foreach (var voucher in Accountant.RunVoucherQuery(
+        foreach (var voucher in session.Accountant.RunVoucherQuery(
                      $"{{T224101 {content.Quotation('\'')}}}*{{T660300}}*{{T224101 {content.Quotation('\'')} +T3999+T660300 A {rng.AsDateRange()}}}")
                 )
         {
@@ -178,15 +176,15 @@ internal class CreditCardConvert : PluginBase
         return new PlainText(sb.ToString());
     }
 
-    private IQueryResult Create(string content, ref string expr)
+    private IQueryResult Create(string content, ref string expr, Session session)
     {
         var currency = Parsing.Token(ref expr, false);
         var baseCurrency = Parsing.Token(ref expr, false);
 
-        using var vir = Accountant.Virtualize();
+        using var vir = session.Accountant.Virtualize();
         while (!string.IsNullOrWhiteSpace(expr))
         {
-            var date = Parsing.UniqueTime(ref expr, Accountant.Client);
+            var date = Parsing.UniqueTime(ref expr, session.Client);
             if (!date.HasValue)
             {
                 var dayF = ParsingF.DoubleF(ref expr);
@@ -195,7 +193,7 @@ internal class CreditCardConvert : PluginBase
                 if (day != dayF)
                     throw new ApplicationException("非整数日期");
 
-                var today = Accountant.Client.ClientDateTime.Today;
+                var today = session.Client.ClientDateTime.Today;
                 date = today.Day < day
                     ?  today.AddMonths(-1).AddDays(day - today.Day)
                     :  today.AddDays(day - today.Day);
@@ -203,7 +201,7 @@ internal class CreditCardConvert : PluginBase
 
             var from = ParsingF.DoubleF(ref expr);
             var to = ParsingF.DoubleF(ref expr);
-            Accountant.Upsert(new Voucher
+            session.Accountant.Upsert(new Voucher
                 {
                     Date = date.Value,
                     Details = new()

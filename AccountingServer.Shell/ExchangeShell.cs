@@ -36,22 +36,16 @@ namespace AccountingServer.Shell;
 internal class ExchangeShell : IShellComponent
 {
     /// <summary>
-    ///     基本会计业务处理类
-    /// </summary>
-    private readonly Accountant m_Accountant;
-
-    /// <summary>
     ///     定时登记汇率
     /// </summary>
     private readonly Timer m_Timer = new(60 * 60 * 1000) { AutoReset = true }; // hourly
 
-    public ExchangeShell(Accountant helper)
-    {
-        m_Accountant = helper;
-        m_Timer.Elapsed += OnTimedEvent;
-    }
+    private DbSession m_TimerSession;
 
-    public IQueryResult Execute(string expr, Accountant accountant, IEntitiesSerializer serializer)
+    public ExchangeShell()
+        => m_Timer.Elapsed += OnTimedEvent;
+
+    public IQueryResult Execute(string expr, Session session)
     {
         expr = expr.Rest();
         var isAccurate = expr.Initial() == "acc";
@@ -63,23 +57,23 @@ internal class ExchangeShell : IShellComponent
 
         var sb = new StringBuilder();
 
-        if (Parsing.UniqueTime(ref expr, m_Accountant.Client) is var date && date.HasValue)
-            Inquiry(sb, date.Value, from, to, val, isAccurate);
-        else if (Parsing.Range(ref expr, m_Accountant.Client) is var rng && rng != null)
+        if (Parsing.UniqueTime(ref expr, session.Client) is var date && date.HasValue)
+            Inquiry(session, sb, date.Value, from, to, val, isAccurate);
+        else if (Parsing.Range(ref expr, session.Client) is var rng && rng != null)
             for (var dt = rng.StartDate!.Value; dt <= rng.EndDate; dt = dt.AddMonths(1))
-                Inquiry(sb, AccountantHelper.LastDayOfMonth(dt.Year, dt.Month), from, to, val, isAccurate);
+                Inquiry(session, sb, AccountantHelper.LastDayOfMonth(dt.Year, dt.Month), from, to, val, isAccurate);
         else if (isAccurate)
-            Inquiry(sb, null, from, to, val, true);
+            Inquiry(session, sb, null, from, to, val, true);
         else
-            Inquiry(sb, DateTime.UtcNow.AddMinutes(-30), from, to, val, false);
+            Inquiry(session, sb, DateTime.UtcNow.AddMinutes(-30), from, to, val, false);
         Parsing.Eof(expr);
 
         return new PlainText(sb.ToString());
     }
 
-    private void Inquiry(StringBuilder sb, DateTime? dt, string from, string to, double value, bool isAccurate)
+    private void Inquiry(Session session, StringBuilder sb, DateTime? dt, string from, string to, double value, bool isAccurate)
     {
-        var rate = isAccurate ? m_Accountant.SaveHistoricalRate(dt!.Value, from, to).Result : m_Accountant.Query(dt, from, to).Result; // TODO
+        var rate = isAccurate ? session.Accountant.SaveHistoricalRate(dt!.Value, from, to).Result : session.Accountant.Query(dt, from, to).Result; // TODO
         var v = value * rate;
         sb.AppendLine($"{dt.AsDate()} @{from} {value.AsCurrency(from)} = @{to} {v.AsCurrency(to)} ({v:R})");
     }
@@ -89,8 +83,9 @@ internal class ExchangeShell : IShellComponent
     /// <summary>
     ///     启动定时登记汇率
     /// </summary>
-    public void EnableTimer()
+    public void EnableTimer(DbSession db)
     {
+        m_TimerSession = db;
         OnTimedEvent(null, null);
         m_Timer.Enabled = true;
     }
@@ -117,12 +112,13 @@ internal class ExchangeShell : IShellComponent
     {
         var date = CriticalTime(DateTime.UtcNow);
         Console.WriteLine($"{DateTime.UtcNow:o} Ensuring exchange rates exist since {date:o}");
+        var session = new Session(m_TimerSession);
         try
         {
-            foreach (var grpC in m_Accountant.RunGroupedQuery("U - U Revenue - U Expense !C").Items.Cast<ISubtotalCurrency>())
-                m_Accountant.Query(date, grpC.Currency, BaseCurrency.Now);
-            foreach (var grpC in m_Accountant.RunGroupedQuery("U Revenue + U Expense 0 !C").Items.Cast<ISubtotalCurrency>())
-                m_Accountant.Query(date, grpC.Currency, BaseCurrency.Now);
+            foreach (var grpC in session.Accountant.RunGroupedQuery("U - U Revenue - U Expense !C").Items.Cast<ISubtotalCurrency>())
+                session.Accountant.Query(date, grpC.Currency, BaseCurrency.Now);
+            foreach (var grpC in session.Accountant.RunGroupedQuery("U Revenue + U Expense 0 !C").Items.Cast<ISubtotalCurrency>())
+                session.Accountant.Query(date, grpC.Currency, BaseCurrency.Now);
         }
         catch (Exception err)
         {

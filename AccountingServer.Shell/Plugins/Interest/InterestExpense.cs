@@ -25,8 +25,6 @@ namespace AccountingServer.Shell.Plugins.Interest;
 /// </summary>
 internal class InterestExpense : InterestBase
 {
-    public InterestExpense(Accountant accountant) : base(accountant) { }
-
     /// <inheritdoc />
     protected override string MajorFilter() => "T2202+T2203+T224100";
 

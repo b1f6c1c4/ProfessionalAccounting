@@ -29,19 +29,12 @@ namespace AccountingServer.Shell.Plugins;
 internal abstract class PluginBase
 {
     /// <summary>
-    ///     基本会计业务处理类
-    /// </summary>
-    protected readonly Accountant Accountant;
-
-    protected PluginBase(Accountant accountant) => Accountant = accountant;
-
-    /// <summary>
     ///     执行插件表达式
     /// </summary>
     /// <param name="expr">表达式</param>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session"></param>
     /// <returns>执行结果</returns>
-    public abstract IQueryResult Execute(string expr, IEntitiesSerializer serializer);
+    public abstract IQueryResult Execute(string expr, Session session);
 
     /// <summary>
     ///     显示插件帮助

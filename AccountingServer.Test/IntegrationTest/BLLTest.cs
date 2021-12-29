@@ -18,6 +18,7 @@
 
 using System;
 using System.Linq;
+using System.Runtime.Intrinsics.X86;
 using AccountingServer.BLL;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
@@ -33,11 +34,9 @@ public class BLLTest : IDisposable
 
     public BLLTest()
     {
-        m_Accountant = new(db: "accounting-test");
+        m_Accountant = new(new(db: "accounting-test"), "b1", DateTime.UtcNow.Date);
 
         m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance);
-
-        ClientUser.Set("b1");
     }
 
     public void Dispose()

@@ -43,35 +43,33 @@ internal class AmortizationShell : DistributedShell
     /// <param name="distQuery">分期检索式</param>
     /// <param name="dt">计算账面价值的时间</param>
     /// <param name="showSchedule">是否显示折旧计算表</param>
-    /// <param name="accountant"></param>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session"></param>
     /// <returns>执行结果</returns>
     protected override IQueryResult ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery, DateTime? dt,
-        bool showSchedule, Accountant accountant, IEntitiesSerializer serializer)
+        bool showSchedule, Session session)
     {
         var sb = new StringBuilder();
-        foreach (var a in Sort(accountant.SelectAmortizations(distQuery)))
-            sb.Append(ListAmort(a, accountant, serializer, dt, showSchedule));
+        foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
+            sb.Append(ListAmort(a, session, dt, showSchedule));
 
         return new PlainText(sb.ToString());
     }
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        Accountant accountant,
-        IEntitiesSerializer serializer)
-        => new PlainText(serializer.PresentAmorts(Sort(accountant.SelectAmortizations(distQuery))));
+        Session session)
+        => new PlainText(session.Serializer.PresentAmorts(Sort(session.Accountant.SelectAmortizations(distQuery))));
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateFilter rng,
-        IQueryCompounded<IVoucherQueryAtom> query, Accountant accountant, IEntitiesSerializer serializer)
+        IQueryCompounded<IVoucherQueryAtom> query, Session session)
     {
         var sb = new StringBuilder();
-        foreach (var a in Sort(accountant.SelectAmortizations(distQuery)))
+        foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
         {
-            sb.Append(serializer.PresentVouchers(accountant.RegisterVouchers(a, rng, query)));
-            accountant.Upsert(a);
+            sb.Append(session.Serializer.PresentVouchers(session.Accountant.RegisterVouchers(a, rng, query)));
+            session.Accountant.Upsert(a);
         }
 
         if (sb.Length > 0)
@@ -83,10 +81,10 @@ internal class AmortizationShell : DistributedShell
     /// <inheritdoc />
     protected override IQueryResult ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateFilter rng,
-        IQueryCompounded<IVoucherQueryAtom> query, Accountant accountant, IEntitiesSerializer serializer)
+        IQueryCompounded<IVoucherQueryAtom> query, Session session)
     {
         var sb = new StringBuilder();
-        foreach (var a in Sort(accountant.SelectAmortizations(distQuery)))
+        foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
         {
             foreach (var item in a.Schedule.Where(item => item.Date.Within(rng)))
             {
@@ -95,7 +93,7 @@ internal class AmortizationShell : DistributedShell
                     if (item.VoucherID == null)
                         continue;
 
-                    var voucher = accountant.SelectVoucher(item.VoucherID);
+                    var voucher = session.Accountant.SelectVoucher(item.VoucherID);
                     if (voucher != null)
                         if (!MatchHelper.IsMatch(query, voucher.IsMatch))
                             continue;
@@ -104,8 +102,8 @@ internal class AmortizationShell : DistributedShell
                 item.VoucherID = null;
             }
 
-            sb.Append(ListAmort(a, accountant, serializer));
-            accountant.Upsert(a);
+            sb.Append(ListAmort(a, session));
+            session.Accountant.Upsert(a);
         }
 
         if (sb.Length > 0)
@@ -116,26 +114,25 @@ internal class AmortizationShell : DistributedShell
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        Accountant accountant,
-        IEntitiesSerializer serializer)
+        Session session)
     {
         var lst = new List<Amortization>();
-        foreach (var a in Sort(accountant.SelectAmortizations(distQuery)))
+        foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
         {
             Accountant.Amortize(a);
-            accountant.Upsert(a);
+            session.Accountant.Upsert(a);
             lst.Add(a);
         }
 
-        return new DirtyText(serializer.PresentAmorts(lst));
+        return new DirtyText(session.Serializer.PresentAmorts(lst));
     }
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng, Accountant accountant)
+        DateFilter rng, Session session)
     {
         var cnt = 0L;
-        foreach (var a in accountant.SelectAmortizations(distQuery))
+        foreach (var a in session.Accountant.SelectAmortizations(distQuery))
         {
             if (a.Schedule == null)
                 continue;
@@ -143,7 +140,7 @@ internal class AmortizationShell : DistributedShell
             var flag = false;
             foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
                          .Where(item => item.VoucherID != null)
-                         .Where(item => accountant.SelectVoucher(item.VoucherID) == null))
+                         .Where(item => session.Accountant.SelectVoucher(item.VoucherID) == null))
             {
                 item.VoucherID = null;
                 cnt++;
@@ -151,7 +148,7 @@ internal class AmortizationShell : DistributedShell
             }
 
             if (flag)
-                accountant.Upsert(a);
+                session.Accountant.Upsert(a);
         }
 
         return new NumberAffected(cnt);
@@ -159,10 +156,10 @@ internal class AmortizationShell : DistributedShell
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng, Accountant accountant)
+        DateFilter rng, Session session)
     {
         var cnt = 0L;
-        foreach (var a in accountant.SelectAmortizations(distQuery))
+        foreach (var a in session.Accountant.SelectAmortizations(distQuery))
         {
             if (a.Schedule == null)
                 continue;
@@ -171,14 +168,14 @@ internal class AmortizationShell : DistributedShell
             foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
                          .Where(item => item.VoucherID != null))
             {
-                var voucher = accountant.SelectVoucher(item.VoucherID);
+                var voucher = session.Accountant.SelectVoucher(item.VoucherID);
                 if (voucher == null)
                 {
                     item.VoucherID = null;
                     cnt++;
                     flag = true;
                 }
-                else if (accountant.DeleteVoucher(voucher.ID))
+                else if (session.Accountant.DeleteVoucher(voucher.ID))
                 {
                     item.VoucherID = null;
                     cnt++;
@@ -187,7 +184,7 @@ internal class AmortizationShell : DistributedShell
             }
 
             if (flag)
-                accountant.Upsert(a);
+                session.Accountant.Upsert(a);
         }
 
         return new NumberAffected(cnt);
@@ -195,19 +192,19 @@ internal class AmortizationShell : DistributedShell
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        IQueryCompounded<IVoucherQueryAtom> query, Accountant accountant) => throw new InvalidOperationException();
+        IQueryCompounded<IVoucherQueryAtom> query, Session session) => throw new InvalidOperationException();
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
-        bool isCollapsed, Accountant accountant)
+        bool isCollapsed, Session session)
     {
         var sb = new StringBuilder();
-        foreach (var a in Sort(accountant.SelectAmortizations(distQuery)))
+        foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
         {
-            foreach (var item in accountant.Update(a, rng, isCollapsed))
+            foreach (var item in session.Accountant.Update(a, rng, isCollapsed))
                 sb.AppendLine(ListAmortItem(item));
 
-            accountant.Upsert(a);
+            session.Accountant.Upsert(a);
         }
 
         if (sb.Length > 0)
@@ -218,23 +215,22 @@ internal class AmortizationShell : DistributedShell
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
-        Accountant accountant,
-        IEntitiesSerializer serializer)
+        Session session)
     {
         var sb = new StringBuilder();
-        foreach (var a in Sort(accountant.SelectAmortizations(distQuery)))
+        foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
         {
             var sbi = new StringBuilder();
-            foreach (var item in accountant.Update(a, rng, false, true))
+            foreach (var item in session.Accountant.Update(a, rng, false, true))
                 sbi.AppendLine(ListAmortItem(item));
 
             if (sbi.Length != 0)
             {
-                sb.AppendLine(ListAmort(a, accountant, serializer, null, false));
+                sb.AppendLine(ListAmort(a, session, null, false));
                 sb.AppendLine(sbi.ToString());
             }
 
-            accountant.Upsert(a);
+            session.Accountant.Upsert(a);
         }
 
         if (sb.Length > 0)
@@ -247,12 +243,11 @@ internal class AmortizationShell : DistributedShell
     ///     显示摊销及其计算表
     /// </summary>
     /// <param name="amort">摊销</param>
-    /// <param name="accountant"></param>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session"></param>
     /// <param name="dt">计算账面价值的时间</param>
     /// <param name="showSchedule">是否显示计算表</param>
     /// <returns>格式化的信息</returns>
-    private string ListAmort(Amortization amort, Accountant accountant, IEntitySerializer serializer, DateTime? dt = null,
+    private string ListAmort(Amortization amort, Session session, DateTime? dt = null,
         bool showSchedule = true)
     {
         var sb = new StringBuilder();
@@ -272,7 +267,7 @@ internal class AmortizationShell : DistributedShell
             {
                 sb.AppendLine(ListAmortItem(amortItem));
                 if (amortItem.VoucherID != null)
-                    sb.AppendLine(serializer.PresentVoucher(accountant.SelectVoucher(amortItem.VoucherID)).Wrap());
+                    sb.AppendLine(session.Serializer.PresentVoucher(session.Accountant.SelectVoucher(amortItem.VoucherID)).Wrap());
             }
 
         return sb.ToString();

@@ -31,10 +31,8 @@ namespace AccountingServer.Shell.Plugins.AssetHelper;
 /// </summary>
 internal class AssetFactory : PluginBase
 {
-    public AssetFactory(Accountant accountant) : base(accountant) { }
-
     /// <inheritdoc />
-    public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+    public override IQueryResult Execute(string expr, Session session)
     {
         var voucherID = Parsing.Token(ref expr);
         Guid? guid = null;
@@ -46,7 +44,7 @@ internal class AssetFactory : PluginBase
         var lifeT = Parsing.Double(ref expr);
         Parsing.Eof(expr);
 
-        var voucher = Accountant.SelectVoucher(voucherID);
+        var voucher = session.Accountant.SelectVoucher(voucherID);
         if (voucher == null)
             throw new ApplicationException("找不到记账凭证");
 
@@ -89,11 +87,11 @@ internal class AssetFactory : PluginBase
                     },
             };
 
-        Accountant.Upsert(asset);
-        asset = Accountant.SelectAsset(asset.ID!.Value);
+        session.Accountant.Upsert(asset);
+        asset = session.Accountant.SelectAsset(asset.ID!.Value);
         Accountant.Depreciate(asset);
-        Accountant.Upsert(asset);
+        session.Accountant.Upsert(asset);
 
-        return new DirtyText(serializer.PresentAsset(asset).Wrap());
+        return new DirtyText(session.Serializer.PresentAsset(asset).Wrap());
     }
 }

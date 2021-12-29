@@ -37,13 +37,11 @@ namespace AccountingServer.Shell.Plugins.Composite;
 /// </summary>
 internal class Composite : PluginBase
 {
-    public Composite(Accountant accountant) : base(accountant) { }
-
     public static IConfigManager<CompositeTemplates> Templates { private get; set; } =
         new ConfigManager<CompositeTemplates>("Composite.xml");
 
     /// <inheritdoc />
-    public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+    public override IQueryResult Execute(string expr, Session session)
     {
         Template temp = null;
         if (ParsingF.Token(ref expr, true, t => (temp = GetTemplate(t)) != null) == null)
@@ -56,14 +54,14 @@ internal class Composite : PluginBase
 
         DateFilter the;
         if (string.IsNullOrWhiteSpace(expr))
-            the = DateRange(temp.Day, Accountant.Client.ClientDateTime.Today);
+            the = DateRange(temp.Day, session.Client.ClientDateTime.Today);
         else
         {
-            the = ParsingF.Range(ref expr, Accountant.Client) ?? throw new ArgumentException("语法错误", nameof(expr));
+            the = ParsingF.Range(ref expr, session.Client) ?? throw new ArgumentException("语法错误", nameof(expr));
             ParsingF.Eof(expr);
         }
 
-        return DoInquiry(the, temp, out _, currency, serializer);
+        return DoInquiry(the, temp, out _, currency, session);
     }
 
     public static Template GetTemplate(string name) => Templates.Config.Templates.SingleOrDefault(
@@ -106,12 +104,12 @@ internal class Composite : PluginBase
     /// <param name="inq">查询</param>
     /// <param name="val">金额</param>
     /// <param name="baseCurrency"></param>
-    /// <param name="serializer"></param>
+    /// <param name="session"></param>
     /// <returns>执行结果</returns>
     public IQueryResult DoInquiry(DateFilter rng, BaseInquiry inq, out double val, string baseCurrency,
-        IEntitiesSerializer serializer)
+        Session session)
     {
-        var visitor = new InquiriesVisitor(Accountant, rng, baseCurrency, serializer);
+        var visitor = new InquiriesVisitor(session, rng, baseCurrency);
         val = inq.Accept(visitor);
         return new PlainText(visitor.Result);
     }
@@ -134,20 +132,17 @@ internal class Composite : PluginBase
 
 internal class InquiriesVisitor : IInquiryVisitor<double>
 {
-    private readonly Accountant m_Accountant;
+    private readonly Session m_Session;
     private readonly string m_BaseCurrency;
     private readonly DateFilter m_Rng;
     private readonly StringBuilder m_Sb = new();
-    private readonly IEntitiesSerializer m_Serializer;
 
     private string m_Path = "";
 
-    public InquiriesVisitor(Accountant accountant, DateFilter rng, string baseCurrency,
-        IEntitiesSerializer serializer)
+    public InquiriesVisitor(Session session, DateFilter rng, string baseCurrency)
     {
-        m_Accountant = accountant;
+        m_Session = session;
         m_BaseCurrency = baseCurrency;
-        m_Serializer = serializer;
         m_Rng = rng;
     }
 
@@ -178,29 +173,29 @@ internal class InquiriesVisitor : IInquiryVisitor<double>
         var o =
             $"[{(inq.IsLeftExtended ? "" : m_Rng.StartDate.AsDate())}~{m_Rng.EndDate.AsDate()}] {(inq.General ? "G" : "")}";
         var query = ParsingF.GroupedQuery(
-            $"{gen(o)}`{(inq.ByCurrency ? "C" : "")}{(inq.ByTitle ? "t" : "")}{(inq.BySubTitle ? "s" : "")}{(inq.ByContent ? "c" : "")}{(inq.ByRemark ? "r" : "")}{(inq.ByCurrency || inq.ByTitle || inq.BySubTitle || inq.ByContent || inq.ByRemark ? "" : "v")}{(!inq.ByCurrency ? "X" : "")}", m_Accountant.Client);
-        var gq = m_Accountant.SelectVoucherDetailsGrouped(query);
+            $"{gen(o)}`{(inq.ByCurrency ? "C" : "")}{(inq.ByTitle ? "t" : "")}{(inq.BySubTitle ? "s" : "")}{(inq.ByContent ? "c" : "")}{(inq.ByRemark ? "r" : "")}{(inq.ByCurrency || inq.ByTitle || inq.BySubTitle || inq.ByContent || inq.ByRemark ? "" : "v")}{(!inq.ByCurrency ? "X" : "")}", m_Session.Client);
+        var gq = m_Session.Accountant.SelectVoucherDetailsGrouped(query);
         if (inq.ByCurrency)
             foreach (var grp in gq.Items.Cast<ISubtotalCurrency>())
             {
                 var curr = grp.Currency;
-                var ratio = m_Accountant.Query(m_Rng.EndDate!.Value, curr, m_BaseCurrency).Result; // TODO
+                var ratio = m_Session.Accountant.Query(m_Rng.EndDate!.Value, curr, m_BaseCurrency).Result; // TODO
 
                 var theFmt = new CurrencyDecorator(fmt, curr, ratio);
 
                 val += theFmt.GetFund(grp.Fund);
 
                 m_Sb.Append(
-                    new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), theFmt, inq.HideContent)
-                        .PresentSubtotal(grp, query.Subtotal, m_Serializer));
+                    new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), theFmt, inq.HideContent) { Client = m_Session.Client }
+                        .PresentSubtotal(grp, query.Subtotal, m_Session.Serializer));
             }
         else
         {
             val += fmt.GetFund(gq.Fund);
 
             m_Sb.Append(
-                new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), fmt, inq.HideContent)
-                    .PresentSubtotal(gq, query.Subtotal, m_Serializer));
+                new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), fmt, inq.HideContent) { Client = m_Session.Client }
+                    .PresentSubtotal(gq, query.Subtotal, m_Session.Serializer));
         }
 
         return val;

@@ -82,7 +82,7 @@ internal partial class QueryParser
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 
     public partial class VouchersContext : IClientDependable, IQueryAry<IVoucherQueryAtom>
@@ -115,7 +115,7 @@ internal partial class QueryParser
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 
     public partial class Vouchers2Context : IClientDependable, IQueryAry<IVoucherQueryAtom>
@@ -186,7 +186,7 @@ internal partial class QueryParser
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 
     public partial class Vouchers1Context : IClientDependable, IQueryAry<IVoucherQueryAtom>
@@ -220,7 +220,7 @@ internal partial class QueryParser
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 
     public partial class Vouchers0Context : IClientDependable, IQueryAry<IVoucherQueryAtom>
@@ -253,7 +253,7 @@ internal partial class QueryParser
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 
     public partial class EmitContext : IClientDependable, IEmit
@@ -268,7 +268,7 @@ internal partial class QueryParser
             }
         }
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 
     public partial class VoucherDetailQueryContext : IClientDependable, IVoucherDetailQuery
@@ -292,6 +292,6 @@ internal partial class QueryParser
         /// <inheritdoc />
         public IEmit DetailEmitFilter => emit();
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 }

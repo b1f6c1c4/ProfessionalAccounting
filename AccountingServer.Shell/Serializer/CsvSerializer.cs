@@ -221,6 +221,4 @@ public class CsvSerializer : IEntitiesSerializer
         Remark = 0xa,
         Fund = 0xb,
     }
-
-    public Func<Client> Client { private get; set; }
 }

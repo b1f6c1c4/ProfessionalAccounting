@@ -39,31 +39,30 @@ internal class AssetShell : DistributedShell
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery, DateTime? dt,
-        bool showSchedule, Accountant accountant, IEntitiesSerializer serializer)
+        bool showSchedule, Session session)
     {
         var sb = new StringBuilder();
-        foreach (var a in Sort(accountant.SelectAssets(distQuery)))
-            sb.Append(ListAsset(a, accountant, serializer, dt, showSchedule));
+        foreach (var a in Sort(session.Accountant.SelectAssets(distQuery)))
+            sb.Append(ListAsset(a, session, dt, showSchedule));
 
         return new PlainText(sb.ToString());
     }
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        Accountant accountant,
-        IEntitiesSerializer serializer)
-        => new PlainText(serializer.PresentAssets(Sort(accountant.SelectAssets(distQuery))));
+        Session session)
+        => new PlainText(session.Serializer.PresentAssets(Sort(session.Accountant.SelectAssets(distQuery))));
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateFilter rng,
-        IQueryCompounded<IVoucherQueryAtom> query, Accountant accountant, IEntitiesSerializer serializer)
+        IQueryCompounded<IVoucherQueryAtom> query, Session session)
     {
         var sb = new StringBuilder();
-        foreach (var a in Sort(accountant.SelectAssets(distQuery)))
+        foreach (var a in Sort(session.Accountant.SelectAssets(distQuery)))
         {
-            sb.Append(serializer.PresentVouchers(accountant.RegisterVouchers(a, rng, query)));
-            accountant.Upsert(a);
+            sb.Append(session.Serializer.PresentVouchers(session.Accountant.RegisterVouchers(a, rng, query)));
+            session.Accountant.Upsert(a);
         }
 
         if (sb.Length > 0)
@@ -75,10 +74,10 @@ internal class AssetShell : DistributedShell
     /// <inheritdoc />
     protected override IQueryResult ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateFilter rng,
-        IQueryCompounded<IVoucherQueryAtom> query, Accountant accountant, IEntitiesSerializer serializer)
+        IQueryCompounded<IVoucherQueryAtom> query, Session session)
     {
         var sb = new StringBuilder();
-        foreach (var a in Sort(accountant.SelectAssets(distQuery)))
+        foreach (var a in Sort(session.Accountant.SelectAssets(distQuery)))
         {
             foreach (var item in a.Schedule.Where(item => item.Date.Within(rng)))
             {
@@ -87,7 +86,7 @@ internal class AssetShell : DistributedShell
                     if (item.VoucherID == null)
                         continue;
 
-                    var voucher = accountant.SelectVoucher(item.VoucherID);
+                    var voucher = session.Accountant.SelectVoucher(item.VoucherID);
                     if (voucher != null)
                         if (!MatchHelper.IsMatch(query, voucher.IsMatch))
                             continue;
@@ -96,8 +95,8 @@ internal class AssetShell : DistributedShell
                 item.VoucherID = null;
             }
 
-            sb.Append(ListAsset(a, accountant, serializer));
-            accountant.Upsert(a);
+            sb.Append(ListAsset(a, session));
+            session.Accountant.Upsert(a);
         }
 
         if (sb.Length > 0)
@@ -108,26 +107,25 @@ internal class AssetShell : DistributedShell
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        Accountant accountant,
-        IEntitiesSerializer serializer)
+        Session session)
     {
         var lst = new List<Asset>();
-        foreach (var a in Sort(accountant.SelectAssets(distQuery)))
+        foreach (var a in Sort(session.Accountant.SelectAssets(distQuery)))
         {
             Accountant.Depreciate(a);
-            accountant.Upsert(a);
+            session.Accountant.Upsert(a);
             lst.Add(a);
         }
 
-        return new DirtyText(serializer.PresentAssets(lst));
+        return new DirtyText(session.Serializer.PresentAssets(lst));
     }
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng, Accountant accountant)
+        DateFilter rng, Session session)
     {
         var cnt = 0L;
-        foreach (var a in accountant.SelectAssets(distQuery))
+        foreach (var a in session.Accountant.SelectAssets(distQuery))
         {
             if (a.Schedule == null)
                 continue;
@@ -135,7 +133,7 @@ internal class AssetShell : DistributedShell
             var flag = false;
             foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
                          .Where(item => item.VoucherID != null)
-                         .Where(item => accountant.SelectVoucher(item.VoucherID) == null))
+                         .Where(item => session.Accountant.SelectVoucher(item.VoucherID) == null))
             {
                 item.VoucherID = null;
                 cnt++;
@@ -143,7 +141,7 @@ internal class AssetShell : DistributedShell
             }
 
             if (flag)
-                accountant.Upsert(a);
+                session.Accountant.Upsert(a);
         }
 
         return new NumberAffected(cnt);
@@ -151,10 +149,10 @@ internal class AssetShell : DistributedShell
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng, Accountant accountant)
+        DateFilter rng, Session session)
     {
         var cnt = 0L;
-        foreach (var a in accountant.SelectAssets(distQuery))
+        foreach (var a in session.Accountant.SelectAssets(distQuery))
         {
             if (a.Schedule == null)
                 continue;
@@ -163,14 +161,14 @@ internal class AssetShell : DistributedShell
             foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
                          .Where(item => item.VoucherID != null))
             {
-                var voucher = accountant.SelectVoucher(item.VoucherID);
+                var voucher = session.Accountant.SelectVoucher(item.VoucherID);
                 if (voucher == null)
                 {
                     item.VoucherID = null;
                     cnt++;
                     flag = true;
                 }
-                else if (accountant.DeleteVoucher(voucher.ID))
+                else if (session.Accountant.DeleteVoucher(voucher.ID))
                 {
                     item.VoucherID = null;
                     cnt++;
@@ -179,33 +177,33 @@ internal class AssetShell : DistributedShell
             }
 
             if (flag)
-                accountant.Upsert(a);
+                session.Accountant.Upsert(a);
         }
 
         return new NumberAffected(cnt);
     }
 
     protected override IQueryResult ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        IQueryCompounded<IVoucherQueryAtom> query, Accountant accountant) => new NumberAffected(
-        accountant.SelectAssets(distQuery)
+        IQueryCompounded<IVoucherQueryAtom> query, Session session) => new NumberAffected(
+        session.Accountant.SelectAssets(distQuery)
             .Sum(
-                a => accountant.DeleteVouchers(
+                a => session.Accountant.DeleteVouchers(
                     new IntersectQueries<IVoucherQueryAtom>(
                         query ?? VoucherQueryUnconstrained.Instance,
                         ParsingF.VoucherQuery(
-                            $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}", accountant.Client)))));
+                            $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}", session.Accountant.Client)))));
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
-        bool isCollapsed, Accountant accountant)
+        bool isCollapsed, Session session)
     {
         var sb = new StringBuilder();
-        foreach (var a in Sort(accountant.SelectAssets(distQuery)))
+        foreach (var a in Sort(session.Accountant.SelectAssets(distQuery)))
         {
-            foreach (var item in accountant.Update(a, rng, isCollapsed))
+            foreach (var item in session.Accountant.Update(a, rng, isCollapsed))
                 sb.AppendLine(ListAssetItem(item));
 
-            accountant.Upsert(a);
+            session.Accountant.Upsert(a);
         }
 
         if (sb.Length > 0)
@@ -219,27 +217,25 @@ internal class AssetShell : DistributedShell
     /// </summary>
     /// <param name="distQuery">分期检索式</param>
     /// <param name="rng">日期过滤器</param>
-    /// <param name="accountant"></param>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session"></param>
     /// <returns>执行结果</returns>
     protected override IQueryResult ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
-        Accountant accountant,
-        IEntitiesSerializer serializer)
+        Session session)
     {
         var sb = new StringBuilder();
-        foreach (var a in Sort(accountant.SelectAssets(distQuery)))
+        foreach (var a in Sort(session.Accountant.SelectAssets(distQuery)))
         {
             var sbi = new StringBuilder();
-            foreach (var item in accountant.Update(a, rng, false, true))
+            foreach (var item in session.Accountant.Update(a, rng, false, true))
                 sbi.AppendLine(ListAssetItem(item));
 
             if (sbi.Length != 0)
             {
-                sb.AppendLine(ListAsset(a, accountant, serializer, null, false));
+                sb.AppendLine(ListAsset(a, session, null, false));
                 sb.AppendLine(sbi.ToString());
             }
 
-            accountant.Upsert(a);
+            session.Accountant.Upsert(a);
         }
 
         if (sb.Length > 0)
@@ -252,12 +248,11 @@ internal class AssetShell : DistributedShell
     ///     显示资产及其折旧计算表
     /// </summary>
     /// <param name="asset">资产</param>
-    /// <param name="accountant"></param>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session"></param>
     /// <param name="dt">计算账面价值的时间</param>
     /// <param name="showSchedule">是否显示折旧计算表</param>
     /// <returns>格式化的信息</returns>
-    private string ListAsset(Asset asset, Accountant accountant, IEntitySerializer serializer, DateTime? dt = null,
+    private string ListAsset(Asset asset, Session session, DateTime? dt = null,
         bool showSchedule = true)
     {
         var sb = new StringBuilder();
@@ -288,7 +283,7 @@ internal class AssetShell : DistributedShell
             {
                 sb.AppendLine(ListAssetItem(assetItem));
                 if (assetItem.VoucherID != null)
-                    sb.AppendLine(serializer.PresentVoucher(accountant.SelectVoucher(assetItem.VoucherID)).Wrap());
+                    sb.AppendLine(session.Serializer.PresentVoucher(session.Accountant.SelectVoucher(assetItem.VoucherID)).Wrap());
             }
 
         return sb.ToString();

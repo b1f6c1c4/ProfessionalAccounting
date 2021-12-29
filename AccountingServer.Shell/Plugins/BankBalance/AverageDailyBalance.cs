@@ -34,19 +34,17 @@ namespace AccountingServer.Shell.Plugins.BankBalance;
 /// </summary>
 internal class AverageDailyBalance : PluginBase
 {
-    public AverageDailyBalance(Accountant accountant) : base(accountant) { }
-
     /// <inheritdoc />
-    public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+    public override IQueryResult Execute(string expr, Session session)
     {
         var content = Parsing.Token(ref expr);
         var avg = Parsing.DoubleF(ref expr);
         Parsing.Eof(expr);
 
-        var tdy = Accountant.Client.ClientDateTime.Today;
+        var tdy = session.Client.ClientDateTime.Today;
         var ldom = AccountantHelper.LastDayOfMonth(tdy.Year, tdy.Month);
         var srng = new DateFilter(new(tdy.Year, tdy.Month, 1, 0, 0, 0, DateTimeKind.Utc), tdy);
-        var balance = Accountant.RunGroupedQuery(
+        var balance = session.Accountant.RunGroupedQuery(
             $"T1002 {content.Quotation('\'')} [~{tdy.AsDate()}]`vD{srng.AsDateRange()}");
 
         var bal = 0D;

@@ -33,10 +33,8 @@ namespace AccountingServer.Shell.Plugins.AssetHelper;
 /// </summary>
 internal class AssetDisposition : PluginBase
 {
-    public AssetDisposition(Accountant accountant) : base(accountant) { }
-
     /// <inheritdoc />
-    public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+    public override IQueryResult Execute(string expr, Session session)
     {
         var voucherID = Parsing.Token(ref expr);
         var guids = new List<string>();
@@ -46,7 +44,7 @@ internal class AssetDisposition : PluginBase
             guids.Add(guidT.ToString());
         Parsing.Eof(expr);
 
-        var voucher = Accountant.SelectVoucher(voucherID);
+        var voucher = session.Accountant.SelectVoucher(voucherID);
         if (voucher == null)
             throw new ApplicationException("找不到记账凭证");
 
@@ -57,7 +55,7 @@ internal class AssetDisposition : PluginBase
                 !guids.Contains(detail.Content))
                 continue;
 
-            var asset = Accountant.SelectAsset(Guid.Parse(detail.Content));
+            var asset = session.Accountant.SelectAsset(Guid.Parse(detail.Content));
             foreach (var item in asset.Schedule)
             {
                 if (item is DispositionItem)
@@ -80,8 +78,8 @@ internal class AssetDisposition : PluginBase
                 asset.Schedule.RemoveRange(id, asset.Schedule.Count - id);
 
             asset.Schedule.Add(new DispositionItem { Date = voucher.Date, VoucherID = voucher.ID });
-            sb.Append(serializer.PresentAsset(asset).Wrap());
-            Accountant.Upsert(asset);
+            sb.Append(session.Serializer.PresentAsset(asset).Wrap());
+            session.Accountant.Upsert(asset);
         }
 
         if (sb.Length > 0)

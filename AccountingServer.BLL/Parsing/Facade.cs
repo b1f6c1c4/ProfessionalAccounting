@@ -86,7 +86,7 @@ public abstract class FacadeBase
     public DateTime? UniqueTime(ref string s, Client client)
     {
         var ctx = QueryParse(ref s, p => p.uniqueTime());
-        ctx.Client = () => client;
+        ctx.Client = client;
         return ctx.AsDate();
     }
 
@@ -96,7 +96,7 @@ public abstract class FacadeBase
     public DateFilter Range(ref string s, Client client)
     {
         var ctx = QueryParse(ref s, p => p.range());
-        ctx.Client = () => client;
+        ctx.Client = client;
         return ctx.Range;
     }
 
@@ -106,7 +106,7 @@ public abstract class FacadeBase
     public IQueryCompounded<IVoucherQueryAtom> VoucherQuery(ref string s, Client client)
     {
         var ctx = QueryParse(ref s, p => p.vouchers());
-        ctx.Client = () => client;
+        ctx.Client = client;
         return (IQueryCompounded<IVoucherQueryAtom>)QueryParse(ref s, p => p.vouchers()) ??
             VoucherQueryUnconstrained.Instance;
     }

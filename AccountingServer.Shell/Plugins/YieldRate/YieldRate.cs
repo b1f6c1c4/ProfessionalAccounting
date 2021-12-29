@@ -34,15 +34,13 @@ namespace AccountingServer.Shell.Plugins.YieldRate;
 /// </summary>
 internal class YieldRate : PluginBase
 {
-    public YieldRate(Accountant accountant) : base(accountant) { }
-
     /// <inheritdoc />
-    public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+    public override IQueryResult Execute(string expr, Session session)
     {
         FacadeF.ParsingF.Eof(expr);
 
-        var result = Accountant.RunGroupedQuery("T1101+T611102+T1501+T611106 G``cd");
-        var resx = Accountant.RunGroupedQuery("T1101+T1501``c");
+        var result = session.Accountant.RunGroupedQuery("T1101+T611102+T1501+T611106 G``cd");
+        var resx = session.Accountant.RunGroupedQuery("T1101+T1501``c");
         var sb = new StringBuilder();
         foreach (
             var (grp, rte) in
@@ -52,8 +50,7 @@ internal class YieldRate : PluginBase
                     grp => grp.Content,
                     rsx => rsx.Content,
                     (grp, bal) => (Group: grp,
-                        Rate: GetRate(
-                            grp.Items.Cast<ISubtotalDate>().OrderBy(b => b.Date, new DateComparer()).ToList(),
+                        Rate: GetRate(session, grp.Items.Cast<ISubtotalDate>().OrderBy(b => b.Date, new DateComparer()).ToList(),
                             bal.Fund)))
                 .OrderByDescending(kvp => kvp.Rate))
             sb.AppendLine($"{grp.Content.CPadRight(30)} {$"{rte * 360:P2}".PadLeft(7)}");
@@ -64,15 +61,16 @@ internal class YieldRate : PluginBase
     /// <summary>
     ///     计算实际收益率
     /// </summary>
+    /// <param name="session"></param>
     /// <param name="lst">现金流</param>
     /// <param name="pv">现值</param>
     /// <returns>实际收益率</returns>
-    private double GetRate(IReadOnlyList<ISubtotalDate> lst, double pv)
+    private double GetRate(Session session, IReadOnlyList<ISubtotalDate> lst, double pv)
     {
         if (!pv.IsZero())
             return
                 new YieldRateSolver(
-                    lst.Select(b => Accountant.Client.ClientDateTime.Today.Subtract(b.Date!.Value).TotalDays).Concat(new[] { 0D }),
+                    lst.Select(b => session.Client.ClientDateTime.Today.Subtract(b.Date!.Value).TotalDays).Concat(new[] { 0D }),
                     lst.Select(b => b.Fund).Concat(new[] { -pv })).Solve();
 
         return

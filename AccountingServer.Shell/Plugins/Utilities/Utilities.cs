@@ -34,22 +34,20 @@ namespace AccountingServer.Shell.Plugins.Utilities;
 /// </summary>
 internal class Utilities : PluginBase
 {
-    public Utilities(Accountant accountant) : base(accountant) { }
-
     public static IConfigManager<UtilTemplates> Templates { private get; set; } =
         new ConfigManager<UtilTemplates>("Util.xml");
 
     /// <inheritdoc />
-    public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+    public override IQueryResult Execute(string expr, Session session)
     {
-        using var vir = Accountant.Virtualize();
+        using var vir = session.Accountant.Virtualize();
         while (!string.IsNullOrWhiteSpace(expr))
         {
-            var voucher = GenerateVoucher(ref expr);
+            var voucher = GenerateVoucher(session, ref expr);
             if (voucher == null)
                 continue;
 
-            Accountant.Upsert(voucher);
+            session.Accountant.Upsert(voucher);
         }
 
         return new NumberAffected(vir.CachedVouchers);
@@ -69,11 +67,12 @@ internal class Utilities : PluginBase
     /// <summary>
     ///     根据表达式生成记账凭证
     /// </summary>
+    /// <param name="session"></param>
     /// <param name="expr">表达式</param>
     /// <returns>记账凭证</returns>
-    private Voucher GenerateVoucher(ref string expr)
+    private Voucher GenerateVoucher(Session session, ref string expr)
     {
-        var time = Parsing.UniqueTime(ref expr, Accountant.Client) ?? Accountant.Client.ClientDateTime.Today;
+        var time = Parsing.UniqueTime(ref expr, session.Client) ?? session.Client.ClientDateTime.Today;
         var abbr = Parsing.Token(ref expr);
 
         var template = Templates.Config.Templates.FirstOrDefault(t => t.Name == abbr) ??
@@ -89,7 +88,7 @@ internal class Utilities : PluginBase
                 num = val;
             else
             {
-                var arr = Accountant.RunGroupedQuery($"{template.Query} [~{time:yyyyMMdd}] ``v").Fund;
+                var arr = session.Accountant.RunGroupedQuery($"{template.Query} [~{time:yyyyMMdd}] ``v").Fund;
                 num = arr - val;
             }
         }

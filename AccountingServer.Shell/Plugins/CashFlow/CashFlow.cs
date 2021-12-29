@@ -20,11 +20,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
-using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
@@ -35,35 +33,33 @@ namespace AccountingServer.Shell.Plugins.CashFlow;
 /// </summary>
 internal class CashFlow : PluginBase
 {
-    public CashFlow(Accountant accountant) : base(accountant) { }
-
     public static IConfigManager<CashTemplates> Templates { private get; set; } =
         new ConfigManager<CashTemplates>("Cash.xml");
 
     /// <inheritdoc />
-    public override IQueryResult Execute(string expr, IEntitiesSerializer serializer)
+    public override IQueryResult Execute(string expr, Session session)
     {
         var extraMonths = (int)(Parsing.Double(ref expr) ?? 6);
         var prefix = Parsing.Token(ref expr);
         Parsing.Eof(expr);
 
         var accts = Templates.Config.Accounts
-            .Where(a => string.IsNullOrWhiteSpace(a.User) || Accountant.Client.ClientUser.Name == a.User).ToList();
+            .Where(a => string.IsNullOrWhiteSpace(a.User) || session.Client.ClientUser.Name == a.User).ToList();
         var n = accts.Count;
-        var until = Accountant.Client.ClientDateTime.Today.AddMonths(extraMonths);
+        var until = session.Client.ClientDateTime.Today.AddMonths(extraMonths);
 
         var aggs = new double[n];
         var rst = new Dictionary<DateTime, double[,]>();
 
         for (var i = 0; i < n; i++)
         {
-            aggs[i] = Accountant
+            aggs[i] = session.Accountant
                 .RunGroupedQuery($"U{accts[i].User.AsUser()} @{accts[i].Currency}*({accts[i].QuickAsset}) [~.]``v")
                 .Fund;
 
-            foreach (var (date, value) in GetItems(accts[i], serializer, until))
+            foreach (var (date, value) in GetItems(accts[i], session, until))
             {
-                if (date <= Accountant.Client.ClientDateTime.Today)
+                if (date <= session.Client.ClientDateTime.Today)
                     continue;
                 if (date > until)
                     continue;
@@ -100,7 +96,7 @@ internal class CashFlow : PluginBase
             var sum = 0D;
             for (var i = 0; i < n; i++)
             {
-                sum += aggs[i] * Accountant.Query(Accountant.Client.ClientDateTime.Today, accts[i].Currency, BaseCurrency.Now).Result; // TODO
+                sum += aggs[i] * session.Accountant.Query(session.Client.ClientDateTime.Today, accts[i].Currency, BaseCurrency.Now).Result; // TODO
 
                 sb.Append("".PadLeft(15));
                 sb.Append("".PadLeft(15));
@@ -120,7 +116,7 @@ internal class CashFlow : PluginBase
             {
                 aggs[i] += kvp.Value[i, 0] + kvp.Value[i, 1];
 
-                sum += aggs[i] * Accountant.Query(kvp.Key, accts[i].Currency, BaseCurrency.Now).Result; // TODO
+                sum += aggs[i] * session.Accountant.Query(kvp.Key, accts[i].Currency, BaseCurrency.Now).Result; // TODO
 
                 if (!kvp.Value[i, 0].IsZero())
                     sb.Append(kvp.Value[i, 0].AsCurrency(accts[i].Currency).PadLeft(15));
@@ -141,9 +137,9 @@ internal class CashFlow : PluginBase
         return new PlainText(sb.ToString());
     }
 
-    private DateTime NextDate(int day, DateTime? reference = null, bool inclusive = false)
+    private DateTime NextDate(Session session, int day, DateTime? reference = null, bool inclusive = false)
     {
-        var d = reference ?? Accountant.Client.ClientDateTime.Today;
+        var d = reference ?? session.Client.ClientDateTime.Today;
         var v = new DateTime(d.Year, d.Month, 1, 0, 0, 0, DateTimeKind.Utc);
         var last = v.AddMonths(1).AddDays(-1).Day;
         var targ = day <= last ? day : last;
@@ -164,18 +160,17 @@ internal class CashFlow : PluginBase
         return v.AddDays(targ - 1);
     }
 
-    private IEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account, IEntitiesSerializer serializer,
-        DateTime until)
+    private IEnumerable<(DateTime Date, double Value)> GetItems(CashAccount account, Session session, DateTime until)
     {
         var user = $"U{account.User.AsUser()}";
         var curr = $"@{account.Currency}";
 
         if (account.Reimburse != null)
         {
-            var rb = new Composite.Composite(Accountant);
+            var rb = new Composite.Composite();
             var tmp = Composite.Composite.GetTemplate(account.Reimburse);
-            var rng = Composite.Composite.DateRange(tmp.Day, Accountant.Client.ClientDateTime.Today);
-            rb.DoInquiry(rng, tmp, out var rbVal, BaseCurrency.Now, serializer);
+            var rng = Composite.Composite.DateRange(tmp.Day, session.Client.ClientDateTime.Today);
+            rb.DoInquiry(rng, tmp, out var rbVal, BaseCurrency.Now, session);
             var rbF = rng.EndDate!.Value;
             yield return (rbF, rbVal);
         }
@@ -189,12 +184,12 @@ internal class CashFlow : PluginBase
                     break;
 
                 case OnceQueryItem oqi:
-                    yield return (oqi.Date, Accountant.RunGroupedQuery($"{user} {curr}*({oqi.Query})``v").Fund);
+                    yield return (oqi.Date, session.Accountant.RunGroupedQuery($"{user} {curr}*({oqi.Query})``v").Fund);
 
                     break;
 
                 case MonthlyItem mn:
-                    for (var d = NextDate(mn.Day); d <= until; d = NextDate(mn.Day, d))
+                    for (var d = NextDate(session, mn.Day); d <= until; d = NextDate(session, mn.Day, d))
                     {
                         if (mn.Since != default && d < mn.Since)
                             continue;
@@ -207,17 +202,17 @@ internal class CashFlow : PluginBase
                     break;
 
                 case SimpleCreditCard cc:
-                    var rng = $"[{Accountant.Client.ClientDateTime.Today.AddMonths(-3).AsDate()}~]";
+                    var rng = $"[{session.Client.ClientDateTime.Today.AddMonths(-3).AsDate()}~]";
                     var mv = $"{{({user}*{cc.Query})+{user} T3999+{user} T6603 A {rng}}}";
                     var mos = new Dictionary<DateTime, double>();
-                    foreach (var grpC in Accountant.RunGroupedQuery(
+                    foreach (var grpC in session.Accountant.RunGroupedQuery(
                                      $"{{{user}*({cc.Query})*({user} <+(-{user} {curr})) {rng}}}+{mv}:{user}*({cc.Query})`Cd")
                                  .Items
                                  .Cast<ISubtotalCurrency>())
                     foreach (var b in grpC.Items.Cast<ISubtotalDate>())
                     {
-                        var mo = NextDate(cc.RepaymentDay, NextDate(cc.BillDay, b.Date.Value), true);
-                        var cob = Accountant.Query(mo, grpC.Currency, account.Currency).Result // TODO
+                        var mo = NextDate(session, cc.RepaymentDay, NextDate(session, cc.BillDay, b.Date.Value), true);
+                        var cob = session.Accountant.Query(mo, grpC.Currency, account.Currency).Result // TODO
                             * b.Fund;
                         if (mos.ContainsKey(mo))
                             mos[mo] += cob;
@@ -225,23 +220,23 @@ internal class CashFlow : PluginBase
                             mos[mo] = cob;
                     }
 
-                    foreach (var b in Accountant
+                    foreach (var b in session.Accountant
                                  .RunGroupedQuery(
                                      $"{{{user}*({cc.Query})*({user} {curr}>) {rng}}}-{mv}:{user}*({cc.Query})`d")
                                  .Items
                                  .Cast<ISubtotalDate>())
                     {
-                        var mo = NextDate(cc.RepaymentDay, b.Date.Value, true);
+                        var mo = NextDate(session, cc.RepaymentDay, b.Date.Value, true);
                         if (mos.ContainsKey(mo))
                             mos[mo] += b.Fund;
                         else
                             mos[mo] = b.Fund;
                     }
 
-                    for (var d = Accountant.Client.ClientDateTime.Today; d <= until; d = NextDate(cc.BillDay, d))
+                    for (var d = session.Client.ClientDateTime.Today; d <= until; d = NextDate(session, cc.BillDay, d))
                     {
-                        var mo = NextDate(cc.RepaymentDay, NextDate(cc.BillDay, d), true);
-                        var cob = -(NextDate(cc.BillDay, d) - d).TotalDays * cc.MonthlyFee / (365.2425 / 12);
+                        var mo = NextDate(session, cc.RepaymentDay, NextDate(session, cc.BillDay, d), true);
+                        var cob = -(NextDate(session, cc.BillDay, d) - d).TotalDays * cc.MonthlyFee / (365.2425 / 12);
                         if (mos.ContainsKey(mo))
                             mos[mo] += cob;
                         else
@@ -254,29 +249,29 @@ internal class CashFlow : PluginBase
                     break;
 
                 case ComplexCreditCard cc:
-                    var stmt = -Accountant.RunGroupedQuery($"({cc.Query})*({user} {curr})-{user} \"\"``v").Fund;
-                    var pmt = Accountant.RunGroupedQuery($"({cc.Query})*({user} {curr} \"\" >)``v").Fund;
-                    var nxt = -Accountant.RunGroupedQuery($"({cc.Query})*({user} {curr} \"\" <)``v").Fund;
+                    var stmt = -session.Accountant.RunGroupedQuery($"({cc.Query})*({user} {curr})-{user} \"\"``v").Fund;
+                    var pmt = session.Accountant.RunGroupedQuery($"({cc.Query})*({user} {curr} \"\" >)``v").Fund;
+                    var nxt = -session.Accountant.RunGroupedQuery($"({cc.Query})*({user} {curr} \"\" <)``v").Fund;
                     if (pmt < stmt)
                     {
-                        if (NextDate(cc.BillDay, NextDate(cc.RepaymentDay)) == NextDate(cc.BillDay))
-                            yield return (NextDate(cc.RepaymentDay), pmt - stmt);
+                        if (NextDate(session, cc.BillDay, NextDate(session, cc.RepaymentDay)) == NextDate(session, cc.BillDay))
+                            yield return (NextDate(session, cc.RepaymentDay), pmt - stmt);
                         else
                             nxt += stmt - pmt; // Not paid in full
                     }
                     else
                         nxt -= pmt - stmt; // Paid too much
 
-                    for (var d = Accountant.Client.ClientDateTime.Today; d <= until; d = NextDate(cc.BillDay, d))
+                    for (var d = session.Client.ClientDateTime.Today; d <= until; d = NextDate(session, cc.BillDay, d))
                     {
-                        nxt += (NextDate(cc.BillDay, d) - d).TotalDays * cc.MonthlyFee / (365.2425 / 12);
+                        nxt += (NextDate(session, cc.BillDay, d) - d).TotalDays * cc.MonthlyFee / (365.2425 / 12);
                         if (cc.MaximumUtility >= 0 && cc.MaximumUtility < nxt)
                         {
-                            yield return (NextDate(cc.BillDay, d), cc.MaximumUtility - nxt);
+                            yield return (NextDate(session, cc.BillDay, d), cc.MaximumUtility - nxt);
                             nxt = cc.MaximumUtility;
                         }
 
-                        yield return (NextDate(cc.RepaymentDay, d).AddMonths(1), -nxt);
+                        yield return (NextDate(session, cc.RepaymentDay, d).AddMonths(1), -nxt);
                         nxt = 0;
                     }
 

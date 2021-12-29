@@ -146,10 +146,10 @@ internal partial class SubtotalParser
                 if (subtotalEqui() == null)
                     return null;
                 subtotalEqui().rangeDay().Client = Client;
-                return subtotalEqui().rangeDay().AsDate() ?? Client().ClientDateTime.Today;
+                return subtotalEqui().rangeDay().AsDate() ?? Client.ClientDateTime.Today;
             }
         }
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 }

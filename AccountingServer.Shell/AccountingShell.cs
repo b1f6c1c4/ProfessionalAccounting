@@ -34,15 +34,8 @@ namespace AccountingServer.Shell;
 /// </summary>
 internal class AccountingShell : IShellComponent
 {
-    /// <summary>
-    ///     基本会计业务处理类
-    /// </summary>
-    private readonly Accountant m_Accountant;
-
-    public AccountingShell(Accountant helper) => m_Accountant = helper;
-
     /// <inheritdoc />
-    public IQueryResult Execute(string expr, Accountant accountant, IEntitiesSerializer serializer) => Parse(expr)(serializer);
+    public IQueryResult Execute(string expr, Session session) => Parse(expr, session.Client)(session);
 
     /// <inheritdoc />
     public bool IsExecutable(string expr) => true;
@@ -52,7 +45,7 @@ internal class AccountingShell : IShellComponent
     /// </summary>
     /// <param name="expr">表达式</param>
     /// <returns>解析结果</returns>
-    private Func<IEntitiesSerializer, IQueryResult> Parse(string expr)
+    private Func<Session, IQueryResult> Parse(string expr, Client client)
     {
         var type = ExprType.None;
         ISubtotalStringify visitor;
@@ -99,7 +92,7 @@ internal class AccountingShell : IShellComponent
         if (type.HasFlag(ExprType.GroupedQuery))
             try
             {
-                return TryGroupedQuery(expr, visitor);
+                return TryGroupedQuery(expr, visitor, client);
             }
             catch (Exception)
             {
@@ -109,7 +102,7 @@ internal class AccountingShell : IShellComponent
         if (type.HasFlag(ExprType.VoucherGroupedQuery))
             try
             {
-                return TryVoucherGroupedQuery(expr, visitor);
+                return TryVoucherGroupedQuery(expr, visitor, client);
             }
             catch (Exception)
             {
@@ -118,10 +111,10 @@ internal class AccountingShell : IShellComponent
 
         return (type & ExprType.NonGroupedQueries) switch
             {
-                ExprType.VoucherQuery => TryVoucherQuery(expr, !type.HasFlag(ExprType.Unsafe)),
-                ExprType.DetailQuery => TryDetailQuery(expr, !type.HasFlag(ExprType.Unsafe)),
-                ExprType.DetailRQuery => TryDetailRQuery(expr, !type.HasFlag(ExprType.Unsafe)),
-                ExprType.FancyQuery => TryFancyQuery(expr, !type.HasFlag(ExprType.Unsafe)),
+                ExprType.VoucherQuery => TryVoucherQuery(expr, !type.HasFlag(ExprType.Unsafe), client),
+                ExprType.DetailQuery => TryDetailQuery(expr, !type.HasFlag(ExprType.Unsafe), client),
+                ExprType.DetailRQuery => TryDetailRQuery(expr, !type.HasFlag(ExprType.Unsafe), client),
+                ExprType.FancyQuery => TryFancyQuery(expr, !type.HasFlag(ExprType.Unsafe), client),
                 _ => throw new InvalidOperationException("表达式无效"),
             };
     }
@@ -131,15 +124,16 @@ internal class AccountingShell : IShellComponent
     /// </summary>
     /// <param name="expr">表达式</param>
     /// <param name="safe">仅限强检索式</param>
+    /// <param name="client"></param>
     /// <returns>执行结果</returns>
-    private Func<IEntitiesSerializer, IQueryResult> TryVoucherQuery(string expr, bool safe)
+    private Func<Session, IQueryResult> TryVoucherQuery(string expr, bool safe, Client client)
     {
-        var res = ParsingF.VoucherQuery(ref expr, m_Accountant.Client);
+        var res = ParsingF.VoucherQuery(ref expr, client);
         ParsingF.Eof(expr);
         if (res.IsDangerous() && safe)
             throw new SecurityException("检测到弱检索式");
 
-        return serializer => PresentVoucherQuery(res, serializer);
+        return session => PresentVoucherQuery(res, session);
     }
 
     /// <summary>
@@ -147,12 +141,13 @@ internal class AccountingShell : IShellComponent
     /// </summary>
     /// <param name="expr">表达式</param>
     /// <param name="trav">呈现器</param>
+    /// <param name="client"></param>
     /// <returns>执行结果</returns>
-    private Func<IEntitiesSerializer, IQueryResult> TryGroupedQuery(string expr, ISubtotalStringify trav)
+    private Func<Session, IQueryResult> TryGroupedQuery(string expr, ISubtotalStringify trav, Client client)
     {
-        var res = ParsingF.GroupedQuery(ref expr, m_Accountant.Client);
+        var res = ParsingF.GroupedQuery(ref expr, client);
         ParsingF.Eof(expr);
-        return serializer => PresentSubtotal(res, trav, serializer);
+        return session => PresentSubtotal(res, trav, session);
     }
 
     /// <summary>
@@ -160,12 +155,13 @@ internal class AccountingShell : IShellComponent
     /// </summary>
     /// <param name="expr">表达式</param>
     /// <param name="trav">呈现器</param>
+    /// <param name="client"></param>
     /// <returns>执行结果</returns>
-    private Func<IEntitiesSerializer, IQueryResult> TryVoucherGroupedQuery(string expr, ISubtotalStringify trav)
+    private Func<Session, IQueryResult> TryVoucherGroupedQuery(string expr, ISubtotalStringify trav, Client client)
     {
-        var res = ParsingF.VoucherGroupedQuery(ref expr, m_Accountant.Client);
+        var res = ParsingF.VoucherGroupedQuery(ref expr, client);
         ParsingF.Eof(expr);
-        return serializer => PresentSubtotal(res, trav, serializer);
+        return session => PresentSubtotal(res, trav, session);
     }
 
     /// <summary>
@@ -175,23 +171,24 @@ internal class AccountingShell : IShellComponent
     /// <param name="serializer">表示器</param>
     /// <returns>记账凭证表达式</returns>
     private IQueryResult PresentVoucherQuery(IQueryCompounded<IVoucherQueryAtom> query,
-        IEntitiesSerializer serializer)
-        => new PlainText(serializer.PresentVouchers(m_Accountant.SelectVouchers(query)));
+        Session session)
+        => new PlainText(session.Serializer.PresentVouchers(session.Accountant.SelectVouchers(query)));
 
     /// <summary>
     ///     按细目检索式解析
     /// </summary>
     /// <param name="expr">表达式</param>
     /// <param name="safe">仅限强检索式</param>
+    /// <param name="client"></param>
     /// <returns>执行结果</returns>
-    private Func<IEntitiesSerializer, IQueryResult> TryDetailQuery(string expr, bool safe)
+    private Func<Session, IQueryResult> TryDetailQuery(string expr, bool safe, Client client)
     {
-        var res = ParsingF.DetailQuery(ref expr, m_Accountant.Client);
+        var res = ParsingF.DetailQuery(ref expr, client);
         ParsingF.Eof(expr);
         if (res.IsDangerous() && safe)
             throw new SecurityException("检测到弱检索式");
 
-        return serializer => PresentDetailQuery(res, serializer);
+        return session => PresentDetailQuery(res, session);
     }
 
     /// <summary>
@@ -200,23 +197,24 @@ internal class AccountingShell : IShellComponent
     /// <param name="query">细目检索式</param>
     /// <param name="serializer">表示器</param>
     /// <returns>执行结果</returns>
-    private IQueryResult PresentDetailQuery(IVoucherDetailQuery query, IEntitiesSerializer serializer)
-        => new PlainText(serializer.PresentVoucherDetails(m_Accountant.SelectVoucherDetails(query)));
+    private IQueryResult PresentDetailQuery(IVoucherDetailQuery query, Session session)
+        => new PlainText(session.Serializer.PresentVoucherDetails(session.Accountant.SelectVoucherDetails(query)));
 
     /// <summary>
     ///     按带记账凭证的细目检索式解析
     /// </summary>
     /// <param name="expr">表达式</param>
     /// <param name="safe">仅限强检索式</param>
+    /// <param name="client"></param>
     /// <returns>执行结果</returns>
-    private Func<IEntitiesSerializer, IQueryResult> TryDetailRQuery(string expr, bool safe)
+    private Func<Session, IQueryResult> TryDetailRQuery(string expr, bool safe, Client client)
     {
-        var res = ParsingF.DetailQuery(ref expr, m_Accountant.Client);
+        var res = ParsingF.DetailQuery(ref expr, client);
         ParsingF.Eof(expr);
         if (res.IsDangerous() && safe)
             throw new SecurityException("检测到弱检索式");
 
-        return serializer => PresentDetailRQuery(res, serializer);
+        return session => PresentDetailRQuery(res, session);
     }
 
     /// <summary>
@@ -225,10 +223,10 @@ internal class AccountingShell : IShellComponent
     /// <param name="query">细目检索式</param>
     /// <param name="serializer">表示器</param>
     /// <returns>执行结果</returns>
-    private IQueryResult PresentDetailRQuery(IVoucherDetailQuery query, IEntitiesSerializer serializer)
+    private IQueryResult PresentDetailRQuery(IVoucherDetailQuery query, Session session)
         => new PlainText(
-            serializer.PresentVoucherDetails(
-                m_Accountant.SelectVouchers(query.VoucherQuery).SelectMany(
+            session.Serializer.PresentVoucherDetails(
+                session.Accountant.SelectVouchers(query.VoucherQuery).SelectMany(
                     v => v.Details.Where(d => d.IsMatch(query.ActualDetailFilter()))
                         .Select(d => new VoucherDetailR(v, d)))));
 
@@ -237,15 +235,16 @@ internal class AccountingShell : IShellComponent
     /// </summary>
     /// <param name="expr">表达式</param>
     /// <param name="safe">仅限强检索式</param>
+    /// <param name="client"></param>
     /// <returns>执行结果</returns>
-    private Func<IEntitiesSerializer, IQueryResult> TryFancyQuery(string expr, bool safe)
+    private Func<Session, IQueryResult> TryFancyQuery(string expr, bool safe, Client client)
     {
-        var res = ParsingF.DetailQuery(ref expr, m_Accountant.Client);
+        var res = ParsingF.DetailQuery(ref expr, client);
         ParsingF.Eof(expr);
         if (res.IsDangerous() && safe)
             throw new SecurityException("检测到弱检索式");
 
-        return serializer => PresentFancyQuery(res, serializer);
+        return session => PresentFancyQuery(res, session);
     }
 
     /// <summary>
@@ -254,10 +253,10 @@ internal class AccountingShell : IShellComponent
     /// <param name="query">带记账凭证的细目检索式</param>
     /// <param name="serializer">表示器</param>
     /// <returns>执行结果</returns>
-    private IQueryResult PresentFancyQuery(IVoucherDetailQuery query, IEntitiesSerializer serializer)
+    private IQueryResult PresentFancyQuery(IVoucherDetailQuery query, Session session)
         => new PlainText(
-            serializer.PresentVouchers(
-                m_Accountant.SelectVouchers(query.VoucherQuery).Select(v =>
+            session.Serializer.PresentVouchers(
+                session.Accountant.SelectVouchers(query.VoucherQuery).Select(v =>
                     {
                         v.Details.RemoveAll(d => !d.IsMatch(query.ActualDetailFilter()));
                         return v;
@@ -271,10 +270,10 @@ internal class AccountingShell : IShellComponent
     /// <param name="serializer">表示器</param>
     /// <returns>执行结果</returns>
     private IQueryResult PresentSubtotal(IVoucherGroupedQuery query, ISubtotalStringify trav,
-        IEntitiesSerializer serializer)
+        Session session)
     {
-        var result = m_Accountant.SelectVouchersGrouped(query);
-        return new PlainText(trav.PresentSubtotal(result, query.Subtotal, serializer));
+        var result = session.Accountant.SelectVouchersGrouped(query);
+        return new PlainText(trav.PresentSubtotal(result, query.Subtotal, session.Serializer));
     }
 
     /// <summary>
@@ -285,10 +284,10 @@ internal class AccountingShell : IShellComponent
     /// <param name="serializer">表示器</param>
     /// <returns>执行结果</returns>
     private IQueryResult PresentSubtotal(IGroupedQuery query, ISubtotalStringify trav,
-        IEntitiesSerializer serializer)
+        Session session)
     {
-        var result = m_Accountant.SelectVoucherDetailsGrouped(query);
-        return new PlainText(trav.PresentSubtotal(result, query.Subtotal, serializer));
+        var result = session.Accountant.SelectVoucherDetailsGrouped(query);
+        return new PlainText(trav.PresentSubtotal(result, query.Subtotal, session.Serializer));
     }
 
     [Flags]

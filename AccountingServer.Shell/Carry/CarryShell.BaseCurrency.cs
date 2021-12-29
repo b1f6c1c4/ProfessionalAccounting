@@ -46,31 +46,33 @@ internal partial class CarryShell
     /// <summary>
     ///     取消摊销
     /// </summary>
+    /// <param name="session"></param>
     /// <param name="rng">过滤器</param>
     /// <returns>执行结果</returns>
-    private long ResetConversion(DateFilter rng)
-        => m_Accountant.DeleteVouchers($"{rng.AsDateRange()} %equity conversion%");
+    private long ResetConversion(Session session, DateFilter rng)
+        => session.Accountant.DeleteVouchers($"{rng.AsDateRange()} %equity conversion%");
 
     /// <summary>
     ///     所有者权益币种转换
     /// </summary>
+    /// <param name="session"></param>
     /// <param name="sb">日志记录</param>
     /// <param name="dt">日期</param>
     /// <param name="to">目标币种</param>
-    private void ConvertEquity(StringBuilder sb, DateTime dt, string to)
+    private void ConvertEquity(Session session, StringBuilder sb, DateTime dt, string to)
     {
-        var rst = m_Accountant.RunGroupedQuery($"T4101+T4103-@{to} [~{dt.AsDate()}]`Cts");
+        var rst = session.Accountant.RunGroupedQuery($"T4101+T4103-@{to} [~{dt.AsDate()}]`Cts");
 
         foreach (var grpC in rst.Items.Cast<ISubtotalCurrency>())
         {
-            var rate = m_Accountant.Query(dt, grpC.Currency, to).Result; // TODO
+            var rate = session.Accountant.Query(dt, grpC.Currency, to).Result; // TODO
             var dst = rate * grpC.Fund;
             sb.AppendLine(
                 $"=== {dt.AsDate()} @{grpC.Currency} {grpC.Fund.AsCurrency(grpC.Currency)} => @{to} {dst.AsCurrency(to)}");
 
             foreach (var grpt in grpC.Items.Cast<ISubtotalTitle>())
             foreach (var grps in grpt.Items.Cast<ISubtotalSubTitle>())
-                m_Accountant.Upsert(new Voucher
+                session.Accountant.Upsert(new Voucher
                     {
                         Date = dt,
                         Type = VoucherType.Ordinary,

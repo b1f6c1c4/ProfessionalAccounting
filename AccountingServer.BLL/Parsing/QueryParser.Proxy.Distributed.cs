@@ -34,7 +34,7 @@ internal partial class QueryParser
             => new MyDistributedFilter
                 {
                     ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : null,
-                    User = (UserSpec()?.GetText()).ParseUserSpec(Client().ClientUser),
+                    User = (UserSpec()?.GetText()).ParseUserSpec(Client.ClientUser),
                     Name = RegexString()?.GetText().Dequotation().Replace(@"\/", "/"),
                     Remark = PercentQuotedString()?.GetText().Dequotation(),
                 };
@@ -86,7 +86,7 @@ internal partial class QueryParser
             public IEnumerable<IDistributedItem> TheSchedule { get; set; }
         }
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 
     public partial class DistributedQContext : IClientDependable, IQueryAry<IDistributedQueryAtom>
@@ -151,7 +151,7 @@ internal partial class QueryParser
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 
     public partial class DistributedQ1Context : IClientDependable, IQueryAry<IDistributedQueryAtom>
@@ -185,7 +185,7 @@ internal partial class QueryParser
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 
     public partial class DistributedQ0Context : IClientDependable, IQueryAry<IDistributedQueryAtom>
@@ -218,6 +218,6 @@ internal partial class QueryParser
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 }

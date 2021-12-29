@@ -43,30 +43,30 @@ internal abstract class DistributedShell : IShellComponent
                 {
                     new ShellComponent(
                         "soft",
-                        (expr, accountant, _) =>
+                        (expr, session) =>
                             {
-                                var dist = Parsing.DistributedQuery(ref expr, accountant.Client);
-                                var rng = Parsing.Range(ref expr, accountant.Client) ?? DateFilter.Unconstrained;
+                                var dist = Parsing.DistributedQuery(ref expr, session.Client);
+                                var rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
                                 Parsing.Eof(expr);
-                                return ExecuteResetSoft(dist, rng, accountant);
+                                return ExecuteResetSoft(dist, rng, session);
                             }),
                     new ShellComponent(
                         "mixed",
-                        (expr, accountant, _) =>
+                        (expr, session) =>
                             {
-                                var dist = Parsing.DistributedQuery(ref expr, accountant.Client);
-                                var rng = Parsing.Range(ref expr, accountant.Client) ?? DateFilter.Unconstrained;
+                                var dist = Parsing.DistributedQuery(ref expr, session.Client);
+                                var rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
                                 Parsing.Eof(expr);
-                                return ExecuteResetMixed(dist, rng, accountant);
+                                return ExecuteResetMixed(dist, rng, session);
                             }),
                     new ShellComponent(
                         "hard",
-                        (expr, accountant, _) =>
+                        (expr, session) =>
                             {
-                                var dist = Parsing.DistributedQuery(ref expr, accountant.Client);
-                                var vouchers = Parsing.OptColVouchers(ref expr, accountant.Client);
+                                var dist = Parsing.DistributedQuery(ref expr, session.Client);
+                                var vouchers = Parsing.OptColVouchers(ref expr, session.Client);
                                 Parsing.Eof(expr);
-                                return ExecuteResetHard(dist, vouchers, accountant);
+                                return ExecuteResetHard(dist, vouchers, session);
                             }),
                 };
         m_Composer =
@@ -74,96 +74,96 @@ internal abstract class DistributedShell : IShellComponent
                 {
                     new ShellComponent(
                         "all",
-                        (expr, accountant, serializer) =>
+                        (expr, session) =>
                             {
                                 var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
-                                var dist = Parsing.DistributedQuery(ref expr, accountant.Client);
+                                var dist = Parsing.DistributedQuery(ref expr, session.Client);
                                 Parsing.Eof(expr);
                                 if (dist.IsDangerous() && safe)
                                     throw new SecurityException("检测到弱检索式");
 
-                                return ExecuteList(dist, null, false, accountant, serializer);
+                                return ExecuteList(dist, null, false, session);
                             }),
                     new ShellComponent(
                         "li",
-                        (expr, accountant, serializer) =>
+                        (expr, session) =>
                             {
                                 var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
-                                var dt = Parsing.UniqueTime(ref expr, accountant.Client) ?? accountant.Client.ClientDateTime.Today;
-                                var dist = Parsing.DistributedQuery(ref expr, accountant.Client);
+                                var dt = Parsing.UniqueTime(ref expr, session.Client) ?? session.Client.ClientDateTime.Today;
+                                var dist = Parsing.DistributedQuery(ref expr, session.Client);
                                 Parsing.Eof(expr);
                                 if (dist.IsDangerous() && safe)
                                     throw new SecurityException("检测到弱检索式");
 
-                                return ExecuteList(dist, dt, true, accountant, serializer);
+                                return ExecuteList(dist, dt, true, session);
                             }),
                     new ShellComponent(
                         "q",
-                        (expr, accountant, serializer) =>
+                        (expr, session) =>
                             {
                                 var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
-                                var dist = Parsing.DistributedQuery(ref expr, accountant.Client);
+                                var dist = Parsing.DistributedQuery(ref expr, session.Client);
                                 Parsing.Eof(expr);
                                 if (dist.IsDangerous() && safe)
                                     throw new SecurityException("检测到弱检索式");
 
-                                return ExecuteQuery(dist, accountant, serializer);
+                                return ExecuteQuery(dist, session);
                             }),
                     new ShellComponent(
                         "reg",
-                        (expr, accountant, serializer) =>
+                        (expr, session) =>
                             {
-                                var dist = Parsing.DistributedQuery(ref expr, accountant.Client);
-                                var rng = Parsing.Range(ref expr, accountant.Client) ?? DateFilter.Unconstrained;
-                                var vouchers = Parsing.OptColVouchers(ref expr, accountant.Client);
+                                var dist = Parsing.DistributedQuery(ref expr, session.Client);
+                                var rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
+                                var vouchers = Parsing.OptColVouchers(ref expr, session.Client);
                                 Parsing.Eof(expr);
-                                return ExecuteRegister(dist, rng, vouchers, accountant, serializer);
+                                return ExecuteRegister(dist, rng, vouchers, session);
                             }),
                     new ShellComponent(
                         "unreg",
-                        (expr, accountant, serializer) =>
+                        (expr, session) =>
                             {
-                                var dist = Parsing.DistributedQuery(ref expr, accountant.Client);
-                                var rng = Parsing.Range(ref expr, accountant.Client) ?? DateFilter.Unconstrained;
-                                var vouchers = Parsing.OptColVouchers(ref expr, accountant.Client);
+                                var dist = Parsing.DistributedQuery(ref expr, session.Client);
+                                var rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
+                                var vouchers = Parsing.OptColVouchers(ref expr, session.Client);
                                 Parsing.Eof(expr);
-                                return ExecuteUnregister(dist, rng, vouchers, accountant, serializer);
+                                return ExecuteUnregister(dist, rng, vouchers, session);
                             }),
                     new ShellComponent(
                         "recal",
-                        (expr, accountant, serializer) =>
+                        (expr, session) =>
                             {
-                                var dist = Parsing.DistributedQuery(ref expr, accountant.Client);
+                                var dist = Parsing.DistributedQuery(ref expr, session.Client);
                                 Parsing.Eof(expr);
-                                return ExecuteRecal(dist, accountant, serializer);
+                                return ExecuteRecal(dist, session);
                             }),
-                    new ShellComponent("rst", resetComposer.Execute),
+                    new ShellComponent("rst", (expr, session) => resetComposer.Execute(expr, session)),
                     new ShellComponent(
                         "ap",
-                        (expr, accountant, _) =>
+                        (expr, session) =>
                             {
                                 var collapse = Parsing.Optional(ref expr, "col");
-                                var dist = Parsing.DistributedQuery(ref expr, accountant.Client);
-                                var rng = Parsing.Range(ref expr, accountant.Client) ?? DateFilter.Unconstrained;
+                                var dist = Parsing.DistributedQuery(ref expr, session.Client);
+                                var rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
                                 Parsing.Eof(expr);
-                                return ExecuteApply(dist, rng, collapse, accountant);
+                                return ExecuteApply(dist, rng, collapse, session);
                             }),
                     new ShellComponent(
                         "chk",
-                        (expr, accountant, serializer) =>
+                        (expr, session) =>
                             {
-                                var dist = Parsing.DistributedQuery(ref expr, accountant.Client);
+                                var dist = Parsing.DistributedQuery(ref expr, session.Client);
                                 Parsing.Eof(expr);
-                                return ExecuteCheck(dist, new(null, accountant.Client.ClientDateTime.Today), accountant, serializer);
+                                return ExecuteCheck(dist, new(null, session.Client.ClientDateTime.Today), session);
                             }),
                     new ShellComponent(
                         null,
-                        (expr, accountant, serializer) =>
+                        (expr, session) =>
                             {
-                                var dt = Parsing.UniqueTime(ref expr, accountant.Client) ?? accountant.Client.ClientDateTime.Today;
-                                var dist = Parsing.DistributedQuery(ref expr, accountant.Client);
+                                var dt = Parsing.UniqueTime(ref expr, session.Client) ?? session.Client.ClientDateTime.Today;
+                                var dist = Parsing.DistributedQuery(ref expr, session.Client);
                                 Parsing.Eof(expr);
-                                return ExecuteList(dist, dt, false, accountant, serializer);
+                                return ExecuteList(dist, dt, false, session);
                             }),
                 };
     }
@@ -174,8 +174,8 @@ internal abstract class DistributedShell : IShellComponent
     protected abstract string Initial { get; }
 
     /// <inheritdoc />
-    public IQueryResult Execute(string expr, Accountant accountant, IEntitiesSerializer serializer)
-        => m_Composer.Execute(expr.Rest(), accountant, serializer);
+    public IQueryResult Execute(string expr, Session session)
+        => m_Composer.Execute(expr.Rest(), session);
 
     /// <inheritdoc />
     public bool IsExecutable(string expr) => expr.Initial() == Initial;
@@ -186,21 +186,19 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="distQuery">分期检索式</param>
     /// <param name="dt">计算账面价值的时间</param>
     /// <param name="showSchedule">是否显示折旧计算表</param>
-    /// <param name="accountant"></param>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session"></param>
     /// <returns>执行结果</returns>
     protected abstract IQueryResult ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery, DateTime? dt,
-        bool showSchedule, Accountant accountant, IEntitiesSerializer serializer);
+        bool showSchedule, Session session);
 
     /// <summary>
     ///     执行查询表达式
     /// </summary>
     /// <param name="distQuery">分期检索式</param>
-    /// <param name="accountant"></param>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session"></param>
     /// <returns>执行结果</returns>
     protected abstract IQueryResult ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        Accountant accountant, IEntitiesSerializer serializer);
+        Session session);
 
     /// <summary>
     ///     执行注册表达式
@@ -208,12 +206,11 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="distQuery">分期检索式</param>
     /// <param name="rng">日期过滤器</param>
     /// <param name="query">记账凭证检索式</param>
-    /// <param name="accountant"></param>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session"></param>
     /// <returns>执行结果</returns>
     protected abstract IQueryResult ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateFilter rng,
-        IQueryCompounded<IVoucherQueryAtom> query, Accountant accountant, IEntitiesSerializer serializer);
+        IQueryCompounded<IVoucherQueryAtom> query, Session session);
 
     /// <summary>
     ///     执行解除注册表达式
@@ -221,51 +218,49 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="distQuery">分期检索式</param>
     /// <param name="rng">日期过滤器</param>
     /// <param name="query">记账凭证检索式</param>
-    /// <param name="accountant"></param>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session"></param>
     /// <returns>执行结果</returns>
     protected abstract IQueryResult ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng, IQueryCompounded<IVoucherQueryAtom> query, Accountant accountant, IEntitiesSerializer serializer);
+        DateFilter rng, IQueryCompounded<IVoucherQueryAtom> query, Session session);
 
     /// <summary>
     ///     执行重新计算表达式
     /// </summary>
     /// <param name="distQuery">分期检索式</param>
-    /// <param name="accountant"></param>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session"></param>
     /// <returns>执行结果</returns>
     protected abstract IQueryResult ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        Accountant accountant, IEntitiesSerializer serializer);
+        Session session);
 
     /// <summary>
     ///     执行软重置表达式
     /// </summary>
     /// <param name="distQuery">分期检索式</param>
     /// <param name="rng">日期过滤器</param>
-    /// <param name="accountant"></param>
+    /// <param name="session"></param>
     /// <returns>执行结果</returns>
     protected abstract IQueryResult ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng, Accountant accountant);
+        DateFilter rng, Session session);
 
     /// <summary>
     ///     执行混合重置表达式
     /// </summary>
     /// <param name="distQuery">分期检索式</param>
     /// <param name="rng">日期过滤器</param>
-    /// <param name="accountant"></param>
+    /// <param name="session"></param>
     /// <returns>执行结果</returns>
     protected abstract IQueryResult ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng, Accountant accountant);
+        DateFilter rng, Session session);
 
     /// <summary>
     ///     执行硬重置表达式
     /// </summary>
     /// <param name="distQuery">分期检索式</param>
     /// <param name="query">记账凭证检索式</param>
-    /// <param name="accountant"></param>
+    /// <param name="session"></param>
     /// <returns>执行结果</returns>
     protected abstract IQueryResult ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        IQueryCompounded<IVoucherQueryAtom> query, Accountant accountant);
+        IQueryCompounded<IVoucherQueryAtom> query, Session session);
 
     /// <summary>
     ///     执行应用表达式
@@ -273,19 +268,18 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="distQuery">分期检索式</param>
     /// <param name="rng">日期过滤器</param>
     /// <param name="isCollapsed">是否压缩</param>
-    /// <param name="accountant"></param>
+    /// <param name="session"></param>
     /// <returns>执行结果</returns>
     protected abstract IQueryResult ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
-        bool isCollapsed, Accountant accountant);
+        bool isCollapsed, Session session);
 
     /// <summary>
     ///     执行检查表达式
     /// </summary>
     /// <param name="distQuery">分期检索式</param>
     /// <param name="rng">日期过滤器</param>
-    /// <param name="accountant"></param>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session"></param>
     /// <returns>执行结果</returns>
     protected abstract IQueryResult ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
-        Accountant accountant, IEntitiesSerializer serializer);
+        Session session);
 }

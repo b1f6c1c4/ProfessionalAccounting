@@ -57,11 +57,6 @@ public class DbSession : IHistoricalExchange
     public AtomicReference<IDbAdapter> Db { private get; set; }
 
     /// <summary>
-    ///     返回结果数量上限
-    /// </summary>
-    public int Limit { private get; set; } = 0;
-
-    /// <summary>
     ///     查询汇率
     /// </summary>
     /// <param name="date">日期</param>
@@ -170,16 +165,16 @@ public class DbSession : IHistoricalExchange
     public IAsyncEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
         => Db.Get().SelectVoucherDetails(query);
 
-    public Task<ISubtotalResult> SelectVouchersGrouped(IVoucherGroupedQuery query)
+    public Task<ISubtotalResult> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit)
     {
-        var res = Db.Get().SelectVouchersGrouped(query, Limit);
+        var res = Db.Get().SelectVouchersGrouped(query, limit);
         var conv = new SubtotalBuilder(query.Subtotal, this);
         return conv.Build(res);
     }
 
-    public Task<ISubtotalResult> SelectVoucherDetailsGrouped(IGroupedQuery query)
+    public Task<ISubtotalResult> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit)
     {
-        var res = Db.Get().SelectVoucherDetailsGrouped(query, Limit);
+        var res = Db.Get().SelectVoucherDetailsGrouped(query, limit);
         var conv = new SubtotalBuilder(query.Subtotal, this);
         return conv.Build(res);
     }

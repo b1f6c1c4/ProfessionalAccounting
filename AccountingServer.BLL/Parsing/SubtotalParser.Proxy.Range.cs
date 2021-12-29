@@ -37,10 +37,10 @@ internal partial class SubtotalParser
 
         public DateTime? AsDate() =>
             RangeDeltaDay() != null
-                ? Client().ClientDateTime.Today.AddDays(1 - RangeDeltaDay().GetText().Length)
+                ? Client.ClientDateTime.Today.AddDays(1 - RangeDeltaDay().GetText().Length)
                 : ClientDateTime.ParseExact(RangeADay().GetText(), "yyyyMMdd");
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 
     public partial class RangeWeekContext : IClientDependable, IDateRange
@@ -51,14 +51,14 @@ internal partial class SubtotalParser
             get
             {
                 var delta = 1 - RangeDeltaWeek().GetText().Length;
-                var dt = Client().ClientDateTime.Today;
+                var dt = Client.ClientDateTime.Today;
                 dt = dt.AddDays(dt.DayOfWeek == DayOfWeek.Sunday ? -6 : 1 - (int)dt.DayOfWeek);
                 dt = dt.AddDays(delta * 7);
                 return new(dt, dt.AddDays(6));
             }
         }
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 
     public partial class RangeMonthContext : IClientDependable, IDateRange
@@ -73,8 +73,8 @@ internal partial class SubtotalParser
                 {
                     var delta = int.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
                     dt = new(
-                        Client().ClientDateTime.Today.Year,
-                        Client().ClientDateTime.Today.Month,
+                        Client.ClientDateTime.Today.Year,
+                        Client.ClientDateTime.Today.Month,
                         1,
                         0,
                         0,
@@ -89,7 +89,7 @@ internal partial class SubtotalParser
             }
         }
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 
     public partial class RangeYearContext : IDateRange
@@ -139,7 +139,7 @@ internal partial class SubtotalParser
             }
         }
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 
     public partial class RangeCoreContext : IClientDependable, IDateRange
@@ -179,6 +179,6 @@ internal partial class SubtotalParser
             }
         }
 
-        public Func<Client> Client { private get; set; }
+        public Client Client { private get; set; }
     }
 }

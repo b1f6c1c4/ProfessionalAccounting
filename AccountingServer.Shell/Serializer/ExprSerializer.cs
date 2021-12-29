@@ -31,7 +31,7 @@ namespace AccountingServer.Shell.Serializer;
 /// <summary>
 ///     实体表达式
 /// </summary>
-public class ExprSerializer : IEntitySerializer
+public class ExprSerializer : IClientDependable, IEntitySerializer
 {
     private const string TheToken = "new Voucher {";
 
@@ -72,7 +72,7 @@ public class ExprSerializer : IEntitySerializer
             detail.SubTitle.HasValue
                 ? $"// {t}-{TitleManager.GetTitleName(detail.Title, detail.SubTitle)}"
                 : $"// {t}");
-        if (detail.User != Client().ClientUser.Name)
+        if (detail.User != Client.ClientUser.Name)
             sb.Append($"U{detail.User.AsUser()} ");
         if (detail.Currency != BaseCurrency.Now)
             sb.Append($"@{detail.Currency} ");
@@ -129,10 +129,10 @@ public class ExprSerializer : IEntitySerializer
         Parsing.TrimStartComment(ref expr);
         var id = Parsing.Quoted(ref expr, '^');
         Parsing.TrimStartComment(ref expr);
-        DateTime? date = Client().ClientDateTime.Today;
+        DateTime? date = Client.ClientDateTime.Today;
         try
         {
-            date = ParsingF.UniqueTime(ref expr, Client());
+            date = ParsingF.UniqueTime(ref expr, Client);
         }
         catch (Exception)
         {
@@ -205,7 +205,7 @@ public class ExprSerializer : IEntitySerializer
         var lst = new List<string>();
 
         Parsing.TrimStartComment(ref expr);
-        var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal)).ParseUserSpec(Client().ClientUser);
+        var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal)).ParseUserSpec(Client.ClientUser);
         var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))?[1..]
                 .ToUpperInvariant()
             ?? BaseCurrency.Now;
@@ -259,5 +259,5 @@ public class ExprSerializer : IEntitySerializer
 
     protected virtual bool AlternativeTitle(ref string expr, ICollection<string> lst, ref ITitle title) => false;
 
-    public Func<Client> Client { private get; set; }
+    public Client Client { private get; set; }
 }

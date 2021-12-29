@@ -34,20 +34,7 @@ namespace AccountingServer.Shell;
 /// </summary>
 public class Facade
 {
-    /// <summary>
-    ///     默认表示器
-    /// </summary>
-    private static readonly IEntitiesSerializer DefaultSerializer
-        = new TrivialEntitiesSerializer(
-            AlternativeSerializer.Compose(
-                new DiscountSerializer(),
-                new AbbrSerializer(),
-                new CSharpSerializer()));
-
-    /// <summary>
-    ///     基本会计业务处理类
-    /// </summary>
-    private readonly Accountant m_Accountant;
+    private readonly DbSession m_Db;
 
     private readonly AccountingShell m_AccountingShell;
 
@@ -60,63 +47,37 @@ public class Facade
 
     public Facade(string uri = null, string db = null)
     {
-        m_Accountant = new(uri, db);
-        m_AccountingShell = new(m_Accountant);
-        m_ExchangeShell = new(m_Accountant);
+        m_Db = new(uri, db);
+        m_AccountingShell = new();
+        m_ExchangeShell = new();
         m_Composer =
             new()
                 {
-                    new CheckShell(m_Accountant),
-                    new CarryShell(m_Accountant),
+                    new CheckShell(),
+                    new CarryShell(),
                     m_ExchangeShell,
-                    new AssetShell(m_Accountant),
-                    new AmortizationShell(m_Accountant),
-                    new PluginShell(m_Accountant),
+                    new AssetShell(),
+                    new AmortizationShell(),
+                    new PluginShell(),
                     m_AccountingShell,
                 };
     }
 
-    /// <summary>
-    ///     修改返回结果数量上限
-    /// </summary>
-    public void AdjustLimit(int limit)
-        => m_Accountant.AdjustLimit(limit);
+    public Session CreateSession(string user, DateTime dt, string spec, int limit)
+        => new(m_Db, user, dt, spec, limit);
 
     /// <summary>
     ///     空记账凭证的表示
     /// </summary>
     // ReSharper disable once MemberCanBeMadeStatic.Global
-    public string EmptyVoucher(string spec) => GetSerializer(spec).PresentVoucher(null).Wrap();
-
-    /// <summary>
-    ///     从表示器代号寻找表示器
-    /// </summary>
-    /// <param name="spec">表示器代号</param>
-    /// <returns>表示器</returns>
-    private static IEntitiesSerializer GetSerializer(string spec)
-    {
-        if (string.IsNullOrWhiteSpace(spec))
-            return DefaultSerializer;
-
-        return spec.Initial() switch
-            {
-                "abbr" => new TrivialEntitiesSerializer(new AbbrSerializer()),
-                "csharp" => new TrivialEntitiesSerializer(new CSharpSerializer()),
-                "discount" => new TrivialEntitiesSerializer(new DiscountSerializer()),
-                "expr" => new TrivialEntitiesSerializer(new ExprSerializer()),
-                "json" => new JsonSerializer(),
-                "csv" => new CsvSerializer(spec.Rest()),
-                _ => throw new ArgumentException("表示器未知", nameof(spec)),
-            };
-    }
+    public string EmptyVoucher(Session session) => session.Serializer.PresentVoucher(null).Wrap();
 
     /// <summary>
     ///     执行表达式
     /// </summary>
     /// <param name="expr">表达式</param>
-    /// <param name="spec">表示器代号</param>
     /// <returns>执行结果</returns>
-    public IQueryResult Execute(string expr, string spec)
+    public IQueryResult Execute(Session session, string expr)
     {
         switch (expr)
         {
@@ -131,7 +92,7 @@ public class Facade
                 break;
         }
 
-        return m_Composer.Execute(expr, GetSerializer(spec));
+        return m_Composer.Execute(expr, session);
     }
 
     /// <summary>
@@ -140,7 +101,7 @@ public class Facade
     /// <param name="expr">表达式</param>
     /// <param name="spec">表示器代号</param>
     /// <returns>执行结果</returns>
-    public IQueryResult SafeExecute(string expr, string spec)
+    public IQueryResult SafeExecute(Session session, string expr)
     {
         switch (expr)
         {
@@ -150,7 +111,7 @@ public class Facade
                 return ListHelp();
         }
 
-        return m_AccountingShell.Execute(expr, GetSerializer(spec));
+        return m_AccountingShell.Execute(expr, session);
     }
 
     #region Miscellaneous
@@ -197,13 +158,11 @@ public class Facade
     /// <param name="str">记账凭证的表达式</param>
     /// <param name="spec">表示器代号</param>
     /// <returns>新记账凭证的表达式</returns>
-    public string ExecuteVoucherUpsert(string str, string spec)
+    public string ExecuteVoucherUpsert(Session session, string str)
     {
-        var serializer = GetSerializer(spec);
-
-        var voucher = serializer.ParseVoucher(str);
+        var voucher = session.Serializer.ParseVoucher(str);
         var grpCs = voucher.Details.GroupBy(d => d.Currency ?? BaseCurrency.Now).ToList();
-        var grpUs = voucher.Details.GroupBy(d => d.User ?? m_Accountant.Client.ClientUser.Name).ToList();
+        var grpUs = voucher.Details.GroupBy(d => d.User ?? session.Accountant.Client.ClientUser.Name).ToList();
         foreach (var grpC in grpCs)
         {
             var unc = grpC.SingleOrDefault(d => !d.Fund.HasValue);
@@ -231,7 +190,7 @@ public class Facade
                 voucher.Details.Add(
                     new() { User = grpUs.First().Key, Currency = grpC.Key, Title = 3999, Fund = -sum });
             }
-        else if (voucher.Details.GroupBy(d => (d.User ?? m_Accountant.Client.ClientUser.Name, d.Currency ?? BaseCurrency.Now))
+        else if (voucher.Details.GroupBy(d => (d.User ?? session.Accountant.Client.ClientUser.Name, d.Currency ?? BaseCurrency.Now))
                      .Where(grp => !grp.Sum(d => d.Fund!.Value).IsZero()).ToList() is var grpUCs &&
                  grpUCs.Count == 2)
         {
@@ -259,10 +218,10 @@ public class Facade
                 new() { User = q.Key.Item1, Currency = q.Key.Item2, Title = 3998, Fund = -qs / 2 });
         }
 
-        if (!m_Accountant.Upsert(voucher))
+        if (!session.Accountant.Upsert(voucher))
             throw new ApplicationException("更新或添加失败");
 
-        return serializer.PresentVoucher(voucher).Wrap();
+        return session.Serializer.PresentVoucher(voucher).Wrap();
     }
 
     /// <summary>
@@ -271,15 +230,14 @@ public class Facade
     /// <param name="str">资产表达式</param>
     /// <param name="spec">表示器代号</param>
     /// <returns>新资产表达式</returns>
-    public string ExecuteAssetUpsert(string str, string spec)
+    public string ExecuteAssetUpsert(Session session, string str)
     {
-        var serializer = GetSerializer(spec);
-        var asset = serializer.ParseAsset(str);
+        var asset = session.Serializer.ParseAsset(str);
 
-        if (!m_Accountant.Upsert(asset))
+        if (!session.Accountant.Upsert(asset))
             throw new ApplicationException("更新或添加失败");
 
-        return serializer.PresentAsset(asset).Wrap();
+        return session.Serializer.PresentAsset(asset).Wrap();
     }
 
     /// <summary>
@@ -288,15 +246,14 @@ public class Facade
     /// <param name="str">摊销表达式</param>
     /// <param name="spec">表示器代号</param>
     /// <returns>新摊销表达式</returns>
-    public string ExecuteAmortUpsert(string str, string spec)
+    public string ExecuteAmortUpsert(Session session, string str)
     {
-        var serializer = GetSerializer(spec);
-        var amort = serializer.ParseAmort(str);
+        var amort = session.Serializer.ParseAmort(str);
 
-        if (!m_Accountant.Upsert(amort))
+        if (!session.Accountant.Upsert(amort))
             throw new ApplicationException("更新或添加失败");
 
-        return serializer.PresentAmort(amort).Wrap();
+        return session.Serializer.PresentAmort(amort).Wrap();
     }
 
     #endregion
@@ -309,15 +266,14 @@ public class Facade
     /// <param name="str">记账凭证表达式</param>
     /// <param name="spec">表示器代号</param>
     /// <returns>是否成功</returns>
-    public bool ExecuteVoucherRemoval(string str, string spec)
+    public bool ExecuteVoucherRemoval(Session session, string str)
     {
-        var serializer = GetSerializer(spec);
-        var voucher = serializer.ParseVoucher(str);
+        var voucher = session.Serializer.ParseVoucher(str);
 
         if (voucher.ID == null)
             throw new ApplicationException("编号未知");
 
-        return m_Accountant.DeleteVoucher(voucher.ID);
+        return session.Accountant.DeleteVoucher(voucher.ID);
     }
 
     /// <summary>
@@ -326,15 +282,14 @@ public class Facade
     /// <param name="str">资产表达式</param>
     /// <param name="spec">表示器代号</param>
     /// <returns>是否成功</returns>
-    public bool ExecuteAssetRemoval(string str, string spec)
+    public bool ExecuteAssetRemoval(Session session, string str)
     {
-        var serializer = GetSerializer(spec);
-        var asset = serializer.ParseAsset(str);
+        var asset = session.Serializer.ParseAsset(str);
 
         if (!asset.ID.HasValue)
             throw new ApplicationException("编号未知");
 
-        return m_Accountant.DeleteAsset(asset.ID.Value);
+        return session.Accountant.DeleteAsset(asset.ID.Value);
     }
 
     /// <summary>
@@ -343,15 +298,14 @@ public class Facade
     /// <param name="str">摊销表达式</param>
     /// <param name="spec">表示器代号</param>
     /// <returns>是否成功</returns>
-    public bool ExecuteAmortRemoval(string str, string spec)
+    public bool ExecuteAmortRemoval(Session session, string str)
     {
-        var serializer = GetSerializer(spec);
-        var amort = serializer.ParseAmort(str);
+        var amort = session.Serializer.ParseAmort(str);
 
         if (!amort.ID.HasValue)
             throw new ApplicationException("编号未知");
 
-        return m_Accountant.DeleteAmortization(amort.ID.Value);
+        return session.Accountant.DeleteAmortization(amort.ID.Value);
     }
 
     #endregion
@@ -359,7 +313,7 @@ public class Facade
     #region Exchange
 
     // ReSharper disable once UnusedMember.Global
-    public void EnableTimer() => m_ExchangeShell.EnableTimer();
+    public void EnableTimer() => m_ExchangeShell.EnableTimer(m_Db);
 
     #endregion
 }

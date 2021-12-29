@@ -29,7 +29,7 @@ public class Client
 
 public interface IClientDependable
 {
-    Func<Client> Client { set; }
+    Client Client { set; }
 }
 
 internal interface IDate

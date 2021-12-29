@@ -43,24 +43,24 @@ internal class PluginShell : IShellComponent
 {
     private readonly Dictionary<string, PluginBase> m_Plugins;
 
-    public PluginShell(Accountant helper) => m_Plugins =
+    public PluginShell() => m_Plugins =
         new Dictionary<string, PluginBase>
             {
-                ["adb"] = new AverageDailyBalance(helper),
-                ["af"] = new AssetFactory(helper),
-                ["ad"] = new AssetDisposition(helper),
-                ["ir"] = new InterestRevenue(helper),
-                ["ie"] = new InterestExpense(helper),
-                ["cf"] = new CashFlow(helper),
-                ["c"] = new Composite(helper),
-                ["ccc"] = new CreditCardConvert(helper),
-                ["stmt"] = new Statement(helper),
-                ["u"] = new Utilities(helper),
-                ["yr"] = new YieldRate(helper),
+                ["adb"] = new AverageDailyBalance(),
+                ["af"] = new AssetFactory(),
+                ["ad"] = new AssetDisposition(),
+                ["ir"] = new InterestRevenue(),
+                ["ie"] = new InterestExpense(),
+                ["cf"] = new CashFlow(),
+                ["c"] = new Composite(),
+                ["ccc"] = new CreditCardConvert(),
+                ["stmt"] = new Statement(),
+                ["u"] = new Utilities(),
+                ["yr"] = new YieldRate(),
             };
 
     /// <inheritdoc />
-    public IQueryResult Execute(string expr, Accountant accountant, IEntitiesSerializer serializer)
+    public IQueryResult Execute(string expr, Session session)
     {
         var help = false;
         if (expr.StartsWith("?", StringComparison.Ordinal))
@@ -77,7 +77,7 @@ internal class PluginShell : IShellComponent
             return plgName == "" ? new PlainText(ListPlugins()) : new(GetHelp(plgName));
         }
 
-        return GetPlugin(plgName).Execute(expr, serializer);
+        return GetPlugin(plgName).Execute(expr, session);
     }
 
     /// <inheritdoc />

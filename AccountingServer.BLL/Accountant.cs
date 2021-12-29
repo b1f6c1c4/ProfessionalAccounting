@@ -47,8 +47,10 @@ public class Accountant : IHistoricalExchange
         m_AmortAccountant = new(m_Db, Client);
     }
 
-    public void AdjustLimit(int limit)
-        => m_Db.Limit = limit;
+    /// <summary>
+    ///     返回结果数量上限
+    /// </summary>
+    public int Limit { private get; set; } = 0;
 
     public DbSession.VirtualizeLock Virtualize()
         => m_Db.Virtualize();
@@ -74,16 +76,16 @@ public class Accountant : IHistoricalExchange
         => m_Db.SelectVoucherDetails(query);
 
     public ISubtotalResult SelectVoucherDetailsGrouped(IGroupedQuery query)
-        => m_Db.SelectVoucherDetailsGrouped(query).Result;
+        => m_Db.SelectVoucherDetailsGrouped(query, Limit).Result;
 
     public Task<ISubtotalResult> SelectVoucherDetailsGroupedAsync(IGroupedQuery query)
-        => m_Db.SelectVoucherDetailsGrouped(query);
+        => m_Db.SelectVoucherDetailsGrouped(query, Limit);
 
     public ISubtotalResult SelectVouchersGrouped(IVoucherGroupedQuery query)
-        => m_Db.SelectVouchersGrouped(query).Result;
+        => m_Db.SelectVouchersGrouped(query, Limit).Result;
 
     public Task<ISubtotalResult> SelectVouchersGroupedAsync(IVoucherGroupedQuery query)
-        => m_Db.SelectVouchersGrouped(query);
+        => m_Db.SelectVouchersGrouped(query, Limit);
 
     public IEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
         IQueryCompounded<IVoucherQueryAtom> query)

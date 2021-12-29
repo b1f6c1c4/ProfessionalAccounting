@@ -25,8 +25,6 @@ namespace AccountingServer.Shell.Plugins.Interest;
 /// </summary>
 internal class InterestRevenue : InterestBase
 {
-    public InterestRevenue(Accountant accountant) : base(accountant) { }
-
     /// <inheritdoc />
     protected override string MajorFilter() => "T1122+T1123+T1221";
 
