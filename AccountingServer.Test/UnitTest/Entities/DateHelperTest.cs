@@ -121,4 +121,26 @@ public class DateHelperTest
         var filter = new DateFilter(new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), null) { Nullable = true };
         Assert.Equal(expected, DateHelper.Within(value, filter));
     }
+
+    [Theory]
+    [InlineData("2017-01-31", 2016, 12 + 1)]
+    [InlineData("2017-02-28", 2016, 12 + 2)]
+    [InlineData("2017-04-30", 2016, 12 + 4)]
+    [InlineData("2017-01-31", 2018, 1 - 12)]
+    [InlineData("2017-02-28", 2018, 2 - 12)]
+    [InlineData("2017-04-30", 2018, 4 - 12)]
+    [InlineData("2017-01-31", 2017, 1)]
+    [InlineData("2017-02-28", 2017, 2)]
+    [InlineData("2017-04-30", 2017, 4)]
+    [InlineData("2020-01-31", 2020, 1)]
+    [InlineData("2020-02-29", 2020, 2)]
+    [InlineData("2020-04-30", 2020, 4)]
+    [InlineData("2100-01-31", 2100, 1)]
+    [InlineData("2100-02-28", 2100, 2)]
+    [InlineData("2100-04-30", 2100, 4)]
+    public void LastDayOfMonthTest(string expectedS, int year, int month)
+    {
+        var expected = expectedS.ToDateTime();
+        Assert.Equal(expected, DateHelper.LastDayOfMonth(year, month));
+    }
 }

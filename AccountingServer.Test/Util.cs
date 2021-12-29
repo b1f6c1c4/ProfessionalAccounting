@@ -17,6 +17,9 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
 using AccountingServer.Entities;
 
 namespace AccountingServer.Test;
@@ -25,4 +28,12 @@ public static class Util
 {
     public static DateTime? ToDateTime(this string b1S)
         => b1S == null ? null : DateTimeParser.Parse(b1S);
+
+    public static async ValueTask<string> Join(this IAsyncEnumerable<string> iae)
+    {
+        var sb = new StringBuilder();
+        await foreach (var e in iae)
+            sb.Append(e);
+        return sb.ToString();
+    }
 }

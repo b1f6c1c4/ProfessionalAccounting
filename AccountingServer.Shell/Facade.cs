@@ -18,9 +18,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Resources;
+using System.Threading.Tasks;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities.Util;
@@ -149,7 +148,7 @@ public class Facade
     /// <param name="session">客户端会话</param>
     /// <param name="str">记账凭证的表达式</param>
     /// <returns>新记账凭证的表达式</returns>
-    public string ExecuteVoucherUpsert(Session session, string str)
+    public async ValueTask<string> ExecuteVoucherUpsert(Session session, string str)
     {
         var voucher = session.Serializer.ParseVoucher(str);
         var grpCs = voucher.Details.GroupBy(d => d.Currency ?? BaseCurrency.Now).ToList();
@@ -209,7 +208,7 @@ public class Facade
                 new() { User = q.Key.Item1, Currency = q.Key.Item2, Title = 3998, Fund = -qs / 2 });
         }
 
-        if (!session.Accountant.Upsert(voucher))
+        if (!await session.Accountant.UpsertAsync(voucher))
             throw new ApplicationException("更新或添加失败");
 
         return session.Serializer.PresentVoucher(voucher).Wrap();
@@ -221,11 +220,11 @@ public class Facade
     /// <param name="session">客户端会话</param>
     /// <param name="str">资产表达式</param>
     /// <returns>新资产表达式</returns>
-    public string ExecuteAssetUpsert(Session session, string str)
+    public async ValueTask<string> ExecuteAssetUpsert(Session session, string str)
     {
         var asset = session.Serializer.ParseAsset(str);
 
-        if (!session.Accountant.Upsert(asset))
+        if (!await session.Accountant.UpsertAsync(asset))
             throw new ApplicationException("更新或添加失败");
 
         return session.Serializer.PresentAsset(asset).Wrap();
@@ -237,11 +236,11 @@ public class Facade
     /// <param name="session">客户端会话</param>
     /// <param name="str">摊销表达式</param>
     /// <returns>新摊销表达式</returns>
-    public string ExecuteAmortUpsert(Session session, string str)
+    public async ValueTask<string> ExecuteAmortUpsert(Session session, string str)
     {
         var amort = session.Serializer.ParseAmort(str);
 
-        if (!session.Accountant.Upsert(amort))
+        if (!await session.Accountant.UpsertAsync(amort))
             throw new ApplicationException("更新或添加失败");
 
         return session.Serializer.PresentAmort(amort).Wrap();
@@ -257,14 +256,14 @@ public class Facade
     /// <param name="session">客户端会话</param>
     /// <param name="str">记账凭证表达式</param>
     /// <returns>是否成功</returns>
-    public bool ExecuteVoucherRemoval(Session session, string str)
+    public async ValueTask<bool> ExecuteVoucherRemoval(Session session, string str)
     {
         var voucher = session.Serializer.ParseVoucher(str);
 
         if (voucher.ID == null)
             throw new ApplicationException("编号未知");
 
-        return session.Accountant.DeleteVoucher(voucher.ID);
+        return await session.Accountant.DeleteVoucherAsync(voucher.ID);
     }
 
     /// <summary>
@@ -273,14 +272,14 @@ public class Facade
     /// <param name="session">客户端会话</param>
     /// <param name="str">资产表达式</param>
     /// <returns>是否成功</returns>
-    public bool ExecuteAssetRemoval(Session session, string str)
+    public async ValueTask<bool> ExecuteAssetRemoval(Session session, string str)
     {
         var asset = session.Serializer.ParseAsset(str);
 
         if (!asset.ID.HasValue)
             throw new ApplicationException("编号未知");
 
-        return session.Accountant.DeleteAsset(asset.ID.Value);
+        return await session.Accountant.DeleteAssetAsync(asset.ID.Value);
     }
 
     /// <summary>
@@ -289,14 +288,14 @@ public class Facade
     /// <param name="session">客户端会话</param>
     /// <param name="str">摊销表达式</param>
     /// <returns>是否成功</returns>
-    public bool ExecuteAmortRemoval(Session session, string str)
+    public async ValueTask<bool> ExecuteAmortRemoval(Session session, string str)
     {
         var amort = session.Serializer.ParseAmort(str);
 
         if (!amort.ID.HasValue)
             throw new ApplicationException("编号未知");
 
-        return session.Accountant.DeleteAmortization(amort.ID.Value);
+        return await session.Accountant.DeleteAmortizationAsync(amort.ID.Value);
     }
 
     #endregion

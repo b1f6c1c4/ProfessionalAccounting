@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
@@ -84,7 +85,7 @@ public class SubtotalTest
     [InlineData("20170104~20170105", "000011")]
     [InlineData("20170103~20170105", "000111")]
     [InlineData("20170102~20170105", "001111")]
-    public void TestAggrEvery(string rng, string incl)
+    public async Task TestAggrEvery(string rng, string incl)
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]", m_Client).Subtotal, m_Exchange);
 
@@ -95,7 +96,7 @@ public class SubtotalTest
                 new() { Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
             };
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -169,7 +170,7 @@ public class SubtotalTest
     [InlineData("20170104~20170105", "000011")]
     [InlineData("20170103~20170105", "000111")]
     [InlineData("20170102~20170105", "001111")]
-    public void TestAggrEveryNoNull(string rng, string incl)
+    public async Task TestAggrEveryNoNull(string rng, string incl)
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]", m_Client).Subtotal, m_Exchange);
 
@@ -179,7 +180,7 @@ public class SubtotalTest
                 new() { Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 4 },
             };
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -237,13 +238,13 @@ public class SubtotalTest
     [InlineData("20170101~20170101", "0100")]
     [InlineData("20170103~20170103", "0001")]
     [InlineData("20170102~20170103", "0011")]
-    public void TestAggrEveryNull(string rng, string incl)
+    public async Task TestAggrEveryNull(string rng, string incl)
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]", m_Client).Subtotal, m_Exchange);
 
         var bal = Array.Empty<Balance>();
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -314,7 +315,7 @@ public class SubtotalTest
     [InlineData("20170104~20170105", "000011")]
     [InlineData("20170103~20170105", "000111")]
     [InlineData("20170102~20170105", "001111")]
-    public void TestAggrEveryEqui(string rng, string incl)
+    public async Task TestAggrEveryEqui(string rng, string incl)
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]X[20170101]", m_Client).Subtotal, m_Exchange);
 
@@ -348,7 +349,7 @@ public class SubtotalTest
                     },
             };
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -406,13 +407,13 @@ public class SubtotalTest
     [InlineData("20170101~20170101", "0100")]
     [InlineData("20170103~20170103", "0001")]
     [InlineData("20170102~20170103", "0011")]
-    public void TestAggrEveryNullEqui(string rng, string incl)
+    public async Task TestAggrEveryNullEqui(string rng, string incl)
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery($"``vD[{rng}]X[20170101]", m_Client).Subtotal, m_Exchange);
 
         var bal = Array.Empty<Balance>();
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -441,7 +442,7 @@ public class SubtotalTest
     }
 
     [Fact]
-    public void TestAggrChanged()
+    public async Task TestAggrChanged()
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`vD", m_Client).Subtotal, m_Exchange);
 
@@ -453,7 +454,7 @@ public class SubtotalTest
                 new() { Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
             };
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -481,7 +482,7 @@ public class SubtotalTest
     }
 
     [Fact]
-    public void TestAggrChangedEquivalent()
+    public async Task TestAggrChangedEquivalent()
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`vDX[20170101]", m_Client).Subtotal, m_Exchange);
 
@@ -493,7 +494,7 @@ public class SubtotalTest
                 new() { Currency = "CNY", Date = new(2017, 01, 05, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
             };
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -523,7 +524,7 @@ public class SubtotalTest
     }
 
     [Fact]
-    public void TestContent()
+    public async Task TestContent()
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`c", m_Client).Subtotal, m_Exchange);
 
@@ -535,7 +536,7 @@ public class SubtotalTest
                 new() { Content = "CNY", Fund = 2 },
             };
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -562,7 +563,7 @@ public class SubtotalTest
 
 
     [Fact]
-    public void TestCurrency()
+    public async Task TestCurrency()
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`C", m_Client).Subtotal, m_Exchange);
 
@@ -574,7 +575,7 @@ public class SubtotalTest
                 new() { Currency = "CNY", Fund = 2 },
             };
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -600,7 +601,7 @@ public class SubtotalTest
     }
 
     [Fact]
-    public void TestDay()
+    public async Task TestDay()
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`d", m_Client).Subtotal, m_Exchange);
 
@@ -612,7 +613,7 @@ public class SubtotalTest
                 new() { Date = new(2017, 01, 04, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
             };
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -631,7 +632,7 @@ public class SubtotalTest
     }
 
     [Fact]
-    public void TestEquivalent()
+    public async Task TestEquivalent()
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`vX@JPY[20170101]", m_Client).Subtotal, m_Exchange);
 
@@ -643,14 +644,14 @@ public class SubtotalTest
                 new() { Currency = "CNY", Fund = 2 },
             };
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         Assert.Null(res.Items);
         Assert.Equal((8 * 456 + 1 + 4 * 789 + 2) / 456D, res.Fund, 14);
     }
 
     [Fact]
-    public void TestMonth()
+    public async Task TestMonth()
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`m", m_Client).Subtotal, m_Exchange);
 
@@ -662,7 +663,7 @@ public class SubtotalTest
                 new() { Date = new(2017, 04, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
             };
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -681,7 +682,7 @@ public class SubtotalTest
     }
 
     [Fact]
-    public void TestRemark()
+    public async Task TestRemark()
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`r", m_Client).Subtotal, m_Exchange);
 
@@ -693,7 +694,7 @@ public class SubtotalTest
                 new() { Remark = "CNY", Fund = 2 },
             };
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -719,7 +720,7 @@ public class SubtotalTest
     }
 
     [Fact]
-    public void TestTitle()
+    public async Task TestTitle()
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`t", m_Client).Subtotal, m_Exchange);
 
@@ -731,7 +732,7 @@ public class SubtotalTest
                 new() { Title = 1234, Fund = 2 },
             };
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -757,7 +758,7 @@ public class SubtotalTest
     }
 
     [Fact]
-    public void TestTitleSubTitle()
+    public async Task TestTitleSubTitle()
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`ts", m_Client).Subtotal, m_Exchange);
 
@@ -773,7 +774,7 @@ public class SubtotalTest
                 new() { Title = 1234, SubTitle = 08, Fund = 32 },
             };
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -808,7 +809,7 @@ public class SubtotalTest
     }
 
     [Fact]
-    public void TestUser()
+    public async Task TestUser()
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`U", m_Client).Subtotal, m_Exchange);
 
@@ -820,7 +821,7 @@ public class SubtotalTest
                 new() { User = "CNY", Fund = 2 },
             };
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -846,7 +847,7 @@ public class SubtotalTest
     }
 
     [Fact]
-    public void TestWeek()
+    public async Task TestWeek()
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`w", m_Client).Subtotal, m_Exchange);
 
@@ -858,7 +859,7 @@ public class SubtotalTest
                 new() { Date = new(2017, 01, 23, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
             };
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 
@@ -877,7 +878,7 @@ public class SubtotalTest
     }
 
     [Fact]
-    public void TestYear()
+    public async Task TestYear()
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`y", m_Client).Subtotal, m_Exchange);
 
@@ -889,7 +890,7 @@ public class SubtotalTest
                 new() { Date = new(2017, 01, 01, 0, 0, 0, DateTimeKind.Utc), Fund = 2 },
             };
 
-        var res = builder.Build(bal.ToAsyncEnumerable()).Result;
+        var res = await builder.Build(bal.ToAsyncEnumerable());
         Assert.IsAssignableFrom<ISubtotalRoot>(res);
         var resx = (ISubtotalRoot)res;
 

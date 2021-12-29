@@ -18,6 +18,7 @@
 
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using AccountingServer.BLL;
 using AccountingServer.DAL;
 using AccountingServer.Entities;
@@ -43,55 +44,55 @@ public class BLLTest : IDisposable
 
     [Theory]
     [ClassData(typeof(VoucherDataProvider))]
-    public void VoucherStoreTest(string dt, VoucherType type)
+    public async Task VoucherStoreTest(string dt, VoucherType type)
     {
         var voucher1 = VoucherDataProvider.Create(dt, type);
 
-        Assert.True(m_Accountant.Upsert(voucher1));
+        Assert.True(await m_Accountant.UpsertAsync(voucher1));
         Assert.NotNull(voucher1.ID);
 
         voucher1.Remark = "whatever";
-        Assert.True(m_Accountant.Upsert(voucher1));
+        Assert.True(await m_Accountant.UpsertAsync(voucher1));
 
-        var voucher2 = m_Accountant.SelectVouchers(VoucherQueryUnconstrained.Instance).Single();
+        var voucher2 = await m_Accountant.SelectVouchersAsync(VoucherQueryUnconstrained.Instance).SingleAsync();
         Assert.Equal(voucher1, voucher2, new VoucherEqualityComparer());
 
-        var voucher3 = m_Accountant.SelectVoucher(voucher1.ID);
+        var voucher3 = await m_Accountant.SelectVoucherAsync(voucher1.ID);
         Assert.Equal(voucher1, voucher3, new VoucherEqualityComparer());
 
-        Assert.True(m_Accountant.DeleteVoucher(voucher1.ID));
-        Assert.False(m_Accountant.DeleteVoucher(voucher1.ID));
+        Assert.True(await m_Accountant.DeleteVoucherAsync(voucher1.ID));
+        Assert.False(await m_Accountant.DeleteVoucherAsync(voucher1.ID));
 
-        Assert.False(m_Accountant.SelectVouchers(VoucherQueryUnconstrained.Instance).Any());
+        Assert.False(await m_Accountant.SelectVouchersAsync(VoucherQueryUnconstrained.Instance).AnyAsync());
     }
 
     [Fact]
-    public void VoucherBulkStoreTest()
+    public async Task VoucherBulkStoreTest()
     {
         var vouchers = new VoucherDataProvider().Select(pars
             => VoucherDataProvider.Create((string)pars[0], (VoucherType)pars[1])).ToList();
         var cnt = vouchers.Count;
 
-        Assert.Equal(cnt, m_Accountant.Upsert(vouchers));
+        Assert.Equal(cnt, await m_Accountant.UpsertAsync(vouchers));
         foreach (var voucher in vouchers)
             Assert.NotNull(voucher.ID);
 
         vouchers.AddRange(new VoucherDataProvider().Select(pars
             => VoucherDataProvider.Create((string)pars[0], (VoucherType)pars[1])));
-        Assert.Equal(cnt * 2, m_Accountant.Upsert(vouchers));
+        Assert.Equal(cnt * 2, await m_Accountant.UpsertAsync(vouchers));
         foreach (var voucher in vouchers)
             Assert.NotNull(voucher.ID);
 
-        Assert.Equal(cnt * 2, m_Accountant.SelectVouchers(VoucherQueryUnconstrained.Instance).Count());
+        Assert.Equal(cnt * 2, await m_Accountant.SelectVouchersAsync(VoucherQueryUnconstrained.Instance).CountAsync());
 
-        Assert.Equal(cnt * 2, m_Accountant.DeleteVouchers(VoucherQueryUnconstrained.Instance));
+        Assert.Equal(cnt * 2, await m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance));
 
-        Assert.False(m_Accountant.SelectVouchers(VoucherQueryUnconstrained.Instance).Any());
+        Assert.False(await m_Accountant.SelectVouchersAsync(VoucherQueryUnconstrained.Instance).AnyAsync());
     }
 
     [Theory]
     [ClassData(typeof(AssetDataProvider))]
-    public void AssetStoreTest(string dt, DepreciationMethod type)
+    public async Task AssetStoreTest(string dt, DepreciationMethod type)
     {
         var asset1 = AssetDataProvider.Create(dt, type);
         foreach (var item in asset1.Schedule)
@@ -101,11 +102,11 @@ public class BLLTest : IDisposable
                 dev.Amount = 0;
         }
 
-        Assert.True(m_Accountant.Upsert(asset1));
+        Assert.True(await m_Accountant.UpsertAsync(asset1));
         Assert.NotNull(asset1.ID);
 
         asset1.Remark = "whatever";
-        Assert.True(m_Accountant.Upsert(asset1));
+        Assert.True(await m_Accountant.UpsertAsync(asset1));
 
         if (asset1.Date.HasValue)
         {
@@ -113,33 +114,33 @@ public class BLLTest : IDisposable
             asset1.Remark = "whatever";
         }
 
-        var asset2 = m_Accountant.SelectAssets(DistributedQueryUnconstrained.Instance).Single();
+        var asset2 = await m_Accountant.SelectAssetsAsync(DistributedQueryUnconstrained.Instance).SingleAsync();
         Assert.Equal(asset1, asset2, new AssetEqualityComparer());
 
-        var asset3 = m_Accountant.SelectAsset(asset1.ID!.Value);
+        var asset3 = await m_Accountant.SelectAssetAsync(asset1.ID!.Value);
         Assert.Equal(asset1, asset3, new AssetEqualityComparer());
 
-        Assert.True(m_Accountant.DeleteAsset(asset1.ID.Value));
-        Assert.False(m_Accountant.DeleteAsset(asset1.ID.Value));
+        Assert.True(await m_Accountant.DeleteAssetAsync(asset1.ID.Value));
+        Assert.False(await m_Accountant.DeleteAssetAsync(asset1.ID.Value));
 
-        Assert.Equal(0, m_Accountant.DeleteAssets(DistributedQueryUnconstrained.Instance));
+        Assert.Equal(0, await m_Accountant.DeleteAssetsAsync(DistributedQueryUnconstrained.Instance));
 
-        Assert.False(m_Accountant.SelectAssets(DistributedQueryUnconstrained.Instance).Any());
+        Assert.False(await m_Accountant.SelectAssetsAsync(DistributedQueryUnconstrained.Instance).AnyAsync());
     }
 
     [Theory]
     [ClassData(typeof(AmortDataProvider))]
-    public void AmortStoreTest(string dt, AmortizeInterval type)
+    public async Task AmortStoreTest(string dt, AmortizeInterval type)
     {
         var amort1 = AmortDataProvider.Create(dt, type);
         foreach (var item in amort1.Schedule)
             item.Value = 0;
 
-        Assert.True(m_Accountant.Upsert(amort1));
+        Assert.True(await m_Accountant.UpsertAsync(amort1));
         Assert.NotNull(amort1.ID);
 
         amort1.Remark = "whatever";
-        Assert.True(m_Accountant.Upsert(amort1));
+        Assert.True(await m_Accountant.UpsertAsync(amort1));
 
         if (amort1.Date.HasValue)
         {
@@ -147,18 +148,18 @@ public class BLLTest : IDisposable
             amort1.Remark = "whatever";
         }
 
-        var amort2 = m_Accountant.SelectAmortizations(DistributedQueryUnconstrained.Instance).Single();
+        var amort2 = await m_Accountant.SelectAmortizationsAsync(DistributedQueryUnconstrained.Instance).SingleAsync();
         Assert.Equal(amort1, amort2, new AmortEqualityComparer());
 
-        var amort3 = m_Accountant.SelectAmortization(amort1.ID!.Value);
+        var amort3 = await m_Accountant.SelectAmortizationAsync(amort1.ID!.Value);
         Assert.Equal(amort1, amort3, new AmortEqualityComparer());
 
-        Assert.True(m_Accountant.DeleteAmortization(amort1.ID.Value));
-        Assert.False(m_Accountant.DeleteAmortization(amort1.ID.Value));
+        Assert.True(await m_Accountant.DeleteAmortizationAsync(amort1.ID.Value));
+        Assert.False(await m_Accountant.DeleteAmortizationAsync(amort1.ID.Value));
 
-        Assert.Equal(0, m_Accountant.DeleteAmortizations(DistributedQueryUnconstrained.Instance));
+        Assert.Equal(0, await m_Accountant.DeleteAmortizationsAsync(DistributedQueryUnconstrained.Instance));
 
-        Assert.False(m_Accountant.SelectAmortizations(DistributedQueryUnconstrained.Instance).Any());
+        Assert.False(await m_Accountant.SelectAmortizationsAsync(DistributedQueryUnconstrained.Instance).AnyAsync());
     }
 
     [Fact]

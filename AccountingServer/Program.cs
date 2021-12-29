@@ -19,6 +19,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 using AccountingServer.Entities;
 using AccountingServer.Http;
 using AccountingServer.Shell;
@@ -32,7 +33,7 @@ var server = new HttpServer(IPAddress.Any, 30000);
 server.OnHttpRequest += Server_OnHttpRequest;
 server.Start();
 
-HttpResponse Server_OnHttpRequest(HttpRequest request)
+async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
 {
 #if DEBUG
     var fn = Path.Combine(
@@ -116,39 +117,39 @@ HttpResponse Server_OnHttpRequest(HttpRequest request)
         case "/voucherUpsert":
             {
                 var code = request.ReadToEnd();
-                var res = facade.ExecuteVoucherUpsert(session, code);
+                var res = await facade.ExecuteVoucherUpsert(session, code);
                 return GenerateHttpResponse(res, "text/plain; charset=utf-8");
             }
         case "/voucherRemoval":
             {
                 var code = request.ReadToEnd();
-                var res = facade.ExecuteVoucherRemoval(session, code);
+                var res = await facade.ExecuteVoucherRemoval(session, code);
                 return new() { ResponseCode = res ? 204 : 404 };
             }
 
         case "/assetUpsert":
             {
                 var code = request.ReadToEnd();
-                var res = facade.ExecuteAssetUpsert(session, code);
+                var res = await facade.ExecuteAssetUpsert(session, code);
                 return GenerateHttpResponse(res, "text/plain; charset=utf-8");
             }
         case "/assetRemoval":
             {
                 var code = request.ReadToEnd();
-                var res = facade.ExecuteAssetRemoval(session, code);
+                var res = await facade.ExecuteAssetRemoval(session, code);
                 return new() { ResponseCode = res ? 204 : 404 };
             }
 
         case "/amortUpsert":
             {
                 var code = request.ReadToEnd();
-                var res = facade.ExecuteAmortUpsert(session, code);
+                var res = await facade.ExecuteAmortUpsert(session, code);
                 return GenerateHttpResponse(res, "text/plain; charset=utf-8");
             }
         case "/amortRemoval":
             {
                 var code = request.ReadToEnd();
-                var res = facade.ExecuteAmortRemoval(session, code);
+                var res = await facade.ExecuteAmortRemoval(session, code);
                 return new() { ResponseCode = res ? 204 : 404 };
             }
         default:
