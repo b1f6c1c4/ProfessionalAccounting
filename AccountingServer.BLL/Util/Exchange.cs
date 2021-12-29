@@ -18,10 +18,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.NetworkInformation;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -169,19 +168,16 @@ internal class FixerIoExchange : ExchangeApi, IHistoricalExchange
         => m_ApiKeys.Execute(ExchangeInfo.Config.FixerAccessKey,
             key => PartialInvoke(from, to, key, "latest"));
 
-    private static Task<double?> PartialInvoke(string from, string to, string key, string endpoint)
+    private static async Task<double?> PartialInvoke(string from, string to, string key, string endpoint)
     {
-        var url =
-            $"http://data.fixer.io/api/{endpoint}?access_key={key}&symbols={from},{to}";
-        var req = WebRequest.CreateHttp(url); // TODO
-        req.KeepAlive = true;
-        var res = req.GetResponse();
-        using var stream = res.GetResponseStream();
-        var reader = new StreamReader(stream ?? throw new NetworkInformationException());
-        var json = JObject.Parse(reader.ReadToEnd());
+        var client = new HttpClient();
+        var response =
+            await client.GetAsync($"http://data.fixer.io/api/{endpoint}?access_key={key}&symbols={from},{to}");
+        response.EnsureSuccessStatusCode();
+        var json = JObject.Parse(await response.Content.ReadAsStringAsync());
         if (json["success"]!.Value<bool>())
-            return Task.FromResult<double?>(json["rates"]![to]!.Value<double>() / json["rates"]![from]!.Value<double>());
-        return Task.FromResult<double?>(null);
+            return json["rates"]![to]!.Value<double>() / json["rates"]![@from]!.Value<double>();
+        return null;
     }
 
     public Task<double> Query(DateTime? date, string from, string to)
@@ -236,18 +232,14 @@ internal class CoinMarketCapExchange : ExchangeApi
             key => PartialInvoke(fromId.Value, toId.Value, key));
     }
 
-    private static Task<double?> PartialInvoke(int fromId, int toId, string key)
+    private static async Task<double?> PartialInvoke(int fromId, int toId, string key)
     {
-        var url =
-            $"https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id={fromId}&convert_id={toId}";
-        var req = WebRequest.CreateHttp(url); // TODO
-        req.KeepAlive = true;
-        req.Headers.Add("X-CMC_PRO_API_KEY", key);
-        req.Accept = "application/json";
-        var res = req.GetResponse();
-        using var stream = res.GetResponseStream();
-        var reader = new StreamReader(stream ?? throw new NetworkInformationException());
-        var json = JObject.Parse(reader.ReadToEnd());
-        return Task.FromResult(json["data"]?[fromId.ToString()]?["quote"]?[toId.ToString()]?["price"]?.Value<double>());
+        var client = new HttpClient();
+        client.DefaultRequestHeaders.Add("X-CMC_PRO_API_KEY", key);
+        client.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+        var response = await client.GetAsync(
+            $"https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id={fromId}&convert_id={toId}");
+        var json = JObject.Parse(await response.Content.ReadAsStringAsync());
+        return json["data"]?[fromId.ToString()]?["quote"]?[toId.ToString()]?["price"]?.Value<double>();
     }
 }
