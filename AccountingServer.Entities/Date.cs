@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace AccountingServer.Entities;
 
@@ -147,4 +148,35 @@ public static class DateHelper
 
         return !(dt > rng.EndDate);
     }
+}
+
+public static class DateTimeParser
+{
+    // ReSharper disable once UnusedMember.Global
+    public static DateTime Parse(string str) => DateTime.Parse(
+        str,
+        null,
+        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
+
+    // ReSharper disable once UnusedMember.Global
+    public static DateTime ParseExact(string str, string format) => DateTime.ParseExact(
+        str,
+        format,
+        null,
+        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
+
+    // ReSharper disable once UnusedMember.Global
+    public static bool TryParse(string str, out DateTime result) => DateTime.TryParse(
+        str,
+        null,
+        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal,
+        out result);
+
+    // ReSharper disable once UnusedMember.Global
+    public static bool TryParseExact(string str, string format, out DateTime result) => DateTime.TryParseExact(
+        str,
+        format,
+        null,
+        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal,
+        out result);
 }

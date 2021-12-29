@@ -42,16 +42,16 @@ internal partial class CarryShell : IShellComponent
         {
             case "lst":
                 expr = expr.Rest();
-                rng = Parsing.Range(ref expr, session.Accountant.Client) ?? DateFilter.Unconstrained;
+                rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
                 Parsing.Eof(expr);
                 return ListHistory(rng);
             case "rst":
                 expr = expr.Rest();
-                rng = Parsing.Range(ref expr, session.Accountant.Client) ?? DateFilter.Unconstrained;
+                rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
                 Parsing.Eof(expr);
                 return PerformAction(session, rng, true);
             default:
-                rng = Parsing.Range(ref expr, session.Accountant.Client) ?? DateFilter.Unconstrained;
+                rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
                 Parsing.Eof(expr);
                 return PerformAction(session, AutomaticRange(session, rng), false);
         }
@@ -63,7 +63,7 @@ internal partial class CarryShell : IShellComponent
         if (rng.NullOnly)
             return rng;
 
-        var today = session.Accountant.Client.ClientDateTime.Today;
+        var today = session.Client.Today;
         rng.EndDate = rng.EndDate.HasValue
             ? new DateTime(rng.EndDate!.Value.Year, rng.EndDate!.Value.Month, 1, 0, 0, 0, DateTimeKind.Utc)
             : new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Utc)

@@ -17,70 +17,26 @@
  */
 
 using System;
-using System.Globalization;
 
 namespace AccountingServer.BLL;
 
+/// <summary>
+///     客户端
+/// </summary>
 public class Client
 {
-    public ClientUser ClientUser { get; set; }
-    public ClientDateTime ClientDateTime { get; set; }
+    /// <summary>
+    ///     客户端用户
+    /// </summary>
+    public string User { get; init; }
+
+    /// <summary>
+    ///     客户端时间
+    /// </summary>
+    public DateTime Today { get; init; }
 }
 
 public interface IClientDependable
 {
     Client Client { set; }
-}
-
-internal interface IDate
-{
-    DateTime? AsDate();
-}
-
-/// <summary>
-///     客户端用户
-/// </summary>
-public class ClientUser
-{
-    public string Name { get; }
-
-    internal ClientUser(string user) => Name = user ?? throw new InvalidOperationException("必须有一个用户");
-}
-
-/// <summary>
-///     客户端时间
-/// </summary>
-public class ClientDateTime
-{
-    public DateTime Today { get; }
-
-    internal ClientDateTime(DateTime timestamp) => Today = timestamp.Date;
-
-    // ReSharper disable once UnusedMember.Global
-    public static DateTime Parse(string str) => DateTime.Parse(
-        str,
-        null,
-        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
-
-    // ReSharper disable once UnusedMember.Global
-    public static DateTime ParseExact(string str, string format) => DateTime.ParseExact(
-        str,
-        format,
-        null,
-        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
-
-    // ReSharper disable once UnusedMember.Global
-    public static bool TryParse(string str, out DateTime result) => DateTime.TryParse(
-        str,
-        null,
-        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal,
-        out result);
-
-    // ReSharper disable once UnusedMember.Global
-    public static bool TryParseExact(string str, string format, out DateTime result) => DateTime.TryParseExact(
-        str,
-        format,
-        null,
-        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal,
-        out result);
 }

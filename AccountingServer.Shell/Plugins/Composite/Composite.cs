@@ -54,7 +54,7 @@ internal class Composite : PluginBase
 
         DateFilter the;
         if (string.IsNullOrWhiteSpace(expr))
-            the = DateRange(temp.Day, session.Client.ClientDateTime.Today);
+            the = DateRange(temp.Day, session.Client.Today);
         else
         {
             the = ParsingF.Range(ref expr, session.Client) ?? throw new ArgumentException("语法错误", nameof(expr));

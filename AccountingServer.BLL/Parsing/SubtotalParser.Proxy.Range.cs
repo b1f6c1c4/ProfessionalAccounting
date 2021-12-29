@@ -37,8 +37,8 @@ internal partial class SubtotalParser
 
         public DateTime? AsDate() =>
             RangeDeltaDay() != null
-                ? Client.ClientDateTime.Today.AddDays(1 - RangeDeltaDay().GetText().Length)
-                : ClientDateTime.ParseExact(RangeADay().GetText(), "yyyyMMdd");
+                ? Client.Today.AddDays(1 - RangeDeltaDay().GetText().Length)
+                : DateTimeParser.ParseExact(RangeADay().GetText(), "yyyyMMdd");
 
         public Client Client { private get; set; }
     }
@@ -51,7 +51,7 @@ internal partial class SubtotalParser
             get
             {
                 var delta = 1 - RangeDeltaWeek().GetText().Length;
-                var dt = Client.ClientDateTime.Today;
+                var dt = Client.Today;
                 dt = dt.AddDays(dt.DayOfWeek == DayOfWeek.Sunday ? -6 : 1 - (int)dt.DayOfWeek);
                 dt = dt.AddDays(delta * 7);
                 return new(dt, dt.AddDays(6));
@@ -73,8 +73,8 @@ internal partial class SubtotalParser
                 {
                     var delta = int.Parse(RangeDeltaMonth().GetText().TrimStart('-'));
                     dt = new(
-                        Client.ClientDateTime.Today.Year,
-                        Client.ClientDateTime.Today.Month,
+                        Client.Today.Year,
+                        Client.Today.Month,
                         1,
                         0,
                         0,
@@ -83,7 +83,7 @@ internal partial class SubtotalParser
                     dt = dt.AddMonths(-delta);
                 }
                 else
-                    dt = ClientDateTime.ParseExact(RangeAMonth().GetText() + "01", "yyyyMMdd");
+                    dt = DateTimeParser.ParseExact(RangeAMonth().GetText() + "01", "yyyyMMdd");
 
                 return new(dt, dt.AddMonths(1).AddDays(-1));
             }

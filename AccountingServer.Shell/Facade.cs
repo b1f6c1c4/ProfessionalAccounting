@@ -162,7 +162,7 @@ public class Facade
     {
         var voucher = session.Serializer.ParseVoucher(str);
         var grpCs = voucher.Details.GroupBy(d => d.Currency ?? BaseCurrency.Now).ToList();
-        var grpUs = voucher.Details.GroupBy(d => d.User ?? session.Accountant.Client.ClientUser.Name).ToList();
+        var grpUs = voucher.Details.GroupBy(d => d.User ?? session.Client.User).ToList();
         foreach (var grpC in grpCs)
         {
             var unc = grpC.SingleOrDefault(d => !d.Fund.HasValue);
@@ -190,7 +190,7 @@ public class Facade
                 voucher.Details.Add(
                     new() { User = grpUs.First().Key, Currency = grpC.Key, Title = 3999, Fund = -sum });
             }
-        else if (voucher.Details.GroupBy(d => (d.User ?? session.Accountant.Client.ClientUser.Name, d.Currency ?? BaseCurrency.Now))
+        else if (voucher.Details.GroupBy(d => (d.User ?? session.Client.User, d.Currency ?? BaseCurrency.Now))
                      .Where(grp => !grp.Sum(d => d.Fund!.Value).IsZero()).ToList() is var grpUCs &&
                  grpUCs.Count == 2)
         {

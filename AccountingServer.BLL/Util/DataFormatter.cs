@@ -62,10 +62,10 @@ public static class DataFormatter
     /// <param name="value">格式化后的用户</param>
     /// <param name="client">客户端用户</param>
     /// <returns>用户过滤器</returns>
-    public static string ParseUserSpec(this string value, ClientUser client)
+    public static string ParseUserSpec(this string value, Client client)
     {
         if (string.IsNullOrEmpty(value))
-            return client.Name;
+            return client.User;
         if (value == "U")
             return null;
         if (value.StartsWith("U'", StringComparison.Ordinal))

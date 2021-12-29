@@ -20,6 +20,7 @@ using System;
 using System.IO;
 using System.Net;
 using AccountingServer.BLL;
+using AccountingServer.Entities;
 using AccountingServer.Http;
 using AccountingServer.Shell;
 using static AccountingServer.Http.HttpUtil;
@@ -65,7 +66,7 @@ HttpResponse Server_OnHttpRequest(HttpRequest request)
         return new() { ResponseCode = 401 };
 
     if (!request.Header.ContainsKey("x-clientdatetime") ||
-        !ClientDateTime.TryParse(request.Header["x-clientdatetime"], out var dt))
+        !DateTimeParser.TryParse(request.Header["x-clientdatetime"], out var dt))
         return new() { ResponseCode = 400 };
 
     var limit = 0;

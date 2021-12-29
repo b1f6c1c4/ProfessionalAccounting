@@ -41,7 +41,7 @@ internal class AverageDailyBalance : PluginBase
         var avg = Parsing.DoubleF(ref expr);
         Parsing.Eof(expr);
 
-        var tdy = session.Client.ClientDateTime.Today;
+        var tdy = session.Client.Today;
         var ldom = AccountantHelper.LastDayOfMonth(tdy.Year, tdy.Month);
         var srng = new DateFilter(new(tdy.Year, tdy.Month, 1, 0, 0, 0, DateTimeKind.Utc), tdy);
         var balance = session.Accountant.RunGroupedQuery(

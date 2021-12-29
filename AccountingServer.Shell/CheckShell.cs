@@ -168,7 +168,7 @@ internal class CheckShell : IShellComponent
     private IQueryResult DuplicationCheck(Session session, string expr)
     {
         var sb = new StringBuilder();
-        var query = Parsing.VoucherQuery(ref expr, session.Accountant.Client);
+        var query = Parsing.VoucherQuery(ref expr, session.Client);
         Parsing.Eof(expr);
         foreach (var (v, ids) in session.Accountant.SelectDuplicatedVouchers(query))
         {

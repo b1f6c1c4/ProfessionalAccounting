@@ -193,7 +193,7 @@ internal class CreditCardConvert : PluginBase
                 if (day != dayF)
                     throw new ApplicationException("非整数日期");
 
-                var today = session.Client.ClientDateTime.Today;
+                var today = session.Client.Today;
                 date = today.Day < day
                     ?  today.AddMonths(-1).AddDays(day - today.Day)
                     :  today.AddDays(day - today.Day);

@@ -34,7 +34,7 @@ internal partial class QueryParser
             => new MyDistributedFilter
                 {
                     ID = Guid() != null ? System.Guid.Parse(Guid().GetText()) : null,
-                    User = (UserSpec()?.GetText()).ParseUserSpec(Client.ClientUser),
+                    User = (UserSpec()?.GetText()).ParseUserSpec(Client),
                     Name = RegexString()?.GetText().Dequotation().Replace(@"\/", "/"),
                     Remark = PercentQuotedString()?.GetText().Dequotation(),
                 };

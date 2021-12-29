@@ -75,7 +75,7 @@ public class JsonSerializer : IEntitiesSerializer
         var dateStr = obj["date"]?.Value<string>();
         DateTime? date = null;
         if (dateStr != null)
-            date = ClientDateTime.Parse(dateStr);
+            date = DateTimeParser.Parse(dateStr);
         var schedule = obj["schedule"];
         var typeStr = obj["method"]?.Value<string>();
         var method = DepreciationMethod.StraightLine;
@@ -119,7 +119,7 @@ public class JsonSerializer : IEntitiesSerializer
         var dateStr = obj["date"]?.Value<string>();
         DateTime? date = null;
         if (dateStr != null)
-            date = ClientDateTime.Parse(dateStr);
+            date = DateTimeParser.Parse(dateStr);
         var schedule = obj["schedule"];
         var typeStr = obj["interval"]?.Value<string>();
         var interval = AmortizeInterval.EveryDay;
@@ -173,7 +173,7 @@ public class JsonSerializer : IEntitiesSerializer
         var dateStr = obj["date"]?.Value<string>();
         DateTime? date = null;
         if (dateStr != null)
-            date = ClientDateTime.Parse(dateStr);
+            date = DateTimeParser.Parse(dateStr);
         var detail = obj["detail"];
         var typeStr = obj["type"]?.Value<string>();
         var type = VoucherType.Ordinary;
@@ -195,7 +195,7 @@ public class JsonSerializer : IEntitiesSerializer
         var dateStr = obj["date"]?.Value<string>();
         DateTime? date = null;
         if (dateStr != null)
-            date = ClientDateTime.Parse(dateStr);
+            date = DateTimeParser.Parse(dateStr);
 
         return new()
             {
@@ -212,7 +212,7 @@ public class JsonSerializer : IEntitiesSerializer
         var dateStr = obj["date"]?.Value<string>();
         DateTime? date = null;
         if (dateStr != null)
-            date = ClientDateTime.Parse(dateStr);
+            date = DateTimeParser.Parse(dateStr);
         var voucherId = obj["voucherId"]?.Value<string>();
         var value = obj["value"]?.Value<double?>() ?? 0;
         var remark = obj["remark"]?.Value<string>();

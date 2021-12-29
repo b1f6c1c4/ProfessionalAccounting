@@ -70,7 +70,7 @@ internal class YieldRate : PluginBase
         if (!pv.IsZero())
             return
                 new YieldRateSolver(
-                    lst.Select(b => session.Client.ClientDateTime.Today.Subtract(b.Date!.Value).TotalDays).Concat(new[] { 0D }),
+                    lst.Select(b => session.Client.Today.Subtract(b.Date!.Value).TotalDays).Concat(new[] { 0D }),
                     lst.Select(b => b.Fund).Concat(new[] { -pv })).Solve();
 
         return

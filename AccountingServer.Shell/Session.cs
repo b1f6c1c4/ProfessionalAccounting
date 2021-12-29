@@ -13,7 +13,7 @@ public class Session
 
     internal IEntitiesSerializer Serializer { get; }
 
-    public Client Client => Accountant.Client;
+    public Client Client => Accountant.Client ?? throw new ApplicationException("Client should have been set");
 
     internal Session(DbSession db, string user = "anonymous", DateTime? dt = null, string spec = null, int limit = 0)
     {

@@ -44,9 +44,9 @@ internal class CashFlow : PluginBase
         Parsing.Eof(expr);
 
         var accts = Templates.Config.Accounts
-            .Where(a => string.IsNullOrWhiteSpace(a.User) || session.Client.ClientUser.Name == a.User).ToList();
+            .Where(a => string.IsNullOrWhiteSpace(a.User) || session.Client.User == a.User).ToList();
         var n = accts.Count;
-        var until = session.Client.ClientDateTime.Today.AddMonths(extraMonths);
+        var until = session.Client.Today.AddMonths(extraMonths);
 
         var aggs = new double[n];
         var rst = new Dictionary<DateTime, double[,]>();
@@ -59,7 +59,7 @@ internal class CashFlow : PluginBase
 
             foreach (var (date, value) in GetItems(accts[i], session, until))
             {
-                if (date <= session.Client.ClientDateTime.Today)
+                if (date <= session.Client.Today)
                     continue;
                 if (date > until)
                     continue;
@@ -96,7 +96,7 @@ internal class CashFlow : PluginBase
             var sum = 0D;
             for (var i = 0; i < n; i++)
             {
-                sum += aggs[i] * session.Accountant.Query(session.Client.ClientDateTime.Today, accts[i].Currency, BaseCurrency.Now).Result; // TODO
+                sum += aggs[i] * session.Accountant.Query(session.Client.Today, accts[i].Currency, BaseCurrency.Now).Result; // TODO
 
                 sb.Append("".PadLeft(15));
                 sb.Append("".PadLeft(15));
@@ -139,7 +139,7 @@ internal class CashFlow : PluginBase
 
     private DateTime NextDate(Session session, int day, DateTime? reference = null, bool inclusive = false)
     {
-        var d = reference ?? session.Client.ClientDateTime.Today;
+        var d = reference ?? session.Client.Today;
         var v = new DateTime(d.Year, d.Month, 1, 0, 0, 0, DateTimeKind.Utc);
         var last = v.AddMonths(1).AddDays(-1).Day;
         var targ = day <= last ? day : last;
@@ -169,7 +169,7 @@ internal class CashFlow : PluginBase
         {
             var rb = new Composite.Composite();
             var tmp = Composite.Composite.GetTemplate(account.Reimburse);
-            var rng = Composite.Composite.DateRange(tmp.Day, session.Client.ClientDateTime.Today);
+            var rng = Composite.Composite.DateRange(tmp.Day, session.Client.Today);
             rb.DoInquiry(rng, tmp, out var rbVal, BaseCurrency.Now, session);
             var rbF = rng.EndDate!.Value;
             yield return (rbF, rbVal);
@@ -202,7 +202,7 @@ internal class CashFlow : PluginBase
                     break;
 
                 case SimpleCreditCard cc:
-                    var rng = $"[{session.Client.ClientDateTime.Today.AddMonths(-3).AsDate()}~]";
+                    var rng = $"[{session.Client.Today.AddMonths(-3).AsDate()}~]";
                     var mv = $"{{({user}*{cc.Query})+{user} T3999+{user} T6603 A {rng}}}";
                     var mos = new Dictionary<DateTime, double>();
                     foreach (var grpC in session.Accountant.RunGroupedQuery(
@@ -233,7 +233,7 @@ internal class CashFlow : PluginBase
                             mos[mo] = b.Fund;
                     }
 
-                    for (var d = session.Client.ClientDateTime.Today; d <= until; d = NextDate(session, cc.BillDay, d))
+                    for (var d = session.Client.Today; d <= until; d = NextDate(session, cc.BillDay, d))
                     {
                         var mo = NextDate(session, cc.RepaymentDay, NextDate(session, cc.BillDay, d), true);
                         var cob = -(NextDate(session, cc.BillDay, d) - d).TotalDays * cc.MonthlyFee / (365.2425 / 12);
@@ -262,7 +262,7 @@ internal class CashFlow : PluginBase
                     else
                         nxt -= pmt - stmt; // Paid too much
 
-                    for (var d = session.Client.ClientDateTime.Today; d <= until; d = NextDate(session, cc.BillDay, d))
+                    for (var d = session.Client.Today; d <= until; d = NextDate(session, cc.BillDay, d))
                     {
                         nxt += (NextDate(session, cc.BillDay, d) - d).TotalDays * cc.MonthlyFee / (365.2425 / 12);
                         if (cc.MaximumUtility >= 0 && cc.MaximumUtility < nxt)

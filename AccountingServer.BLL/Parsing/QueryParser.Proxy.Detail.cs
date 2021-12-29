@@ -97,7 +97,7 @@ internal partial class QueryParser
                 var t = title();
                 var filter = new VoucherDetail
                     {
-                        User = (UserSpec()?.GetText()).ParseUserSpec(Client.ClientUser),
+                        User = (UserSpec()?.GetText()).ParseUserSpec(Client),
                         Currency = VoucherCurrency()?.GetText().ParseCurrency(),
                         Title = t?.Title,
                         SubTitle = t?.SubTitle,

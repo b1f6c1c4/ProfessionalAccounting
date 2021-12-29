@@ -24,6 +24,11 @@ using Antlr4.Runtime;
 
 namespace AccountingServer.BLL.Parsing;
 
+internal interface IDate
+{
+    DateTime? AsDate();
+}
+
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 [SuppressMessage("ReSharper", "MemberCanBeProtected.Global")]

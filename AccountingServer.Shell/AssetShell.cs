@@ -191,7 +191,7 @@ internal class AssetShell : DistributedShell
                     new IntersectQueries<IVoucherQueryAtom>(
                         query ?? VoucherQueryUnconstrained.Instance,
                         ParsingF.VoucherQuery(
-                            $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}", session.Accountant.Client)))));
+                            $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}", session.Client)))));
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,

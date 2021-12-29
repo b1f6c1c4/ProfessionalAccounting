@@ -86,7 +86,7 @@ internal abstract class StringSubtotalVisitor : IClientDependable, ISubtotalVisi
                     SubtotalLevel.Content => sub.Items.Cast<ISubtotalContent>().OrderBy(s => s.Content, comparer),
                     SubtotalLevel.Remark => sub.Items.Cast<ISubtotalRemark>().OrderBy(s => s.Remark, comparer),
                     SubtotalLevel.User => sub.Items.Cast<ISubtotalUser>()
-                        .OrderBy(s => s.User == Client.ClientUser.Name ? null : s.User),
+                        .OrderBy(s => s.User == Client.User ? null : s.User),
                     SubtotalLevel.Currency => sub.Items.Cast<ISubtotalCurrency>()
                         .OrderBy(s => s.Currency == BaseCurrency.Now ? null : s.Currency),
                     SubtotalLevel.Day => sub.Items.Cast<ISubtotalDate>().OrderBy(s => s.Date),

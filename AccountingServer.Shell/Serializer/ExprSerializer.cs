@@ -72,7 +72,7 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
             detail.SubTitle.HasValue
                 ? $"// {t}-{TitleManager.GetTitleName(detail.Title, detail.SubTitle)}"
                 : $"// {t}");
-        if (detail.User != Client.ClientUser.Name)
+        if (detail.User != Client.User)
             sb.Append($"U{detail.User.AsUser()} ");
         if (detail.Currency != BaseCurrency.Now)
             sb.Append($"@{detail.Currency} ");
@@ -129,7 +129,7 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
         Parsing.TrimStartComment(ref expr);
         var id = Parsing.Quoted(ref expr, '^');
         Parsing.TrimStartComment(ref expr);
-        DateTime? date = Client.ClientDateTime.Today;
+        DateTime? date = Client.Today;
         try
         {
             date = ParsingF.UniqueTime(ref expr, Client);
@@ -205,7 +205,7 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
         var lst = new List<string>();
 
         Parsing.TrimStartComment(ref expr);
-        var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal)).ParseUserSpec(Client.ClientUser);
+        var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal)).ParseUserSpec(Client);
         var currency = Parsing.Token(ref expr, false, t => t.StartsWith("@", StringComparison.Ordinal))?[1..]
                 .ToUpperInvariant()
             ?? BaseCurrency.Now;

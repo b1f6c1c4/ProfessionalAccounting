@@ -104,7 +104,7 @@ internal abstract class InterestBase : PluginBase
                 ref capitalIntegral,
                 ref interestIntegral,
                 lastD,
-                endDate ?? session.Client.ClientDateTime.Today);
+                endDate ?? session.Client.Today);
         }
         else
         {
@@ -114,7 +114,7 @@ internal abstract class InterestBase : PluginBase
                 ref capitalIntegral,
                 ref interestIntegral,
                 null,
-                session.Client.ClientDateTime.Today);
+                session.Client.Today);
         }
 
         return new DirtySucceed();

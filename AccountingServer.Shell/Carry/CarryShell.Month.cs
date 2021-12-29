@@ -60,7 +60,7 @@ internal partial class CarryShell
         }
 
         var tasks = CarrySettings.Config.UserSettings
-            .Single(us => us.User == session.Accountant.Client.ClientUser.Name).Targets
+            .Single(us => us.User == session.Client.User).Targets
             .Select(t => new CarryTask
                 {
                     Target = t,
