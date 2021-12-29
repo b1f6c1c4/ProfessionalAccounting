@@ -346,9 +346,9 @@ internal class MongoDbAdapter : IDbAdapter
 
         BsonDocument grp;
         if (query.Subtotal.GatherType == GatheringType.Count)
-            grp = new BsonDocument { ["_id"] = prj, ["count"] = new BsonDocument { ["$sum"] = 1 } };
+            grp = new() { ["_id"] = prj, ["count"] = new BsonDocument { ["$sum"] = 1 } };
         else
-            grp = new BsonDocument { ["_id"] = prj, ["total"] = new BsonDocument { ["$sum"] = "$detail.fund" } };
+            grp = new() { ["_id"] = prj, ["total"] = new BsonDocument { ["$sum"] = "$detail.fund" } };
 
         var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Unwind("detail").Match(chk).Group(grp);
         if (query.ShouldAvoidZero())

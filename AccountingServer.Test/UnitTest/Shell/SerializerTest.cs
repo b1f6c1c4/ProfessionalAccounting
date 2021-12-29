@@ -179,7 +179,7 @@ public class AbbrSerializerTest : SerializerTest
     {
         var voucher = Serializer.ParseVoucher(@"new Voucher { abbr1 123 abbr2 ""gg"" 765 }");
         Assert.Equal(
-            new Voucher
+            new()
                 {
                     Date = Client.Today,
                     Details = new()
@@ -315,7 +315,7 @@ d48
 @usd T1001 -29120
 }");
         Assert.Equal(
-            new Voucher
+            new()
                 {
                     Date = m_Client.Today,
                     Type = VoucherType.Ordinary,
@@ -392,7 +392,7 @@ dnull
 @usd T1001 -2864
 }");
         Assert.Equal(
-            new Voucher
+            new()
                 {
                     Date = m_Client.Today,
                     Type = VoucherType.Ordinary,
@@ -443,7 +443,7 @@ d8
 @usd T1001 -29120
 }");
         Assert.Equal(
-            new Voucher
+            new()
                 {
                     Date = m_Client.Today,
                     Type = VoucherType.Ordinary,
@@ -495,7 +495,7 @@ tnull
 @usd T1001 -2864
 }");
         Assert.Equal(
-            new Voucher
+            new()
                 {
                     Date = m_Client.Today,
                     Type = VoucherType.Ordinary,
@@ -544,7 +544,7 @@ t2
 @cny T1001 -2912
 }");
         Assert.Equal(
-            new Voucher
+            new()
                 {
                     Date = new(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                     Type = VoucherType.Ordinary,
@@ -645,7 +645,7 @@ public class CsvCustomSerializerTest : SerializerTest
     [Fact]
     public void OtherTest()
     {
-        var r = Serializer.PresentVoucher(new Voucher
+        var r = Serializer.PresentVoucher(new()
             {
                 ID = "hhh",
                 Date = Client.Today,

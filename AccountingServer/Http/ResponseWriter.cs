@@ -17,66 +17,96 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace AccountingServer.Http;
 
 internal static class ResponseWriter
 {
-    public static void Write(Stream stream, HttpResponse response)
+    public static async Task Write(Stream stream, HttpResponse response)
     {
-        stream.WriteLine($"HTTP/1.1 {response.ResponseCode} {ResponseCodes.Get(response.ResponseCode)}");
+        await stream.WriteLineAsync($"HTTP/1.1 {response.ResponseCode} {ResponseCodes.Get(response.ResponseCode)}");
 
         response.Header ??= new();
         response.Header["Connection"] = "close";
 
-        if (response.ResponseStream != null &&
-            !response.Header.ContainsKey("Content-Length"))
+        if (response.ResponseStream != null)
+        {
+            if (!response.Header.ContainsKey("Content-Length"))
+            {
+                response.Header["Transfer-Encoding"] = "chunked";
+                await SendHeader(stream, response);
+                await SendContent(stream, response.ResponseStream);
+            }
+            else
+            {
+                await SendHeader(stream, response);
+                await SendContent(stream, response.ResponseStream, Convert.ToInt64(response.Header["Content-Length"]));
+            }
+        }
+        else if (response.ResponseAsyncEnumerable != null)
+        {
             response.Header["Transfer-Encoding"] = "chunked";
-
-        SendHeader(stream, response);
-
-        if (response.ResponseStream == null)
-            return;
-
-        if (response.Header.ContainsKey("Content-Length"))
-            SendContent(stream, response, Convert.ToInt64(response.Header["Content-Length"]));
+            await SendHeader(stream, response);
+            await SendContent(stream, response.ResponseAsyncEnumerable);
+        }
         else
-            SendContent(stream, response);
+            await SendHeader(stream, response);
     }
 
-    private static void SendHeader(Stream stream, HttpResponse response)
+    private static async Task SendHeader(Stream stream, HttpResponse response)
     {
         foreach (var (key, value) in response.Header)
-            stream.WriteLine($"{key}: {value}");
-        stream.WriteLine();
+            await stream.WriteLineAsync($"{key}: {value}");
+        await stream.WriteLineAsync();
     }
 
-    private static void SendContent(Stream stream, HttpResponse response)
+    private static async Task SendContent(Stream stream, Stream src)
     {
         var buff = new byte[4096];
         while (true)
         {
-            var sz = response.ResponseStream.Read(buff, 0, 4096);
-            stream.WriteLine($"{sz:x}");
-            stream.Write(buff, 0, sz);
-            stream.WriteLine();
+            var sz = await src.ReadAsync(buff, 0, 4096);
+            await stream.WriteLineAsync($"{sz:x}");
+            await stream.WriteAsync(buff, 0, sz);
+            await stream.WriteLineAsync();
             if (sz == 0)
                 break;
         }
+        await stream.WriteLineAsync($"{0:x}");
+        await stream.WriteLineAsync();
     }
 
-    private static void SendContent(Stream stream, HttpResponse response, long length)
+    private static async Task SendContent(Stream stream, Stream src, long length)
     {
         var buff = new byte[4096];
         var rest = length;
         while (rest > 0)
         {
             var sz = rest < 4096
-                ? response.ResponseStream.Read(buff, 0, (int)rest)
-                : response.ResponseStream.Read(buff, 0, 4096);
-            stream.Write(buff, 0, sz);
+                ? await src.ReadAsync(buff, 0, (int)rest)
+                : await src.ReadAsync(buff, 0, 4096);
+            await stream.WriteAsync(buff, 0, sz);
             rest -= sz;
         }
+    }
+
+    private static async Task SendContent(Stream stream, IAsyncEnumerable<byte[]> iae)
+    {
+        await foreach (var s in iae)
+        {
+            if (s.Length == 0)
+                continue;
+
+            await stream.WriteLineAsync($"{s.Length:x}");
+            await stream.WriteAsync(s);
+            await stream.WriteLineAsync();
+            await stream.FlushAsync();
+        }
+        await stream.WriteLineAsync($"{0:x}");
+        await stream.WriteLineAsync();
     }
 }

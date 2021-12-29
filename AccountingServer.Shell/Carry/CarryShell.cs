@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Util;
@@ -32,30 +33,37 @@ namespace AccountingServer.Shell.Carry;
 internal partial class CarryShell : IShellComponent
 {
     /// <inheritdoc />
-    public IAsyncEnumerable<string> Execute(string expr, Session session)
+    public async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         expr = expr.Rest();
         DateFilter rng;
+        IAsyncEnumerable<string> iae;
         switch (expr.Initial())
         {
             case "lst":
                 expr = expr.Rest();
                 rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
                 Parsing.Eof(expr);
-                return ListHistory(rng);
+                iae = ListHistory(rng).ToAsyncEnumerable();
+                break;
             case "rst":
                 expr = expr.Rest();
                 rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
                 Parsing.Eof(expr);
-                return PerformAction(session, rng, true);
+                iae = PerformAction(session, rng, true);
+                break;
             default:
                 rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
                 Parsing.Eof(expr);
-                return PerformAction(session, AutomaticRange(session, rng), false);
+                iae = PerformAction(session, await AutomaticRange(session, rng), false);
+                break;
         }
+
+        await foreach (var e in iae)
+            yield return e;
     }
 
-    private DateFilter AutomaticRange(Session session, DateFilter rng)
+    private async ValueTask<DateFilter> AutomaticRange(Session session, DateFilter rng)
     {
         rng ??= DateFilter.Unconstrained;
         if (rng.NullOnly)
@@ -63,13 +71,13 @@ internal partial class CarryShell : IShellComponent
 
         var today = session.Client.Today;
         rng.EndDate = rng.EndDate.HasValue
-            ? new DateTime(rng.EndDate!.Value.Year, rng.EndDate!.Value.Month, 1, 0, 0, 0, DateTimeKind.Utc)
+            ? new(rng.EndDate!.Value.Year, rng.EndDate!.Value.Month, 1, 0, 0, 0, DateTimeKind.Utc)
             : new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Utc)
                 .AddMonths(-1);
         rng.EndDate = rng.EndDate!.Value.AddMonths(1).AddDays(-1);
         if (!rng.StartDate.HasValue)
         {
-            var st = session.Accountant.RunVoucherGroupedQuery("[~null] !!y").Items.Cast<ISubtotalDate>()
+            var st = (await session.Accountant.RunVoucherGroupedQueryAsync("[~null] !!y")).Items.Cast<ISubtotalDate>()
                 .OrderBy(grpd => grpd.Date).FirstOrDefault()?.Date;
             if (st.HasValue)
                 rng.StartDate = st;

@@ -50,7 +50,7 @@ internal abstract class StringSubtotalVisitor : IClientDependable, ISubtotalVisi
         Ga = par.GatherType;
         Cu = par.EquivalentCurrency;
         Serializer = serializer;
-        Sb = new StringBuilder();
+        Sb = new();
         Depth = 0;
         Pre();
         raw?.Accept(this);

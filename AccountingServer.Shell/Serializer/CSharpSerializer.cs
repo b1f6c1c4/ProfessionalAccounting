@@ -109,7 +109,7 @@ public class CSharpSerializer : IEntitySerializer
             var failure = result.Diagnostics.First(diagnostic =>
                 diagnostic.IsWarningAsError ||
                 diagnostic.Severity == DiagnosticSeverity.Error);
-            throw new Exception(failure.GetMessage());
+            throw new(failure.GetMessage());
         }
 
         ms.Seek(0, SeekOrigin.Begin);

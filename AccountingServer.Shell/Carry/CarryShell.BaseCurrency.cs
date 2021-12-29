@@ -33,7 +33,7 @@ internal partial class CarryShell
     /// </summary>
     /// <param name="rng">过滤器</param>
     /// <returns>执行结果</returns>
-    private static async IAsyncEnumerable<string> ListHistory(DateFilter rng)
+    private static IEnumerable<string> ListHistory(DateFilter rng)
     {
         foreach (var info in BaseCurrency.History)
             if (info.Date.Within(rng))

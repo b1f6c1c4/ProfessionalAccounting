@@ -321,7 +321,7 @@ public class SubtotalBuilder
                     : dt.AddDays(-6 - (int)dt.DayOfWeek),
                 SubtotalLevel.Month =>
                     new DateTime(dt.Year, dt.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-1),
-                SubtotalLevel.Year => new DateTime(dt.Year - 1, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                SubtotalLevel.Year => new(dt.Year - 1, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 _ => throw new ArgumentOutOfRangeException(),
             };
     }

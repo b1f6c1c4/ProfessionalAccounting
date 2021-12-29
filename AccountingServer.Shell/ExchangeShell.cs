@@ -105,16 +105,16 @@ internal class ExchangeShell : IShellComponent
         return now.AddDays(-3.5).AddMinutes(-35);
     }
 
-    private void OnTimedEvent(object source, ElapsedEventArgs e)
+    private async void OnTimedEvent(object source, ElapsedEventArgs e)
     {
         var date = CriticalTime(DateTime.UtcNow);
         Console.WriteLine($"{DateTime.UtcNow:o} Ensuring exchange rates exist since {date:o}");
         var session = new Session(m_TimerSession);
         try
         {
-            Task.WhenAll(session.Accountant.RunGroupedQuery("U - U Revenue - U Expense !C")
+            Task.WhenAll((await session.Accountant.RunGroupedQueryAsync("U - U Revenue - U Expense !C"))
                 .Items.Cast<ISubtotalCurrency>()
-                .Concat(session.Accountant.RunGroupedQuery("U Revenue + U Expense 0 !C")
+                .Concat((await session.Accountant.RunGroupedQueryAsync("U Revenue + U Expense 0 !C"))
                     .Items.Cast<ISubtotalCurrency>())
                 .Select(grpC =>
                     session.Accountant.Query(date, grpC.Currency, BaseCurrency.Now).AsTask())).Wait();

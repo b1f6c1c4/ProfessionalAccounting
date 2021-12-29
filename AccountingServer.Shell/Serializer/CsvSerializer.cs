@@ -129,7 +129,7 @@ public class CsvSerializer : IEntitiesSerializer
         if (voucher == null)
             return "";
         foreach (var d in voucher.Details)
-            sb.AppendLine(Present(new VoucherDetailR(voucher, d), m_Specs));
+            sb.AppendLine(Present(new(voucher, d), m_Specs));
         return sb.ToString();
     }
 

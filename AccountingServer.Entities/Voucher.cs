@@ -189,7 +189,7 @@ public class VoucherDetailR : VoucherDetail
 {
     public VoucherDetailR(Voucher v, VoucherDetail d) : base(d) => Voucher = v;
 
-    public VoucherDetailR(VoucherDetailR d) : this(new Voucher(d.Voucher), d) { }
+    public VoucherDetailR(VoucherDetailR d) : this(new(d.Voucher), d) { }
 
     /// <summary>
     ///     所属记账凭证

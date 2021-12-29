@@ -156,7 +156,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
         }
 
         foreach (var grp in lst.GroupBy(
-                     it => new VoucherDetail
+                     it => new()
                          {
                              User = it.User,
                              Currency = it.Currency,

@@ -27,5 +27,6 @@ public class HttpResponse : IDisposable
     public int ResponseCode { get; set; }
     public Dictionary<string, string> Header { get; set; }
     public Stream ResponseStream { get; set; }
+    public IAsyncEnumerable<byte[]> ResponseAsyncEnumerable { get; set; }
     public void Dispose() => ResponseStream?.Dispose();
 }

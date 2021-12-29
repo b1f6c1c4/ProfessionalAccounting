@@ -91,7 +91,7 @@ internal class CheckShell : IShellComponent
                                        $"T{title.Id.AsTitle()}00"))
                         yield return s;
                 else if (Math.Abs(title.Direction) == 2)
-                    await foreach (var s in DoCheck(
+                    foreach (var s in DoCheck(
                                        title.Direction,
                                        await session.Accountant.RunGroupedQueryAsync($"T{title.Id.AsTitle()}00 G`CcD"),
                                        $"T{title.Id.AsTitle()}00"))
@@ -108,7 +108,7 @@ internal class CheckShell : IShellComponent
                                        $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}"))
                         yield return s;
                 else if (Math.Abs(subTitle.Direction) == 2)
-                    await foreach (var s in DoCheck(
+                    foreach (var s in DoCheck(
                                        subTitle.Direction,
                                        await session.Accountant.RunGroupedQueryAsync(
                                            $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} G`CcD"),
@@ -117,7 +117,7 @@ internal class CheckShell : IShellComponent
         }
     }
 
-    private static async IAsyncEnumerable<string> DoCheck(int dir, ISubtotalResult res, string info)
+    private static IEnumerable<string> DoCheck(int dir, ISubtotalResult res, string info)
     {
         foreach (var grpC in res.Items.Cast<ISubtotalCurrency>())
         foreach (var grpc in grpC.Items.Cast<ISubtotalContent>())

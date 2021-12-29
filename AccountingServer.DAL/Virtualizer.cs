@@ -109,7 +109,7 @@ public class Virtualizer : IDbAdapter, IDisposable
     }
 
     private static IAsyncEnumerable<Balance> Merge(IAsyncEnumerable<Balance> balances)
-        => balances.GroupByAwait(b => new ValueTask<Balance>(b), b => new ValueTask<double>(b.Fund),
+        => balances.GroupByAwait(b => new(b), b => new ValueTask<double>(b.Fund),
             async (b, fs) =>
                 {
                     b.Fund = await fs.SumAsync(f => f);

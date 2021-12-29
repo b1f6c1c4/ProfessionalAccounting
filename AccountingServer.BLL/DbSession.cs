@@ -36,7 +36,7 @@ public class DbSession : IHistoricalExchange
     public VirtualizeLock Virtualize()
     {
         Db.Set(Facade.Virtualize(Db.Get()));
-        return new VirtualizeLock(this);
+        return new(this);
     }
 
     public class VirtualizeLock : IDisposable
@@ -72,10 +72,10 @@ public class DbSession : IHistoricalExchange
         if (date > now)
             date = now;
 
-        var res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = from, To = to });
+        var res = await Db.Get().SelectExchangeRecord(new() { Time = date, From = from, To = to });
         if (res != null)
             return res.Value;
-        res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = from });
+        res = await Db.Get().SelectExchangeRecord(new() { Time = date, From = to, To = from });
         if (res != null)
             return 1D / res.Value;
 
@@ -90,10 +90,10 @@ public class DbSession : IHistoricalExchange
 
     public async ValueTask<double> SaveHistoricalRate(DateTime date, string from, string to)
     {
-        var res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = from, To = to });
+        var res = await Db.Get().SelectExchangeRecord(new() { Time = date, From = from, To = to });
         if (res != null && res.Time == date)
             return res.Value;
-        res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = from });
+        res = await Db.Get().SelectExchangeRecord(new() { Time = date, From = to, To = from });
         if (res != null && res.Time == date)
             return 1D / res.Value;
 

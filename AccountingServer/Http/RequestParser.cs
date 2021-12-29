@@ -31,8 +31,7 @@ internal static class RequestParser
     {
         var method = Parse(stream, ParsingState.Method);
         var uri = Parse(stream, ParsingState.Uri);
-        Dictionary<string, string> par;
-        var baseUri = ParseUri(uri, out par);
+        var baseUri = ParseUri(uri, out var par);
         var request = new HttpRequest
             {
                 Method = method,

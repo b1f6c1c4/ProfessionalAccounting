@@ -188,7 +188,7 @@ public class MatchHelperTest
     [InlineData(false, 7000, TitleKind.Expense)]
     public void DetailMatchTestKind(bool expected, int? value, TitleKind? kind)
         => Assert.Equal(expected,
-            MatchHelper.IsMatch(new() { Title = value }, new VoucherDetail(), kind: kind));
+            MatchHelper.IsMatch(new() { Title = value }, new(), kind: kind));
 
     [Theory]
     [InlineData(true, null, 0)]
@@ -201,7 +201,7 @@ public class MatchHelperTest
     [InlineData(true, +0.5 * VoucherDetail.Tolerance, -1)]
     public void DetailMatchTestDir(bool expected, double? value, int dir)
         => Assert.Equal(expected,
-            MatchHelper.IsMatch(new() { Fund = value }, new VoucherDetail(), dir: dir));
+            MatchHelper.IsMatch(new() { Fund = value }, new(), dir: dir));
 
     [Fact]
     public void DetailMatchTestContent()
@@ -211,7 +211,7 @@ public class MatchHelperTest
     [Fact]
     public void DetailMatchTestContentPrefix()
         => StringPrefixMatchTest(
-            (v, f) => MatchHelper.IsMatch(new() { Content = v }, new VoucherDetail(), contentPrefix: f));
+            (v, f) => MatchHelper.IsMatch(new() { Content = v }, new(), contentPrefix: f));
 
     [Fact]
     public void DetailMatchTestNull()
@@ -299,5 +299,5 @@ public class MatchHelperTest
     [Fact]
     public void DetailMatchTestRemarkPrefix()
         => StringPrefixMatchTest(
-            (v, f) => MatchHelper.IsMatch(new() { Remark = v }, new VoucherDetail(), remarkPrefix: f));
+            (v, f) => MatchHelper.IsMatch(new() { Remark = v }, new(), remarkPrefix: f));
 }

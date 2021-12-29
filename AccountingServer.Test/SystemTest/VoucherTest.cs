@@ -159,7 +159,7 @@ Ub2 T3998\s+10
     public async Task ChkTest()
     {
         var res = await m_Facade.Execute(m_Session, "chk-1").Join();
-        Assert.Equal("OK", res);
+        Assert.Equal("", res);
     }
 
     [Fact]

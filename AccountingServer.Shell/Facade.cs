@@ -83,7 +83,7 @@ public class Facade
         switch (expr)
         {
             case "T":
-                return ListTitles();
+                return ListTitles().ToAsyncEnumerable();
             case "?":
                 return ListHelp();
             case "reload":
@@ -107,7 +107,7 @@ public class Facade
         switch (expr)
         {
             case "T":
-                return ListTitles();
+                return ListTitles().ToAsyncEnumerable();
             case "?":
                 return ListHelp();
         }
@@ -128,7 +128,7 @@ public class Facade
     ///     显示所有会计科目及其编号
     /// </summary>
     /// <returns>会计科目及其编号</returns>
-    private static async IAsyncEnumerable<string> ListTitles()
+    private static IEnumerable<string> ListTitles()
     {
         foreach (var title in TitleManager.Titles)
         {

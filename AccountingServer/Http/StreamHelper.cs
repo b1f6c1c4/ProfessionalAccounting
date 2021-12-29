@@ -16,8 +16,10 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace AccountingServer.Http;
 
@@ -25,13 +27,13 @@ internal static class StreamHelper
 {
     private static readonly byte[] CrLf = { (byte)'\r', (byte)'\n' };
 
-    internal static void Write(this Stream stream, string str, Encoding encoding = null)
+    internal static byte[] GetBytes(this string str, Encoding encoding = null)
     {
         encoding ??= Encoding.UTF8;
-        var data = encoding.GetBytes(str);
-        stream.Write(data, 0, data.Length);
+        return encoding.GetBytes(str);
     }
 
+    [Obsolete]
     internal static void WriteLine(this Stream stream, string str = null, Encoding encoding = null)
     {
         encoding ??= Encoding.UTF8;
@@ -39,5 +41,14 @@ internal static class StreamHelper
         stream.Write(data, 0, data.Length);
 
         stream.Write(CrLf, 0, CrLf.Length);
+    }
+
+    internal static async Task WriteLineAsync(this Stream stream, string str = null, Encoding encoding = null)
+    {
+        encoding ??= Encoding.UTF8;
+        var data = encoding.GetBytes(str ?? "");
+        await stream.WriteAsync(data, 0, data.Length);
+
+        await stream.WriteAsync(CrLf, 0, CrLf.Length);
     }
 }

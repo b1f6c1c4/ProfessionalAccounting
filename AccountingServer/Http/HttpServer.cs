@@ -97,7 +97,7 @@ public class HttpServer
 #endif
 
             using (response)
-                ResponseWriter.Write(stream, response);
+                await ResponseWriter.Write(stream, response);
 
             stream.Close();
 

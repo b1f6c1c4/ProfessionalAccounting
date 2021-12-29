@@ -144,10 +144,10 @@ internal class TrivialEntitiesSerializer : IEntitiesSerializer
         => vouchers.Select(voucher => m_Serializer.PresentVoucher(voucher).Wrap());
 
     public IAsyncEnumerable<string> PresentVoucherDetails(IAsyncEnumerable<VoucherDetail> details)
-        => details.Select(detail => m_Serializer.PresentVoucherDetail(detail).Wrap());
+        => details.Select(detail => m_Serializer.PresentVoucherDetail(detail));
 
     public IAsyncEnumerable<string> PresentVoucherDetails(IAsyncEnumerable<VoucherDetailR> details)
-        => details.Select(detail => m_Serializer.PresentVoucherDetail(detail).Wrap());
+        => details.Select(detail => m_Serializer.PresentVoucherDetail(detail));
 
     public IAsyncEnumerable<string> PresentAssets(IAsyncEnumerable<Asset> assets)
         => assets.Select(asset => m_Serializer.PresentAsset(asset).Wrap());
