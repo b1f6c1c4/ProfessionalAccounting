@@ -49,8 +49,7 @@ internal class AssetShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        Session session)
+    protected override IQueryResult ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery, Session session)
         => new PlainText(session.Serializer.PresentAssets(Sort(session.Accountant.SelectAssets(distQuery))));
 
     /// <inheritdoc />
@@ -72,8 +71,7 @@ internal class AssetShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng,
+    protected override IQueryResult ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
         IQueryCompounded<IVoucherQueryAtom> query, Session session)
     {
         var sb = new StringBuilder();
@@ -106,8 +104,7 @@ internal class AssetShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        Session session)
+    protected override IQueryResult ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery, Session session)
     {
         var lst = new List<Asset>();
         foreach (var a in Sort(session.Accountant.SelectAssets(distQuery)))
@@ -121,8 +118,8 @@ internal class AssetShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng, Session session)
+    protected override IQueryResult ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+        Session session)
     {
         var cnt = 0L;
         foreach (var a in session.Accountant.SelectAssets(distQuery))
@@ -148,8 +145,8 @@ internal class AssetShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng, Session session)
+    protected override IQueryResult ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+        Session session)
     {
         var cnt = 0L;
         foreach (var a in session.Accountant.SelectAssets(distQuery))
@@ -191,7 +188,8 @@ internal class AssetShell : DistributedShell
                     new IntersectQueries<IVoucherQueryAtom>(
                         query ?? VoucherQueryUnconstrained.Instance,
                         ParsingF.VoucherQuery(
-                            $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}", session.Client)))));
+                            $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}",
+                            session.Client)))));
 
     /// <inheritdoc />
     protected override IQueryResult ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
@@ -217,7 +215,7 @@ internal class AssetShell : DistributedShell
     /// </summary>
     /// <param name="distQuery">分期检索式</param>
     /// <param name="rng">日期过滤器</param>
-    /// <param name="session"></param>
+    /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
     protected override IQueryResult ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
         Session session)
@@ -248,12 +246,11 @@ internal class AssetShell : DistributedShell
     ///     显示资产及其折旧计算表
     /// </summary>
     /// <param name="asset">资产</param>
-    /// <param name="session"></param>
+    /// <param name="session">客户端会话</param>
     /// <param name="dt">计算账面价值的时间</param>
     /// <param name="showSchedule">是否显示折旧计算表</param>
     /// <returns>格式化的信息</returns>
-    private string ListAsset(Asset asset, Session session, DateTime? dt = null,
-        bool showSchedule = true)
+    private string ListAsset(Asset asset, Session session, DateTime? dt = null, bool showSchedule = true)
     {
         var sb = new StringBuilder();
 
@@ -283,7 +280,8 @@ internal class AssetShell : DistributedShell
             {
                 sb.AppendLine(ListAssetItem(assetItem));
                 if (assetItem.VoucherID != null)
-                    sb.AppendLine(session.Serializer.PresentVoucher(session.Accountant.SelectVoucher(assetItem.VoucherID)).Wrap());
+                    sb.AppendLine(session.Serializer
+                        .PresentVoucher(session.Accountant.SelectVoucher(assetItem.VoucherID)).Wrap());
             }
 
         return sb.ToString();

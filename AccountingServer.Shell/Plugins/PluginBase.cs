@@ -18,8 +18,6 @@
 
 using System.IO;
 using System.Resources;
-using AccountingServer.BLL;
-using AccountingServer.Shell.Serializer;
 
 namespace AccountingServer.Shell.Plugins;
 
@@ -32,7 +30,7 @@ internal abstract class PluginBase
     ///     执行插件表达式
     /// </summary>
     /// <param name="expr">表达式</param>
-    /// <param name="session"></param>
+    /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
     public abstract IQueryResult Execute(string expr, Session session);
 

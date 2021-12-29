@@ -19,11 +19,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
-using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
@@ -123,7 +121,7 @@ internal abstract class InterestBase : PluginBase
     /// <summary>
     ///     从上次计息日后一日起计算单利利息并整理还款
     /// </summary>
-    /// <param name="session"></param>
+    /// <param name="session">客户端会话</param>
     /// <param name="info">借款信息</param>
     /// <param name="capitalIntegral">剩余本金</param>
     /// <param name="interestIntegral">剩余利息</param>
@@ -205,7 +203,7 @@ internal abstract class InterestBase : PluginBase
     /// <summary>
     ///     计算利息
     /// </summary>
-    /// <param name="session"></param>
+    /// <param name="session">客户端会话</param>
     /// <param name="info">借款信息</param>
     /// <param name="capitalIntegral">剩余本金</param>
     /// <param name="delta">间隔日数</param>
@@ -251,7 +249,7 @@ internal abstract class InterestBase : PluginBase
     /// <summary>
     ///     正确登记还款
     /// </summary>
-    /// <param name="session"></param>
+    /// <param name="session">客户端会话</param>
     /// <param name="info">借款信息</param>
     /// <param name="voucher">记账凭证</param>
     /// <param name="capVol">本金还款额</param>

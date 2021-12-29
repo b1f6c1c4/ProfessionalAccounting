@@ -50,7 +50,7 @@ public class Accountant : IHistoricalExchange
     /// <summary>
     ///     返回结果数量上限
     /// </summary>
-    public int Limit { private get; set; } = 0;
+    public int Limit { private get; init; }
 
     public DbSession.VirtualizeLock Virtualize()
         => m_Db.Virtualize();

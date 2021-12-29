@@ -43,7 +43,7 @@ internal class AmortizationShell : DistributedShell
     /// <param name="distQuery">分期检索式</param>
     /// <param name="dt">计算账面价值的时间</param>
     /// <param name="showSchedule">是否显示折旧计算表</param>
-    /// <param name="session"></param>
+    /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
     protected override IQueryResult ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery, DateTime? dt,
         bool showSchedule, Session session)
@@ -56,8 +56,7 @@ internal class AmortizationShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        Session session)
+    protected override IQueryResult ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery, Session session)
         => new PlainText(session.Serializer.PresentAmorts(Sort(session.Accountant.SelectAmortizations(distQuery))));
 
     /// <inheritdoc />
@@ -79,8 +78,7 @@ internal class AmortizationShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng,
+    protected override IQueryResult ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
         IQueryCompounded<IVoucherQueryAtom> query, Session session)
     {
         var sb = new StringBuilder();
@@ -113,8 +111,7 @@ internal class AmortizationShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        Session session)
+    protected override IQueryResult ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery, Session session)
     {
         var lst = new List<Amortization>();
         foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
@@ -128,8 +125,8 @@ internal class AmortizationShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng, Session session)
+    protected override IQueryResult ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+        Session session)
     {
         var cnt = 0L;
         foreach (var a in session.Accountant.SelectAmortizations(distQuery))
@@ -155,8 +152,8 @@ internal class AmortizationShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override IQueryResult ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng, Session session)
+    protected override IQueryResult ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+        Session session)
     {
         var cnt = 0L;
         foreach (var a in session.Accountant.SelectAmortizations(distQuery))
@@ -243,12 +240,11 @@ internal class AmortizationShell : DistributedShell
     ///     显示摊销及其计算表
     /// </summary>
     /// <param name="amort">摊销</param>
-    /// <param name="session"></param>
+    /// <param name="session">客户端会话</param>
     /// <param name="dt">计算账面价值的时间</param>
     /// <param name="showSchedule">是否显示计算表</param>
     /// <returns>格式化的信息</returns>
-    private string ListAmort(Amortization amort, Session session, DateTime? dt = null,
-        bool showSchedule = true)
+    private string ListAmort(Amortization amort, Session session, DateTime? dt = null, bool showSchedule = true)
     {
         var sb = new StringBuilder();
 
@@ -267,7 +263,8 @@ internal class AmortizationShell : DistributedShell
             {
                 sb.AppendLine(ListAmortItem(amortItem));
                 if (amortItem.VoucherID != null)
-                    sb.AppendLine(session.Serializer.PresentVoucher(session.Accountant.SelectVoucher(amortItem.VoucherID)).Wrap());
+                    sb.AppendLine(session.Serializer
+                        .PresentVoucher(session.Accountant.SelectVoucher(amortItem.VoucherID)).Wrap());
             }
 
         return sb.ToString();

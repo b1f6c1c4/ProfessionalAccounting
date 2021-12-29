@@ -64,17 +64,13 @@ internal class DirtySucceed : IQueryResult
     public override string ToString() => "Done";
 }
 
+/// <summary>
+///     文档数
+/// </summary>
 internal class NumberAffected : IQueryResult
 {
-    /// <summary>
-    ///     文档数
-    /// </summary>
     private readonly long m_N;
 
-    /// <summary>
-    ///     文档数
-    /// </summary>
-    /// <param name="n"></param>
     public NumberAffected(long n) => m_N = n;
 
     /// <inheritdoc />

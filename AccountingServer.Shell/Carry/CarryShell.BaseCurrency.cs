@@ -46,7 +46,7 @@ internal partial class CarryShell
     /// <summary>
     ///     取消摊销
     /// </summary>
-    /// <param name="session"></param>
+    /// <param name="session">客户端会话</param>
     /// <param name="rng">过滤器</param>
     /// <returns>执行结果</returns>
     private long ResetConversion(Session session, DateFilter rng)
@@ -55,7 +55,7 @@ internal partial class CarryShell
     /// <summary>
     ///     所有者权益币种转换
     /// </summary>
-    /// <param name="session"></param>
+    /// <param name="session">客户端会话</param>
     /// <param name="sb">日志记录</param>
     /// <param name="dt">日期</param>
     /// <param name="to">目标币种</param>

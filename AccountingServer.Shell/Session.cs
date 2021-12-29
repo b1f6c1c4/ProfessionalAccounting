@@ -4,6 +4,9 @@ using AccountingServer.Shell.Serializer;
 
 namespace AccountingServer.Shell;
 
+/// <summary>
+///     客户端会话
+/// </summary>
 public class Session
 {
     /// <summary>
@@ -11,8 +14,14 @@ public class Session
     /// </summary>
     internal Accountant Accountant { get; }
 
+    /// <summary>
+    ///     表示器
+    /// </summary>
     internal IEntitiesSerializer Serializer { get; }
 
+    /// <summary>
+    ///     客户端
+    /// </summary>
     public Client Client => Accountant.Client ?? throw new ApplicationException("Client should have been set");
 
     internal Session(DbSession db, string user = "anonymous", DateTime? dt = null, string spec = null, int limit = 0)

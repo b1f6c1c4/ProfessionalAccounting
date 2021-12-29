@@ -22,7 +22,6 @@ using System.Security;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
-using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Subtotal;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.FacadeF;
@@ -44,6 +43,7 @@ internal class AccountingShell : IShellComponent
     ///     解析表达式
     /// </summary>
     /// <param name="expr">表达式</param>
+    /// <param name="client">客户端</param>
     /// <returns>解析结果</returns>
     private Func<Session, IQueryResult> Parse(string expr, Client client)
     {
@@ -124,7 +124,7 @@ internal class AccountingShell : IShellComponent
     /// </summary>
     /// <param name="expr">表达式</param>
     /// <param name="safe">仅限强检索式</param>
-    /// <param name="client"></param>
+    /// <param name="client">客户端</param>
     /// <returns>执行结果</returns>
     private Func<Session, IQueryResult> TryVoucherQuery(string expr, bool safe, Client client)
     {
@@ -141,7 +141,7 @@ internal class AccountingShell : IShellComponent
     /// </summary>
     /// <param name="expr">表达式</param>
     /// <param name="trav">呈现器</param>
-    /// <param name="client"></param>
+    /// <param name="client">客户端</param>
     /// <returns>执行结果</returns>
     private Func<Session, IQueryResult> TryGroupedQuery(string expr, ISubtotalStringify trav, Client client)
     {
@@ -155,7 +155,7 @@ internal class AccountingShell : IShellComponent
     /// </summary>
     /// <param name="expr">表达式</param>
     /// <param name="trav">呈现器</param>
-    /// <param name="client"></param>
+    /// <param name="client">客户端</param>
     /// <returns>执行结果</returns>
     private Func<Session, IQueryResult> TryVoucherGroupedQuery(string expr, ISubtotalStringify trav, Client client)
     {
@@ -168,10 +168,9 @@ internal class AccountingShell : IShellComponent
     ///     执行记账凭证检索式并呈现记账凭证
     /// </summary>
     /// <param name="query">记账凭证检索式</param>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session">客户端会话</param>
     /// <returns>记账凭证表达式</returns>
-    private IQueryResult PresentVoucherQuery(IQueryCompounded<IVoucherQueryAtom> query,
-        Session session)
+    private IQueryResult PresentVoucherQuery(IQueryCompounded<IVoucherQueryAtom> query, Session session)
         => new PlainText(session.Serializer.PresentVouchers(session.Accountant.SelectVouchers(query)));
 
     /// <summary>
@@ -179,7 +178,7 @@ internal class AccountingShell : IShellComponent
     /// </summary>
     /// <param name="expr">表达式</param>
     /// <param name="safe">仅限强检索式</param>
-    /// <param name="client"></param>
+    /// <param name="client">客户端</param>
     /// <returns>执行结果</returns>
     private Func<Session, IQueryResult> TryDetailQuery(string expr, bool safe, Client client)
     {
@@ -195,7 +194,7 @@ internal class AccountingShell : IShellComponent
     ///     执行细目检索式并呈现结果
     /// </summary>
     /// <param name="query">细目检索式</param>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
     private IQueryResult PresentDetailQuery(IVoucherDetailQuery query, Session session)
         => new PlainText(session.Serializer.PresentVoucherDetails(session.Accountant.SelectVoucherDetails(query)));
@@ -205,7 +204,7 @@ internal class AccountingShell : IShellComponent
     /// </summary>
     /// <param name="expr">表达式</param>
     /// <param name="safe">仅限强检索式</param>
-    /// <param name="client"></param>
+    /// <param name="client">客户端</param>
     /// <returns>执行结果</returns>
     private Func<Session, IQueryResult> TryDetailRQuery(string expr, bool safe, Client client)
     {
@@ -221,7 +220,7 @@ internal class AccountingShell : IShellComponent
     ///     执行带记账凭证的细目检索式并呈现结果
     /// </summary>
     /// <param name="query">细目检索式</param>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
     private IQueryResult PresentDetailRQuery(IVoucherDetailQuery query, Session session)
         => new PlainText(
@@ -235,7 +234,7 @@ internal class AccountingShell : IShellComponent
     /// </summary>
     /// <param name="expr">表达式</param>
     /// <param name="safe">仅限强检索式</param>
-    /// <param name="client"></param>
+    /// <param name="client">客户端</param>
     /// <returns>执行结果</returns>
     private Func<Session, IQueryResult> TryFancyQuery(string expr, bool safe, Client client)
     {
@@ -251,7 +250,7 @@ internal class AccountingShell : IShellComponent
     ///     执行记账凭证检索式，保留部分细目并呈现结果
     /// </summary>
     /// <param name="query">带记账凭证的细目检索式</param>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
     private IQueryResult PresentFancyQuery(IVoucherDetailQuery query, Session session)
         => new PlainText(
@@ -267,10 +266,9 @@ internal class AccountingShell : IShellComponent
     /// </summary>
     /// <param name="query">记账凭证分类汇总检索式</param>
     /// <param name="trav">呈现器</param>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    private IQueryResult PresentSubtotal(IVoucherGroupedQuery query, ISubtotalStringify trav,
-        Session session)
+    private IQueryResult PresentSubtotal(IVoucherGroupedQuery query, ISubtotalStringify trav, Session session)
     {
         var result = session.Accountant.SelectVouchersGrouped(query);
         return new PlainText(trav.PresentSubtotal(result, query.Subtotal, session.Serializer));
@@ -281,10 +279,9 @@ internal class AccountingShell : IShellComponent
     /// </summary>
     /// <param name="query">分类汇总检索式</param>
     /// <param name="trav">呈现器</param>
-    /// <param name="serializer">表示器</param>
+    /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    private IQueryResult PresentSubtotal(IGroupedQuery query, ISubtotalStringify trav,
-        Session session)
+    private IQueryResult PresentSubtotal(IGroupedQuery query, ISubtotalStringify trav, Session session)
     {
         var result = session.Accountant.SelectVoucherDetailsGrouped(query);
         return new PlainText(trav.PresentSubtotal(result, query.Subtotal, session.Serializer));

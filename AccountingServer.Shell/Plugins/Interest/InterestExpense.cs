@@ -16,8 +16,6 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-using AccountingServer.BLL;
-
 namespace AccountingServer.Shell.Plugins.Interest;
 
 /// <summary>

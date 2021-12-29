@@ -123,7 +123,7 @@ internal class AssetAccountant : DistributedAccountant
         foreach (
             var voucher in
             Db.SelectVouchers(ParsingF.VoucherQuery(
-                    $"U{asset.User.AsUser()} T{asset.Title.AsTitle()} {asset.StringID.Quotation('\'')}", m_Client))
+                    $"U{asset.User.AsUser()} T{asset.Title.AsTitle()} {asset.StringID.Quotation('\'')}", Client))
                 .Where(v => v.IsMatch(query)).ToEnumerable()) // TODO
         {
             if (voucher.Remark == Asset.IgnoranceMark)
@@ -178,7 +178,7 @@ internal class AssetAccountant : DistributedAccountant
             var voucher in
             Db.SelectVouchers(
                 ParsingF.VoucherQuery(
-                    $"U{asset.User.AsUser()} T{asset.DepreciationTitle.AsTitle()} {asset.StringID.Quotation('\'')}", m_Client)).ToEnumerable() // TODO
+                    $"U{asset.User.AsUser()} T{asset.DepreciationTitle.AsTitle()} {asset.StringID.Quotation('\'')}", Client)).ToEnumerable() // TODO
         )
         {
             if (voucher.Remark == Asset.IgnoranceMark)
@@ -203,7 +203,7 @@ internal class AssetAccountant : DistributedAccountant
             var voucher in
             Db.SelectVouchers(
                 ParsingF.VoucherQuery(
-                    $"U{asset.User.AsUser()} T{asset.DevaluationTitle.AsTitle()} {asset.StringID.Quotation('\'')}", m_Client)).ToEnumerable() // TODO
+                    $"U{asset.User.AsUser()} T{asset.DevaluationTitle.AsTitle()} {asset.StringID.Quotation('\'')}", Client)).ToEnumerable() // TODO
         )
         {
             if (voucher.Remark == Asset.IgnoranceMark)

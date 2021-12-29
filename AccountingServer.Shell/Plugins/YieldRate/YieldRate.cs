@@ -19,12 +19,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AccountingServer.BLL;
 using AccountingServer.BLL.Parsing;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
-using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 
 namespace AccountingServer.Shell.Plugins.YieldRate;
@@ -61,7 +59,7 @@ internal class YieldRate : PluginBase
     /// <summary>
     ///     计算实际收益率
     /// </summary>
-    /// <param name="session"></param>
+    /// <param name="session">客户端会话</param>
     /// <param name="lst">现金流</param>
     /// <param name="pv">现值</param>
     /// <returns>实际收益率</returns>

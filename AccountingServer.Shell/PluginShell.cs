@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using AccountingServer.BLL;
 using AccountingServer.Shell.Plugins;
 using AccountingServer.Shell.Plugins.AssetHelper;
 using AccountingServer.Shell.Plugins.BankBalance;
@@ -30,7 +29,6 @@ using AccountingServer.Shell.Plugins.Interest;
 using AccountingServer.Shell.Plugins.Statement;
 using AccountingServer.Shell.Plugins.Utilities;
 using AccountingServer.Shell.Plugins.YieldRate;
-using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
@@ -102,7 +100,7 @@ internal class PluginShell : IShellComponent
     /// <summary>
     ///     列出所有插件
     /// </summary>
-    /// <returns></returns>
+    /// <returns>插件</returns>
     private string ListPlugins()
     {
         var sb = new StringBuilder();

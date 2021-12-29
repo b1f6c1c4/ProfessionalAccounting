@@ -20,8 +20,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using AccountingServer.BLL;
-using AccountingServer.Shell.Serializer;
 
 namespace AccountingServer.Shell;
 
@@ -34,7 +32,7 @@ internal interface IShellComponent
     ///     执行表达式
     /// </summary>
     /// <param name="expr">表达式</param>
-    /// <param name="session"></param>
+    /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
     IQueryResult Execute(string expr, Session session);
 

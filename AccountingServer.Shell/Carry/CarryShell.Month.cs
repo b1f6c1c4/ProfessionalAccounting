@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
-using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -40,7 +39,7 @@ internal partial class CarryShell
     /// <summary>
     ///     月末结转
     /// </summary>
-    /// <param name="session"></param>
+    /// <param name="session">客户端会话</param>
     /// <param name="sb">日志记录</param>
     /// <param name="dt">月，若为<c>null</c>则表示对无日期进行结转</param>
     private void Carry(Session session, StringBuilder sb, DateTime? dt)
@@ -136,7 +135,7 @@ internal partial class CarryShell
     /// <summary>
     ///     按目标月末结转
     /// </summary>
-    /// <param name="session"></param>
+    /// <param name="session">客户端会话</param>
     /// <param name="sb">日志记录</param>
     /// <param name="task">任务</param>
     /// <param name="rng">范围</param>

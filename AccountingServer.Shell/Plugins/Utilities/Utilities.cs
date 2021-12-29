@@ -20,10 +20,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AccountingServer.BLL;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
-using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 
@@ -67,7 +65,7 @@ internal class Utilities : PluginBase
     /// <summary>
     ///     根据表达式生成记账凭证
     /// </summary>
-    /// <param name="session"></param>
+    /// <param name="session">客户端会话</param>
     /// <param name="expr">表达式</param>
     /// <returns>记账凭证</returns>
     private Voucher GenerateVoucher(Session session, ref string expr)
@@ -102,7 +100,7 @@ internal class Utilities : PluginBase
     /// <param name="template">记账凭证模板</param>
     /// <param name="num">倍乘</param>
     /// <param name="time">日期</param>
-    /// <returns></returns>
+    /// <returns>记账凭证</returns>
     private static Voucher MakeVoucher(Voucher template, double num, DateTime? time)
     {
         var lst =

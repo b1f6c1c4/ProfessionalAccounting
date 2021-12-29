@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -52,7 +51,7 @@ internal class CheckShell : IShellComponent
     /// <summary>
     ///     检查每张会计记账凭证借贷方是否相等
     /// </summary>
-    /// <param name="session"></param>
+    /// <param name="session">客户端会话</param>
     /// <returns>有误的会计记账凭证表达式</returns>
     private IQueryResult BasicCheck(Session session)
     {
@@ -84,7 +83,7 @@ internal class CheckShell : IShellComponent
     /// <summary>
     ///     检查每科目每内容借贷方向
     /// </summary>
-    /// <param name="session"></param>
+    /// <param name="session">客户端会话</param>
     /// <returns>发生错误的信息</returns>
     private IQueryResult AdvancedCheck(Session session)
     {

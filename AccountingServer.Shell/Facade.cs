@@ -75,6 +75,7 @@ public class Facade
     /// <summary>
     ///     执行表达式
     /// </summary>
+    /// <param name="session">客户端会话</param>
     /// <param name="expr">表达式</param>
     /// <returns>执行结果</returns>
     public IQueryResult Execute(Session session, string expr)
@@ -98,8 +99,8 @@ public class Facade
     /// <summary>
     ///     执行基础表达式
     /// </summary>
+    /// <param name="session">客户端会话</param>
     /// <param name="expr">表达式</param>
-    /// <param name="spec">表示器代号</param>
     /// <returns>执行结果</returns>
     public IQueryResult SafeExecute(Session session, string expr)
     {
@@ -155,8 +156,8 @@ public class Facade
     /// <summary>
     ///     更新或添加记账凭证
     /// </summary>
+    /// <param name="session">客户端会话</param>
     /// <param name="str">记账凭证的表达式</param>
-    /// <param name="spec">表示器代号</param>
     /// <returns>新记账凭证的表达式</returns>
     public string ExecuteVoucherUpsert(Session session, string str)
     {
@@ -227,8 +228,8 @@ public class Facade
     /// <summary>
     ///     更新或添加资产
     /// </summary>
+    /// <param name="session">客户端会话</param>
     /// <param name="str">资产表达式</param>
-    /// <param name="spec">表示器代号</param>
     /// <returns>新资产表达式</returns>
     public string ExecuteAssetUpsert(Session session, string str)
     {
@@ -243,8 +244,8 @@ public class Facade
     /// <summary>
     ///     更新或添加摊销
     /// </summary>
+    /// <param name="session">客户端会话</param>
     /// <param name="str">摊销表达式</param>
-    /// <param name="spec">表示器代号</param>
     /// <returns>新摊销表达式</returns>
     public string ExecuteAmortUpsert(Session session, string str)
     {
@@ -263,8 +264,8 @@ public class Facade
     /// <summary>
     ///     删除记账凭证
     /// </summary>
+    /// <param name="session">客户端会话</param>
     /// <param name="str">记账凭证表达式</param>
-    /// <param name="spec">表示器代号</param>
     /// <returns>是否成功</returns>
     public bool ExecuteVoucherRemoval(Session session, string str)
     {
@@ -279,8 +280,8 @@ public class Facade
     /// <summary>
     ///     删除资产
     /// </summary>
+    /// <param name="session">客户端会话</param>
     /// <param name="str">资产表达式</param>
-    /// <param name="spec">表示器代号</param>
     /// <returns>是否成功</returns>
     public bool ExecuteAssetRemoval(Session session, string str)
     {
@@ -295,8 +296,8 @@ public class Facade
     /// <summary>
     ///     删除摊销
     /// </summary>
+    /// <param name="session">客户端会话</param>
     /// <param name="str">摊销表达式</param>
-    /// <param name="spec">表示器代号</param>
     /// <returns>是否成功</returns>
     public bool ExecuteAmortRemoval(Session session, string str)
     {

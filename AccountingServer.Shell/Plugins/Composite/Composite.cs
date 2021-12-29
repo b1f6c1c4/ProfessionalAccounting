@@ -20,11 +20,9 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
-using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Subtotal;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
@@ -103,8 +101,8 @@ internal class Composite : PluginBase
     /// <param name="rng">日期过滤器</param>
     /// <param name="inq">查询</param>
     /// <param name="val">金额</param>
-    /// <param name="baseCurrency"></param>
-    /// <param name="session"></param>
+    /// <param name="baseCurrency">记账本位币</param>
+    /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
     public IQueryResult DoInquiry(DateFilter rng, BaseInquiry inq, out double val, string baseCurrency,
         Session session)
