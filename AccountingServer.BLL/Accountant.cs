@@ -57,82 +57,37 @@ public class Accountant : IHistoricalExchange
 
     #region Voucher
 
-    [Obsolete]
-    public Voucher SelectVoucher(string id)
-        => m_Db.SelectVoucher(id).AsTask().Result;
-
     public ValueTask<Voucher> SelectVoucherAsync(string id)
         => m_Db.SelectVoucher(id);
-
-    [Obsolete]
-    public IEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-        => m_Db.SelectVouchers(query).ToEnumerable();
 
     public IAsyncEnumerable<Voucher> SelectVouchersAsync(IQueryCompounded<IVoucherQueryAtom> query)
         => m_Db.SelectVouchers(query);
 
-    [Obsolete]
-    public IEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
-        => m_Db.SelectVoucherDetails(query).ToEnumerable();
-
     public IAsyncEnumerable<VoucherDetail> SelectVoucherDetailsAsync(IVoucherDetailQuery query)
         => m_Db.SelectVoucherDetails(query);
-
-    [Obsolete]
-    public ISubtotalResult SelectVoucherDetailsGrouped(IGroupedQuery query)
-        => m_Db.SelectVoucherDetailsGrouped(query, Limit).AsTask().Result;
 
     public ValueTask<ISubtotalResult> SelectVoucherDetailsGroupedAsync(IGroupedQuery query)
         => m_Db.SelectVoucherDetailsGrouped(query, Limit);
 
-    [Obsolete]
-    public ISubtotalResult SelectVouchersGrouped(IVoucherGroupedQuery query)
-        => m_Db.SelectVouchersGrouped(query, Limit).AsTask().Result;
-
     public ValueTask<ISubtotalResult> SelectVouchersGroupedAsync(IVoucherGroupedQuery query)
         => m_Db.SelectVouchersGrouped(query, Limit);
-
-    [Obsolete]
-    public IEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
-        IQueryCompounded<IVoucherQueryAtom> query)
-        => m_Db.SelectUnbalancedVouchers(query).ToEnumerable();
 
     public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchersAsync(
         IQueryCompounded<IVoucherQueryAtom> query)
         => m_Db.SelectUnbalancedVouchers(query);
 
-    [Obsolete]
-    public IEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-        => m_Db.SelectDuplicatedVouchers(query).ToEnumerable();
-
     public IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchersAsync(
         IQueryCompounded<IVoucherQueryAtom> query)
         => m_Db.SelectDuplicatedVouchers(query);
 
-    [Obsolete]
-    public bool DeleteVoucher(string id)
-        => m_Db.DeleteVoucher(id).AsTask().Result;
-
     public ValueTask<bool> DeleteVoucherAsync(string id)
         => m_Db.DeleteVoucher(id);
-
-    [Obsolete]
-    public long DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-        => m_Db.DeleteVouchers(query).AsTask().Result;
 
     public ValueTask<long> DeleteVouchersAsync(IQueryCompounded<IVoucherQueryAtom> query)
         => m_Db.DeleteVouchers(query);
 
-    [Obsolete]
-    public bool Upsert(Voucher entity)
-        => m_Db.Upsert(entity).AsTask().Result;
-
     public ValueTask<bool> UpsertAsync(Voucher entity)
         => m_Db.Upsert(entity);
-
-    [Obsolete]
-    public long Upsert(IReadOnlyCollection<Voucher> entities)
-        => m_Db.Upsert(entities).AsTask().Result;
 
     public ValueTask<long> UpsertAsync(IReadOnlyCollection<Voucher> entities)
         => m_Db.Upsert(entities);
@@ -141,37 +96,17 @@ public class Accountant : IHistoricalExchange
 
     #region Asset
 
-    [Obsolete]
-    public Asset SelectAsset(Guid id)
-        => AssetAccountant.InternalRegular(m_Db.SelectAsset(id).AsTask().Result);
-
     public async ValueTask<Asset> SelectAssetAsync(Guid id)
         => AssetAccountant.InternalRegular(await m_Db.SelectAsset(id));
-
-    [Obsolete]
-    public IEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter)
-        => m_Db.SelectAssets(filter).Select(AssetAccountant.InternalRegular).ToEnumerable();
 
     public IAsyncEnumerable<Asset> SelectAssetsAsync(IQueryCompounded<IDistributedQueryAtom> filter)
         => m_Db.SelectAssets(filter).Select(AssetAccountant.InternalRegular);
 
-    [Obsolete]
-    public bool DeleteAsset(Guid id)
-        => m_Db.DeleteAsset(id).AsTask().Result;
-
     public ValueTask<bool> DeleteAssetAsync(Guid id)
         => m_Db.DeleteAsset(id);
 
-    [Obsolete]
-    public long DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
-        => m_Db.DeleteAssets(filter).AsTask().Result;
-
     public ValueTask<long> DeleteAssetsAsync(IQueryCompounded<IDistributedQueryAtom> filter)
         => m_Db.DeleteAssets(filter);
-
-    [Obsolete]
-    public bool Upsert(Asset entity)
-        => m_Db.Upsert(entity).AsTask().Result;
 
     public ValueTask<bool> UpsertAsync(Asset entity)
         => m_Db.Upsert(entity);
@@ -190,37 +125,17 @@ public class Accountant : IHistoricalExchange
 
     #region Amort
 
-    [Obsolete]
-    public Amortization SelectAmortization(Guid id)
-        => AmortAccountant.InternalRegular(m_Db.SelectAmortization(id).AsTask().Result);
-
     public async ValueTask<Amortization> SelectAmortizationAsync(Guid id)
         => AmortAccountant.InternalRegular(await m_Db.SelectAmortization(id));
-
-    [Obsolete]
-    public IEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
-        => m_Db.SelectAmortizations(filter).Select(AmortAccountant.InternalRegular).ToEnumerable();
 
     public IAsyncEnumerable<Amortization> SelectAmortizationsAsync(IQueryCompounded<IDistributedQueryAtom> filter)
         => m_Db.SelectAmortizations(filter).Select(AmortAccountant.InternalRegular);
 
-    [Obsolete]
-    public bool DeleteAmortization(Guid id)
-        => m_Db.DeleteAmortization(id).AsTask().Result;
-
     public ValueTask<bool> DeleteAmortizationAsync(Guid id)
         => m_Db.DeleteAmortization(id);
 
-    [Obsolete]
-    public long DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
-        => m_Db.DeleteAmortizations(filter).AsTask().Result;
-
     public ValueTask<long> DeleteAmortizationsAsync(IQueryCompounded<IDistributedQueryAtom> filter)
         => m_Db.DeleteAmortizations(filter);
-
-    [Obsolete]
-    public bool Upsert(Amortization entity)
-        => m_Db.Upsert(entity).AsTask().Result;
 
     public ValueTask<bool> UpsertAsync(Amortization entity)
         => m_Db.Upsert(entity);

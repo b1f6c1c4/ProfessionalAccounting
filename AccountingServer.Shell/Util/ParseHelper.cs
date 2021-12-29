@@ -46,27 +46,11 @@ public static class ParseHelper
             throw new ArgumentException("语法错误", nameof(expr));
     }
 
-    [Obsolete]
-    public static IEnumerable<Voucher> RunVoucherQuery(this Accountant acc, string str)
-    {
-        var res = FacadeF.ParsingF.VoucherQuery(ref str, acc.Client);
-        FacadeF.ParsingF.Eof(str);
-        return acc.SelectVouchers(res);
-    }
-
     public static IAsyncEnumerable<Voucher> RunVoucherQueryAsync(this Accountant acc, string str)
     {
         var res = FacadeF.ParsingF.VoucherQuery(ref str, acc.Client);
         FacadeF.ParsingF.Eof(str);
         return acc.SelectVouchersAsync(res);
-    }
-
-    [Obsolete]
-    public static long DeleteVouchers(this Accountant acc, string str)
-    {
-        var res = FacadeF.ParsingF.VoucherQuery(ref str, acc.Client);
-        FacadeF.ParsingF.Eof(str);
-        return acc.DeleteVouchers(res);
     }
 
     public static ValueTask<long> DeleteVouchersAsync(this Accountant acc, string str)
@@ -76,27 +60,11 @@ public static class ParseHelper
         return acc.DeleteVouchersAsync(res);
     }
 
-    [Obsolete]
-    public static ISubtotalResult RunGroupedQuery(this Accountant acc, string str)
-    {
-        var res = FacadeF.ParsingF.GroupedQuery(ref str, acc.Client);
-        FacadeF.ParsingF.Eof(str);
-        return acc.SelectVoucherDetailsGrouped(res);
-    }
-
     public static ValueTask<ISubtotalResult> RunGroupedQueryAsync(this Accountant acc, string str)
     {
         var res = FacadeF.ParsingF.GroupedQuery(ref str, acc.Client);
         FacadeF.ParsingF.Eof(str);
         return acc.SelectVoucherDetailsGroupedAsync(res);
-    }
-
-    [Obsolete]
-    public static ISubtotalResult RunVoucherGroupedQuery(this Accountant acc, string str)
-    {
-        var res = FacadeF.ParsingF.VoucherGroupedQuery(ref str, acc.Client);
-        FacadeF.ParsingF.Eof(str);
-        return acc.SelectVouchersGrouped(res);
     }
 
     public static ValueTask<ISubtotalResult> RunVoucherGroupedQueryAsync(this Accountant acc, string str)

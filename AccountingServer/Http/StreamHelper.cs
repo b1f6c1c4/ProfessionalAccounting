@@ -16,7 +16,6 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,16 +30,6 @@ internal static class StreamHelper
     {
         encoding ??= Encoding.UTF8;
         return encoding.GetBytes(str);
-    }
-
-    [Obsolete]
-    internal static void WriteLine(this Stream stream, string str = null, Encoding encoding = null)
-    {
-        encoding ??= Encoding.UTF8;
-        var data = encoding.GetBytes(str ?? "");
-        stream.Write(data, 0, data.Length);
-
-        stream.Write(CrLf, 0, CrLf.Length);
     }
 
     internal static async Task WriteLineAsync(this Stream stream, string str = null, Encoding encoding = null)
