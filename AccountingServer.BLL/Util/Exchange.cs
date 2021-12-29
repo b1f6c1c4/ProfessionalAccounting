@@ -52,7 +52,7 @@ internal interface IExchange
     /// <param name="from">购汇币种</param>
     /// <param name="to">结汇币种</param>
     /// <returns>汇率</returns>
-    Task<double> Query(string from, string to);
+    ValueTask<double> Query(string from, string to);
 }
 
 /// <summary>
@@ -67,7 +67,7 @@ public interface IHistoricalExchange
     /// <param name="from">购汇币种</param>
     /// <param name="to">结汇币种</param>
     /// <returns>汇率</returns>
-    Task<double> Query(DateTime? date, string from, string to);
+    ValueTask<double> Query(DateTime? date, string from, string to);
 }
 
 [Serializable]
@@ -111,7 +111,7 @@ internal class RoundRobinApiKeys
     private long m_CurrentId;
     private long GetCurrentId() => Interlocked.Increment(ref m_CurrentId);
 
-    public async Task<TOut> Execute<TOut>(IList<string> keys, Func<string, Task<TOut?>> func) where TOut : struct
+    public async ValueTask<TOut> Execute<TOut>(IList<string> keys, Func<string, ValueTask<TOut?>> func) where TOut : struct
     {
         if (keys.Count == 0)
             throw new UnauthorizedAccessException("No access key found");
@@ -135,10 +135,10 @@ internal abstract class ExchangeApi : IExchange
 
     internal ExchangeApi Successor { private get; init; }
 
-    public Task<double> Query(string from, string to)
+    public ValueTask<double> Query(string from, string to)
         => Query(from, to, Enumerable.Empty<Exception>());
 
-    private Task<double> Query(string from, string to, IEnumerable<Exception> err)
+    private ValueTask<double> Query(string from, string to, IEnumerable<Exception> err)
     {
         try
         {
@@ -154,7 +154,7 @@ internal abstract class ExchangeApi : IExchange
         }
     }
 
-    protected abstract Task<double> Invoke(string from, string to);
+    protected abstract ValueTask<double> Invoke(string from, string to);
 }
 
 /// <summary>
@@ -164,11 +164,11 @@ internal class FixerIoExchange : ExchangeApi, IHistoricalExchange
 {
     private readonly RoundRobinApiKeys m_ApiKeys = new();
 
-    protected override Task<double> Invoke(string from, string to)
+    protected override ValueTask<double> Invoke(string from, string to)
         => m_ApiKeys.Execute(ExchangeInfo.Config.FixerAccessKey,
             key => PartialInvoke(from, to, key, "latest"));
 
-    private static async Task<double?> PartialInvoke(string from, string to, string key, string endpoint)
+    private static async ValueTask<double?> PartialInvoke(string from, string to, string key, string endpoint)
     {
         var client = new HttpClient();
         var response =
@@ -180,7 +180,7 @@ internal class FixerIoExchange : ExchangeApi, IHistoricalExchange
         return null;
     }
 
-    public Task<double> Query(DateTime? date, string from, string to)
+    public ValueTask<double> Query(DateTime? date, string from, string to)
     {
         if (!date.HasValue)
             return Invoke(from, to);
@@ -197,7 +197,7 @@ internal class CoinMarketCapExchange : ExchangeApi
 {
     private readonly RoundRobinApiKeys m_ApiKeys = new();
 
-    protected override Task<double> Invoke(string from, string to)
+    protected override ValueTask<double> Invoke(string from, string to)
     {
         int? fromId = null, toId = null;
         var isCrypto = false;
@@ -232,7 +232,7 @@ internal class CoinMarketCapExchange : ExchangeApi
             key => PartialInvoke(fromId.Value, toId.Value, key));
     }
 
-    private static async Task<double?> PartialInvoke(int fromId, int toId, string key)
+    private static async ValueTask<double?> PartialInvoke(int fromId, int toId, string key)
     {
         var client = new HttpClient();
         client.DefaultRequestHeaders.Add("X-CMC_PRO_API_KEY", key);

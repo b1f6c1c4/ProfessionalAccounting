@@ -176,17 +176,17 @@ public class DbQueryTest : QueryTestBase, IDisposable
     {
         m_Adapter = Facade.Create(db: "accounting-test");
 
-        m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+        m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance).AsTask().Wait();
     }
 
-    public void Dispose() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+    public void Dispose() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance).AsTask().Wait();
 
-    protected override void PrepareVoucher(Voucher voucher) => m_Adapter.Upsert(voucher);
+    protected override void PrepareVoucher(Voucher voucher) => m_Adapter.Upsert(voucher).AsTask().Wait();
 
     protected override bool RunQuery(IQueryCompounded<IVoucherQueryAtom> query)
         => m_Adapter.SelectVouchers(query).ToEnumerable().SingleOrDefault() != null;
 
-    protected override void ResetVouchers() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+    protected override void ResetVouchers() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance).AsTask().Wait();
 
     [Theory]
     [ClassData(typeof(DataProvider))]

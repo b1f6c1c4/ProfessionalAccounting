@@ -175,11 +175,11 @@ public class SubtotalBuilder
     /// </summary>
     /// <param name="raw">原始数据</param>
     /// <returns>分类汇总结果</returns>
-    public Task<ISubtotalResult> Build(IAsyncEnumerable<Balance> raw)
+    public ValueTask<ISubtotalResult> Build(IAsyncEnumerable<Balance> raw)
     {
         m_Depth = 0;
         m_Flags = SubtotalLevel.None;
-        return Build(new SubtotalRoot(), raw).AsTask();
+        return Build(new SubtotalRoot(), raw);
     }
 
     private async ValueTask<ISubtotalResult> Build(SubtotalResult sub, IAsyncEnumerable<Balance> raw)
@@ -199,7 +199,7 @@ public class SubtotalBuilder
         return sub;
     }
 
-    private async Task BuildChildren(SubtotalResult sub, IAsyncEnumerable<Balance> raw, SubtotalLevel level)
+    private async ValueTask BuildChildren(SubtotalResult sub, IAsyncEnumerable<Balance> raw, SubtotalLevel level)
     {
         ValueTask<List<ISubtotalResult>> Invoke<T>(SubtotalResultFactory<T> f) =>
             raw.GroupBy(f.Selector).SelectAwait(g => Build(f.Create(g), g)).Where(g => g != null).ToListAsync();

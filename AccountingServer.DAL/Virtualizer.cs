@@ -52,7 +52,7 @@ public class Virtualizer : IDbAdapter, IDisposable
         m_Vouchers.Clear();
     }
 
-    public Task<Voucher> SelectVoucher(string id)
+    public ValueTask<Voucher> SelectVoucher(string id)
         => Db.SelectVoucher(id);
 
     public IAsyncEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
@@ -152,13 +152,13 @@ public class Virtualizer : IDbAdapter, IDisposable
     public IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => throw new NotSupportedException();
 
-    public Task<bool> DeleteVoucher(string id)
+    public ValueTask<bool> DeleteVoucher(string id)
         => Db.DeleteVoucher(id);
 
-    public async Task<long> DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+    public async ValueTask<long> DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => await Db.DeleteVouchers(query) + m_Vouchers.RemoveAll(v => v.IsMatch(query));
 
-    public async Task<bool> Upsert(Voucher entity)
+    public async ValueTask<bool> Upsert(Voucher entity)
     {
         if (entity.ID != null)
             return await Db.Upsert(entity);
@@ -167,7 +167,7 @@ public class Virtualizer : IDbAdapter, IDisposable
         return true;
     }
 
-    public async Task<long> Upsert(IEnumerable<Voucher> entities)
+    public async ValueTask<long> Upsert(IEnumerable<Voucher> entities)
     {
         var lst = new List<Voucher>();
         var cnt = 0L;
@@ -183,39 +183,39 @@ public class Virtualizer : IDbAdapter, IDisposable
         return cnt + await Db.Upsert(lst);
     }
 
-    public Task<Asset> SelectAsset(Guid id)
+    public ValueTask<Asset> SelectAsset(Guid id)
         => Db.SelectAsset(id);
 
     public IAsyncEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter)
         => Db.SelectAssets(filter);
 
-    public Task<bool> DeleteAsset(Guid id)
+    public ValueTask<bool> DeleteAsset(Guid id)
         => Db.DeleteAsset(id);
 
-    public Task<long> DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
+    public ValueTask<long> DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
         => Db.DeleteAssets(filter);
 
-    public Task<bool> Upsert(Asset entity)
+    public ValueTask<bool> Upsert(Asset entity)
         => Db.Upsert(entity);
 
-    public Task<Amortization> SelectAmortization(Guid id)
+    public ValueTask<Amortization> SelectAmortization(Guid id)
         => Db.SelectAmortization(id);
 
     public IAsyncEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
         => Db.SelectAmortizations(filter);
 
-    public Task<bool> DeleteAmortization(Guid id)
+    public ValueTask<bool> DeleteAmortization(Guid id)
         => Db.DeleteAmortization(id);
 
-    public Task<long> DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
+    public ValueTask<long> DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
         => Db.DeleteAmortizations(filter);
 
-    public Task<bool> Upsert(Amortization entity)
+    public ValueTask<bool> Upsert(Amortization entity)
         => Db.Upsert(entity);
 
-    public Task<ExchangeRecord> SelectExchangeRecord(ExchangeRecord record)
+    public ValueTask<ExchangeRecord> SelectExchangeRecord(ExchangeRecord record)
         => Db.SelectExchangeRecord(record);
 
-    public Task<bool> Upsert(ExchangeRecord record)
+    public ValueTask<bool> Upsert(ExchangeRecord record)
         => Db.Upsert(record);
 }

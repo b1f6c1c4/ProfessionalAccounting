@@ -40,7 +40,7 @@ public class SubtotalTest : IDisposable
     {
         m_Adapter = Facade.Create(db: "accounting-test");
 
-        m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+        m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance).AsTask().Wait();
 
         m_Adapter = Facade.Virtualize(m_Adapter);
         m_Adapter.Upsert(new Voucher[]
@@ -126,13 +126,13 @@ public class SubtotalTest : IDisposable
                                     },
                             },
                     },
-            });
+            }).AsTask().Wait();
     }
 
     public void Dispose()
     {
         m_Adapter = Facade.UnVirtualize(m_Adapter);
-        m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
+        m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance).AsTask().Wait();
     }
 
     [Fact]

@@ -191,7 +191,7 @@ internal class MongoDbAdapter : IDbAdapter
         m_Records = m_Db.GetCollection<ExchangeRecord>("exchangeRecord");
     }
 
-    private static async Task<bool> Upsert<T, TId>(IMongoCollection<T> collection, T entity, BaseSerializer<T, TId> idProvider)
+    private static async ValueTask<bool> Upsert<T, TId>(IMongoCollection<T> collection, T entity, BaseSerializer<T, TId> idProvider)
     {
         if (idProvider.FillId(collection, entity))
         {
@@ -206,7 +206,7 @@ internal class MongoDbAdapter : IDbAdapter
         return res.ModifiedCount <= 1;
     }
 
-    private static async Task<long> Upsert<T, TId>(IMongoCollection<T> collection, IEnumerable<T> entities, BaseSerializer<T, TId> idProvider)
+    private static async ValueTask<long> Upsert<T, TId>(IMongoCollection<T> collection, IEnumerable<T> entities, BaseSerializer<T, TId> idProvider)
     {
         var ops = new List<WriteModel<T>>();
         foreach (var entity in entities)
@@ -258,7 +258,7 @@ internal class MongoDbAdapter : IDbAdapter
     #region Voucher
 
     /// <inheritdoc />
-    public async Task<Voucher> SelectVoucher(string id) =>
+    public async ValueTask<Voucher> SelectVoucher(string id) =>
         (await m_Vouchers.FindAsync(GetNQuery<Voucher>(id))).FirstOrDefault();
 
     /// <inheritdoc />
@@ -429,31 +429,31 @@ internal class MongoDbAdapter : IDbAdapter
                 });
 
     /// <inheritdoc />
-    public async Task<bool> DeleteVoucher(string id)
+    public async ValueTask<bool> DeleteVoucher(string id)
     {
         var res = await m_Vouchers.DeleteOneAsync(GetNQuery<Voucher>(id));
         return res.DeletedCount == 1;
     }
 
     /// <inheritdoc />
-    public async Task<long> DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+    public async ValueTask<long> DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
     {
         var res = await m_Vouchers.DeleteManyAsync(query.Accept(new MongoDbNativeVoucher()));
         return res.DeletedCount;
     }
 
     /// <inheritdoc />
-    public Task<bool> Upsert(Voucher entity) => Upsert(m_Vouchers, entity, new VoucherSerializer());
+    public ValueTask<bool> Upsert(Voucher entity) => Upsert(m_Vouchers, entity, new VoucherSerializer());
 
     /// <inheritdoc />
-    public Task<long> Upsert(IEnumerable<Voucher> entities) => Upsert(m_Vouchers, entities, new VoucherSerializer());
+    public ValueTask<long> Upsert(IEnumerable<Voucher> entities) => Upsert(m_Vouchers, entities, new VoucherSerializer());
 
     #endregion
 
     #region Asset
 
     /// <inheritdoc />
-    public async Task<Asset> SelectAsset(Guid id) => (await m_Assets.FindAsync(GetNQuery<Asset>(id))).FirstOrDefault();
+    public async ValueTask<Asset> SelectAsset(Guid id) => (await m_Assets.FindAsync(GetNQuery<Asset>(id))).FirstOrDefault();
 
     /// <inheritdoc />
     public IAsyncEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter) =>
@@ -461,14 +461,14 @@ internal class MongoDbAdapter : IDbAdapter
             .ToAsyncEnumerable();
 
     /// <inheritdoc />
-    public async Task<bool> DeleteAsset(Guid id)
+    public async ValueTask<bool> DeleteAsset(Guid id)
     {
         var res = await m_Assets.DeleteOneAsync(GetNQuery<Asset>(id));
         return res.DeletedCount == 1;
     }
 
     /// <inheritdoc />
-    public async Task<bool> Upsert(Asset entity)
+    public async ValueTask<bool> Upsert(Asset entity)
     {
         var res = await m_Assets.ReplaceOneAsync(
             Builders<Asset>.Filter.Eq("_id", entity.ID),
@@ -478,7 +478,7 @@ internal class MongoDbAdapter : IDbAdapter
     }
 
     /// <inheritdoc />
-    public async Task<long> DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
+    public async ValueTask<long> DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
     {
         var res = await m_Assets.DeleteManyAsync(filter.Accept(new MongoDbNativeDistributed<Asset>()));
         return res.DeletedCount;
@@ -489,7 +489,7 @@ internal class MongoDbAdapter : IDbAdapter
     #region Amortization
 
     /// <inheritdoc />
-    public async Task<Amortization> SelectAmortization(Guid id) =>
+    public async ValueTask<Amortization> SelectAmortization(Guid id) =>
         (await m_Amortizations.FindAsync(GetNQuery<Amortization>(id))).FirstOrDefault();
 
     /// <inheritdoc />
@@ -498,14 +498,14 @@ internal class MongoDbAdapter : IDbAdapter
             .ToAsyncEnumerable();
 
     /// <inheritdoc />
-    public async Task<bool> DeleteAmortization(Guid id)
+    public async ValueTask<bool> DeleteAmortization(Guid id)
     {
         var res = await m_Amortizations.DeleteOneAsync(GetNQuery<Amortization>(id));
         return res.DeletedCount == 1;
     }
 
     /// <inheritdoc />
-    public async Task<bool> Upsert(Amortization entity)
+    public async ValueTask<bool> Upsert(Amortization entity)
     {
         var res = await m_Amortizations.ReplaceOneAsync(
             Builders<Amortization>.Filter.Eq("_id", entity.ID),
@@ -515,7 +515,7 @@ internal class MongoDbAdapter : IDbAdapter
     }
 
     /// <inheritdoc />
-    public async Task<long> DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
+    public async ValueTask<long> DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
     {
         var res = await m_Amortizations.DeleteManyAsync(filter.Accept(new MongoDbNativeDistributed<Amortization>()));
         return res.DeletedCount;
@@ -526,7 +526,7 @@ internal class MongoDbAdapter : IDbAdapter
     #region ExchangeRecord
 
     /// <inheritdoc />
-    public async Task<ExchangeRecord> SelectExchangeRecord(ExchangeRecord record) =>
+    public async ValueTask<ExchangeRecord> SelectExchangeRecord(ExchangeRecord record) =>
         (await m_Records.Find(
                 Builders<ExchangeRecord>.Filter.Gte("_id.date", record.Time) &
                 Builders<ExchangeRecord>.Filter.Eq("_id.from", record.From) &
@@ -537,7 +537,7 @@ internal class MongoDbAdapter : IDbAdapter
         ).SingleOrDefault();
 
     /// <inheritdoc />
-    public async Task<bool> Upsert(ExchangeRecord record)
+    public async ValueTask<bool> Upsert(ExchangeRecord record)
     {
         try
         {

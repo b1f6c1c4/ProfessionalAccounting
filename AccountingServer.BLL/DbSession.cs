@@ -63,7 +63,7 @@ public class DbSession : IHistoricalExchange
     /// <param name="from">购汇币种</param>
     /// <param name="to">结汇币种</param>
     /// <returns>汇率</returns>
-    private async Task<double> LookupExchange(DateTime date, string from, string to)
+    private async ValueTask<double> LookupExchange(DateTime date, string from, string to)
     {
         if (from == to)
             return 1;
@@ -72,10 +72,10 @@ public class DbSession : IHistoricalExchange
         if (date > now)
             date = now;
 
-        var res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = from, To = to });
+        var res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = @from, To = to });
         if (res != null)
             return res.Value;
-        res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = from });
+        res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = @from });
         if (res != null)
             return 1D / res.Value;
 
@@ -83,27 +83,27 @@ public class DbSession : IHistoricalExchange
         var value = ExchangeFactory.Instance.Query(from, to).Result;
         await Db.Get().Upsert(new ExchangeRecord
             {
-                Time = now, From = from, To = to, Value = value,
+                Time = now, From = @from, To = to, Value = value,
             });
         return value;
     }
 
-    public async Task<double> SaveHistoricalRate(DateTime date, string from, string to)
+    public async ValueTask<double> SaveHistoricalRate(DateTime date, string from, string to)
     {
-        var res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = from, To = to });
+        var res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = @from, To = to });
         if (res != null && res.Time == date)
             return res.Value;
-        res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = from });
+        res = await Db.Get().SelectExchangeRecord(new ExchangeRecord { Time = date, From = to, To = @from });
         if (res != null && res.Time == date)
             return 1D / res.Value;
 
         var value = await ExchangeFactory.HistoricalInstance.Query(date, from, to);
-        await Db.Get().Upsert(new ExchangeRecord { Time = date, From = from, To = to, Value = value });
+        await Db.Get().Upsert(new ExchangeRecord { Time = date, From = @from, To = to, Value = value });
         return value;
     }
 
     /// <inheritdoc />
-    public Task<double> Query(DateTime? date, string from, string to)
+    public ValueTask<double> Query(DateTime? date, string from, string to)
         => LookupExchange(date ?? DateTime.UtcNow, from, to);
 
     private static int Compare<T>(T? lhs, T? rhs)
@@ -156,7 +156,7 @@ public class DbSession : IHistoricalExchange
         return res != 0 ? res : 0;
     }
 
-    public async Task<Voucher> SelectVoucher(string id)
+    public async ValueTask<Voucher> SelectVoucher(string id)
         => await Db.Get().SelectVoucher(id);
 
     public IAsyncEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
@@ -165,14 +165,14 @@ public class DbSession : IHistoricalExchange
     public IAsyncEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
         => Db.Get().SelectVoucherDetails(query);
 
-    public Task<ISubtotalResult> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit)
+    public ValueTask<ISubtotalResult> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit)
     {
         var res = Db.Get().SelectVouchersGrouped(query, limit);
         var conv = new SubtotalBuilder(query.Subtotal, this);
         return conv.Build(res);
     }
 
-    public Task<ISubtotalResult> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit)
+    public ValueTask<ISubtotalResult> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit)
     {
         var res = Db.Get().SelectVoucherDetailsGrouped(query, limit);
         var conv = new SubtotalBuilder(query.Subtotal, this);
@@ -186,20 +186,20 @@ public class DbSession : IHistoricalExchange
     public IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => Db.Get().SelectDuplicatedVouchers(query);
 
-    public Task<bool> DeleteVoucher(string id)
+    public ValueTask<bool> DeleteVoucher(string id)
         => Db.Get().DeleteVoucher(id);
 
-    public Task<long> DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+    public ValueTask<long> DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => Db.Get().DeleteVouchers(query);
 
-    public Task<bool> Upsert(Voucher entity)
+    public ValueTask<bool> Upsert(Voucher entity)
     {
         Regularize(entity);
 
         return Db.Get().Upsert(entity);
     }
 
-    public Task<long> Upsert(IReadOnlyCollection<Voucher> entities)
+    public ValueTask<long> Upsert(IReadOnlyCollection<Voucher> entities)
     {
         foreach (var entity in entities)
             Regularize(entity);
@@ -233,34 +233,34 @@ public class DbSession : IHistoricalExchange
         entity.Details.Sort(TheComparison);
     }
 
-    public Task<Asset> SelectAsset(Guid id)
+    public ValueTask<Asset> SelectAsset(Guid id)
         => Db.Get().SelectAsset(id);
 
     public IAsyncEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter)
         => Db.Get().SelectAssets(filter);
 
-    public Task<bool> DeleteAsset(Guid id)
+    public ValueTask<bool> DeleteAsset(Guid id)
         => Db.Get().DeleteAsset(id);
 
-    public Task<long> DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
+    public ValueTask<long> DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
         => Db.Get().DeleteAssets(filter);
 
-    public Task<bool> Upsert(Asset entity)
+    public ValueTask<bool> Upsert(Asset entity)
         => Db.Get().Upsert(entity);
 
-    public Task<Amortization> SelectAmortization(Guid id)
+    public ValueTask<Amortization> SelectAmortization(Guid id)
         => Db.Get().SelectAmortization(id);
 
     public IAsyncEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
         => Db.Get().SelectAmortizations(filter);
 
-    public Task<bool> DeleteAmortization(Guid id)
+    public ValueTask<bool> DeleteAmortization(Guid id)
         => Db.Get().DeleteAmortization(id);
 
-    public Task<long> DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
+    public ValueTask<long> DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
         => Db.Get().DeleteAmortizations(filter);
 
-    public Task<bool> Upsert(Amortization entity)
+    public ValueTask<bool> Upsert(Amortization entity)
     {
         Regularize(entity.Template);
 

@@ -91,18 +91,18 @@ public class DbQueryTest : QueryTestBase, IDisposable
     {
         m_Adapter = Facade.Create(db: "accounting-test");
 
-        m_Adapter.DeleteAssets(DistributedQueryUnconstrained.Instance);
-        m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance);
+        m_Adapter.DeleteAssets(DistributedQueryUnconstrained.Instance).AsTask().Wait();
+        m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance).AsTask().Wait();
     }
 
     public void Dispose()
     {
-        m_Adapter.DeleteAssets(DistributedQueryUnconstrained.Instance);
-        m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance);
+        m_Adapter.DeleteAssets(DistributedQueryUnconstrained.Instance).AsTask().Wait();
+        m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance).AsTask().Wait();
     }
 
-    protected override void PrepareAsset(Asset asset) => m_Adapter.Upsert(asset);
-    protected override void PrepareAmort(Amortization amort) => m_Adapter.Upsert(amort);
+    protected override void PrepareAsset(Asset asset) => m_Adapter.Upsert(asset).AsTask().Wait();
+    protected override void PrepareAmort(Amortization amort) => m_Adapter.Upsert(amort).AsTask().Wait();
 
     protected override bool RunAssetQuery(IQueryCompounded<IDistributedQueryAtom> query)
         => m_Adapter.SelectAssets(query).ToEnumerable().SingleOrDefault() != null;
@@ -110,8 +110,8 @@ public class DbQueryTest : QueryTestBase, IDisposable
     protected override bool RunAmortQuery(IQueryCompounded<IDistributedQueryAtom> query)
         => m_Adapter.SelectAmortizations(query).ToEnumerable().SingleOrDefault() != null;
 
-    protected override void ResetAssets() => m_Adapter.DeleteAssets(DistributedQueryUnconstrained.Instance);
-    protected override void ResetAmorts() => m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance);
+    protected override void ResetAssets() => m_Adapter.DeleteAssets(DistributedQueryUnconstrained.Instance).AsTask().Wait();
+    protected override void ResetAmorts() => m_Adapter.DeleteAmortizations(DistributedQueryUnconstrained.Instance).AsTask().Wait();
 
     [Theory]
     [ClassData(typeof(DataProvider))]
