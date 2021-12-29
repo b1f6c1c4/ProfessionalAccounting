@@ -36,15 +36,15 @@ namespace AccountingServer.Shell;
 internal class CheckShell : IShellComponent
 {
     /// <inheritdoc />
-    public ValueTask<IQueryResult> Execute(string expr, Session session)
-        => ValueTask.FromResult(expr.Rest() switch
+    public IAsyncEnumerable<string> Execute(string expr, Session session)
+        => expr.Rest() switch
             {
                 "1" => BasicCheck(session),
                 "2" => AdvancedCheck(session),
-                "3" => new NumberAffected(session.Accountant.Upsert(session.Accountant.RunVoucherQuery("U A").ToList())),
+                "3" => UpsertCheck(session),
                 var x when x.StartsWith("4") => DuplicationCheck(session, x.Rest()),
                 _ => throw new InvalidOperationException("表达式无效"),
-            });
+            };
 
     /// <inheritdoc />
     public bool IsExecutable(string expr) => expr.Initial() == "chk";
@@ -54,31 +54,22 @@ internal class CheckShell : IShellComponent
     /// </summary>
     /// <param name="session">客户端会话</param>
     /// <returns>有误的会计记账凭证表达式</returns>
-    private IQueryResult BasicCheck(Session session)
+    private async IAsyncEnumerable<string> BasicCheck(Session session)
     {
-        var sb = new StringBuilder();
         Voucher old = null;
-        foreach (var (voucher, user, curr, v) in
-                 session.Accountant.SelectUnbalancedVouchers(VoucherQueryUnconstrained.Instance))
+        await foreach (var (voucher, user, curr, v) in
+                       session.Accountant.SelectUnbalancedVouchersAsync(VoucherQueryUnconstrained.Instance))
         {
             if (old == null)
                 old = voucher;
             else if (voucher.ID != old.ID)
-            {
-                sb.Append(session.Serializer.PresentVoucher(old).Wrap());
-                sb.AppendLine();
-            }
+                yield return session.Serializer.PresentVoucher(old).Wrap();
 
-            sb.AppendLine($"/* U{user.AsUser()} @{curr}: Debit - Credit = {v:R} */");
+            yield return $"/* U{user.AsUser()} @{curr}: Debit - Credit = {v:R} */";
         }
 
         if (old != null)
-            sb.Append(session.Serializer.PresentVoucher(old).Wrap());
-
-        if (sb.Length > 0)
-            return new PlainText(sb.ToString());
-
-        return new PlainSucceed();
+            yield return session.Serializer.PresentVoucher(old).Wrap();
     }
 
     /// <summary>
@@ -86,56 +77,49 @@ internal class CheckShell : IShellComponent
     /// </summary>
     /// <param name="session">客户端会话</param>
     /// <returns>发生错误的信息</returns>
-    private IQueryResult AdvancedCheck(Session session)
+    private async IAsyncEnumerable<string> AdvancedCheck(Session session)
     {
-        var sb = new StringBuilder();
         foreach (var title in TitleManager.Titles)
         {
             if (!title.IsVirtual)
                 if (Math.Abs(title.Direction) == 1)
-                    DoCheck(
-                        session.Accountant.RunVoucherQuery(
-                                $"T{title.Id.AsTitle()}00 {(title.Direction < 0 ? ">" : "<")} G")
-                            .SelectMany(
-                                v => v.Details.Where(d => d.Title == title.Id)
-                                    .Select(d => (Voucher: v, Detail: d))),
-                        $"T{title.Id.AsTitle()}00",
-                        sb);
+                    await foreach (var s in DoCheck(
+                                       session.Accountant
+                                           .RunVoucherQueryAsync(
+                                               $"T{title.Id.AsTitle()}00 {(title.Direction < 0 ? ">" : "<")} G")
+                                           .SelectMany(v
+                                               => v.Details.Where(d => d.Title == title.Id)
+                                                   .Select(d => (Voucher: v, Detail: d)).ToAsyncEnumerable()),
+                                       $"T{title.Id.AsTitle()}00"))
+                        yield return s;
                 else if (Math.Abs(title.Direction) == 2)
-                    DoCheck(
-                        title.Direction,
-                        session.Accountant.RunGroupedQuery($"T{title.Id.AsTitle()}00 G`CcD"),
-                        $"T{title.Id.AsTitle()}00",
-                        sb);
+                    await foreach (var s in DoCheck(
+                                       title.Direction,
+                                       await session.Accountant.RunGroupedQueryAsync($"T{title.Id.AsTitle()}00 G`CcD"),
+                                       $"T{title.Id.AsTitle()}00"))
+                        yield return s;
 
             foreach (var subTitle in title.SubTitles)
                 if (Math.Abs(subTitle.Direction) == 1)
-                    DoCheck(
-                        session.Accountant.RunVoucherQuery(
-                                $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} {(subTitle.Direction < 0 ? ">" : "<")} G")
-                            .SelectMany(
-                                v =>
-                                    v.Details.Where(
-                                            d =>
-                                                d.Title == title.Id && d.SubTitle == subTitle.Id)
-                                        .Select(d => (Voucher: v, Detail: d))),
-                        $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}",
-                        sb);
+                    await foreach (var s in DoCheck(
+                                       session.Accountant.RunVoucherQueryAsync(
+                                               $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} {(subTitle.Direction < 0 ? ">" : "<")} G")
+                                           .SelectMany(v
+                                               => v.Details.Where(d => d.Title == title.Id && d.SubTitle == subTitle.Id)
+                                                   .Select(d => (Voucher: v, Detail: d)).ToAsyncEnumerable()),
+                                       $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}"))
+                        yield return s;
                 else if (Math.Abs(subTitle.Direction) == 2)
-                    DoCheck(
-                        subTitle.Direction,
-                        session.Accountant.RunGroupedQuery($"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} G`CcD"),
-                        $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}",
-                        sb);
+                    await foreach (var s in DoCheck(
+                                       subTitle.Direction,
+                                       await session.Accountant.RunGroupedQueryAsync(
+                                           $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} G`CcD"),
+                                       $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}"))
+                        yield return s;
         }
-
-        if (sb.Length > 0)
-            return new PlainText(sb.ToString());
-
-        return new PlainSucceed();
     }
 
-    private static void DoCheck(int dir, ISubtotalResult res, string info, StringBuilder sb)
+    private static async IAsyncEnumerable<string> DoCheck(int dir, ISubtotalResult res, string info)
     {
         foreach (var grpC in res.Items.Cast<ISubtotalCurrency>())
         foreach (var grpc in grpC.Items.Cast<ISubtotalContent>())
@@ -146,41 +130,42 @@ internal class CheckShell : IShellComponent
                 case < 0 when grpd.Fund.IsNonPositive():
                     continue;
                 default:
-                    sb.AppendLine($"{grpd.Date:yyyyMMdd} {info} {grpc.Content}:@{grpC.Currency} {grpd.Fund:R}");
+                    yield return $"{grpd.Date:yyyyMMdd} {info} {grpc.Content}:@{grpC.Currency} {grpd.Fund:R}";
                     break;
             }
     }
 
-    private static void DoCheck(IEnumerable<(Voucher Voucher, VoucherDetail Detail)> res, string info,
-        StringBuilder sb)
+    private static async IAsyncEnumerable<string> DoCheck(IAsyncEnumerable<(Voucher Voucher, VoucherDetail Detail)> res,
+        string info)
     {
-        foreach (var (v, d) in res)
+        await foreach (var (v, d) in res)
         {
             if (d.Remark == "reconciliation")
                 continue;
 
-            sb.AppendLine(
-                $"{v.ID} {v.Date:yyyyMMdd} {info} {d.Content}:{d.Fund!.Value:R}");
-            sb.AppendLine();
+            yield return $"{v.ID} {v.Date:yyyyMMdd} {info} {d.Content}:{d.Fund!.Value:R}";
         }
     }
 
-    private IQueryResult DuplicationCheck(Session session, string expr)
+    private async IAsyncEnumerable<string> UpsertCheck(Session session)
     {
-        var sb = new StringBuilder();
+        yield return "Reading...";
+        var lst = await session.Accountant.RunVoucherQueryAsync("U A").ToListAsync();
+        yield return $"Read {lst.Count} vouchers, writing...";
+        await session.Accountant.UpsertAsync(lst);
+        yield return "Written";
+    }
+
+    private async IAsyncEnumerable<string> DuplicationCheck(Session session, string expr)
+    {
         var query = Parsing.VoucherQuery(ref expr, session.Client);
         Parsing.Eof(expr);
-        foreach (var (v, ids) in session.Accountant.SelectDuplicatedVouchers(query))
+        await foreach (var (v, ids) in session.Accountant.SelectDuplicatedVouchersAsync(query))
         {
-            sb.AppendLine($"// Date = {v.Date.AsDate()} Duplication = {ids.Count}");
+            yield return $"// Date = {v.Date.AsDate()} Duplication = {ids.Count}";
             foreach (var id in ids)
-                sb.AppendLine($"//   ^{id}^");
-            sb.AppendLine(session.Serializer.PresentVoucher(v).Wrap());
+                yield return $"//   ^{id}^";
+            yield return session.Serializer.PresentVoucher(v).Wrap();
         }
-
-        if (sb.Length > 0)
-            return new PlainText(sb.ToString());
-
-        return new PlainSucceed();
     }
 }

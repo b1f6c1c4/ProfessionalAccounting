@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
 using AccountingServer.Entities;
@@ -173,7 +174,7 @@ internal abstract class DistributedShell : IShellComponent
     protected abstract string Initial { get; }
 
     /// <inheritdoc />
-    public ValueTask<IQueryResult> Execute(string expr, Session session)
+    public IAsyncEnumerable<string> Execute(string expr, Session session)
         => m_Composer.Execute(expr.Rest(), session);
 
     /// <inheritdoc />
@@ -187,7 +188,7 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="showSchedule">是否显示折旧计算表</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract ValueTask<IQueryResult> ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected abstract IAsyncEnumerable<string> ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateTime? dt, bool showSchedule, Session session);
 
     /// <summary>
@@ -196,7 +197,7 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="distQuery">分期检索式</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract ValueTask<IQueryResult> ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected abstract IAsyncEnumerable<string> ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
         Session session);
 
     /// <summary>
@@ -207,7 +208,7 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="query">记账凭证检索式</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract ValueTask<IQueryResult> ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected abstract IAsyncEnumerable<string> ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateFilter rng, IQueryCompounded<IVoucherQueryAtom> query, Session session);
 
     /// <summary>
@@ -218,7 +219,7 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="query">记账凭证检索式</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract ValueTask<IQueryResult> ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected abstract IAsyncEnumerable<string> ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateFilter rng, IQueryCompounded<IVoucherQueryAtom> query, Session session);
 
     /// <summary>
@@ -227,7 +228,7 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="distQuery">分期检索式</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract ValueTask<IQueryResult> ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected abstract IAsyncEnumerable<string> ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery,
         Session session);
 
     /// <summary>
@@ -237,7 +238,7 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="rng">日期过滤器</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract ValueTask<IQueryResult> ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected abstract IAsyncEnumerable<string> ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateFilter rng, Session session);
 
     /// <summary>
@@ -247,7 +248,7 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="rng">日期过滤器</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract ValueTask<IQueryResult> ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected abstract IAsyncEnumerable<string> ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateFilter rng, Session session);
 
     /// <summary>
@@ -257,7 +258,7 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="query">记账凭证检索式</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract ValueTask<IQueryResult> ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected abstract IAsyncEnumerable<string> ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery,
         IQueryCompounded<IVoucherQueryAtom> query, Session session);
 
     /// <summary>
@@ -268,7 +269,7 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="isCollapsed">是否压缩</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract ValueTask<IQueryResult> ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected abstract IAsyncEnumerable<string> ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateFilter rng, bool isCollapsed, Session session);
 
     /// <summary>
@@ -278,6 +279,6 @@ internal abstract class DistributedShell : IShellComponent
     /// <param name="rng">日期过滤器</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected abstract ValueTask<IQueryResult> ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected abstract IAsyncEnumerable<string> ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateFilter rng, Session session);
 }

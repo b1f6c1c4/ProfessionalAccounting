@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,7 +34,7 @@ namespace AccountingServer.Shell.Carry;
 internal partial class CarryShell : IShellComponent
 {
     /// <inheritdoc />
-    public async ValueTask<IQueryResult> Execute(string expr, Session session)
+    public IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         expr = expr.Rest();
         DateFilter rng;
@@ -48,11 +49,11 @@ internal partial class CarryShell : IShellComponent
                 expr = expr.Rest();
                 rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
                 Parsing.Eof(expr);
-                return await PerformAction(session, rng, true);
+                return PerformAction(session, rng, true);
             default:
                 rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
                 Parsing.Eof(expr);
-                return await PerformAction(session, AutomaticRange(session, rng), false);
+                return PerformAction(session, AutomaticRange(session, rng), false);
         }
     }
 
@@ -84,22 +85,23 @@ internal partial class CarryShell : IShellComponent
         return rng;
     }
 
-    private async ValueTask<IQueryResult> PerformAction(Session session, DateFilter rng, bool isRst)
+    private async IAsyncEnumerable<string> PerformAction(Session session, DateFilter rng, bool isRst)
     {
-        var sb = new StringBuilder();
-
-        sb.AppendLine($"=== rm -rf Carry {rng.AsDateRange()} ===> {ResetCarry(session, rng)} removed");
-        sb.AppendLine($"=== rm -rf CarryYear {rng.AsDateRange()} ===> {ResetCarryYear(session, rng)} removed");
-        sb.AppendLine($"=== rm -rf Conversion {rng.AsDateRange()} ===> {ResetConversion(session, rng)} removed");
+        yield return $"=== rm -rf Carry {rng.AsDateRange()} ===> {await ResetCarry(session, rng)} removed";
+        yield return $"=== rm -rf CarryYear {rng.AsDateRange()} ===> {await ResetCarryYear(session, rng)} removed";
+        yield return $"=== rm -rf Conversion {rng.AsDateRange()} ===> {await ResetConversion(session, rng)} removed";
         if (isRst)
-            return new DirtyText(sb.ToString());
+            yield break;
 
         using var vir = session.Accountant.Virtualize();
 
         if (rng.NullOnly || rng.Nullable)
         {
-            await Carry(session, sb, null);
-            CarryYear(session, sb, null);
+            await foreach (var s in Carry(session, null))
+                yield return s;
+
+            await foreach (var s in CarryYear(session, null))
+                yield return s;
         }
 
         if (!rng.NullOnly)
@@ -107,16 +109,18 @@ internal partial class CarryShell : IShellComponent
             {
                 foreach (var info in BaseCurrency.History)
                     if (info.Date >= dt && info.Date < dt.AddMonths(1))
-                        await ConvertEquity(session, sb, info.Date!.Value, info.Currency);
+                        await foreach (var s in ConvertEquity(session, info.Date!.Value, info.Currency))
+                            yield return s;
 
-                await Carry(session, sb, dt);
+                await foreach (var s in Carry(session, dt))
+                    yield return s;
+
                 if (dt.Month == 12)
-                    CarryYear(session, sb, dt);
+                    await foreach (var s in CarryYear(session, dt))
+                        yield return s;
             }
 
-        sb.AppendLine($"=== Total vouchers: {vir.CachedVouchers}");
-
-        return new DirtyText(sb.ToString());
+        yield return $"=== Total vouchers: {vir.CachedVouchers}";
     }
 
     /// <inheritdoc />

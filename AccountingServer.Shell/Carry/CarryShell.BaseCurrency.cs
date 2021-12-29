@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,15 +34,11 @@ internal partial class CarryShell
     /// </summary>
     /// <param name="rng">过滤器</param>
     /// <returns>执行结果</returns>
-    private static IQueryResult ListHistory(DateFilter rng)
+    private static async IAsyncEnumerable<string> ListHistory(DateFilter rng)
     {
-        var sb = new StringBuilder();
-
         foreach (var info in BaseCurrency.History)
             if (info.Date.Within(rng))
-                sb.AppendLine($"{info.Date.AsDate().PadLeft(8)} @{info.Currency}");
-
-        return new PlainText(sb.ToString());
+                yield return $"{info.Date.AsDate(),8} @{info.Currency}";
     }
 
     /// <summary>
@@ -50,26 +47,25 @@ internal partial class CarryShell
     /// <param name="session">客户端会话</param>
     /// <param name="rng">过滤器</param>
     /// <returns>执行结果</returns>
-    private long ResetConversion(Session session, DateFilter rng)
-        => session.Accountant.DeleteVouchers($"{rng.AsDateRange()} %equity conversion%");
+    private ValueTask<long> ResetConversion(Session session, DateFilter rng)
+        => session.Accountant.DeleteVouchersAsync($"{rng.AsDateRange()} %equity conversion%");
 
     /// <summary>
     ///     所有者权益币种转换
     /// </summary>
     /// <param name="session">客户端会话</param>
-    /// <param name="sb">日志记录</param>
     /// <param name="dt">日期</param>
     /// <param name="to">目标币种</param>
-    private async Task ConvertEquity(Session session, StringBuilder sb, DateTime dt, string to)
+    private async IAsyncEnumerable<string> ConvertEquity(Session session, DateTime dt, string to)
     {
-        var rst = session.Accountant.RunGroupedQuery($"T4101+T4103-@{to} [~{dt.AsDate()}]`Cts");
+        var rst = await session.Accountant.RunGroupedQueryAsync($"T4101+T4103-@{to} [~{dt.AsDate()}]`Cts");
 
         foreach (var grpC in rst.Items.Cast<ISubtotalCurrency>())
         {
             var rate = await session.Accountant.Query(dt, grpC.Currency, to);
             var dst = rate * grpC.Fund;
-            sb.AppendLine(
-                $"=== {dt.AsDate()} @{grpC.Currency} {grpC.Fund.AsCurrency(grpC.Currency)} => @{to} {dst.AsCurrency(to)}");
+            yield return
+                $"=== {dt.AsDate()} @{grpC.Currency} {grpC.Fund.AsCurrency(grpC.Currency)} => @{to} {dst.AsCurrency(to)}";
 
             foreach (var grpt in grpC.Items.Cast<ISubtotalTitle>())
             foreach (var grps in grpt.Items.Cast<ISubtotalSubTitle>())

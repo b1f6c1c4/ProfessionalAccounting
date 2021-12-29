@@ -34,7 +34,7 @@ public class VoucherTest
 
     public VoucherTest()
     {
-        DAL.Facade.Create(db: "accounting-test").DeleteVouchers(VoucherQueryUnconstrained.Instance);
+        DAL.Facade.Create(db: "accounting-test").DeleteVouchers(VoucherQueryUnconstrained.Instance).AsTask().Wait();
 
         BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
             new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
@@ -90,8 +90,6 @@ Ub2 T3998\s+10
     public void SimpleTest()
     {
         var res = m_Facade.Execute(m_Session, "\"huh\"");
-        Assert.False(res.Dirty);
-        Assert.False(res.AutoReturn);
         Assert.Matches(@"@new Voucher {\^[0-9a-f]{24}\^
 [0-9]{8}
 // kyh
@@ -114,8 +112,6 @@ Ub2 T3998\s+10
     public void UnsafeSrawTest()
     {
         var res = m_Facade.Execute(m_Session, "unsafe sraw Ub2");
-        Assert.False(res.Dirty);
-        Assert.False(res.AutoReturn);
         Assert.Matches(@"[0-9]{8} // sth-obj
 Ub2 T123401 'whatever'\s+-10
 [0-9]{8} // kyh
@@ -131,8 +127,6 @@ Ub2 T3998\s+10
     public void SubtotalTest()
     {
         var res = m_Facade.Execute(m_Session, "json U > `t");
-        Assert.False(res.Dirty);
-        Assert.False(res.AutoReturn);
         Assert.Matches(@"{
   ""value"": 20.0,
   ""title"": {
@@ -150,8 +144,6 @@ Ub2 T3998\s+10
     public void FancyTest()
     {
         var res = m_Facade.Execute(m_Session, "unsafe fancy U T3998");
-        Assert.False(res.Dirty);
-        Assert.False(res.AutoReturn);
         Assert.Matches(@"@new Voucher {\^[0-9a-f]{24}\^
 [0-9]{8}
 // kyh
@@ -166,8 +158,6 @@ Ub2 T3998\s+10
     public void ChkTest()
     {
         var res = m_Facade.Execute(m_Session, "chk-1");
-        Assert.False(res.Dirty);
-        Assert.True(res.AutoReturn);
         Assert.Equal("OK", res.ToString()!);
     }
 

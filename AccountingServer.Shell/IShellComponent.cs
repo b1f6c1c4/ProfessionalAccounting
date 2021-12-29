@@ -35,7 +35,7 @@ internal interface IShellComponent
     /// <param name="expr">表达式</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    ValueTask<IQueryResult> Execute(string expr, Session session);
+    IAsyncEnumerable<string> Execute(string expr, Session session);
 
     /// <summary>
     ///     粗略判断表达式是否可执行
@@ -53,21 +53,21 @@ internal class ShellComponent : IShellComponent
     /// <summary>
     ///     操作
     /// </summary>
-    private readonly Func<string, Session, ValueTask<IQueryResult>> m_Action;
+    private readonly Func<string, Session, IAsyncEnumerable<string>> m_Action;
 
     /// <summary>
     ///     首段字符串
     /// </summary>
     private readonly string m_Initial;
 
-    public ShellComponent(string initial, Func<string, Session, ValueTask<IQueryResult>> action)
+    public ShellComponent(string initial, Func<string, Session, IAsyncEnumerable<string>> action)
     {
         m_Initial = initial;
         m_Action = action;
     }
 
     /// <inheritdoc />
-    public ValueTask<IQueryResult> Execute(string expr, Session session)
+    public IAsyncEnumerable<string> Execute(string expr, Session session)
         => m_Action(m_Initial == null ? expr : expr.Rest(), session);
 
     /// <inheritdoc />
@@ -85,7 +85,7 @@ internal sealed class ShellComposer : IShellComponent, IEnumerable
     public IEnumerator GetEnumerator() => m_Components.GetEnumerator();
 
     /// <inheritdoc />
-    public ValueTask<IQueryResult> Execute(string expr, Session session)
+    public IAsyncEnumerable<string> Execute(string expr, Session session)
         => FirstExecutable(expr).Execute(expr, session);
 
     /// <inheritdoc />

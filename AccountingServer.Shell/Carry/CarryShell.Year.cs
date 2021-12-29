@@ -17,8 +17,9 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Util;
@@ -27,16 +28,15 @@ namespace AccountingServer.Shell.Carry;
 
 internal partial class CarryShell
 {
-    private long ResetCarryYear(Session session, DateFilter rng)
-        => session.Accountant.DeleteVouchers($"{rng.AsDateRange()} AnnualCarry");
+    private ValueTask<long> ResetCarryYear(Session session, DateFilter rng)
+        => session.Accountant.DeleteVouchersAsync($"{rng.AsDateRange()} AnnualCarry");
 
     /// <summary>
     ///     年末结转
     /// </summary>
     /// <param name="session">客户端会话</param>
-    /// <param name="sb">日志记录</param>
     /// <param name="dt">年，若为<c>null</c>则表示对无日期进行结转</param>
-    private void CarryYear(Session session, StringBuilder sb, DateTime? dt)
+    private async IAsyncEnumerable<string> CarryYear(Session session, DateTime? dt)
     {
         DateTime? ed;
         DateFilter rng;
@@ -52,13 +52,13 @@ internal partial class CarryShell
             rng = DateFilter.TheNullOnly;
         }
 
-        foreach (var grpC in session.Accountant.RunGroupedQuery(
-                     $"T4103 {rng.AsDateRange()}`Cs").Items.Cast<ISubtotalCurrency>())
+        foreach (var grpC in (await session.Accountant.RunGroupedQueryAsync(
+                     $"T4103 {rng.AsDateRange()}`Cs")).Items.Cast<ISubtotalCurrency>())
         {
-            sb.AppendLine(
-                $"{dt.AsDate(SubtotalLevel.Month)} CarryYear => @{grpC.Currency} {grpC.Fund.AsCurrency(grpC.Currency)}");
+            yield return
+                $"{dt.AsDate(SubtotalLevel.Month)} CarryYear => @{grpC.Currency} {grpC.Fund.AsCurrency(grpC.Currency)}";
             foreach (var grps in grpC.Items.Cast<ISubtotalSubTitle>())
-                session.Accountant.Upsert(new Voucher
+                await session.Accountant.UpsertAsync(new Voucher
                     {
                         Date = ed,
                         Type = VoucherType.AnnualCarry,

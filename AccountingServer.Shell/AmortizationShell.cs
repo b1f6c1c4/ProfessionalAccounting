@@ -46,46 +46,37 @@ internal class AmortizationShell : DistributedShell
     /// <param name="showSchedule">是否显示折旧计算表</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    protected override ValueTask<IQueryResult> ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateTime? dt,
-        bool showSchedule, Session session)
-    {
-        var sb = new StringBuilder();
-        foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
-            sb.Append(ListAmort(a, session, dt, showSchedule));
-
-        return ValueTask.FromResult<IQueryResult>(new PlainText(sb.ToString()));
-    }
+    protected override IAsyncEnumerable<string> ExecuteList(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateTime? dt, bool showSchedule, Session session)
+        => Sort(session.Accountant.SelectAmortizationsAsync(distQuery))
+            .SelectAwait(a => ListAmort(a, session, dt, showSchedule));
 
     /// <inheritdoc />
-    protected override ValueTask<IQueryResult> ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected override IAsyncEnumerable<string> ExecuteQuery(IQueryCompounded<IDistributedQueryAtom> distQuery,
         Session session)
-        => new(new PlainText(session.Serializer.PresentAmorts(Sort(session.Accountant.SelectAmortizations(distQuery)))));
+        => session.Serializer.PresentAmorts(Sort(session.Accountant.SelectAmortizationsAsync(distQuery)));
 
     /// <inheritdoc />
-    protected override async ValueTask<IQueryResult> ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected override async IAsyncEnumerable<string> ExecuteRegister(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateFilter rng,
         IQueryCompounded<IVoucherQueryAtom> query, Session session)
     {
-        var sb = new StringBuilder();
-        foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
+        await foreach (var a in Sort(session.Accountant.SelectAmortizationsAsync(distQuery)))
         {
-            sb.Append(session.Serializer.PresentVouchers(session.Accountant.RegisterVouchers(a, rng, query)));
+            await foreach (var s in session.Serializer.PresentVouchers(
+                               session.Accountant.RegisterVouchers(a, rng, query).ToAsyncEnumerable()))
+                yield return s;
+
             await session.Accountant.UpsertAsync(a);
         }
-
-        if (sb.Length > 0)
-            return new DirtyText(sb.ToString());
-
-        return new PlainSucceed();
     }
 
     /// <inheritdoc />
-    protected override async ValueTask<IQueryResult> ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+    protected override async IAsyncEnumerable<string> ExecuteUnregister(
+        IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
         IQueryCompounded<IVoucherQueryAtom> query, Session session)
     {
-        var sb = new StringBuilder();
-        foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
+        await foreach (var a in Sort(session.Accountant.SelectAmortizationsAsync(distQuery)))
         {
             foreach (var item in a.Schedule.Where(item => item.Date.Within(rng)))
             {
@@ -103,66 +94,55 @@ internal class AmortizationShell : DistributedShell
                 item.VoucherID = null;
             }
 
-            sb.Append(ListAmort(a, session));
+            yield return await ListAmort(a, session);
             await session.Accountant.UpsertAsync(a);
         }
-
-        if (sb.Length > 0)
-            return new DirtyText(sb.ToString());
-
-        return new PlainSucceed();
     }
 
     /// <inheritdoc />
-    protected override async ValueTask<IQueryResult> ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected override async IAsyncEnumerable<string> ExecuteRecal(IQueryCompounded<IDistributedQueryAtom> distQuery,
         Session session)
     {
-        var lst = new List<Amortization>();
-        foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
+        await foreach (var a in Sort(session.Accountant.SelectAmortizationsAsync(distQuery)))
         {
             Accountant.Amortize(a);
+            yield return session.Serializer.PresentAmort(a);
             await session.Accountant.UpsertAsync(a);
-            lst.Add(a);
         }
-
-        return new DirtyText(session.Serializer.PresentAmorts(lst));
     }
 
     /// <inheritdoc />
-    protected override async ValueTask<IQueryResult> ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng,
-        Session session)
+    protected override async IAsyncEnumerable<string> ExecuteResetSoft(
+        IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng, Session session)
     {
-        var cnt = 0L;
-        foreach (var a in session.Accountant.SelectAmortizations(distQuery))
+        await foreach (var a in session.Accountant.SelectAmortizationsAsync(distQuery))
         {
             if (a.Schedule == null)
                 continue;
 
             var flag = false;
             foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
-                         .Where(item => item.VoucherID != null)
-                         .Where(item => session.Accountant.SelectVoucher(item.VoucherID) == null))
+                         .Where(item => item.VoucherID != null))
             {
+                if (await session.Accountant.SelectVoucherAsync(item.VoucherID) != null)
+                    continue;
                 item.VoucherID = null;
-                cnt++;
                 flag = true;
             }
 
-            if (flag)
-                await session.Accountant.UpsertAsync(a);
-        }
+            if (!flag)
+                continue;
 
-        return new NumberAffected(cnt);
+            yield return session.Serializer.PresentAmort(a);
+            await session.Accountant.UpsertAsync(a);
+        }
     }
 
     /// <inheritdoc />
-    protected override async ValueTask<IQueryResult> ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng,
-        Session session)
+    protected override async IAsyncEnumerable<string> ExecuteResetMixed(
+        IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng, Session session)
     {
-        var cnt = 0L;
-        foreach (var a in session.Accountant.SelectAmortizations(distQuery))
+        await foreach (var a in session.Accountant.SelectAmortizationsAsync(distQuery))
         {
             if (a.Schedule == null)
                 continue;
@@ -175,73 +155,58 @@ internal class AmortizationShell : DistributedShell
                 if (voucher == null)
                 {
                     item.VoucherID = null;
-                    cnt++;
                     flag = true;
                 }
                 else if (await session.Accountant.DeleteVoucherAsync(voucher.ID))
                 {
                     item.VoucherID = null;
-                    cnt++;
                     flag = true;
                 }
             }
 
-            if (flag)
-                await session.Accountant.UpsertAsync(a);
+            if (!flag)
+                continue;
+            yield return session.Serializer.PresentAmort(a);
+            await session.Accountant.UpsertAsync(a);
         }
-
-        return new NumberAffected(cnt);
     }
 
     /// <inheritdoc />
-    protected override ValueTask<IQueryResult> ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected override IAsyncEnumerable<string> ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery,
         IQueryCompounded<IVoucherQueryAtom> query, Session session) => throw new InvalidOperationException();
 
     /// <inheritdoc />
-    protected override async ValueTask<IQueryResult> ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery,
+    protected override async IAsyncEnumerable<string> ExecuteApply(IQueryCompounded<IDistributedQueryAtom> distQuery,
         DateFilter rng,
         bool isCollapsed, Session session)
     {
-        var sb = new StringBuilder();
-        foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
+        await foreach (var a in Sort(session.Accountant.SelectAmortizationsAsync(distQuery)))
         {
-            foreach (var item in session.Accountant.Update(a, rng, isCollapsed).ToEnumerable())
-                sb.AppendLine(ListAmortItem(item));
+            await foreach (var item in session.Accountant.Update(a, rng, isCollapsed))
+                yield return ListAmortItem(item);
 
             await session.Accountant.UpsertAsync(a);
         }
-
-        if (sb.Length > 0)
-            return new DirtyText(sb.ToString());
-
-        return new PlainSucceed();
     }
 
     /// <inheritdoc />
-    protected override async ValueTask<IQueryResult> ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery,
-        DateFilter rng,
-        Session session)
+    protected override async IAsyncEnumerable<string> ExecuteCheck(IQueryCompounded<IDistributedQueryAtom> distQuery,
+        DateFilter rng, Session session)
     {
-        var sb = new StringBuilder();
-        foreach (var a in Sort(session.Accountant.SelectAmortizations(distQuery)))
+        await foreach (var a in Sort(session.Accountant.SelectAmortizationsAsync(distQuery)))
         {
             var sbi = new StringBuilder();
-            foreach (var item in session.Accountant.Update(a, rng, false, true).ToEnumerable())
+            await foreach (var item in session.Accountant.Update(a, rng, false, true))
                 sbi.AppendLine(ListAmortItem(item));
 
             if (sbi.Length != 0)
             {
-                sb.AppendLine(ListAmort(a, session, null, false));
-                sb.AppendLine(sbi.ToString());
+                yield return await ListAmort(a, session, null, false);
+                yield return sbi.ToString();
             }
 
             await session.Accountant.UpsertAsync(a);
         }
-
-        if (sb.Length > 0)
-            return new DirtyText(sb.ToString());
-
-        return new PlainSucceed();
     }
 
     /// <summary>
@@ -252,7 +217,8 @@ internal class AmortizationShell : DistributedShell
     /// <param name="dt">计算账面价值的时间</param>
     /// <param name="showSchedule">是否显示计算表</param>
     /// <returns>格式化的信息</returns>
-    private string ListAmort(Amortization amort, Session session, DateTime? dt = null, bool showSchedule = true)
+    private async ValueTask<string> ListAmort(Amortization amort, Session session, DateTime? dt = null,
+        bool showSchedule = true)
     {
         var sb = new StringBuilder();
 
@@ -266,13 +232,14 @@ internal class AmortizationShell : DistributedShell
             $"U{amort.User.AsUser().CPadRight(5)} " +
             $"{amort.Value.AsCurrency().CPadLeft(13)}{(dt.HasValue ? bookValue.AsCurrency().CPadLeft(13) : "-".CPadLeft(13))}" +
             $"{(amort.TotalDays?.ToString(CultureInfo.InvariantCulture) ?? "-").CPadLeft(4)}{amort.Interval.ToString().CPadLeft(20)}");
+
         if (showSchedule && amort.Schedule != null)
             foreach (var amortItem in amort.Schedule)
             {
                 sb.AppendLine(ListAmortItem(amortItem));
                 if (amortItem.VoucherID != null)
                     sb.AppendLine(session.Serializer
-                        .PresentVoucher(session.Accountant.SelectVoucher(amortItem.VoucherID)).Wrap());
+                        .PresentVoucher(await session.Accountant.SelectVoucherAsync(amortItem.VoucherID)).Wrap());
             }
 
         return sb.ToString();
@@ -298,6 +265,6 @@ internal class AmortizationShell : DistributedShell
     /// </summary>
     /// <param name="enumerable">摊销</param>
     /// <returns>排序后的摊销</returns>
-    private static IEnumerable<Amortization> Sort(IEnumerable<Amortization> enumerable)
+    private static IAsyncEnumerable<Amortization> Sort(IAsyncEnumerable<Amortization> enumerable)
         => enumerable.OrderBy(o => o.Date, new DateComparer()).ThenBy(o => o.Name).ThenBy(o => o.ID);
 }

@@ -17,15 +17,16 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Resources;
-using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Carry;
 using AccountingServer.Shell.Serializer;
+using AccountingServer.Shell.Util;
 
 namespace AccountingServer.Shell;
 
@@ -78,7 +79,7 @@ public class Facade
     /// <param name="session">客户端会话</param>
     /// <param name="expr">表达式</param>
     /// <returns>执行结果</returns>
-    public IQueryResult Execute(Session session, string expr)
+    public IAsyncEnumerable<string> Execute(Session session, string expr)
     {
         switch (expr)
         {
@@ -87,13 +88,13 @@ public class Facade
             case "?":
                 return ListHelp();
             case "reload":
-                return new NumberAffected(MetaConfigManager.ReloadAll());
+                return MetaConfigManager.ReloadAll();
             case "die":
                 Environment.Exit(0);
                 break;
         }
 
-        return m_Composer.Execute(expr, session).AsTask().Result;
+        return m_Composer.Execute(expr, session);
     }
 
     /// <summary>
@@ -102,7 +103,7 @@ public class Facade
     /// <param name="session">客户端会话</param>
     /// <param name="expr">表达式</param>
     /// <returns>执行结果</returns>
-    public IQueryResult SafeExecute(Session session, string expr)
+    public IAsyncEnumerable<string> SafeExecute(Session session, string expr)
     {
         switch (expr)
         {
@@ -112,7 +113,7 @@ public class Facade
                 return ListHelp();
         }
 
-        return m_AccountingShell.Execute(expr, session).AsTask().Result;
+        return m_AccountingShell.Execute(expr, session);
     }
 
     #region Miscellaneous
@@ -121,32 +122,21 @@ public class Facade
     ///     显示控制台帮助
     /// </summary>
     /// <returns>帮助内容</returns>
-    private static IQueryResult ListHelp()
-    {
-        const string resName = "AccountingServer.Shell.Resources.Document.txt";
-        using var stream = typeof(Facade).Assembly.GetManifestResourceStream(resName);
-        if (stream == null)
-            throw new MissingManifestResourceException();
-
-        using var reader = new StreamReader(stream);
-        return new PlainText(reader.ReadToEnd());
-    }
+    private static IAsyncEnumerable<string> ListHelp()
+        => ResourceHelper.ReadResource("AccountingServer.Shell.Resources.Document.txt", typeof(Facade));
 
     /// <summary>
     ///     显示所有会计科目及其编号
     /// </summary>
     /// <returns>会计科目及其编号</returns>
-    private static IQueryResult ListTitles()
+    private static async IAsyncEnumerable<string> ListTitles()
     {
-        var sb = new StringBuilder();
         foreach (var title in TitleManager.Titles)
         {
-            sb.AppendLine($"{title.Id.AsTitle(),-8}{title.Name}");
+            yield return $"{title.Id.AsTitle(),-8}{title.Name}";
             foreach (var subTitle in title.SubTitles)
-                sb.AppendLine($"{title.Id.AsTitle()}{subTitle.Id.AsSubTitle(),-4}{subTitle.Name}");
+                yield return $"{title.Id.AsTitle()}{subTitle.Id.AsSubTitle(),-4}{subTitle.Name}";
         }
-
-        return new PlainText(sb.ToString());
     }
 
     #endregion

@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using AccountingServer.BLL.Util;
@@ -34,16 +33,15 @@ internal partial class CarryShell
     public static IConfigManager<CarrySettings> CarrySettings { private get; set; } =
         new ConfigManager<CarrySettings>("Carry.xml");
 
-    private long ResetCarry(Session session, DateFilter rng)
-        => session.Accountant.DeleteVouchers($"{rng.AsDateRange()} Carry");
+    private ValueTask<long> ResetCarry(Session session, DateFilter rng)
+        => session.Accountant.DeleteVouchersAsync($"{rng.AsDateRange()} Carry");
 
     /// <summary>
     ///     月末结转
     /// </summary>
     /// <param name="session">客户端会话</param>
-    /// <param name="sb">日志记录</param>
     /// <param name="dt">月，若为<c>null</c>则表示对无日期进行结转</param>
-    private async ValueTask Carry(Session session, StringBuilder sb, DateTime? dt)
+    private async IAsyncEnumerable<string> Carry(Session session, DateTime? dt)
     {
         DateTime? ed;
         DateFilter rng;
@@ -68,13 +66,15 @@ internal partial class CarryShell
                     Voucher = new() { Date = ed, Type = VoucherType.Carry, Details = new() },
                 }).ToList();
 
-        await Task.WhenAll(tasks.Select(task => PartialCarry(session, sb, task, rng, false)));
+        foreach (var task in tasks)
+        await foreach (var s in PartialCarry(session, task, rng, false))
+            yield return s;
 
         var baseCur = BaseCurrency.At(ed);
         if (ed.HasValue)
         {
             var totalG =
-                await session.Accountant.RunGroupedQuery($"T3999 [~{ed.AsDate()}]`C")
+                await (await session.Accountant.RunGroupedQueryAsync($"T3999 [~{ed.AsDate()}]`C"))
                     .Items.Cast<ISubtotalCurrency>().ToAsyncEnumerable().SumAwaitAsync(
                         async bal => await session.Accountant.Query(ed.Value, bal.Currency, baseCur)
                             * bal.Fund);
@@ -87,9 +87,9 @@ internal partial class CarryShell
             var total = totalG + totalC;
             if (!total.IsZero())
             {
-                sb.AppendLine(total < 0
+                yield return total < 0
                     ? $"{dt.AsDate(SubtotalLevel.Month)} CurrencyCarry Gain @{baseCur} {(-total).AsCurrency(baseCur)}"
-                    : $"{dt.AsDate(SubtotalLevel.Month)} CurrencyCarry Lost @{baseCur} {(+total).AsCurrency(baseCur)}");
+                    : $"{dt.AsDate(SubtotalLevel.Month)} CurrencyCarry Lost @{baseCur} {(+total).AsCurrency(baseCur)}";
                 await session.Accountant.UpsertAsync(new Voucher
                     {
                         Date = ed,
@@ -107,12 +107,14 @@ internal partial class CarryShell
             }
         }
 
-        await Task.WhenAll(tasks.Select(task => PartialCarry(session, sb, task, rng, true)));
+        foreach (var task in tasks)
+        await foreach (var s in PartialCarry(session, task, rng, true))
+            yield return s;
 
         if (tasks.Any(t => !t.Value.IsZero()))
         {
             var grand = tasks.Sum(t => t.Value);
-            sb.AppendLine($"{dt.AsDate(SubtotalLevel.Month)} Carry => @@ {grand.AsCurrency(baseCur)}");
+            yield return $"{dt.AsDate(SubtotalLevel.Month)} Carry => @@ {grand.AsCurrency(baseCur)}";
         }
 
         foreach (var task in tasks)
@@ -136,12 +138,11 @@ internal partial class CarryShell
     ///     按目标月末结转
     /// </summary>
     /// <param name="session">客户端会话</param>
-    /// <param name="sb">日志记录</param>
     /// <param name="task">任务</param>
     /// <param name="rng">范围</param>
     /// <param name="baseCurrency">是否为基准</param>
     /// <returns>结转记账凭证</returns>
-    private async Task PartialCarry(Session session, StringBuilder sb, CarryTask task, DateFilter rng, bool baseCurrency)
+    private async IAsyncEnumerable<string> PartialCarry(Session session, CarryTask task, DateFilter rng, bool baseCurrency)
     {
         var total = 0D;
         var ed = rng.NullOnly ? null : rng.EndDate;
@@ -149,15 +150,15 @@ internal partial class CarryShell
         var voucher = task.Voucher;
         var baseCur = BaseCurrency.At(ed);
         var res =
-            session.Accountant.RunGroupedQuery(
+            await session.Accountant.RunGroupedQueryAsync(
                 $"({target.Query}) {(baseCurrency ? '*' : '-')}@{baseCur} {rng.AsDateRange()}`Ctscr");
         var flag = 0;
         foreach (var grpC in res.Items.Cast<ISubtotalCurrency>())
         {
             flag++;
             var b = grpC.Fund;
-            sb.AppendLine(
-                $"{rng.StartDate.AsDate(SubtotalLevel.Month)} PartialCarry => @{grpC.Currency} {b.AsCurrency(grpC.Currency)} (S={task.Target.IsSpecial})");
+            yield return
+                $"{rng.StartDate.AsDate(SubtotalLevel.Month)} PartialCarry => @{grpC.Currency} {b.AsCurrency(grpC.Currency)} (S={task.Target.IsSpecial})";
             foreach (var grpt in grpC.Items.Cast<ISubtotalTitle>())
             foreach (var grps in grpt.Items.Cast<ISubtotalSubTitle>())
             foreach (var grpc in grps.Items.Cast<ISubtotalContent>())
@@ -193,8 +194,8 @@ internal partial class CarryShell
         }
 
         if (flag >= 2)
-            sb.AppendLine(
-                $"{rng.StartDate.AsDate(SubtotalLevel.Month)} PartialCarry ==> @@ {total.AsCurrency(baseCur)} (S={task.Target.IsSpecial})");
+            yield return
+                $"{rng.StartDate.AsDate(SubtotalLevel.Month)} PartialCarry ==> @@ {total.AsCurrency(baseCur)} (S={task.Target.IsSpecial})";
         task.Value += total;
     }
 }

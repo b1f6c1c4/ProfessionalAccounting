@@ -54,12 +54,13 @@ public static class MetaConfigManager
     /// <summary>
     ///     重新读取配置文件
     /// </summary>
-    public static long ReloadAll()
+    public static async IAsyncEnumerable<string> ReloadAll()
     {
         foreach (var manager in ConfigManagers)
+        {
             manager.Reload(true);
-
-        return ConfigManagers.Count;
+            yield return manager.GetType().ToString();
+        }
     }
 }
 

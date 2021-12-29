@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,7 +45,7 @@ internal class ExchangeShell : IShellComponent
     public ExchangeShell()
         => m_Timer.Elapsed += OnTimedEvent;
 
-    public ValueTask<IQueryResult> Execute(string expr, Session session)
+    public async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         expr = expr.Rest();
         var isAccurate = expr.Initial() == "acc";
@@ -54,30 +55,25 @@ internal class ExchangeShell : IShellComponent
         var val = Parsing.DoubleF(ref expr);
         var to = Parsing.Token(ref expr)?.ToUpperInvariant() ?? BaseCurrency.Now;
 
-        var sb = new StringBuilder();
-
         if (Parsing.UniqueTime(ref expr, session.Client) is var date && date.HasValue)
-            Inquiry(session, sb, date.Value, from, to, val, isAccurate).Wait();
+            yield return await Inquiry(session, date.Value, from, to, val, isAccurate);
         else if (Parsing.Range(ref expr, session.Client) is var rng && rng != null)
             for (var dt = rng.StartDate!.Value; dt <= rng.EndDate; dt = dt.AddMonths(1))
-                Inquiry(session, sb, DateHelper.LastDayOfMonth(dt.Year, dt.Month), from, to, val, isAccurate).Wait();
+                yield return await Inquiry(session, DateHelper.LastDayOfMonth(dt.Year, dt.Month), from, to, val, isAccurate);
         else if (isAccurate)
-            Inquiry(session, sb, null, from, to, val, true).Wait();
+            yield return await Inquiry(session, null, from, to, val, true);
         else
-            Inquiry(session, sb, DateTime.UtcNow.AddMinutes(-30), from, to, val, false).Wait();
+            yield return await Inquiry(session, DateTime.UtcNow.AddMinutes(-30), from, to, val, false);
         Parsing.Eof(expr);
-
-        return new(new PlainText(sb.ToString()));
     }
 
-    private async Task Inquiry(Session session, StringBuilder sb, DateTime? dt, string from, string to, double value,
-        bool isAccurate)
+    private async ValueTask<string> Inquiry(Session session, DateTime? dt, string from, string to, double value, bool isAccurate)
     {
         var rate = isAccurate
             ? await session.Accountant.SaveHistoricalRate(dt!.Value, from, to)
             : await session.Accountant.Query(dt, from, to);
         var v = value * rate;
-        sb.AppendLine($"{dt.AsDate()} @{from} {value.AsCurrency(from)} = @{to} {v.AsCurrency(to)} ({v:R})");
+        return $"{dt.AsDate()} @{from} {value.AsCurrency(from)} = @{to} {v.AsCurrency(to)} ({v:R})";
     }
 
     public bool IsExecutable(string expr) => expr.Initial() == "?e";

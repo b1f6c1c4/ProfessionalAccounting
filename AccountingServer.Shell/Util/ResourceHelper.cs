@@ -16,31 +16,23 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
-using AccountingServer.Shell.Util;
+using System.IO;
+using System.Resources;
 
-namespace AccountingServer.Shell.Plugins;
+namespace AccountingServer.Shell.Util;
 
-/// <summary>
-///     插件基类
-/// </summary>
-internal abstract class PluginBase
+public static class ResourceHelper
 {
-    /// <summary>
-    ///     执行插件表达式
-    /// </summary>
-    /// <param name="expr">表达式</param>
-    /// <param name="session">客户端会话</param>
-    /// <returns>执行结果</returns>
-    public abstract IAsyncEnumerable<string> Execute(string expr, Session session);
-
-    /// <summary>
-    ///     显示插件帮助
-    /// </summary>
-    /// <returns>帮助内容</returns>
-    public virtual IAsyncEnumerable<string> ListHelp()
+    public static async IAsyncEnumerable<string> ReadResource(string resName, Type type)
     {
-        var type = GetType();
-        return ResourceHelper.ReadResource($"{type.Namespace}.Resources.Document.txt", type);
+        await using var stream = type.Assembly.GetManifestResourceStream(resName);
+        if (stream == null)
+            throw new MissingManifestResourceException();
+
+        using var reader = new StreamReader(stream);
+        while (!reader.EndOfStream)
+            yield return await reader.ReadLineAsync();
     }
 }

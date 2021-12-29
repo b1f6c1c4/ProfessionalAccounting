@@ -64,8 +64,8 @@ HttpResponse Server_OnHttpRequest(HttpRequest request)
     if (user == "anonymous")
         return new() { ResponseCode = 401 };
 
-    if (!request.Header.ContainsKey("x-clientdatetime") ||
-        !DateTimeParser.TryParse(request.Header["x-clientdatetime"], out var dt))
+    if (!request.Header.ContainsKey("X-ClientDateTime".ToLowerInvariant()) ||
+        !DateTimeParser.TryParse(request.Header["X-ClientDateTime".ToLowerInvariant()], out var dt))
         return new() { ResponseCode = 400 };
 
     var limit = 0;
@@ -92,10 +92,7 @@ HttpResponse Server_OnHttpRequest(HttpRequest request)
                 {
                     var expr = request.Parameters["q"];
                     var res = facade.SafeExecute(session, expr);
-                    var response = GenerateHttpResponse(res.ToString(), "text/plain; charset=utf-8");
-                    response.Header["X-Type"] = res.GetType().Name;
-                    response.Header["X-AutoReturn"] = res.AutoReturn ? "true" : "false";
-                    response.Header["X-Dirty"] = res.Dirty ? "true" : "false";
+                    var response = GenerateHttpResponse(res, "text/plain; charset=utf-8");
                     response.Header["Cache-Control"] = "public, max-age=30";
                     response.Header["Vary"] = "X-User, X-Serializer, X-ClientDateTime, X-Limit";
                     return response;
@@ -113,11 +110,7 @@ HttpResponse Server_OnHttpRequest(HttpRequest request)
             {
                 var expr = request.ReadToEnd();
                 var res = facade.Execute(session, expr);
-                var response = GenerateHttpResponse(res.ToString(), "text/plain; charset=utf-8");
-                response.Header["X-Type"] = res.GetType().Name;
-                response.Header["X-AutoReturn"] = res.AutoReturn ? "true" : "false";
-                response.Header["X-Dirty"] = res.Dirty ? "true" : "false";
-                return response;
+                return GenerateHttpResponse(res, "text/plain; charset=utf-8");
             }
 
         case "/voucherUpsert":

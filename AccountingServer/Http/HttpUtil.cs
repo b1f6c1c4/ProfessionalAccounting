@@ -17,9 +17,11 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace AccountingServer.Http;
 
@@ -61,6 +63,36 @@ public static class HttpUtil
                         {
                             { "Content-Type", contentType },
                             { "Content-Length", stream.Length.ToString(CultureInfo.InvariantCulture) },
+                        },
+                ResponseStream = stream,
+            };
+    }
+
+    public static HttpResponse GenerateHttpResponse(IAsyncEnumerable<string> str, string contentType = "application/json")
+    {
+        var stream = new MemoryStream();
+        var sw = new StreamWriter(stream);
+        Task.Run(async () =>
+            {
+                await foreach (var s in str)
+                {
+                    await sw.WriteAsync(Encoding.UTF8.GetByteCount(s).ToString(CultureInfo.InvariantCulture));
+                    await sw.WriteAsync("\r\n");
+                    await sw.WriteAsync(s);
+                    await sw.WriteAsync("\r\n");
+                    await sw.FlushAsync();
+                }
+                await sw.WriteAsync("0\r\n\r\n");
+                await sw.FlushAsync();
+            });
+        return new HttpResponse
+            {
+                ResponseCode = 200,
+                Header =
+                    new()
+                        {
+                            { "Content-Type", contentType },
+                            { "Transfer-Encoding", "chunked" },
                         },
                 ResponseStream = stream,
             };

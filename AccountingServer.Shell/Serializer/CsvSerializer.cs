@@ -119,29 +119,62 @@ public class CsvSerializer : IEntitiesSerializer
         }
     }
 
+    private IList<ColumnSpec> DetailSpec => m_Specs.Where(s => !s.HasFlag(ColumnSpec.Voucher)).ToList();
+
     /// <inheritdoc />
     public string PresentVoucher(Voucher voucher)
-        => voucher == null ? "" : PresentVouchers(new[] { voucher });
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine(PresentHeader(m_Specs));
+        if (voucher == null)
+            return "";
+        foreach (var d in voucher.Details)
+            sb.AppendLine(Present(new VoucherDetailR(voucher, d), m_Specs));
+        return sb.ToString();
+    }
 
     /// <inheritdoc />
-    public string PresentVoucherDetail(VoucherDetail detail) => PresentVoucherDetails(new[] { detail });
+    public string PresentVoucherDetail(VoucherDetail detail)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine(PresentHeader(DetailSpec));
+        sb.AppendLine(Present(new(null, detail), DetailSpec));
+        return sb.ToString();
+    }
 
     /// <inheritdoc />
-    public string PresentVoucherDetail(VoucherDetailR detail) => PresentVoucherDetails(new[] { detail });
+    public string PresentVoucherDetail(VoucherDetailR detail)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine(PresentHeader(m_Specs));
+        sb.AppendLine(Present(detail, m_Specs));
+        return sb.ToString();
+    }
 
     /// <inheritdoc />
-    public string PresentVouchers(IEnumerable<Voucher> vouchers)
-        => PresentVoucherDetails(vouchers.SelectMany(v => v.Details.Select(d => new VoucherDetailR(v, d))));
+    public async IAsyncEnumerable<string> PresentVouchers(IAsyncEnumerable<Voucher> vouchers)
+    {
+        yield return PresentHeader(m_Specs);
+        await foreach (var voucher in vouchers)
+        foreach (var detail in voucher.Details)
+            yield return Present(new(voucher, detail), m_Specs);
+    }
 
     /// <inheritdoc />
-    public string PresentVoucherDetails(IEnumerable<VoucherDetail> details)
-        => Present(
-            details.Select(d => new VoucherDetailR(null, d)),
-            m_Specs.Where(s => !s.HasFlag(ColumnSpec.Voucher)).ToList());
+    public async IAsyncEnumerable<string> PresentVoucherDetails(IAsyncEnumerable<VoucherDetail> details)
+    {
+        yield return PresentHeader(DetailSpec);
+        await foreach (var detail in details)
+            yield return Present(new(null, detail), DetailSpec);
+    }
 
     /// <inheritdoc />
-    public string PresentVoucherDetails(IEnumerable<VoucherDetailR> details)
-        => Present(details, m_Specs);
+    public async IAsyncEnumerable<string> PresentVoucherDetails(IAsyncEnumerable<VoucherDetailR> details)
+    {
+        yield return PresentHeader(m_Specs);
+        await foreach (var detail in details)
+            yield return Present(detail, m_Specs);
+    }
 
     public Voucher ParseVoucher(string str) => throw new NotImplementedException();
     public VoucherDetail ParseVoucherDetail(string str) => throw new NotImplementedException();
@@ -150,16 +183,13 @@ public class CsvSerializer : IEntitiesSerializer
     public string PresentAmort(Amortization amort) => throw new NotImplementedException();
     public Amortization ParseAmort(string str) => throw new NotImplementedException();
 
-    public string PresentAssets(IEnumerable<Asset> assets) => throw new NotImplementedException();
-    public string PresentAmorts(IEnumerable<Amortization> amorts) => throw new NotImplementedException();
+    public IAsyncEnumerable<string> PresentAssets(IAsyncEnumerable<Asset> assets)
+        => throw new NotImplementedException();
 
-    /// <summary>
-    ///     将带记账凭证的细目转换为Csv表示
-    /// </summary>
-    /// <param name="details">细目</param>
-    /// <param name="spec">列</param>
-    /// <returns>Csv表示</returns>
-    private string Present(IEnumerable<VoucherDetailR> details, IList<ColumnSpec> spec)
+    public IAsyncEnumerable<string> PresentAmorts(IAsyncEnumerable<Amortization> amorts)
+        => throw new NotImplementedException();
+
+    private string PresentHeader(IList<ColumnSpec> spec)
     {
         var sb = new StringBuilder();
         for (var i = 0; i < spec.Count; i++)
@@ -170,34 +200,39 @@ public class CsvSerializer : IEntitiesSerializer
             sb.Append(s);
         }
 
-        sb.AppendLine();
+        return sb.ToString();
+    }
 
-        foreach (var d in details)
+    /// <summary>
+    ///     将带记账凭证的细目转换为Csv表示
+    /// </summary>
+    /// <param name="d">细目</param>
+    /// <param name="spec">列</param>
+    /// <returns>Csv表示</returns>
+    private string Present(VoucherDetailR d, IList<ColumnSpec> spec)
+    {
+        var sb = new StringBuilder();
+        for (var i = 0; i < spec.Count; i++)
         {
-            for (var i = 0; i < spec.Count; i++)
-            {
-                if (i > 0)
-                    sb.Append(m_Sep);
+            if (i > 0)
+                sb.Append(m_Sep);
 
-                sb.Append(spec[i] switch
-                    {
-                        ColumnSpec.VoucherID => d.Voucher.ID,
-                        ColumnSpec.VoucherDate => d.Voucher.Date.AsDate(),
-                        ColumnSpec.VoucherType => d.Voucher.Type,
-                        ColumnSpec.User => d.User,
-                        ColumnSpec.Currency => d.Currency,
-                        ColumnSpec.Title => d.Title.AsTitle(),
-                        ColumnSpec.TitleComment => TitleManager.GetTitleName(d.Title),
-                        ColumnSpec.SubTitle => d.SubTitle.AsSubTitle(),
-                        ColumnSpec.SubTitleComment => TitleManager.GetTitleName(d.Title, d.SubTitle),
-                        ColumnSpec.Content => d.Content.Quotation('\''),
-                        ColumnSpec.Remark => d.Remark.Quotation('"'),
-                        ColumnSpec.Fund => $"{d.Fund:R}",
-                        _ => throw new ArgumentOutOfRangeException(),
-                    });
-            }
-
-            sb.AppendLine();
+            sb.Append(spec[i] switch
+                {
+                    ColumnSpec.VoucherID => d.Voucher.ID,
+                    ColumnSpec.VoucherDate => d.Voucher.Date.AsDate(),
+                    ColumnSpec.VoucherType => d.Voucher.Type,
+                    ColumnSpec.User => d.User,
+                    ColumnSpec.Currency => d.Currency,
+                    ColumnSpec.Title => d.Title.AsTitle(),
+                    ColumnSpec.TitleComment => TitleManager.GetTitleName(d.Title),
+                    ColumnSpec.SubTitle => d.SubTitle.AsSubTitle(),
+                    ColumnSpec.SubTitleComment => TitleManager.GetTitleName(d.Title, d.SubTitle),
+                    ColumnSpec.Content => d.Content.Quotation('\''),
+                    ColumnSpec.Remark => d.Remark.Quotation('"'),
+                    ColumnSpec.Fund => $"{d.Fund:R}",
+                    _ => throw new ArgumentOutOfRangeException(),
+                });
         }
 
         return sb.ToString();

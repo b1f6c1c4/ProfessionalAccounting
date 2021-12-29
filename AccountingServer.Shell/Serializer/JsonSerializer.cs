@@ -140,20 +140,40 @@ public class JsonSerializer : IEntitiesSerializer
             };
     }
 
-    public string PresentVouchers(IEnumerable<Voucher> vouchers)
-        => new JArray(vouchers.Select(PresentJson)).ToString(Formatting.Indented);
+    public async IAsyncEnumerable<string> PresentVouchers(IAsyncEnumerable<Voucher> vouchers)
+    {
+        yield return "[\n";
+        await foreach (var voucher in vouchers)
+            yield return PresentJson(voucher).ToString(Formatting.Indented);
+        yield return "]";
+    }
 
-    public string PresentVoucherDetails(IEnumerable<VoucherDetail> details)
-        => new JArray(details.Select(PresentJson)).ToString(Formatting.Indented);
+    public async IAsyncEnumerable<string> PresentVoucherDetails(IAsyncEnumerable<VoucherDetail> details)
+    {
+        yield return "[\n";
+        await foreach (var detail in details)
+            yield return PresentJson(detail).ToString(Formatting.Indented);
+        yield return "]";
+    }
 
-    public string PresentVoucherDetails(IEnumerable<VoucherDetailR> details)
+    public IAsyncEnumerable<string> PresentVoucherDetails(IAsyncEnumerable<VoucherDetailR> details)
         => PresentVoucherDetails(details.Cast<VoucherDetail>());
 
-    public string PresentAssets(IEnumerable<Asset> assets)
-        => new JArray(assets.Select(PresentJson)).ToString(Formatting.Indented);
+    public async IAsyncEnumerable<string> PresentAssets(IAsyncEnumerable<Asset> assets)
+    {
+        yield return "[\n";
+        await foreach (var asset in assets)
+            yield return PresentJson(asset).ToString(Formatting.Indented);
+        yield return "]";
+    }
 
-    public string PresentAmorts(IEnumerable<Amortization> amorts)
-        => new JArray(amorts.Select(PresentJson)).ToString(Formatting.Indented);
+    public async IAsyncEnumerable<string> PresentAmorts(IAsyncEnumerable<Amortization> amorts)
+    {
+        yield return "[\n";
+        await foreach (var amort in amorts)
+            yield return PresentJson(amort).ToString(Formatting.Indented);
+        yield return "]";
+    }
 
     private static JObject ParseJson(string str)
     {

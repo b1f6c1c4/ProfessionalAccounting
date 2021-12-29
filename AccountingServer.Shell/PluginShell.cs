@@ -59,7 +59,7 @@ internal class PluginShell : IShellComponent
             };
 
     /// <inheritdoc />
-    public ValueTask<IQueryResult> Execute(string expr, Session session)
+    public IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         var help = false;
         if (expr.StartsWith("?", StringComparison.Ordinal))
@@ -73,7 +73,9 @@ internal class PluginShell : IShellComponent
         if (help)
         {
             Parsing.Eof(expr);
-            return new ValueTask<IQueryResult>(plgName == "" ? new PlainText(ListPlugins()) : new(GetHelp(plgName)));
+            if (plgName == "")
+                return ListPlugins();
+            return GetHelp(plgName);
         }
 
         return GetPlugin(plgName).Execute(expr, session);
@@ -96,18 +98,15 @@ internal class PluginShell : IShellComponent
     /// </summary>
     /// <param name="name">名称</param>
     /// <returns>帮助内容</returns>
-    private string GetHelp(string name) => GetPlugin(name).ListHelp();
+    private IAsyncEnumerable<string> GetHelp(string name) => GetPlugin(name).ListHelp();
 
     /// <summary>
     ///     列出所有插件
     /// </summary>
     /// <returns>插件</returns>
-    private string ListPlugins()
+    private async IAsyncEnumerable<string> ListPlugins()
     {
-        var sb = new StringBuilder();
         foreach (var (key, value) in m_Plugins)
-            sb.AppendLine($"{key,-8}{value.GetType().FullName}");
-
-        return sb.ToString();
+            yield return $"{key,-8}{value.GetType().FullName}";
     }
 }
