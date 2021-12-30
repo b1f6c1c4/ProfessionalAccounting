@@ -40,7 +40,7 @@ internal class CheckShell : IShellComponent
                 "1" => BasicCheck(session),
                 "2" => AdvancedCheck(session),
                 "3" => UpsertCheck(session),
-                var x when x.StartsWith("4") => DuplicationCheck(session, x.Rest()),
+                var x when x.StartsWith("4", StringComparison.Ordinal) => DuplicationCheck(session, x.Rest()),
                 _ => throw new InvalidOperationException("表达式无效"),
             };
 

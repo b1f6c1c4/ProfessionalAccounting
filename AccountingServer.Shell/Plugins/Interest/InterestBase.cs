@@ -88,11 +88,11 @@ internal abstract class InterestBase : PluginBase
             endDate.HasValue)
         {
             var lastD = (await session.Accountant.RunVoucherQueryAsync(info.QueryInterest())
-                    .OrderByDescending(v => v.Date, new DateComparer())
+                    .OrderByDescending(static v => v.Date, new DateComparer())
                     .FirstOrDefaultAsync())
                 ?.Date ??
                 (await session.Accountant.RunVoucherQueryAsync(info.QueryCapital())
-                    .OrderBy(v => v.Date, new DateComparer())
+                    .OrderBy(static v => v.Date, new DateComparer())
                     .FirstAsync())
                 .Date!.Value;
             var capQuery = $"{info.QueryCapital()} [~{lastD.AsDate()}]``v";
@@ -138,8 +138,8 @@ internal abstract class InterestBase : PluginBase
         await foreach (var grp in
                        session.Accountant
                            .RunVoucherQueryAsync($"{info.QueryMajor()} {rng.AsDateRange()}")
-                           .GroupBy(v => v.Date)
-                           .OrderBy(grp => grp.Key, new DateComparer()))
+                           .GroupBy(static v => v.Date)
+                           .OrderBy(static grp => grp.Key, new DateComparer()))
         {
             var key = grp.Key ?? throw new ApplicationException("无法处理无穷长时间以前的利息收入");
 
@@ -157,7 +157,7 @@ internal abstract class InterestBase : PluginBase
             capitalIntegral +=
                 await grp.SelectMany(v
                         => v.Details.Where(d => d.IsMatch(capitalPattern, dir: Dir())).ToAsyncEnumerable())
-                    .Select(d => d.Fund!.Value)
+                    .Select(static d => d.Fund!.Value)
                     .SumAsync();
 
             // Settle Return
@@ -165,12 +165,12 @@ internal abstract class InterestBase : PluginBase
                 var voucher in
                 grp.WhereAwait(v => ValueTask.FromResult(v.Details.Any(d
                         => d.IsMatch(capitalPattern, dir: -Dir()) || d.IsMatch(interestPattern, dir: -Dir()))))
-                    .OrderBy(v => v.ID))
+                    .OrderBy(static v => v.ID))
             {
                 var value =
                     -voucher.Details.Where(
                             d => d.IsMatch(capitalPattern, dir: -Dir()) || d.IsMatch(interestPattern, dir: -Dir()))
-                        .Select(d => d.Fund!.Value)
+                        .Select(static d => d.Fund!.Value)
                         .Sum();
                 if ((Dir() * (-value + interestIntegral)).IsNonNegative())
                 {

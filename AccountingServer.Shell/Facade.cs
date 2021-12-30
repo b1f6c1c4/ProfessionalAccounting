@@ -162,19 +162,19 @@ public class Facade
     public async ValueTask<string> ExecuteVoucherUpsert(Session session, string str)
     {
         var voucher = session.Serializer.ParseVoucher(str);
-        var grpCs = voucher.Details.GroupBy(d => d.Currency ?? BaseCurrency.Now).ToList();
+        var grpCs = voucher.Details.GroupBy(static d => d.Currency ?? BaseCurrency.Now).ToList();
         var grpUs = voucher.Details.GroupBy(d => d.User ?? session.Client.User).ToList();
         foreach (var grpC in grpCs)
         {
-            var unc = grpC.SingleOrDefault(d => !d.Fund.HasValue);
+            var unc = grpC.SingleOrDefault(static d => !d.Fund.HasValue);
             if (unc != null)
-                unc.Fund = -grpC.Sum(d => d.Fund ?? 0D);
+                unc.Fund = -grpC.Sum(static d => d.Fund ?? 0D);
         }
 
         if (grpCs.Count == 1 && grpUs.Count > 1)
             foreach (var grpU in grpUs)
             {
-                var sum = grpU.Sum(d => d.Fund!.Value);
+                var sum = grpU.Sum(static d => d.Fund!.Value);
                 if (sum.IsZero())
                     continue;
 
@@ -184,7 +184,7 @@ public class Facade
         else if (grpCs.Count > 1 && grpUs.Count == 1)
             foreach (var grpC in grpCs)
             {
-                var sum = grpC.Sum(d => d.Fund!.Value);
+                var sum = grpC.Sum(static d => d.Fund!.Value);
                 if (sum.IsZero())
                     continue;
 
@@ -192,13 +192,13 @@ public class Facade
                     new() { User = grpUs.First().Key, Currency = grpC.Key, Title = 3999, Fund = -sum });
             }
         else if (voucher.Details.GroupBy(d => (d.User ?? session.Client.User, d.Currency ?? BaseCurrency.Now))
-                     .Where(grp => !grp.Sum(d => d.Fund!.Value).IsZero()).ToList() is var grpUCs &&
+                     .Where(static grp => !grp.Sum(static d => d.Fund!.Value).IsZero()).ToList() is var grpUCs &&
                  grpUCs.Count == 2)
         {
             var p = grpUCs[0];
-            var ps = p.Sum(d => d.Fund!.Value);
+            var ps = p.Sum(static d => d.Fund!.Value);
             var q = grpUCs[1];
-            var qs = q.Sum(d => d.Fund!.Value);
+            var qs = q.Sum(static d => d.Fund!.Value);
             // UpCp -> UqCp -> UqCq
             voucher.Details.Add(
                 new() { User = p.Key.Item1, Currency = p.Key.Item2, Title = 3998, Fund = -ps / 2 });

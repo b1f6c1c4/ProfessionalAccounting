@@ -79,8 +79,8 @@ internal partial class CarryShell
                         async bal => await session.Accountant.Query(ed.Value, bal.Currency, baseCur)
                             * bal.Fund);
             var totalC =
-                await tasks.SelectMany(t => t.Voucher.Details)
-                    .Where(d => d.Title == 3999).ToAsyncEnumerable().SumAwaitAsync(
+                await tasks.SelectMany(static t => t.Voucher.Details)
+                    .Where(static d => d.Title == 3999).ToAsyncEnumerable().SumAwaitAsync(
                         async d => await session.Accountant.Query(ed.Value, d.Currency, baseCur)
                             * d.Fund!.Value);
 
@@ -111,9 +111,9 @@ internal partial class CarryShell
         await foreach (var s in PartialCarry(session, task, rng, true))
             yield return s;
 
-        if (tasks.Any(t => !t.Value.IsZero()))
+        if (tasks.Any(static t => !t.Value.IsZero()))
         {
-            var grand = tasks.Sum(t => t.Value);
+            var grand = tasks.Sum(static t => t.Value);
             yield return $"{dt.AsDate(SubtotalLevel.Month)} Carry => @@ {grand.AsCurrency(baseCur)}";
         }
 

@@ -94,7 +94,7 @@ public class CSharpSerializer : IEntitySerializer
                 Path.Combine(Path.GetDirectoryName(typeof(Voucher).GetTypeInfo().Assembly.Location)!,
                     "AccountingServer.Entities.dll"),
             };
-        var references = refPaths.Select(r => MetadataReference.CreateFromFile(r)).ToArray();
+        var references = refPaths.Select(static r => MetadataReference.CreateFromFile(r)).ToArray();
         var compilation = CSharpCompilation.Create(
             assemblyName,
             new[] { syntaxTree },
@@ -106,7 +106,7 @@ public class CSharpSerializer : IEntitySerializer
         var result = compilation.Emit(ms);
         if (!result.Success)
         {
-            var failure = result.Diagnostics.First(diagnostic =>
+            var failure = result.Diagnostics.First(static diagnostic =>
                 diagnostic.IsWarningAsError ||
                 diagnostic.Severity == DiagnosticSeverity.Error);
             throw new(failure.GetMessage());

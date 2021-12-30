@@ -46,12 +46,9 @@ internal class AssetDisposition : PluginBase
         if (voucher == null)
             throw new ApplicationException("找不到记账凭证");
 
-        foreach (var detail in voucher.Details.Where(vd => vd.Title is 1601 or 1701))
+        foreach (var detail in voucher.Details.Where(static vd => vd.Title is 1601 or 1701)
+                     .Where(detail => guids.Count == 0 || guids.Contains(detail.Content)))
         {
-            if (guids.Count != 0 &&
-                !guids.Contains(detail.Content))
-                continue;
-
             var asset = await session.Accountant.SelectAssetAsync(Guid.Parse(detail.Content));
             foreach (var item in asset.Schedule)
             {

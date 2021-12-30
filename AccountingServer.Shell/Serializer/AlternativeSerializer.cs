@@ -51,7 +51,7 @@ internal class AlternativeSerializer : IEntitySerializer
     public Amortization ParseAmort(string str) => Run(s => s.ParseAmort(str));
 
     public static IEntitySerializer Compose(params IEntitySerializer[] serializers)
-        => serializers.Aggregate((p, s) => new AlternativeSerializer(p, s));
+        => serializers.Aggregate(static (p, s) => new AlternativeSerializer(p, s));
 
     private TOut Run<TOut>(Func<IEntitySerializer, TOut> func)
     {

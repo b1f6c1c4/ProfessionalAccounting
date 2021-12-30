@@ -43,7 +43,7 @@ public class DbTest : IDisposable
 
     [Theory]
     [ClassData(typeof(VoucherDataProvider))]
-    public async void VoucherStoreTest(string dt, VoucherType type)
+    public async Task VoucherStoreTest(string dt, VoucherType type)
     {
         var voucher1 = VoucherDataProvider.Create(dt, type);
 
@@ -68,7 +68,7 @@ public class DbTest : IDisposable
     [Fact]
     public async Task VoucherBulkStoreTest()
     {
-        var vouchers = new VoucherDataProvider().Select(pars
+        var vouchers = new VoucherDataProvider().Select(static pars
             => VoucherDataProvider.Create((string)pars[0], (VoucherType)pars[1])).ToList();
         var cnt = vouchers.Count;
 
@@ -76,7 +76,7 @@ public class DbTest : IDisposable
         foreach (var voucher in vouchers)
             Assert.NotNull(voucher.ID);
 
-        vouchers.AddRange(new VoucherDataProvider().Select(pars
+        vouchers.AddRange(new VoucherDataProvider().Select(static pars
             => VoucherDataProvider.Create((string)pars[0], (VoucherType)pars[1])));
         Assert.Equal(cnt * 2, await m_Adapter.Upsert(vouchers));
         foreach (var voucher in vouchers)
@@ -151,5 +151,5 @@ public class DbTest : IDisposable
 
     [Fact]
     public void UriInvalidTest()
-        => Assert.Throws<NotSupportedException>(() => Facade.Create("https:///"));
+        => Assert.Throws<NotSupportedException>(static () => Facade.Create("https:///"));
 }

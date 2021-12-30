@@ -41,7 +41,7 @@ public class QuotedStringTest
     {
         Assert.Null(QuotedStringHelper.Dequotation(null));
         Assert.Equal("", "".Dequotation());
-        Assert.Throws<ArgumentException>(() => "\'".Dequotation());
-        Assert.Throws<ArgumentException>(() => "\'aaerv\"".Dequotation());
+        Assert.Throws<ArgumentException>(static () => "\'".Dequotation());
+        Assert.Throws<ArgumentException>(static () => "\'aaerv\"".Dequotation());
     }
 }

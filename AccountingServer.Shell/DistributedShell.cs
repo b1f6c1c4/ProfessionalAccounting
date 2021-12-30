@@ -75,7 +75,7 @@ internal abstract class DistributedShell : IShellComponent
                         "all",
                         (expr, session) =>
                             {
-                                var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
+                                var safe = Parsing.Token(ref expr, false, static t => t == "unsafe") == null;
                                 var dist = Parsing.DistributedQuery(ref expr, session.Client);
                                 Parsing.Eof(expr);
                                 if (dist.IsDangerous() && safe)
@@ -87,7 +87,7 @@ internal abstract class DistributedShell : IShellComponent
                         "li",
                         (expr, session) =>
                             {
-                                var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
+                                var safe = Parsing.Token(ref expr, false, static t => t == "unsafe") == null;
                                 var dt = Parsing.UniqueTime(ref expr, session.Client) ?? session.Client.Today;
                                 var dist = Parsing.DistributedQuery(ref expr, session.Client);
                                 Parsing.Eof(expr);
@@ -100,7 +100,7 @@ internal abstract class DistributedShell : IShellComponent
                         "q",
                         (expr, session) =>
                             {
-                                var safe = Parsing.Token(ref expr, false, t => t == "unsafe") == null;
+                                var safe = Parsing.Token(ref expr, false, static t => t == "unsafe") == null;
                                 var dist = Parsing.DistributedQuery(ref expr, session.Client);
                                 Parsing.Eof(expr);
                                 if (dist.IsDangerous() && safe)

@@ -69,7 +69,7 @@ public class BLLTest : IDisposable
     [Fact]
     public async Task VoucherBulkStoreTest()
     {
-        var vouchers = new VoucherDataProvider().Select(pars
+        var vouchers = new VoucherDataProvider().Select(static pars
             => VoucherDataProvider.Create((string)pars[0], (VoucherType)pars[1])).ToList();
         var cnt = vouchers.Count;
 
@@ -77,7 +77,7 @@ public class BLLTest : IDisposable
         foreach (var voucher in vouchers)
             Assert.NotNull(voucher.ID);
 
-        vouchers.AddRange(new VoucherDataProvider().Select(pars
+        vouchers.AddRange(new VoucherDataProvider().Select(static pars
             => VoucherDataProvider.Create((string)pars[0], (VoucherType)pars[1])));
         Assert.Equal(cnt * 2, await m_Accountant.UpsertAsync(vouchers));
         foreach (var voucher in vouchers)
@@ -164,5 +164,5 @@ public class BLLTest : IDisposable
 
     [Fact]
     public void UriInvalidTest()
-        => Assert.Throws<NotSupportedException>(() => Facade.Create("https:///"));
+        => Assert.Throws<NotSupportedException>(static () => Facade.Create("https:///"));
 }

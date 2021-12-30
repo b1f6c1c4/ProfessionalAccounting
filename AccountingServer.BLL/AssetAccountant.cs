@@ -333,7 +333,7 @@ internal class AssetAccountant : DistributedAccountant
                                 Fund = asset.Schedule.Where(it
                                         => DateHelper.CompareDate(it.Date, item.Date) < 0 && it is DepreciateItem)
                                     .Cast<DepreciateItem>()
-                                    .Aggregate(0D, (td, it) => td + it.Amount),
+                                    .Aggregate(0D, static (td, it) => td + it.Amount),
                             },
                         new()
                             {
@@ -344,7 +344,7 @@ internal class AssetAccountant : DistributedAccountant
                                 Fund = asset.Schedule.Where(it
                                         => DateHelper.CompareDate(it.Date, item.Date) < 0 && it is DevalueItem)
                                     .Cast<DevalueItem>()
-                                    .Aggregate(0D, (td, it) => td + it.Amount),
+                                    .Aggregate(0D, static (td, it) => td + it.Amount),
                             }, new()
                             {
                                 User = asset.User,
@@ -413,11 +413,8 @@ internal class AssetAccountant : DistributedAccountant
             voucher.Type = voucherType;
         }
 
-        foreach (var d in expectedDetails)
+        foreach (var d in expectedDetails.Where(static d => d.Remark != Asset.IgnoranceMark))
         {
-            if (d.Remark == Asset.IgnoranceMark)
-                continue;
-
             UpdateDetail(d, voucher, out var success, out var mo, editOnly);
             if (!success)
                 return false;
@@ -443,9 +440,8 @@ internal class AssetAccountant : DistributedAccountant
             return;
 
         var items =
-            asset.Schedule.Where(
-                    assetItem =>
-                        assetItem is not DepreciateItem || assetItem.Remark == AssetItem.IgnoranceMark)
+            asset.Schedule.Where(static assetItem =>
+                    assetItem is not DepreciateItem || assetItem.Remark == AssetItem.IgnoranceMark)
                 .ToList();
 
         switch (asset.Method)
@@ -547,8 +543,8 @@ internal class AssetAccountant : DistributedAccountant
                 //}
                 break;
             case DepreciationMethod.SumOfTheYear:
-                if (items.Any(a => a is DevalueItem || a.Remark == AssetItem.IgnoranceMark) ||
-                    items.Count(a => a is AcquisitionItem) != 1)
+                if (items.Any(static a => a is DevalueItem || a.Remark == AssetItem.IgnoranceMark) ||
+                    items.Count(static a => a is AcquisitionItem) != 1)
                     throw new NotImplementedException();
 
                 {

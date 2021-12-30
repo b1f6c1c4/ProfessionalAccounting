@@ -78,7 +78,7 @@ internal partial class CarryShell : IShellComponent
         if (!rng.StartDate.HasValue)
         {
             var st = (await session.Accountant.RunVoucherGroupedQueryAsync("[~null] !!y")).Items.Cast<ISubtotalDate>()
-                .OrderBy(grpd => grpd.Date).FirstOrDefault()?.Date;
+                .OrderBy(static grpd => grpd.Date).FirstOrDefault()?.Date;
             if (st.HasValue)
                 rng.StartDate = st;
             else
@@ -113,10 +113,9 @@ internal partial class CarryShell : IShellComponent
         if (!rng.NullOnly)
             for (var dt = rng.StartDate!.Value; dt <= rng.EndDate!.Value; dt = dt.AddMonths(1))
             {
-                foreach (var info in BaseCurrency.History)
-                    if (info.Date >= dt && info.Date < dt.AddMonths(1))
-                        await foreach (var s in ConvertEquity(session, info.Date!.Value, info.Currency))
-                            yield return s;
+                foreach (var info in BaseCurrency.History.Where(info => info.Date >= dt && info.Date < dt.AddMonths(1)))
+                await foreach (var s in ConvertEquity(session, info.Date!.Value, info.Currency))
+                    yield return s;
 
                 await foreach (var s in Carry(session, dt))
                     yield return s;

@@ -100,7 +100,7 @@ public class JsonSerializer : IEntitiesSerializer
                 DevaluationExpenseTitle = obj["devaluation"]?["expense"]?["title"]?.Value<int?>(),
                 DevaluationExpenseSubTitle = obj["devaluation"]?["expense"]?["subtitle"]?.Value<int?>(),
                 Remark = obj["remark"]?.Value<string>(),
-                Schedule = schedule != null ? schedule.Select(ParseAssetItem).ToList() : new(),
+                Schedule = schedule?.Select(ParseAssetItem).ToList() ?? new(),
             };
     }
 
@@ -136,7 +136,7 @@ public class JsonSerializer : IEntitiesSerializer
                 Interval = interval,
                 Template = ParseVoucher(obj["template"]),
                 Remark = obj["remark"]?.Value<string>(),
-                Schedule = schedule != null ? schedule.Select(ParseAmortItem).ToList() : new(),
+                Schedule = schedule?.Select(ParseAmortItem).ToList() ?? new(),
             };
     }
 
@@ -205,7 +205,7 @@ public class JsonSerializer : IEntitiesSerializer
                 Date = date,
                 Remark = obj["remark"]?.Value<string>(),
                 Type = type,
-                Details = detail != null ? detail.Select(ParseVoucherDetail).ToList() : new(),
+                Details = detail?.Select(ParseVoucherDetail).ToList() ?? new(),
             };
     }
 

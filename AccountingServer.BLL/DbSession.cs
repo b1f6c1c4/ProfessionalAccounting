@@ -180,8 +180,7 @@ public class DbSession : IHistoricalExchange
         return conv.Build(res);
     }
 
-    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
-        IQueryCompounded<IVoucherQueryAtom> query)
+    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => Db.Get().SelectUnbalancedVouchers(query);
 
     public IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)

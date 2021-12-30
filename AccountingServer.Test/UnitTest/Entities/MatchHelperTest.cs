@@ -205,13 +205,11 @@ public class MatchHelperTest
 
     [Fact]
     public void DetailMatchTestContent()
-        => StringMatchTest(
-            (v, f) => MatchHelper.IsMatch(new() { Content = v }, new VoucherDetail { Content = f }));
+        => StringMatchTest(static (v, f) => MatchHelper.IsMatch(new() { Content = v }, new VoucherDetail { Content = f }));
 
     [Fact]
     public void DetailMatchTestContentPrefix()
-        => StringPrefixMatchTest(
-            (v, f) => MatchHelper.IsMatch(new() { Content = v }, new(), contentPrefix: f));
+        => StringPrefixMatchTest(static (v, f) => MatchHelper.IsMatch(new() { Content = v }, new(), contentPrefix: f));
 
     [Fact]
     public void DetailMatchTestNull()
@@ -222,8 +220,7 @@ public class MatchHelperTest
 
     [Fact]
     public void DetailMatchTestRemark()
-        => StringMatchTest(
-            (v, f) => MatchHelper.IsMatch(new() { Remark = v }, new VoucherDetail { Remark = f }));
+        => StringMatchTest(static (v, f) => MatchHelper.IsMatch(new() { Remark = v }, new VoucherDetail { Remark = f }));
 
     [Fact]
     public void VoucherMatchTest()
@@ -294,10 +291,9 @@ public class MatchHelperTest
 
     [Fact]
     public void VoucherMatchTestRemark()
-        => StringMatchTest((v, f) => MatchHelper.IsMatch(new() { Remark = v }, new Voucher { Remark = f }));
+        => StringMatchTest(static (v, f) => MatchHelper.IsMatch(new() { Remark = v }, new Voucher { Remark = f }));
 
     [Fact]
     public void DetailMatchTestRemarkPrefix()
-        => StringPrefixMatchTest(
-            (v, f) => MatchHelper.IsMatch(new() { Remark = v }, new(), remarkPrefix: f));
+        => StringPrefixMatchTest(static (v, f) => MatchHelper.IsMatch(new() { Remark = v }, new(), remarkPrefix: f));
 }

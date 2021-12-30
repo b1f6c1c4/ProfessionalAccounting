@@ -90,7 +90,7 @@ internal class AmortAccountant : DistributedAccountant
 
         var lst = amort.Schedule?.ToList() ?? new();
 
-        lst.Sort((item1, item2) => DateHelper.CompareDate(item1.Date, item2.Date));
+        lst.Sort(static (item1, item2) => DateHelper.CompareDate(item1.Date, item2.Date));
 
         var resiValue = amort.Value.Value;
         foreach (var item in lst)
@@ -108,23 +108,18 @@ internal class AmortAccountant : DistributedAccountant
     /// <param name="rng">日期过滤器</param>
     /// <param name="query">检索式</param>
     /// <returns>未注册的记账凭证</returns>
-    public IEnumerable<Voucher> RegisterVouchers(Amortization amort, DateFilter rng,
+    public async IAsyncEnumerable<Voucher> RegisterVouchers(Amortization amort, DateFilter rng,
         IQueryCompounded<IVoucherQueryAtom> query)
     {
         if (amort.Remark == Amortization.IgnoranceMark)
             yield break;
 
         var queryT = new RegisteringQuery(amort);
-        foreach (var voucher in Db.SelectVouchers(new IntersectQueries<IVoucherQueryAtom>(query, queryT))
-                     .ToEnumerable()) // TODO
+        await foreach (var voucher in Db.SelectVouchers(new IntersectQueries<IVoucherQueryAtom>(query, queryT))
+                           .Where(static voucher => voucher.Remark != Amortization.IgnoranceMark)
+                           .Where(voucher => amort.Schedule.All(item => item.VoucherID != voucher.ID)))
         {
-            if (voucher.Remark == Amortization.IgnoranceMark)
-                continue;
-
-            if (amort.Schedule.Any(item => item.VoucherID == voucher.ID))
-                continue;
-
-            if (voucher.Details.Zip(amort.Template.Details, (d1, d2) => d1.IsMatch(d2)).Contains(false))
+            if (voucher.Details.Zip(amort.Template.Details, static (d1, d2) => d1.IsMatch(d2)).Contains(false))
                 yield return voucher;
             else
             {
@@ -316,8 +311,7 @@ internal class AmortAccountant : DistributedAccountant
         {
             VoucherFilter = amort.Template;
             DetailFilter = amort.Template.Details.Aggregate(
-                (IQueryCompounded<IDetailQueryAtom>)DetailQueryUnconstrained.Instance,
-                (query, filter) => new IntersectQueries<IDetailQueryAtom>(
+                (IQueryCompounded<IDetailQueryAtom>)DetailQueryUnconstrained.Instance, static (query, filter) => new IntersectQueries<IDetailQueryAtom>(
                     query,
                     new RegisteringDetailQuery(filter)));
         }

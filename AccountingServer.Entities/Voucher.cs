@@ -87,7 +87,7 @@ public class Voucher
         Remark = v.Remark;
         Type = v.Type;
         if (v.Details != null)
-            Details = v.Details.Select(d => new VoucherDetail(d)).ToList();
+            Details = v.Details.Select(static d => new VoucherDetail(d)).ToList();
     }
 
     /// <summary>

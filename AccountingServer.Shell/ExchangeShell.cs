@@ -107,6 +107,7 @@ internal class ExchangeShell : IShellComponent
         return now.AddDays(-3.5).AddMinutes(-35);
     }
 
+    // ReSharper disable once AsyncVoidMethod
     private async void OnTimedEvent(object source, ElapsedEventArgs e)
     {
         var date = CriticalTime(DateTime.UtcNow);

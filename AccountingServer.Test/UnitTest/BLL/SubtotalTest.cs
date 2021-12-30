@@ -110,7 +110,7 @@ public class SubtotalTest
             lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
         }
 
-        Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
+        Assert.Equal(bal.Sum(static b => b.Fund), res.Fund);
 
         var lst0 = new List<Balance>();
         if (incl[0] == '1')
@@ -194,7 +194,7 @@ public class SubtotalTest
             lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
         }
 
-        Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
+        Assert.Equal(bal.Sum(static b => b.Fund), res.Fund);
 
         var lst0 = new List<Balance>();
         if (incl[0] == '1')
@@ -258,7 +258,7 @@ public class SubtotalTest
             lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
         }
 
-        Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
+        Assert.Equal(bal.Sum(static b => b.Fund), res.Fund);
 
         var lst0 = new List<Balance>();
         if (incl[0] == '1')
@@ -470,7 +470,7 @@ public class SubtotalTest
             lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
         }
 
-        Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
+        Assert.Equal(bal.Sum(static b => b.Fund), res.Fund);
         Assert.Equal(
             new Balance[]
                 {
@@ -551,7 +551,7 @@ public class SubtotalTest
             lst.Add(new() { Content = resxx.Content, Fund = resxx.Fund });
         }
 
-        Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
+        Assert.Equal(bal.Sum(static b => b.Fund), res.Fund);
         Assert.Equal(
             new List<Balance>
                 {
@@ -590,7 +590,7 @@ public class SubtotalTest
             lst.Add(new() { Currency = resxx.Currency, Fund = resxx.Fund });
         }
 
-        Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
+        Assert.Equal(bal.Sum(static b => b.Fund), res.Fund);
         Assert.Equal(
             new List<Balance>
                 {
@@ -629,7 +629,7 @@ public class SubtotalTest
             lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
         }
 
-        Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
+        Assert.Equal(bal.Sum(static b => b.Fund), res.Fund);
         Assert.Equal(bal, lst, new BalanceEqualityComparer());
     }
 
@@ -679,7 +679,7 @@ public class SubtotalTest
             lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
         }
 
-        Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
+        Assert.Equal(bal.Sum(static b => b.Fund), res.Fund);
         Assert.Equal(bal, lst, new BalanceEqualityComparer());
     }
 
@@ -709,7 +709,7 @@ public class SubtotalTest
             lst.Add(new() { Remark = resxx.Remark, Fund = resxx.Fund });
         }
 
-        Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
+        Assert.Equal(bal.Sum(static b => b.Fund), res.Fund);
         Assert.Equal(
             new List<Balance>
                 {
@@ -747,7 +747,7 @@ public class SubtotalTest
             lst.Add(new() { Title = resxx.Title, Fund = resxx.Fund });
         }
 
-        Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
+        Assert.Equal(bal.Sum(static b => b.Fund), res.Fund);
         Assert.Equal(
             new List<Balance>
                 {
@@ -794,7 +794,7 @@ public class SubtotalTest
             }
         }
 
-        Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
+        Assert.Equal(bal.Sum(static b => b.Fund), res.Fund);
         Assert.Equal(
             new List<Balance>
                 {
@@ -836,7 +836,7 @@ public class SubtotalTest
             lst.Add(new() { User = resxx.User, Fund = resxx.Fund });
         }
 
-        Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
+        Assert.Equal(bal.Sum(static b => b.Fund), res.Fund);
         Assert.Equal(
             new List<Balance>
                 {
@@ -875,7 +875,11 @@ public class SubtotalTest
             lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
         }
 
-        Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
+        double sum = 0;
+        foreach (var b in bal)
+            sum += b.Fund;
+
+        Assert.Equal(sum, res.Fund);
         Assert.Equal(bal, lst, new BalanceEqualityComparer());
     }
 
@@ -906,7 +910,7 @@ public class SubtotalTest
             lst.Add(new() { Date = resxx.Date, Fund = resxx.Fund });
         }
 
-        Assert.Equal(bal.Sum(b => b.Fund), res.Fund);
+        Assert.Equal(bal.Sum(static b => b.Fund), res.Fund);
         Assert.Equal(bal, lst, new BalanceEqualityComparer());
     }
 }

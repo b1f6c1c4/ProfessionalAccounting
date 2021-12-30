@@ -42,14 +42,12 @@ internal class YieldRate : PluginBase
             var (grp, rte) in
             result.Items.Cast<ISubtotalContent>()
                 .Join(
-                    resx.Items.Cast<ISubtotalContent>(),
-                    grp => grp.Content,
-                    rsx => rsx.Content,
+                    resx.Items.Cast<ISubtotalContent>(), static grp => grp.Content, static rsx => rsx.Content,
                     (grp, bal) => (Group: grp,
                         Rate: GetRate(session,
-                            grp.Items.Cast<ISubtotalDate>().OrderBy(b => b.Date, new DateComparer()).ToList(),
+                            grp.Items.Cast<ISubtotalDate>().OrderBy(static b => b.Date, new DateComparer()).ToList(),
                             bal.Fund)))
-                .OrderByDescending(kvp => kvp.Rate))
+                .OrderByDescending(static kvp => kvp.Rate))
             yield return $"{grp.Content.CPadRight(30)} {$"{rte * 360:P2}",7}";
     }
 
@@ -66,11 +64,11 @@ internal class YieldRate : PluginBase
             return
                 new YieldRateSolver(
                     lst.Select(b => session.Client.Today.Subtract(b.Date!.Value).TotalDays).Concat(new[] { 0D }),
-                    lst.Select(b => b.Fund).Concat(new[] { -pv })).Solve();
+                    lst.Select(static b => b.Fund).Concat(new[] { -pv })).Solve();
 
         return
             new YieldRateSolver(
                 lst.Select(b => lst[^1].Date!.Value.Subtract(b.Date!.Value).TotalDays),
-                lst.Select(b => b.Fund)).Solve();
+                lst.Select(static b => b.Fund)).Solve();
     }
 }

@@ -119,7 +119,7 @@ public class CsvSerializer : IEntitiesSerializer
         }
     }
 
-    private IList<ColumnSpec> DetailSpec => m_Specs.Where(s => !s.HasFlag(ColumnSpec.Voucher)).ToList();
+    private IList<ColumnSpec> DetailSpec => m_Specs.Where(static s => !s.HasFlag(ColumnSpec.Voucher)).ToList();
 
     /// <inheritdoc />
     public string PresentVoucher(Voucher voucher)

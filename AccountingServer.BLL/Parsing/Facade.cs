@@ -87,38 +87,38 @@ public abstract class FacadeBase
         => Title(ref s);
 
     public ITitle Title(ref string s)
-        => QueryParse(ref s, p => p.title(), null);
+        => QueryParse(ref s, static p => p.title(), null);
 
     public DateTime? UniqueTime(string s, Client client)
         => UniqueTime(ref s, client);
 
     public DateTime? UniqueTime(ref string s, Client client)
-        => QueryParse(ref s, p => p.uniqueTime(), client)?.AsDate();
+        => QueryParse(ref s, static p => p.uniqueTime(), client)?.AsDate();
 
     public DateFilter Range(string s, Client client)
         => Range(ref s, client);
 
     public DateFilter Range(ref string s, Client client)
-        => QueryParse(ref s, p => p.range(), client)?.Range;
+        => QueryParse(ref s, static p => p.range(), client)?.Range;
 
     public IQueryCompounded<IVoucherQueryAtom> VoucherQuery(string s, Client client)
         => VoucherQuery(ref s, client);
 
     public IQueryCompounded<IVoucherQueryAtom> VoucherQuery(ref string s, Client client)
-        => (IQueryCompounded<IVoucherQueryAtom>)QueryParse(ref s, p => p.vouchers(), client) ??
+        => (IQueryCompounded<IVoucherQueryAtom>)QueryParse(ref s, static p => p.vouchers(), client) ??
             VoucherQueryUnconstrained.Instance;
 
     public IVoucherDetailQuery DetailQuery(string s, Client client)
         => DetailQuery(ref s, client);
 
     public IVoucherDetailQuery DetailQuery(ref string s, Client client)
-        => QueryParse(ref s, p => p.voucherDetailQuery(), client);
+        => QueryParse(ref s, static p => p.voucherDetailQuery(), client);
 
     public ISubtotal Subtotal(string s, Client client)
         => Subtotal(ref s, client);
 
     public ISubtotal Subtotal(ref string s, Client client)
-        => SubtotalParse(ref s, p => p.subtotal(), client);
+        => SubtotalParse(ref s, static p => p.subtotal(), client);
 
     public IVoucherGroupedQuery VoucherGroupedQuery(string s, Client client)
         => VoucherGroupedQuery(ref s, client);
@@ -158,7 +158,7 @@ public abstract class FacadeBase
         => DistributedQuery(ref s, client);
 
     public IQueryCompounded<IDistributedQueryAtom> DistributedQuery(ref string s, Client client)
-        => (IQueryCompounded<IDistributedQueryAtom>)QueryParse(ref s, p => p.distributedQ(), client) ??
+        => (IQueryCompounded<IDistributedQueryAtom>)QueryParse(ref s, static p => p.distributedQ(), client) ??
             DistributedQueryUnconstrained.Instance;
 
     private sealed class VoucherGroupedQueryStub : IVoucherGroupedQuery

@@ -64,7 +64,7 @@ internal class AmortizationShell : DistributedShell
         await foreach (var a in Sort(session.Accountant.SelectAmortizationsAsync(distQuery)))
         {
             await foreach (var s in session.Serializer.PresentVouchers(
-                               session.Accountant.RegisterVouchers(a, rng, query).ToAsyncEnumerable()))
+                               session.Accountant.RegisterVouchers(a, rng, query)))
                 yield return s;
 
             await session.Accountant.UpsertAsync(a);
@@ -72,8 +72,7 @@ internal class AmortizationShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override async IAsyncEnumerable<string> ExecuteUnregister(
-        IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+    protected override async IAsyncEnumerable<string> ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
         IQueryCompounded<IVoucherQueryAtom> query, Session session)
     {
         await foreach (var a in Sort(session.Accountant.SelectAmortizationsAsync(distQuery)))
@@ -112,8 +111,7 @@ internal class AmortizationShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override async IAsyncEnumerable<string> ExecuteResetSoft(
-        IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng, Session session)
+    protected override async IAsyncEnumerable<string> ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng, Session session)
     {
         await foreach (var a in session.Accountant.SelectAmortizationsAsync(distQuery))
         {
@@ -122,7 +120,7 @@ internal class AmortizationShell : DistributedShell
 
             var flag = false;
             foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
-                         .Where(item => item.VoucherID != null))
+                         .Where(static item => item.VoucherID != null))
             {
                 if (await session.Accountant.SelectVoucherAsync(item.VoucherID) != null)
                     continue;
@@ -139,8 +137,7 @@ internal class AmortizationShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override async IAsyncEnumerable<string> ExecuteResetMixed(
-        IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng, Session session)
+    protected override async IAsyncEnumerable<string> ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng, Session session)
     {
         await foreach (var a in session.Accountant.SelectAmortizationsAsync(distQuery))
         {
@@ -149,7 +146,7 @@ internal class AmortizationShell : DistributedShell
 
             var flag = false;
             foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
-                         .Where(item => item.VoucherID != null))
+                         .Where(static item => item.VoucherID != null))
             {
                 var voucher = await session.Accountant.SelectVoucherAsync(item.VoucherID);
                 if (voucher == null)
@@ -266,5 +263,5 @@ internal class AmortizationShell : DistributedShell
     /// <param name="enumerable">摊销</param>
     /// <returns>排序后的摊销</returns>
     private static IAsyncEnumerable<Amortization> Sort(IAsyncEnumerable<Amortization> enumerable)
-        => enumerable.OrderBy(o => o.Date, new DateComparer()).ThenBy(o => o.Name).ThenBy(o => o.ID);
+        => enumerable.OrderBy(static o => o.Date, new DateComparer()).ThenBy(static o => o.Name).ThenBy(static o => o.ID);
 }

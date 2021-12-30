@@ -50,7 +50,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
             throw new FormatException("格式错误");
 
         expr = expr[TheToken.Length..];
-        if (ParsingF.Token(ref expr, false, s => s == "!") == null)
+        if (ParsingF.Token(ref expr, false, static s => s == "!") == null)
             throw new NotImplementedException();
 
         var v = GetVoucher(ref expr);
@@ -88,7 +88,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
             // ignore
         }
 
-        var currency = Parsing.Token(ref expr, false, s => s.StartsWith("@", StringComparison.Ordinal))?[1..]
+        var currency = Parsing.Token(ref expr, false, static s => s.StartsWith("@", StringComparison.Ordinal))?[1..]
                 .ToUpperInvariant()
             ?? BaseCurrency.Now;
 
@@ -124,14 +124,14 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
             resLst.Add(vd);
 
         // Don't use Enumerable.Sum, it ignores null values
-        var actualVals = resLst.Aggregate((double?)0D, (s, dd) => s + dd.Fund);
+        var actualVals = resLst.Aggregate((double?)0D, static (s, dd) => s + dd.Fund);
 
         if (!d.HasValue || !t.HasValue)
         {
             if (!actualVals.HasValue)
                 throw new ApplicationException("不定项过多");
 
-            var sum = lst.Sum(item => item.Fund - item.DiscountFund);
+            var sum = lst.Sum(static item => item.Fund - item.DiscountFund);
             if (!d.HasValue)
                 d = sum + t + actualVals;
             else // if (!t.HasValue)
@@ -139,7 +139,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
         }
 
 
-        var total = lst.Sum(it => it.Fund!.Value);
+        var total = lst.Sum(static it => it.Fund!.Value);
         foreach (var item in lst)
         {
             item.DiscountFund += d!.Value / total * item.Fund!.Value;
@@ -155,8 +155,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
             item.DiscountFund = 0D;
         }
 
-        foreach (var grp in lst.GroupBy(
-                     it => new()
+        foreach (var grp in lst.GroupBy(static it => new()
                          {
                              User = it.User,
                              Currency = it.Currency,
@@ -167,7 +166,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
                          },
                      new DetailEqualityComparer()))
         {
-            grp.Key.Fund = grp.Sum(it => it.Fund!.Value);
+            grp.Key.Fund = grp.Sum(static it => it.Fund!.Value);
             resLst.Add(grp.Key);
         }
 
@@ -191,7 +190,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
         var lst = new List<string>();
 
         Parsing.TrimStartComment(ref expr);
-        var user = Parsing.Token(ref expr, false, t => t.StartsWith("U", StringComparison.Ordinal))
+        var user = Parsing.Token(ref expr, false, static t => t.StartsWith("U", StringComparison.Ordinal))
             .ParseUserSpec(Client);
         var title = Parsing.Title(ref expr);
         if (title == null)
@@ -252,7 +251,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
             lst.Add((vd, actual));
         }
 
-        if (ParsingF.Token(ref expr, false, s => s == ":") == null)
+        if (ParsingF.Token(ref expr, false, static s => s == ":") == null)
             return null;
 
         var resLst = new List<Item>();

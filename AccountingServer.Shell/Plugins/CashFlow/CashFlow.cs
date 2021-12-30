@@ -110,7 +110,7 @@ internal class CashFlow : PluginBase
             sb.Clear();
         }
 
-        foreach (var kvp in rst.OrderBy(kvp => kvp.Key))
+        foreach (var kvp in rst.OrderBy(static kvp => kvp.Key))
         {
             sb.Append(prefix);
             sb.Append($"{kvp.Key.AsDate()}");

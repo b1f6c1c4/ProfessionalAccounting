@@ -35,7 +35,7 @@ public class ParseTest
 
     private void PairedSucc<TR>(string name, string s, Action<TR> pred = null)
     {
-        pred ??= r => Assert.NotNull(r);
+        pred ??= static r => Assert.NotNull(r);
 
         {
             var m1 = typeof(FacadeBase).GetMethod(name, new[] { typeof(string) });
@@ -144,7 +144,7 @@ public class ParseTest
     [InlineData("[20200101]", "2020-01-01")]
     public void UniqueTimeTest(string s, string t)
         => PairedSucc<DateTime?>(nameof(ParsingF.UniqueTime), s,
-            r => { Assert.Equal(t, r?.ToString("yyyy-MM-dd")); });
+            r => Assert.Equal(t, r?.ToString("yyyy-MM-dd")));
 
     [Theory]
     [InlineData(".", 0)]
@@ -155,7 +155,7 @@ public class ParseTest
     [InlineData("[...]", 2)]
     public void UniqueTimeRelTest(string s, int d)
         => PairedSucc<DateTime?>(nameof(ParsingF.UniqueTime), s,
-            r => { Assert.Equal(m_Client.Today.AddDays(-d), r); });
+            r => Assert.Equal(m_Client.Today.AddDays(-d), r));
 
     [Theory]
     [InlineData(null)]

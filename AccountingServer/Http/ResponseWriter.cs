@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AccountingServer.Http;
@@ -100,11 +101,8 @@ internal static class ResponseWriter
     {
         try
         {
-            await foreach (var s in iae)
+            await foreach (var s in iae.Where(static s => s.Length != 0))
             {
-                if (s.Length == 0)
-                    continue;
-
                 await stream.WriteLineAsync($"{s.Length:x}");
                 await stream.WriteAsync(s);
                 await stream.WriteLineAsync();

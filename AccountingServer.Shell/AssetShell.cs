@@ -68,8 +68,7 @@ internal class AssetShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override async IAsyncEnumerable<string> ExecuteUnregister(
-        IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+    protected override async IAsyncEnumerable<string> ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
         IQueryCompounded<IVoucherQueryAtom> query, Session session)
     {
         await foreach (var a in Sort(session.Accountant.SelectAssetsAsync(distQuery)))
@@ -108,8 +107,7 @@ internal class AssetShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override async IAsyncEnumerable<string> ExecuteResetSoft(
-        IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng, Session session)
+    protected override async IAsyncEnumerable<string> ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng, Session session)
     {
         await foreach (var a in session.Accountant.SelectAssetsAsync(distQuery))
         {
@@ -118,7 +116,7 @@ internal class AssetShell : DistributedShell
 
             var flag = false;
             foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
-                         .Where(item => item.VoucherID != null))
+                         .Where(static item => item.VoucherID != null))
             {
                 if (await session.Accountant.SelectVoucherAsync(item.VoucherID) != null)
                     continue;
@@ -136,8 +134,7 @@ internal class AssetShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override async IAsyncEnumerable<string> ExecuteResetMixed(
-        IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng, Session session)
+    protected override async IAsyncEnumerable<string> ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng, Session session)
     {
         await foreach (var a in session.Accountant.SelectAssetsAsync(distQuery))
         {
@@ -146,7 +143,7 @@ internal class AssetShell : DistributedShell
 
             var flag = false;
             foreach (var item in a.Schedule.Where(item => item.Date.Within(rng))
-                         .Where(item => item.VoucherID != null))
+                         .Where(static item => item.VoucherID != null))
             {
                 var voucher = await session.Accountant.SelectVoucherAsync(item.VoucherID);
                 if (voucher == null)
@@ -168,8 +165,7 @@ internal class AssetShell : DistributedShell
         }
     }
 
-    protected override async IAsyncEnumerable<string> ExecuteResetHard(
-        IQueryCompounded<IDistributedQueryAtom> distQuery, IQueryCompounded<IVoucherQueryAtom> query, Session session)
+    protected override async IAsyncEnumerable<string> ExecuteResetHard(IQueryCompounded<IDistributedQueryAtom> distQuery, IQueryCompounded<IVoucherQueryAtom> query, Session session)
     {
         await foreach (var a in session.Accountant.SelectAssetsAsync(distQuery))
         {
@@ -308,5 +304,5 @@ internal class AssetShell : DistributedShell
     /// <param name="enumerable">资产</param>
     /// <returns>排序后的资产</returns>
     private static IAsyncEnumerable<Asset> Sort(IAsyncEnumerable<Asset> enumerable)
-        => enumerable.OrderBy(a => a.Date, new DateComparer()).ThenBy(a => a.Name).ThenBy(a => a.ID);
+        => enumerable.OrderBy(static a => a.Date, new DateComparer()).ThenBy(static a => a.Name).ThenBy(static a => a.ID);
 }

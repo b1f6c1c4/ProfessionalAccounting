@@ -31,7 +31,7 @@ internal static class QueryPreprocessor
         if (query.Subtotal.EquivalentDate.HasValue)
             throw new InvalidOperationException("记账凭证分类汇总不能等值");
 
-        var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
+        var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, static (total, l) => total | l);
         if (query.Subtotal.AggrType != AggregationType.None)
             level |= query.Subtotal.AggrInterval;
 
@@ -53,7 +53,7 @@ internal static class QueryPreprocessor
 
     public static SubtotalLevel Preprocess(this IGroupedQuery query)
     {
-        var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, (total, l) => total | l);
+        var level = query.Subtotal.Levels.Aggregate(SubtotalLevel.None, static (total, l) => total | l);
         if (query.Subtotal.AggrType != AggregationType.None)
             level |= query.Subtotal.AggrInterval;
         if (query.Subtotal.EquivalentDate.HasValue)

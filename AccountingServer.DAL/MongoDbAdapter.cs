@@ -275,7 +275,7 @@ internal class MongoDbAdapter : IDbAdapter
         var chk = GetChk(query);
         var srt = Builders<Voucher>.Sort.Ascending("date");
         return m_Vouchers.Aggregate().Match(preF).Sort(srt).Project(ProjectDetails).Unwind("detail").Match(chk)
-            .Project(ProjectDetail).ToAsyncEnumerable().Select(b => BsonSerializer.Deserialize<VoucherDetail>(b));
+            .Project(ProjectDetail).ToAsyncEnumerable().Select(static b => BsonSerializer.Deserialize<VoucherDetail>(b));
     }
 
     /// <inheritdoc />
@@ -305,7 +305,7 @@ internal class MongoDbAdapter : IDbAdapter
         var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Group(grp);
         if (limit > 0)
             fluent = fluent.Sort(new SortDefinitionBuilder<BsonDocument>().Descending("count")).Limit(limit);
-        return fluent.ToAsyncEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
+        return fluent.ToAsyncEnumerable().Select(static b => BsonSerializer.Deserialize<Balance>(b));
     }
 
     /// <inheritdoc />
@@ -354,11 +354,10 @@ internal class MongoDbAdapter : IDbAdapter
             fluent = fluent.Match(FilterNonZero);
         if (limit > 0)
             fluent = fluent.Sort(new SortDefinitionBuilder<BsonDocument>().Descending("count")).Limit(limit);
-        return fluent.ToAsyncEnumerable().Select(b => BsonSerializer.Deserialize<Balance>(b));
+        return fluent.ToAsyncEnumerable().Select(static b => BsonSerializer.Deserialize<Balance>(b));
     }
 
-    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
-        IQueryCompounded<IVoucherQueryAtom> query)
+    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => m_Vouchers.Aggregate().Match(query.Accept(new MongoDbNativeVoucher()))
             .Unwind("detail").Group(new BsonDocument
                 {
@@ -380,7 +379,7 @@ internal class MongoDbAdapter : IDbAdapter
                 })
             .Lookup("voucher", "_id.id", "_id", "voucher")
             .Sort(new SortDefinitionBuilder<BsonDocument>().Ascending("voucher.date"))
-            .ToAsyncEnumerable().Select(b =>
+            .ToAsyncEnumerable().Select(static b =>
                 {
                     var bsonReader = new BsonDocumentReader(b);
                     string read = null;
@@ -413,14 +412,14 @@ internal class MongoDbAdapter : IDbAdapter
                 })
             .Match(new FilterDefinitionBuilder<BsonDocument>().Gt("count", 1))
             .Sort(new SortDefinitionBuilder<BsonDocument>().Ascending("_id.date"))
-            .ToAsyncEnumerable().Select(b =>
+            .ToAsyncEnumerable().Select(static b =>
                 {
                     var bsonReader = new BsonDocumentReader(b);
                     string read = null;
                     bsonReader.ReadStartDocument();
                     var v = bsonReader.ReadDocument("_id", ref read, new VoucherSerializer().Deserialize);
                     bsonReader.ReadInt32("count", ref read);
-                    var ids = bsonReader.ReadArray("ids", ref read, bR => bR.ReadObjectId().ToString());
+                    var ids = bsonReader.ReadArray("ids", ref read, static bR => bR.ReadObjectId().ToString());
                     bsonReader.ReadEndDocument();
                     return (v, ids);
                 });

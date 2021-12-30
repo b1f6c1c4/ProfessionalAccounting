@@ -159,7 +159,7 @@ public class ParseTest
     {
         ParseHelper.Eof(null, null);
         ParseHelper.Eof(null, "");
-        Assert.Throws<ArgumentException>(() => ParseHelper.Eof(null, "asdf"));
+        Assert.Throws<ArgumentException>(static () => ParseHelper.Eof(null, "asdf"));
     }
 
     [Fact]

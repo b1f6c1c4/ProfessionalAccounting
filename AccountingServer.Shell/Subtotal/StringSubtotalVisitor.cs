@@ -82,18 +82,18 @@ internal abstract class StringSubtotalVisitor : IClientDependable, ISubtotalVisi
                 .GetStringComparer(CompareOptions.StringSort);
             items = (m_Par.Levels[Depth] & SubtotalLevel.Subtotal) switch
                 {
-                    SubtotalLevel.Title => sub.Items.Cast<ISubtotalTitle>().OrderBy(s => s.Title),
-                    SubtotalLevel.SubTitle => sub.Items.Cast<ISubtotalSubTitle>().OrderBy(s => s.SubTitle),
-                    SubtotalLevel.Content => sub.Items.Cast<ISubtotalContent>().OrderBy(s => s.Content, comparer),
-                    SubtotalLevel.Remark => sub.Items.Cast<ISubtotalRemark>().OrderBy(s => s.Remark, comparer),
+                    SubtotalLevel.Title => sub.Items.Cast<ISubtotalTitle>().OrderBy(static s => s.Title),
+                    SubtotalLevel.SubTitle => sub.Items.Cast<ISubtotalSubTitle>().OrderBy(static s => s.SubTitle),
+                    SubtotalLevel.Content => sub.Items.Cast<ISubtotalContent>().OrderBy(static s => s.Content, comparer),
+                    SubtotalLevel.Remark => sub.Items.Cast<ISubtotalRemark>().OrderBy(static s => s.Remark, comparer),
                     SubtotalLevel.User => sub.Items.Cast<ISubtotalUser>()
                         .OrderBy(s => s.User == Client.User ? null : s.User),
                     SubtotalLevel.Currency => sub.Items.Cast<ISubtotalCurrency>()
-                        .OrderBy(s => s.Currency == BaseCurrency.Now ? null : s.Currency),
-                    SubtotalLevel.Day => sub.Items.Cast<ISubtotalDate>().OrderBy(s => s.Date),
-                    SubtotalLevel.Week => sub.Items.Cast<ISubtotalDate>().OrderBy(s => s.Date),
-                    SubtotalLevel.Month => sub.Items.Cast<ISubtotalDate>().OrderBy(s => s.Date),
-                    SubtotalLevel.Year => sub.Items.Cast<ISubtotalDate>().OrderBy(s => s.Date),
+                        .OrderBy(static s => s.Currency == BaseCurrency.Now ? null : s.Currency),
+                    SubtotalLevel.Day => sub.Items.Cast<ISubtotalDate>().OrderBy(static s => s.Date),
+                    SubtotalLevel.Week => sub.Items.Cast<ISubtotalDate>().OrderBy(static s => s.Date),
+                    SubtotalLevel.Month => sub.Items.Cast<ISubtotalDate>().OrderBy(static s => s.Date),
+                    SubtotalLevel.Year => sub.Items.Cast<ISubtotalDate>().OrderBy(static s => s.Date),
                     _ => throw new ArgumentOutOfRangeException(),
                 };
         }

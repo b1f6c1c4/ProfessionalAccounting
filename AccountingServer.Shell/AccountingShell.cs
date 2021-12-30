@@ -51,35 +51,35 @@ internal class AccountingShell : IShellComponent
         var type = ExprType.None;
         ISubtotalStringify visitor;
 
-        if (ParsingF.Token(ref expr, false, t => t == "unsafe") != null)
+        if (ParsingF.Token(ref expr, false, static t => t == "unsafe") != null)
             type |= ExprType.Unsafe;
 
-        if (ParsingF.Token(ref expr, false, t => t == "json") != null)
+        if (ParsingF.Token(ref expr, false, static t => t == "json") != null)
         {
             type |= ExprType.GroupedQueries;
             visitor = new JsonSubtotal();
         }
-        else if (ParsingF.Token(ref expr, false, t => t == "Rps") != null)
+        else if (ParsingF.Token(ref expr, false, static t => t == "Rps") != null)
         {
             type |= ExprType.GroupedQueries;
             visitor = new PreciseSubtotalPre();
         }
-        else if (ParsingF.Token(ref expr, false, t => t == "rps") != null)
+        else if (ParsingF.Token(ref expr, false, static t => t == "rps") != null)
         {
             type |= ExprType.GroupedQueries;
             visitor = new PreciseSubtotalPre(false);
         }
-        else if (ParsingF.Token(ref expr, false, t => t == "raw") != null)
+        else if (ParsingF.Token(ref expr, false, static t => t == "raw") != null)
         {
             type |= ExprType.GroupedQueries | ExprType.DetailQuery;
             visitor = new RawSubtotal();
         }
-        else if (ParsingF.Token(ref expr, false, t => t == "sraw") != null)
+        else if (ParsingF.Token(ref expr, false, static t => t == "sraw") != null)
         {
             type |= ExprType.GroupedQueries | ExprType.DetailRQuery;
             visitor = new RawSubtotal(true);
         }
-        else if (ParsingF.Token(ref expr, false, t => t == "fancy") != null)
+        else if (ParsingF.Token(ref expr, false, static t => t == "fancy") != null)
         {
             type |= ExprType.FancyQuery;
             visitor = null;

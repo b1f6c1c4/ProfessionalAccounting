@@ -72,12 +72,10 @@ public class Accountant : IHistoricalExchange
     public ValueTask<ISubtotalResult> SelectVouchersGroupedAsync(IVoucherGroupedQuery query)
         => m_Db.SelectVouchersGrouped(query, Limit);
 
-    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchersAsync(
-        IQueryCompounded<IVoucherQueryAtom> query)
+    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchersAsync(IQueryCompounded<IVoucherQueryAtom> query)
         => m_Db.SelectUnbalancedVouchers(query);
 
-    public IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchersAsync(
-        IQueryCompounded<IVoucherQueryAtom> query)
+    public IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchersAsync(IQueryCompounded<IVoucherQueryAtom> query)
         => m_Db.SelectDuplicatedVouchers(query);
 
     public ValueTask<bool> DeleteVoucherAsync(string id)
@@ -146,7 +144,7 @@ public class Accountant : IHistoricalExchange
     public ValueTask<bool> UpsertAsync(Amortization entity)
         => m_Db.Upsert(entity);
 
-    public IEnumerable<Voucher> RegisterVouchers(Amortization amort, DateFilter rng,
+    public IAsyncEnumerable<Voucher> RegisterVouchers(Amortization amort, DateFilter rng,
         IQueryCompounded<IVoucherQueryAtom> query)
         => m_AmortAccountant.RegisterVouchers(amort, rng, query);
 

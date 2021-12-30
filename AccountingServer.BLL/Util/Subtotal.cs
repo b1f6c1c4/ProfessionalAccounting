@@ -195,14 +195,14 @@ public class SubtotalBuilder
             sub is not ISubtotalRoot)
             return null;
 
-        sub.Fund = sub.TheItems.Sum(isr => isr.Fund);
+        sub.Fund = sub.TheItems.Sum(static isr => isr.Fund);
         return sub;
     }
 
     private async ValueTask BuildChildren(SubtotalResult sub, IAsyncEnumerable<Balance> raw, SubtotalLevel level)
     {
         ValueTask<List<ISubtotalResult>> Invoke<T>(SubtotalResultFactory<T> f) =>
-            raw.GroupBy(f.Selector).SelectAwait(g => Build(f.Create(g), g)).Where(g => g != null).ToListAsync();
+            raw.GroupBy(f.Selector).SelectAwait(g => Build(f.Create(g), g)).Where(static g => g != null).ToListAsync();
 
         m_Flags = level & SubtotalLevel.Flags;
         sub.TheItems = await ((level & SubtotalLevel.Subtotal) switch
@@ -234,7 +234,7 @@ public class SubtotalBuilder
 
                 return sub;
             case AggregationType.ChangedDay:
-                sub.TheItems = await raw.GroupBy(b => b.Date).OrderBy(grp => grp.Key)
+                sub.TheItems = await raw.GroupBy(static b => b.Date).OrderBy(static grp => grp.Key)
                     .SelectAwait(
                         async grp => new SubtotalDate(grp.Key, m_Par.AggrInterval)
                             {
@@ -270,7 +270,7 @@ public class SubtotalBuilder
                 var forcedNull =
                     (m_Par.EveryDayRange.StartDate.HasValue || m_Par.EveryDayRange.NullOnly) &&
                     m_Par.EveryDayRange.Nullable;
-                foreach (var grp in raw.GroupBy(b => b.Date).OrderBy(grp => grp.Key).ToEnumerable())
+                foreach (var grp in raw.GroupBy(static b => b.Date).OrderBy(static grp => grp.Key).ToEnumerable())
                 {
                     if (flag &&
                         grp.Key != null &&
@@ -343,5 +343,5 @@ public class SubtotalBuilder
         ? raw.SumAwaitAsync(
             async b => b.Fund
                 * await m_Exchange.Query(m_Par.EquivalentDate.Value, b.Currency, m_Par.EquivalentCurrency))
-        : raw.SumAsync(b => b.Fund);
+        : raw.SumAsync(static b => b.Fund);
 }

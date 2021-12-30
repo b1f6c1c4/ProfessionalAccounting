@@ -64,7 +64,7 @@ public class Virtualizer : IDbAdapter, IAsyncDisposable
         }
     }
 
-    public int CachedVouchers => ReadLocked(_ => _.Count);
+    public int CachedVouchers => ReadLocked(static _ => _.Count);
 
     public async ValueTask DisposeAsync()
     {
@@ -90,7 +90,7 @@ public class Virtualizer : IDbAdapter, IAsyncDisposable
 
     public IAsyncEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
         => Db.SelectVoucherDetails(query).Concat(ReadLocked(_ => _.Where(v => v.IsMatch(query.VoucherQuery)))
-            .SelectMany(v => v.Details).Where(d => d.IsMatch(query.ActualDetailFilter())).ToAsyncEnumerable());
+            .SelectMany(static v => v.Details).Where(d => d.IsMatch(query.ActualDetailFilter())).ToAsyncEnumerable());
 
     private class BalanceComparer : IEqualityComparer<Balance>
     {
@@ -109,12 +109,11 @@ public class Virtualizer : IDbAdapter, IAsyncDisposable
     }
 
     private static IAsyncEnumerable<Balance> Merge(IAsyncEnumerable<Balance> balances)
-        => balances.GroupByAwait(b => new(b), b => new ValueTask<double>(b.Fund),
-            async (b, fs) =>
-                {
-                    b.Fund = await fs.SumAsync(f => f);
-                    return b;
-                }, new BalanceComparer());
+        => balances.GroupByAwait(static b => new(b), static b => new ValueTask<double>(b.Fund), static async (b, fs) =>
+            {
+                b.Fund = await fs.SumAsync(static f => f);
+                return b;
+            }, new BalanceComparer());
 
     private static DateTime? ProjectDate(DateTime? dt, SubtotalLevel level)
     {
@@ -158,7 +157,7 @@ public class Virtualizer : IDbAdapter, IAsyncDisposable
         var level = query.Preprocess();
         var fluent = Merge(Db.SelectVoucherDetailsGrouped(query).Concat(
             ReadLocked(_ => _.Where(v => v.IsMatch(query.VoucherEmitQuery.VoucherQuery)))
-                .SelectMany(v => v.Details.Select(d => new VoucherDetailR(v, d)))
+                .SelectMany(static v => v.Details.Select(d => new VoucherDetailR(v, d)))
                 .Where(d => d.IsMatch(query.VoucherEmitQuery.ActualDetailFilter()))
                 .Select(d => new Balance
                     {
@@ -171,11 +170,10 @@ public class Virtualizer : IDbAdapter, IAsyncDisposable
                         Remark = level.HasFlag(SubtotalLevel.Remark) ? d.Remark : null,
                         Fund = query.Subtotal.GatherType == GatheringType.Count ? 1 : d.Fund!.Value,
                     }).ToAsyncEnumerable()));
-        return query.ShouldAvoidZero() ? fluent.Where(b => !b.Fund.IsZero()) : fluent;
+        return query.ShouldAvoidZero() ? fluent.Where(static b => !b.Fund.IsZero()) : fluent;
     }
 
-    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
-        IQueryCompounded<IVoucherQueryAtom> query)
+    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => throw new NotSupportedException();
 
     public IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)

@@ -45,7 +45,7 @@ public static class ClientHelper
 {
     public static T Assign<T>(this T value, Client client) where T : IClientDependable
     {
-        if (value != null)
+        if (value is { })
             value.Client = client;
         return value;
     }

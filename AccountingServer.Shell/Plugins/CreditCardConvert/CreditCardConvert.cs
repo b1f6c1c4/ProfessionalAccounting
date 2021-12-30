@@ -97,7 +97,7 @@ internal class CreditCardConvert : PluginBase
             }
 
             trans.AddRange(
-                ds.Where(d => d.Fund!.Value < 0)
+                ds.Where(static d => d.Fund!.Value < 0)
                     .Select(
                         d => new Trans { Date = voucher.Date, RawCurrency = d.Currency, RawFund = -d.Fund.Value }));
         }
@@ -107,8 +107,8 @@ internal class CreditCardConvert : PluginBase
                            $"{{T224101 {content.Quotation('\'')}}}*{{T660300}}*{{T224101 {content.Quotation('\'')} +T3999+T660300 A {rng.AsDateRange()}}}"))
         {
             // Assume proper ordering here
-            var d0 = voucher.Details.Single(d => d.Title == 2241);
-            var d1 = voucher.Details.Single(d => d.Title == 6603);
+            var d0 = voucher.Details.Single(static d => d.Title == 2241);
+            var d1 = voucher.Details.Single(static d => d.Title == 6603);
             if (d0.Title != 2241 ||
                 d0.SubTitle != 01 ||
                 d0.Content != content)
@@ -163,7 +163,7 @@ internal class CreditCardConvert : PluginBase
 
         yield return "===========================================================";
 
-        foreach (var tran in trans.Concat(rebates).OrderByDescending(t => t.Date))
+        foreach (var tran in trans.Concat(rebates).OrderByDescending(static t => t.Date))
         {
             sb.Append(tran.Date.AsDate());
             sb.Append($" @{tran.RawCurrency} {tran.RawFund.AsCurrency().CPadLeft(15)}");
