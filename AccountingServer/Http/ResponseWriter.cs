@@ -37,28 +37,30 @@ internal static class ResponseWriter
             if (!response.Header.ContainsKey("Content-Length"))
             {
                 response.Header["Transfer-Encoding"] = "chunked";
-                await SendHeader(stream, response);
+                await SendHeader(stream, response.Header);
                 await SendContent(stream, response.ResponseStream);
             }
             else
             {
-                await SendHeader(stream, response);
+                await SendHeader(stream, response.Header);
                 await SendContent(stream, response.ResponseStream, Convert.ToInt64(response.Header["Content-Length"]));
             }
         }
         else if (response.ResponseAsyncEnumerable != null)
         {
             response.Header["Transfer-Encoding"] = "chunked";
-            await SendHeader(stream, response);
-            await SendContent(stream, response.ResponseAsyncEnumerable);
+            response.Header["Trailer"] = "X-Status";
+            await SendHeader(stream, response.Header);
+            var good = await SendContent(stream, response.ResponseAsyncEnumerable);
+            await SendHeader(stream, new() { { "X-Status", good ? "200" : "500" } });
         }
         else
-            await SendHeader(stream, response);
+            await SendHeader(stream, response.Header);
     }
 
-    private static async Task SendHeader(Stream stream, HttpResponse response)
+    private static async Task SendHeader(Stream stream, Dictionary<string, string> header)
     {
-        foreach (var (key, value) in response.Header)
+        foreach (var (key, value) in header)
             await stream.WriteLineAsync($"{key}: {value}");
         await stream.WriteLineAsync();
     }
@@ -68,9 +70,9 @@ internal static class ResponseWriter
         var buff = new byte[4096];
         while (true)
         {
-            var sz = await src.ReadAsync(buff, 0, 4096);
+            var sz = await src.ReadAsync(buff.AsMemory(0, 4096));
             await stream.WriteLineAsync($"{sz:x}");
-            await stream.WriteAsync(buff, 0, sz);
+            await stream.WriteAsync(buff.AsMemory(0, sz));
             await stream.WriteLineAsync();
             if (sz == 0)
                 break;
@@ -87,27 +89,40 @@ internal static class ResponseWriter
         while (rest > 0)
         {
             var sz = rest < 4096
-                ? await src.ReadAsync(buff, 0, (int)rest)
-                : await src.ReadAsync(buff, 0, 4096);
-            await stream.WriteAsync(buff, 0, sz);
+                ? await src.ReadAsync(buff.AsMemory(0, (int)rest))
+                : await src.ReadAsync(buff.AsMemory(0, 4096));
+            await stream.WriteAsync(buff.AsMemory(0, sz));
             rest -= sz;
         }
     }
 
-    private static async Task SendContent(Stream stream, IAsyncEnumerable<byte[]> iae)
+    private static async Task<bool> SendContent(Stream stream, IAsyncEnumerable<byte[]> iae)
     {
-        await foreach (var s in iae)
+        try
         {
-            if (s.Length == 0)
-                continue;
+            await foreach (var s in iae)
+            {
+                if (s.Length == 0)
+                    continue;
 
+                await stream.WriteLineAsync($"{s.Length:x}");
+                await stream.WriteAsync(s);
+                await stream.WriteLineAsync();
+                await stream.FlushAsync();
+            }
+
+            await stream.WriteLineAsync($"{0:x}");
+            return true;
+        }
+        catch (Exception e)
+        {
+            var s = e.ToString().GetBytes();
             await stream.WriteLineAsync($"{s.Length:x}");
             await stream.WriteAsync(s);
             await stream.WriteLineAsync();
             await stream.FlushAsync();
+            await stream.WriteLineAsync($"{0:x}");
+            return false;
         }
-
-        await stream.WriteLineAsync($"{0:x}");
-        await stream.WriteLineAsync();
     }
 }

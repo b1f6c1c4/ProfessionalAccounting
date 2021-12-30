@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.DAL;
@@ -193,19 +194,10 @@ public class DbSession : IHistoricalExchange
         => Db.Get().DeleteVouchers(query);
 
     public ValueTask<bool> Upsert(Voucher entity)
-    {
-        Regularize(entity);
+        => Db.Get().Upsert(Regularize(entity));
 
-        return Db.Get().Upsert(entity);
-    }
-
-    public ValueTask<long> Upsert(IReadOnlyCollection<Voucher> entities)
-    {
-        foreach (var entity in entities)
-            Regularize(entity);
-
-        return Db.Get().Upsert(entities);
-    }
+    public ValueTask<long> Upsert(IEnumerable<Voucher> entities)
+        => Db.Get().Upsert(entities.Select(Regularize));
 
     public static double? Regularize(double? fund)
     {
@@ -219,18 +211,19 @@ public class DbSession : IHistoricalExchange
         return Math.Abs(t - c) < coercionTolerance / 10 ? t : fund;
     }
 
-    public static void Regularize(Voucher entity)
+    public static Voucher Regularize(Voucher entity)
     {
         entity.Details ??= new();
 
         foreach (var d in entity.Details)
         {
-            d.User ??= "anonymous";
+            _ = d.User ?? throw new ApplicationException("User must be specified before passing to DbSession");
             d.Currency = d.Currency.ToUpperInvariant();
             d.Fund = Regularize(d.Fund);
         }
 
         entity.Details.Sort(TheComparison);
+        return entity;
     }
 
     public ValueTask<Asset> SelectAsset(Guid id)

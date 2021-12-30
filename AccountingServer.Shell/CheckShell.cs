@@ -58,10 +58,9 @@ internal class CheckShell : IShellComponent
         await foreach (var (voucher, user, curr, v) in
                        session.Accountant.SelectUnbalancedVouchersAsync(VoucherQueryUnconstrained.Instance))
         {
-            if (old == null)
-                old = voucher;
-            else if (voucher.ID != old.ID)
+            if (old != null && voucher.ID != old.ID)
                 yield return session.Serializer.PresentVoucher(old).Wrap();
+            old = voucher;
 
             yield return $"/* U{user.AsUser()} @{curr}: Debit - Credit = {v:R} */";
         }

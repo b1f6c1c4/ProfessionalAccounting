@@ -47,9 +47,9 @@ const fancyxhr = (cb) => {
       }
     }
   };
-  xhr.addEventListener('progress', function (e) {
+  xhr.onprogress = function (e) {
     cb(this.responseText, undefined, false);
-  });
+  };
   return send(xhr);
 };
 

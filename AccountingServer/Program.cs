@@ -62,7 +62,7 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
         user = request.Header["x-user"];
     else
         return new() { ResponseCode = 400 };
-    if (user == "anonymous")
+    if (string.IsNullOrEmpty(user))
         return new() { ResponseCode = 401 };
 
     if (!request.Header.ContainsKey("X-ClientDateTime".ToLowerInvariant()) ||

@@ -86,11 +86,17 @@ public class Accountant : IHistoricalExchange
     public ValueTask<long> DeleteVouchersAsync(IQueryCompounded<IVoucherQueryAtom> query)
         => m_Db.DeleteVouchers(query);
 
-    public ValueTask<bool> UpsertAsync(Voucher entity)
-        => m_Db.Upsert(entity);
+    private Voucher Regularize(Voucher entity)
+    {
+        entity.Details?.ForEach(d => d.User ??= Client.User);
+        return entity;
+    }
 
-    public ValueTask<long> UpsertAsync(IReadOnlyCollection<Voucher> entities)
-        => m_Db.Upsert(entities);
+    public ValueTask<bool> UpsertAsync(Voucher entity)
+        => m_Db.Upsert(Regularize(entity));
+
+    public ValueTask<long> UpsertAsync(IEnumerable<Voucher> entities)
+        => m_Db.Upsert(entities.Select(Regularize));
 
     #endregion
 

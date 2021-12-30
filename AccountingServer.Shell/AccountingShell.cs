@@ -90,6 +90,8 @@ internal class AccountingShell : IShellComponent
             visitor = new RichSubtotalPre();
         }
 
+        (visitor as IClientDependable).Assign(client);
+
         if (type.HasFlag(ExprType.GroupedQuery))
             try
             {

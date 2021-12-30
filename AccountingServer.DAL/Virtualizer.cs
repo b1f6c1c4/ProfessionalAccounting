@@ -68,21 +68,18 @@ public class Virtualizer : IDbAdapter, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        m_Lock.EnterWriteLock();
-        try
-        {
-            if (m_Vouchers.Count == 0)
-                return;
+        var a = WriteLocked(_ =>
+            {
+                var a = m_Vouchers.ToArray();
+                _.Clear();
+                return a;
+            });
 
-            if (await Db.Upsert(m_Vouchers) != m_Vouchers.Count)
-                throw new ApplicationException("Cannot write-back voucher cache");
+        if (a.Length == 0)
+            return;
 
-            m_Vouchers.Clear();
-        }
-        finally
-        {
-            m_Lock.ExitWriteLock();
-        }
+        if (await Db.Upsert(a) != a.Length)
+            throw new ApplicationException("Cannot write-back voucher cache");
     }
 
     public ValueTask<Voucher> SelectVoucher(string id)
