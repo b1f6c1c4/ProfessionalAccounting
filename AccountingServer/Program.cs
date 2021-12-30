@@ -91,7 +91,7 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
                 }
             case "/safe":
                 {
-                    var expr = request.Parameters["q"];
+                    var expr = request.Parameters?["q"];
                     var res = facade.SafeExecute(session, expr);
                     var response = GenerateHttpResponse(res, "text/plain; charset=utf-8");
                     response.Header["Cache-Control"] = "public, max-age=30";

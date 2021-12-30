@@ -82,6 +82,8 @@ public class Facade
     {
         switch (expr)
         {
+            case null:
+                return HelloWorld();
             case "T":
                 return ListTitles().ToAsyncEnumerable();
             case "?":
@@ -106,6 +108,8 @@ public class Facade
     {
         switch (expr)
         {
+            case null:
+                return HelloWorld();
             case "T":
                 return ListTitles().ToAsyncEnumerable();
             case "?":
@@ -113,6 +117,13 @@ public class Facade
         }
 
         return m_AccountingShell.Execute(expr, session);
+    }
+
+    private static async IAsyncEnumerable<string> HelloWorld()
+    {
+        yield return "Hello ";
+        await Task.Delay(1000);
+        yield return "World!";
     }
 
     #region Miscellaneous
