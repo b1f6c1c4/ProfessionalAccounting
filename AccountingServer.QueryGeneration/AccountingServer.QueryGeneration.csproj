@@ -1,40 +1,40 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
-    <Configurations>Gen</Configurations>
-    <Platforms>AnyCPU</Platforms>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <Configurations>Gen</Configurations>
+        <Platforms>AnyCPU</Platforms>
+    </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Gen' ">
-    <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
-    <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
-  </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Gen' ">
+        <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
+        <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Antlr4.CodeGenerator" Version="4.6.6">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Antlr4.Runtime" Version="4.6.6" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Antlr4.CodeGenerator" Version="4.6.6">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Antlr4.Runtime" Version="4.6.6"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Antlr4 Include="Query.g4">
-      <Generator>MSBuild:Compile</Generator>
-      <Listener>False</Listener>
-      <Visitor>False</Visitor>
-    </Antlr4>
-    <Antlr4 Include="Subtotal.g4">
-      <Generator>MSBuild:Compile</Generator>
-      <Listener>False</Listener>
-      <Visitor>False</Visitor>
-    </Antlr4>
-  </ItemGroup>
+    <ItemGroup>
+        <Antlr4 Include="Query.g4">
+            <Generator>MSBuild:Compile</Generator>
+            <Listener>False</Listener>
+            <Visitor>False</Visitor>
+        </Antlr4>
+        <Antlr4 Include="Subtotal.g4">
+            <Generator>MSBuild:Compile</Generator>
+            <Listener>False</Listener>
+            <Visitor>False</Visitor>
+        </Antlr4>
+    </ItemGroup>
 
-  <PropertyGroup>
-    <Antlr4UseCSharpGenerator>True</Antlr4UseCSharpGenerator>
-  </PropertyGroup>
+    <PropertyGroup>
+        <Antlr4UseCSharpGenerator>True</Antlr4UseCSharpGenerator>
+    </PropertyGroup>
 
 </Project>

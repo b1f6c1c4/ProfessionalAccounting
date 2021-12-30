@@ -19,9 +19,9 @@
 using System;
 using System.IO;
 using System.Reflection;
+using AccountingServer.QueryGeneration;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
-using AccountingServer.QueryGeneration;
 
 Type GetLexer(string kind)
     => kind switch

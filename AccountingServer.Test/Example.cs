@@ -111,10 +111,7 @@ internal class AssetDataProvider : IEnumerable<object[]>
                 {
                     new AcquisitionItem
                         {
-                            Date = "2017-01-01".ToDateTime(),
-                            Value = 5553,
-                            OrigValue = 5553,
-                            Remark = "\\\t@#$%^&*(%",
+                            Date = "2017-01-01".ToDateTime(), Value = 5553, OrigValue = 5553, Remark = "\\\t@#$%^&*(%",
                         },
                     new DepreciateItem
                         {
@@ -190,10 +187,7 @@ internal class AmortDataProvider : IEnumerable<object[]>
                         },
                     new()
                         {
-                            Date = "2011-03-04".ToDateTime(),
-                            Amount = 974,
-                            Value = 33344 - 123 - 974,
-                            Remark = "*(%",
+                            Date = "2011-03-04".ToDateTime(), Amount = 974, Value = 33344 - 123 - 974, Remark = "*(%",
                         },
                 },
         };

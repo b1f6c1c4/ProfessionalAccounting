@@ -1,18 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Antlr4.Runtime" Version="4.6.6" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Antlr4.Runtime" Version="4.6.6"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\AccountingServer.DAL\AccountingServer.DAL.csproj" />
-    <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\AccountingServer.DAL\AccountingServer.DAL.csproj"/>
+        <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj"/>
+    </ItemGroup>
 
 </Project>

@@ -1,23 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
-    <OutputType>Exe</OutputType>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj" />
-    <ProjectReference Include="..\AccountingServer.Shell\AccountingServer.Shell.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj"/>
+        <ProjectReference Include="..\AccountingServer.Shell\AccountingServer.Shell.csproj"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Dockerfile">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update=".dockerignore">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+    <ItemGroup>
+        <None Update="Dockerfile">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update=".dockerignore">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 
 </Project>
