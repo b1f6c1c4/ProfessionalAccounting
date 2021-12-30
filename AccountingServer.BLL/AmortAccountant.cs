@@ -118,7 +118,6 @@ internal class AmortAccountant : DistributedAccountant
         await foreach (var voucher in Db.SelectVouchers(new IntersectQueries<IVoucherQueryAtom>(query, queryT))
                            .Where(static voucher => voucher.Remark != Amortization.IgnoranceMark)
                            .Where(voucher => amort.Schedule.All(item => item.VoucherID != voucher.ID)))
-        {
             if (voucher.Details.Zip(amort.Template.Details, static (d1, d2) => d1.IsMatch(d2)).Contains(false))
                 yield return voucher;
             else
@@ -133,7 +132,6 @@ internal class AmortAccountant : DistributedAccountant
                 else
                     yield return voucher;
             }
-        }
     }
 
     /// <summary>
@@ -311,9 +309,10 @@ internal class AmortAccountant : DistributedAccountant
         {
             VoucherFilter = amort.Template;
             DetailFilter = amort.Template.Details.Aggregate(
-                (IQueryCompounded<IDetailQueryAtom>)DetailQueryUnconstrained.Instance, static (query, filter) => new IntersectQueries<IDetailQueryAtom>(
-                    query,
-                    new RegisteringDetailQuery(filter)));
+                (IQueryCompounded<IDetailQueryAtom>)DetailQueryUnconstrained.Instance, static (query, filter)
+                    => new IntersectQueries<IDetailQueryAtom>(
+                        query,
+                        new RegisteringDetailQuery(filter)));
         }
 
         public bool ForAll => true;

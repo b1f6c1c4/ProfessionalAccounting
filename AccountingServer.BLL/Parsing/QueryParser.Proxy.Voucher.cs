@@ -27,6 +27,8 @@ internal partial class QueryParser
 {
     public partial class VoucherQueryContext : IClientDependable, IVoucherQueryAtom
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public bool ForAll => MatchAllMark() != null;
 
@@ -69,12 +71,12 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
-
-        public Client Client { private get; set; }
     }
 
     public partial class VouchersContext : IClientDependable, IQueryAry<IVoucherQueryAtom>
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public OperatorType Operator => OperatorType.None;
 
@@ -90,12 +92,12 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
-
-        public Client Client { private get; set; }
     }
 
     public partial class Vouchers2Context : IClientDependable, IQueryAry<IVoucherQueryAtom>
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public OperatorType Operator
         {
@@ -143,12 +145,12 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
-
-        public Client Client { private get; set; }
     }
 
     public partial class Vouchers1Context : IClientDependable, IQueryAry<IVoucherQueryAtom>
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public OperatorType Operator => Op == null ? OperatorType.None : OperatorType.Intersect;
 
@@ -165,12 +167,12 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
-
-        public Client Client { private get; set; }
     }
 
     public partial class Vouchers0Context : IClientDependable, IQueryAry<IVoucherQueryAtom>
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public OperatorType Operator => OperatorType.None;
 
@@ -186,28 +188,26 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
-
-        public Client Client { private get; set; }
     }
 
     public partial class EmitContext : IClientDependable, IEmit
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public IQueryCompounded<IDetailQueryAtom> DetailFilter
             => details().Assign(Client);
-
-        public Client Client { private get; set; }
     }
 
     public partial class VoucherDetailQueryContext : IClientDependable, IVoucherDetailQuery
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public IQueryCompounded<IVoucherQueryAtom> VoucherQuery
             => (IQueryCompounded<IVoucherQueryAtom>)voucherQuery().Assign(Client) ?? vouchers().Assign(Client);
 
         /// <inheritdoc />
         public IEmit DetailEmitFilter => emit().Assign(Client);
-
-        public Client Client { private get; set; }
     }
 }

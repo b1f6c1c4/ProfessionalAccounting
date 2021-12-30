@@ -32,16 +32,16 @@ public class SubtotalTest
 {
     private readonly Client m_Client = new() { User = "b1", Today = DateTime.UtcNow.Date };
 
-    public SubtotalTest()
-        => BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
-            new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
-
     private readonly IHistoricalExchange m_Exchange = new MockExchange
         {
             { new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "JPY", 456 },
             { new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "USD", 789 },
             { new(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc), "CNY", 1 },
         };
+
+    public SubtotalTest()
+        => BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
+            new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
     [Theory]
     [InlineData("", "101110")]

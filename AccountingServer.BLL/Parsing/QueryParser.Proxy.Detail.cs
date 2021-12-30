@@ -58,6 +58,12 @@ internal partial class QueryParser
 
     public partial class DetailQueryContext : IClientDependable, IDetailQueryAtom
     {
+        private string ContentText => token()?.GetPureText();
+
+        private string RemarkText => DoubleQuotedString()?.GetText().Dequotation();
+
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public TitleKind? Kind
             => TitleKind() switch
@@ -65,29 +71,6 @@ internal partial class QueryParser
                     null => null,
                     var x => (TitleKind?)Enum.Parse(typeof(TitleKind), x.GetText()),
                 };
-
-        private string ContentText => token()?.GetPureText();
-
-        private string RemarkText => DoubleQuotedString()?.GetText().Dequotation();
-
-        private (bool, bool) DecideEtc()
-        {
-            switch (Etc().Length)
-            {
-                case 0:
-                    return (false, false);
-                case 2:
-                    return (true, true);
-            }
-
-            if (ContentText == null)
-                return (false, true);
-            if (RemarkText == null)
-                return (true, false);
-            return Etc(0).SourceInterval.StartsBeforeDisjoint(DoubleQuotedString().SourceInterval)
-                ? (true, false)
-                : (false, true);
-        }
 
         /// <inheritdoc />
         public VoucherDetail Filter
@@ -145,11 +128,30 @@ internal partial class QueryParser
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
 
-        public Client Client { private get; set; }
+        private (bool, bool) DecideEtc()
+        {
+            switch (Etc().Length)
+            {
+                case 0:
+                    return (false, false);
+                case 2:
+                    return (true, true);
+            }
+
+            if (ContentText == null)
+                return (false, true);
+            if (RemarkText == null)
+                return (true, false);
+            return Etc(0).SourceInterval.StartsBeforeDisjoint(DoubleQuotedString().SourceInterval)
+                ? (true, false)
+                : (false, true);
+        }
     }
 
     public partial class DetailsContext : IClientDependable, IQueryAry<IDetailQueryAtom>
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public OperatorType Operator
             => Op switch
@@ -191,12 +193,12 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
-
-        public Client Client { private get; set; }
     }
 
     public partial class Details1Context : IClientDependable, IQueryAry<IDetailQueryAtom>
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public OperatorType Operator => Op == null ? OperatorType.None : OperatorType.Intersect;
 
@@ -213,12 +215,12 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
-
-        public Client Client { private get; set; }
     }
 
     public partial class Details0Context : IClientDependable, IQueryAry<IDetailQueryAtom>
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public OperatorType Operator => OperatorType.None;
 
@@ -234,8 +236,6 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
-
-        public Client Client { private get; set; }
     }
 
     public partial class TokenContext

@@ -34,28 +34,20 @@ public class DbSession : IHistoricalExchange
 {
     public DbSession(string uri = null, string db = null) => Db = new(Facade.Create(uri, db));
 
+    /// <summary>
+    ///     数据库访问
+    /// </summary>
+    public AtomicReference<IDbAdapter> Db { private get; set; }
+
+    /// <inheritdoc />
+    public ValueTask<double> Query(DateTime? date, string from, string to)
+        => LookupExchange(date ?? DateTime.UtcNow, from, to);
+
     public VirtualizeLock Virtualize()
     {
         Db.Set(Facade.Virtualize(Db.Get()));
         return new(this);
     }
-
-    public class VirtualizeLock : IAsyncDisposable
-    {
-        public VirtualizeLock(DbSession db) => Db = db;
-
-        private DbSession Db { get; }
-
-        public int CachedVouchers => (Db.Db.Get() as Virtualizer)!.CachedVouchers;
-
-        public async ValueTask DisposeAsync()
-            => Db.Db.Set(await Facade.UnVirtualize(Db.Db.Get()));
-    }
-
-    /// <summary>
-    ///     数据库访问
-    /// </summary>
-    public AtomicReference<IDbAdapter> Db { private get; set; }
 
     /// <summary>
     ///     查询汇率
@@ -102,10 +94,6 @@ public class DbSession : IHistoricalExchange
         await Db.Get().Upsert(new ExchangeRecord { Time = date, From = from, To = to, Value = value });
         return value;
     }
-
-    /// <inheritdoc />
-    public ValueTask<double> Query(DateTime? date, string from, string to)
-        => LookupExchange(date ?? DateTime.UtcNow, from, to);
 
     private static int Compare<T>(T? lhs, T? rhs)
         where T : struct, IComparable<T>
@@ -180,7 +168,8 @@ public class DbSession : IHistoricalExchange
         return conv.Build(res);
     }
 
-    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
+        IQueryCompounded<IVoucherQueryAtom> query)
         => Db.Get().SelectUnbalancedVouchers(query);
 
     public IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
@@ -257,5 +246,17 @@ public class DbSession : IHistoricalExchange
         Regularize(entity.Template);
 
         return Db.Get().Upsert(entity);
+    }
+
+    public class VirtualizeLock : IAsyncDisposable
+    {
+        public VirtualizeLock(DbSession db) => Db = db;
+
+        private DbSession Db { get; }
+
+        public int CachedVouchers => (Db.Db.Get() as Virtualizer)!.CachedVouchers;
+
+        public async ValueTask DisposeAsync()
+            => Db.Db.Set(await Facade.UnVirtualize(Db.Db.Get()));
     }
 }

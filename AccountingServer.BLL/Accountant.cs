@@ -32,11 +32,11 @@ namespace AccountingServer.BLL;
 /// </summary>
 public class Accountant : IHistoricalExchange
 {
+    public readonly Client Client;
     private readonly AmortAccountant m_AmortAccountant;
 
     private readonly AssetAccountant m_AssetAccountant;
     private readonly DbSession m_Db;
-    public readonly Client Client;
 
     public Accountant(DbSession db, string user, DateTime dt)
     {
@@ -72,10 +72,12 @@ public class Accountant : IHistoricalExchange
     public ValueTask<ISubtotalResult> SelectVouchersGroupedAsync(IVoucherGroupedQuery query)
         => m_Db.SelectVouchersGrouped(query, Limit);
 
-    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchersAsync(IQueryCompounded<IVoucherQueryAtom> query)
+    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchersAsync(
+        IQueryCompounded<IVoucherQueryAtom> query)
         => m_Db.SelectUnbalancedVouchers(query);
 
-    public IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchersAsync(IQueryCompounded<IVoucherQueryAtom> query)
+    public IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchersAsync(
+        IQueryCompounded<IVoucherQueryAtom> query)
         => m_Db.SelectDuplicatedVouchers(query);
 
     public ValueTask<bool> DeleteVoucherAsync(string id)

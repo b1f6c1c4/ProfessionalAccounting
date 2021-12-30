@@ -129,10 +129,10 @@ internal class Composite : PluginBase
 
 internal class InquiriesVisitor : IInquiryVisitor<ValueTask<double>>
 {
-    private readonly Session m_Session;
     private readonly string m_BaseCurrency;
     private readonly DateFilter m_Rng;
     private readonly StringBuilder m_Sb = new();
+    private readonly Session m_Session;
 
     private string m_Path = "";
 

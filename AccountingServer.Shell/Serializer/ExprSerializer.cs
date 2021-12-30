@@ -35,6 +35,8 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
 {
     private const string TheToken = "new Voucher {";
 
+    public Client Client { private get; set; }
+
     /// <inheritdoc />
     public string PresentVoucher(Voucher voucher)
     {
@@ -259,6 +261,4 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
     }
 
     protected virtual bool AlternativeTitle(ref string expr, ICollection<string> lst, ref ITitle title) => false;
-
-    public Client Client { private get; set; }
 }

@@ -63,6 +63,9 @@ internal partial class CarryShell : IShellComponent
             yield return e + "\n";
     }
 
+    /// <inheritdoc />
+    public bool IsExecutable(string expr) => expr.Initial() == "ca";
+
     private async ValueTask<DateFilter> AutomaticRange(Session session, DateFilter rng)
     {
         rng ??= DateFilter.Unconstrained;
@@ -127,7 +130,4 @@ internal partial class CarryShell : IShellComponent
 
         yield return $"=== Total vouchers: {vir.CachedVouchers}";
     }
-
-    /// <inheritdoc />
-    public bool IsExecutable(string expr) => expr.Initial() == "ca";
 }

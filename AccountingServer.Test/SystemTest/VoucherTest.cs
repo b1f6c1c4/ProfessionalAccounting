@@ -31,6 +31,8 @@ namespace AccountingServer.Test.SystemTest;
 public class VoucherTest
 {
     private readonly Facade m_Facade;
+
+    private readonly string m_ID;
     private readonly Session m_Session;
 
     public VoucherTest()
@@ -81,8 +83,6 @@ Ub2 T3998\s+10
 ", res);
         m_ID = new Regex(@"\^[0-9a-f]{24}\^").Match(res).Value;
     }
-
-    private readonly string m_ID;
 
     [Fact]
     public void EmptyTest()

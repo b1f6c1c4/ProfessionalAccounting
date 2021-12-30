@@ -67,6 +67,8 @@ internal class ExchangeShell : IShellComponent
         Parsing.Eof(expr);
     }
 
+    public bool IsExecutable(string expr) => expr.Initial() == "?e";
+
     private async ValueTask<string> Inquiry(Session session, DateTime? dt, string from, string to, double value,
         bool isAccurate)
     {
@@ -76,8 +78,6 @@ internal class ExchangeShell : IShellComponent
         var v = value * rate;
         return $"{dt.AsDate()} @{from} {value.AsCurrency(from)} = @{to} {v.AsCurrency(to)} ({v:R})";
     }
-
-    public bool IsExecutable(string expr) => expr.Initial() == "?e";
 
     /// <summary>
     ///     启动定时登记汇率

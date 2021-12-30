@@ -165,6 +165,15 @@ internal class FixerIoExchange : ExchangeApi, IHistoricalExchange
 {
     private readonly RoundRobinApiKeys m_ApiKeys = new();
 
+    public ValueTask<double> Query(DateTime? date, string from, string to)
+    {
+        if (!date.HasValue)
+            return Invoke(from, to);
+
+        return m_ApiKeys.Execute(ExchangeInfo.Config.FixerAccessKey,
+            key => PartialInvoke(from, to, key, date!.Value.ToString("yyyy-MM-dd")));
+    }
+
     protected override ValueTask<double> Invoke(string from, string to)
         => m_ApiKeys.Execute(ExchangeInfo.Config.FixerAccessKey,
             key => PartialInvoke(from, to, key, "latest"));
@@ -179,15 +188,6 @@ internal class FixerIoExchange : ExchangeApi, IHistoricalExchange
         if (json["success"]!.Value<bool>())
             return json["rates"]![to]!.Value<double>() / json["rates"]![from]!.Value<double>();
         return null;
-    }
-
-    public ValueTask<double> Query(DateTime? date, string from, string to)
-    {
-        if (!date.HasValue)
-            return Invoke(from, to);
-
-        return m_ApiKeys.Execute(ExchangeInfo.Config.FixerAccessKey,
-            key => PartialInvoke(from, to, key, date!.Value.ToString("yyyy-MM-dd")));
     }
 }
 

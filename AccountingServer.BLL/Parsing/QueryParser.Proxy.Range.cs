@@ -25,6 +25,8 @@ internal partial class QueryParser
 {
     public partial class RangeDayContext : IClientDependable, IDateRange
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public DateFilter Range
         {
@@ -39,12 +41,12 @@ internal partial class QueryParser
             RangeDeltaDay() != null
                 ? Client.Today.AddDays(1 - RangeDeltaDay().GetText().Length)
                 : DateTimeParser.ParseExact(RangeADay().GetText(), "yyyyMMdd");
-
-        public Client Client { private get; set; }
     }
 
     public partial class RangeWeekContext : IClientDependable, IDateRange
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public DateFilter Range
         {
@@ -57,12 +59,12 @@ internal partial class QueryParser
                 return new(dt, dt.AddDays(6));
             }
         }
-
-        public Client Client { private get; set; }
     }
 
     public partial class RangeMonthContext : IClientDependable, IDateRange
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public DateFilter Range
         {
@@ -88,8 +90,6 @@ internal partial class QueryParser
                 return new(dt, dt.AddMonths(1).AddDays(-1));
             }
         }
-
-        public Client Client { private get; set; }
     }
 
     public partial class RangeYearContext : IDateRange
@@ -109,6 +109,8 @@ internal partial class QueryParser
 
     public partial class RangeCertainPointContext : IClientDependable, IDateRange
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public DateFilter Range
         {
@@ -126,8 +128,6 @@ internal partial class QueryParser
                 throw new MemberAccessException("表达式错误");
             }
         }
-
-        public Client Client { private get; set; }
     }
 
     public partial class RangePointContext : IDateRange
@@ -149,6 +149,8 @@ internal partial class QueryParser
 
     public partial class UniqueTimeCoreContext : IClientDependable
     {
+        public Client Client { private get; set; }
+
         public DateTime? AsDate()
         {
             if (RangeNull() != null)
@@ -156,12 +158,12 @@ internal partial class QueryParser
 
             return rangeDay().Assign(Client).AsDate();
         }
-
-        public Client Client { private get; set; }
     }
 
     public partial class RangeCoreContext : IClientDependable, IDateRange
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public DateFilter Range
         {
@@ -186,24 +188,22 @@ internal partial class QueryParser
                 return f;
             }
         }
-
-        public Client Client { private get; set; }
     }
 
     public partial class UniqueTimeContext : IClientDependable
     {
+        public Client Client { private get; set; }
+
         public DateTime? AsDate()
             => Core.Assign(Client).AsDate();
-
-        public Client Client { private get; set; }
     }
 
     public partial class RangeContext : IClientDependable, IDateRange
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public DateFilter Range
             => rangeCore().Assign(Client)?.Range ?? DateFilter.Unconstrained;
-
-        public Client Client { private get; set; }
     }
 }

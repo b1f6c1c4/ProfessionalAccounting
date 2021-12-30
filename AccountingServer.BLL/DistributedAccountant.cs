@@ -28,12 +28,12 @@ namespace AccountingServer.BLL;
 /// </summary>
 internal abstract class DistributedAccountant
 {
+    protected readonly Client Client;
+
     /// <summary>
     ///     数据库访问
     /// </summary>
     protected readonly DbSession Db;
-
-    protected readonly Client Client;
 
     protected DistributedAccountant(DbSession db, Client client)
     {

@@ -29,6 +29,8 @@ internal partial class QueryParser
 {
     public partial class DistributedQAtomContext : IClientDependable, IDistributedQueryAtom
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public IDistributed Filter
             => new MyDistributedFilter
@@ -76,12 +78,12 @@ internal partial class QueryParser
             /// <inheritdoc />
             public IEnumerable<IDistributedItem> TheSchedule { get; set; }
         }
-
-        public Client Client { private get; set; }
     }
 
     public partial class DistributedQContext : IClientDependable, IQueryAry<IDistributedQueryAtom>
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public OperatorType Operator
             => Op switch
@@ -123,12 +125,12 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
-
-        public Client Client { private get; set; }
     }
 
     public partial class DistributedQ1Context : IClientDependable, IQueryAry<IDistributedQueryAtom>
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public OperatorType Operator => Op == null ? OperatorType.None : OperatorType.Intersect;
 
@@ -145,12 +147,12 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
-
-        public Client Client { private get; set; }
     }
 
     public partial class DistributedQ0Context : IClientDependable, IQueryAry<IDistributedQueryAtom>
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public OperatorType Operator => OperatorType.None;
 
@@ -167,7 +169,5 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
-
-        public Client Client { private get; set; }
     }
 }

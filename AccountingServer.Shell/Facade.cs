@@ -34,16 +34,16 @@ namespace AccountingServer.Shell;
 /// </summary>
 public class Facade
 {
-    private readonly DbSession m_Db;
-
     private readonly AccountingShell m_AccountingShell;
-
-    private readonly ExchangeShell m_ExchangeShell;
 
     /// <summary>
     ///     复合表达式解释器
     /// </summary>
     private readonly ShellComposer m_Composer;
+
+    private readonly DbSession m_Db;
+
+    private readonly ExchangeShell m_ExchangeShell;
 
     public Facade(string uri = null, string db = null)
     {
@@ -125,6 +125,13 @@ public class Facade
         await Task.Delay(1000);
         yield return "World!";
     }
+
+    #region Exchange
+
+    // ReSharper disable once UnusedMember.Global
+    public void EnableTimer() => m_ExchangeShell.EnableTimer(m_Db);
+
+    #endregion
 
     #region Miscellaneous
 
@@ -308,13 +315,6 @@ public class Facade
 
         return await session.Accountant.DeleteAmortizationAsync(amort.ID.Value);
     }
-
-    #endregion
-
-    #region Exchange
-
-    // ReSharper disable once UnusedMember.Global
-    public void EnableTimer() => m_ExchangeShell.EnableTimer(m_Db);
 
     #endregion
 }

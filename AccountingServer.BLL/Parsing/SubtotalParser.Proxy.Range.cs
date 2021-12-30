@@ -25,6 +25,8 @@ internal partial class SubtotalParser
 {
     public partial class RangeDayContext : IClientDependable, IDateRange
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public DateFilter Range
         {
@@ -39,12 +41,12 @@ internal partial class SubtotalParser
             RangeDeltaDay() != null
                 ? Client.Today.AddDays(1 - RangeDeltaDay().GetText().Length)
                 : DateTimeParser.ParseExact(RangeADay().GetText(), "yyyyMMdd");
-
-        public Client Client { private get; set; }
     }
 
     public partial class RangeWeekContext : IClientDependable, IDateRange
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public DateFilter Range
         {
@@ -57,12 +59,12 @@ internal partial class SubtotalParser
                 return new(dt, dt.AddDays(6));
             }
         }
-
-        public Client Client { private get; set; }
     }
 
     public partial class RangeMonthContext : IClientDependable, IDateRange
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public DateFilter Range
         {
@@ -88,8 +90,6 @@ internal partial class SubtotalParser
                 return new(dt, dt.AddMonths(1).AddDays(-1));
             }
         }
-
-        public Client Client { private get; set; }
     }
 
     public partial class RangeYearContext : IDateRange
@@ -109,6 +109,8 @@ internal partial class SubtotalParser
 
     public partial class RangeCertainPointContext : IClientDependable, IDateRange
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public DateFilter Range
         {
@@ -126,12 +128,12 @@ internal partial class SubtotalParser
                 throw new MemberAccessException("表达式错误");
             }
         }
-
-        public Client Client { private get; set; }
     }
 
     public partial class RangeCoreContext : IClientDependable, IDateRange
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public DateFilter Range
         {
@@ -156,7 +158,5 @@ internal partial class SubtotalParser
                 return f;
             }
         }
-
-        public Client Client { private get; set; }
     }
 }

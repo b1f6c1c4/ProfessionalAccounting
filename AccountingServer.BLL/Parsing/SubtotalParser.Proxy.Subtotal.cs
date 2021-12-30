@@ -28,6 +28,8 @@ internal partial class SubtotalParser
 {
     public partial class SubtotalContext : IClientDependable, ISubtotal
     {
+        public Client Client { private get; set; }
+
         /// <inheritdoc />
         public GatheringType GatherType
             => Mark.Text switch
@@ -141,7 +143,5 @@ internal partial class SubtotalParser
                     null => null,
                     var x => x.rangeDay().Assign(Client)?.AsDate() ?? Client.Today,
                 };
-
-        public Client Client { private get; set; }
     }
 }

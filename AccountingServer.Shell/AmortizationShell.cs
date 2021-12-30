@@ -72,7 +72,8 @@ internal class AmortizationShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override async IAsyncEnumerable<string> ExecuteUnregister(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
+    protected override async IAsyncEnumerable<string> ExecuteUnregister(
+        IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng,
         IQueryCompounded<IVoucherQueryAtom> query, Session session)
     {
         await foreach (var a in Sort(session.Accountant.SelectAmortizationsAsync(distQuery)))
@@ -111,7 +112,8 @@ internal class AmortizationShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override async IAsyncEnumerable<string> ExecuteResetSoft(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng, Session session)
+    protected override async IAsyncEnumerable<string> ExecuteResetSoft(
+        IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng, Session session)
     {
         await foreach (var a in session.Accountant.SelectAmortizationsAsync(distQuery))
         {
@@ -137,7 +139,8 @@ internal class AmortizationShell : DistributedShell
     }
 
     /// <inheritdoc />
-    protected override async IAsyncEnumerable<string> ExecuteResetMixed(IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng, Session session)
+    protected override async IAsyncEnumerable<string> ExecuteResetMixed(
+        IQueryCompounded<IDistributedQueryAtom> distQuery, DateFilter rng, Session session)
     {
         await foreach (var a in session.Accountant.SelectAmortizationsAsync(distQuery))
         {
@@ -263,5 +266,6 @@ internal class AmortizationShell : DistributedShell
     /// <param name="enumerable">摊销</param>
     /// <returns>排序后的摊销</returns>
     private static IAsyncEnumerable<Amortization> Sort(IAsyncEnumerable<Amortization> enumerable)
-        => enumerable.OrderBy(static o => o.Date, new DateComparer()).ThenBy(static o => o.Name).ThenBy(static o => o.ID);
+        => enumerable.OrderBy(static o => o.Date, new DateComparer()).ThenBy(static o => o.Name)
+            .ThenBy(static o => o.ID);
 }

@@ -150,9 +150,8 @@ public abstract class QueryTestBase
 [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
 public class MatchTest : QueryTestBase
 {
-    protected override Client Client { get; } = new() { User = "b1", Today = DateTime.UtcNow.Date };
-
     private Voucher m_Voucher;
+    protected override Client Client { get; } = new() { User = "b1", Today = DateTime.UtcNow.Date };
 
     protected override ValueTask PrepareVoucher(Voucher voucher)
     {
@@ -178,8 +177,6 @@ public class MatchTest : QueryTestBase
 [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
 public class DbQueryTest : QueryTestBase, IDisposable
 {
-    protected override Client Client { get; } = new() { User = "b1", Today = DateTime.UtcNow.Date };
-
     private readonly IDbAdapter m_Adapter;
 
     public DbQueryTest()
@@ -188,6 +185,8 @@ public class DbQueryTest : QueryTestBase, IDisposable
 
         m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance).AsTask().Wait();
     }
+
+    protected override Client Client { get; } = new() { User = "b1", Today = DateTime.UtcNow.Date };
 
     public void Dispose() => m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance).AsTask().Wait();
 
@@ -209,7 +208,6 @@ public class DbQueryTest : QueryTestBase, IDisposable
 public class BLLQueryTest : QueryTestBase, IDisposable
 {
     private readonly Accountant m_Accountant;
-    protected override Client Client => m_Accountant.Client;
 
     public BLLQueryTest()
     {
@@ -217,6 +215,8 @@ public class BLLQueryTest : QueryTestBase, IDisposable
 
         m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance).AsTask().Wait();
     }
+
+    protected override Client Client => m_Accountant.Client;
 
     public void Dispose() => m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance).AsTask().Wait();
 
@@ -238,7 +238,6 @@ public class BLLQueryTest : QueryTestBase, IDisposable
 public class VirtualizedQueryTest : QueryTestBase, IAsyncDisposable
 {
     private readonly Accountant m_Accountant;
-    protected override Client Client => m_Accountant.Client;
     private readonly DbSession.VirtualizeLock m_Lock;
 
     public VirtualizedQueryTest()
@@ -248,6 +247,8 @@ public class VirtualizedQueryTest : QueryTestBase, IAsyncDisposable
         m_Lock = m_Accountant.Virtualize();
         m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance).AsTask().Wait();
     }
+
+    protected override Client Client => m_Accountant.Client;
 
     public async ValueTask DisposeAsync()
     {

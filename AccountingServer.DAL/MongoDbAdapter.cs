@@ -275,7 +275,8 @@ internal class MongoDbAdapter : IDbAdapter
         var chk = GetChk(query);
         var srt = Builders<Voucher>.Sort.Ascending("date");
         return m_Vouchers.Aggregate().Match(preF).Sort(srt).Project(ProjectDetails).Unwind("detail").Match(chk)
-            .Project(ProjectDetail).ToAsyncEnumerable().Select(static b => BsonSerializer.Deserialize<VoucherDetail>(b));
+            .Project(ProjectDetail).ToAsyncEnumerable()
+            .Select(static b => BsonSerializer.Deserialize<VoucherDetail>(b));
     }
 
     /// <inheritdoc />
@@ -357,7 +358,8 @@ internal class MongoDbAdapter : IDbAdapter
         return fluent.ToAsyncEnumerable().Select(static b => BsonSerializer.Deserialize<Balance>(b));
     }
 
-    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
+        IQueryCompounded<IVoucherQueryAtom> query)
         => m_Vouchers.Aggregate().Match(query.Accept(new MongoDbNativeVoucher()))
             .Unwind("detail").Group(new BsonDocument
                 {

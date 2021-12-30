@@ -28,41 +28,15 @@ namespace AccountingServer.DAL;
 
 public class Virtualizer : IDbAdapter, IAsyncDisposable
 {
-    /// <summary>
-    ///     数据库访问
-    /// </summary>
-    internal IDbAdapter Db { get; init; }
-
     private readonly ReaderWriterLockSlim m_Lock = new();
     private readonly List<Voucher> m_Vouchers = new();
 
     internal Virtualizer(IDbAdapter db) => Db = db;
 
-    private T ReadLocked<T>(Func<List<Voucher>, T> func)
-    {
-        m_Lock.EnterReadLock();
-        try
-        {
-            return func(m_Vouchers);
-        }
-        finally
-        {
-            m_Lock.ExitReadLock();
-        }
-    }
-
-    private T WriteLocked<T>(Func<List<Voucher>, T> func)
-    {
-        m_Lock.EnterWriteLock();
-        try
-        {
-            return func(m_Vouchers);
-        }
-        finally
-        {
-            m_Lock.ExitWriteLock();
-        }
-    }
+    /// <summary>
+    ///     数据库访问
+    /// </summary>
+    internal IDbAdapter Db { get; init; }
 
     public int CachedVouchers => ReadLocked(static _ => _.Count);
 
@@ -91,55 +65,6 @@ public class Virtualizer : IDbAdapter, IAsyncDisposable
     public IAsyncEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
         => Db.SelectVoucherDetails(query).Concat(ReadLocked(_ => _.Where(v => v.IsMatch(query.VoucherQuery)))
             .SelectMany(static v => v.Details).Where(d => d.IsMatch(query.ActualDetailFilter())).ToAsyncEnumerable());
-
-    private class BalanceComparer : IEqualityComparer<Balance>
-    {
-        public bool Equals(Balance x, Balance y)
-        {
-            if (x == y)
-                return true;
-            if (x == null || y == null)
-                return false;
-            return Nullable.Equals(x.Date, y.Date) && x.Title == y.Title && x.SubTitle == y.SubTitle &&
-                x.Content == y.Content && x.Remark == y.Remark && x.Currency == y.Currency && x.User == y.User;
-        }
-
-        public int GetHashCode(Balance obj)
-            => HashCode.Combine(obj.Date, obj.Title, obj.SubTitle, obj.Content, obj.Remark, obj.Currency, obj.User);
-    }
-
-    private static IAsyncEnumerable<Balance> Merge(IAsyncEnumerable<Balance> balances)
-        => balances.GroupByAwait(static b => new(b), static b => new ValueTask<double>(b.Fund), static async (b, fs) =>
-            {
-                b.Fund = await fs.SumAsync(static f => f);
-                return b;
-            }, new BalanceComparer());
-
-    private static DateTime? ProjectDate(DateTime? dt, SubtotalLevel level)
-    {
-        if (!dt.HasValue)
-            return null;
-        if (!level.HasFlag(SubtotalLevel.Day))
-            return null;
-        if (!level.HasFlag(SubtotalLevel.Week))
-            return dt;
-        if (level.HasFlag(SubtotalLevel.Year))
-            return new(dt!.Value.Year, 1, 1);
-        if (level.HasFlag(SubtotalLevel.Month))
-            return new(dt!.Value.Year, dt!.Value.Month, 1);
-        // if (level.HasFlag(SubtotalLevel.Week))
-        return dt.Value.DayOfWeek switch
-            {
-                DayOfWeek.Monday => dt.Value.AddDays(-0),
-                DayOfWeek.Tuesday => dt.Value.AddDays(-1),
-                DayOfWeek.Wednesday => dt.Value.AddDays(-2),
-                DayOfWeek.Thursday => dt.Value.AddDays(-3),
-                DayOfWeek.Friday => dt.Value.AddDays(-4),
-                DayOfWeek.Saturday => dt.Value.AddDays(-5),
-                DayOfWeek.Sunday => dt.Value.AddDays(-6),
-                _ => throw new ArgumentOutOfRangeException(),
-            };
-    }
 
     public IAsyncEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit)
     {
@@ -173,7 +98,8 @@ public class Virtualizer : IDbAdapter, IAsyncDisposable
         return query.ShouldAvoidZero() ? fluent.Where(static b => !b.Fund.IsZero()) : fluent;
     }
 
-    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+    public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
+        IQueryCompounded<IVoucherQueryAtom> query)
         => throw new NotSupportedException();
 
     public IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(IQueryCompounded<IVoucherQueryAtom> query)
@@ -253,4 +179,79 @@ public class Virtualizer : IDbAdapter, IAsyncDisposable
 
     public ValueTask<bool> Upsert(ExchangeRecord record)
         => Db.Upsert(record);
+
+    private T ReadLocked<T>(Func<List<Voucher>, T> func)
+    {
+        m_Lock.EnterReadLock();
+        try
+        {
+            return func(m_Vouchers);
+        }
+        finally
+        {
+            m_Lock.ExitReadLock();
+        }
+    }
+
+    private T WriteLocked<T>(Func<List<Voucher>, T> func)
+    {
+        m_Lock.EnterWriteLock();
+        try
+        {
+            return func(m_Vouchers);
+        }
+        finally
+        {
+            m_Lock.ExitWriteLock();
+        }
+    }
+
+    private static IAsyncEnumerable<Balance> Merge(IAsyncEnumerable<Balance> balances)
+        => balances.GroupByAwait(static b => new(b), static b => new ValueTask<double>(b.Fund), static async (b, fs) =>
+            {
+                b.Fund = await fs.SumAsync(static f => f);
+                return b;
+            }, new BalanceComparer());
+
+    private static DateTime? ProjectDate(DateTime? dt, SubtotalLevel level)
+    {
+        if (!dt.HasValue)
+            return null;
+        if (!level.HasFlag(SubtotalLevel.Day))
+            return null;
+        if (!level.HasFlag(SubtotalLevel.Week))
+            return dt;
+        if (level.HasFlag(SubtotalLevel.Year))
+            return new(dt!.Value.Year, 1, 1);
+        if (level.HasFlag(SubtotalLevel.Month))
+            return new(dt!.Value.Year, dt!.Value.Month, 1);
+        // if (level.HasFlag(SubtotalLevel.Week))
+        return dt.Value.DayOfWeek switch
+            {
+                DayOfWeek.Monday => dt.Value.AddDays(-0),
+                DayOfWeek.Tuesday => dt.Value.AddDays(-1),
+                DayOfWeek.Wednesday => dt.Value.AddDays(-2),
+                DayOfWeek.Thursday => dt.Value.AddDays(-3),
+                DayOfWeek.Friday => dt.Value.AddDays(-4),
+                DayOfWeek.Saturday => dt.Value.AddDays(-5),
+                DayOfWeek.Sunday => dt.Value.AddDays(-6),
+                _ => throw new ArgumentOutOfRangeException(),
+            };
+    }
+
+    private class BalanceComparer : IEqualityComparer<Balance>
+    {
+        public bool Equals(Balance x, Balance y)
+        {
+            if (x == y)
+                return true;
+            if (x == null || y == null)
+                return false;
+            return Nullable.Equals(x.Date, y.Date) && x.Title == y.Title && x.SubTitle == y.SubTitle &&
+                x.Content == y.Content && x.Remark == y.Remark && x.Currency == y.Currency && x.User == y.User;
+        }
+
+        public int GetHashCode(Balance obj)
+            => HashCode.Combine(obj.Date, obj.Title, obj.SubTitle, obj.Content, obj.Remark, obj.Currency, obj.User);
+    }
 }

@@ -63,7 +63,8 @@ internal static class RequestParser
         }
 
         var spp = sp[1].Split('&');
-        par = spp.ToDictionary(static s => s[..s.IndexOf('=')], static s => HttpUtility.UrlDecode(s[(s.IndexOf('=') + 1)..]));
+        par = spp.ToDictionary(static s => s[..s.IndexOf('=')],
+            static s => HttpUtility.UrlDecode(s[(s.IndexOf('=') + 1)..]));
         return sp[0];
     }
 

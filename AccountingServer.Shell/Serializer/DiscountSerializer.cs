@@ -34,6 +34,8 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
 {
     private const string TheToken = "new Voucher {";
 
+    public Client Client { private get; set; }
+
     /// <inheritdoc />
     public string PresentVoucher(Voucher voucher) => throw new NotImplementedException();
 
@@ -355,6 +357,4 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
             obj.SubTitle?.GetHashCode() | obj.Content?.GetHashCode() | obj.Fund?.GetHashCode() |
             obj.Remark?.GetHashCode() ?? 0;
     }
-
-    public Client Client { private get; set; }
 }

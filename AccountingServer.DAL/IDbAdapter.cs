@@ -72,7 +72,8 @@ public interface IDbAdapter
     /// </summary>
     /// <param name="query">检索式</param>
     /// <returns>匹配检索式的记账凭证以及不匹配原因</returns>
-    IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(IQueryCompounded<IVoucherQueryAtom> query);
+    IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
+        IQueryCompounded<IVoucherQueryAtom> query);
 
     /// <summary>
     ///     查找重复的记账凭证

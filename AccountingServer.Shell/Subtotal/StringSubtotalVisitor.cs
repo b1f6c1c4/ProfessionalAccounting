@@ -43,6 +43,8 @@ internal abstract class StringSubtotalVisitor : IClientDependable, ISubtotalVisi
     protected StringBuilder Sb;
     protected IEntitiesSerializer Serializer;
 
+    public Client Client { private get; set; }
+
     /// <inheritdoc />
     public string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer)
     {
@@ -84,7 +86,8 @@ internal abstract class StringSubtotalVisitor : IClientDependable, ISubtotalVisi
                 {
                     SubtotalLevel.Title => sub.Items.Cast<ISubtotalTitle>().OrderBy(static s => s.Title),
                     SubtotalLevel.SubTitle => sub.Items.Cast<ISubtotalSubTitle>().OrderBy(static s => s.SubTitle),
-                    SubtotalLevel.Content => sub.Items.Cast<ISubtotalContent>().OrderBy(static s => s.Content, comparer),
+                    SubtotalLevel.Content => sub.Items.Cast<ISubtotalContent>()
+                        .OrderBy(static s => s.Content, comparer),
                     SubtotalLevel.Remark => sub.Items.Cast<ISubtotalRemark>().OrderBy(static s => s.Remark, comparer),
                     SubtotalLevel.User => sub.Items.Cast<ISubtotalUser>()
                         .OrderBy(s => s.User == Client.User ? null : s.User),
@@ -106,6 +109,4 @@ internal abstract class StringSubtotalVisitor : IClientDependable, ISubtotalVisi
 
         Depth--;
     }
-
-    public Client Client { private get; set; }
 }

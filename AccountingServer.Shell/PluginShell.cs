@@ -42,7 +42,7 @@ internal class PluginShell : IShellComponent
     private readonly Dictionary<string, PluginBase> m_Plugins;
 
     public PluginShell() => m_Plugins =
-        new Dictionary<string, PluginBase>
+        new()
             {
                 ["adb"] = new AverageDailyBalance(),
                 ["af"] = new AssetFactory(),
