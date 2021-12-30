@@ -7,7 +7,7 @@ services:
       - "18080:443/tcp"
       - "18080:443/udp"
     volumes:
-      - /data/accounting/certs:/opt/accounting/certs
+      - /data/accounting/certs:/opt/accounting/certs:ro
       - /data/accounting/nginx-cache:/var/cache/nginx
       - /data/accounting/nginx-pid:/var/run
     networks:
@@ -20,8 +20,8 @@ services:
       MONGO_URI: /opt/accounting/atlas/url
       MONGO_CERT: /opt/accounting/atlas/cert.pem
     volumes:
-      - /data/accounting/atlas:/opt/accounting/atlas
-      - /data/accounting/config.d:/opt/accounting/config.d
+      - /data/accounting/atlas:/opt/accounting/atlas:ro
+      - /data/accounting/config.d:/opt/accounting/config.d:ro
     networks:
       - prod
 
