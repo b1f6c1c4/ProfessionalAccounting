@@ -41,7 +41,7 @@ public class Accountant : IHistoricalExchange
     public Accountant(DbSession db, string user, DateTime dt)
     {
         m_Db = db;
-        Client = new() { User = user, Today = dt };
+        Client = new() { User = user, Today = dt.Date };
 
         m_AssetAccountant = new(m_Db, Client);
         m_AmortAccountant = new(m_Db, Client);

@@ -201,6 +201,7 @@ public class DbSession : IHistoricalExchange
 
     public static Voucher Regularize(Voucher entity)
     {
+        entity.Date = entity.Date?.Date;
         entity.Details ??= new();
 
         foreach (var d in entity.Details)

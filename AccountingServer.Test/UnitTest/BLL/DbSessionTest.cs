@@ -16,6 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using AccountingServer.BLL;
 using AccountingServer.Entities;
 using Xunit;
@@ -265,6 +266,7 @@ public class DbSessionTest
     {
         var voucher = new Voucher
             {
+                Date = new(2022, 1, 1, 12, 34, 56, DateTimeKind.Utc),
                 Details = new()
                     {
                         new() { User = "b1", Currency = "jPy" },
@@ -275,6 +277,7 @@ public class DbSessionTest
 
         DbSession.Regularize(voucher);
 
+        Assert.Equal(new DateTime(2022, 1, 1, 0, 0, 0, DateTimeKind.Utc), voucher.Date);
         Assert.Equal(3, voucher.Details.Count);
         Assert.Equal("b1", voucher.Details[0].User);
         Assert.Equal("CNY", voucher.Details[0].Currency);
@@ -284,8 +287,10 @@ public class DbSessionTest
         Assert.Equal("b2", voucher.Details[2].User);
         Assert.Equal("CNY", voucher.Details[2].Currency);
 
+        voucher.Date = null;
         voucher.Details = null;
         DbSession.Regularize(voucher);
+        Assert.Null(voucher.Date);
         Assert.NotNull(voucher.Details);
         Assert.Empty(voucher.Details);
     }
