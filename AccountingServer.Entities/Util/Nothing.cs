@@ -1,4 +1,4 @@
-/* Copyright (C) 2020-2021 b1f6c1c4
+/* Copyright (C) 2020-2022 b1f6c1c4
  *
  * This file is part of ProfessionalAccounting.
  *
