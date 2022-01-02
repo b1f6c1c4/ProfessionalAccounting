@@ -154,26 +154,26 @@ public class CsvSerializer : IEntitiesSerializer
     /// <inheritdoc />
     public async IAsyncEnumerable<string> PresentVouchers(IAsyncEnumerable<Voucher> vouchers)
     {
-        yield return PresentHeader(m_Specs);
+        yield return PresentHeader(m_Specs) + "\n";
         await foreach (var voucher in vouchers)
         foreach (var detail in voucher.Details)
-            yield return Present(new(voucher, detail), m_Specs);
+            yield return Present(new(voucher, detail), m_Specs) + "\n";
     }
 
     /// <inheritdoc />
     public async IAsyncEnumerable<string> PresentVoucherDetails(IAsyncEnumerable<VoucherDetail> details)
     {
-        yield return PresentHeader(DetailSpec);
+        yield return PresentHeader(DetailSpec) + "\n";
         await foreach (var detail in details)
-            yield return Present(new(null, detail), DetailSpec);
+            yield return Present(new(null, detail), DetailSpec) + "\n";
     }
 
     /// <inheritdoc />
     public async IAsyncEnumerable<string> PresentVoucherDetails(IAsyncEnumerable<VoucherDetailR> details)
     {
-        yield return PresentHeader(m_Specs);
+        yield return PresentHeader(m_Specs) + "\n";
         await foreach (var detail in details)
-            yield return Present(detail, m_Specs);
+            yield return Present(detail, m_Specs) + "\n";
     }
 
     public Voucher ParseVoucher(string str) => throw new NotImplementedException();

@@ -143,17 +143,29 @@ public class JsonSerializer : IEntitiesSerializer
     public async IAsyncEnumerable<string> PresentVouchers(IAsyncEnumerable<Voucher> vouchers)
     {
         yield return "[\n";
+
+        var flag = false;
         await foreach (var voucher in vouchers)
-            yield return PresentJson(voucher).ToString(Formatting.Indented);
-        yield return "]";
+        {
+            yield return (flag ? ",\n" : "") + PresentJson(voucher).ToString(Formatting.Indented);
+            flag = true;
+        }
+
+        yield return "\n]";
     }
 
     public async IAsyncEnumerable<string> PresentVoucherDetails(IAsyncEnumerable<VoucherDetail> details)
     {
         yield return "[\n";
+
+        var flag = false;
         await foreach (var detail in details)
-            yield return PresentJson(detail).ToString(Formatting.Indented);
-        yield return "]";
+        {
+            yield return (flag ? ",\n" : "") + PresentJson(detail).ToString(Formatting.Indented);
+            flag = true;
+        }
+
+        yield return "\n]";
     }
 
     public IAsyncEnumerable<string> PresentVoucherDetails(IAsyncEnumerable<VoucherDetailR> details)
@@ -162,17 +174,29 @@ public class JsonSerializer : IEntitiesSerializer
     public async IAsyncEnumerable<string> PresentAssets(IAsyncEnumerable<Asset> assets)
     {
         yield return "[\n";
+
+        var flag = false;
         await foreach (var asset in assets)
-            yield return PresentJson(asset).ToString(Formatting.Indented);
-        yield return "]";
+        {
+            yield return (flag ? ",\n" : "") + PresentJson(asset).ToString(Formatting.Indented);
+            flag = true;
+        }
+
+        yield return "\n]";
     }
 
     public async IAsyncEnumerable<string> PresentAmorts(IAsyncEnumerable<Amortization> amorts)
     {
         yield return "[\n";
+
+        var flag = false;
         await foreach (var amort in amorts)
-            yield return PresentJson(amort).ToString(Formatting.Indented);
-        yield return "]";
+        {
+            yield return (flag ? ",\n" : "") + PresentJson(amort).ToString(Formatting.Indented);
+            flag = true;
+        }
+
+        yield return "\n]";
     }
 
     private static JObject ParseJson(string str)

@@ -52,14 +52,14 @@ internal class Statement : PluginBase
             parsed.Parse(csv);
             yield return $"{parsed.Items.Count} parsed";
             await foreach (var s in RunMark(session, filt, parsed, marker))
-                yield return s;
+                yield return s + "\n";
         }
         else if (ParsingF.Optional(ref expr, "unmark"))
         {
             var filt = ParsingF.DetailQuery(ref expr, session.Client);
             ParsingF.Eof(expr);
             await foreach (var s in RunUnmark(session, filt))
-                yield return s;
+                yield return s + "\n";
         }
         else if (ParsingF.Optional(ref expr, "check"))
         {
@@ -68,7 +68,7 @@ internal class Statement : PluginBase
             parsed.Parse(csv);
             yield return $"{parsed.Items.Count} parsed";
             await foreach (var s in RunCheck(session, filt, parsed))
-                yield return s;
+                yield return s + "\n";
         }
         else
         {
@@ -100,11 +100,11 @@ internal class Statement : PluginBase
                         new StmtDetailQuery(""),
                         new StmtDetailQuery(marker))));
             await foreach (var s in RunUnmark(session, markerFilt))
-                yield return s;
+                yield return s + "\n";
             await foreach (var s in RunMark(session, nullFilt, parsed, marker))
-                yield return s;
+                yield return s + "\n";
             await foreach (var s in RunCheck(session, nmFilt, parsed))
-                yield return s;
+                yield return s + "\n";
         }
     }
 
