@@ -47,7 +47,7 @@ internal partial class CarryShell
     /// <param name="rng">过滤器</param>
     /// <returns>执行结果</returns>
     private ValueTask<long> ResetConversion(Session session, DateFilter rng)
-        => session.Accountant.DeleteVouchersAsync($"{rng.AsDateRange()} %equity conversion%");
+        => session.Accountant.DeleteVouchersAsync($"{rng.AsDateRange()} %equity conversion% AnnualCarry");
 
     /// <summary>
     ///     所有者权益币种转换
@@ -71,7 +71,7 @@ internal partial class CarryShell
                 await session.Accountant.UpsertAsync(new Voucher
                     {
                         Date = dt,
-                        Type = VoucherType.Ordinary,
+                        Type = VoucherType.AnnualCarry,
                         Remark = "equity conversion",
                         Details =
                             new()

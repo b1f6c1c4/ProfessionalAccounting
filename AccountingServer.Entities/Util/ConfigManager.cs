@@ -59,7 +59,7 @@ public static class MetaConfigManager
         foreach (var manager in ConfigManagers)
         {
             manager.Reload(true);
-            yield return manager.GetType().ToString();
+            yield return manager.GetType() + "\n";
         }
     }
 }
