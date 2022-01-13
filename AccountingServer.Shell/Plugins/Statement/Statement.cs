@@ -50,7 +50,7 @@ internal class Statement : PluginBase
                 throw new FormatException("格式错误");
 
             parsed.Parse(csv);
-            yield return $"{parsed.Items.Count} parsed";
+            yield return $"{parsed.Items.Count} parsed\n";
             await foreach (var s in RunMark(session, filt, parsed, marker))
                 yield return s + "\n";
         }
@@ -66,7 +66,7 @@ internal class Statement : PluginBase
             var filt = ParsingF.DetailQuery(ref expr, session.Client);
             ParsingF.Eof(expr);
             parsed.Parse(csv);
-            yield return $"{parsed.Items.Count} parsed";
+            yield return $"{parsed.Items.Count} parsed\n";
             await foreach (var s in RunCheck(session, filt, parsed))
                 yield return s + "\n";
         }
@@ -81,7 +81,7 @@ internal class Statement : PluginBase
                 throw new FormatException("格式错误");
 
             parsed.Parse(csv);
-            yield return $"{parsed.Items.Count} parsed";
+            yield return $"{parsed.Items.Count} parsed\n";
             var markerFilt = new StmtVoucherDetailQuery(
                 filt.VoucherQuery,
                 new IntersectQueries<IDetailQueryAtom>(
