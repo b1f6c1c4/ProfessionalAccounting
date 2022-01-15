@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Iori Oikawa
+/* Copyright (C) 2021-2022 Iori Oikawa
  *
  * This file is part of ProfessionalAccounting.
  *
