@@ -73,5 +73,5 @@ public static class SecurityHelper
     /// <param name="query">记账凭证细目映射检索式</param>
     /// <returns>若包含则为<c>true</c>，否则为<c>false</c></returns>
     public static bool IsDangerous(this IVoucherDetailQuery query)
-        => query.VoucherQuery.IsDangerous() && (query.DetailEmitFilter?.DetailFilter?.IsDangerous() ?? true);
+        => query.VoucherQuery.IsDangerous() && query.ActualDetailFilter().IsDangerous();
 }

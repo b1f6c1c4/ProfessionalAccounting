@@ -70,23 +70,23 @@ public class Virtualizer : IDbAdapter, IAsyncDisposable
     {
         if (limit != 0)
             throw new NotSupportedException();
-        var level = query.Preprocess();
+        var level = query.Subtotal.PreprocessVoucher();
         return Merge(Db.SelectVouchersGrouped(query).Concat(ReadLocked(_ => _.Where(v => v.IsMatch(query.VoucherQuery)))
-            .Select(v => new Balance { Date = ProjectDate(v.Date, level), Fund = 1 }).ToAsyncEnumerable()));
+            .Select(v => new Balance { Date = v.Date.Project(level), Fund = 1 }).ToAsyncEnumerable()));
     }
 
     public IAsyncEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit)
     {
         if (limit != 0)
             throw new NotSupportedException();
-        var level = query.Preprocess();
+        var level = query.Subtotal.PreprocessDetail();
         var fluent = Merge(Db.SelectVoucherDetailsGrouped(query).Concat(
             ReadLocked(_ => _.Where(v => v.IsMatch(query.VoucherEmitQuery.VoucherQuery)))
                 .SelectMany(static v => v.Details.Select(d => new VoucherDetailR(v, d)))
                 .Where(d => d.IsMatch(query.VoucherEmitQuery.ActualDetailFilter()))
                 .Select(d => new Balance
                     {
-                        Date = ProjectDate(d.Voucher.Date, level),
+                        Date = d.Voucher.Date.Project(level),
                         User = level.HasFlag(SubtotalLevel.User) ? d.User : null,
                         Currency = level.HasFlag(SubtotalLevel.Currency) ? d.Currency : null,
                         Title = level.HasFlag(SubtotalLevel.Title) ? d.Title : null,
@@ -95,7 +95,7 @@ public class Virtualizer : IDbAdapter, IAsyncDisposable
                         Remark = level.HasFlag(SubtotalLevel.Remark) ? d.Remark : null,
                         Fund = query.Subtotal.GatherType == GatheringType.Count ? 1 : d.Fund!.Value,
                     }).ToAsyncEnumerable()));
-        return query.ShouldAvoidZero() ? fluent.Where(static b => !b.Fund.IsZero()) : fluent;
+        return query.Subtotal.ShouldAvoidZero() ? fluent.Where(static b => !b.Fund.IsZero()) : fluent;
     }
 
     public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
@@ -212,32 +212,6 @@ public class Virtualizer : IDbAdapter, IAsyncDisposable
                 b.Fund = await fs.SumAsync(static f => f);
                 return b;
             }, new BalanceComparer());
-
-    private static DateTime? ProjectDate(DateTime? dt, SubtotalLevel level)
-    {
-        if (!dt.HasValue)
-            return null;
-        if (!level.HasFlag(SubtotalLevel.Day))
-            return null;
-        if (!level.HasFlag(SubtotalLevel.Week))
-            return dt;
-        if (level.HasFlag(SubtotalLevel.Year))
-            return new(dt!.Value.Year, 1, 1);
-        if (level.HasFlag(SubtotalLevel.Month))
-            return new(dt!.Value.Year, dt!.Value.Month, 1);
-        // if (level.HasFlag(SubtotalLevel.Week))
-        return dt.Value.DayOfWeek switch
-            {
-                DayOfWeek.Monday => dt.Value.AddDays(-0),
-                DayOfWeek.Tuesday => dt.Value.AddDays(-1),
-                DayOfWeek.Wednesday => dt.Value.AddDays(-2),
-                DayOfWeek.Thursday => dt.Value.AddDays(-3),
-                DayOfWeek.Friday => dt.Value.AddDays(-4),
-                DayOfWeek.Saturday => dt.Value.AddDays(-5),
-                DayOfWeek.Sunday => dt.Value.AddDays(-6),
-                _ => throw new ArgumentOutOfRangeException(),
-            };
-    }
 
     private class BalanceComparer : IEqualityComparer<Balance>
     {

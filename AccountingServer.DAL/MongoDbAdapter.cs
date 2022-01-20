@@ -282,7 +282,7 @@ internal class MongoDbAdapter : IDbAdapter
     /// <inheritdoc />
     public IAsyncEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit = 0)
     {
-        var level = query.Preprocess();
+        var level = query.Subtotal.PreprocessVoucher();
         var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher());
 
         BsonDocument pprj;
@@ -312,7 +312,7 @@ internal class MongoDbAdapter : IDbAdapter
     /// <inheritdoc />
     public IAsyncEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit = 0)
     {
-        var level = query.Preprocess();
+        var level = query.Subtotal.PreprocessDetail();
         var preF = query.VoucherEmitQuery.VoucherQuery.Accept(new MongoDbNativeVoucher());
         var chk = GetChk(query.VoucherEmitQuery);
 
@@ -351,7 +351,7 @@ internal class MongoDbAdapter : IDbAdapter
             grp = new() { ["_id"] = prj, ["total"] = new BsonDocument { ["$sum"] = "$detail.fund" } };
 
         var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Unwind("detail").Match(chk).Group(grp);
-        if (query.ShouldAvoidZero())
+        if (query.Subtotal.ShouldAvoidZero())
             fluent = fluent.Match(FilterNonZero);
         if (limit > 0)
             fluent = fluent.Sort(new SortDefinitionBuilder<BsonDocument>().Descending("count")).Limit(limit);

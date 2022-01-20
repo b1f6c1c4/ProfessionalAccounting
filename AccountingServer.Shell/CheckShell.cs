@@ -62,7 +62,7 @@ internal class CheckShell : IShellComponent
                 yield return session.Serializer.PresentVoucher(old).Wrap();
             old = voucher;
 
-            yield return $"/* U{user.AsUser()} @{curr}: Debit - Credit = {v:R} */";
+            yield return $"/* U{user.AsUser()} @{curr}: Debit - Credit = {v:R} */\n";
         }
 
         if (old != null)
