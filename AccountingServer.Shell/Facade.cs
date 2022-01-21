@@ -22,6 +22,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
+using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Carry;
 using AccountingServer.Shell.Serializer;
@@ -198,38 +199,52 @@ public class Facade
                 voucher.Details.Add(
                     new() { User = grpUs.First().Key, Currency = grpC.Key, Title = 3999, Fund = -sum });
             }
-        else if (voucher.Details.GroupBy(d => (d.User ?? session.Client.User, d.Currency ?? BaseCurrency.Now))
-                     .Where(static grp => !grp.Sum(static d => d.Fund!.Value).IsZero()).ToList() is var grpUCs &&
-                 grpUCs.Count == 2)
+        else
         {
-            var p = grpUCs[0];
-            var ps = p.Sum(static d => d.Fund!.Value);
-            var q = grpUCs[1];
-            var qs = q.Sum(static d => d.Fund!.Value);
-            // UpCp -> UqCp -> UqCq
-            voucher.Details.Add(
-                new() { User = p.Key.Item1, Currency = p.Key.Item2, Title = 3998, Fund = -ps / 2 });
-            voucher.Details.Add(
-                new() { User = q.Key.Item1, Currency = p.Key.Item2, Title = 3998, Fund = +ps / 2 });
-            voucher.Details.Add(
-                new() { User = q.Key.Item1, Currency = p.Key.Item2, Title = 3999, Fund = -ps / 2 });
-            voucher.Details.Add(
-                new() { User = q.Key.Item1, Currency = q.Key.Item2, Title = 3999, Fund = -qs / 2 });
-            // UpCp -> UpCq -> UqCq
-            voucher.Details.Add(
-                new() { User = p.Key.Item1, Currency = p.Key.Item2, Title = 3999, Fund = -ps / 2 });
-            voucher.Details.Add(
-                new() { User = p.Key.Item1, Currency = q.Key.Item2, Title = 3999, Fund = -qs / 2 });
-            voucher.Details.Add(
-                new() { User = p.Key.Item1, Currency = q.Key.Item2, Title = 3998, Fund = +qs / 2 });
-            voucher.Details.Add(
-                new() { User = q.Key.Item1, Currency = q.Key.Item2, Title = 3998, Fund = -qs / 2 });
+            var grpUCs = voucher.Details.GroupBy(d => (d.User ?? session.Client.User, d.Currency ?? BaseCurrency.Now))
+                .ToList();
+            var ps = grpUCs.Where(static grp => !grp.Sum(static d => d.Fund!.Value).IsNonPositive()).ToList();
+            var qs = grpUCs.Where(static grp => !grp.Sum(static d => d.Fund!.Value).IsNonNegative()).ToList();
+            var pss = ps.Sum(static grp => grp.Sum(static d => d.Fund!.Value));
+            var qss = qs.Sum(static grp => grp.Sum(static d => d.Fund!.Value));
+            var lst = new List<VoucherDetail>();
+            if (ps.Count == 1 && qs.Count >= 1)
+                foreach (var q in qs)
+                    QuadratureNormalization(lst, ps[0], pss, q, qss);
+            else if (ps.Count >= 1 && qs.Count == 1)
+                foreach (var p in ps)
+                    QuadratureNormalization(lst, p, pss, qs[0], qss);
+            voucher.Details.AddRange(lst.GroupBy(static d => (d.User, d.Currency, d.Title), static (key, res)
+                => new VoucherDetail
+                    {
+                        User = key.User, Currency = key.Currency, Title = key.Title, Fund = res.Sum(static d => d.Fund),
+                    }));
         }
 
         if (!await session.Accountant.UpsertAsync(voucher))
             throw new ApplicationException("更新或添加失败");
 
         return session.Serializer.PresentVoucher(voucher).Wrap();
+    }
+
+    private static void QuadratureNormalization(ICollection<VoucherDetail> details,
+        IGrouping<(string, string), VoucherDetail> p, double pss,
+        IGrouping<(string, string), VoucherDetail> q, double qss)
+    {
+        var ps0 = p.Sum(static d => d.Fund!.Value);
+        var qs0 = q.Sum(static d => d.Fund!.Value);
+        var ps = ps0 * qs0 / qss;
+        var qs = qs0 * ps0 / pss;
+        // UpCp -> UqCp -> UqCq
+        details.Add(new() { User = p.Key.Item1, Currency = p.Key.Item2, Title = 3998, Fund = -ps / 2 });
+        details.Add(new() { User = q.Key.Item1, Currency = p.Key.Item2, Title = 3998, Fund = +ps / 2 });
+        details.Add(new() { User = q.Key.Item1, Currency = p.Key.Item2, Title = 3999, Fund = -ps / 2 });
+        details.Add(new() { User = q.Key.Item1, Currency = q.Key.Item2, Title = 3999, Fund = -qs / 2 });
+        // UpCp -> UpCq -> UqCq
+        details.Add(new() { User = p.Key.Item1, Currency = p.Key.Item2, Title = 3999, Fund = -ps / 2 });
+        details.Add(new() { User = p.Key.Item1, Currency = q.Key.Item2, Title = 3999, Fund = -qs / 2 });
+        details.Add(new() { User = p.Key.Item1, Currency = q.Key.Item2, Title = 3998, Fund = +qs / 2 });
+        details.Add(new() { User = q.Key.Item1, Currency = q.Key.Item2, Title = 3998, Fund = -qs / 2 });
     }
 
     /// <summary>
