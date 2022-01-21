@@ -35,42 +35,49 @@ internal class Coupling : PluginBase
     public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         var rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
-        var sub = Parsing.Subtotal(ref expr, session.Client);
         Parsing.Eof(expr);
-        var level = sub.PreprocessDetail();
+
+        // var rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
+        // var sub = Parsing.Subtotal(ref expr, session.Client);
+        // Parsing.Eof(expr);
+        // var level = sub.PreprocessDetail();
 
         var sas = Templates.Config.SpecialAccounts
             .Select(sa => (Account: sa, Query: Parsing.PureDetailQuery(sa.Query, session.Client))).ToList();
-        var couples = GetCouples(session, rng);
-        var dic = new Dictionary<(string, string), double>();
-        await foreach (var couple in couples)
+        var total = new Dictionary<string, double>();
+        await foreach (var couple in GetCouples(session, rng))
         {
             var sac = sas.FirstOrDefault(sa => couple.Creditor.IsMatch(sa.Query)).Account;
             var sad = sas.FirstOrDefault(sa => couple.Debitor.IsMatch(sa.Query)).Account;
-            if (sac == null || sad == null)
-                continue;
-
             var ac = GetSpecializedAccount(couple.Creditor, sac);
             var ad = GetSpecializedAccount(couple.Debitor, sad);
             var fund = couple.Fund *
                 await session.Accountant.Query(couple.Voucher.Date, couple.Currency, BaseCurrency.Now);
-            if (string.Compare(ac, ad, StringComparison.Ordinal) > 0)
+            if (couple.Creditor.User == session.Client.User)
             {
-                fund = -fund;
-                (ac, ad) = (ad, ac);
+                if (!total.ContainsKey(ad))
+                    total.Add(ad, 0);
+                total[ad] += fund;
+                yield return $"{couple}\n";
             }
-
-            if (!dic.ContainsKey((ac, ad)))
-                dic.Add((ac, ad), 0D);
-            dic[(ac, ad)] += fund;
+            else if (couple.Debitor.User == session.Client.User)
+            {
+                if (!total.ContainsKey(ac))
+                    total.Add(ac, 0);
+                total[ac] -= couple.Fund;
+                yield return $"{couple}\n";
+            }
         }
 
-        foreach (var ((ac, ad), fund) in dic)
-            yield return $"{ac} -> {ad}: {fund.AsCurrency(BaseCurrency.Now)}\n";
+        foreach (var (tgt, fund) in total)
+            yield return $"{tgt}: {fund.AsCurrency(BaseCurrency.Now)}\n";
     }
 
     private static string GetSpecializedAccount(VoucherDetail detail, SpecialAccount sa)
     {
+        if (sa == null)
+            return $"U{detail.User.AsUser()}";
+
         var a = $"U{detail.User.AsUser()}-{sa.Name}";
         if (sa.ByContent)
             a += $"-{detail.Content}";
@@ -129,31 +136,40 @@ internal class Coupling : PluginBase
     {
         foreach (var grpC in voucher.Details.GroupBy(static d => d.Currency))
         {
+            var ratio = new Dictionary<string, double>();
             // U1 c* -> U1 d* + U1 T3998 >
+            // ratio = T3998 / (T3998 + debits)
             var totalCredits = 0D;
-            var creditors = new Dictionary<string, List<VoucherDetail>>();
+            var creditors = new List<VoucherDetail>();
             // U2 d* <- U2 c* + U2 T3998 <
+            // ratio = T3998 / (T3998 + credits)
             var totalDebits = 0D;
-            var debitors = new Dictionary<string, List<VoucherDetail>>();
-            foreach (var grpU in voucher.Details.GroupBy(static d => d.User))
+            var debitors = new List<VoucherDetail>();
+            foreach (var grpU in grpC.GroupBy(static d => d.User))
             {
                 if (!grpU.Sum(static d => d.Fund!.Value).IsZero())
                     throw new ApplicationException(
                         $"Unbalanced Voucher ^{voucher.ID}^ U{grpU.Key.AsUser()} @{grpC.Key}, run chk 1 first");
 
-                var t3998 = grpU.Where(static d => d.Title == 3998).Sum(static d => d.Fund!.Value);
+                var t3998 = grpU.SingleOrDefault(static d => d.Title == 3998)?.Fund ?? 0D;
                 if (t3998.IsZero())
                     continue;
 
                 if (t3998 > 0)
                 {
                     totalCredits += -t3998;
-                    creditors.Add(grpU.Key, grpU.Where(static d => !d.Fund!.Value.IsNonNegative()).ToList());
+                    ratio.Add(grpU.Key, t3998 / grpU.Sum(static d => Math.Max(0D, d.Fund!.Value)));
+                    creditors.AddRange(grpU.Where(static d =>
+                        !(d.Title == 6603 && d.SubTitle == null) &&
+                        !d.Fund!.Value.IsNonNegative()));
                 }
                 else
                 {
                     totalDebits += -t3998;
-                    debitors.Add(grpU.Key, grpU.Where(static d => !d.Fund!.Value.IsNonPositive()).ToList());
+                    ratio.Add(grpU.Key, t3998 / grpU.Sum(static d => Math.Min(0D, d.Fund!.Value)));
+                    debitors.AddRange(grpU.Where(static d =>
+                        !(d.Title == 6603 && d.SubTitle == null) &&
+                        !d.Fund!.Value.IsNonPositive()));
                 }
             }
 
@@ -164,17 +180,16 @@ internal class Coupling : PluginBase
             if (totalCredits.IsZero())
                 continue;
 
-            foreach (var (_, credits) in creditors)
-            foreach (var c in credits)
-            foreach (var (_, debits) in debitors)
-            foreach (var d in debits)
+            foreach (var c in creditors)
+            foreach (var d in debitors)
                 yield return new()
                     {
                         Voucher = voucher,
                         Creditor = c,
                         Debitor = d,
                         Currency = grpC.Key,
-                        Fund = -d.Fund!.Value * c.Fund!.Value / totalDebits,
+                        Fund = -d.Fund!.Value * ratio[d.User]
+                            * c.Fund!.Value * ratio[c.User] / totalDebits,
                     };
         }
     }

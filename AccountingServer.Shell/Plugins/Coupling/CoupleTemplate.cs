@@ -41,9 +41,6 @@ public class SpecialAccount
     [XmlAttribute("byRemark")]
     public bool ByRemark { get; set; }
 
-    [XmlAttribute("strict")]
-    public bool IsStrict { get; set; }
-
     [XmlText]
     public string Query { get; set; }
 }
