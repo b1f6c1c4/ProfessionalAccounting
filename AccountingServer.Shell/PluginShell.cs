@@ -24,6 +24,7 @@ using AccountingServer.Shell.Plugins.AssetHelper;
 using AccountingServer.Shell.Plugins.BankBalance;
 using AccountingServer.Shell.Plugins.CashFlow;
 using AccountingServer.Shell.Plugins.Composite;
+using AccountingServer.Shell.Plugins.Coupling;
 using AccountingServer.Shell.Plugins.CreditCardConvert;
 using AccountingServer.Shell.Plugins.Interest;
 using AccountingServer.Shell.Plugins.Statement;
@@ -52,6 +53,7 @@ internal class PluginShell : IShellComponent
                 ["cf"] = new CashFlow(),
                 ["c"] = new Composite(),
                 ["ccc"] = new CreditCardConvert(),
+                ["cp"] = new Coupling(),
                 ["stmt"] = new Statement(),
                 ["u"] = new Utilities(),
                 ["yr"] = new YieldRate(),

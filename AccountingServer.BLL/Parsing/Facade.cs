@@ -114,6 +114,12 @@ public abstract class FacadeBase
     public IVoucherDetailQuery DetailQuery(ref string s, Client client)
         => QueryParse(ref s, static p => p.voucherDetailQuery(), client);
 
+    public IQueryCompounded<IDetailQueryAtom> PureDetailQuery(string s, Client client)
+        => PureDetailQuery(ref s, client);
+
+    public IQueryCompounded<IDetailQueryAtom> PureDetailQuery(ref string s, Client client)
+        => QueryParse(ref s, static p => p.details(), client);
+
     public ISubtotal Subtotal(string s, Client client)
         => Subtotal(ref s, client);
 
