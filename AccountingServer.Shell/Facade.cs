@@ -84,6 +84,8 @@ public class Facade
         switch (expr)
         {
             case null:
+            case "":
+            case " ":
                 return HelloWorld();
             case "T":
                 return ListTitles().ToAsyncEnumerable();
@@ -110,6 +112,8 @@ public class Facade
         switch (expr)
         {
             case null:
+            case "":
+            case " ":
                 return HelloWorld();
             case "T":
                 return ListTitles().ToAsyncEnumerable();
@@ -122,9 +126,12 @@ public class Facade
 
     private static async IAsyncEnumerable<string> HelloWorld()
     {
-        yield return "Hello ";
-        await Task.Delay(1000);
-        yield return "World!";
+        const string str = "Hello, World!\n";
+        foreach (var ch in str)
+        {
+            await Task.Delay(250);
+            yield return $"{ch}";
+        }
     }
 
     #region Exchange
