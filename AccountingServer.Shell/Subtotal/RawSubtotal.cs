@@ -19,7 +19,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.Entities;
-using AccountingServer.Entities.Util;
 
 namespace AccountingServer.Shell.Subtotal;
 
@@ -34,76 +33,72 @@ internal class RawSubtotal : StringSubtotalVisitor
 
     public RawSubtotal(bool separate = false) => m_Separate = separate;
 
-    private void ShowSubtotal(ISubtotalResult sub)
+    private async IAsyncEnumerable<string> ShowSubtotal(ISubtotalResult sub)
     {
         if (sub.Items == null)
         {
             m_Path.Fund = sub.Fund;
             if (m_Separate)
-                Sb.Append(Serializer.PresentVoucherDetail(m_Path));
+                yield return Serializer.PresentVoucherDetail(m_Path);
             else
                 m_History.Add(new(m_Path));
         }
 
-        VisitChildren(sub);
+        await foreach (var s in VisitChildren(sub))
+            yield return s;
     }
 
-    protected override void Pre() => m_History = new();
-
-    protected override void Post() => Sb.Append(Serializer.PresentVoucherDetails(m_History.ToAsyncEnumerable()));
-
-    public override Nothing Visit(ISubtotalRoot sub)
+    protected override IAsyncEnumerable<string> Pre()
     {
-        ShowSubtotal(sub);
-        return Nothing.AtAll;
+        m_History = new();
+        return base.Pre();
     }
 
-    public override Nothing Visit(ISubtotalDate sub)
+    protected override IAsyncEnumerable<string> Post()
+        => Serializer.PresentVoucherDetails(m_History.ToAsyncEnumerable());
+
+    public override IAsyncEnumerable<string> Visit(ISubtotalRoot sub)
+        => ShowSubtotal(sub);
+
+    public override IAsyncEnumerable<string> Visit(ISubtotalDate sub)
     {
         m_Path.Voucher.Date = sub.Date;
-        ShowSubtotal(sub);
-        return Nothing.AtAll;
+        return ShowSubtotal(sub);
     }
 
-    public override Nothing Visit(ISubtotalUser sub)
+    public override IAsyncEnumerable<string> Visit(ISubtotalUser sub)
     {
         m_Path.User = sub.User;
-        ShowSubtotal(sub);
-        return Nothing.AtAll;
+        return ShowSubtotal(sub);
     }
 
-    public override Nothing Visit(ISubtotalCurrency sub)
+    public override IAsyncEnumerable<string> Visit(ISubtotalCurrency sub)
     {
         m_Path.Currency = sub.Currency;
-        ShowSubtotal(sub);
-        return Nothing.AtAll;
+        return ShowSubtotal(sub);
     }
 
-    public override Nothing Visit(ISubtotalTitle sub)
+    public override IAsyncEnumerable<string> Visit(ISubtotalTitle sub)
     {
         m_Path.Title = sub.Title;
-        ShowSubtotal(sub);
-        return Nothing.AtAll;
+        return ShowSubtotal(sub);
     }
 
-    public override Nothing Visit(ISubtotalSubTitle sub)
+    public override IAsyncEnumerable<string> Visit(ISubtotalSubTitle sub)
     {
         m_Path.SubTitle = sub.SubTitle;
-        ShowSubtotal(sub);
-        return Nothing.AtAll;
+        return ShowSubtotal(sub);
     }
 
-    public override Nothing Visit(ISubtotalContent sub)
+    public override IAsyncEnumerable<string> Visit(ISubtotalContent sub)
     {
         m_Path.Content = sub.Content;
-        ShowSubtotal(sub);
-        return Nothing.AtAll;
+        return ShowSubtotal(sub);
     }
 
-    public override Nothing Visit(ISubtotalRemark sub)
+    public override IAsyncEnumerable<string> Visit(ISubtotalRemark sub)
     {
         m_Path.Remark = sub.Remark;
-        ShowSubtotal(sub);
-        return Nothing.AtAll;
+        return ShowSubtotal(sub);
     }
 }

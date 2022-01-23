@@ -16,9 +16,9 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Generic;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
-using AccountingServer.Entities.Util;
 
 namespace AccountingServer.Shell.Subtotal;
 
@@ -52,80 +52,78 @@ internal class PreciseSubtotalPre : StringSubtotalVisitor
         return path + interval + token;
     }
 
-    private void ShowSubtotal(ISubtotalResult sub)
+    private async IAsyncEnumerable<string> ShowSubtotal(ISubtotalResult sub)
     {
         if (m_WithSubtotal || sub.Items == null)
-            Sb.AppendLine($"{m_Path}\t{sub.Fund:R}");
-        VisitChildren(sub);
+            yield return $"{m_Path}\t{sub.Fund:R}\n";
+        await foreach (var s in VisitChildren(sub))
+            yield return s;
     }
 
-    public override Nothing Visit(ISubtotalRoot sub)
-    {
-        ShowSubtotal(sub);
-        return Nothing.AtAll;
-    }
+    public override IAsyncEnumerable<string> Visit(ISubtotalRoot sub)
+        => ShowSubtotal(sub);
 
-    public override Nothing Visit(ISubtotalDate sub)
+    public override async IAsyncEnumerable<string> Visit(ISubtotalDate sub)
     {
         var prev = m_Path;
         m_Path = Merge(m_Path, sub.Date.AsDate(sub.Level));
-        ShowSubtotal(sub);
+        await foreach (var s in ShowSubtotal(sub))
+            yield return s;
         m_Path = prev;
-        return Nothing.AtAll;
     }
 
-    public override Nothing Visit(ISubtotalUser sub)
+    public override async IAsyncEnumerable<string> Visit(ISubtotalUser sub)
     {
         var prev = m_Path;
         m_Path = Merge(m_Path, $"U{sub.User.AsUser()}");
-        ShowSubtotal(sub);
+        await foreach (var s in ShowSubtotal(sub))
+            yield return s;
         m_Path = prev;
-        return Nothing.AtAll;
     }
 
-    public override Nothing Visit(ISubtotalCurrency sub)
+    public override async IAsyncEnumerable<string> Visit(ISubtotalCurrency sub)
     {
         var prev = m_Path;
         m_Path = Merge(m_Path, $"@{sub.Currency}");
-        ShowSubtotal(sub);
+        await foreach (var s in ShowSubtotal(sub))
+            yield return s;
         m_Path = prev;
-        return Nothing.AtAll;
     }
 
-    public override Nothing Visit(ISubtotalTitle sub)
+    public override async IAsyncEnumerable<string> Visit(ISubtotalTitle sub)
     {
         var prev = m_Path;
         m_Path = Merge(m_Path, $"{sub.Title.AsTitle()}:{TitleManager.GetTitleName(sub.Title)}");
         m_Title = sub.Title;
-        ShowSubtotal(sub);
+        await foreach (var s in ShowSubtotal(sub))
+            yield return s;
         m_Path = prev;
-        return Nothing.AtAll;
     }
 
-    public override Nothing Visit(ISubtotalSubTitle sub)
+    public override async IAsyncEnumerable<string> Visit(ISubtotalSubTitle sub)
     {
         var prev = m_Path;
         m_Path = Merge(m_Path, $"{sub.SubTitle.AsSubTitle()}:{TitleManager.GetTitleName(m_Title, sub.SubTitle)}");
-        ShowSubtotal(sub);
+        await foreach (var s in ShowSubtotal(sub))
+            yield return s;
         m_Path = prev;
-        return Nothing.AtAll;
     }
 
-    public override Nothing Visit(ISubtotalContent sub)
+    public override async IAsyncEnumerable<string> Visit(ISubtotalContent sub)
     {
         var prev = m_Path;
         m_Path = Merge(m_Path, sub.Content);
-        ShowSubtotal(sub);
+        await foreach (var s in ShowSubtotal(sub))
+            yield return s;
         m_Path = prev;
-        return Nothing.AtAll;
     }
 
-    public override Nothing Visit(ISubtotalRemark sub)
+    public override async IAsyncEnumerable<string> Visit(ISubtotalRemark sub)
     {
         var prev = m_Path;
         m_Path = Merge(m_Path, sub.Remark);
-        ShowSubtotal(sub);
+        await foreach (var s in ShowSubtotal(sub))
+            yield return s;
         m_Path = prev;
-        return Nothing.AtAll;
     }
 }

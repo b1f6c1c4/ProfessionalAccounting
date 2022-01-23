@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
@@ -35,11 +36,11 @@ internal class JsonSubtotal : ISubtotalVisitor<JProperty>, ISubtotalStringify
     private ISubtotal m_Par;
 
     /// <inheritdoc />
-    public string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer)
+    public IAsyncEnumerable<string> PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer)
     {
         m_Par = par;
         m_Depth = 0;
-        return (raw?.Accept(this)?.Value as JObject)?.ToString();
+        return AsyncEnumerable.Repeat((raw?.Accept(this)?.Value as JObject)?.ToString(), 1);
     }
 
     JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalRoot sub)

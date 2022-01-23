@@ -20,11 +20,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
-using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 
 namespace AccountingServer.Shell.Subtotal;
@@ -32,7 +30,8 @@ namespace AccountingServer.Shell.Subtotal;
 /// <summary>
 ///     分类汇总结果处理器
 /// </summary>
-internal abstract class StringSubtotalVisitor : IClientDependable, ISubtotalVisitor<Nothing>, ISubtotalStringify
+internal abstract class StringSubtotalVisitor
+    : IClientDependable, ISubtotalVisitor<IAsyncEnumerable<string>>, ISubtotalStringify
 {
     protected string Cu;
     protected int Depth;
@@ -40,42 +39,44 @@ internal abstract class StringSubtotalVisitor : IClientDependable, ISubtotalVisi
     protected GatheringType Ga;
 
     private ISubtotal m_Par;
-    protected StringBuilder Sb;
     protected IEntitiesSerializer Serializer;
 
     public Client Client { private get; set; }
 
     /// <inheritdoc />
-    public string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer)
+    public async IAsyncEnumerable<string> PresentSubtotal(ISubtotalResult raw, ISubtotal par,
+        IEntitiesSerializer serializer)
     {
         m_Par = par;
         Ga = par.GatherType;
         Cu = par.EquivalentCurrency;
         Serializer = serializer;
-        Sb = new();
         Depth = 0;
-        Pre();
-        raw?.Accept(this);
-        Post();
-        return Sb.ToString();
+        await foreach (var s in Pre())
+            yield return s;
+        if (raw != null)
+            await foreach (var s in raw.Accept(this))
+                yield return s;
+        await foreach (var s in Post())
+            yield return s;
     }
 
-    public abstract Nothing Visit(ISubtotalRoot sub);
-    public abstract Nothing Visit(ISubtotalDate sub);
-    public abstract Nothing Visit(ISubtotalUser sub);
-    public abstract Nothing Visit(ISubtotalCurrency sub);
-    public abstract Nothing Visit(ISubtotalTitle sub);
-    public abstract Nothing Visit(ISubtotalSubTitle sub);
-    public abstract Nothing Visit(ISubtotalContent sub);
-    public abstract Nothing Visit(ISubtotalRemark sub);
+    public abstract IAsyncEnumerable<string> Visit(ISubtotalRoot sub);
+    public abstract IAsyncEnumerable<string> Visit(ISubtotalDate sub);
+    public abstract IAsyncEnumerable<string> Visit(ISubtotalUser sub);
+    public abstract IAsyncEnumerable<string> Visit(ISubtotalCurrency sub);
+    public abstract IAsyncEnumerable<string> Visit(ISubtotalTitle sub);
+    public abstract IAsyncEnumerable<string> Visit(ISubtotalSubTitle sub);
+    public abstract IAsyncEnumerable<string> Visit(ISubtotalContent sub);
+    public abstract IAsyncEnumerable<string> Visit(ISubtotalRemark sub);
 
-    protected virtual void Pre() { }
-    protected virtual void Post() { }
+    protected virtual IAsyncEnumerable<string> Pre() => AsyncEnumerable.Empty<string>();
+    protected virtual IAsyncEnumerable<string> Post() => AsyncEnumerable.Empty<string>();
 
-    protected void VisitChildren(ISubtotalResult sub)
+    protected async IAsyncEnumerable<string> VisitChildren(ISubtotalResult sub)
     {
         if (sub.Items == null)
-            return;
+            yield break;
 
         IEnumerable<ISubtotalResult> items;
         if (Depth < m_Par.Levels.Count)
@@ -105,7 +106,8 @@ internal abstract class StringSubtotalVisitor : IClientDependable, ISubtotalVisi
 
         Depth++;
         foreach (var item in items)
-            item.Accept(this);
+        await foreach (var s in item.Accept(this))
+            yield return s;
 
         Depth--;
     }

@@ -16,6 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Generic;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Serializer;
 
@@ -33,5 +34,5 @@ internal interface ISubtotalStringify
     /// <param name="par">参数</param>
     /// <param name="serializer">表示器</param>
     /// <returns>分类汇总结果</returns>
-    string PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer);
+    IAsyncEnumerable<string> PresentSubtotal(ISubtotalResult raw, ISubtotal par, IEntitiesSerializer serializer);
 }

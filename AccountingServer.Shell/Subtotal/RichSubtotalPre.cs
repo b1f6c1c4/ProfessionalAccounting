@@ -16,9 +16,9 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Generic;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
-using AccountingServer.Entities.Util;
 
 namespace AccountingServer.Shell.Subtotal;
 
@@ -38,63 +38,46 @@ internal class RichSubtotalPre : StringSubtotalVisitor
         ? f.ToString("N0")
         : f.AsCurrency(Cu ?? m_Currency);
 
-    private void ShowSubtotal(ISubtotalResult sub, string str)
+    private async IAsyncEnumerable<string> ShowSubtotal(ISubtotalResult sub, string str)
     {
-        Sb.AppendLine($"{Idents}{str.CPadRight(38)}{Ts(sub.Fund).CPadLeft(12 + 2 * Depth)}");
-        VisitChildren(sub);
+        yield return $"{Idents}{str.CPadRight(38)}{Ts(sub.Fund).CPadLeft(12 + 2 * Depth)}\n";
+        await foreach (var s in VisitChildren(sub))
+            yield return s;
     }
 
-    public override Nothing Visit(ISubtotalRoot sub)
+    public override async IAsyncEnumerable<string> Visit(ISubtotalRoot sub)
     {
-        Sb.AppendLine($"{Idents}{Ts(sub.Fund)}");
-        VisitChildren(sub);
-        return Nothing.AtAll;
+        yield return $"{Idents}{Ts(sub.Fund)}\n";
+        await foreach (var s in VisitChildren(sub))
+            yield return s;
     }
 
-    public override Nothing Visit(ISubtotalDate sub)
-    {
-        ShowSubtotal(sub, sub.Date.AsDate(sub.Level));
-        return Nothing.AtAll;
-    }
+    public override IAsyncEnumerable<string> Visit(ISubtotalDate sub)
+        => ShowSubtotal(sub, sub.Date.AsDate(sub.Level));
 
-    public override Nothing Visit(ISubtotalUser sub)
-    {
-        ShowSubtotal(sub, $"U{sub.User.AsUser()}");
-        return Nothing.AtAll;
-    }
+    public override IAsyncEnumerable<string> Visit(ISubtotalUser sub)
+        => ShowSubtotal(sub, $"U{sub.User.AsUser()}");
 
-    public override Nothing Visit(ISubtotalCurrency sub)
+    public override async IAsyncEnumerable<string> Visit(ISubtotalCurrency sub)
     {
         m_Currency = sub.Currency;
-        ShowSubtotal(sub, $"@{sub.Currency}");
+        await foreach (var s in ShowSubtotal(sub, $"@{sub.Currency}"))
+            yield return s;
         m_Currency = null;
-        return Nothing.AtAll;
     }
 
-    public override Nothing Visit(ISubtotalTitle sub)
+    public override IAsyncEnumerable<string> Visit(ISubtotalTitle sub)
     {
         m_Title = sub.Title;
-        ShowSubtotal(sub, $"{sub.Title.AsTitle()} {TitleManager.GetTitleName(sub.Title)}");
-        return Nothing.AtAll;
+        return ShowSubtotal(sub, $"{sub.Title.AsTitle()} {TitleManager.GetTitleName(sub.Title)}");
     }
 
-    public override Nothing Visit(ISubtotalSubTitle sub)
-    {
-        ShowSubtotal(
-            sub,
-            $"{sub.SubTitle.AsSubTitle()} {TitleManager.GetTitleName(m_Title, sub.SubTitle)}");
-        return Nothing.AtAll;
-    }
+    public override IAsyncEnumerable<string> Visit(ISubtotalSubTitle sub)
+        => ShowSubtotal(sub, $"{sub.SubTitle.AsSubTitle()} {TitleManager.GetTitleName(m_Title, sub.SubTitle)}");
 
-    public override Nothing Visit(ISubtotalContent sub)
-    {
-        ShowSubtotal(sub, sub.Content.Quotation('\''));
-        return Nothing.AtAll;
-    }
+    public override IAsyncEnumerable<string> Visit(ISubtotalContent sub)
+        => ShowSubtotal(sub, sub.Content.Quotation('\''));
 
-    public override Nothing Visit(ISubtotalRemark sub)
-    {
-        ShowSubtotal(sub, sub.Remark.Quotation('"'));
-        return Nothing.AtAll;
-    }
+    public override IAsyncEnumerable<string> Visit(ISubtotalRemark sub)
+        => ShowSubtotal(sub, sub.Remark.Quotation('"'));
 }

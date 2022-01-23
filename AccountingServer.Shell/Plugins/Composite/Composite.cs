@@ -271,77 +271,73 @@ internal class SubtotalVisitor : StringSubtotalVisitor
         m_HideContent = hideContent;
     }
 
-    private void ShowSubtotal(ISubtotalResult sub)
+    private async IAsyncEnumerable<string> ShowSubtotal(ISubtotalResult sub)
     {
         if (sub.Items == null)
-            Sb.AppendLine($"{m_Path}\t{m_Formatter.GetFundString(sub.Fund)}");
-        VisitChildren(sub);
+            yield return $"{m_Path}\t{m_Formatter.GetFundString(sub.Fund)}";
+        await foreach (var s in VisitChildren(sub))
+            yield return s;
     }
 
-    public override Nothing Visit(ISubtotalRoot sub)
-    {
-        ShowSubtotal(sub);
-        return Nothing.AtAll;
-    }
+    public override IAsyncEnumerable<string> Visit(ISubtotalRoot sub)
+        => ShowSubtotal(sub);
 
-    public override Nothing Visit(ISubtotalDate sub)
+    public override IAsyncEnumerable<string> Visit(ISubtotalDate sub)
     {
         var prev = m_Path;
         m_Path = Composite.Merge(m_Path, sub.Date.AsDate(sub.Level));
-        ShowSubtotal(sub);
+        var s = ShowSubtotal(sub);
         m_Path = prev;
-        return Nothing.AtAll;
+        return s;
     }
 
-    public override Nothing Visit(ISubtotalUser sub)
+    public override IAsyncEnumerable<string> Visit(ISubtotalUser sub)
     {
         Depth++; // Hack
-        ShowSubtotal(sub);
-        return Nothing.AtAll;
+        return ShowSubtotal(sub);
     }
 
-    public override Nothing Visit(ISubtotalCurrency sub)
+    public override IAsyncEnumerable<string> Visit(ISubtotalCurrency sub)
     {
         Depth++; // Hack
-        ShowSubtotal(sub);
-        return Nothing.AtAll;
+        return ShowSubtotal(sub);
     }
 
-    public override Nothing Visit(ISubtotalTitle sub)
+    public override IAsyncEnumerable<string> Visit(ISubtotalTitle sub)
     {
         var prev = m_Path;
         m_Path = Composite.Merge(m_Path, TitleManager.GetTitleName(sub.Title));
         m_Title = sub.Title;
-        ShowSubtotal(sub);
+        var s = ShowSubtotal(sub);
         m_Path = prev;
-        return Nothing.AtAll;
+        return s;
     }
 
-    public override Nothing Visit(ISubtotalSubTitle sub)
+    public override IAsyncEnumerable<string> Visit(ISubtotalSubTitle sub)
     {
         var prev = m_Path;
         m_Path = Composite.Merge(m_Path, TitleManager.GetTitleName(m_Title, sub.SubTitle));
-        ShowSubtotal(sub);
+        var s = ShowSubtotal(sub);
         m_Path = prev;
-        return Nothing.AtAll;
+        return s;
     }
 
-    public override Nothing Visit(ISubtotalContent sub)
+    public override IAsyncEnumerable<string> Visit(ISubtotalContent sub)
     {
         var prev = m_Path;
         if (!m_HideContent)
             m_Path = Composite.Merge(m_Path, sub.Content);
-        ShowSubtotal(sub);
+        var s = ShowSubtotal(sub);
         m_Path = prev;
-        return Nothing.AtAll;
+        return s;
     }
 
-    public override Nothing Visit(ISubtotalRemark sub)
+    public override IAsyncEnumerable<string> Visit(ISubtotalRemark sub)
     {
         var prev = m_Path;
         m_Path = Composite.Merge(m_Path, sub.Remark);
-        ShowSubtotal(sub);
+        var s = ShowSubtotal(sub);
         m_Path = prev;
-        return Nothing.AtAll;
+        return s;
     }
 }
