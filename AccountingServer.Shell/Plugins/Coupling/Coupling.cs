@@ -192,7 +192,17 @@ internal class Coupling : PluginBase
                     throw new ApplicationException(
                         $"Unbalanced Voucher ^{voucher.ID}^ U{grpU.Key.AsUser()} @{grpC.Key}, run chk 1 first");
 
-                var t3998 = grpU.SingleOrDefault(static d => d.Title == 3998)?.Fund ?? 0D;
+                double t3998;
+                try
+                {
+                    t3998 = grpU.SingleOrDefault(static d => d.Title == 3998)?.Fund ?? 0D;
+                }
+                catch (Exception e)
+                {
+                    throw new ApplicationException(
+                        $"Error during Decoupling Voucher ^{voucher.ID}^ U{grpU.Key.AsUser()} @{grpC.Key}", e);
+                }
+
                 if (t3998.IsZero())
                     continue;
 

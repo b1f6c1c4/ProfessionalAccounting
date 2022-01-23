@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Coupling>
+  <!-- <Couple user="b1&amp;pn">
+    <Cash>T1001</Cash>
+    <Cash>T1002</Cash>
+    <Cash>T1012</Cash>
+    <Cash>T1101</Cash>
+    <Cash>T1121</Cash>
+    <Cash>T2001</Cash>
+    <Cash>T2201</Cash>
+    <Of user="b1">
+      <Cash>T1001</Cash>
+      <Cash>T1002</Cash>
+      <Cash>T1012</Cash>
+      <Cash>T1101</Cash>
+      <Cash>T1121</Cash>
+      <Cash>T2001</Cash>
+      <Cash>T2201</Cash>
+      <Cash byContent="true" byRemark="true">T224101</Cash>
+    </Of>
+    <Of user="pn">
+      <Cash>T1001</Cash>
+      <Cash>T1002</Cash>
+      <Cash>T1012</Cash>
+      <Cash>T1101</Cash>
+      <Cash>T1121</Cash>
+      <Cash>T2001</Cash>
+      <Cash>T2201</Cash>
+      <Cash byContent="true" byRemark="true">T224101</Cash>
+    </Of>
+  </Couple> -->
+</Coupling>
