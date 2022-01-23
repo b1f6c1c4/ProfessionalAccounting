@@ -48,7 +48,7 @@ internal class YieldRate : PluginBase
                             grp.Items.Cast<ISubtotalDate>().OrderBy(static b => b.Date, new DateComparer()).ToList(),
                             bal.Fund)))
                 .OrderByDescending(static kvp => kvp.Rate))
-            yield return $"{grp.Content.CPadRight(30)} {$"{rte * 360:P2}",7}";
+            yield return $"{grp.Content.CPadRight(30)} {$"{rte * 360:P2}",7}\n";
     }
 
     /// <summary>

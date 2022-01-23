@@ -88,8 +88,8 @@ internal partial class CarryShell
             if (!total.IsZero())
             {
                 yield return total < 0
-                    ? $"{dt.AsDate(SubtotalLevel.Month)} CurrencyCarry Gain @{baseCur} {(-total).AsCurrency(baseCur)}"
-                    : $"{dt.AsDate(SubtotalLevel.Month)} CurrencyCarry Lost @{baseCur} {(+total).AsCurrency(baseCur)}";
+                    ? $"{dt.AsDate(SubtotalLevel.Month)} CurrencyCarry Gain @{baseCur} {(-total).AsCurrency(baseCur)}\n"
+                    : $"{dt.AsDate(SubtotalLevel.Month)} CurrencyCarry Lost @{baseCur} {(+total).AsCurrency(baseCur)}\n";
                 await session.Accountant.UpsertAsync(new Voucher
                     {
                         Date = ed,
@@ -114,7 +114,7 @@ internal partial class CarryShell
         if (tasks.Any(static t => !t.Value.IsZero()))
         {
             var grand = tasks.Sum(static t => t.Value);
-            yield return $"{dt.AsDate(SubtotalLevel.Month)} Carry => @@ {grand.AsCurrency(baseCur)}";
+            yield return $"{dt.AsDate(SubtotalLevel.Month)} Carry => @@ {grand.AsCurrency(baseCur)}\n";
         }
 
         foreach (var task in tasks)
@@ -159,7 +159,7 @@ internal partial class CarryShell
             flag++;
             var b = grpC.Fund;
             yield return
-                $"{rng.StartDate.AsDate(SubtotalLevel.Month)} PartialCarry => @{grpC.Currency} {b.AsCurrency(grpC.Currency)} (S={task.Target.IsSpecial})";
+                $"{rng.StartDate.AsDate(SubtotalLevel.Month)} PartialCarry => @{grpC.Currency} {b.AsCurrency(grpC.Currency)} (S={task.Target.IsSpecial})\n";
             foreach (var grpt in grpC.Items.Cast<ISubtotalTitle>())
             foreach (var grps in grpt.Items.Cast<ISubtotalSubTitle>())
             foreach (var grpc in grps.Items.Cast<ISubtotalContent>())
@@ -196,7 +196,7 @@ internal partial class CarryShell
 
         if (flag >= 2)
             yield return
-                $"{rng.StartDate.AsDate(SubtotalLevel.Month)} PartialCarry ==> @@ {total.AsCurrency(baseCur)} (S={task.Target.IsSpecial})";
+                $"{rng.StartDate.AsDate(SubtotalLevel.Month)} PartialCarry ==> @@ {total.AsCurrency(baseCur)} (S={task.Target.IsSpecial})\n";
         task.Value += total;
     }
 }

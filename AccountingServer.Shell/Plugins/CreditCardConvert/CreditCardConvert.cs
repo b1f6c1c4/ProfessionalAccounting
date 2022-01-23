@@ -161,7 +161,7 @@ internal class CreditCardConvert : PluginBase
             sb.Clear();
         }
 
-        yield return "===========================================================";
+        yield return "===========================================================\n";
 
         foreach (var tran in trans.Concat(rebates).OrderByDescending(static t => t.Date))
         {
@@ -231,7 +231,7 @@ internal class CreditCardConvert : PluginBase
                 });
         }
 
-        yield return $"{vir.CachedVouchers}";
+        yield return $"{vir.CachedVouchers}\n";
     }
 
     private class Trans

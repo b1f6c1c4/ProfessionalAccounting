@@ -60,7 +60,7 @@ internal partial class CarryShell : IShellComponent
         }
 
         await foreach (var e in iae)
-            yield return e + "\n";
+            yield return e;
     }
 
     /// <inheritdoc />
@@ -96,9 +96,9 @@ internal partial class CarryShell : IShellComponent
 
     private async IAsyncEnumerable<string> PerformAction(Session session, DateFilter rng, bool isRst)
     {
-        yield return $"=== rm -rf Carry {rng.AsDateRange()} ===> {await ResetCarry(session, rng)} removed";
-        yield return $"=== rm -rf CarryYear {rng.AsDateRange()} ===> {await ResetCarryYear(session, rng)} removed";
-        yield return $"=== rm -rf Conversion {rng.AsDateRange()} ===> {await ResetConversion(session, rng)} removed";
+        yield return $"=== rm -rf Carry {rng.AsDateRange()} ===> {await ResetCarry(session, rng)} removed\n";
+        yield return $"=== rm -rf CarryYear {rng.AsDateRange()} ===> {await ResetCarryYear(session, rng)} removed\n";
+        yield return $"=== rm -rf Conversion {rng.AsDateRange()} ===> {await ResetConversion(session, rng)} removed\n";
         if (isRst)
             yield break;
 
@@ -128,6 +128,6 @@ internal partial class CarryShell : IShellComponent
                         yield return s;
             }
 
-        yield return $"=== Total vouchers: {vir.CachedVouchers}";
+        yield return $"=== Total vouchers: {vir.CachedVouchers}\n";
     }
 }

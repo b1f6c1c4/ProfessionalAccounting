@@ -56,7 +56,7 @@ internal partial class CarryShell
                      $"T4103 {rng.AsDateRange()}`Cs")).Items.Cast<ISubtotalCurrency>())
         {
             yield return
-                $"{dt.AsDate(SubtotalLevel.Month)} CarryYear => @{grpC.Currency} {grpC.Fund.AsCurrency(grpC.Currency)}";
+                $"{dt.AsDate(SubtotalLevel.Month)} CarryYear => @{grpC.Currency} {grpC.Fund.AsCurrency(grpC.Currency)}\n";
             foreach (var grps in grpC.Items.Cast<ISubtotalSubTitle>())
                 await session.Accountant.UpsertAsync(new Voucher
                     {

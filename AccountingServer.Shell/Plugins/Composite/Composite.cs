@@ -274,7 +274,7 @@ internal class SubtotalVisitor : StringSubtotalVisitor
     private async IAsyncEnumerable<string> ShowSubtotal(ISubtotalResult sub)
     {
         if (sub.Items == null)
-            yield return $"{m_Path}\t{m_Formatter.GetFundString(sub.Fund)}";
+            yield return $"{m_Path}\t{m_Formatter.GetFundString(sub.Fund)}\n";
         await foreach (var s in VisitChildren(sub))
             yield return s;
     }

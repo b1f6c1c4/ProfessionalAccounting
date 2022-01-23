@@ -179,7 +179,7 @@ internal class AssetShell : DistributedShell
                     ParsingF.VoucherQuery(
                         $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}",
                         session.Client)));
-            yield return $"{a.StringID} {a.Name} => {cnt}";
+            yield return $"{a.StringID} {a.Name} => {cnt}\n";
         }
     }
 

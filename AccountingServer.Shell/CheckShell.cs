@@ -127,7 +127,7 @@ internal class CheckShell : IShellComponent
                 case < 0 when grpd.Fund.IsNonPositive():
                     continue;
                 default:
-                    yield return $"{grpd.Date:yyyyMMdd} {info} {grpc.Content}:@{grpC.Currency} {grpd.Fund:R}";
+                    yield return $"{grpd.Date:yyyyMMdd} {info} {grpc.Content}:@{grpC.Currency} {grpd.Fund:R}\n";
                     break;
             }
     }
@@ -140,17 +140,17 @@ internal class CheckShell : IShellComponent
             if (d.Remark == "reconciliation")
                 continue;
 
-            yield return $"{v.ID} {v.Date:yyyyMMdd} {info} {d.Content}:{d.Fund!.Value:R}";
+            yield return $"{v.ID} {v.Date:yyyyMMdd} {info} {d.Content}:{d.Fund!.Value:R}\n";
         }
     }
 
     private async IAsyncEnumerable<string> UpsertCheck(Session session)
     {
-        yield return "Reading...";
+        yield return "Reading...\n";
         var lst = await session.Accountant.RunVoucherQueryAsync("U A").ToListAsync();
-        yield return $"Read {lst.Count} vouchers, writing...";
+        yield return $"Read {lst.Count} vouchers, writing...\n";
         await session.Accountant.UpsertAsync(lst);
-        yield return "Written";
+        yield return "Written\n";
     }
 
     private async IAsyncEnumerable<string> DuplicationCheck(Session session, string expr)
@@ -159,9 +159,9 @@ internal class CheckShell : IShellComponent
         Parsing.Eof(expr);
         await foreach (var (v, ids) in session.Accountant.SelectDuplicatedVouchersAsync(query))
         {
-            yield return $"// Date = {v.Date.AsDate()} Duplication = {ids.Count}";
+            yield return $"// Date = {v.Date.AsDate()} Duplication = {ids.Count}\n";
             foreach (var id in ids)
-                yield return $"//   ^{id}^";
+                yield return $"//   ^{id}^\n";
             yield return session.Serializer.PresentVoucher(v).Wrap();
         }
     }

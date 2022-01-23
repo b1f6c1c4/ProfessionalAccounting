@@ -52,14 +52,14 @@ internal class Statement : PluginBase
             parsed.Parse(csv);
             yield return $"{parsed.Items.Count} parsed\n";
             await foreach (var s in RunMark(session, filt, parsed, marker))
-                yield return s + "\n";
+                yield return s;
         }
         else if (ParsingF.Optional(ref expr, "unmark"))
         {
             var filt = ParsingF.DetailQuery(ref expr, session.Client);
             ParsingF.Eof(expr);
             await foreach (var s in RunUnmark(session, filt))
-                yield return s + "\n";
+                yield return s;
         }
         else if (ParsingF.Optional(ref expr, "check"))
         {
@@ -68,7 +68,7 @@ internal class Statement : PluginBase
             parsed.Parse(csv);
             yield return $"{parsed.Items.Count} parsed\n";
             await foreach (var s in RunCheck(session, filt, parsed))
-                yield return s + "\n";
+                yield return s;
         }
         else
         {
@@ -100,11 +100,11 @@ internal class Statement : PluginBase
                         new StmtDetailQuery(""),
                         new StmtDetailQuery(marker))));
             await foreach (var s in RunUnmark(session, markerFilt))
-                yield return s + "\n";
+                yield return s;
             await foreach (var s in RunMark(session, nullFilt, parsed, marker))
-                yield return s + "\n";
+                yield return s;
             await foreach (var s in RunCheck(session, nmFilt, parsed))
-                yield return s + "\n";
+                yield return s;
         }
     }
 
@@ -151,14 +151,14 @@ internal class Statement : PluginBase
             if (Trial(true) || Trial(false))
                 continue;
 
-            yield return b.Raw;
+            yield return $"{b.Raw}\n";
         }
 
         await session.Accountant.UpsertAsync(ops);
 
-        yield return $"{marked} marked";
-        yield return $"{remarked} remarked";
-        yield return $"{converted} converted";
+        yield return $"{marked} marked\n";
+        yield return $"{remarked} remarked\n";
+        yield return $"{converted} converted\n";
     }
 
     private async IAsyncEnumerable<string> RunUnmark(Session session, IVoucherDetailQuery filt)
@@ -189,8 +189,8 @@ internal class Statement : PluginBase
         }
 
         await session.Accountant.UpsertAsync(ops);
-        yield return $"{cntAll} selected";
-        yield return $"{cnt} unmarked";
+        yield return $"{cntAll} selected\n";
+        yield return $"{cnt} unmarked\n";
     }
 
     private async IAsyncEnumerable<string> RunCheck(Session session, IVoucherDetailQuery filt, CsvParser parsed)
@@ -223,11 +223,11 @@ internal class Statement : PluginBase
                 continue;
             }
 
-            yield return $"{v.ID.Quotation('^')} {v.Date.AsDate()} {d.Content} {d.Fund.AsCurrency(d.Currency)}";
+            yield return $"{v.ID.Quotation('^')} {v.Date.AsDate()} {d.Content} {d.Fund.AsCurrency(d.Currency)}\n";
         }
 
         foreach (var b in lst)
-            yield return b.Raw;
+            yield return $"{b.Raw}\n";
     }
 
     private sealed class StmtVoucherDetailQuery : IVoucherDetailQuery

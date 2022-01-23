@@ -49,7 +49,7 @@ internal class Utilities : PluginBase
             await session.Accountant.UpsertAsync(voucher);
         }
 
-        yield return $"{vir.CachedVouchers}";
+        yield return $"{vir.CachedVouchers}\n";
     }
 
     /// <inheritdoc />
@@ -59,7 +59,7 @@ internal class Utilities : PluginBase
             yield return s;
 
         foreach (var util in Templates.Config.Templates)
-            yield return $"{util.Name,20}{util.Description}";
+            yield return $"{util.Name,20}{util.Description}\n";
     }
 
     /// <summary>

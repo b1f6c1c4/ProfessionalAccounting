@@ -37,7 +37,7 @@ internal partial class CarryShell
     {
         foreach (var info in BaseCurrency.History)
             if (info.Date.Within(rng))
-                yield return $"{info.Date.AsDate(),8} @{info.Currency}";
+                yield return $"{info.Date.AsDate(),8} @{info.Currency}\n";
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ internal partial class CarryShell
             var rate = await session.Accountant.Query(dt, grpC.Currency, to);
             var dst = rate * grpC.Fund;
             yield return
-                $"=== {dt.AsDate()} @{grpC.Currency} {grpC.Fund.AsCurrency(grpC.Currency)} => @{to} {dst.AsCurrency(to)}";
+                $"=== {dt.AsDate()} @{grpC.Currency} {grpC.Fund.AsCurrency(grpC.Currency)} => @{to} {dst.AsCurrency(to)}\n";
 
             foreach (var grpt in grpC.Items.Cast<ISubtotalTitle>())
             foreach (var grps in grpt.Items.Cast<ISubtotalSubTitle>())

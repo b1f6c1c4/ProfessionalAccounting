@@ -108,6 +108,6 @@ internal class PluginShell : IShellComponent
     private IEnumerable<string> ListPlugins()
     {
         foreach (var (key, value) in m_Plugins)
-            yield return $"{key,-8}{value.GetType().FullName}";
+            yield return $"{key,-8}{value.GetType().FullName}\n";
     }
 }
