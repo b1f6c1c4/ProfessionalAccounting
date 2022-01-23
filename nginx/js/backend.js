@@ -72,18 +72,22 @@ const execute = (cmd, cb) => {
     return xhr('GET', '/api/emptyVoucher');
   }
   if (cmd === '??') {
-    return Promise.resolve(`客户端帮助文档
+    const t = `客户端帮助文档
 
 ??                          客户端帮助文档
 login|user ...              选择用户
 SPEC -- ...                 临时选择序列化器
-`);
+`;
+    if (cb) return cb(t, undefined, true);
+    else return Promise.resolve(t);
   }
 
   const mx = cmd.match(/^(?:login|user) (.*)$/);
   if (mx) {
     login(mx[1]);
-    return Promise.resolve(`Login as ${theUser}`);
+    const t = `Login as ${theUser}`;
+    if (cb) return cb(t, undefined, true);
+    else return Promise.resolve(t);
   }
 
   const m = cmd.match(/^([a-z](?:[^-]|-[^-]|---)+)--(.*)$/);
