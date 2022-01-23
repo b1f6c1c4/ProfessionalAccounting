@@ -34,84 +34,119 @@ internal class Coupling : PluginBase
 
     public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
+        var len = expr.Length;
+        var aux = Parsing.PureDetailQuery(ref expr, session.Client);
+        if (len == expr.Length)
+            aux = null;
         var rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
         Parsing.Eof(expr);
 
-        // var rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
-        // var sub = Parsing.Subtotal(ref expr, session.Client);
-        // Parsing.Eof(expr);
-        // var level = sub.PreprocessDetail();
+        foreach (var configCouple in Templates.Config.Couples)
+        await foreach (var ret in AnalyzeCouple(session, configCouple, rng, aux))
+            yield return ret;
+    }
 
-        var sas = Templates.Config.SpecialAccounts
-            .Select(sa => (Account: sa, Query: Parsing.PureDetailQuery(sa.Query, session.Client))).ToList();
-        var total = new Dictionary<string, double>();
-        await foreach (var couple in GetCouples(session, rng))
+    private static async IAsyncEnumerable<string> AnalyzeCouple(Session session, ConfigCouple configCouple,
+        DateFilter rng, IQueryCompounded<IDetailQueryAtom> aux)
+    {
+        var spendEntries = new SortedDictionary<string, (List<Couple>, List<Couple>, List<Couple>)>();
+        var gatherEntries = new SortedDictionary<string, List<Couple>>();
+        var errEntries = new List<Couple>();
+        await foreach (var couple in GetCouples(session, configCouple.User, rng))
         {
-            var sac = sas.FirstOrDefault(sa => couple.Creditor.IsMatch(sa.Query)).Account;
-            var sad = sas.FirstOrDefault(sa => couple.Debitor.IsMatch(sa.Query)).Account;
-            var ac = GetSpecializedAccount(couple.Creditor, sac);
-            var ad = GetSpecializedAccount(couple.Debitor, sad);
-            var fund = couple.Fund *
-                await session.Accountant.Query(couple.Voucher.Date, couple.Currency, BaseCurrency.Now);
-            if (couple.Creditor.User == session.Client.User)
+            if (aux != null && !couple.Creditor.IsMatch(aux) && !couple.Debitor.IsMatch(aux))
+                continue;
+
+            var lc = configCouple.Liabilities.SingleOrDefault(l => l.User == couple.Creditor.User);
+            var cc = lc?.IsCash(couple.Creditor) ?? false;
+            var ld = configCouple.Liabilities.SingleOrDefault(l => l.User == couple.Debitor.User);
+            var cd = ld?.IsCash(couple.Debitor) ?? false;
+            if (cc && configCouple.IsCash(couple.Debitor)) // U1 cash -> U1&2 cash
             {
-                if (!total.ContainsKey(ad))
-                    total.Add(ad, 0);
-                total[ad] += fund;
-                yield return $"{couple}\n";
+                var a = $"U{couple.Creditor.User.AsUser()}";
+                if (!gatherEntries.ContainsKey(a))
+                    gatherEntries.Add(a, new());
+                gatherEntries[a].Add(couple);
             }
-            else if (couple.Debitor.User == session.Client.User)
+            else if (cc && configCouple.IsNonCash(couple.Debitor)) // U1 cash -> U1&2 non-cash
             {
-                if (!total.ContainsKey(ac))
-                    total.Add(ac, 0);
-                total[ac] -= couple.Fund;
-                yield return $"{couple}\n";
+                var a = lc.NameOf(couple.Creditor);
+                if (!spendEntries.ContainsKey(a))
+                    spendEntries.Add(a, (new(), new(), new()));
+                spendEntries[a].Item1.Add(couple);
             }
+            else if (configCouple.IsCash(couple.Creditor) && cd) // U1&2 cash -> U1 cash
+            {
+                var a = ld.NameOf(couple.Debitor);
+                if (!spendEntries.ContainsKey(a))
+                    spendEntries.Add(a, (new(), new(), new()));
+                spendEntries[a].Item2.Add(couple);
+            }
+            else if (configCouple.IsNonCash(couple.Creditor) && cd) // U1&2 non-cash -> U1 cash
+            {
+                var a = ld.NameOf(couple.Debitor);
+                if (!spendEntries.ContainsKey(a))
+                    spendEntries.Add(a, (new(), new(), new()));
+                spendEntries[a].Item3.Add(couple);
+            }
+            else if (configCouple.User == couple.Creditor.User ||
+                     configCouple.User == couple.Debitor.User) // otherwise
+                errEntries.Add(couple);
         }
 
-        foreach (var (tgt, fund) in total)
-            yield return $"{tgt}: {fund.AsCurrency(BaseCurrency.Now)}\n";
+        foreach (var (a, lst) in gatherEntries)
+        {
+            var fund = await lst.ToAsyncEnumerable().SumAwaitAsync(async couple => couple.Fund *
+                await session.Accountant.Query(couple.Voucher.Date, couple.Currency, BaseCurrency.Now));
+            yield return
+                $"// U{configCouple.User.AsUser()} *** cash by *** {a} {fund.AsCurrency(BaseCurrency.Now)}\n";
+            foreach (var couple in lst)
+                yield return $"{couple}\n";
+        }
+
+        foreach (var (a, (paidBy, paidInCashTo, paidTo)) in spendEntries)
+        {
+            var fund1 = await paidBy.ToAsyncEnumerable().SumAwaitAsync(async couple => couple.Fund *
+                await session.Accountant.Query(couple.Voucher.Date, couple.Currency, BaseCurrency.Now));
+            var fund2 = await paidInCashTo.ToAsyncEnumerable().SumAwaitAsync(async couple => couple.Fund *
+                await session.Accountant.Query(couple.Voucher.Date, couple.Currency, BaseCurrency.Now));
+            var fund3 = await paidTo.ToAsyncEnumerable().SumAwaitAsync(async couple => couple.Fund *
+                await session.Accountant.Query(couple.Voucher.Date, couple.Currency, BaseCurrency.Now));
+            if (paidInCashTo.Count != 0)
+            {
+                yield return
+                    $"// U{configCouple.User.AsUser()} *** cash to *** {a} {fund2.AsCurrency(BaseCurrency.Now)}\n";
+                foreach (var couple in paidInCashTo)
+                    yield return $"{couple}\n";
+            }
+
+            if (paidTo.Count != 0)
+            {
+                yield return
+                    $"// U{configCouple.User.AsUser()} +++ paid to +++ {a} {fund3.AsCurrency(BaseCurrency.Now)}\n";
+                if (aux != null)
+                    foreach (var couple in paidTo)
+                        yield return $"{couple}\n";
+            }
+
+            yield return
+                $"// U{configCouple.User.AsUser()} --- paid by --- {a} {fund1.AsCurrency(BaseCurrency.Now)}\n";
+            if (aux != null)
+                foreach (var couple in paidBy)
+                    yield return $"{couple}\n";
+        }
+
+        if (errEntries.Count != 0)
+            yield return $"// ignored {errEntries.Count} items\n";
+        if (aux != null)
+            foreach (var couple in errEntries)
+                yield return $"// ignored: {couple}\n";
     }
 
-    private static string GetSpecializedAccount(VoucherDetail detail, SpecialAccount sa)
-    {
-        if (sa == null)
-            return $"U{detail.User.AsUser()}";
-
-        var a = $"U{detail.User.AsUser()}-{sa.Name}";
-        if (sa.ByContent)
-            a += $"-{detail.Content}";
-        if (sa.ByRemark)
-            a += $"-{detail.Remark}";
-        return a;
-    }
-
-    private static IAsyncEnumerable<Couple> GetCouples(Session session, DateFilter rng)
-        => session.Accountant.SelectVouchersAsync(Parsing.VoucherQuery($"U T3998 {rng.AsDateRange()}", session.Client))
+    private static IAsyncEnumerable<Couple> GetCouples(Session session, string user, DateFilter rng)
+        => session.Accountant
+            .SelectVouchersAsync(Parsing.VoucherQuery($"U{user.AsUser()} T3998 {rng.AsDateRange()}", session.Client))
             .SelectMany(static v => Decouple(v).ToAsyncEnumerable());
-
-    private sealed class VoucherStub : IVoucherQueryAtom
-    {
-        public bool IsDangerous() => DetailFilter.IsDangerous();
-
-        public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
-
-        public bool ForAll => false;
-        public Voucher VoucherFilter => null;
-        public DateFilter Range => DateFilter.Unconstrained;
-        public IQueryCompounded<IDetailQueryAtom> DetailFilter { get; init; }
-    }
-
-    private sealed class IntersectStub<TAtom> : IQueryAry<TAtom> where TAtom : class
-    {
-        public bool IsDangerous() => Filter1.IsDangerous() && Filter2.IsDangerous();
-
-        public T Accept<T>(IQueryVisitor<TAtom, T> visitor) => visitor.Visit(this);
-
-        public OperatorType Operator => OperatorType.Intersect;
-        public IQueryCompounded<TAtom> Filter1 { get; init; }
-        public IQueryCompounded<TAtom> Filter2 { get; init; }
-    }
 
     private struct Couple
     {
@@ -123,12 +158,18 @@ internal class Coupling : PluginBase
 
         public override string ToString()
         {
-            var c =
-                $"U{Creditor.User.AsUser()} T{Creditor.Title.AsTitle()}{Creditor.SubTitle.AsSubTitle()} {Creditor.Content.Quotation('\'')} {Creditor.Remark.Quotation('"')}";
-            var d =
-                $"U{Debitor.User.AsUser()} T{Debitor.Title.AsTitle()}{Debitor.SubTitle.AsSubTitle()} {Debitor.Content.Quotation('\'')} {Debitor.Remark.Quotation('"')}";
+            var c = $"U{Creditor.User.AsUser()} T{Creditor.Title.AsTitle()}{Creditor.SubTitle.AsSubTitle()}";
+            if (Creditor.Content != null)
+                c += $" {Creditor.Content.Quotation('\'')}";
+            if (Creditor.Remark != null)
+                c += $" {Creditor.Remark.Quotation('"')}";
+            var d = $"U{Debitor.User.AsUser()} T{Debitor.Title.AsTitle()}{Debitor.SubTitle.AsSubTitle()}";
+            if (Debitor.Content != null)
+                d += $" {Debitor.Content.Quotation('\'')}";
+            if (Debitor.Remark != null)
+                d += $" {Debitor.Remark.Quotation('"')}";
             return
-                $"^{Voucher.ID}^ {Voucher.Date.AsDate()} {c.CPadRight(60)} -> {d.CPadRight(60)} @{Currency} {Fund.AsCurrency(Currency)}";
+                $"^{Voucher.ID}^ {Voucher.Date.AsDate()} {c.CPadRight(18)} -> {d.CPadRight(51)} @{Currency} {Fund.AsCurrency(Currency)}";
         }
     }
 
