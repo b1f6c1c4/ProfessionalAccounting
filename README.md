@@ -160,12 +160,13 @@ docker-compose up -d
 - [AA制消费的快速录入](AccountingServer.Shell/Serializer/DiscountSerializer.cs)
 - [多币种记账](AccountingServer.Entities/Voucher.cs#L153-L157)（支持一张记账凭证多个币种共存）
 - [汇率查询与自动转换](AccountingServer.BLL/Util/Exchange.cs)（在分类汇总时可按本位币显示外币）
-- [记账系统的不同用户之间的转账结算](AccountingServer.Entities/Voucher.cs#L147-L151)（支持一张记账凭证多个用户共存）
+- [多用户互相转账](AccountingServer.Entities/Voucher.cs#L147-L151)（支持一张记账凭证多个用户共存）
 - [记账本位币变动](AccountingServer.Shell/Carry/BaseCurrencyShell.cs)（所有者权益币种变动）
 - [固定资产管理](AccountingServer.Shell/AssetShell.cs)（购置登记、折旧、贬值与处置）
 - [自动摊销](AccountingServer.Shell/AmortizationShell.cs)
 - [期末结转](AccountingServer.Shell/Carry/CarryShell.cs)
 - [JSON/CSV格式导入/导出](AccountingServer.Shell/Serializer)
+- [（妻妻）共同财产现金流分析](AccountingServer.Shell/Plugins/Coupling)
 - [利息收入与费用计算](AccountingServer.Shell/Plugins/Interest)
 - [投资收益率计算](AccountingServer.Shell/Plugins/YieldRate)
 - [活期存款利息计算](AccountingServer.Shell/Plugins/BankBalance)
