@@ -216,6 +216,9 @@ internal class MongoDbAdapter : IDbAdapter
                     {
                         IsUpsert = true,
                     });
+        if (ops.Count == 0)
+            return 0L;
+
         var res = await collection.BulkWriteAsync(ops, new() { IsOrdered = false });
         return res.ProcessedRequests.Count;
     }
