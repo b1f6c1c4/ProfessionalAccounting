@@ -183,7 +183,7 @@ internal class AmortizationShell : DistributedShell
         await foreach (var a in Sort(session.Accountant.SelectAmortizationsAsync(distQuery)))
         {
             await foreach (var item in session.Accountant.Update(a, rng, isCollapsed))
-                yield return ListAmortItem(item);
+                yield return ListAmortItem(item) + "\n";
 
             await session.Accountant.UpsertAsync(a);
         }

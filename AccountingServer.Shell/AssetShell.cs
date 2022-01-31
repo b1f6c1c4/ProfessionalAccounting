@@ -190,7 +190,7 @@ internal class AssetShell : DistributedShell
         await foreach (var a in Sort(session.Accountant.SelectAssetsAsync(distQuery)))
         {
             await foreach (var item in session.Accountant.Update(a, rng, isCollapsed))
-                yield return ListAssetItem(item);
+                yield return ListAssetItem(item) + "\n";
 
             await session.Accountant.UpsertAsync(a);
         }
