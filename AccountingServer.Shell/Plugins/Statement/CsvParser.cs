@@ -75,15 +75,19 @@ internal class CsvParser
         var header = headerB;
 
         var dateId = -1;
+        var currId = -1;
         var fundId = -1;
 
         var dateReg = new Regex(@"^trans(?:\.|action)\s+date$", RegexOptions.IgnoreCase);
+        var currReg = new Regex(@"^trans(?:\.|action)\s+curr(?:\.|ency)$", RegexOptions.IgnoreCase);
         var fundReg = new Regex(@"^(?:amount|fund|value)$", RegexOptions.IgnoreCase);
         for (var i = 0; !string.IsNullOrWhiteSpace(header); i++)
         {
             var f = Next(ref header);
             if (dateReg.IsMatch(f))
                 dateId = i;
+            else if (currReg.IsMatch(f))
+                currId = i;
             else if (fundReg.IsMatch(f))
                 fundId = i;
         }
@@ -95,7 +99,7 @@ internal class CsvParser
             for (var i = 0; !string.IsNullOrWhiteSpace(header); i++)
             {
                 var f = Next(ref header);
-                if (i == fundId)
+                if (i == fundId || i == currId)
                     continue;
                 if (dateReg2.IsMatch(f))
                     dateId = i;
@@ -118,6 +122,8 @@ internal class CsvParser
                 var f = Next(ref l);
                 if (i == dateId)
                     item.Date = DateTimeParser.Parse(f);
+                else if (i == currId)
+                    item.Currency = f;
                 else if (i == fundId)
                     item.Fund = m_Dir * Convert.ToDouble(f);
             }
@@ -130,6 +136,7 @@ internal class CsvParser
 internal class BankItem
 {
     public DateTime Date;
+    public string Currency;
     public double Fund;
     public string Raw;
 }

@@ -130,12 +130,14 @@ internal class Statement : PluginBase
                         : double.PositiveInfinity);
                 var voucher = resx
                     .FirstOrDefault(v => v.Details.Any(d
-                        => (d.Fund!.Value - b.Fund).IsZero() && d.IsMatch(filt.ActualDetailFilter())));
+                        => (b.Currency == null || d.Currency == b.Currency) &&
+                        (d.Fund!.Value - b.Fund).IsZero() && d.IsMatch(filt.ActualDetailFilter())));
                 if (voucher == null)
                     return false;
 
                 var o = voucher.Details.First(d
-                    => (d.Fund!.Value - b.Fund).IsZero() && d.IsMatch(filt.ActualDetailFilter()));
+                    => (b.Currency == null || d.Currency == b.Currency) &&
+                    (d.Fund!.Value - b.Fund).IsZero() && d.IsMatch(filt.ActualDetailFilter()));
                 if (o.Remark == null)
                     marked++;
                 else if (o.Remark == marker)
@@ -206,7 +208,9 @@ internal class Statement : PluginBase
             if (!d.IsMatch(filt.ActualDetailFilter()))
                 continue;
 
-            var obj1 = lst.FirstOrDefault(b => (b.Fund - d.Fund!.Value).IsZero() && b.Date == v.Date);
+            var obj1 = lst.FirstOrDefault(b
+                => (b.Currency == null || d.Currency == b.Currency) &&
+                (b.Fund - d.Fund!.Value).IsZero() && b.Date == v.Date);
             if (obj1 != null)
             {
                 lst.Remove(obj1);
@@ -214,7 +218,7 @@ internal class Statement : PluginBase
             }
 
             var obj2 = lst
-                .Where(b => (b.Fund - d.Fund!.Value).IsZero())
+                .Where(b => (b.Currency == null || d.Currency == b.Currency) && (b.Fund - d.Fund!.Value).IsZero())
                 .OrderBy(b => Math.Abs((b.Date - v.Date!.Value).TotalDays))
                 .FirstOrDefault();
             if (obj2 != null)
