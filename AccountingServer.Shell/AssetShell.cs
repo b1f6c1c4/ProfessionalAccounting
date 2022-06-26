@@ -241,7 +241,7 @@ internal class AssetShell : DistributedShell
             return null;
 
         sb.AppendLine($"{asset.StringID} {asset.Name.CPadRight(35)}{asset.Date:yyyyMMdd}" +
-            $"U{asset.User.AsUser().CPadRight(5)} " +
+            $"{asset.User.AsUser().CPadRight(6)} " +
             asset.Value.AsCurrency(asset.Currency).CPadLeft(13) +
             (dt.HasValue ? bookValue.AsCurrency(asset.Currency).CPadLeft(13) : "-".CPadLeft(13)) +
             asset.Salvage.AsCurrency(asset.Currency).CPadLeft(13) +

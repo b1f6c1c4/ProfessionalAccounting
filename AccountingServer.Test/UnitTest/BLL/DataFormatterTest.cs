@@ -48,8 +48,8 @@ public class DataFormatterTest
 
     [Theory]
     [InlineData(null, "")]
-    [InlineData("b1", "b1")]
-    [InlineData("b-1", "'b-1'")]
+    [InlineData("b1", "Ub1")]
+    [InlineData("b-1", "U'b-1'")]
     public void AsUserTest(string value, string fmt)
         => Assert.Equal(fmt, value.AsUser());
 

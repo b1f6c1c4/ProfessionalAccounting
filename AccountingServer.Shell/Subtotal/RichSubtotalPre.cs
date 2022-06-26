@@ -56,7 +56,7 @@ internal class RichSubtotalPre : StringSubtotalVisitor
         => ShowSubtotal(sub, sub.Date.AsDate(sub.Level));
 
     public override IAsyncEnumerable<string> Visit(ISubtotalUser sub)
-        => ShowSubtotal(sub, $"U{sub.User.AsUser()}");
+        => ShowSubtotal(sub, sub.User.AsUser());
 
     public override async IAsyncEnumerable<string> Visit(ISubtotalCurrency sub)
     {

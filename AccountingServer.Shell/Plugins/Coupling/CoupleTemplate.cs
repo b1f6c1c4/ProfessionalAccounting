@@ -95,7 +95,7 @@ public class CashAccount
 
     public static string NameOf(VoucherDetail detail, CashAccount sa)
     {
-        var a = $"U{detail.User.AsUser()}";
+        var a = detail.User.AsUser();
         if (sa == null)
             return a;
 

@@ -63,7 +63,7 @@ internal class Coupling : PluginBase
             var cd = ld?.IsCash(couple.Debitor) ?? false;
             if (cc && configCouple.IsCash(couple.Debitor)) // U1 cash -> U1&2 cash
             {
-                var a = $"U{couple.Creditor.User.AsUser()}";
+                var a = couple.Creditor.User.AsUser();
                 if (!gatherEntries.ContainsKey(a))
                     gatherEntries.Add(a, new());
                 gatherEntries[a].Add(couple);
@@ -99,7 +99,7 @@ internal class Coupling : PluginBase
             var fund = await lst.ToAsyncEnumerable().SumAwaitAsync(async couple => couple.Fund *
                 await session.Accountant.Query(couple.Voucher.Date, couple.Currency, BaseCurrency.Now));
             yield return
-                $"// U{configCouple.User.AsUser()} *** cash by *** {a} {fund.AsCurrency(BaseCurrency.Now)}\n";
+                $"// {configCouple.User.AsUser()} *** cash by *** {a} {fund.AsCurrency(BaseCurrency.Now)}\n";
             foreach (var couple in lst)
                 yield return $"{couple}\n";
         }
@@ -115,7 +115,7 @@ internal class Coupling : PluginBase
             if (paidInCashTo.Count != 0)
             {
                 yield return
-                    $"// U{configCouple.User.AsUser()} *** cash to *** {a} {fund2.AsCurrency(BaseCurrency.Now)}\n";
+                    $"// {configCouple.User.AsUser()} *** cash to *** {a} {fund2.AsCurrency(BaseCurrency.Now)}\n";
                 foreach (var couple in paidInCashTo)
                     yield return $"{couple}\n";
             }
@@ -123,14 +123,14 @@ internal class Coupling : PluginBase
             if (paidTo.Count != 0)
             {
                 yield return
-                    $"// U{configCouple.User.AsUser()} +++ paid to +++ {a} {fund3.AsCurrency(BaseCurrency.Now)}\n";
+                    $"// {configCouple.User.AsUser()} +++ paid to +++ {a} {fund3.AsCurrency(BaseCurrency.Now)}\n";
                 if (aux != null)
                     foreach (var couple in paidTo)
                         yield return $"{couple}\n";
             }
 
             yield return
-                $"// U{configCouple.User.AsUser()} --- paid by --- {a} {fund1.AsCurrency(BaseCurrency.Now)}\n";
+                $"// {configCouple.User.AsUser()} --- paid by --- {a} {fund1.AsCurrency(BaseCurrency.Now)}\n";
             if (aux != null)
                 foreach (var couple in paidBy)
                     yield return $"{couple}\n";
@@ -145,7 +145,7 @@ internal class Coupling : PluginBase
 
     private static IAsyncEnumerable<Couple> GetCouples(Session session, string user, DateFilter rng)
         => session.Accountant
-            .SelectVouchersAsync(Parsing.VoucherQuery($"U{user.AsUser()} T3998 {rng.AsDateRange()}", session.Client))
+            .SelectVouchersAsync(Parsing.VoucherQuery($"{user.AsUser()} T3998 {rng.AsDateRange()}", session.Client))
             .SelectMany(static v => Decouple(v).ToAsyncEnumerable());
 
     private struct Couple
@@ -158,12 +158,12 @@ internal class Coupling : PluginBase
 
         public override string ToString()
         {
-            var c = $"U{Creditor.User.AsUser()} T{Creditor.Title.AsTitle()}{Creditor.SubTitle.AsSubTitle()}";
+            var c = $"{Creditor.User.AsUser()} T{Creditor.Title.AsTitle()}{Creditor.SubTitle.AsSubTitle()}";
             if (Creditor.Content != null)
                 c += $" {Creditor.Content.Quotation('\'')}";
             if (Creditor.Remark != null)
                 c += $" {Creditor.Remark.Quotation('"')}";
-            var d = $"U{Debitor.User.AsUser()} T{Debitor.Title.AsTitle()}{Debitor.SubTitle.AsSubTitle()}";
+            var d = $"{Debitor.User.AsUser()} T{Debitor.Title.AsTitle()}{Debitor.SubTitle.AsSubTitle()}";
             if (Debitor.Content != null)
                 d += $" {Debitor.Content.Quotation('\'')}";
             if (Debitor.Remark != null)
@@ -190,7 +190,7 @@ internal class Coupling : PluginBase
             {
                 if (!grpU.Sum(static d => d.Fund!.Value).IsZero())
                     throw new ApplicationException(
-                        $"Unbalanced Voucher ^{voucher.ID}^ U{grpU.Key.AsUser()} @{grpC.Key}, run chk 1 first");
+                        $"Unbalanced Voucher ^{voucher.ID}^ {grpU.Key.AsUser()} @{grpC.Key}, run chk 1 first");
 
                 double t3998;
                 try
@@ -200,7 +200,7 @@ internal class Coupling : PluginBase
                 catch (Exception e)
                 {
                     throw new ApplicationException(
-                        $"Error during Decoupling Voucher ^{voucher.ID}^ U{grpU.Key.AsUser()} @{grpC.Key}", e);
+                        $"Error during Decoupling Voucher ^{voucher.ID}^ {grpU.Key.AsUser()} @{grpC.Key}", e);
                 }
 
                 if (t3998.IsZero())

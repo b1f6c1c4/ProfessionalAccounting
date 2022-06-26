@@ -81,12 +81,12 @@ public static class DataFormatter
     public static string AsUser(this string value)
     {
         if (value == null)
-            return string.Empty;
+            return "U";
 
         if (Reg.IsMatch(value))
-            return value;
+            return $"U{value}";
 
-        return value.Quotation('\'');
+        return $"U{value.Quotation('\'')}";
     }
 
     /// <summary>
