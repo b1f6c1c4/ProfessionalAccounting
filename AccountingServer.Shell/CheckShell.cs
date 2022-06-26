@@ -83,35 +83,35 @@ internal class CheckShell : IShellComponent
                     await foreach (var s in DoCheck(
                                        session.Accountant
                                            .RunVoucherQueryAsync(
-                                               $"T{title.Id.AsTitle()}00 {(title.Direction < 0 ? ">" : "<")} G")
+                                               $"{title.Id.AsTitle()}00 {(title.Direction < 0 ? ">" : "<")} G")
                                            .SelectMany(v
                                                => v.Details.Where(d => d.Title == title.Id)
                                                    .Select(d => (Voucher: v, Detail: d)).ToAsyncEnumerable()),
-                                       $"T{title.Id.AsTitle()}00"))
+                                       $"{title.Id.AsTitle()}00"))
                         yield return s;
                 else if (Math.Abs(title.Direction) == 2)
                     foreach (var s in DoCheck(
                                  title.Direction,
-                                 await session.Accountant.RunGroupedQueryAsync($"T{title.Id.AsTitle()}00 G`CcD"),
-                                 $"T{title.Id.AsTitle()}00"))
+                                 await session.Accountant.RunGroupedQueryAsync($"{title.Id.AsTitle()}00 G`CcD"),
+                                 $"{title.Id.AsTitle()}00"))
                         yield return s;
 
             foreach (var subTitle in title.SubTitles)
                 if (Math.Abs(subTitle.Direction) == 1)
                     await foreach (var s in DoCheck(
                                        session.Accountant.RunVoucherQueryAsync(
-                                               $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} {(subTitle.Direction < 0 ? ">" : "<")} G")
+                                               $"{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} {(subTitle.Direction < 0 ? ">" : "<")} G")
                                            .SelectMany(v
                                                => v.Details.Where(d => d.Title == title.Id && d.SubTitle == subTitle.Id)
                                                    .Select(d => (Voucher: v, Detail: d)).ToAsyncEnumerable()),
-                                       $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}"))
+                                       $"{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}"))
                         yield return s;
                 else if (Math.Abs(subTitle.Direction) == 2)
                     foreach (var s in DoCheck(
                                  subTitle.Direction,
                                  await session.Accountant.RunGroupedQueryAsync(
-                                     $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} G`CcD"),
-                                 $"T{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}"))
+                                     $"{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()} G`CcD"),
+                                 $"{title.Id.AsTitle()}{subTitle.Id.AsSubTitle()}"))
                         yield return s;
         }
     }

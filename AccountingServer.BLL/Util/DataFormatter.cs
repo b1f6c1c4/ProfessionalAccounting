@@ -134,7 +134,7 @@ public static class DataFormatter
     /// </summary>
     /// <param name="value">一级科目编号</param>
     /// <returns>格式化后的编号</returns>
-    public static string AsTitle(this int value) => $"{value:0000}";
+    public static string AsTitle(this int value) => $"T{value:0000}";
 
     /// <summary>
     ///     格式化一级科目编号

@@ -158,7 +158,7 @@ public class Facade
     {
         foreach (var title in TitleManager.Titles)
         {
-            yield return $"{title.Id.AsTitle(),-8}{title.Name}\n";
+            yield return $"{title.Id.AsTitle(),-9}{title.Name}\n";
             foreach (var subTitle in title.SubTitles)
                 yield return $"{title.Id.AsTitle()}{subTitle.Id.AsSubTitle(),-4}{subTitle.Name}\n";
         }

@@ -177,7 +177,7 @@ internal class AssetShell : DistributedShell
                 new IntersectQueries<IVoucherQueryAtom>(
                     query ?? VoucherQueryUnconstrained.Instance,
                     ParsingF.VoucherQuery(
-                        $"{{ T{a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ T{a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}",
+                        $"{{ {a.DepreciationTitle.AsTitle()} {a.StringID.Quotation('\'')} Depreciation }} + {{ {a.DevaluationTitle.AsTitle()} {a.StringID.Quotation('\'')} Devalue }}",
                         session.Client)));
             yield return $"{a.StringID} {a.Name} => {cnt}\n";
         }
@@ -245,12 +245,12 @@ internal class AssetShell : DistributedShell
             asset.Value.AsCurrency(asset.Currency).CPadLeft(13) +
             (dt.HasValue ? bookValue.AsCurrency(asset.Currency).CPadLeft(13) : "-".CPadLeft(13)) +
             asset.Salvage.AsCurrency(asset.Currency).CPadLeft(13) +
-            asset.Title.AsTitle().CPadLeft(5) +
-            asset.DepreciationTitle.AsTitle().CPadLeft(5) +
-            asset.DevaluationTitle.AsTitle().CPadLeft(5) +
-            asset.DepreciationExpenseTitle.AsTitle().CPadLeft(5) +
+            asset.Title.AsTitle().CPadLeft(6) +
+            asset.DepreciationTitle.AsTitle().CPadLeft(6) +
+            asset.DevaluationTitle.AsTitle().CPadLeft(6) +
+            asset.DepreciationExpenseTitle.AsTitle().CPadLeft(6) +
             asset.DepreciationExpenseSubTitle.AsSubTitle() +
-            asset.DevaluationExpenseTitle.AsTitle().CPadLeft(5) +
+            asset.DevaluationExpenseTitle.AsTitle().CPadLeft(6) +
             asset.DevaluationExpenseSubTitle.AsSubTitle() +
             asset.Life.ToString().CPadLeft(4) +
             asset.Method.ToString().CPadLeft(20));

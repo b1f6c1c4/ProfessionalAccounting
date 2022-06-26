@@ -158,12 +158,12 @@ internal class Coupling : PluginBase
 
         public override string ToString()
         {
-            var c = $"{Creditor.User.AsUser()} T{Creditor.Title.AsTitle()}{Creditor.SubTitle.AsSubTitle()}";
+            var c = $"{Creditor.User.AsUser()} {Creditor.Title.AsTitle()}{Creditor.SubTitle.AsSubTitle()}";
             if (Creditor.Content != null)
                 c += $" {Creditor.Content.Quotation('\'')}";
             if (Creditor.Remark != null)
                 c += $" {Creditor.Remark.Quotation('"')}";
-            var d = $"{Debitor.User.AsUser()} T{Debitor.Title.AsTitle()}{Debitor.SubTitle.AsSubTitle()}";
+            var d = $"{Debitor.User.AsUser()} {Debitor.Title.AsTitle()}{Debitor.SubTitle.AsSubTitle()}";
             if (Debitor.Content != null)
                 d += $" {Debitor.Content.Quotation('\'')}";
             if (Debitor.Remark != null)
