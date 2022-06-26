@@ -37,6 +37,8 @@
         <EmbeddedResource Include="Plugins\Utilities\Resources\Document.txt" />
         <None Remove="Plugins\YieldRate\Resources\Document.txt" />
         <EmbeddedResource Include="Plugins\YieldRate\Resources\Document.txt" />
+        <None Remove="Plugins\Cheque\Resources\Document.txt" />
+        <EmbeddedResource Include="Plugins\Cheque\Resources\Document.txt" />
     </ItemGroup>
 
 </Project>

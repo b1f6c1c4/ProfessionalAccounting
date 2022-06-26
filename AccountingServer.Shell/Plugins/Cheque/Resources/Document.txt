@@ -1,0 +1,11 @@
+Cheque帮助文档
+
+支票插件ChequeFactory
+别名：chq
+
+chq
+chq [日期] 用户 pay 用户 [币种] 金额 备注
+chq [日期] 银行账户 deposit|dep|d 备注
+chq [日期] 银行账户 withdraw|wd|w 备注
+
+注：可以根据银行账户自动检测用户

@@ -167,6 +167,7 @@ docker-compose up -d
 - [期末结转](AccountingServer.Shell/Carry/CarryShell.cs)
 - [JSON/CSV格式导入/导出](AccountingServer.Shell/Serializer)
 - [（妻妻）共同财产现金流分析](AccountingServer.Shell/Plugins/Coupling)
+- [支票管理](AccountingServer.Shell/Plugins/Cheque)
 - [利息收入与费用计算](AccountingServer.Shell/Plugins/Interest)
 - [投资收益率计算](AccountingServer.Shell/Plugins/YieldRate)
 - [活期存款利息计算](AccountingServer.Shell/Plugins/BankBalance)
