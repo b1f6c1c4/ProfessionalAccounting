@@ -100,6 +100,10 @@ export default function Edit(p, store) {
             }
             return [`${this.activeUser()} * (U T1001 + U T1002 + U T1012 + U T2001 + U T2201 + U T2241) -9~ !t`];
         },
+        trim: (s) => {
+            if (s.startsWith('T')) return s.substr(1);
+            return s;
+        },
         single: true,
     });
     this.subtitleSelector = new Selector(p, store, {
