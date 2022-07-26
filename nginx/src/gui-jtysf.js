@@ -16,24 +16,9 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-window.addEventListener('load', () => {
-    const lst = document.createElement('ul');
-    lst.innerHTML = `
-    <li><a href="/"><span>CLI</span></a></li>
-    <li><a href="/gui-discount.html"><span>!</span></a></li>
-    <li><a href="/gui-jtysf.html"><span>jtysf</span></a></li>
-`;
-    lst.classList.add('hide');
-    lst.classList.add('swap');
-    document.body.appendChild(lst);
-    const btn = document.createElement('a');
-    btn.innerText = '<';
-    btn.classList.add('swap');
-    btn.addEventListener('click', () => {
-        lst.classList.toggle('hide');
-    });
-    document.body.appendChild(btn);
-    document.body.addEventListener('click', () => {
-        lst.classList.add('hide');
-    }, true);
-});
+import { render } from 'preact';
+import { html } from 'htm/preact';
+
+render(html`
+    <h1>Hello, world!</h1>
+`, document.body);

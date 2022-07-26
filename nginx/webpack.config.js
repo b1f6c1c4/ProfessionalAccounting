@@ -26,6 +26,12 @@ const plugins = [
     new HtmlWebpackPlugin({
         filename: 'gui-discount.html',
         template: 'gui-discount.html',
+        chunks: ['discount'],
+    }),
+    new HtmlWebpackPlugin({
+        filename: 'gui-jtysf.html',
+        template: 'gui-jtysf.html',
+        chunks: ['jtysf'],
     }),
     new webpack.EnvironmentPlugin({
         API_URL: '/api',
@@ -50,9 +56,12 @@ if (process.env.ANALYZE) {
 }
 
 module.exports = {
-    entry: './src/gui-discount.js',
+    entry: {
+        discount: ['./src/gui-discount.js'],
+        jtysf: ['./src/gui-jtysf.js'],
+    },
     output: {
-        filename: 'gui-discount.js',
+        filename: '[name].bundle.js',
         path: path.resolve(__dirname, 'dist'),
     },
     externalsType: 'script',

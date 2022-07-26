@@ -23,6 +23,7 @@
   "homepage": "https://github.com/b1f6c1c4/ProfessionalAccounting#readme",
   "devDependencies": {
     "copy-webpack-plugin": "^10.0.0",
+    "htm": "^3.1.1",
     "html-webpack-plugin": "^5.5.0",
     "webpack": "^5.64.4",
     "webpack-bundle-analyzer": "^4.5.0",
@@ -36,6 +37,7 @@
     "lodash-es": "^4.17.21",
     "modern-normalize": "^1.1.0",
     "p5": "^1.4.0",
+    "preact": "^10.10.0",
     "redux-logger": "^3.0.6",
     "redux-saga": "^1.1.3"
   }
