@@ -50,9 +50,9 @@ if (process.env.ANALYZE) {
 }
 
 module.exports = {
-    entry: './src/index.js',
+    entry: './src/gui-discount.js',
     output: {
-        filename: 'main.js',
+        filename: 'gui-discount.js',
         path: path.resolve(__dirname, 'dist'),
     },
     externalsType: 'script',
