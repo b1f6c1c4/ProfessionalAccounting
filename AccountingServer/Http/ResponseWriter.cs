@@ -24,7 +24,7 @@ using System.Threading.Tasks;
 
 namespace AccountingServer.Http;
 
-internal static class ResponseWriter
+public static class ResponseWriter
 {
     public static async Task Write(Stream stream, HttpResponse response)
     {
@@ -97,7 +97,7 @@ internal static class ResponseWriter
         }
     }
 
-    private static async Task<bool> SendContent(Stream stream, IAsyncEnumerable<byte[]> iae)
+    public static async Task<bool> SendContent(Stream stream, IAsyncEnumerable<byte[]> iae)
     {
         try
         {
