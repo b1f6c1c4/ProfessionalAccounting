@@ -4,6 +4,11 @@
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AccountingServer\AccountingServer.csproj"/>
+    <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj"/>
+    <ProjectReference Include="..\AccountingServer.Shell\AccountingServer.Shell.csproj"/>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.1.1" />
   </ItemGroup>
   <ItemGroup>
