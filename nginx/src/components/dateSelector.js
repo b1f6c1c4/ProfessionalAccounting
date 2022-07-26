@@ -22,11 +22,11 @@ import { html } from 'htm/preact';
 export default function DateSelector(props) {
     const {
         title,
-        onDate,
-        date: dateText,
+        onValue,
+        value,
     } = props;
-    const d = dayjs(dateText, 'YYYYMMDD');
-    let date = dateText;
+    const d = dayjs(value, 'YYYYMMDD');
+    let date = value;
     switch (d.day()) {
         case 0: date += '[S]'; break;
         case 1: date += '[M]'; break;
@@ -41,9 +41,9 @@ export default function DateSelector(props) {
     return html`
         <p class="selector">
             <span>${title}</span>
-            <span class="button" onclick=${() => onDate(dp)}>-</span>
+            <span class="button" onclick=${() => onValue(dp)}>-</span>
             <span class="chosen">${date}</span>
-            <span class="button" onclick=${() => onDate(dn)}>+</span>
+            <span class="button" onclick=${() => onValue(dn)}>+</span>
         </p>
     `;
 }

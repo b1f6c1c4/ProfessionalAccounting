@@ -19,17 +19,14 @@
 import { render } from 'preact';
 import { useErrorBoundary } from 'preact/hooks';
 import { html } from 'htm/preact';
-import DateSelector from './components/dateSelector';
-import FlatSelector from './components/flatSelector';
+import Jtysf from './containers/jtysf/jtysf';
 
 const App = () => {
     const [error] = useErrorBoundary();
     return html`
         <h1>jtysf</h1>
         ${error && html`<pre class="error">Error: ${''+error}</pre>`}
-        <${DateSelector} title="date" date="20220107" />
-        <${FlatSelector} title="company" query="U T660208 G !c" />
-        <${FlatSelector} title="payee" query="U T660208 G !U" />
+        <${Jtysf} />
     `;
 };
 

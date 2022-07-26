@@ -23,8 +23,8 @@ import { html } from 'htm/preact';
 export default function FlatSelector(props) {
     const {
         title,
-        selected,
-        onSelected,
+        value,
+        onValue,
     } = props;
     const [entries, setEntries] = useState(null);
     const [error, setError] = useState(null);
@@ -34,6 +34,8 @@ export default function FlatSelector(props) {
                 const { data } = await Api.safeApi(props.query, 'usr');
                 const res = data.split('\n').map((s) => s.split('\t')[0]).filter((s) => s);
                 setEntries(res);
+                if (res.length === 1 && !value)
+                    onValue(res[0]);
                 setError(null);
             } catch (e) {
                 setError(e);
@@ -46,13 +48,13 @@ export default function FlatSelector(props) {
             <span>${title}</span>
             ${error
                 ? html`<span class="error">E: ${''+error}</span>`
-                : selected
+                : value
                     ? html`<span class="chosen"
-                        onclick=${() => onSelected(null)}>${selected}</span>`
+                        onclick=${() => onValue(null)}>${value}</span>`
                     : Array.isArray(entries)
                         ? entries.map((ent) => html`
                             <input type="button" value=${ent} class="button"
-                                onclick=${() => onSelected(ent)} />`)
+                                onclick=${() => onValue(ent)} />`)
                         : '...'}
         </p>
     `);
