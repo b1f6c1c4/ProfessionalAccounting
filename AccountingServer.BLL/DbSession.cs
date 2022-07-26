@@ -39,6 +39,11 @@ public class DbSession : IHistoricalExchange
     /// </summary>
     public AtomicReference<IDbAdapter> Db { private get; set; }
 
+    /// <summary>
+    ///     汇率日志
+    /// </summary>
+    public Action<string, bool> ExchangeLogger { get; set; }
+
     /// <inheritdoc />
     public ValueTask<double> Query(DateTime? date, string from, string to)
         => LookupExchange(date ?? DateTime.UtcNow, from, to);
@@ -72,7 +77,11 @@ public class DbSession : IHistoricalExchange
         if (res != null)
             return 1D / res.Value;
 
-        Console.WriteLine($"{now:o} Query: {date:o} {from}/{to}");
+        var log = $"{now:o} Query: {date:o} {from}/{to}";
+        if (ExchangeLogger != null)
+            ExchangeLogger(log, false);
+        else
+            Console.WriteLine(log);
         var value = await ExchangeFactory.Instance.Query(from, to);
         await Db.Get().Upsert(new ExchangeRecord
             {
