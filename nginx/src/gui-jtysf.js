@@ -17,8 +17,20 @@
  */
 
 import { render } from 'preact';
+import { useErrorBoundary } from 'preact/hooks';
 import { html } from 'htm/preact';
+import FlatSelector from './components/flatSelector';
+
+const App = () => {
+    const [error] = useErrorBoundary();
+    return html`
+        <h1>jtysf</h1>
+        ${error && html`<pre class="error">Error: ${''+error}</pre>`}
+        <${FlatSelector} title="company" query="U T660208 G !c" />
+        <${FlatSelector} title="payee" query="U T660208 G !U" />
+    `;
+};
 
 render(html`
-    <h1>Hello, world!</h1>
-`, document.body);
+    <${App} />
+`, document.getElementById('app'));
