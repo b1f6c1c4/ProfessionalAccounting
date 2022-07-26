@@ -139,6 +139,9 @@ public class Facade
     // ReSharper disable once UnusedMember.Global
     public void EnableTimer() => m_ExchangeShell.EnableTimer(m_Db);
 
+    // ReSharper disable once UnusedMember.Global
+    public void ImmediateExchange() => m_ExchangeShell.ImmediateExchange(m_Db);
+
     #endregion
 
     #region Miscellaneous
