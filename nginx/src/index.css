@@ -49,6 +49,9 @@ a.swap {
     font-family: monospace;
     z-index: 10000;
 }
+.hide {
+    display: none !important;
+}
 ul.swap {
     display: flex;
     flex-direction: column;
@@ -68,6 +71,13 @@ ul.swap {
     padding: 0;
 }
 ul.swap li {
+    margin: 0;
+    padding: 0;
+    border-width: 1px 0;
+    border-style: solid;
+    border-color: lightgray;
+}
+ul.swap span {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -75,12 +85,6 @@ ul.swap li {
     min-width: 120px;
     margin: 0;
     padding: 5px;
-    border-width: 1px 0;
-    border-style: solid;
-    border-color: lightgray;
-}
-.hide {
-    display: none !important;
 }
 ul.swap a {
     margin: 0;

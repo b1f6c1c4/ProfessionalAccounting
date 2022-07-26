@@ -19,8 +19,8 @@
 window.addEventListener('load', () => {
     const lst = document.createElement('ul');
     lst.innerHTML = `
-    <li><a href="/">CLI</li>
-    <li><a href="/gui-discount.html">!</li>
+    <li><a href="/"><span>CLI</span></a></li>
+    <li><a href="/gui-discount.html"><span>!</span></a></li>
 `;
     lst.classList.add('hide');
     lst.classList.add('swap');
@@ -32,7 +32,7 @@ window.addEventListener('load', () => {
         lst.classList.toggle('hide');
     });
     document.body.appendChild(btn);
-    document.body.addEventListener('mousedown', () => {
+    document.body.addEventListener('click', () => {
         lst.classList.add('hide');
-    });
+    }, true);
 });
