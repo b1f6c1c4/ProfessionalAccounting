@@ -20,7 +20,7 @@ window.addEventListener('load', () => {
     const lst = document.createElement('ul');
     lst.innerHTML = `
     <li><a href="/">CLI</li>
-    <li><a href="/gui.html">GUI</li>
+    <li><a href="/gui-discount.html">!</li>
 `;
     lst.classList.add('hide');
     lst.classList.add('swap');

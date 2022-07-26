@@ -24,8 +24,8 @@ const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 const plugins = [
     new HtmlWebpackPlugin({
-        filename: 'gui.html',
-        template: 'gui.html',
+        filename: 'gui-discount.html',
+        template: 'gui-discount.html',
     }),
     new webpack.EnvironmentPlugin({
         API_URL: '/api',
