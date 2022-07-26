@@ -89,6 +89,15 @@ internal class ExchangeShell : IShellComponent
         m_Timer.Enabled = true;
     }
 
+    /// <summary>
+    ///     立即登记汇率
+    /// </summary>
+    public void ImmediateExchange(DbSession db)
+    {
+        m_TimerSession = db;
+        OnTimedEvent(null, null);
+    }
+
     private static DateTime CriticalTime(DateTime now)
     {
         // every T00:00:00+Z of base currency change day
