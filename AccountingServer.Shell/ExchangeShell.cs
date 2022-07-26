@@ -120,7 +120,11 @@ internal class ExchangeShell : IShellComponent
     private async void OnTimedEvent(object source, ElapsedEventArgs e)
     {
         var date = CriticalTime(DateTime.UtcNow);
-        Console.WriteLine($"{DateTime.UtcNow:o} Ensuring exchange rates exist since {date:o}");
+        var log = $"{DateTime.UtcNow:o} Ensuring exchange rates exist since {date:o}";
+        if (m_TimerSession.ExchangeLogger != null)
+            m_TimerSession.ExchangeLogger(log, false);
+        else
+            Console.WriteLine(log);
         var session = new Session(m_TimerSession);
         try
         {
@@ -133,7 +137,10 @@ internal class ExchangeShell : IShellComponent
         }
         catch (Exception err)
         {
-            Console.WriteLine(err);
+            if (m_TimerSession.ExchangeLogger != null)
+                m_TimerSession.ExchangeLogger(err.ToString(), true);
+            else
+                Console.WriteLine(err);
         }
     }
 }

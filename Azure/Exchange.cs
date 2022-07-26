@@ -34,8 +34,10 @@ public class Exchange
     public void Run(
             [TimerTrigger("14 1 * * * *")] TimerInfo myTimer,
             ILogger log)
-    {
-        log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
-        facade.ImmediateExchange();
-    }
+        => facade.ImmediateExchange((s, e) => {
+               if (e)
+                   log.LogError(s);
+               else
+                   log.LogInformation(s);
+           });
 }
