@@ -207,3 +207,11 @@ p.selector .button, p.selector .chosen {
     white-space: pre-wrap;
     word-wrap: break-word;
 }
+.revoke {
+    color: white;
+    background-color: red;
+}
+.actions {
+    display: flex;
+    gap: 10px;
+}

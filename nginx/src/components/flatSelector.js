@@ -27,6 +27,7 @@ export default function FlatSelector(props) {
         title,
         value,
         onValue,
+        isDisabled,
     } = props;
     const [entries, setEntries] = useState(null);
     const [error, setError] = useState(null);
@@ -52,11 +53,11 @@ export default function FlatSelector(props) {
                 ? html`<span class="error">E: ${''+error}</span>`
                 : value
                     ? html`<span class="chosen"
-                        onclick=${() => onValue(null)}>${value}</span>`
+                        onclick=${() => !isDisabled && onValue(null)}>${value}</span>`
                     : Array.isArray(entries)
                         ? entries.map((ent) => html`
                             <input type="button" value=${ent} class="button"
-                                onclick=${() => onValue(ent)} />`)
+                                onclick=${() => !isDisabled && onValue(ent)} />`)
                         : '...'}
         </p>
     `);
