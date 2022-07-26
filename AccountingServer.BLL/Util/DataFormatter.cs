@@ -81,7 +81,7 @@ public static class DataFormatter
     public static string AsUser(this string value)
     {
         if (value == null)
-            return "U";
+            return "";
 
         if (Reg.IsMatch(value))
             return $"U{value}";

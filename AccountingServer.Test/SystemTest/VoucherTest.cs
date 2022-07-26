@@ -130,13 +130,13 @@ Ub2 T3998\s+10
     {
         var res = await m_Facade.Execute(m_Session, "json U > `t").Join();
         Assert.Matches(@"{
-  ""value"": 20.0,
+  ""value"": 20\.0,
   ""title"": {
-    ""(?:3998|5678)"": {
-      ""value"": 10.0
+    ""T(?:3998|5678)"": {
+      ""value"": 10\.0
     },
-    ""(?:5678|3998)"": {
-      ""value"": 10.0
+    ""T(?:5678|3998)"": {
+      ""value"": 10\.0
     }
   }
 }", res);
