@@ -88,7 +88,7 @@ CountMark
 	;
 
 SubtotalField
-	:	[tscrdwmyCU]
+	:	[tscrdwmyCUV]
 	;
 
 SubtotalNoField

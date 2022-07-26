@@ -101,4 +101,9 @@ internal class RawSubtotal : StringSubtotalVisitor
         m_Path.Remark = sub.Remark;
         return ShowSubtotal(sub);
     }
+
+    public override IAsyncEnumerable<string> Visit(ISubtotalValue sub)
+    {
+        return ShowSubtotal(sub);
+    }
 }

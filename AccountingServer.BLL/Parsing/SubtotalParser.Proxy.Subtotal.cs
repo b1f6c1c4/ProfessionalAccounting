@@ -89,6 +89,7 @@ internal partial class SubtotalParser
                                         'w' => zz | SubtotalLevel.Week,
                                         'm' => zz | SubtotalLevel.Month,
                                         'y' => zz | SubtotalLevel.Year,
+                                        'V' => zz | SubtotalLevel.Value,
                                         _ => throw new MemberAccessException("表达式错误"),
                                     };
                             })

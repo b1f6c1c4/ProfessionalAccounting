@@ -80,4 +80,7 @@ internal class RichSubtotalPre : StringSubtotalVisitor
 
     public override IAsyncEnumerable<string> Visit(ISubtotalRemark sub)
         => ShowSubtotal(sub, sub.Remark.Quotation('"'));
+
+    public override IAsyncEnumerable<string> Visit(ISubtotalValue sub)
+        => ShowSubtotal(sub, sub.Value.AsCurrency(m_Currency));
 }

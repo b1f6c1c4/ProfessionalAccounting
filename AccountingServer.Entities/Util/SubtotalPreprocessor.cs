@@ -46,6 +46,8 @@ public static class SubtotalPreprocessor
             throw new InvalidOperationException("记账凭证不能按内容分类汇总");
         if (level.HasFlag(SubtotalLevel.Remark))
             throw new InvalidOperationException("记账凭证不能按备注分类汇总");
+        if (level.HasFlag(SubtotalLevel.Value))
+            throw new InvalidOperationException("记账凭证不能按金额分类汇总");
 
         return level;
     }

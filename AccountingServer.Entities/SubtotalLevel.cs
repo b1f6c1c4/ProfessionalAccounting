@@ -83,6 +83,11 @@ public enum SubtotalLevel
     Year = 0b0010_0110_0000,
 
     /// <summary>
+    ///     按金额分类
+    /// </summary>
+    Value = 0b0100_0000_0000,
+
+    /// <summary>
     ///     分类汇总普通部分
     /// </summary>
     Subtotal = 0b0111_1111_1111_1111_1111_1111_1111_1111,
@@ -161,6 +166,11 @@ public interface ISubtotalRemark : ISubtotalResult
     string Remark { get; }
 }
 
+public interface ISubtotalValue : ISubtotalResult
+{
+    double? Value { get; }
+}
+
 /// <summary>
 ///     分类汇总结果访问者
 /// </summary>
@@ -175,4 +185,5 @@ public interface ISubtotalVisitor<out T>
     T Visit(ISubtotalSubTitle sub);
     T Visit(ISubtotalContent sub);
     T Visit(ISubtotalRemark sub);
+    T Visit(ISubtotalValue sub);
 }

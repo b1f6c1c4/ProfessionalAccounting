@@ -913,4 +913,42 @@ public class SubtotalTest
         Assert.Equal(bal.Sum(static b => b.Fund), res.Fund);
         Assert.Equal(bal, lst, new BalanceEqualityComparer());
     }
+
+    [Fact]
+    public async Task TestValue()
+    {
+        var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`V", m_Client).Subtotal, m_Exchange);
+
+        var bal = new Balance[]
+            {
+                new() { Value = 1, Fund = 8 },
+                new() { Value = 2, Fund = 1 },
+                new() { Value = 3, Fund = 4 },
+                new() { Value = 2, Fund = 2 },
+            };
+
+        var res = await builder.Build(bal.ToAsyncEnumerable());
+        Assert.IsAssignableFrom<ISubtotalRoot>(res);
+        var resx = (ISubtotalRoot)res;
+
+        var lst = new List<Balance>();
+        foreach (var item in resx.Items)
+        {
+            Assert.IsAssignableFrom<ISubtotalValue>(item);
+            var resxx = (ISubtotalValue)item;
+            Assert.Null(resxx.Items);
+            lst.Add(new() { Value = resxx.Value, Fund = resxx.Fund });
+        }
+
+        Assert.Equal(bal.Sum(static b => b.Fund), res.Fund);
+        Assert.Equal(
+            new List<Balance>
+                {
+                    new() { Value = 1, Fund = 8 },
+                    new() { Value = 2, Fund = 3 },
+                    new() { Value = 3, Fund = 4 },
+                },
+            lst,
+            new BalanceEqualityComparer());
+    }
 }

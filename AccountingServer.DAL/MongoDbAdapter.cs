@@ -346,6 +346,15 @@ internal class MongoDbAdapter : IDbAdapter
             prj["content"] = "$detail.content";
         if (level.HasFlag(SubtotalLevel.Remark))
             prj["remark"] = "$detail.remark";
+        if (level.HasFlag(SubtotalLevel.Value))
+            prj["value"] = new BsonDocument
+                {
+                    ["$round"] = new BsonArray
+                        {
+                            "$detail.fund",
+                            -(int)Math.Log10(VoucherDetail.Tolerance),
+                        },
+                };
 
         BsonDocument grp;
         if (query.Subtotal.GatherType == GatheringType.Count)

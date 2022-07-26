@@ -54,6 +54,7 @@ internal class BalanceSerializer : BaseSerializer<Balance>
                                         SubTitle = bR.ReadInt32("subtitle", ref read),
                                         Content = bR.ReadString("content", ref read),
                                         Remark = bR.ReadString("remark", ref read),
+                                        Value = bR.ReadDouble("value", ref read),
                                     };
                             bR.ReadEndDocument();
                             return bal;

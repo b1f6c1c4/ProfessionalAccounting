@@ -93,6 +93,7 @@ public class Virtualizer : IDbAdapter, IAsyncDisposable
                         SubTitle = level.HasFlag(SubtotalLevel.SubTitle) ? d.SubTitle : null,
                         Content = level.HasFlag(SubtotalLevel.Content) ? d.Content : null,
                         Remark = level.HasFlag(SubtotalLevel.Remark) ? d.Remark : null,
+                        Value = level.HasFlag(SubtotalLevel.Value) ? Math.Round(d.Fund!.Value, -(int)Math.Log10(VoucherDetail.Tolerance)) : null,
                         Fund = query.Subtotal.GatherType == GatheringType.Count ? 1 : d.Fund!.Value,
                     }).ToAsyncEnumerable()));
         return query.Subtotal.ShouldAvoidZero() ? fluent.Where(static b => !b.Fund.IsZero()) : fluent;
@@ -222,7 +223,7 @@ public class Virtualizer : IDbAdapter, IAsyncDisposable
             if (x == null || y == null)
                 return false;
             return Nullable.Equals(x.Date, y.Date) && x.Title == y.Title && x.SubTitle == y.SubTitle &&
-                x.Content == y.Content && x.Remark == y.Remark && x.Currency == y.Currency && x.User == y.User;
+                x.Content == y.Content && x.Remark == y.Remark && x.Currency == y.Currency && x.User == y.User && x.Value == y.Value;
         }
 
         public int GetHashCode(Balance obj)

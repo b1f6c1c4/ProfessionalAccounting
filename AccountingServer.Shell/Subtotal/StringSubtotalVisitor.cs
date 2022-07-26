@@ -69,6 +69,7 @@ internal abstract class StringSubtotalVisitor
     public abstract IAsyncEnumerable<string> Visit(ISubtotalSubTitle sub);
     public abstract IAsyncEnumerable<string> Visit(ISubtotalContent sub);
     public abstract IAsyncEnumerable<string> Visit(ISubtotalRemark sub);
+    public abstract IAsyncEnumerable<string> Visit(ISubtotalValue sub);
 
     protected virtual IAsyncEnumerable<string> Pre() => AsyncEnumerable.Empty<string>();
     protected virtual IAsyncEnumerable<string> Post() => AsyncEnumerable.Empty<string>();

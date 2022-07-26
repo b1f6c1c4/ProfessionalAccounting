@@ -340,4 +340,13 @@ internal class SubtotalVisitor : StringSubtotalVisitor
         m_Path = prev;
         return s;
     }
+
+    public override IAsyncEnumerable<string> Visit(ISubtotalValue sub)
+    {
+        var prev = m_Path;
+        m_Path = Composite.Merge(m_Path, $"{sub.Value:R}");
+        var s = ShowSubtotal(sub);
+        m_Path = prev;
+        return s;
+    }
 }

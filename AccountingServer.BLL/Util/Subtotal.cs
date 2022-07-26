@@ -154,6 +154,20 @@ internal class SubtotalRemarkFactory : SubtotalResultFactory<string>
     public override SubtotalResult Create(IAsyncGrouping<string, Balance> grp) => new SubtotalRemark(grp.Key);
 }
 
+internal class SubtotalValue : SubtotalResult, ISubtotalValue
+{
+    public SubtotalValue(double? value) => Value = value;
+    public double? Value { get; }
+
+    public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
+}
+
+internal class SubtotalValueFactory : SubtotalResultFactory<double?>
+{
+    public override double? Selector(Balance b) => b.Value;
+    public override SubtotalResult Create(IAsyncGrouping<double?, Balance> grp) => new SubtotalValue(grp.Key);
+}
+
 /// <summary>
 ///     分类汇总结果建造者
 /// </summary>
@@ -217,6 +231,7 @@ public class SubtotalBuilder
                 SubtotalLevel.Week => Invoke(new SubtotalDateFactory(level)),
                 SubtotalLevel.Month => Invoke(new SubtotalDateFactory(level)),
                 SubtotalLevel.Year => Invoke(new SubtotalDateFactory(level)),
+                SubtotalLevel.Value => Invoke(new SubtotalValueFactory()),
                 _ => throw new ArgumentOutOfRangeException(),
             });
     }

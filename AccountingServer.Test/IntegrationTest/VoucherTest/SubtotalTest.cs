@@ -311,6 +311,16 @@ public class SubtotalTest : IAsyncDisposable
                 .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
 
     [Theory]
+    [InlineData(123, null, "``V")]
+    [InlineData(123.45, 123.45, "``V")]
+    [InlineData(-78.53, -78.53, "``V")]
+    public void RunTestV(double v, double? value, string query)
+        => Assert.Equal(
+            value,
+            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query, m_Client)).ToEnumerable()
+                .SingleOrDefault(b => b.Value == v)?.Fund);
+
+    [Theory]
     [InlineData("!!U")]
     [InlineData("!!C")]
     [InlineData("!!t")]

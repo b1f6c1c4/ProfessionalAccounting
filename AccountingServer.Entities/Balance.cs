@@ -61,6 +61,11 @@ public class Balance
     public string User { get; init; }
 
     /// <summary>
+    ///     金额
+    /// </summary>
+    public double? Value { get; set; }
+
+    /// <summary>
     ///     余额
     /// </summary>
     public double Fund { get; set; }
