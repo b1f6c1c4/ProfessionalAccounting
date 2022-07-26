@@ -40,25 +40,41 @@ internal class HttpAdapter : IActionResult
     public string ContentType { private get; init; } = "text/plain; charset=utf-8";
     public string CacheControl { private get; init; }
     public string Vary { private get; init; }
-    public IAsyncEnumerable<string> Result { private get; init; }
+    private byte[] ResultBytes { get; }
+    private IAsyncEnumerable<byte[]> ResultIAE { get; }
+
+    public HttpAdapter(IAsyncEnumerable<string> iae)
+        => ResultIAE = iae.Where(static s => s != null).Select(static s => Encoding.UTF8.GetBytes(s));
+
+    public HttpAdapter(string str)
+        => ResultBytes = Encoding.UTF8.GetBytes(str);
+
+    public HttpAdapter(bool success)
+        => Code = success ? 204 : 404;
 
     public async Task ExecuteResultAsync(ActionContext context)
     {
-        context.HttpContext.Response.StatusCode = Code;
-        context.HttpContext.Response.ContentType = ContentType;
+        var r = context.HttpContext.Response;
+        r.StatusCode = Code;
+        r.ContentType = ContentType;
         if (!string.IsNullOrEmpty(CacheControl))
-            context.HttpContext.Response.Headers["Cache-Control"] = CacheControl;
+            r.Headers["Cache-Control"] = CacheControl;
         if (!string.IsNullOrEmpty(Vary))
-            context.HttpContext.Response.Headers["Vary"] = Vary;
-        await SendContent(context.HttpContext.Response.Body, Result.Where(static s => s != null).Select(static s => Encoding.UTF8.GetBytes(s)));
+            r.Headers["Vary"] = Vary;
+        if (ResultIAE != null)
+            await SendContent(r.Body, ResultIAE);
+        else {
+            r.ContentLength = ResultBytes.Length;
+            await r.Body.WriteAsync(ResultBytes);
+        }
     }
 }
 
-public static class GetSafe
+public static class Program
 {
     private static Facade facade;
 
-    static GetSafe() => facade = new Facade();
+    static Program() => facade = new Facade();
 
     private static Session CreateSession(HttpRequest req)
     {
@@ -82,9 +98,26 @@ public static class GetSafe
         return facade.CreateSession(user, dt, spec, limit);
     }
 
+    [FunctionName("emptyVoucher")]
+    public static async Task<IActionResult> ApiEmptyVoucher(
+            [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req,
+            ILogger log)
+    {
+        var session = CreateSession(req);
+        if (session == null) {
+            log.LogError("/api/emptyVoucher: Missing request headers");
+            return new StatusCodeResult(400);
+        }
+        return new HttpAdapter(facade.EmptyVoucher(session))
+            {
+                CacheControl = "public, max-age=30",
+                Vary = "X-Serializer, X-Limit",
+            };
+    }
+
     [FunctionName("safe")]
     public static async Task<IActionResult> ApiSafe(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req,
             ILogger log)
     {
         var session = CreateSession(req);
@@ -92,15 +125,109 @@ public static class GetSafe
             log.LogError("/api/safe: Missing request headers");
             return new StatusCodeResult(400);
         }
-
         var expr = req.Query["q"];
-        // string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-        var res = facade.SafeExecute(session, expr);
-        return new HttpAdapter
+        return new HttpAdapter(facade.SafeExecute(session, expr))
             {
                 CacheControl = "public, max-age=30",
                 Vary = "X-User, X-Serializer, X-ClientDateTime, X-Limit",
-                Result = res,
             };
+    }
+
+    [FunctionName("execute")]
+    public static async Task<IActionResult> ApiExecute(
+            [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
+            ILogger log)
+    {
+        var session = CreateSession(req);
+        if (session == null) {
+            log.LogError("/api/execute: Missing request headers");
+            return new StatusCodeResult(400);
+        }
+        var expr = await new StreamReader(req.Body).ReadToEndAsync();
+        return new HttpAdapter(facade.Execute(session, expr));
+    }
+
+    [FunctionName("voucherUpsert")]
+    public static async Task<IActionResult> ApiVoucherUpsert(
+            [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
+            ILogger log)
+    {
+        var session = CreateSession(req);
+        if (session == null) {
+            log.LogError("/api/voucherUpsert: Missing request headers");
+            return new StatusCodeResult(400);
+        }
+        var code = await new StreamReader(req.Body).ReadToEndAsync();
+        return new HttpAdapter(await facade.ExecuteVoucherUpsert(session, code));
+    }
+
+    [FunctionName("voucherRemoval")]
+    public static async Task<IActionResult> ApiVoucherRemoval(
+            [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
+            ILogger log)
+    {
+        var session = CreateSession(req);
+        if (session == null) {
+            log.LogError("/api/voucherRemoval: Missing request headers");
+            return new StatusCodeResult(400);
+        }
+        var code = await new StreamReader(req.Body).ReadToEndAsync();
+        return new HttpAdapter(await facade.ExecuteVoucherRemoval(session, code));
+    }
+
+    [FunctionName("assetUpsert")]
+    public static async Task<IActionResult> ApiAssetUpsert(
+            [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
+            ILogger log)
+    {
+        var session = CreateSession(req);
+        if (session == null) {
+            log.LogError("/api/assetUpsert: Missing request headers");
+            return new StatusCodeResult(400);
+        }
+        var code = await new StreamReader(req.Body).ReadToEndAsync();
+        return new HttpAdapter(await facade.ExecuteAssetUpsert(session, code));
+    }
+
+    [FunctionName("assetRemoval")]
+    public static async Task<IActionResult> ApiAssetRemoval(
+            [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
+            ILogger log)
+    {
+        var session = CreateSession(req);
+        if (session == null) {
+            log.LogError("/api/assetRemoval: Missing request headers");
+            return new StatusCodeResult(400);
+        }
+        var code = await new StreamReader(req.Body).ReadToEndAsync();
+        return new HttpAdapter(await facade.ExecuteAssetRemoval(session, code));
+    }
+
+    [FunctionName("amortUpsert")]
+    public static async Task<IActionResult> ApiAmortUpsert(
+            [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
+            ILogger log)
+    {
+        var session = CreateSession(req);
+        if (session == null) {
+            log.LogError("/api/amortUpsert: Missing request headers");
+            return new StatusCodeResult(400);
+        }
+        var code = await new StreamReader(req.Body).ReadToEndAsync();
+        return new HttpAdapter(await facade.ExecuteAmortUpsert(session, code));
+    }
+
+    [FunctionName("amortRemoval")]
+    public static async Task<IActionResult> ApiAmortRemoval(
+            [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
+            ILogger log)
+    {
+        var session = CreateSession(req);
+        if (session == null) {
+            log.LogError("/api/amortRemoval: Missing request headers");
+            return new StatusCodeResult(400);
+        }
+        var code = await new StreamReader(req.Body).ReadToEndAsync();
+        return new HttpAdapter(await facade.ExecuteAmortRemoval(session, code));
     }
 }
