@@ -20,6 +20,8 @@ import * as Api from '../app/api.js';
 import { useEffect, useState } from 'preact/hooks';
 import { html } from 'htm/preact';
 
+const theUser = window.localStorage.getItem('user') || 'anonymous';
+
 export default function FlatSelector(props) {
     const {
         title,
@@ -31,7 +33,7 @@ export default function FlatSelector(props) {
     useEffect(() => {
         async function go() {
             try {
-                const { data } = await Api.safeApi(props.query, 'usr');
+                const { data } = await Api.safeApi(props.query, theUser);
                 const res = data.split('\n').map((s) => s.split('\t')[0]).filter((s) => s);
                 setEntries(res);
                 if (res.length === 1 && !value)

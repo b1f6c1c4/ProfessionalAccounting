@@ -29,11 +29,12 @@ window.addEventListener('load', () => {
     const btn = document.createElement('a');
     btn.innerText = '<';
     btn.classList.add('swap');
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
         lst.classList.toggle('hide');
+        e.stopPropagation();
     });
     document.body.appendChild(btn);
     document.body.addEventListener('click', () => {
         lst.classList.add('hide');
-    }, true);
+    });
 });

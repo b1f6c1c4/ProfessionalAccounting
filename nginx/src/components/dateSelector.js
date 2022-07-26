@@ -36,13 +36,14 @@ export default function DateSelector(props) {
         case 5: date += '[F]'; break;
         case 6: date += '[A]'; break;
     }
+    const dt = dayjs().format('YYYYMMDD');
     const dp = d.subtract(1, 'day').format('YYYYMMDD');
-    const dn = d.subtract(1, 'day').format('YYYYMMDD');
+    const dn = d.add(1, 'day').format('YYYYMMDD');
     return html`
         <p class="selector">
             <span>${title}</span>
             <span class="button" onclick=${() => onValue(dp)}>-</span>
-            <span class="chosen">${date}</span>
+            <span class="chosen" onclick=${() => onValue(dt)}>${date}</span>
             <span class="button" onclick=${() => onValue(dn)}>+</span>
         </p>
     `;
