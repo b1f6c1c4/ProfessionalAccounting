@@ -31,7 +31,7 @@ body.desktop, body.gui {
     padding: 0;
     margin: 0;
 }
-a#swap {
+a.swap {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -48,6 +48,45 @@ a#swap {
     text-decoration: none;
     font-family: monospace;
     z-index: 10000;
+}
+ul.swap {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    right: 20px;
+    bottom: 100px;
+    background-color: white;
+    border: 1px solid darkviolet;
+    color: white;
+    border-radius: 20px;
+    font-size: 16px;
+    text-decoration: none;
+    font-family: monospace;
+    z-index: 10000;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+ul.swap li {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60px;
+    min-width: 120px;
+    margin: 0;
+    padding: 5px;
+    border-width: 1px 0;
+    border-style: solid;
+    border-color: lightgray;
+}
+.hide {
+    display: none !important;
+}
+ul.swap a {
+    margin: 0;
+    padding: 0;
+    color: darkviolet;
+    text-decoration: none;
 }
 .mobile #wrapper {
     position: fixed;
