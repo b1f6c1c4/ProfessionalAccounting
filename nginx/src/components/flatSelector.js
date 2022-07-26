@@ -23,8 +23,9 @@ import { html } from 'htm/preact';
 export default function FlatSelector(props) {
     const {
         title,
+        selected,
+        onSelected,
     } = props;
-    const [selected, setSelected] = useState(null);
     const [entries, setEntries] = useState(null);
     const [error, setError] = useState(null);
     useEffect(() => {
@@ -41,17 +42,17 @@ export default function FlatSelector(props) {
         go();
     }, [props.query, setEntries, setError]);
     return (html`
-        <p class="flat-selector">
+        <p class="selector">
             <span>${title}</span>
             ${error
                 ? html`<span class="error">E: ${''+error}</span>`
                 : selected
                     ? html`<span class="chosen"
-                        onclick=${() => setSelected(null)}>${selected}</span>`
+                        onclick=${() => onSelected(null)}>${selected}</span>`
                     : Array.isArray(entries)
                         ? entries.map((ent) => html`
-                            <input type="button" value=${ent}
-                                onclick=${() => setSelected(ent)} />`)
+                            <input type="button" value=${ent} class="button"
+                                onclick=${() => onSelected(ent)} />`)
                         : '...'}
         </p>
     `);

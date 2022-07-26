@@ -179,16 +179,16 @@ input:focus, textarea:focus {
 body.gui-jtysf #app {
     padding: 15px 4%;
 }
-p.flat-selector {
+p.selector {
     display: flex;
     flex-wrap: wrap;
     gap: 5px 6px;
     margin: 2px 0 12px 0;
 }
-p.flat-selector span {
+p.selector span {
     margin: 0 3px 0 8px;
 }
-p.flat-selector input, p.flat-selector .chosen {
+p.selector .button, p.selector .chosen {
     margin: 0;
     padding: 0 8px;
     border-radius: 0px;
