@@ -99,6 +99,7 @@ internal abstract class StringSubtotalVisitor
                     SubtotalLevel.Week => sub.Items.Cast<ISubtotalDate>().OrderBy(static s => s.Date),
                     SubtotalLevel.Month => sub.Items.Cast<ISubtotalDate>().OrderBy(static s => s.Date),
                     SubtotalLevel.Year => sub.Items.Cast<ISubtotalDate>().OrderBy(static s => s.Date),
+                    SubtotalLevel.Value => sub.Items.Cast<ISubtotalValue>().OrderBy(static s => s.Value),
                     _ => throw new ArgumentOutOfRangeException(),
                 };
         }
