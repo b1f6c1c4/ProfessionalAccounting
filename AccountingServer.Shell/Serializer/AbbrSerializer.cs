@@ -31,8 +31,8 @@ namespace AccountingServer.Shell.Serializer;
 
 public class AbbrSerializer : ExprSerializer
 {
-    public static IConfigManager<Abbreviations> Abbrs { private get; set; } =
-        MetaConfigManager.Generate<Abbreviations>("Abbr");
+    static AbbrSerializer()
+        => Cfg.RegisterType<Abbreviations>("Abbr");
 
     protected override bool AlternativeTitle(ref string expr, ICollection<string> lst, ref ITitle title) =>
         GetAlternativeTitle(ref expr, lst, ref title);
@@ -44,7 +44,7 @@ public class AbbrSerializer : ExprSerializer
             Parsing.Token(
                 ref expr,
                 false,
-                t => (d = Abbrs.Config.Abbrs.FirstOrDefault(a => a.Abbr == t)) != null) == null)
+                t => (d = Cfg.Get<Abbreviations>().Abbrs.FirstOrDefault(a => a.Abbr == t)) != null) == null)
             return false;
 
         title = d;

@@ -1,4 +1,4 @@
-/* Copyright (C) 2020-2022 b1f6c1c4
+/* Copyright (C) 2022 b1f6c1c4
  *
  * This file is part of ProfessionalAccounting.
  *
@@ -17,24 +17,29 @@
  */
 
 using System;
-using System.Collections;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AccountingServer.BLL.Util;
 using AccountingServer.Entities.Util;
 
-namespace AccountingServer.Test;
-
-public class MockExchange : IHistoricalExchange, IEnumerable
+public class ConfigFilesManager
 {
-    private readonly Dictionary<Tuple<DateTime?, string>, double> m_Dic = new();
-
-    public IEnumerator GetEnumerator() => m_Dic.GetEnumerator();
-
-    public ValueTask<double> Query(DateTime? date, string from, string to)
-        => ValueTask.FromResult(m_Dic[new(date, from)] / m_Dic[new(date, to)]);
-
-    public void Add(DateTime date, string target, double val) => m_Dic.Add(
-        new(date, target),
-        val);
+    public static async IAsyncEnumerable<string> InitializeConfigFiles()
+    {
+        var names = new[] {
+            "BaseCurrency",
+            "Symbol",
+            "Exchange",
+            "Titles",
+            "Carry",
+            "Cash",
+            "Composite",
+            "Coupling",
+            "Util",
+            "Abbr",
+        };
+        await Task.WhenAll(names.Select(Cfg.RegisterName));
+        await foreach (var s in Cfg.ReloadAll())
+            yield return s;
+    }
 }

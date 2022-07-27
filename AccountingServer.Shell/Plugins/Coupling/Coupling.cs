@@ -29,8 +29,8 @@ namespace AccountingServer.Shell.Plugins.Coupling;
 
 internal class Coupling : PluginBase
 {
-    public static IConfigManager<CoupleTemplate> Templates { private get; set; } =
-        MetaConfigManager.Generate<CoupleTemplate>("Coupling");
+    static Coupling()
+        => Cfg.RegisterType<CoupleTemplate>("Coupling");
 
     public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
@@ -41,7 +41,7 @@ internal class Coupling : PluginBase
         var rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
         Parsing.Eof(expr);
 
-        foreach (var configCouple in Templates.Config.Couples)
+        foreach (var configCouple in Cfg.Get<CoupleTemplate>().Couples)
         await foreach (var ret in AnalyzeCouple(session, configCouple, rng, aux))
             yield return ret;
     }

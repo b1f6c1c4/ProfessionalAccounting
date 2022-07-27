@@ -37,8 +37,8 @@ namespace AccountingServer.Shell.Plugins.Composite;
 /// </summary>
 internal class Composite : PluginBase
 {
-    public static IConfigManager<CompositeTemplates> Templates { private get; set; } =
-        MetaConfigManager.Generate<CompositeTemplates>("Composite");
+    static Composite()
+        => Cfg.RegisterType<CompositeTemplates>("Composite");
 
     /// <inheritdoc />
     public override async IAsyncEnumerable<string> Execute(string expr, Session session)
@@ -64,7 +64,7 @@ internal class Composite : PluginBase
         yield return (await DoInquiry(the, temp, currency, session)).Item1;
     }
 
-    public static Template GetTemplate(string name) => Templates.Config.Templates.SingleOrDefault(
+    public static Template GetTemplate(string name) => Cfg.Get<CompositeTemplates>().Templates.SingleOrDefault(
         p => p.Name == name);
 
     public static DateFilter DateRange(int day, DateTime now)
@@ -91,7 +91,7 @@ internal class Composite : PluginBase
     {
         await foreach (var s in base.ListHelp())
             yield return s;
-        foreach (var tmp in Templates.Config.Templates)
+        foreach (var tmp in Cfg.Get<CompositeTemplates>().Templates)
             yield return tmp.Name;
     }
 

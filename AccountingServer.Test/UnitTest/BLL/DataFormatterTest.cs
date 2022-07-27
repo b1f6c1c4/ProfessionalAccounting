@@ -20,6 +20,7 @@ using System;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using Xunit;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
@@ -31,10 +32,11 @@ public class DataFormatterTest
 
     public DataFormatterTest()
     {
-        BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
-            new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
-        DataFormatter.CurrencySymbols = new MockConfigManager<CurrencySymbols>(
-            new() { Symbols = new() { new() { Currency = "DOGE", Symbol = "#" } } });
+        Cfg.Assign(new BaseCurrencyInfos()
+            { Infos = new() { new() { Date = null, Currency = "CNY" } } });
+
+        Cfg.Assign(new CurrencySymbols()
+            { Symbols = new() { new() { Currency = "DOGE", Symbol = "#" } } });
     }
 
     [Theory]

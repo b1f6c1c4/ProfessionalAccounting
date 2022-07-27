@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using Xunit;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
@@ -40,8 +41,8 @@ public class SubtotalTest
         };
 
     public SubtotalTest()
-        => BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
-            new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
+        => Cfg.Assign(new BaseCurrencyInfos()
+            { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
     [Theory]
     [InlineData("", "101110")]

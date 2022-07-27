@@ -131,8 +131,8 @@ internal abstract class ExchangeApi : IExchange
     /// <summary>
     ///     汇率API配置
     /// </summary>
-    protected static IConfigManager<ExchangeInfo> ExchangeInfo { get; set; } =
-        MetaConfigManager.Generate<ExchangeInfo>("Exchange");
+    static ExchangeApi()
+        => Cfg.RegisterType<ExchangeInfo>("Exchange");
 
     internal ExchangeApi Successor { private get; init; }
 
@@ -170,12 +170,12 @@ internal class FixerIoExchange : ExchangeApi, IHistoricalExchange
         if (!date.HasValue)
             return Invoke(from, to);
 
-        return m_ApiKeys.Execute(ExchangeInfo.Config.FixerAccessKey,
+        return m_ApiKeys.Execute(Cfg.Get<ExchangeInfo>().FixerAccessKey,
             key => PartialInvoke(from, to, key, date!.Value.ToString("yyyy-MM-dd")));
     }
 
     protected override ValueTask<double> Invoke(string from, string to)
-        => m_ApiKeys.Execute(ExchangeInfo.Config.FixerAccessKey,
+        => m_ApiKeys.Execute(Cfg.Get<ExchangeInfo>().FixerAccessKey,
             key => PartialInvoke(from, to, key, "latest"));
 
     private static async ValueTask<double?> PartialInvoke(string from, string to, string key, string endpoint)
@@ -202,7 +202,7 @@ internal class CoinMarketCapExchange : ExchangeApi
     {
         int? fromId = null, toId = null;
         var isCrypto = false;
-        foreach (var cur in ExchangeInfo.Config.Currencies)
+        foreach (var cur in Cfg.Get<ExchangeInfo>().Currencies)
             switch (cur)
             {
                 case CryptoCurrency c:
@@ -229,7 +229,7 @@ internal class CoinMarketCapExchange : ExchangeApi
 
         if (!fromId.HasValue || !toId.HasValue || !isCrypto)
             throw new InvalidOperationException("Not a cryptocurrency");
-        return m_ApiKeys.Execute(ExchangeInfo.Config.CoinAccessKey,
+        return m_ApiKeys.Execute(Cfg.Get<ExchangeInfo>().CoinAccessKey,
             key => PartialInvoke(fromId.Value, toId.Value, key));
     }
 
