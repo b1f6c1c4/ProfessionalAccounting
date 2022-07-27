@@ -85,17 +85,17 @@ internal class ExchangeShell : IShellComponent
     public void EnableTimer(DbSession db)
     {
         m_TimerSession = db;
-        OnTimedEvent(null, null);
+        ImmediateExchange();
         m_Timer.Enabled = true;
     }
 
     /// <summary>
     ///     立即登记汇率
     /// </summary>
-    public void ImmediateExchange(DbSession db)
+    public Task ImmediateExchange(DbSession db)
     {
         m_TimerSession = db;
-        OnTimedEvent(null, null);
+        return ImmediateExchange();
     }
 
     private static DateTime CriticalTime(DateTime now)
@@ -117,7 +117,10 @@ internal class ExchangeShell : IShellComponent
     }
 
     // ReSharper disable once AsyncVoidMethod
-    private async void OnTimedEvent(object source, ElapsedEventArgs e)
+    private void OnTimedEvent(object source, ElapsedEventArgs e)
+        => ImmediateExchange();
+
+    private async Task ImmediateExchange()
     {
         var date = CriticalTime(DateTime.UtcNow);
         var log = $"{DateTime.UtcNow:o} Ensuring exchange rates exist since {date:o}";
