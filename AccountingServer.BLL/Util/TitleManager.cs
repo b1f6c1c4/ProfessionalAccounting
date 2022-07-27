@@ -91,7 +91,7 @@ public static class TitleManager
     ///     会计科目信息文档
     /// </summary>
     public static IConfigManager<TitleInfos> TitleInfos { private get; set; } =
-        new ConfigManager<TitleInfos>("Titles.xml");
+        MetaConfigManager.Generate<TitleInfos>("Titles");
 
     /// <summary>
     ///     返回所有会计科目编号和名称

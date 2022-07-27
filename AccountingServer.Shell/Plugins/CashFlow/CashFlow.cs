@@ -34,7 +34,7 @@ namespace AccountingServer.Shell.Plugins.CashFlow;
 internal class CashFlow : PluginBase
 {
     public static IConfigManager<CashTemplates> Templates { private get; set; } =
-        new ConfigManager<CashTemplates>("Cash.xml");
+        MetaConfigManager.Generate<CashTemplates>("Cash");
 
     /// <inheritdoc />
     public override async IAsyncEnumerable<string> Execute(string expr, Session session)

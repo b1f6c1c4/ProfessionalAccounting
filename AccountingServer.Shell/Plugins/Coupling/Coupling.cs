@@ -30,7 +30,7 @@ namespace AccountingServer.Shell.Plugins.Coupling;
 internal class Coupling : PluginBase
 {
     public static IConfigManager<CoupleTemplate> Templates { private get; set; } =
-        new ConfigManager<CoupleTemplate>("Coupling.xml");
+        MetaConfigManager.Generate<CoupleTemplate>("Coupling");
 
     public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {

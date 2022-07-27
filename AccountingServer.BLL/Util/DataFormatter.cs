@@ -54,7 +54,7 @@ public static class DataFormatter
     ///     记账本位币信息文档
     /// </summary>
     public static IConfigManager<CurrencySymbols> CurrencySymbols { private get; set; } =
-        new ConfigManager<CurrencySymbols>("Symbol.xml");
+        MetaConfigManager.Generate<CurrencySymbols>("Symbol");
 
     /// <summary>
     ///     解析用户过滤器

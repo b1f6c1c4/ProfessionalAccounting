@@ -31,7 +31,7 @@ namespace AccountingServer.Shell.Carry;
 internal partial class CarryShell
 {
     public static IConfigManager<CarrySettings> CarrySettings { private get; set; } =
-        new ConfigManager<CarrySettings>("Carry.xml");
+        MetaConfigManager.Generate<CarrySettings>("Carry");
 
     private ValueTask<long> ResetCarry(Session session, DateFilter rng)
         => session.Accountant.DeleteVouchersAsync($"{rng.AsDateRange()} Carry");

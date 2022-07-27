@@ -24,7 +24,7 @@ using System.Xml.Serialization;
 namespace AccountingServer.Entities.Util;
 
 /// <summary>
-///     可重载的配置文件管理
+///     配置文件管理
 /// </summary>
 public interface IConfigManager
 {
@@ -33,35 +33,6 @@ public interface IConfigManager
     /// </summary>
     /// <param name="throws">允许抛出异常</param>
     void Reload(bool throws);
-}
-
-/// <summary>
-///     元配置文件管理
-/// </summary>
-public static class MetaConfigManager
-{
-    /// <summary>
-    ///     所有配置文件
-    /// </summary>
-    private static readonly List<IConfigManager> ConfigManagers = new();
-
-    /// <summary>
-    ///     添加配置文件
-    /// </summary>
-    /// <param name="manager">配置文件管理</param>
-    public static void Register(IConfigManager manager) => ConfigManagers.Add(manager);
-
-    /// <summary>
-    ///     重新读取配置文件
-    /// </summary>
-    public static IEnumerable<string> ReloadAll()
-    {
-        foreach (var manager in ConfigManagers)
-        {
-            manager.Reload(true);
-            yield return manager.GetType() + "\n";
-        }
-    }
 }
 
 /// <summary>
@@ -77,15 +48,65 @@ public interface IConfigManager<out T> : IConfigManager
 }
 
 /// <summary>
+///     配置文件管理器工厂
+/// </summary>
+/// <typeparam name="T">配置文件类型</typeparam>
+public interface IConfigManagerFactory
+{
+    IConfigManager<T> Generate<T>(string filename);
+}
+
+/// <summary>
+///     元配置文件管理
+/// </summary>
+public static class MetaConfigManager
+{
+    /// <summary>
+    ///     所有配置文件
+    /// </summary>
+    private static readonly List<IConfigManager> ConfigManagers = new();
+
+    /// <summary>
+    ///     默认配置文件管理器工厂
+    /// </summary>
+    public static IConfigManagerFactory DefaultFactory { private get; set; } = new FSConfigManagerFactory();
+
+    public static IConfigManager<T> Generate<T>(string filename)
+    {
+        var icm = DefaultFactory.Generate<T>(filename);
+        Register(icm);
+        return icm;
+    }
+
+    /// <summary>
+    ///     添加配置文件
+    /// </summary>
+    /// <param name="manager">配置文件管理</param>
+    private static void Register(IConfigManager manager) => ConfigManagers.Add(manager);
+
+    /// <summary>
+    ///     重新读取配置文件
+    /// </summary>
+    public static IEnumerable<string> ReloadAll()
+    {
+        foreach (var manager in ConfigManagers)
+        {
+            manager.Reload(true);
+            yield return manager.GetType() + "\n";
+        }
+    }
+}
+
+/// <summary>
 ///     配置文件管理器
 /// </summary>
 /// <typeparam name="T">配置文件类型</typeparam>
-public class ConfigManager<T> : IConfigManager<T>
+public abstract class XmlConfigManager<T> : IConfigManager<T>
 {
     /// <summary>
-    ///     文件名
+    ///     资源标识
     /// </summary>
-    private readonly string m_FileName;
+    protected string Identifier { private get; set; }
 
     /// <summary>
     ///     配置文件
@@ -97,28 +118,22 @@ public class ConfigManager<T> : IConfigManager<T>
     /// </summary>
     private Exception m_Exception;
 
-    /// <summary>
-    ///     设置配置文件
-    /// </summary>
-    /// <param name="filename">文件名</param>
-    public ConfigManager(string filename)
-    {
-        m_FileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.d", filename);
-        Reload(false);
-        MetaConfigManager.Register(this);
-    }
-
     /// <inheritdoc />
     public T Config
     {
         get
         {
             if (m_Exception != null)
-                throw new MemberAccessException($"加载配置文件{m_FileName}时发生错误", m_Exception);
+                throw new MemberAccessException($"加载配置文件{Identifier}时发生错误", m_Exception);
 
             return m_Config;
         }
     }
+
+    /// <summary>
+    ///     读取配置文件
+    /// </summary>
+    protected abstract StreamReader Retrieve();
 
     /// <inheritdoc />
     public void Reload(bool throws)
@@ -126,7 +141,7 @@ public class ConfigManager<T> : IConfigManager<T>
         try
         {
             var ser = new XmlSerializer(typeof(T));
-            using var stream = new StreamReader(m_FileName);
+            using var stream = Retrieve();
             m_Config = (T)ser.Deserialize(stream);
         }
         catch (Exception e)
@@ -137,4 +152,39 @@ public class ConfigManager<T> : IConfigManager<T>
             m_Exception = e;
         }
     }
+}
+
+/// <summary>
+///     基于文件系统的配置文件管理器工厂
+/// </summary>
+public class FSConfigManagerFactory : IConfigManagerFactory
+{
+    public IConfigManager<T> Generate<T>(string filename)
+        => new FSConfigManager<T>(filename);
+}
+
+/// <summary>
+///     基于文件系统的配置文件管理器
+/// </summary>
+internal class FSConfigManager<T> : XmlConfigManager<T>
+{
+    /// <summary>
+    ///     文件名
+    /// </summary>
+    private readonly string m_FileName;
+
+    /// <summary>
+    ///     设置配置文件
+    /// </summary>
+    /// <param name="filename">文件名</param>
+    internal FSConfigManager(string filename)
+    {
+        m_FileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.d", filename);
+        Identifier = m_FileName;
+        Reload(false);
+    }
+
+    /// <inheritdoc />
+    protected override StreamReader Retrieve()
+        => new(m_FileName);
 }

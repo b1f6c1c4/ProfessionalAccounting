@@ -51,7 +51,7 @@ public static class BaseCurrency
     ///     记账本位币信息文档
     /// </summary>
     public static IConfigManager<BaseCurrencyInfos> BaseCurrencyInfos { private get; set; } =
-        new ConfigManager<BaseCurrencyInfos>("BaseCurrency.xml");
+        MetaConfigManager.Generate<BaseCurrencyInfos>("BaseCurrency");
 
     public static IReadOnlyList<BaseCurrencyInfo> History => BaseCurrencyInfos.Config.Infos.AsReadOnly();
 

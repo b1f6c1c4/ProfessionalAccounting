@@ -38,7 +38,7 @@ namespace AccountingServer.Shell.Plugins.Composite;
 internal class Composite : PluginBase
 {
     public static IConfigManager<CompositeTemplates> Templates { private get; set; } =
-        new ConfigManager<CompositeTemplates>("Composite.xml");
+        MetaConfigManager.Generate<CompositeTemplates>("Composite");
 
     /// <inheritdoc />
     public override async IAsyncEnumerable<string> Execute(string expr, Session session)
