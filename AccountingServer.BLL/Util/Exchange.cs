@@ -132,7 +132,7 @@ internal abstract class ExchangeApi : IExchange
     ///     汇率API配置
     /// </summary>
     protected static IConfigManager<ExchangeInfo> ExchangeInfo { get; set; } =
-        new ConfigManager<ExchangeInfo>("Exchange.xml");
+        MetaConfigManager.Generate<ExchangeInfo>("Exchange");
 
     internal ExchangeApi Successor { private get; init; }
 

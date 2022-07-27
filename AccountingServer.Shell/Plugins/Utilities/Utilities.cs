@@ -33,7 +33,7 @@ namespace AccountingServer.Shell.Plugins.Utilities;
 internal class Utilities : PluginBase
 {
     public static IConfigManager<UtilTemplates> Templates { private get; set; } =
-        new ConfigManager<UtilTemplates>("Util.xml");
+        MetaConfigManager.Generate<UtilTemplates>("Util");
 
     /// <inheritdoc />
     public override async IAsyncEnumerable<string> Execute(string expr, Session session)
