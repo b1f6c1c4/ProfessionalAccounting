@@ -30,8 +30,8 @@ namespace AccountingServer.Shell.Carry;
 
 internal partial class CarryShell
 {
-    public static IConfigManager<CarrySettings> CarrySettings { private get; set; } =
-        MetaConfigManager.Generate<CarrySettings>("Carry");
+    static CarryShell()
+        => Cfg.RegisterType<CarrySettings>("Carry");
 
     private ValueTask<long> ResetCarry(Session session, DateFilter rng)
         => session.Accountant.DeleteVouchersAsync($"{rng.AsDateRange()} Carry");
@@ -57,7 +57,7 @@ internal partial class CarryShell
             rng = DateFilter.TheNullOnly;
         }
 
-        var tasks = CarrySettings.Config.UserSettings
+        var tasks = Cfg.Get<CarrySettings>().UserSettings
             .Single(us => us.User == session.Client.User).Targets
             .Select(t => new CarryTask
                 {

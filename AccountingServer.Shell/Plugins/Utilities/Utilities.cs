@@ -32,8 +32,8 @@ namespace AccountingServer.Shell.Plugins.Utilities;
 /// </summary>
 internal class Utilities : PluginBase
 {
-    public static IConfigManager<UtilTemplates> Templates { private get; set; } =
-        MetaConfigManager.Generate<UtilTemplates>("Util");
+    static Utilities()
+        => Cfg.RegisterType<UtilTemplates>("Util");
 
     /// <inheritdoc />
     public override async IAsyncEnumerable<string> Execute(string expr, Session session)
@@ -58,7 +58,7 @@ internal class Utilities : PluginBase
         await foreach (var s in base.ListHelp())
             yield return s;
 
-        foreach (var util in Templates.Config.Templates)
+        foreach (var util in Cfg.Get<UtilTemplates>().Templates)
             yield return $"{util.Name,20}{util.Description}\n";
     }
 
@@ -73,7 +73,7 @@ internal class Utilities : PluginBase
         var time = Parsing.UniqueTime(ref expr, session.Client) ?? session.Client.Today;
         var abbr = Parsing.Token(ref expr);
 
-        var template = Templates.Config.Templates.FirstOrDefault(t => t.Name == abbr) ??
+        var template = Cfg.Get<UtilTemplates>().Templates.FirstOrDefault(t => t.Name == abbr) ??
             throw new KeyNotFoundException($"找不到常见记账凭证{abbr}");
 
         var num = 1D;

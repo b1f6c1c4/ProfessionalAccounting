@@ -21,6 +21,7 @@ using System.Linq;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Serializer;
 using Xunit;
 
@@ -33,10 +34,11 @@ public abstract class SerializerTest
 
     protected SerializerTest()
     {
-        BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
-            new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
+        Cfg.Assign(new BaseCurrencyInfos()
+            { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
-        TitleManager.TitleInfos = new MockConfigManager<TitleInfos>(new() { Titles = new() });
+        Cfg.Assign(new TitleInfos()
+            { Titles = new() });
     }
 
     protected abstract IEntitySerializer Serializer { get; }
@@ -140,9 +142,7 @@ public class AbbrSerializerTest : SerializerTest
     public AbbrSerializerTest()
     {
         Serializer = new AbbrSerializer { Client = Client };
-        AbbrSerializer.Abbrs =
-            new MockConfigManager<Abbreviations>(
-                new()
+        Cfg.Assign(new Abbreviations()
                     {
                         Abbrs = new()
                             {
@@ -245,15 +245,14 @@ public class DiscountSerializerTest
     {
         Serializer = new DiscountSerializer { Client = m_Client };
 
-        BaseCurrency.BaseCurrencyInfos = new MockConfigManager<BaseCurrencyInfos>(
-            new() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
+        Cfg.Assign(new BaseCurrencyInfos()
+            { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
-        TitleManager.TitleInfos =
-            new MockConfigManager<TitleInfos>(new() { Titles = new() });
+        Cfg.Assign(new TitleInfos()
+                { Titles = new() });
 
-        AbbrSerializer.Abbrs =
-            new MockConfigManager<Abbreviations>(
-                new() { Abbrs = new() { new() { Abbr = "aaa", Title = 1001, Editable = false } } });
+        Cfg.Assign(new Abbreviations()
+                { Abbrs = new() { new() { Abbr = "aaa", Title = 1001, Editable = false } } });
     }
 
     private IEntitySerializer Serializer { get; }

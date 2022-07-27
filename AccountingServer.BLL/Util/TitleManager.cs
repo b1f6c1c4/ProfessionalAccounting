@@ -90,14 +90,14 @@ public static class TitleManager
     /// <summary>
     ///     会计科目信息文档
     /// </summary>
-    public static IConfigManager<TitleInfos> TitleInfos { private get; set; } =
-        MetaConfigManager.Generate<TitleInfos>("Titles");
+    static TitleManager()
+        => Cfg.RegisterType<TitleInfos>("Titles");
 
     /// <summary>
     ///     返回所有会计科目编号和名称
     /// </summary>
     /// <returns>编号和科目名称</returns>
-    public static IReadOnlyList<TitleInfo> Titles => TitleInfos.Config.Titles.AsReadOnly();
+    public static IReadOnlyList<TitleInfo> Titles => Cfg.Get<TitleInfos>().Titles.AsReadOnly();
 
     /// <summary>
     ///     返回编号对应的会计科目名称

@@ -33,8 +33,8 @@ namespace AccountingServer.Shell.Plugins.CashFlow;
 /// </summary>
 internal class CashFlow : PluginBase
 {
-    public static IConfigManager<CashTemplates> Templates { private get; set; } =
-        MetaConfigManager.Generate<CashTemplates>("Cash");
+    static CashFlow()
+        => Cfg.RegisterType<CashTemplates>("Cash");
 
     /// <inheritdoc />
     public override async IAsyncEnumerable<string> Execute(string expr, Session session)
@@ -43,7 +43,7 @@ internal class CashFlow : PluginBase
         var prefix = Parsing.Token(ref expr);
         Parsing.Eof(expr);
 
-        var accts = Templates.Config.Accounts
+        var accts = Cfg.Get<CashTemplates>().Accounts
             .Where(a => string.IsNullOrWhiteSpace(a.User) || session.Client.User == a.User).ToList();
         var n = accts.Count;
         var until = session.Client.Today.AddMonths(extraMonths);

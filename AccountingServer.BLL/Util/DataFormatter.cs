@@ -53,8 +53,8 @@ public static class DataFormatter
     /// <summary>
     ///     记账本位币信息文档
     /// </summary>
-    public static IConfigManager<CurrencySymbols> CurrencySymbols { private get; set; } =
-        MetaConfigManager.Generate<CurrencySymbols>("Symbol");
+    static DataFormatter()
+        => Cfg.RegisterType<CurrencySymbols>("Symbol");
 
     /// <summary>
     ///     解析用户过滤器
@@ -115,7 +115,7 @@ public static class DataFormatter
     {
         var sym = curr == null
             ? ""
-            : CurrencySymbols.Config.Symbols.SingleOrDefault(cs => cs.Currency == curr)?.Symbol ?? curr + " ";
+            : Cfg.Get<CurrencySymbols>().Symbols.SingleOrDefault(cs => cs.Currency == curr)?.Symbol ?? curr + " ";
         var s = $"{sym}{value:N4}";
         return s.TrimEnd('0').CPadRight(s.Length);
     }

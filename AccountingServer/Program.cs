@@ -21,9 +21,18 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using AccountingServer.Http;
 using AccountingServer.Shell;
 using static AccountingServer.Http.HttpUtil;
+
+var xwd = AppDomain.CurrentDomain.BaseDirectory;
+
+Cfg.DefaultLoader = async (m) => new StreamReader(Path.Combine(xwd, "config.d", m + ".xml"));
+Console.WriteLine("Loading config files");
+await foreach (var s in ConfigFilesManager.InitializeConfigFiles())
+    Console.Write(s);
+Console.WriteLine("All config files loaded");
 
 var facade = new Facade();
 #if RELEASE
@@ -37,7 +46,7 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
 {
 #if DEBUG
     var fn = Path.Combine(
-        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../../nginx/dist"),
+        Path.Combine(xwd, "../../../../nginx/dist"),
         (request.BaseUri == "/" ? "/index-desktop.html" : request.BaseUri).TrimStart('/'));
     if (request.Method == "GET")
         if (File.Exists(fn))

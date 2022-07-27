@@ -50,14 +50,14 @@ public static class BaseCurrency
     /// <summary>
     ///     记账本位币信息文档
     /// </summary>
-    public static IConfigManager<BaseCurrencyInfos> BaseCurrencyInfos { private get; set; } =
-        MetaConfigManager.Generate<BaseCurrencyInfos>("BaseCurrency");
+    static BaseCurrency()
+        => Cfg.RegisterType<BaseCurrencyInfos>("BaseCurrency");
 
-    public static IReadOnlyList<BaseCurrencyInfo> History => BaseCurrencyInfos.Config.Infos.AsReadOnly();
+    public static IReadOnlyList<BaseCurrencyInfo> History => Cfg.Get<BaseCurrencyInfos>().Infos.AsReadOnly();
 
     public static string Now
-        => BaseCurrencyInfos.Config.Infos.Last().Currency;
+        => Cfg.Get<BaseCurrencyInfos>().Infos.Last().Currency;
 
     public static string At(DateTime? dt)
-        => BaseCurrencyInfos.Config.Infos.Last(bc => DateHelper.CompareDate(bc.Date, dt) <= 0).Currency;
+        => Cfg.Get<BaseCurrencyInfos>().Infos.Last(bc => DateHelper.CompareDate(bc.Date, dt) <= 0).Currency;
 }

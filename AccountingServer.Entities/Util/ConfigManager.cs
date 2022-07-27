@@ -18,6 +18,7 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
@@ -28,166 +29,113 @@ namespace AccountingServer.Entities.Util;
 /// <summary>
 ///     配置文件管理
 /// </summary>
-public interface IConfigManager
+public static class Cfg
 {
-    /// <summary>
-    ///     读取配置文件
-    /// </summary>
-    /// <param name="throws">允许抛出异常</param>
-    Task Reload(bool throws);
-}
+    private static readonly ReaderWriterLockSlim m_Lock = new();
 
-/// <summary>
-///     配置文件管理
-/// </summary>
-/// <typeparam name="T">配置文件类型</typeparam>
-public interface IConfigManager<out T> : IConfigManager
-{
-    /// <summary>
-    ///     配置文件
-    /// </summary>
-    T Config { get; }
-}
+    private static readonly Dictionary<string, StreamReader> m_ConfigStreamsMap = new();
 
-/// <summary>
-///     配置文件管理器工厂
-/// </summary>
-/// <typeparam name="T">配置文件类型</typeparam>
-public interface IConfigManagerFactory
-{
-    IConfigManager<T> Generate<T>(string filename);
-}
+    private static readonly Dictionary<Type, string> m_ConfigTypesMap = new();
 
-/// <summary>
-///     元配置文件管理
-/// </summary>
-public static class MetaConfigManager
-{
-    /// <summary>
-    ///     所有配置文件
-    /// </summary>
-    private static readonly List<IConfigManager> ConfigManagers = new();
+    private static readonly Dictionary<Type, dynamic> m_ConfigsMap = new();
 
-    /// <summary>
-    ///     默认配置文件管理器工厂
-    /// </summary>
-    public static IConfigManagerFactory DefaultFactory { private get; set; } = new FSConfigManagerFactory();
-
-    public static IConfigManager<T> Generate<T>(string filename)
+    private static T ReadLocked<T>(Func<T> func)
     {
-        var icm = DefaultFactory.Generate<T>(filename);
-        Register(icm);
-        return icm;
+        m_Lock.EnterReadLock();
+        try
+        {
+            return func();
+        }
+        finally
+        {
+            m_Lock.ExitReadLock();
+        }
     }
 
-    /// <summary>
-    ///     添加配置文件
-    /// </summary>
-    /// <param name="manager">配置文件管理</param>
-    private static void Register(IConfigManager manager) => ConfigManagers.Add(manager);
+    private static T WriteLocked<T>(Func<T> func)
+    {
+        m_Lock.EnterWriteLock();
+        try
+        {
+            return func();
+        }
+        finally
+        {
+            m_Lock.ExitWriteLock();
+        }
+    }
+
+    public static Func<string, Task<StreamReader>> DefaultLoader;
+
+    public static void RegisterType<T>(string filename)
+        => WriteLocked(() => {
+                m_ConfigTypesMap[typeof(T)] = filename;
+                return Nothing.AtAll;
+            });
+
+    public static async Task RegisterName(string filename)
+    {
+        var stream = await DefaultLoader(filename);
+        m_Lock.EnterWriteLock();
+        try
+        {
+            m_ConfigStreamsMap[filename] = stream;
+        }
+        finally
+        {
+            m_Lock.ExitWriteLock();
+        }
+    }
+
+    public static T Get<T>()
+    {
+        var (stream, obj) = ReadLocked(() => {
+            StreamReader stream = null;
+            if (m_ConfigsMap.ContainsKey(typeof(T)))
+                return (stream, m_ConfigsMap[typeof(T)]);
+            var fn = m_ConfigTypesMap[typeof(T)];
+            stream = m_ConfigStreamsMap[fn];
+            return (stream, null);
+        });
+
+        if (stream == null)
+            return obj;
+
+        obj = new XmlSerializer(typeof(T)).Deserialize(stream);
+
+        return WriteLocked(() => {
+                m_ConfigsMap[typeof(T)] = obj;
+                return (T)obj;
+            });
+    }
+
+    public static void Assign<T>(T obj)
+        => WriteLocked(() => {
+                m_ConfigsMap[typeof(T)] = obj;
+                return Nothing.AtAll;
+            });
 
     /// <summary>
     ///     重新读取配置文件
     /// </summary>
     public static async IAsyncEnumerable<string> ReloadAll()
     {
-        var tasks = ConfigManagers.Select((m) => (m, m.Reload(true))).ToList();
-        foreach (var (m, t) in tasks)
+        m_Lock.EnterWriteLock();
+        try {
+            m_ConfigsMap.Clear();
+            var fns = new List<string>();
+            foreach (var (k, v) in m_ConfigStreamsMap)
+                fns.Add(k);
+            m_ConfigStreamsMap.Clear();
+            foreach (var (m, t) in fns.Select((fn) => (fn, DefaultLoader(fn))).ToList())
+            {
+                await t;
+                yield return $"Loaded config file {m}\n";
+            }
+        }
+        finally
         {
-            await t;
-            yield return m.GetType() + "\n";
+            m_Lock.ExitWriteLock();
         }
     }
-}
-
-/// <summary>
-///     配置文件管理器
-/// </summary>
-/// <typeparam name="T">配置文件类型</typeparam>
-public abstract class XmlConfigManager<T> : IConfigManager<T>
-{
-    /// <summary>
-    ///     资源标识
-    /// </summary>
-    protected string Identifier { private get; set; }
-
-    /// <summary>
-    ///     配置文件
-    /// </summary>
-    private T m_Config;
-
-    /// <summary>
-    ///     读取配置文件时发生的错误
-    /// </summary>
-    private Exception m_Exception;
-
-    /// <inheritdoc />
-    public T Config
-    {
-        get
-        {
-            if (m_Exception != null)
-                throw new MemberAccessException($"加载配置文件{Identifier}时发生错误", m_Exception);
-
-            return m_Config;
-        }
-    }
-
-    /// <summary>
-    ///     读取配置文件
-    /// </summary>
-    protected abstract Task<StreamReader> Retrieve();
-
-    /// <inheritdoc />
-    public async Task Reload(bool throws)
-    {
-        try
-        {
-            var ser = new XmlSerializer(typeof(T));
-            using var stream = await Retrieve();
-            m_Config = (T)ser.Deserialize(stream);
-        }
-        catch (Exception e)
-        {
-            if (throws)
-                throw;
-
-            m_Exception = e;
-        }
-    }
-}
-
-/// <summary>
-///     基于文件系统的配置文件管理器工厂
-/// </summary>
-public class FSConfigManagerFactory : IConfigManagerFactory
-{
-    public IConfigManager<T> Generate<T>(string filename)
-        => new FSConfigManager<T>(filename);
-}
-
-/// <summary>
-///     基于文件系统的配置文件管理器
-/// </summary>
-internal class FSConfigManager<T> : XmlConfigManager<T>
-{
-    /// <summary>
-    ///     文件名
-    /// </summary>
-    private readonly string m_FileName;
-
-    /// <summary>
-    ///     设置配置文件
-    /// </summary>
-    /// <param name="filename">文件名</param>
-    internal FSConfigManager(string filename)
-    {
-        m_FileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.d", filename);
-        Identifier = m_FileName;
-        Reload(false);
-    }
-
-    /// <inheritdoc />
-    protected override async Task<StreamReader> Retrieve()
-        => new(m_FileName);
 }
