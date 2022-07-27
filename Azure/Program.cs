@@ -103,16 +103,23 @@ public static class Program
             [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req,
             ILogger log)
     {
-        var session = CreateSession(req);
-        if (session == null) {
-            log.LogError("/api/emptyVoucher: Missing request headers");
-            return new StatusCodeResult(400);
-        }
-        return new HttpAdapter(facade.EmptyVoucher(session))
+        try
+        {
+            var session = CreateSession(req);
+            if (session == null)
             {
-                CacheControl = "public, max-age=30",
-                Vary = "X-Serializer, X-Limit",
-            };
+                log.LogError("/api/emptyVoucher: Missing request headers");
+                return new StatusCodeResult(400);
+            }
+            return new HttpAdapter(facade.EmptyVoucher(session))
+                {
+                    CacheControl = "public, max-age=30",
+                    Vary = "X-Serializer, X-Limit",
+                };
+        } catch (Exception ex) {
+            log.LogError(ex.ToString());
+            return new BadRequestObjectResult(ex);
+        }
     }
 
     [FunctionName("safe")]
@@ -120,17 +127,24 @@ public static class Program
             [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req,
             ILogger log)
     {
-        var session = CreateSession(req);
-        if (session == null) {
-            log.LogError("/api/safe: Missing request headers");
-            return new StatusCodeResult(400);
-        }
-        var expr = req.Query["q"];
-        return new HttpAdapter(facade.SafeExecute(session, expr))
+        try
+        {
+            var session = CreateSession(req);
+            if (session == null)
             {
-                CacheControl = "public, max-age=30",
-                Vary = "X-User, X-Serializer, X-ClientDateTime, X-Limit",
-            };
+                log.LogError("/api/safe: Missing request headers");
+                return new StatusCodeResult(400);
+            }
+            var expr = req.Query["q"];
+            return new HttpAdapter(facade.SafeExecute(session, expr))
+                {
+                    CacheControl = "public, max-age=30",
+                    Vary = "X-User, X-Serializer, X-ClientDateTime, X-Limit",
+                };
+        } catch (Exception ex) {
+            log.LogError(ex.ToString());
+            return new BadRequestObjectResult(ex);
+        }
     }
 
     [FunctionName("execute")]
@@ -138,13 +152,20 @@ public static class Program
             [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
             ILogger log)
     {
-        var session = CreateSession(req);
-        if (session == null) {
-            log.LogError("/api/execute: Missing request headers");
-            return new StatusCodeResult(400);
+        try
+        {
+            var session = CreateSession(req);
+            if (session == null)
+            {
+                log.LogError("/api/execute: Missing request headers");
+                return new StatusCodeResult(400);
+            }
+            var expr = await new StreamReader(req.Body).ReadToEndAsync();
+            return new HttpAdapter(facade.Execute(session, expr));
+        } catch (Exception ex) {
+            log.LogError(ex.ToString());
+            return new BadRequestObjectResult(ex);
         }
-        var expr = await new StreamReader(req.Body).ReadToEndAsync();
-        return new HttpAdapter(facade.Execute(session, expr));
     }
 
     [FunctionName("voucherUpsert")]
@@ -152,13 +173,20 @@ public static class Program
             [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
             ILogger log)
     {
-        var session = CreateSession(req);
-        if (session == null) {
-            log.LogError("/api/voucherUpsert: Missing request headers");
-            return new StatusCodeResult(400);
+        try
+        {
+            var session = CreateSession(req);
+            if (session == null)
+            {
+                log.LogError("/api/voucherUpsert: Missing request headers");
+                return new StatusCodeResult(400);
+            }
+            var code = await new StreamReader(req.Body).ReadToEndAsync();
+            return new HttpAdapter(await facade.ExecuteVoucherUpsert(session, code));
+        } catch (Exception ex) {
+            log.LogError(ex.ToString());
+            return new BadRequestObjectResult(ex);
         }
-        var code = await new StreamReader(req.Body).ReadToEndAsync();
-        return new HttpAdapter(await facade.ExecuteVoucherUpsert(session, code));
     }
 
     [FunctionName("voucherRemoval")]
@@ -166,13 +194,20 @@ public static class Program
             [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
             ILogger log)
     {
-        var session = CreateSession(req);
-        if (session == null) {
-            log.LogError("/api/voucherRemoval: Missing request headers");
-            return new StatusCodeResult(400);
+        try
+        {
+            var session = CreateSession(req);
+            if (session == null)
+            {
+                log.LogError("/api/voucherRemoval: Missing request headers");
+                return new StatusCodeResult(400);
+            }
+            var code = await new StreamReader(req.Body).ReadToEndAsync();
+            return new HttpAdapter(await facade.ExecuteVoucherRemoval(session, code));
+        } catch (Exception ex) {
+            log.LogError(ex.ToString());
+            return new BadRequestObjectResult(ex);
         }
-        var code = await new StreamReader(req.Body).ReadToEndAsync();
-        return new HttpAdapter(await facade.ExecuteVoucherRemoval(session, code));
     }
 
     [FunctionName("assetUpsert")]
@@ -180,13 +215,20 @@ public static class Program
             [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
             ILogger log)
     {
-        var session = CreateSession(req);
-        if (session == null) {
-            log.LogError("/api/assetUpsert: Missing request headers");
-            return new StatusCodeResult(400);
+        try
+        {
+            var session = CreateSession(req);
+            if (session == null)
+            {
+                log.LogError("/api/assetUpsert: Missing request headers");
+                return new StatusCodeResult(400);
+            }
+            var code = await new StreamReader(req.Body).ReadToEndAsync();
+            return new HttpAdapter(await facade.ExecuteAssetUpsert(session, code));
+        } catch (Exception ex) {
+            log.LogError(ex.ToString());
+            return new BadRequestObjectResult(ex);
         }
-        var code = await new StreamReader(req.Body).ReadToEndAsync();
-        return new HttpAdapter(await facade.ExecuteAssetUpsert(session, code));
     }
 
     [FunctionName("assetRemoval")]
@@ -194,13 +236,20 @@ public static class Program
             [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
             ILogger log)
     {
-        var session = CreateSession(req);
-        if (session == null) {
-            log.LogError("/api/assetRemoval: Missing request headers");
-            return new StatusCodeResult(400);
+        try
+        {
+            var session = CreateSession(req);
+            if (session == null)
+            {
+                log.LogError("/api/assetRemoval: Missing request headers");
+                return new StatusCodeResult(400);
+            }
+            var code = await new StreamReader(req.Body).ReadToEndAsync();
+            return new HttpAdapter(await facade.ExecuteAssetRemoval(session, code));
+        } catch (Exception ex) {
+            log.LogError(ex.ToString());
+            return new BadRequestObjectResult(ex);
         }
-        var code = await new StreamReader(req.Body).ReadToEndAsync();
-        return new HttpAdapter(await facade.ExecuteAssetRemoval(session, code));
     }
 
     [FunctionName("amortUpsert")]
@@ -208,13 +257,20 @@ public static class Program
             [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
             ILogger log)
     {
-        var session = CreateSession(req);
-        if (session == null) {
-            log.LogError("/api/amortUpsert: Missing request headers");
-            return new StatusCodeResult(400);
+        try
+        {
+            var session = CreateSession(req);
+            if (session == null)
+            {
+                log.LogError("/api/amortUpsert: Missing request headers");
+                return new StatusCodeResult(400);
+            }
+            var code = await new StreamReader(req.Body).ReadToEndAsync();
+            return new HttpAdapter(await facade.ExecuteAmortUpsert(session, code));
+        } catch (Exception ex) {
+            log.LogError(ex.ToString());
+            return new BadRequestObjectResult(ex);
         }
-        var code = await new StreamReader(req.Body).ReadToEndAsync();
-        return new HttpAdapter(await facade.ExecuteAmortUpsert(session, code));
     }
 
     [FunctionName("amortRemoval")]
@@ -222,12 +278,19 @@ public static class Program
             [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
             ILogger log)
     {
-        var session = CreateSession(req);
-        if (session == null) {
-            log.LogError("/api/amortRemoval: Missing request headers");
-            return new StatusCodeResult(400);
+        try
+        {
+            var session = CreateSession(req);
+            if (session == null)
+            {
+                log.LogError("/api/amortRemoval: Missing request headers");
+                return new StatusCodeResult(400);
+            }
+            var code = await new StreamReader(req.Body).ReadToEndAsync();
+            return new HttpAdapter(await facade.ExecuteAmortRemoval(session, code));
+        } catch (Exception ex) {
+            log.LogError(ex.ToString());
+            return new BadRequestObjectResult(ex);
         }
-        var code = await new StreamReader(req.Body).ReadToEndAsync();
-        return new HttpAdapter(await facade.ExecuteAmortRemoval(session, code));
     }
 }

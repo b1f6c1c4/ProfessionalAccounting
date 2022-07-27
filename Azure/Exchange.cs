@@ -38,25 +38,36 @@ public class Exchange
     public void Run(
             [TimerTrigger("14 1 * * * *")] TimerInfo myTimer,
             ILogger log)
-        => facade.ImmediateExchange((s, e) => {
-               if (e)
-                   log.LogError(s);
-               else
-                   log.LogInformation(s);
-           });
+    {
+        try {
+            facade.ImmediateExchange((s, e) => {
+                if (e)
+                    log.LogError(s);
+                else
+                    log.LogInformation(s);
+            });
+        } catch (Exception ex) {
+            log.LogError(ex.ToString());
+        }
+    }
 
     [FunctionName("exchangeNow")]
     public static async Task<IActionResult> RunNow(
             [HttpTrigger(AuthorizationLevel.Admin, "post")] HttpRequest req,
             ILogger log)
     {
-        log.LogInformation("Forceful exchange triggered");
-        facade.ImmediateExchange((s, e) => {
-            if (e)
-                log.LogError(s);
-            else
-                log.LogInformation(s);
-        });
-        return new StatusCodeResult(204);
+        try {
+            log.LogInformation("Forceful exchange triggered");
+            await facade.ImmediateExchange((s, e) => {
+                if (e)
+                    log.LogError(s);
+                else
+                    log.LogInformation(s);
+            });
+            return new StatusCodeResult(204);
+        } catch (Exception ex) {
+            log.LogError(ex.ToString());
+            return new BadRequestObjectResult(ex);
+        }
     }
 }
