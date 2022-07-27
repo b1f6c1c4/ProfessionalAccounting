@@ -29,10 +29,9 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using AccountingServer.Shell;
 using static AccountingServer.Http.ResponseWriter;
-
-namespace Azure;
 
 internal class HttpAdapter : IActionResult
 {
@@ -72,11 +71,7 @@ internal class HttpAdapter : IActionResult
 
 public static class Program
 {
-    private static Facade facade;
-
-    static Program() => facade = new Facade();
-
-    private static Session CreateSession(HttpRequest req)
+    private static Session CreateSession(Facade facade, HttpRequest req)
     {
         var user = req.Headers["x-user"];
         if (string.IsNullOrEmpty(user))
@@ -105,8 +100,9 @@ public static class Program
     {
         try
         {
-            var session = CreateSession(req);
-            if (session == null)
+            if (await Startup.Get(log) is var facade && facade == null)
+                return new StatusCodeResult(500);
+            if (CreateSession(facade, req) is var session && session == null)
             {
                 log.LogError("/api/emptyVoucher: Missing request headers");
                 return new StatusCodeResult(400);
@@ -129,8 +125,9 @@ public static class Program
     {
         try
         {
-            var session = CreateSession(req);
-            if (session == null)
+            if (await Startup.Get(log) is var facade && facade == null)
+                return new StatusCodeResult(500);
+            if (CreateSession(facade, req) is var session && session == null)
             {
                 log.LogError("/api/safe: Missing request headers");
                 return new StatusCodeResult(400);
@@ -154,8 +151,9 @@ public static class Program
     {
         try
         {
-            var session = CreateSession(req);
-            if (session == null)
+            if (await Startup.Get(log) is var facade && facade == null)
+                return new StatusCodeResult(500);
+            if (CreateSession(facade, req) is var session && session == null)
             {
                 log.LogError("/api/execute: Missing request headers");
                 return new StatusCodeResult(400);
@@ -175,8 +173,9 @@ public static class Program
     {
         try
         {
-            var session = CreateSession(req);
-            if (session == null)
+            if (await Startup.Get(log) is var facade && facade == null)
+                return new StatusCodeResult(500);
+            if (CreateSession(facade, req) is var session && session == null)
             {
                 log.LogError("/api/voucherUpsert: Missing request headers");
                 return new StatusCodeResult(400);
@@ -196,8 +195,9 @@ public static class Program
     {
         try
         {
-            var session = CreateSession(req);
-            if (session == null)
+            if (await Startup.Get(log) is var facade && facade == null)
+                return new StatusCodeResult(500);
+            if (CreateSession(facade, req) is var session && session == null)
             {
                 log.LogError("/api/voucherRemoval: Missing request headers");
                 return new StatusCodeResult(400);
@@ -217,8 +217,9 @@ public static class Program
     {
         try
         {
-            var session = CreateSession(req);
-            if (session == null)
+            if (await Startup.Get(log) is var facade && facade == null)
+                return new StatusCodeResult(500);
+            if (CreateSession(facade, req) is var session && session == null)
             {
                 log.LogError("/api/assetUpsert: Missing request headers");
                 return new StatusCodeResult(400);
@@ -238,8 +239,9 @@ public static class Program
     {
         try
         {
-            var session = CreateSession(req);
-            if (session == null)
+            if (await Startup.Get(log) is var facade && facade == null)
+                return new StatusCodeResult(500);
+            if (CreateSession(facade, req) is var session && session == null)
             {
                 log.LogError("/api/assetRemoval: Missing request headers");
                 return new StatusCodeResult(400);
@@ -259,8 +261,9 @@ public static class Program
     {
         try
         {
-            var session = CreateSession(req);
-            if (session == null)
+            if (await Startup.Get(log) is var facade && facade == null)
+                return new StatusCodeResult(500);
+            if (CreateSession(facade, req) is var session && session == null)
             {
                 log.LogError("/api/amortUpsert: Missing request headers");
                 return new StatusCodeResult(400);
@@ -280,8 +283,9 @@ public static class Program
     {
         try
         {
-            var session = CreateSession(req);
-            if (session == null)
+            if (await Startup.Get(log) is var facade && facade == null)
+                return new StatusCodeResult(500);
+            if (CreateSession(facade, req) is var session && session == null)
             {
                 log.LogError("/api/amortRemoval: Missing request headers");
                 return new StatusCodeResult(400);

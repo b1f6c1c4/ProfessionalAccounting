@@ -26,27 +26,26 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using AccountingServer.Shell;
 
-namespace Azure;
-
 public class Exchange
 {
-    private static Facade facade;
-
-    static Exchange() => facade = new Facade();
-
     [FunctionName("exchange")]
-    public void Run(
+    public async Task Run(
             [TimerTrigger("14 1 * * * *")] TimerInfo myTimer,
             ILogger log)
     {
-        try {
-            facade.ImmediateExchange((s, e) => {
+        try
+        {
+            if (await Startup.Get(log) is var facade && facade == null)
+                return;
+            await facade.ImmediateExchange((s, e) => {
                 if (e)
                     log.LogError(s);
                 else
                     log.LogInformation(s);
             });
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             log.LogError(ex.ToString());
         }
     }
@@ -56,8 +55,11 @@ public class Exchange
             [HttpTrigger(AuthorizationLevel.Admin, "post")] HttpRequest req,
             ILogger log)
     {
-        try {
+        try
+        {
             log.LogInformation("Forceful exchange triggered");
+            if (await Startup.Get(log) is var facade && facade == null)
+                return new StatusCodeResult(500);
             await facade.ImmediateExchange((s, e) => {
                 if (e)
                     log.LogError(s);
@@ -65,7 +67,9 @@ public class Exchange
                     log.LogInformation(s);
             });
             return new StatusCodeResult(204);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             log.LogError(ex.ToString());
             return new BadRequestObjectResult(ex);
         }

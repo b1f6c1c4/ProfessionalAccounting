@@ -4,11 +4,13 @@
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AccountingServer\AccountingServer.csproj"/>
-    <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj"/>
-    <ProjectReference Include="..\AccountingServer.Shell\AccountingServer.Shell.csproj"/>
+    <ProjectReference Include="..\AccountingServer\AccountingServer.csproj" />
+    <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj" />
+    <ProjectReference Include="..\AccountingServer.Shell\AccountingServer.Shell.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Azure.Core" Version="1.25.0" />
+    <PackageReference Include="Azure.Storage.Files.Shares" Version="12.11.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.1.1" />
   </ItemGroup>
   <ItemGroup>
