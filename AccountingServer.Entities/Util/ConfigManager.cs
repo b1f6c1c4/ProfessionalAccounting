@@ -17,6 +17,8 @@
  */
 
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
@@ -32,7 +34,7 @@ public interface IConfigManager
     ///     读取配置文件
     /// </summary>
     /// <param name="throws">允许抛出异常</param>
-    void Reload(bool throws);
+    Task Reload(bool throws);
 }
 
 /// <summary>
@@ -87,12 +89,13 @@ public static class MetaConfigManager
     /// <summary>
     ///     重新读取配置文件
     /// </summary>
-    public static IEnumerable<string> ReloadAll()
+    public static async IAsyncEnumerable<string> ReloadAll()
     {
-        foreach (var manager in ConfigManagers)
+        var tasks = ConfigManagers.Select((m) => (m, m.Reload(true))).ToList();
+        foreach (var (m, t) in tasks)
         {
-            manager.Reload(true);
-            yield return manager.GetType() + "\n";
+            await t;
+            yield return m.GetType() + "\n";
         }
     }
 }
@@ -133,15 +136,15 @@ public abstract class XmlConfigManager<T> : IConfigManager<T>
     /// <summary>
     ///     读取配置文件
     /// </summary>
-    protected abstract StreamReader Retrieve();
+    protected abstract Task<StreamReader> Retrieve();
 
     /// <inheritdoc />
-    public void Reload(bool throws)
+    public async Task Reload(bool throws)
     {
         try
         {
             var ser = new XmlSerializer(typeof(T));
-            using var stream = Retrieve();
+            using var stream = await Retrieve();
             m_Config = (T)ser.Deserialize(stream);
         }
         catch (Exception e)
@@ -185,6 +188,6 @@ internal class FSConfigManager<T> : XmlConfigManager<T>
     }
 
     /// <inheritdoc />
-    protected override StreamReader Retrieve()
+    protected override async Task<StreamReader> Retrieve()
         => new(m_FileName);
 }
