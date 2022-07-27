@@ -17,8 +17,12 @@
  */
 
 using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using AccountingServer.Shell;
 
@@ -40,4 +44,19 @@ public class Exchange
                else
                    log.LogInformation(s);
            });
+
+    [FunctionName("exchangeNow")]
+    public static async Task<IActionResult> RunNow(
+            [HttpTrigger(AuthorizationLevel.Admin, "post")] HttpRequest req,
+            ILogger log)
+    {
+        log.LogInformation("Forceful exchange triggered");
+        facade.ImmediateExchange((s, e) => {
+            if (e)
+                log.LogError(s);
+            else
+                log.LogInformation(s);
+        });
+        return new StatusCodeResult(204);
+    }
 }
