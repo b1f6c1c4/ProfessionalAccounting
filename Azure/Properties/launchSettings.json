@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "Azure": {
-      "commandName": "Project",
-      "commandLineArgs": "--port 7243",
-      "launchBrowser": false
-    }
-  }
-}
