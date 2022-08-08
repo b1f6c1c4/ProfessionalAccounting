@@ -270,13 +270,10 @@ internal class MongoDbAdapter : IDbAdapter
 
     /// <inheritdoc />
     public IAsyncEnumerable<Voucher> SelectVouchersEmit(IVoucherDetailQuery query) =>
-        m_Vouchers.Find(query.VoucherQuery.Accept(new MongoDbNativeVoucher()), new BsonDocument
-            {
-                ["details"] = new BsonDocument
-                    {
-                        ["$elemMatch"] = query.ActualDetailFilter().Accept(new MongoDbNativeDetail()),
-                    },
-            }).Sort(Builders<Voucher>.Sort.Ascending("date"))
+        m_Vouchers.Find(query.VoucherQuery.Accept(new MongoDbNativeVoucher()))
+            .Project<Voucher>(Builders<Voucher>.Projection.ElemMatch("details",
+                query.ActualDetailFilter().Accept(new MongoDbNativeDetail())))
+            .Sort(Builders<Voucher>.Sort.Ascending("date"))
             .ToAsyncEnumerable();
 
     private static FilterDefinition<BsonDocument> GetChk(IVoucherDetailQuery query)
