@@ -45,6 +45,13 @@ public interface IDbAdapter
     IAsyncEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query);
 
     /// <summary>
+    ///     按检索式查找记账凭证，匹配细目检索式
+    /// </summary>
+    /// <param name="query">检索式</param>
+    /// <returns>匹配检索式的记账凭证，用细目检索式筛选</returns>
+    IAsyncEnumerable<Voucher> SelectVouchersEmit(IVoucherDetailQuery query);
+
+    /// <summary>
     ///     按检索式查找细目
     /// </summary>
     /// <param name="query">检索式</param>

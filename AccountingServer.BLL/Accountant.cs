@@ -63,6 +63,9 @@ public class Accountant : IHistoricalExchange
     public IAsyncEnumerable<Voucher> SelectVouchersAsync(IQueryCompounded<IVoucherQueryAtom> query)
         => m_Db.SelectVouchers(query);
 
+    public IAsyncEnumerable<Voucher> SelectVouchersEmitAsync(IVoucherDetailQuery query)
+        => m_Db.SelectVouchersEmit(query);
+
     public IAsyncEnumerable<VoucherDetail> SelectVoucherDetailsAsync(IVoucherDetailQuery query)
         => m_Db.SelectVoucherDetails(query);
 
