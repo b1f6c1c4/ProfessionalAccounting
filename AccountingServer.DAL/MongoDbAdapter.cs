@@ -271,7 +271,7 @@ internal class MongoDbAdapter : IDbAdapter
     /// <inheritdoc />
     public IAsyncEnumerable<Voucher> SelectVouchersEmit(IVoucherDetailQuery query) =>
         m_Vouchers.Find(query.VoucherQuery.Accept(new MongoDbNativeVoucher()))
-            .Project<Voucher>(Builders<Voucher>.Projection.ElemMatch("details",
+            .Project<Voucher>(Builders<Voucher>.Projection.ElemMatch("detail",
                 query.ActualDetailFilter().Accept(new MongoDbNativeDetail())))
             .Sort(Builders<Voucher>.Sort.Ascending("date"))
             .ToAsyncEnumerable();
