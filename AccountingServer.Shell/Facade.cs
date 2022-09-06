@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
@@ -181,8 +182,12 @@ public class Facade
     /// </summary>
     /// <returns>帮助内容</returns>
     private static IEnumerable<string> ListVersions()
-        => AppDomain.CurrentDomain.GetAssemblies().Select(static asm => asm.GetName())
-            .Select(static nm => $"{nm.Name}@{nm.Version}\n").OrderBy(static s => s);
+        => AppDomain.CurrentDomain.GetAssemblies().Select(static asm =>
+            {
+                var nm = asm.GetName();
+                var iv = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+                return $"{nm.Name}@{nm.Version}@{iv}\n";
+            }).OrderBy(static s => s);
 
     #endregion
 

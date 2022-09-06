@@ -1,4 +1,4 @@
-version: 1.0.{build}
+version: 1.0.0.{build}
 
 branches:
   only:
@@ -44,21 +44,21 @@ install:
 dotnet_csproj:
   patch: true
   file: '**\*.csproj'
-  version: '{version}'
-  package_version: '{version}'
-  assembly_version: '{version}'
-  file_version: '{version}'
-  informational_version: '{version}'
+  version_prefix: 1.0.0.$(APPVEYOR_BUILD_NUMBER)
+  package_version: 1.0.0
+  assembly_version: 1.0.0.$(APPVEYOR_BUILD_NUMBER)
+  file_version: $(APPVEYOR_BUILD_VERSION).$(APPVEYOR_BUILD_NUMBER)
+  informational_version: $(APPVEYOR_REPO_COMMIT)
 
 build_script:
   - cd nginx && npm run build
   - msbuild /p:Configuration=Gen     /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer.QueryGeneration/AccountingServer.QueryGeneration.csproj
   - ps: ./DeployParser.ps1
-  - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer.Entities\AccountingServer.Entities.csproj
-  - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer.DAL\AccountingServer.DAL.csproj
-  - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer.BLL\AccountingServer.BLL.csproj
-  - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer.Shell\AccountingServer.Shell.csproj
-  - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer\AccountingServer.csproj
+  - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:VersionSuffix=$(APPVEYOR_BUILD_ID) AccountingServer.Entities\AccountingServer.Entities.csproj
+  - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:VersionSuffix=$(APPVEYOR_BUILD_ID) AccountingServer.DAL\AccountingServer.DAL.csproj
+  - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:VersionSuffix=$(APPVEYOR_BUILD_ID) AccountingServer.BLL\AccountingServer.BLL.csproj
+  - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:VersionSuffix=$(APPVEYOR_BUILD_ID) AccountingServer.Shell\AccountingServer.Shell.csproj
+  - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:VersionSuffix=$(APPVEYOR_BUILD_ID) AccountingServer\AccountingServer.csproj
   - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer.Test\AccountingServer.Test.csproj
 
 # test_script:

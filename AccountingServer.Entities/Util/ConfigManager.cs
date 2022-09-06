@@ -134,9 +134,12 @@ public static class Cfg
             ConfigStreamsMap.Clear();
             foreach (var (m, t) in fns.Select(static fn => (fn, DefaultLoader(fn))).ToList())
             {
-                await t;
+                ConfigStreamsMap[m] = await t;
                 yield return $"Loaded config file {m}\n";
             }
+
+            foreach (var (t, m) in ConfigsMap)
+                yield return $"{m} is bound to {t.FullName}";
         }
         finally
         {
