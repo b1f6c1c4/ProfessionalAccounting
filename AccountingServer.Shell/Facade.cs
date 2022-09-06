@@ -96,6 +96,8 @@ public class Facade
             case "die":
                 Environment.Exit(0);
                 break;
+            case "version":
+                return ListVersions().ToAsyncEnumerable();
         }
 
         return m_Composer.Execute(expr, session);
@@ -119,6 +121,8 @@ public class Facade
                 return ListTitles().ToAsyncEnumerable();
             case "?":
                 return ListHelp();
+            case "version":
+                return ListVersions().ToAsyncEnumerable();
         }
 
         return m_AccountingShell.Execute(expr, session);
@@ -170,6 +174,14 @@ public class Facade
                 yield return $"{title.Id.AsTitle()}{subTitle.Id.AsSubTitle(),-4}{subTitle.Name}\n";
         }
     }
+
+    /// <summary>
+    ///     显示控制台帮助
+    /// </summary>
+    /// <returns>帮助内容</returns>
+    private static IEnumerable<string> ListVersions()
+        => AppDomain.CurrentDomain.GetAssemblies().Select(static asm => asm.GetName())
+            .Select(static nm => $"{nm.Name}@{nm.Version}\n").OrderBy(static s => s);
 
     #endregion
 

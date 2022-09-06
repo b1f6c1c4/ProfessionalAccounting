@@ -41,6 +41,15 @@ install:
   - nuget restore AccountingServer.sln
   - openssl rsa -in ./certs/key.pem -out ./certs/key.pem -passin env:PRIVATE_KEY_PASSWORD
 
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  version: '{version}'
+  package_version: '{version}'
+  assembly_version: '{version}'
+  file_version: '{version}'
+  informational_version: '{version}'
+
 build_script:
   - cd nginx && npm run build
   - msbuild /p:Configuration=Gen     /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer.QueryGeneration/AccountingServer.QueryGeneration.csproj
