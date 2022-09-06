@@ -16,7 +16,6 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -26,18 +25,19 @@ public class ConfigFilesManager
 {
     public static async IAsyncEnumerable<string> InitializeConfigFiles()
     {
-        var names = new[] {
-            "BaseCurrency",
-            "Symbol",
-            "Exchange",
-            "Titles",
-            "Carry",
-            "Cash",
-            "Composite",
-            "Coupling",
-            "Util",
-            "Abbr",
-        };
+        var names = new[]
+            {
+                "BaseCurrency",
+                "Symbol",
+                "Exchange",
+                "Titles",
+                "Carry",
+                "Cash",
+                "Composite",
+                "Coupling",
+                "Util",
+                "Abbr",
+            };
         await Task.WhenAll(names.Select(Cfg.RegisterName));
         await foreach (var s in Cfg.ReloadAll())
             yield return s;

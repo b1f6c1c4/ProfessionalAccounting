@@ -41,8 +41,7 @@ public class SubtotalTest
         };
 
     public SubtotalTest()
-        => Cfg.Assign(new BaseCurrencyInfos()
-            { Infos = new() { new() { Date = null, Currency = "CNY" } } });
+        => Cfg.Assign(new BaseCurrencyInfos() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
     [Theory]
     [InlineData("", "101110")]
@@ -945,9 +944,7 @@ public class SubtotalTest
         Assert.Equal(
             new List<Balance>
                 {
-                    new() { Value = 1, Fund = 8 },
-                    new() { Value = 2, Fund = 3 },
-                    new() { Value = 3, Fund = 4 },
+                    new() { Value = 1, Fund = 8 }, new() { Value = 2, Fund = 3 }, new() { Value = 3, Fund = 4 },
                 },
             lst,
             new BalanceEqualityComparer());

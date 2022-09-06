@@ -144,7 +144,8 @@ public class Facade
     public void EnableTimer() => m_ExchangeShell.EnableTimer(m_Db);
 
     // ReSharper disable once UnusedMember.Global
-    public async Task ImmediateExchange(Action<string, bool> logger) {
+    public async Task ImmediateExchange(Action<string, bool> logger)
+    {
         m_Db.ExchangeLogger = logger;
         await m_ExchangeShell.ImmediateExchange(m_Db);
         m_Db.ExchangeLogger = null;

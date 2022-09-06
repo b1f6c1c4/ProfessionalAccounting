@@ -103,7 +103,5 @@ internal class RawSubtotal : StringSubtotalVisitor
     }
 
     public override IAsyncEnumerable<string> Visit(ISubtotalValue sub)
-    {
-        return ShowSubtotal(sub);
-    }
+        => ShowSubtotal(sub);
 }

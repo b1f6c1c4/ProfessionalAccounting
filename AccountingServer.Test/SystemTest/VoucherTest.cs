@@ -39,10 +39,9 @@ public class VoucherTest
     {
         DAL.Facade.Create(db: "accounting-test").DeleteVouchers(VoucherQueryUnconstrained.Instance).AsTask().Wait();
 
-        Cfg.Assign(new BaseCurrencyInfos()
-            { Infos = new() { new() { Date = null, Currency = "CNY" } } });
+        Cfg.Assign(new BaseCurrencyInfos { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
-        Cfg.Assign(new TitleInfos()
+        Cfg.Assign(new TitleInfos
             {
                 Titles = new()
                     {
@@ -59,10 +58,7 @@ public class VoucherTest
                     },
             });
 
-        Cfg.Assign(new Abbreviations()
-            {
-                Abbrs = new() { new() { Abbr = "aaa", Title = 5678, Editable = false } },
-            });
+        Cfg.Assign(new Abbreviations { Abbrs = new() { new() { Abbr = "aaa", Title = 5678, Editable = false } } });
 
         m_Facade = new(db: "accounting-test");
         m_Session = m_Facade.CreateSession("b1", DateTime.UtcNow.Date);

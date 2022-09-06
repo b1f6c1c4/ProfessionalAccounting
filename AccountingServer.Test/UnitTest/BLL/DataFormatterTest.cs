@@ -32,11 +32,9 @@ public class DataFormatterTest
 
     public DataFormatterTest()
     {
-        Cfg.Assign(new BaseCurrencyInfos()
-            { Infos = new() { new() { Date = null, Currency = "CNY" } } });
+        Cfg.Assign(new BaseCurrencyInfos { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
-        Cfg.Assign(new CurrencySymbols()
-            { Symbols = new() { new() { Currency = "DOGE", Symbol = "#" } } });
+        Cfg.Assign(new CurrencySymbols { Symbols = new() { new() { Currency = "DOGE", Symbol = "#" } } });
     }
 
     [Theory]

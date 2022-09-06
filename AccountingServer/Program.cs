@@ -28,7 +28,7 @@ using static AccountingServer.Http.HttpUtil;
 
 var xwd = AppDomain.CurrentDomain.BaseDirectory;
 
-Cfg.DefaultLoader = async (m) => new StreamReader(Path.Combine(xwd, "config.d", m + ".xml"));
+Cfg.DefaultLoader = m => Task.FromResult(new StreamReader(Path.Combine(xwd, "config.d", m + ".xml")));
 Console.WriteLine("Loading config files");
 await foreach (var s in ConfigFilesManager.InitializeConfigFiles())
     Console.Write(s);

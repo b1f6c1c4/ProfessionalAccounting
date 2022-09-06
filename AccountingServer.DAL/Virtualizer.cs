@@ -222,6 +222,7 @@ public class Virtualizer : IDbAdapter, IAsyncDisposable
                 return true;
             if (x == null || y == null)
                 return false;
+
             return Nullable.Equals(x.Date, y.Date) && x.Title == y.Title && x.SubTitle == y.SubTitle &&
                 x.Content == y.Content && x.Remark == y.Remark && x.Currency == y.Currency && x.User == y.User && x.Value == y.Value;
         }

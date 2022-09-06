@@ -164,7 +164,7 @@ internal abstract class MongoDbNativeDetail<T> : MongoDbNativeVisitor<T, IDetail
             lst.Add(query.Filter.SubTitle switch
                 {
                     00 => Builders<T>.Filter.Exists(p + "subtitle", false),
-                    var x => Builders<T>.Filter.Eq(p + "subtitle", x.Value),
+                    var x => Builders<T>.Filter.Eq(p + "subtitle", x!.Value),
                 });
         if (query.Filter?.Content != null)
             lst.Add(query.Filter.Content switch

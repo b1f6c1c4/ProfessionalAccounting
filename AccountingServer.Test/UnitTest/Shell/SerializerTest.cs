@@ -34,11 +34,9 @@ public abstract class SerializerTest
 
     protected SerializerTest()
     {
-        Cfg.Assign(new BaseCurrencyInfos()
-            { Infos = new() { new() { Date = null, Currency = "CNY" } } });
+        Cfg.Assign(new BaseCurrencyInfos { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
-        Cfg.Assign(new TitleInfos()
-            { Titles = new() });
+        Cfg.Assign(new TitleInfos { Titles = new() });
     }
 
     protected abstract IEntitySerializer Serializer { get; }
@@ -142,21 +140,21 @@ public class AbbrSerializerTest : SerializerTest
     public AbbrSerializerTest()
     {
         Serializer = new AbbrSerializer { Client = Client };
-        Cfg.Assign(new Abbreviations()
+        Cfg.Assign(new Abbreviations
+            {
+                Abbrs = new()
                     {
-                        Abbrs = new()
+                        new()
                             {
-                                new()
-                                    {
-                                        Abbr = "abbr1",
-                                        Title = 1234,
-                                        SubTitle = 04,
-                                        Content = "cnt",
-                                        Editable = false,
-                                    },
-                                new() { Abbr = "abbr2", Title = 1234, Editable = true },
+                                Abbr = "abbr1",
+                                Title = 1234,
+                                SubTitle = 04,
+                                Content = "cnt",
+                                Editable = false,
                             },
-                    });
+                        new() { Abbr = "abbr2", Title = 1234, Editable = true },
+                    },
+            });
     }
 
     protected override IEntitySerializer Serializer { get; }
@@ -245,14 +243,11 @@ public class DiscountSerializerTest
     {
         Serializer = new DiscountSerializer { Client = m_Client };
 
-        Cfg.Assign(new BaseCurrencyInfos()
-            { Infos = new() { new() { Date = null, Currency = "CNY" } } });
+        Cfg.Assign(new BaseCurrencyInfos { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
-        Cfg.Assign(new TitleInfos()
-                { Titles = new() });
+        Cfg.Assign(new TitleInfos { Titles = new() });
 
-        Cfg.Assign(new Abbreviations()
-                { Abbrs = new() { new() { Abbr = "aaa", Title = 1001, Editable = false } } });
+        Cfg.Assign(new Abbreviations { Abbrs = new() { new() { Abbr = "aaa", Title = 1001, Editable = false } } });
     }
 
     private IEntitySerializer Serializer { get; }
