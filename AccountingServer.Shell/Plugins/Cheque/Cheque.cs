@@ -67,22 +67,37 @@ internal class Cheque : PluginBase
         {
             var tok2 = Parsing.Token(ref expr, false);
             var chq = Parsing.Token(ref expr);
-            Parsing.Eof(expr);
-            switch (tok2)
+            voucher = new() { Date = date, Details = new() };
+            do
             {
-                case "deposit":
-                case "dep":
-                case "d":
-                    voucher = new() { Date = date, Details = await Bank(session, tok1, chq, 1121) };
-                    break;
-                case "withdraw":
-                case "wd":
-                case "w":
-                    voucher = new() { Date = date, Details = await Bank(session, tok1, chq, 2201) };
-                    break;
-                default:
-                    goto fmt;
+                switch (tok2)
+                {
+                    case "deposit":
+                    case "dep":
+                    case "d":
+                        voucher.Details.Add(await Bank(session, tok1, chq, 1121));
+                        break;
+                    case "withdraw":
+                    case "wd":
+                    case "w":
+                        Parsing.Eof(expr);
+                        voucher.Details.Add(await Bank(session, tok1, chq, 2201));
+                        break;
+                    default:
+                        goto fmt;
+                }
             }
+            while ((chq = Parsing.Token(ref expr)) != null);
+
+            foreach (var grpC in voucher.Details.GroupBy(static d => d.Currency).ToList())
+                voucher.Details.Add(new()
+                    {
+                        User = session.Client.User,
+                        Currency = grpC.Key,
+                        Title = 1002,
+                        Content = tok1,
+                        Fund = -grpC.Sum(static d => d.Fund!.Value),
+                    });
         }
 
         await session.Accountant.UpsertAsync(voucher);
@@ -223,7 +238,7 @@ internal class Cheque : PluginBase
             };
     }
 
-    private static async ValueTask<List<VoucherDetail>> Bank(Session session, string acct, string cheque, int title)
+    private static async ValueTask<VoucherDetail> Bank(Session session, string acct, string cheque, int title)
     {
         var user = await ResolveAccountUser(session, acct);
         try
@@ -234,23 +249,12 @@ internal class Cheque : PluginBase
                 .Single(d => d.User == user && d.Title == title && d.SubTitle == 01 && d.Content == cheque);
             return new()
                 {
-                    new()
-                        {
-                            User = user,
-                            Currency = detail.Currency,
-                            Title = 1002,
-                            Content = acct,
-                            Fund = detail.Fund,
-                        },
-                    new()
-                        {
-                            User = user,
-                            Currency = detail.Currency,
-                            Title = title,
-                            SubTitle = 01,
-                            Content = cheque,
-                            Fund = -detail.Fund,
-                        },
+                    User = user,
+                    Currency = detail.Currency,
+                    Title = title,
+                    SubTitle = 01,
+                    Content = cheque,
+                    Fund = -detail.Fund,
                 };
         }
         catch (InvalidOperationException e)
