@@ -41,7 +41,7 @@ public class SubtotalTest
         };
 
     public SubtotalTest()
-        => Cfg.Assign(new BaseCurrencyInfos() { Infos = new() { new() { Date = null, Currency = "CNY" } } });
+        => Cfg.Assign(new BaseCurrencyInfos { Infos = new() { new() { Date = null, Currency = "CNY" } } });
 
     [Theory]
     [InlineData("", "101110")]

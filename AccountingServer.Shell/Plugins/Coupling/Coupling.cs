@@ -148,31 +148,6 @@ internal class Coupling : PluginBase
             .SelectVouchersAsync(Parsing.VoucherQuery($"{user.AsUser()} T3998 {rng.AsDateRange()}", session.Client))
             .SelectMany(static v => Decouple(v).ToAsyncEnumerable());
 
-    private struct Couple
-    {
-        public Voucher Voucher;
-        public VoucherDetail Creditor;
-        public VoucherDetail Debitor;
-        public string Currency;
-        public double Fund;
-
-        public override string ToString()
-        {
-            var c = $"{Creditor.User.AsUser()} {Creditor.Title.AsTitle()}{Creditor.SubTitle.AsSubTitle()}";
-            if (Creditor.Content != null)
-                c += $" {Creditor.Content.Quotation('\'')}";
-            if (Creditor.Remark != null)
-                c += $" {Creditor.Remark.Quotation('"')}";
-            var d = $"{Debitor.User.AsUser()} {Debitor.Title.AsTitle()}{Debitor.SubTitle.AsSubTitle()}";
-            if (Debitor.Content != null)
-                d += $" {Debitor.Content.Quotation('\'')}";
-            if (Debitor.Remark != null)
-                d += $" {Debitor.Remark.Quotation('"')}";
-            return
-                $"^{Voucher.ID}^ {Voucher.Date.AsDate()} {c.CPadRight(18)} -> {d.CPadRight(51)} @{Currency} {Fund.AsCurrency(Currency)}";
-        }
-    }
-
     private static IEnumerable<Couple> Decouple(Voucher voucher)
     {
         foreach (var grpC in voucher.Details.GroupBy(static d => d.Currency))
@@ -242,6 +217,31 @@ internal class Coupling : PluginBase
                         Fund = -d.Fund!.Value * ratio[d.User]
                             * c.Fund!.Value * ratio[c.User] / totalDebits,
                     };
+        }
+    }
+
+    private struct Couple
+    {
+        public Voucher Voucher;
+        public VoucherDetail Creditor;
+        public VoucherDetail Debitor;
+        public string Currency;
+        public double Fund;
+
+        public override string ToString()
+        {
+            var c = $"{Creditor.User.AsUser()} {Creditor.Title.AsTitle()}{Creditor.SubTitle.AsSubTitle()}";
+            if (Creditor.Content != null)
+                c += $" {Creditor.Content.Quotation('\'')}";
+            if (Creditor.Remark != null)
+                c += $" {Creditor.Remark.Quotation('"')}";
+            var d = $"{Debitor.User.AsUser()} {Debitor.Title.AsTitle()}{Debitor.SubTitle.AsSubTitle()}";
+            if (Debitor.Content != null)
+                d += $" {Debitor.Content.Quotation('\'')}";
+            if (Debitor.Remark != null)
+                d += $" {Debitor.Remark.Quotation('"')}";
+            return
+                $"^{Voucher.ID}^ {Voucher.Date.AsDate()} {c.CPadRight(18)} -> {d.CPadRight(51)} @{Currency} {Fund.AsCurrency(Currency)}";
         }
     }
 }

@@ -29,13 +29,13 @@ namespace AccountingServer.Shell.Plugins.Coupling;
 
 public abstract class Cash
 {
-    [XmlAttribute("user")]
-    public string User { get; set; }
-
     [XmlElement("Cash")] public List<CashAccount> CashAccounts;
 
     [XmlIgnore]
     private List<IQueryCompounded<IDetailQueryAtom>> m_CashQuery;
+
+    [XmlAttribute("user")]
+    public string User { get; set; }
 
     public bool IsCash(VoucherDetail detail)
     {

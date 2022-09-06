@@ -17,11 +17,11 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.IO;
 using System.Xml.Serialization;
 
 namespace AccountingServer.Entities.Util;
@@ -38,6 +38,8 @@ public static class Cfg
     private static readonly Dictionary<Type, string> ConfigTypesMap = new();
 
     private static readonly Dictionary<Type, dynamic> ConfigsMap = new();
+
+    public static Func<string, Task<StreamReader>> DefaultLoader;
 
     private static T ReadLocked<T>(Func<T> func)
     {
@@ -64,8 +66,6 @@ public static class Cfg
             Lock.ExitWriteLock();
         }
     }
-
-    public static Func<string, Task<StreamReader>> DefaultLoader;
 
     public static void RegisterType<T>(string filename)
         => WriteLocked(() =>

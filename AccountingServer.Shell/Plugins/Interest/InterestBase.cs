@@ -84,7 +84,7 @@ internal abstract class InterestBase : PluginBase
             };
 
         await using var vir = session.Accountant.Virtualize();
-        if (!all && !endDate.HasValue ||
+        if ((!all && !endDate.HasValue) ||
             endDate.HasValue)
         {
             var lastD = (await session.Accountant.RunVoucherQueryAsync(info.QueryInterest())

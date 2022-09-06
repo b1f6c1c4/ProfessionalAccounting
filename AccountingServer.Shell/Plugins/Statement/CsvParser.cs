@@ -135,8 +135,8 @@ internal class CsvParser
 
 internal class BankItem
 {
-    public DateTime Date;
     public string Currency;
+    public DateTime Date;
     public double Fund;
     public string Raw;
 }

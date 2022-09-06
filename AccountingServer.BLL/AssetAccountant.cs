@@ -547,45 +547,42 @@ internal class AssetAccountant : DistributedAccountant
                     items.Count(static a => a is AcquisitionItem) != 1)
                     throw new NotImplementedException();
 
+            {
+                var n = asset.Life.Value;
+                var mo = asset.Date.Value.Month;
+                var yr = asset.Date.Value.Year;
+                var amount = asset.Value.Value - asset.Salvage.Value;
+                var z = n * (n + 1) / 2;
+                var nstar = n - mo / 12D;
+                var zstar = (Math.Floor(nstar) + 1) * (Math.Floor(nstar) + 2 * (nstar - Math.Floor(nstar))) / 2;
+                if (mo < 12)
                 {
-                    var n = asset.Life.Value;
-                    var mo = asset.Date.Value.Month;
-                    var yr = asset.Date.Value.Year;
-                    var amount = asset.Value.Value - asset.Salvage.Value;
-                    var z = n * (n + 1) / 2;
-                    var nstar = n - mo / 12D;
-                    var zstar = (Math.Floor(nstar) + 1) * (Math.Floor(nstar) + 2 * (nstar - Math.Floor(nstar))) / 2;
-                    if (mo < 12)
-                    {
-                        var a = amount * n / z * (12 - mo) / z;
-                        amount -= a;
-                        for (var mon = mo + 1; mon <= 12; mon++)
-                            items.Add(
-                                new DepreciateItem
-                                    {
-                                        Date = DateHelper.LastDayOfMonth(yr, mon), Amount = a / (12 - mo),
-                                    });
-                    }
+                    var a = amount * n / z * (12 - mo) / z;
+                    amount -= a;
+                    for (var mon = mo + 1; mon <= 12; mon++)
+                        items.Add(
+                            new DepreciateItem { Date = DateHelper.LastDayOfMonth(yr, mon), Amount = a / (12 - mo) });
+                }
 
-                    for (var year = 1; year < n; year++)
-                    for (var mon = 1; mon <= 12; mon++)
+                for (var year = 1; year < n; year++)
+                for (var mon = 1; mon <= 12; mon++)
+                    items.Add(
+                        new DepreciateItem
+                            {
+                                Date = DateHelper.LastDayOfMonth(yr + year, mon),
+                                Amount = amount * (nstar - year + 1) / zstar / 12,
+                            });
+                // if (mo > 0)
+                {
+                    for (var mon = 1; mon <= mo; mon++)
                         items.Add(
                             new DepreciateItem
                                 {
-                                    Date = DateHelper.LastDayOfMonth(yr + year, mon),
-                                    Amount = amount * (nstar - year + 1) / zstar / 12,
+                                    Date = DateHelper.LastDayOfMonth(yr + n, mon),
+                                    Amount = amount * (nstar - (n + 1) + 2) / zstar / 12,
                                 });
-                    // if (mo > 0)
-                    {
-                        for (var mon = 1; mon <= mo; mon++)
-                            items.Add(
-                                new DepreciateItem
-                                    {
-                                        Date = DateHelper.LastDayOfMonth(yr + n, mon),
-                                        Amount = amount * (nstar - (n + 1) + 2) / zstar / 12,
-                                    });
-                    }
                 }
+            }
 
                 break;
             case DepreciationMethod.DoubleDeclineMethod:

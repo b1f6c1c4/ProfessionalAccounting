@@ -143,8 +143,8 @@ public static class MatchHelper
 
         if (dir != 0)
             if (!voucherDetail.Fund.HasValue ||
-                dir > 0 && voucherDetail.Fund < -VoucherDetail.Tolerance ||
-                dir < 0 && voucherDetail.Fund > +VoucherDetail.Tolerance)
+                (dir > 0 && voucherDetail.Fund < -VoucherDetail.Tolerance) ||
+                (dir < 0 && voucherDetail.Fund > +VoucherDetail.Tolerance))
                 return false;
 
         if (filter.Remark != null)

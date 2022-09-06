@@ -285,7 +285,8 @@ internal class AccountingShell : IShellComponent
     /// <param name="trav">呈现器</param>
     /// <param name="session">客户端会话</param>
     /// <returns>执行结果</returns>
-    private async IAsyncEnumerable<string> PresentSubtotal(IGroupedQuery query, ISubtotalStringify trav, Session session)
+    private async IAsyncEnumerable<string> PresentSubtotal(IGroupedQuery query, ISubtotalStringify trav,
+        Session session)
     {
         var result = await session.Accountant.SelectVoucherDetailsGroupedAsync(query);
         await foreach (var s in trav.PresentSubtotal(result, query.Subtotal, session.Serializer))

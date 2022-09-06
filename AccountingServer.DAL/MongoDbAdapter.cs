@@ -349,11 +349,7 @@ internal class MongoDbAdapter : IDbAdapter
         if (level.HasFlag(SubtotalLevel.Value))
             prj["value"] = new BsonDocument
                 {
-                    ["$round"] = new BsonArray
-                        {
-                            "$detail.fund",
-                            -(int)Math.Log10(VoucherDetail.Tolerance),
-                        },
+                    ["$round"] = new BsonArray { "$detail.fund", -(int)Math.Log10(VoucherDetail.Tolerance) },
                 };
 
         BsonDocument grp;
