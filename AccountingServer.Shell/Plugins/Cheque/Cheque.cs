@@ -92,7 +92,7 @@ internal class Cheque : PluginBase
             foreach (var grpC in voucher.Details.GroupBy(static d => d.Currency).ToList())
                 voucher.Details.Add(new()
                     {
-                        User = session.Client.User,
+                        User = grpC.Select(static d => d.User).Distinct().Single(),
                         Currency = grpC.Key,
                         Title = 1002,
                         Content = tok1,

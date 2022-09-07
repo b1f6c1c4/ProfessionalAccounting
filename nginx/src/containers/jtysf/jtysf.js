@@ -56,7 +56,7 @@ export default function Jtysf() {
 
             if (payer) {
                 form.push(html`<${FlatSelector} title="card" value=${card} onValue=${setCard}
-                    isDisabled=${isLoading || isFinished} query=${`rps ${cf} : ${payer} T101201 G !c`} />`);
+                    isDisabled=${isLoading || isFinished} query=${`rps ${cf} G : ${payer} T101201 !c`} />`);
 
                 if (card) {
                     const txt = `new Voucher {
