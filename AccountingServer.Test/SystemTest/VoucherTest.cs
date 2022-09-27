@@ -89,22 +89,14 @@ Ub2 T3998\s+10
 [0-9]{8}
 // sth-
 @XXX\s+T123456\s+100
-// kyh
-@XXX\s+T3998\s+-50
 // hd
-@XXX\s+T3999\s+-50
+@XXX\s+T3999\s+-100
 // kyh
-@YYY\s+T3998\s+-0.5
+@YYY\s+T3998\s+-1
 // hd
-@YYY\s+T3999\s+0.5
+@YYY\s+T3999\s+1
 // kyh
-Ub2\s+@XXX\s+T3998\s+50
-// hd
-Ub2\s+@XXX\s+T3999\s+-50
-// kyh
-Ub2\s+@YYY\s+T3998\s+0.5
-// hd
-Ub2\s+@YYY\s+T3999\s+0.5
+Ub2\s+@YYY\s+T3998\s+1
 // -
 Ub2\s+@YYY\s+T654321\s+-1
 }@
