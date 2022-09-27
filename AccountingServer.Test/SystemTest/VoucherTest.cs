@@ -55,6 +55,7 @@ public class VoucherTest
                             },
                         new() { Direction = 0, Id = 5678, IsVirtual = false, Name = "els" },
                         new() { Direction = 0, Id = 3998, IsVirtual = false, Name = "kyh" },
+                        new() { Direction = 0, Id = 3999, IsVirtual = false, Name = "hd" },
                     },
             });
 
@@ -78,6 +79,37 @@ Ub2 T3998\s+10
 }@
 ", res);
         m_ID = new Regex(@"\^[0-9a-f]{24}\^").Match(res).Value;
+    }
+
+    [Fact]
+    public void CornerTest()
+    {
+        var res = m_Facade.ExecuteVoucherUpsert(m_Session, "new Voucher { Ub1 @XXX T123456 100 Ub2 @YYY T654321 -1 }").AsTask().Result;
+        Assert.Matches(@"@new Voucher {\^[0-9a-f]{24}\^
+[0-9]{8}
+// sth-
+@XXX\s+T123456\s+100
+// kyh
+@XXX\s+T3998\s+-50
+// hd
+@XXX\s+T3999\s+-50
+// kyh
+@YYY\s+T3998\s+-0.5
+// hd
+@YYY\s+T3999\s+0.5
+// kyh
+Ub2\s+@XXX\s+T3998\s+50
+// hd
+Ub2\s+@XXX\s+T3999\s+-50
+// kyh
+Ub2\s+@YYY\s+T3998\s+0.5
+// hd
+Ub2\s+@YYY\s+T3999\s+0.5
+// -
+Ub2\s+@YYY\s+T654321\s+-1
+}@
+", res);
+        Assert.True(m_Facade.ExecuteVoucherRemoval(m_Session, res.Substring(1, res.Length - 3)).AsTask().Result);
     }
 
     [Fact]
