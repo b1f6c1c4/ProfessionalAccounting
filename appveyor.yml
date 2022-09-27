@@ -61,8 +61,8 @@ build_script:
   - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:VersionSuffix=$(APPVEYOR_BUILD_ID) AccountingServer\AccountingServer.csproj
   - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer.Test\AccountingServer.Test.csproj
 
-# test_script:
-#   - dotnet test AccountingServer.Test\bin\Release\net6.0\AccountingServer.Test.dll
+test_script:
+  - dotnet test AccountingServer.Test\bin\Release\net6.0\AccountingServer.Test.dll
 
 artifacts:
   - path: 'nginx\dist'
