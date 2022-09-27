@@ -18,10 +18,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Serializer;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace AccountingServer.Shell.Subtotal;
@@ -40,7 +43,14 @@ internal class JsonSubtotal : ISubtotalVisitor<JProperty>, ISubtotalStringify
     {
         m_Par = par;
         m_Depth = 0;
-        return AsyncEnumerable.Repeat((raw?.Accept(this)?.Value as JObject)?.ToString(), 1);
+        var obj = raw?.Accept(this)?.Value as JObject;
+
+        using var sw = new StringWriter(CultureInfo.InvariantCulture);
+        sw.NewLine = "\n";
+        var jw = new JsonTextWriter(sw);
+        jw.Formatting = Formatting.Indented;
+        obj?.WriteTo(jw);
+        return AsyncEnumerable.Repeat(sw.ToString(), 1);
     }
 
     JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalRoot sub)

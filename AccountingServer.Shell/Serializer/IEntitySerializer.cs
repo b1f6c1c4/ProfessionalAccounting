@@ -132,7 +132,7 @@ internal interface IEntitiesSerializer : IEntitySerializer
 
 internal static class SerializerHelper
 {
-    public static string Wrap(this string str) => $"@{str}@" + Environment.NewLine;
+    public static string Wrap(this string str) => $"@{str}@\n";
 }
 
 internal class TrivialEntitiesSerializer : IEntitiesSerializer
