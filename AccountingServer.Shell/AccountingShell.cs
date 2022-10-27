@@ -257,11 +257,7 @@ internal class AccountingShell : IShellComponent
     /// <returns>执行结果</returns>
     private IAsyncEnumerable<string> PresentFancyQuery(IVoucherDetailQuery query, Session session)
         => session.Serializer.PresentVouchers(
-            session.Accountant.SelectVouchersAsync(query.VoucherQuery).Select(v =>
-                {
-                    v.Details.RemoveAll(d => !d.IsMatch(query.ActualDetailFilter()));
-                    return v;
-                }));
+            session.Accountant.SelectVouchersEmitAsync(query));
 
     /// <summary>
     ///     执行记账凭证分类汇总检索式并呈现结果

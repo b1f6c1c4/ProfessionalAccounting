@@ -268,6 +268,14 @@ internal class MongoDbAdapter : IDbAdapter
         m_Vouchers.Find(query.Accept(new MongoDbNativeVoucher())).Sort(Builders<Voucher>.Sort.Ascending("date"))
             .ToAsyncEnumerable();
 
+    /// <inheritdoc />
+    public IAsyncEnumerable<Voucher> SelectVouchersEmit(IVoucherDetailQuery query) =>
+        m_Vouchers.Find(query.VoucherQuery.Accept(new MongoDbNativeVoucher()))
+            .Project<Voucher>(Builders<Voucher>.Projection.ElemMatch("detail",
+                query.ActualDetailFilter().Accept(new MongoDbNativeDetail())))
+            .Sort(Builders<Voucher>.Sort.Ascending("date"))
+            .ToAsyncEnumerable();
+
     private static FilterDefinition<BsonDocument> GetChk(IVoucherDetailQuery query)
         => query.ActualDetailFilter().Accept(new MongoDbNativeDetailUnwinded());
 

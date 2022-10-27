@@ -160,6 +160,9 @@ public class DbSession : IHistoricalExchange
     public IAsyncEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => Db.Get().SelectVouchers(query);
 
+    public IAsyncEnumerable<Voucher> SelectVouchersEmit(IVoucherDetailQuery query)
+        => Db.Get().SelectVouchersEmit(query);
+
     public IAsyncEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
         => Db.Get().SelectVoucherDetails(query);
 

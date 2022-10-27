@@ -62,6 +62,14 @@ public class Virtualizer : IDbAdapter, IAsyncDisposable
     public IAsyncEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => Db.SelectVouchers(query).Concat(ReadLocked(_ => _.Where(v => v.IsMatch(query))).ToAsyncEnumerable());
 
+    public IAsyncEnumerable<Voucher> SelectVouchersEmit(IVoucherDetailQuery query)
+        => Db.SelectVouchersEmit(query).Concat(ReadLocked(_ => _.Where(v => v.IsMatch(query.VoucherQuery)).Select(v =>
+                {
+                    var v2 = new Voucher(v);
+                    v2.Details.RemoveAll(d => !d.IsMatch(query.ActualDetailFilter()));
+                    return v2;
+                })).ToAsyncEnumerable());
+
     public IAsyncEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
         => Db.SelectVoucherDetails(query).Concat(ReadLocked(_ => _.Where(v => v.IsMatch(query.VoucherQuery)))
             .SelectMany(static v => v.Details).Where(d => d.IsMatch(query.ActualDetailFilter())).ToAsyncEnumerable());
