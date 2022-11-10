@@ -104,7 +104,7 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         regex: /^(?:Ordinary|General|Carry|Depreciation|Devalue|AnnualCarry|Uncertain|Amortization)$/,
       }, {
         token: 'support.class',
-        regex: /\b(?:Voucher|Asset|Amortization|VoucherDetail|List|AcquisationItem|DepreciateItem|DevalueItem|DisposeItem|AmortItem)\b/,
+        regex: /\b(?:Voucher|Asset|Amortization|VoucherDetail|List|AcquisationItem|DepreciateItem|DevalueItem|DispositionItem|AmortItem)\b/,
       }, {
         token: 'variable.parameter.user',
         regex: /\bU[A-Za-z0-9_]+(&[A-Za-z0-9_]+)*\b/,
