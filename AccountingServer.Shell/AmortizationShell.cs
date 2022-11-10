@@ -183,7 +183,7 @@ internal class AmortizationShell : DistributedShell
         await foreach (var a in Sort(session.Accountant.SelectAmortizationsAsync(distQuery)))
         {
             await foreach (var item in session.Accountant.Update(a, rng, isCollapsed))
-                yield return ListAmortItem(item) + "\n";
+                yield return ListAmortItem(item);
 
             await session.Accountant.UpsertAsync(a);
         }
@@ -197,7 +197,7 @@ internal class AmortizationShell : DistributedShell
         {
             var sbi = new StringBuilder();
             await foreach (var item in session.Accountant.Update(a, rng, false, true))
-                sbi.AppendLine(ListAmortItem(item));
+                sbi.Append(ListAmortItem(item));
 
             if (sbi.Length != 0)
             {
@@ -227,18 +227,18 @@ internal class AmortizationShell : DistributedShell
             !bookValue?.IsZero() != true)
             return null;
 
-        sb.AppendLine(
+        sb.Append(
             $"{amort.StringID} {amort.Name.CPadRight(35)}{amort.Date:yyyyMMdd}" +
             $"{amort.User.AsUser().CPadRight(6)} " +
             $"{amort.Value.AsCurrency().CPadLeft(13)}{(dt.HasValue ? bookValue.AsCurrency().CPadLeft(13) : "-".CPadLeft(13))}" +
-            $"{(amort.TotalDays?.ToString(CultureInfo.InvariantCulture) ?? "-").CPadLeft(4)}{amort.Interval.ToString().CPadLeft(20)}");
+            $"{(amort.TotalDays?.ToString(CultureInfo.InvariantCulture) ?? "-").CPadLeft(4)}{amort.Interval.ToString().CPadLeft(20)}\n");
 
         if (showSchedule && amort.Schedule != null)
             foreach (var amortItem in amort.Schedule)
             {
-                sb.AppendLine(ListAmortItem(amortItem));
+                sb.Append(ListAmortItem(amortItem));
                 if (amortItem.VoucherID != null)
-                    sb.AppendLine(session.Serializer
+                    sb.Append(session.Serializer
                         .PresentVoucher(await session.Accountant.SelectVoucherAsync(amortItem.VoucherID)).Wrap());
             }
 
@@ -252,7 +252,7 @@ internal class AmortizationShell : DistributedShell
     /// <returns>格式化的信息</returns>
     private static string ListAmortItem(AmortItem amortItem)
         => string.Format(
-            "   {0:yyyMMdd} AMO:{1} ={3} ({2})",
+            "   {0:yyyMMdd} AMO:{1} ={3} ({2})\n",
             amortItem.Date,
             amortItem.Amount.AsCurrency()
                 .CPadLeft(13),

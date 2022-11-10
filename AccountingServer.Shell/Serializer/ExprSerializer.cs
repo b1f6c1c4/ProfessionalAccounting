@@ -44,18 +44,18 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
         sb.Append(TheToken);
         if (voucher == null)
         {
-            sb.AppendLine();
-            sb.AppendLine();
+            sb.Append("\n");
+            sb.Append("\n");
         }
         else
         {
-            sb.AppendLine(voucher.ID?.Quotation('^'));
-            sb.AppendLine(voucher.Date.AsDate());
+            sb.Append(voucher.ID?.Quotation('^') + "\n");
+            sb.Append(voucher.Date.AsDate() + "\n");
             if (voucher.Remark != null)
-                sb.AppendLine(voucher.Remark.Quotation('%'));
+                sb.Append(voucher.Remark.Quotation('%') + "\n");
             if (voucher.Type.HasValue &&
                 voucher.Type != VoucherType.Ordinary)
-                sb.AppendLine(voucher.Type.ToString());
+                sb.Append(voucher.Type.ToString() + "\n");
 
             foreach (var d in voucher.Details)
                 sb.Append(PresentVoucherDetail(d));
@@ -70,10 +70,10 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
     {
         var sb = new StringBuilder();
         var t = TitleManager.GetTitleName(detail.Title);
-        sb.AppendLine(
+        sb.Append(
             detail.SubTitle.HasValue
-                ? $"// {t}-{TitleManager.GetTitleName(detail.Title, detail.SubTitle)}"
-                : $"// {t}");
+                ? $"// {t}-{TitleManager.GetTitleName(detail.Title, detail.SubTitle)}\n"
+                : $"// {t}\n");
         if (detail.User != Client.User)
             sb.Append($"{detail.User.AsUser()} ");
         if (detail.Currency != BaseCurrency.Now)
@@ -84,7 +84,7 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
             sb.Append("''");
         else
             sb.Append(detail.Content?.Quotation('\''));
-        sb.AppendLine($" {detail.Remark?.Quotation('\"')} {detail.Fund}");
+        sb.Append($" {detail.Remark?.Quotation('\"')} {detail.Fund}\n");
         return sb.ToString();
     }
 

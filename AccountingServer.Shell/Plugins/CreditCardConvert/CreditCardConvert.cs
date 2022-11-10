@@ -155,8 +155,8 @@ internal class CreditCardConvert : PluginBase
         {
             sb.Append(conv.Date.AsDate());
             sb.Append($" @{conv.OriginCurrency} {conv.OriginFund.AsCurrency().CPadLeft(15)}");
-            sb.AppendLine(
-                $" {conv.Date.AsDate()} @{conv.TargetCurrency} {conv.TargetFund.AsCurrency().CPadLeft(15)} !!!");
+            sb.Append(
+                $" {conv.Date.AsDate()} @{conv.TargetCurrency} {conv.TargetFund.AsCurrency().CPadLeft(15)} !!!\n");
             yield return sb.ToString();
             sb.Clear();
         }
@@ -168,10 +168,10 @@ internal class CreditCardConvert : PluginBase
             sb.Append(tran.Date.AsDate());
             sb.Append($" @{tran.RawCurrency} {tran.RawFund.AsCurrency().CPadLeft(15)}");
             if (tran.TheConversion != null)
-                sb.AppendLine(
-                    $" {tran.TheConversion.Date.AsDate()} @{tran.TheConversion.TargetCurrency} {tran.TheConversion.TargetFund.AsCurrency().CPadLeft(15)}");
+                sb.Append(
+                    $" {tran.TheConversion.Date.AsDate()} @{tran.TheConversion.TargetCurrency} {tran.TheConversion.TargetFund.AsCurrency().CPadLeft(15)}\n");
             else
-                sb.AppendLine();
+                sb.Append("\n");
             yield return sb.ToString();
             sb.Clear();
         }

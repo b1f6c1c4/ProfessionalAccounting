@@ -57,48 +57,48 @@ internal class AverageDailyBalance : PluginBase
         var targ = ldom.Day * avg;
 
         var sb = new StringBuilder();
-        sb.AppendLine($"Target: {targ.AsCurrency()}");
-        sb.AppendLine($"Balance until yesterday: {bal.AsCurrency()}");
+        sb.Append($"Target: {targ.AsCurrency()}\n");
+        sb.Append($"Balance until yesterday: {bal.AsCurrency()}\n");
         if ((bal - targ).IsNonNegative())
         {
-            sb.AppendLine("Achieved.");
-            sb.AppendLine();
+            sb.Append("Achieved.\n");
+            sb.Append("\n");
 
-            sb.AppendLine(
+            sb.Append(
                 (btd - avg).IsNonNegative()
-                    ? $"Plan A: Credit {(btd - avg).AsCurrency()}, Balance {avg.AsCurrency()}"
-                    : $"Plan A: Debit {(avg - btd).AsCurrency()}, Balance {avg.AsCurrency()}");
-            sb.AppendLine("Plan B: No Action");
+                    ? $"Plan A: Credit {(btd - avg).AsCurrency()}, Balance {avg.AsCurrency()}\n"
+                    : $"Plan A: Debit {(avg - btd).AsCurrency()}, Balance {avg.AsCurrency()}\n");
+            sb.Append("Plan B: No Action\n");
         }
         else
         {
             var res = targ - bal;
             var rsd = ldom.Day - tdy.Day + 1;
-            sb.AppendLine($"Deficiency: {res.AsCurrency()}");
+            sb.Append($"Deficiency: {res.AsCurrency()}\n");
             var avx = res / rsd;
             if ((rsd * avg - res).IsNonNegative())
             {
-                sb.AppendLine($"Average deficiency: {avx.AsCurrency()} <= {avg.AsCurrency()}");
-                sb.AppendLine();
+                sb.Append($"Average deficiency: {avx.AsCurrency()} <= {avg.AsCurrency()}\n");
+                sb.Append("\n");
 
-                sb.AppendLine(
+                sb.Append(
                     (btd - avx).IsNonNegative()
-                        ? $"Plan A: Credit {(btd - avx).AsCurrency()}, Balance {avx.AsCurrency()}"
-                        : $"Plan A: Debit {(avx - btd).AsCurrency()}, Balance {avx.AsCurrency()}");
-                sb.AppendLine(
+                        ? $"Plan A: Credit {(btd - avx).AsCurrency()}, Balance {avx.AsCurrency()}\n"
+                        : $"Plan A: Debit {(avx - btd).AsCurrency()}, Balance {avx.AsCurrency()}\n");
+                sb.Append(
                     (btd - avg).IsNonNegative()
-                        ? $"Plan B: Credit {(btd - avg).AsCurrency()}, Balance {avg.AsCurrency()}"
-                        : $"Plan B: Debit {(avg - btd).AsCurrency()}, Balance {avg.AsCurrency()}");
+                        ? $"Plan B: Credit {(btd - avg).AsCurrency()}, Balance {avg.AsCurrency()}\n"
+                        : $"Plan B: Debit {(avg - btd).AsCurrency()}, Balance {avg.AsCurrency()}\n");
             }
             else
             {
-                sb.AppendLine($"Average deficiency: {avx.AsCurrency()} > {avg.AsCurrency()}");
-                sb.AppendLine();
+                sb.Append($"Average deficiency: {avx.AsCurrency()} > {avg.AsCurrency()}\n");
+                sb.Append("\n");
 
-                sb.AppendLine(
+                sb.Append(
                     (btd - avx).IsNonNegative()
-                        ? $"Plan: Credit {(btd - avx).AsCurrency()}, Balance {avx.AsCurrency()}"
-                        : $"Plan: Debit {(avx - btd).AsCurrency()}, Balance {avx.AsCurrency()}");
+                        ? $"Plan: Credit {(btd - avx).AsCurrency()}, Balance {avx.AsCurrency()}\n"
+                        : $"Plan: Debit {(avx - btd).AsCurrency()}, Balance {avx.AsCurrency()}\n");
             }
         }
 

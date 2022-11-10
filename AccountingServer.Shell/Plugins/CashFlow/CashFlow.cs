@@ -86,7 +86,8 @@ internal class CashFlow : PluginBase
             sb.Append($"#### {c} ####".PadLeft(15));
         }
 
-        sb.AppendLine("@@@@ All @@@@".PadLeft(15));
+        sb.Append("@@@@ All @@@@".PadLeft(15));
+        sb.Append("\n");
         yield return sb.ToString();
         sb.Clear();
 
@@ -105,7 +106,8 @@ internal class CashFlow : PluginBase
                 sb.Append(aggs[i].AsCurrency(accts[i].Currency).PadLeft(15));
             }
 
-            sb.AppendLine(sum.AsCurrency(BaseCurrency.Now).PadLeft(15));
+            sb.Append(sum.AsCurrency(BaseCurrency.Now).PadLeft(15));
+            sb.Append("\n");
             yield return sb.ToString();
             sb.Clear();
         }
@@ -135,7 +137,8 @@ internal class CashFlow : PluginBase
                 sb.Append(aggs[i].AsCurrency(accts[i].Currency).PadLeft(15));
             }
 
-            sb.AppendLine(sum.AsCurrency(BaseCurrency.Now).PadLeft(15));
+            sb.Append(sum.AsCurrency(BaseCurrency.Now).PadLeft(15));
+            sb.Append("\n");
             yield return sb.ToString();
             sb.Clear();
         }

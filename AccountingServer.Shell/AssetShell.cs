@@ -190,7 +190,7 @@ internal class AssetShell : DistributedShell
         await foreach (var a in Sort(session.Accountant.SelectAssetsAsync(distQuery)))
         {
             await foreach (var item in session.Accountant.Update(a, rng, isCollapsed))
-                yield return ListAssetItem(item) + "\n";
+                yield return ListAssetItem(item);
 
             await session.Accountant.UpsertAsync(a);
         }
@@ -210,7 +210,7 @@ internal class AssetShell : DistributedShell
         {
             var sbi = new StringBuilder();
             await foreach (var item in session.Accountant.Update(a, rng, false, true))
-                sbi.AppendLine(ListAssetItem(item));
+                sbi.Append(ListAssetItem(item));
 
             if (sbi.Length != 0)
             {
@@ -240,7 +240,7 @@ internal class AssetShell : DistributedShell
             !bookValue?.IsZero() != true)
             return null;
 
-        sb.AppendLine($"{asset.StringID} {asset.Name.CPadRight(35)}{asset.Date:yyyyMMdd}" +
+        sb.Append($"{asset.StringID} {asset.Name.CPadRight(35)}{asset.Date:yyyyMMdd}" +
             $"{asset.User.AsUser().CPadRight(6)} " +
             asset.Value.AsCurrency(asset.Currency).CPadLeft(13) +
             (dt.HasValue ? bookValue.AsCurrency(asset.Currency).CPadLeft(13) : "-".CPadLeft(13)) +
@@ -253,14 +253,14 @@ internal class AssetShell : DistributedShell
             asset.DevaluationExpenseTitle.AsTitle().CPadLeft(6) +
             asset.DevaluationExpenseSubTitle.AsSubTitle() +
             asset.Life.ToString().CPadLeft(4) +
-            asset.Method.ToString().CPadLeft(20));
+            asset.Method.ToString().CPadLeft(20) + "\n");
 
         if (showSchedule && asset.Schedule != null)
             foreach (var assetItem in asset.Schedule)
             {
-                sb.AppendLine(ListAssetItem(assetItem));
+                sb.Append(ListAssetItem(assetItem));
                 if (assetItem.VoucherID != null)
-                    sb.AppendLine(session.Serializer
+                    sb.Append(session.Serializer
                         .PresentVoucher(await session.Accountant.SelectVoucherAsync(assetItem.VoucherID)).Wrap());
             }
 
@@ -276,25 +276,25 @@ internal class AssetShell : DistributedShell
         => assetItem switch
             {
                 AcquisitionItem acq => string.Format(
-                    "   {0:yyyMMdd} ACQ:{1} ={3} ({2})",
+                    "   {0:yyyMMdd} ACQ:{1} ={3} ({2})\n",
                     assetItem.Date,
                     acq.OrigValue.AsCurrency().CPadLeft(13),
                     assetItem.VoucherID,
                     assetItem.Value.AsCurrency().CPadLeft(13)),
                 DepreciateItem dep => string.Format(
-                    "   {0:yyyMMdd} DEP:{1} ={3} ({2})",
+                    "   {0:yyyMMdd} DEP:{1} ={3} ({2})\n",
                     assetItem.Date,
                     dep.Amount.AsCurrency().CPadLeft(13),
                     assetItem.VoucherID,
                     assetItem.Value.AsCurrency().CPadLeft(13)),
                 DevalueItem dev => string.Format(
-                    "   {0:yyyMMdd} DEV:{1} ={3} ({2})",
+                    "   {0:yyyMMdd} DEV:{1} ={3} ({2})\n",
                     assetItem.Date,
                     dev.Amount.AsCurrency().CPadLeft(13),
                     assetItem.VoucherID,
                     assetItem.Value.AsCurrency().CPadLeft(13)),
                 DispositionItem => string.Format(
-                    "   {0:yyyMMdd} DSP:{1} ={3} ({2})",
+                    "   {0:yyyMMdd} DSP:{1} ={3} ({2})\n",
                     assetItem.Date,
                     "ALL".CPadLeft(13),
                     assetItem.VoucherID,

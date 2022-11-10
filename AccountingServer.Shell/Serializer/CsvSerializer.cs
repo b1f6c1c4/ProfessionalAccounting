@@ -125,11 +125,11 @@ public class CsvSerializer : IEntitiesSerializer
     public string PresentVoucher(Voucher voucher)
     {
         var sb = new StringBuilder();
-        sb.AppendLine(PresentHeader(m_Specs));
+        sb.Append(PresentHeader(m_Specs));
         if (voucher == null)
             return "";
         foreach (var d in voucher.Details)
-            sb.AppendLine(Present(new(voucher, d), m_Specs));
+            sb.Append(Present(new(voucher, d), m_Specs));
         return sb.ToString();
     }
 
@@ -137,8 +137,8 @@ public class CsvSerializer : IEntitiesSerializer
     public string PresentVoucherDetail(VoucherDetail detail)
     {
         var sb = new StringBuilder();
-        sb.AppendLine(PresentHeader(DetailSpec));
-        sb.AppendLine(Present(new(null, detail), DetailSpec));
+        sb.Append(PresentHeader(DetailSpec));
+        sb.Append(Present(new(null, detail), DetailSpec));
         return sb.ToString();
     }
 
@@ -146,34 +146,34 @@ public class CsvSerializer : IEntitiesSerializer
     public string PresentVoucherDetail(VoucherDetailR detail)
     {
         var sb = new StringBuilder();
-        sb.AppendLine(PresentHeader(m_Specs));
-        sb.AppendLine(Present(detail, m_Specs));
+        sb.Append(PresentHeader(m_Specs));
+        sb.Append(Present(detail, m_Specs));
         return sb.ToString();
     }
 
     /// <inheritdoc />
     public async IAsyncEnumerable<string> PresentVouchers(IAsyncEnumerable<Voucher> vouchers)
     {
-        yield return PresentHeader(m_Specs) + "\n";
+        yield return PresentHeader(m_Specs);
         await foreach (var voucher in vouchers)
         foreach (var detail in voucher.Details)
-            yield return Present(new(voucher, detail), m_Specs) + "\n";
+            yield return Present(new(voucher, detail), m_Specs);
     }
 
     /// <inheritdoc />
     public async IAsyncEnumerable<string> PresentVoucherDetails(IAsyncEnumerable<VoucherDetail> details)
     {
-        yield return PresentHeader(DetailSpec) + "\n";
+        yield return PresentHeader(DetailSpec);
         await foreach (var detail in details)
-            yield return Present(new(null, detail), DetailSpec) + "\n";
+            yield return Present(new(null, detail), DetailSpec);
     }
 
     /// <inheritdoc />
     public async IAsyncEnumerable<string> PresentVoucherDetails(IAsyncEnumerable<VoucherDetailR> details)
     {
-        yield return PresentHeader(m_Specs) + "\n";
+        yield return PresentHeader(m_Specs);
         await foreach (var detail in details)
-            yield return Present(detail, m_Specs) + "\n";
+            yield return Present(detail, m_Specs);
     }
 
     public Voucher ParseVoucher(string str) => throw new NotImplementedException();
@@ -200,6 +200,7 @@ public class CsvSerializer : IEntitiesSerializer
             sb.Append(s);
         }
 
+        sb.Append("\n");
         return sb.ToString();
     }
 
@@ -235,6 +236,7 @@ public class CsvSerializer : IEntitiesSerializer
                 });
         }
 
+        sb.Append("\n");
         return sb.ToString();
     }
 
