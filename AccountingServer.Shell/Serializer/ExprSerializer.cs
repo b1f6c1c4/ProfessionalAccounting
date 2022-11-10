@@ -49,13 +49,13 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
         }
         else
         {
-            sb.Append(voucher.ID?.Quotation('^') + "\n");
-            sb.Append(voucher.Date.AsDate() + "\n");
+            sb.Append($"{voucher.ID?.Quotation('^')}\n");
+            sb.Append($"{voucher.Date.AsDate()}\n");
             if (voucher.Remark != null)
-                sb.Append(voucher.Remark.Quotation('%') + "\n");
+                sb.Append($"{voucher.Remark.Quotation('%')}\n");
             if (voucher.Type.HasValue &&
                 voucher.Type != VoucherType.Ordinary)
-                sb.Append(voucher.Type.ToString() + "\n");
+                sb.Append($"{voucher.Type}\n");
 
             foreach (var d in voucher.Details)
                 sb.Append(PresentVoucherDetail(d));

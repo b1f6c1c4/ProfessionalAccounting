@@ -33,6 +33,6 @@ public static class ResourceHelper
 
         using var reader = new StreamReader(stream);
         while (!reader.EndOfStream)
-            yield return await reader.ReadLineAsync() + "\n";
+            yield return $"{await reader.ReadLineAsync()}\n";
     }
 }

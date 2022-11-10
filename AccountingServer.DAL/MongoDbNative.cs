@@ -120,24 +120,24 @@ internal abstract class MongoDbNativeDetail<T> : MongoDbNativeVisitor<T, IDetail
         switch (query.Kind)
         {
             case TitleKind.Asset:
-                lst.Add(Builders<T>.Filter.Gte(p + "title", 1000));
-                lst.Add(Builders<T>.Filter.Lt(p + "title", 2000));
+                lst.Add(Builders<T>.Filter.Gte($"{p}title", 1000));
+                lst.Add(Builders<T>.Filter.Lt($"{p}title", 2000));
                 break;
             case TitleKind.Liability:
-                lst.Add(Builders<T>.Filter.Gte(p + "title", 2000));
-                lst.Add(Builders<T>.Filter.Lt(p + "title", 3000));
+                lst.Add(Builders<T>.Filter.Gte($"{p}title", 2000));
+                lst.Add(Builders<T>.Filter.Lt($"{p}title", 3000));
                 break;
             case TitleKind.Equity:
-                lst.Add(Builders<T>.Filter.Gte(p + "title", 4000));
-                lst.Add(Builders<T>.Filter.Lt(p + "title", 5000));
+                lst.Add(Builders<T>.Filter.Gte($"{p}title", 4000));
+                lst.Add(Builders<T>.Filter.Lt($"{p}title", 5000));
                 break;
             case TitleKind.Revenue:
-                lst.Add(Builders<T>.Filter.Gte(p + "title", 6000));
-                lst.Add(Builders<T>.Filter.Lt(p + "title", 6400));
+                lst.Add(Builders<T>.Filter.Gte($"{p}title", 6000));
+                lst.Add(Builders<T>.Filter.Lt($"{p}title", 6400));
                 break;
             case TitleKind.Expense:
-                lst.Add(Builders<T>.Filter.Gte(p + "title", 6400));
-                lst.Add(Builders<T>.Filter.Lt(p + "title", 7000));
+                lst.Add(Builders<T>.Filter.Gte($"{p}title", 6400));
+                lst.Add(Builders<T>.Filter.Lt($"{p}title", 7000));
                 break;
             case null:
                 break;
@@ -148,40 +148,40 @@ internal abstract class MongoDbNativeDetail<T> : MongoDbNativeVisitor<T, IDetail
         if (query.Dir != 0)
             lst.Add(
                 query.Dir > 0
-                    ? Builders<T>.Filter.Gt(p + "fund", -VoucherDetail.Tolerance)
-                    : Builders<T>.Filter.Lt(p + "fund", +VoucherDetail.Tolerance));
+                    ? Builders<T>.Filter.Gt($"{p}fund", -VoucherDetail.Tolerance)
+                    : Builders<T>.Filter.Lt($"{p}fund", +VoucherDetail.Tolerance));
         if (query.ContentPrefix != null)
-            lst.Add(Builders<T>.Filter.Regex(p + "content", PrefixRegex(query.ContentPrefix)));
+            lst.Add(Builders<T>.Filter.Regex($"{p}content", PrefixRegex(query.ContentPrefix)));
         if (query.RemarkPrefix != null)
-            lst.Add(Builders<T>.Filter.Regex(p + "remark", PrefixRegex(query.RemarkPrefix)));
+            lst.Add(Builders<T>.Filter.Regex($"{p}remark", PrefixRegex(query.RemarkPrefix)));
         if (query.Filter?.User != null)
-            lst.Add(Builders<T>.Filter.Eq(p + "user", query.Filter?.User));
+            lst.Add(Builders<T>.Filter.Eq($"{p}user", query.Filter?.User));
         if (query.Filter?.Currency != null)
-            lst.Add(Builders<T>.Filter.Eq(p + "currency", query.Filter?.Currency));
+            lst.Add(Builders<T>.Filter.Eq($"{p}currency", query.Filter?.Currency));
         if (query.Filter?.Title != null)
-            lst.Add(Builders<T>.Filter.Eq(p + "title", query.Filter.Title.Value));
+            lst.Add(Builders<T>.Filter.Eq($"{p}title", query.Filter.Title.Value));
         if (query.Filter?.SubTitle != null)
             lst.Add(query.Filter.SubTitle switch
                 {
-                    00 => Builders<T>.Filter.Exists(p + "subtitle", false),
-                    var x => Builders<T>.Filter.Eq(p + "subtitle", x!.Value),
+                    00 => Builders<T>.Filter.Exists($"{p}subtitle", false),
+                    var x => Builders<T>.Filter.Eq($"{p}subtitle", x!.Value),
                 });
         if (query.Filter?.Content != null)
             lst.Add(query.Filter.Content switch
                 {
-                    "" => Builders<T>.Filter.Exists(p + "content", false),
-                    var x => Builders<T>.Filter.Eq(p + "content", x),
+                    "" => Builders<T>.Filter.Exists($"{p}content", false),
+                    var x => Builders<T>.Filter.Eq($"{p}content", x),
                 });
         if (query.Filter?.Remark != null)
             lst.Add(query.Filter.Remark switch
                 {
-                    "" => Builders<T>.Filter.Exists(p + "remark", false),
-                    var x => Builders<T>.Filter.Eq(p + "remark", x),
+                    "" => Builders<T>.Filter.Exists($"{p}remark", false),
+                    var x => Builders<T>.Filter.Eq($"{p}remark", x),
                 });
         if (query.Filter?.Fund != null)
             lst.Add(
-                Builders<T>.Filter.Gte(p + "fund", query.Filter.Fund.Value - VoucherDetail.Tolerance) &
-                Builders<T>.Filter.Lte(p + "fund", query.Filter.Fund.Value + VoucherDetail.Tolerance));
+                Builders<T>.Filter.Gte($"{p}fund", query.Filter.Fund.Value - VoucherDetail.Tolerance) &
+                Builders<T>.Filter.Lte($"{p}fund", query.Filter.Fund.Value + VoucherDetail.Tolerance));
         return And(lst);
     }
 
@@ -191,7 +191,7 @@ internal abstract class MongoDbNativeDetail<T> : MongoDbNativeVisitor<T, IDetail
     /// <param name="s">前缀字符串</param>
     /// <returns>前缀正则表达式</returns>
     private static BsonRegularExpression PrefixRegex(string s)
-        => new("^" + Regex.Escape(s), "i");
+        => new($"^{Regex.Escape(s)}", "i");
 }
 
 internal class MongoDbNativeDetail : MongoDbNativeDetail<VoucherDetail> { }

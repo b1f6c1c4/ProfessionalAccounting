@@ -370,7 +370,7 @@ internal abstract class InterestBase : PluginBase
                     Currency = Currency,
                     Title = Title,
                     Content = Content,
-                    Remark = Remark + "-利息",
+                    Remark = $"{Remark}-利息",
                     Fund = fund,
                 };
 

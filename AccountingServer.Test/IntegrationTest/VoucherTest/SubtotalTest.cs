@@ -159,7 +159,7 @@ public class SubtotalTest : IAsyncDisposable
             m_Adapter.SelectVoucherDetails(ParsingF.DetailQuery(query, m_Client)).ToEnumerable().Count());
         Assert.Equal(
             number,
-            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query + "!v", m_Client)).ToEnumerable()
+            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery($"{query}!v", m_Client)).ToEnumerable()
                 .SingleOrDefault()?.Fund ??
             0);
     }

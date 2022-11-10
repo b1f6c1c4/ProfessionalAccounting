@@ -115,7 +115,7 @@ public static class DataFormatter
     {
         var sym = curr == null
             ? ""
-            : Cfg.Get<CurrencySymbols>().Symbols.SingleOrDefault(cs => cs.Currency == curr)?.Symbol ?? curr + " ";
+            : Cfg.Get<CurrencySymbols>().Symbols.SingleOrDefault(cs => cs.Currency == curr)?.Symbol ?? $"{curr} ";
         var s = $"{sym}{value:N4}";
         return s.TrimEnd('0').CPadRight(s.Length);
     }

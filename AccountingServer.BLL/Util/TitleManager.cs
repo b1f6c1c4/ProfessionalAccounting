@@ -121,6 +121,6 @@ public static class TitleManager
     /// <returns>名称</returns>
     public static string GetTitleName(VoucherDetail detail) =>
         detail.SubTitle.HasValue
-            ? GetTitleName(detail.Title) + "-" + GetTitleName(detail.Title, detail.SubTitle)
+            ? $"{GetTitleName(detail.Title)}-{GetTitleName(detail.Title, detail.SubTitle)}"
             : GetTitleName(detail.Title);
 }

@@ -85,7 +85,7 @@ internal partial class SubtotalParser
                     dt = dt.AddMonths(-delta);
                 }
                 else
-                    dt = DateTimeParser.ParseExact(RangeAMonth().GetText() + "01", "yyyyMMdd");
+                    dt = DateTimeParser.ParseExact($"{RangeAMonth().GetText()}01", "yyyyMMdd");
 
                 return new(dt, dt.AddMonths(1).AddDays(-1));
             }
