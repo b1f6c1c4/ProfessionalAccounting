@@ -12,39 +12,39 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0"/>
-        <PackageReference Include="System.Runtime.Loader" Version="4.3.0"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.1" />
+        <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\AccountingServer.BLL\AccountingServer.BLL.csproj"/>
-        <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj"/>
+        <ProjectReference Include="..\AccountingServer.BLL\AccountingServer.BLL.csproj" />
+        <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="Resources\Document.txt"/>
-        <EmbeddedResource Include="Plugins\Coupling\Resources\Document.txt"/>
-        <EmbeddedResource Include="Resources\Document.txt"/>
-        <None Remove="Plugins\AssetHelper\Resources\Document.txt"/>
-        <EmbeddedResource Include="Plugins\AssetHelper\Resources\Document.txt"/>
-        <None Remove="Plugins\BankBalance\Resources\Document.txt"/>
-        <EmbeddedResource Include="Plugins\BankBalance\Resources\Document.txt"/>
-        <None Remove="Plugins\CashFlow\Resources\Document.txt"/>
-        <EmbeddedResource Include="Plugins\CashFlow\Resources\Document.txt"/>
-        <None Remove="Plugins\Composite\Resources\Document.txt"/>
-        <EmbeddedResource Include="Plugins\Composite\Resources\Document.txt"/>
-        <None Remove="Plugins\CreditCardConvert\Resources\Document.txt"/>
-        <EmbeddedResource Include="Plugins\CreditCardConvert\Resources\Document.txt"/>
-        <None Remove="Plugins\Interest\Resources\Document.txt"/>
-        <EmbeddedResource Include="Plugins\Interest\Resources\Document.txt"/>
-        <None Remove="Plugins\Statement\Resources\Document.txt"/>
-        <EmbeddedResource Include="Plugins\Statement\Resources\Document.txt"/>
-        <None Remove="Plugins\Utilities\Resources\Document.txt"/>
-        <EmbeddedResource Include="Plugins\Utilities\Resources\Document.txt"/>
-        <None Remove="Plugins\YieldRate\Resources\Document.txt"/>
-        <EmbeddedResource Include="Plugins\YieldRate\Resources\Document.txt"/>
-        <None Remove="Plugins\Cheque\Resources\Document.txt"/>
-        <EmbeddedResource Include="Plugins\Cheque\Resources\Document.txt"/>
+        <None Remove="Resources\Document.txt" />
+        <EmbeddedResource Include="Plugins\Coupling\Resources\Document.txt" />
+        <EmbeddedResource Include="Resources\Document.txt" />
+        <None Remove="Plugins\AssetHelper\Resources\Document.txt" />
+        <EmbeddedResource Include="Plugins\AssetHelper\Resources\Document.txt" />
+        <None Remove="Plugins\BankBalance\Resources\Document.txt" />
+        <EmbeddedResource Include="Plugins\BankBalance\Resources\Document.txt" />
+        <None Remove="Plugins\CashFlow\Resources\Document.txt" />
+        <EmbeddedResource Include="Plugins\CashFlow\Resources\Document.txt" />
+        <None Remove="Plugins\Composite\Resources\Document.txt" />
+        <EmbeddedResource Include="Plugins\Composite\Resources\Document.txt" />
+        <None Remove="Plugins\CreditCardConvert\Resources\Document.txt" />
+        <EmbeddedResource Include="Plugins\CreditCardConvert\Resources\Document.txt" />
+        <None Remove="Plugins\Interest\Resources\Document.txt" />
+        <EmbeddedResource Include="Plugins\Interest\Resources\Document.txt" />
+        <None Remove="Plugins\Statement\Resources\Document.txt" />
+        <EmbeddedResource Include="Plugins\Statement\Resources\Document.txt" />
+        <None Remove="Plugins\Utilities\Resources\Document.txt" />
+        <EmbeddedResource Include="Plugins\Utilities\Resources\Document.txt" />
+        <None Remove="Plugins\YieldRate\Resources\Document.txt" />
+        <EmbeddedResource Include="Plugins\YieldRate\Resources\Document.txt" />
+        <None Remove="Plugins\Cheque\Resources\Document.txt" />
+        <EmbeddedResource Include="Plugins\Cheque\Resources\Document.txt" />
     </ItemGroup>
 
 </Project>
