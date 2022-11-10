@@ -100,7 +100,7 @@ public class ParseTest
     }
 
     [Theory]
-    [InlineData(0, " 0.0000 asdf", " asdf")]
+    [InlineData(0.0, " 0.0000 asdf", " asdf")]
     [InlineData(null, " '0.0000' asdf", "'0.0000' asdf")]
     [InlineData(-1.57e-323, " -1.57e-323 asdf", " asdf")]
     [InlineData(157.0e305, " 157.0e305 asdf", " asdf")]
@@ -112,7 +112,7 @@ public class ParseTest
     }
 
     [Theory]
-    [InlineData(0, " 0.0000 asdf", " asdf")]
+    [InlineData(0.0, " 0.0000 asdf", " asdf")]
     [InlineData(null, " '0.0000' asdf", "'0.0000' asdf")]
     [InlineData(-1.57e-323, " -1.57e-323 asdf", " asdf")]
     [InlineData(157.0e305, " 157.0e305 asdf", " asdf")]

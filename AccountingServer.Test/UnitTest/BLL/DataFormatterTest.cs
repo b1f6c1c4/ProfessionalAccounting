@@ -62,7 +62,7 @@ public class DataFormatterTest
 
     [Theory]
     [InlineData(null, null, "")]
-    [InlineData(null, 12500, "12,500.    ")]
+    [InlineData(null, 12500.0, "12,500.    ")]
     [InlineData(null, 123.45, "123.45  ")]
     [InlineData("DOGE", null, "")]
     [InlineData("DOGE", 123.45, "#123.45  ")]

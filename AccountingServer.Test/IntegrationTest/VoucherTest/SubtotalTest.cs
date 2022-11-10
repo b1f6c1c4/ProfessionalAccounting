@@ -167,8 +167,8 @@ public class SubtotalTest : IAsyncDisposable
     [Theory]
     [InlineData(null, "T9999 `v")]
     [InlineData(null, "T9999 ``v")]
-    [InlineData(0, "`v")]
-    [InlineData(0, "``v")]
+    [InlineData(0.0, "`v")]
+    [InlineData(0.0, "``v")]
     [InlineData(123.45 + 78.53 + 66.66, "\"rmk1\"`v")]
     [InlineData(66.66, "\"rmk1\" : T123456-'cnt1' `v")]
     [InlineData(78.53 + 66.66, "< 20170201 : > `v")]
@@ -180,14 +180,14 @@ public class SubtotalTest : IAsyncDisposable
 
     [Theory]
     [InlineData("b2", null, "``U")]
-    [InlineData("b1", 0, "``U")]
+    [InlineData("b1", 0.0, "``U")]
     [InlineData("b1&b2", null, "``U")]
     [InlineData("b2", null, "U``U")]
-    [InlineData("b1", 0, "U``U")]
-    [InlineData("b1&b2", 114514, "U``U")]
+    [InlineData("b1", 0.0, "U``U")]
+    [InlineData("b1&b2", 114514.0, "U``U")]
     [InlineData("b2", null, "Ub1&b2``U")]
     [InlineData("b1", null, "Ub1&b2``U")]
-    [InlineData("b1&b2", 114514, "Ub1&b2``U")]
+    [InlineData("b1&b2", 114514.0, "Ub1&b2``U")]
     public void RunTestUser(string user, double? value, string query)
         => Assert.Equal(
             value,
@@ -196,7 +196,7 @@ public class SubtotalTest : IAsyncDisposable
 
     [Theory]
     [InlineData("CNY", null, "``C")]
-    [InlineData("JPY", 0, "``C")]
+    [InlineData("JPY", 0.0, "``C")]
     [InlineData("JPY", -123.45 - 78.53, "\"rmk2\"``C")]
     [InlineData("JPY", 123.45, "%xrmk1% : \"rmk1\"``C")]
     [InlineData("USD", -66.66, "\"rmk2\"``C")]
@@ -209,7 +209,7 @@ public class SubtotalTest : IAsyncDisposable
 
     [Theory]
     [InlineData("qwer", null, "``c")]
-    [InlineData("cnt1", 0, "``c")]
+    [InlineData("cnt1", 0.0, "``c")]
     [InlineData("cnt1", -123.45 - 78.53, "\"rmk2\"``c")]
     [InlineData("cnt1", 123.45, "%xrmk1% : \"rmk1\"``c")]
     [InlineData("cnt2", -66.66, "\"rmk2\"``c")]
@@ -311,7 +311,7 @@ public class SubtotalTest : IAsyncDisposable
                 .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
 
     [Theory]
-    [InlineData(123, null, "``V")]
+    [InlineData(123.0, null, "``V")]
     [InlineData(123.45, 123.45, "``V")]
     [InlineData(-78.53, -78.53, "``V")]
     public void RunTestV(double v, double? value, string query)
@@ -334,7 +334,7 @@ public class SubtotalTest : IAsyncDisposable
             });
 
     [Theory]
-    [InlineData(2, "!!v")]
+    [InlineData(2L, "!!v")]
     public void RunVTestValue(long? value, string query)
         => Assert.Equal(
             value,
@@ -344,12 +344,12 @@ public class SubtotalTest : IAsyncDisposable
     [Theory]
     [InlineData(null, null, "!!d")]
     [InlineData("2016-01-01", null, "!!d")]
-    [InlineData("2016-12-31", 1, "!!d")]
-    [InlineData("2017-02-01", 1, "!!d")]
+    [InlineData("2016-12-31", 1L, "!!d")]
+    [InlineData("2017-02-01", 1L, "!!d")]
     [InlineData(null, null, "!!vD[2017~2018]")]
     [InlineData("2016-01-01", null, "!!vD[]")]
-    [InlineData("2016-12-31", 1, "!!vD")]
-    [InlineData("2017-02-01", 1, "!!vD[]")]
+    [InlineData("2016-12-31", 1L, "!!vD")]
+    [InlineData("2017-02-01", 1L, "!!vD[]")]
     public void RunVTestDay(string dt, long? value, string query)
         => Assert.Equal(
             value,
@@ -360,9 +360,9 @@ public class SubtotalTest : IAsyncDisposable
     [InlineData(null, null, "!!w")]
     [InlineData("2016-01-01", null, "!!w")]
     [InlineData("2016-12-31", null, "!!w")]
-    [InlineData("2016-12-26", 1, "!!w")]
+    [InlineData("2016-12-26", 1L, "!!w")]
     [InlineData("2017-02-01", null, "!!w")]
-    [InlineData("2017-01-30", 1, "!!w")]
+    [InlineData("2017-01-30", 1L, "!!w")]
     public void RunVTestWeek(string dt, long? value, string query)
         => Assert.Equal(
             value,
@@ -373,8 +373,8 @@ public class SubtotalTest : IAsyncDisposable
     [InlineData(null, null, "!!m")]
     [InlineData("2016-01-01", null, "!!m")]
     [InlineData("2016-12-31", null, "!!m")]
-    [InlineData("2016-12-01", 1, "!!m")]
-    [InlineData("2017-02-01", 1, "!!m")]
+    [InlineData("2016-12-01", 1L, "!!m")]
+    [InlineData("2017-02-01", 1L, "!!m")]
     public void RunVTestMonth(string dt, long? value, string query)
         => Assert.Equal(
             value,
@@ -383,9 +383,9 @@ public class SubtotalTest : IAsyncDisposable
 
     [Theory]
     [InlineData("2016-12-31", null, "!!y")]
-    [InlineData("2016-01-01", 1, "!!y")]
-    [InlineData("2017-01-01", 1, "!!y")]
-    [InlineData("2017-01-01", 1, "!!vY")]
+    [InlineData("2016-01-01", 1L, "!!y")]
+    [InlineData("2017-01-01", 1L, "!!y")]
+    [InlineData("2017-01-01", 1L, "!!vY")]
     public void RunVTestYear(string dt, long? value, string query)
         => Assert.Equal(
             value,
