@@ -18,7 +18,7 @@
 
 using System.Collections.Generic;
 
-namespace AccountingServer.Http;
+namespace Http;
 
 internal static class ResponseCodes
 {

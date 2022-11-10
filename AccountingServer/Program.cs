@@ -22,9 +22,9 @@ using System.Net;
 using System.Threading.Tasks;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
-using AccountingServer.Http;
 using AccountingServer.Shell;
-using static AccountingServer.Http.HttpUtil;
+using Http;
+using static Http.HttpUtil;
 
 var xwd = AppDomain.CurrentDomain.BaseDirectory;
 

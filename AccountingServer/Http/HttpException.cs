@@ -18,7 +18,7 @@
 
 using System;
 
-namespace AccountingServer.Http;
+namespace Http;
 
 public class HttpException : Exception
 {

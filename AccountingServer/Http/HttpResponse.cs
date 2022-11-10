@@ -20,7 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace AccountingServer.Http;
+namespace Http;
 
 public class HttpResponse : IDisposable
 {

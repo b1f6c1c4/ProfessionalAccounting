@@ -22,7 +22,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace AccountingServer.Http;
+namespace Http;
 
 public class HttpServer
 {

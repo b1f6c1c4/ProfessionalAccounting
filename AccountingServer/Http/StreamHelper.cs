@@ -20,7 +20,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AccountingServer.Http;
+namespace Http;
 
 internal static class StreamHelper
 {

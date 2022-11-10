@@ -22,7 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AccountingServer.Http;
+namespace Http;
 
 public static class ResponseWriter
 {

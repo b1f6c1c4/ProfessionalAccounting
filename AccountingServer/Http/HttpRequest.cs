@@ -24,7 +24,7 @@ using System.IO;
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable UnusedMember.Global
 
-namespace AccountingServer.Http;
+namespace Http;
 
 public class HttpRequest
 {

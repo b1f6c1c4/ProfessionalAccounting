@@ -23,7 +23,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 
-namespace AccountingServer.Http;
+namespace Http;
 
 internal static class RequestParser
 {
