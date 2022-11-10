@@ -4,6 +4,7 @@
 
 [![Appveyor Build](https://img.shields.io/appveyor/build/b1f6c1c4/ProfessionalAccounting?style=flat-square)](https://ci.appveyor.com/project/b1f6c1c4/professionalaccounting)
 [![Appveyor Tests](https://img.shields.io/appveyor/tests/b1f6c1c4/ProfessionalAccounting?style=flat-square)](https://ci.appveyor.com/project/b1f6c1c4/professionalaccounting/build/tests)
+[![Coveralls](https://img.shields.io/coveralls/github/b1f6c1c4/ProfessionalAccounting?style=flat-square)](https://coveralls.io/github/b1f6c1c4/ProfessionalAccounting)
 
 ## 简介
 

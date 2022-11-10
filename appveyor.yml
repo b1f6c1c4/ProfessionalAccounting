@@ -30,11 +30,14 @@ environment:
   DOCKER_USER: b1f6c1c4
   DOCKER_PASS:
     secure: xh4rPu+6sbJUK4FlcoIUcrvOxrDhIhs2iLOtimcKtdd5aHi1M7hYXQtMg0JkluLe
+  COVERALLS_REPO_TOKEN:
+    secure: lV5WGMiwfTLSBoDzNNzc3XpvvfjNO6oqjNDk6ccQugihg425h/NAvh6NVGHJgHjm
 
 services:
   - mongodb
 
 install:
+  - dotnet tool install coveralls.net --tool-path tools
   - choco install --no-progress sed archiver nodejs
   - arc archive nginx/archive.tar.xz .
   - cd nginx && npm ci
@@ -62,7 +65,8 @@ build_script:
   - msbuild /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" AccountingServer.Test\AccountingServer.Test.csproj
 
 test_script:
-  - dotnet test AccountingServer.Test\bin\Release\net6.0\AccountingServer.Test.dll
+  - dotnet test /p:AltCover=true /p:AltCoverAssemblyExcludeFilter="xunit|System.Linq.Async|AltCover.Monitor"
+  - ./tools/csmacnz.Coveralls --opencover -i AccountingServer.Test/coverage.xml
 
 artifacts:
   - path: 'nginx\dist'

@@ -22,6 +22,7 @@ ipch
 *~
 
 /packages/
+/tools/
 /AccountingServer.BLL/Parsing/Query.tokens
 /AccountingServer.BLL/Parsing/QueryLexer.cs
 /AccountingServer.BLL/Parsing/QueryLexer.tokens
