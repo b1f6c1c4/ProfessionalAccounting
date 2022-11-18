@@ -89,6 +89,13 @@ internal class Coupling : PluginBase
                     spendEntries.Add(a, (new(), new(), new()));
                 spendEntries[a].Item3.Add(couple);
             }
+            else if (configCouple.IsExtraCash(couple.Creditor) && configCouple.IsNonExtraCash(couple.Debitor)) // U1&2 cash+ -> U1&2 non-cash+
+            {
+                var a = configCouple.NameOf(couple.Creditor);
+                if (!spendEntries.ContainsKey(a))
+                    spendEntries.Add(a, (new(), new(), new()));
+                spendEntries[a].Item2.Add(couple);
+            }
             else if (configCouple.User == couple.Creditor.User ||
                      configCouple.User == couple.Debitor.User) // otherwise
                 errEntries.Add(couple);
@@ -145,10 +152,10 @@ internal class Coupling : PluginBase
 
     private static IAsyncEnumerable<Couple> GetCouples(Session session, string user, DateFilter rng)
         => session.Accountant
-            .SelectVouchersAsync(Parsing.VoucherQuery($"{user.AsUser()} T3998 {rng.AsDateRange()}", session.Client))
-            .SelectMany(static v => Decouple(v).ToAsyncEnumerable());
+            .SelectVouchersAsync(Parsing.VoucherQuery($"{{{user.AsUser()} {rng.AsDateRange()}}}-{{U T3998}}", session.Client))
+            .SelectMany(v => Decouple(v, user).ToAsyncEnumerable());
 
-    private static IEnumerable<Couple> Decouple(Voucher voucher)
+    private static IEnumerable<Couple> Decouple(Voucher voucher, string primaryUser)
     {
         foreach (var grpC in voucher.Details.GroupBy(static d => d.Currency))
         {
@@ -178,21 +185,62 @@ internal class Coupling : PluginBase
                         $"Error during Decoupling Voucher ^{voucher.ID}^ {grpU.Key.AsUser()} @{grpC.Key}", e);
                 }
 
+                if (grpU.Key == primaryUser)
+                {
+                    // my cash sources
+                    var primaryCredits = grpU.Sum(static d => Math.Min(0D, d.Fund!.Value));
+                    var primaryCreditRatio = 1 - t3998 / primaryCredits;
+                    var primaryCreditors = grpU.Where(static d =>
+                        d.Title != 3998 &&
+                        !(d.Title == 6603 && d.SubTitle == null) &&
+                        !d.Fund!.Value.IsNonNegative());
+                    // my spent destinations
+                    var primaryDebits = grpU.Sum(static d => Math.Max(0D, d.Fund!.Value));
+                    var primaryDebitRatio = 1 - t3998 / primaryDebits;
+                    var primaryDebitors = grpU.Where(static d =>
+                        d.Title != 3998 &&
+                        !(d.Title == 6603 && d.SubTitle == null) &&
+                        !d.Fund!.Value.IsNonPositive()).ToList();
+
+                    if (!(primaryCredits + primaryDebits).IsZero())
+                        throw new ApplicationException(
+                            $"Unbalanced Voucher ^{voucher.ID}^ @{grpC.Key}, run chk 1 first");
+
+                    if (primaryCredits.IsZero())
+                        continue;
+
+                    foreach (var c in primaryCreditors) // all my cash sources
+                    foreach (var d in primaryDebitors) // all my spent destinations
+                        yield return new()
+                            {
+                                Voucher = voucher,
+                                Creditor = c,
+                                Debitor = d,
+                                Currency = grpC.Key,
+                                Fund = -d.Fund!.Value * primaryDebitRatio
+                                    * c.Fund!.Value * primaryCreditRatio / primaryDebits,
+                            };
+                }
+
                 if (t3998.IsZero())
                     continue;
 
-                if (t3998 > 0)
+                if (t3998 > 0) // this user sent cash to other users
                 {
-                    totalCredits += -t3998;
-                    ratio.Add(grpU.Key, t3998 / grpU.Sum(static d => Math.Max(0D, d.Fund!.Value)));
+                    totalCredits += -t3998; // amount of cash sent
+                    var userDebits = grpU.Sum(static d => Math.Max(0D, d.Fund!.Value));
+                    ratio.Add(grpU.Key, t3998 / userDebits); // proportion of cash sent among cash used
+                    // note all cash sources for late use
                     creditors.AddRange(grpU.Where(static d =>
                         !(d.Title == 6603 && d.SubTitle == null) &&
                         !d.Fund!.Value.IsNonNegative()));
                 }
-                else
+                else // this user received cash from other users
                 {
-                    totalDebits += -t3998;
-                    ratio.Add(grpU.Key, t3998 / grpU.Sum(static d => Math.Min(0D, d.Fund!.Value)));
+                    totalDebits += -t3998; // amount of cash received
+                    var userCredits = grpU.Sum(static d => Math.Min(0D, d.Fund!.Value));
+                    ratio.Add(grpU.Key, t3998 / userCredits); // proportion of cash received among money spent
+                    // note all spent destinations for late use
                     debitors.AddRange(grpU.Where(static d =>
                         !(d.Title == 6603 && d.SubTitle == null) &&
                         !d.Fund!.Value.IsNonPositive()));
@@ -206,14 +254,17 @@ internal class Coupling : PluginBase
             if (totalCredits.IsZero())
                 continue;
 
-            foreach (var c in creditors)
-            foreach (var d in debitors)
+            foreach (var c in creditors) // all cash sources
+            foreach (var d in debitors) // all spent destinations
                 yield return new()
                     {
                         Voucher = voucher,
                         Creditor = c,
                         Debitor = d,
                         Currency = grpC.Key,
+                        // not all cash of c.User are for others, so {*= ratio[c.User]}
+                        // not all spent of d.User are from others, so {*= ratio[d.User]}
+                        // this destination ows {d.Fund / totalDebits} percent of total money transferred
                         Fund = -d.Fund!.Value * ratio[d.User]
                             * c.Fund!.Value * ratio[c.User] / totalDebits,
                     };

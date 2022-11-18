@@ -31,31 +31,52 @@ public abstract class Cash
 {
     [XmlElement("Cash")] public List<CashAccount> CashAccounts;
 
+    [XmlElement("ExtraCash")] public List<CashAccount> ExtraCashAccounts;
+
     [XmlIgnore]
     private List<IQueryCompounded<IDetailQueryAtom>> m_CashQuery;
+
+    private List<IQueryCompounded<IDetailQueryAtom>> CashQuery
+    {
+        get
+        {
+            m_CashQuery ??= CashAccounts.Select(sa
+                => ParsingF.PureDetailQuery(sa.Query, new() { User = User, Today = DateTime.UtcNow.Date })).ToList();
+            return m_CashQuery;
+        }
+    }
+
+    [XmlIgnore]
+    private List<IQueryCompounded<IDetailQueryAtom>> m_ExtraCashQuery;
+
+    private List<IQueryCompounded<IDetailQueryAtom>> ExtraCashQuery
+    {
+        get
+        {
+            m_ExtraCashQuery ??= ExtraCashAccounts.Select(sa
+                => ParsingF.PureDetailQuery(sa.Query, new() { User = User, Today = DateTime.UtcNow.Date })).ToList();
+            return m_ExtraCashQuery;
+        }
+    }
 
     [XmlAttribute("user")]
     public string User { get; set; }
 
     public bool IsCash(VoucherDetail detail)
-    {
-        m_CashQuery ??= CashAccounts.Select(sa
-            => ParsingF.PureDetailQuery(sa.Query, new() { User = User, Today = DateTime.UtcNow.Date })).ToList();
-        return detail.User == User && m_CashQuery.Any(detail.IsMatch);
-    }
+        => detail.User == User && CashQuery.Any(detail.IsMatch);
+
+    public bool IsExtraCash(VoucherDetail detail)
+        => detail.User == User && (CashQuery.Any(detail.IsMatch) || ExtraCashQuery.Any(detail.IsMatch));
 
     public bool IsNonCash(VoucherDetail detail)
-    {
-        m_CashQuery ??= CashAccounts.Select(sa
-            => ParsingF.PureDetailQuery(sa.Query, new() { User = User, Today = DateTime.UtcNow.Date })).ToList();
-        return detail.User == User && !m_CashQuery.Any(detail.IsMatch);
-    }
+        => detail.User == User && !CashQuery.Any(detail.IsMatch);
+
+    public bool IsNonExtraCash(VoucherDetail detail)
+        => detail.User == User && !(CashQuery.Any(detail.IsMatch) || ExtraCashQuery.Any(detail.IsMatch));
 
     public string NameOf(VoucherDetail detail)
     {
-        m_CashQuery ??= CashAccounts.Select(sa
-            => ParsingF.PureDetailQuery(sa.Query, new() { User = User, Today = DateTime.UtcNow.Date })).ToList();
-        var id = m_CashQuery.FindIndex(detail.IsMatch);
+        var id = CashQuery.FindIndex(detail.IsMatch);
         return CashAccount.NameOf(detail, id < 0 ? null : CashAccounts[id]);
     }
 }

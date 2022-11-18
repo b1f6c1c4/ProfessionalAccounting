@@ -8,6 +8,10 @@
     <Cash>T1121</Cash>
     <Cash>T2001</Cash>
     <Cash>T2201</Cash>
+    <ExtraCash>T1123</ExtraCash>
+    <ExtraCash>T1221</ExtraCash>
+    <ExtraCash>T2202</ExtraCash>
+    <ExtraCash>T224100</ExtraCash>
     <Of user="b1">
       <Cash>T1001</Cash>
       <Cash>T1002</Cash>
