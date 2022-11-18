@@ -66,7 +66,7 @@ build_script:
 
 test_script:
   - dotnet test /p:AltCover=true /p:AltCoverAssemblyExcludeFilter="xunit|System.Linq.Async|AltCover.Monitor" /p:AltCoverFileFilter="Microsoft\.NET\.Test\.Sdk\.Program\.cs" & exit 0
-  - .\tools\csmacnz.Coveralls --opencover -i AccountingServer.Test/coverage.xml --useRelativePaths
+  - .\tools\csmacnz.Coveralls --opencover -i AccountingServer.Test/coverage.xml --useRelativePaths & exit 0
 
 artifacts:
   - path: 'nginx\dist'
