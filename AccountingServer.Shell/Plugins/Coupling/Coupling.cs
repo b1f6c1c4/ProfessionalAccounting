@@ -46,102 +46,89 @@ internal class Coupling : PluginBase
             yield return ret;
     }
 
-    private static async IAsyncEnumerable<string> AnalyzeCouple(Session session, ConfigCouple configCouple,
-        DateFilter rng, IQueryCompounded<IDetailQueryAtom> aux)
+    private static async IAsyncEnumerable<string> ShowEntries(Session session,
+        SortedDictionary<string, List<Couple>> dic, Func<string, string> func, bool hideDetail = false)
     {
-        var spendEntries = new SortedDictionary<string, (List<Couple>, List<Couple>, List<Couple>)>();
-        var gatherEntries = new SortedDictionary<string, List<Couple>>();
-        var errEntries = new List<Couple>();
-        await foreach (var couple in GetCouples(session, configCouple.User, rng))
-        {
-            if (aux != null && !couple.Creditor.IsMatch(aux) && !couple.Debitor.IsMatch(aux))
-                continue;
-
-            var lc = configCouple.Liabilities.SingleOrDefault(l => l.User == couple.Creditor.User);
-            var cc = lc?.IsCash(couple.Creditor) ?? false;
-            var ld = configCouple.Liabilities.SingleOrDefault(l => l.User == couple.Debitor.User);
-            var cd = ld?.IsCash(couple.Debitor) ?? false;
-            if (cc && configCouple.IsCash(couple.Debitor)) // U1 cash -> U1&2 cash
-            {
-                var a = couple.Creditor.User.AsUser();
-                if (!gatherEntries.ContainsKey(a))
-                    gatherEntries.Add(a, new());
-                gatherEntries[a].Add(couple);
-            }
-            else if (cc && configCouple.IsNonCash(couple.Debitor)) // U1 cash -> U1&2 non-cash
-            {
-                var a = lc.NameOf(couple.Creditor);
-                if (!spendEntries.ContainsKey(a))
-                    spendEntries.Add(a, (new(), new(), new()));
-                spendEntries[a].Item1.Add(couple);
-            }
-            else if (configCouple.IsCash(couple.Creditor) && cd) // U1&2 cash -> U1 cash
-            {
-                var a = ld.NameOf(couple.Debitor);
-                if (!spendEntries.ContainsKey(a))
-                    spendEntries.Add(a, (new(), new(), new()));
-                spendEntries[a].Item2.Add(couple);
-            }
-            else if (configCouple.IsNonCash(couple.Creditor) && cd) // U1&2 non-cash -> U1 cash
-            {
-                var a = ld.NameOf(couple.Debitor);
-                if (!spendEntries.ContainsKey(a))
-                    spendEntries.Add(a, (new(), new(), new()));
-                spendEntries[a].Item3.Add(couple);
-            }
-            else if (configCouple.IsExtraCash(couple.Creditor) && configCouple.IsNonExtraCash(couple.Debitor)) // U1&2 cash+ -> U1&2 non-cash+
-            {
-                var a = configCouple.NameOf(couple.Creditor);
-                if (!spendEntries.ContainsKey(a))
-                    spendEntries.Add(a, (new(), new(), new()));
-                spendEntries[a].Item2.Add(couple);
-            }
-            else if (configCouple.User == couple.Creditor.User ||
-                     configCouple.User == couple.Debitor.User) // otherwise
-                errEntries.Add(couple);
-        }
-
-        foreach (var (a, lst) in gatherEntries)
+        foreach (var (a, lst) in dic)
         {
             var fund = await lst.ToAsyncEnumerable().SumAwaitAsync(async couple => couple.Fund *
                 await session.Accountant.Query(couple.Voucher.Date, couple.Currency, BaseCurrency.Now));
-            yield return
-                $"// {configCouple.User.AsUser()} *** cash by *** {a} {fund.AsCurrency(BaseCurrency.Now)}\n";
-            foreach (var couple in lst)
-                yield return $"{couple}\n";
+            yield return $"// {func(a)} {fund.AsCurrency(BaseCurrency.Now)}\n";
+            if (!hideDetail || string.IsNullOrEmpty(a))
+                foreach (var couple in lst)
+                    yield return $"{couple}\n";
         }
+    }
 
-        foreach (var (a, (paidBy, paidInCashTo, paidTo)) in spendEntries)
+    private static async IAsyncEnumerable<string> AnalyzeCouple(Session session, ConfigCouple configCouple,
+        DateFilter rng, IQueryCompounded<IDetailQueryAtom> aux)
+    {
+        var gatherEntries = new SortedDictionary<string, List<Couple>>();
+        var scatterEntries = new SortedDictionary<string, List<Couple>>();
+        var reimEntries = new SortedDictionary<string, List<Couple>>();
+        var misaEntries = new SortedDictionary<string, List<Couple>>();
+        var spendEntries = new SortedDictionary<string, List<Couple>>();
+        var errEntries = new List<Couple>();
+
+        void Add(SortedDictionary<string, List<Couple>> dic, Couple couple, string key)
         {
-            var fund1 = await paidBy.ToAsyncEnumerable().SumAwaitAsync(async couple => couple.Fund *
-                await session.Accountant.Query(couple.Voucher.Date, couple.Currency, BaseCurrency.Now));
-            var fund2 = await paidInCashTo.ToAsyncEnumerable().SumAwaitAsync(async couple => couple.Fund *
-                await session.Accountant.Query(couple.Voucher.Date, couple.Currency, BaseCurrency.Now));
-            var fund3 = await paidTo.ToAsyncEnumerable().SumAwaitAsync(async couple => couple.Fund *
-                await session.Accountant.Query(couple.Voucher.Date, couple.Currency, BaseCurrency.Now));
-            if (paidInCashTo.Count != 0)
-            {
-                yield return
-                    $"// {configCouple.User.AsUser()} *** cash to *** {a} {fund2.AsCurrency(BaseCurrency.Now)}\n";
-                foreach (var couple in paidInCashTo)
-                    yield return $"{couple}\n";
-            }
-
-            if (paidTo.Count != 0)
-            {
-                yield return
-                    $"// {configCouple.User.AsUser()} +++ paid to +++ {a} {fund3.AsCurrency(BaseCurrency.Now)}\n";
-                if (aux != null)
-                    foreach (var couple in paidTo)
-                        yield return $"{couple}\n";
-            }
-
-            yield return
-                $"// {configCouple.User.AsUser()} --- paid by --- {a} {fund1.AsCurrency(BaseCurrency.Now)}\n";
-            if (aux != null)
-                foreach (var couple in paidBy)
-                    yield return $"{couple}\n";
+            if (!dic.ContainsKey(key))
+                dic.Add(key, new());
+            dic[key].Add(couple);
         }
+
+        await foreach (var couple in GetCouples(session, configCouple.User, rng)
+                           .Where(couple => aux == null || couple.Creditor.IsMatch(aux) || couple.Debitor.IsMatch(aux)))
+        {
+            var (typeC, nameC) = configCouple.Parse(couple.Creditor);
+            var (typeD, nameD) = configCouple.Parse(couple.Debitor);
+            switch (typeC, typeD)
+            {
+                // individual give cash to couple's account
+                case (CashCategory.Cash, CashCategory.Cash | CashCategory.IsCouple):
+                    Add(gatherEntries, couple, nameC);
+                    break;
+                // couple give cash to individual's account
+                case (CashCategory.Cash | CashCategory.IsCouple, CashCategory.Cash):
+                    Add(scatterEntries, couple, nameD);
+                    break;
+                // couple's revenue goes to to individual's account
+                case (CashCategory.ExtraCash | CashCategory.IsCouple, CashCategory.Cash):
+                case (CashCategory.NonCash | CashCategory.IsCouple, CashCategory.Cash):
+                    Add(reimEntries, couple, nameD);
+                    break;
+                // individuals' spending from couple's account
+                case (CashCategory.Cash | CashCategory.IsCouple, CashCategory.ExtraCash):
+                case (CashCategory.Cash | CashCategory.IsCouple, CashCategory.NonCash):
+                    Add(misaEntries, couple, nameC);
+                    break;
+                // couple spending from individuals' account
+                case (CashCategory.Cash, CashCategory.ExtraCash | CashCategory.IsCouple):
+                case (CashCategory.Cash, CashCategory.NonCash | CashCategory.IsCouple):
+                    Add(spendEntries, couple, nameC);
+                    break;
+                // couple spending from couple's account
+                case (CashCategory.Cash | CashCategory.IsCouple, CashCategory.NonCash | CashCategory.IsCouple):
+                case (CashCategory.ExtraCash | CashCategory.IsCouple, CashCategory.NonCash | CashCategory.IsCouple):
+                    Add(spendEntries, couple, nameC);
+                    break;
+                default:
+                    errEntries.Add(couple);
+                    break;
+            }
+        }
+
+        yield return $"/* {configCouple.User.AsUser()} Account Summary */\n";
+        await foreach (var s in ShowEntries(session, gatherEntries, static a => $"[GATHER] from {a}"))
+            yield return s;
+        await foreach (var s in ShowEntries(session, scatterEntries, static a => $"[SCATTER] to {a}"))
+            yield return s;
+        await foreach (var s in ShowEntries(session, reimEntries, static a => $"[REIM] to {a}"))
+            yield return s;
+        await foreach (var s in ShowEntries(session, misaEntries, static a => $"[MISA] by {a}"))
+            yield return s;
+        await foreach (var s in ShowEntries(session, spendEntries, static a => $"[SPEND] using {a}", aux == null))
+            yield return s;
 
         if (errEntries.Count != 0)
             yield return $"// ignored {errEntries.Count} items\n";
@@ -152,7 +139,7 @@ internal class Coupling : PluginBase
 
     private static IAsyncEnumerable<Couple> GetCouples(Session session, string user, DateFilter rng)
         => session.Accountant
-            .SelectVouchersAsync(Parsing.VoucherQuery($"{{{user.AsUser()} {rng.AsDateRange()}}}-{{U T3998}}", session.Client))
+            .SelectVouchersAsync(Parsing.VoucherQuery($"{user.AsUser()} {rng.AsDateRange()}", session.Client))
             .SelectMany(v => Decouple(v, user).ToAsyncEnumerable());
 
     private static IEnumerable<Couple> Decouple(Voucher voucher, string primaryUser)
@@ -206,20 +193,18 @@ internal class Coupling : PluginBase
                         throw new ApplicationException(
                             $"Unbalanced Voucher ^{voucher.ID}^ @{grpC.Key}, run chk 1 first");
 
-                    if (primaryCredits.IsZero())
-                        continue;
-
-                    foreach (var c in primaryCreditors) // all my cash sources
-                    foreach (var d in primaryDebitors) // all my spent destinations
-                        yield return new()
-                            {
-                                Voucher = voucher,
-                                Creditor = c,
-                                Debitor = d,
-                                Currency = grpC.Key,
-                                Fund = -d.Fund!.Value * primaryDebitRatio
-                                    * c.Fund!.Value * primaryCreditRatio / primaryDebits,
-                            };
+                    if (!primaryCredits.IsZero())
+                        foreach (var c in primaryCreditors) // all my cash sources
+                        foreach (var d in primaryDebitors) // all my spent destinations
+                            yield return new()
+                                {
+                                    Voucher = voucher,
+                                    Creditor = c,
+                                    Debitor = d,
+                                    Currency = grpC.Key,
+                                    Fund = -d.Fund!.Value * primaryDebitRatio
+                                        * c.Fund!.Value * primaryCreditRatio / primaryDebits,
+                                };
                 }
 
                 if (t3998.IsZero())

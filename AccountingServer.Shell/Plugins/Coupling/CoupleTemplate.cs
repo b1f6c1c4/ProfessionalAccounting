@@ -27,6 +27,15 @@ using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.Shell.Plugins.Coupling;
 
+[Flags]
+public enum CashCategory
+{
+    Cash = 0x1,
+    ExtraCash = 0x2,
+    NonCash = 0x3,
+    IsCouple = 0x40000000,
+}
+
 public abstract class Cash
 {
     [XmlElement("Cash")] public List<CashAccount> CashAccounts;
@@ -62,22 +71,20 @@ public abstract class Cash
     [XmlAttribute("user")]
     public string User { get; set; }
 
-    public bool IsCash(VoucherDetail detail)
-        => detail.User == User && CashQuery.Any(detail.IsMatch);
-
-    public bool IsExtraCash(VoucherDetail detail)
-        => detail.User == User && (CashQuery.Any(detail.IsMatch) || ExtraCashQuery.Any(detail.IsMatch));
-
-    public bool IsNonCash(VoucherDetail detail)
-        => detail.User == User && !CashQuery.Any(detail.IsMatch);
-
-    public bool IsNonExtraCash(VoucherDetail detail)
-        => detail.User == User && !(CashQuery.Any(detail.IsMatch) || ExtraCashQuery.Any(detail.IsMatch));
-
-    public string NameOf(VoucherDetail detail)
+    public (CashCategory, string) Parse(VoucherDetail detail)
     {
+        if (detail.User != User)
+            throw new ApplicationException("Inapplicable user");
+
         var id = CashQuery.FindIndex(detail.IsMatch);
-        return CashAccount.NameOf(detail, id < 0 ? null : CashAccounts[id]);
+        if (id >= 0)
+            return (CashCategory.Cash, CashAccount.NameOf(detail, CashAccounts[id]));
+
+        id = ExtraCashQuery.FindIndex(detail.IsMatch);
+        if (id >= 0)
+            return (CashCategory.ExtraCash, CashAccount.NameOf(detail, ExtraCashAccounts[id]));
+
+        return (CashCategory.NonCash, null);
     }
 }
 
@@ -94,6 +101,15 @@ public class ConfigCouple : Cash
 {
     [XmlElement("Of")]
     public List<Liability> Liabilities;
+
+    public new (CashCategory, string) Parse(VoucherDetail detail)
+    {
+        if (User != detail.User)
+            return Liabilities.Single(l => l.User == detail.User).Parse(detail);
+
+        var (type, name) = base.Parse(detail);
+        return (type | CashCategory.IsCouple, name);
+    }
 }
 
 [Serializable]
