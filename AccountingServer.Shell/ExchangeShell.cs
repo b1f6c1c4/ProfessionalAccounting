@@ -85,7 +85,9 @@ internal class ExchangeShell : IShellComponent
     public void EnableTimer(DbSession db)
     {
         m_TimerSession = db;
+ #pragma warning disable CS4014
         ImmediateExchange();
+ #pragma warning restore CS4014
         m_Timer.Enabled = true;
     }
 
@@ -118,7 +120,9 @@ internal class ExchangeShell : IShellComponent
 
     // ReSharper disable once AsyncVoidMethod
     private void OnTimedEvent(object source, ElapsedEventArgs e)
+ #pragma warning disable CS4014
         => ImmediateExchange();
+ #pragma warning restore CS4014
 
     private async Task ImmediateExchange()
     {

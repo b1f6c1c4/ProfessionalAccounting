@@ -265,10 +265,10 @@ along with ProfessionalAccounting.  If not, see
   &lt;Assembly Path="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5\mscorlib.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Users\b1f6c1c4\Documents\GitHub\ProfessionalAccounting\packages\MongoDB.Driver.2.2.4\lib\net45\MongoDB.Driver.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
-	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=AccountingServer_002EBLL_003B_002A_003BAccountingServer_002EBLL_002EParsing_002EQueryLexer_003B_002A/@EntryIndexedValue">True</s:Boolean>
-	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=AccountingServer_002EBLL_003B_002A_003BAccountingServer_002EBLL_002EParsing_002EQueryParser_003B_002A/@EntryIndexedValue">True</s:Boolean>
-	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=AccountingServer_002EBLL_003B_002A_003BAccountingServer_002EBLL_002EParsing_002ESubtotalLexer_003B_002A/@EntryIndexedValue">True</s:Boolean>
-	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=AccountingServer_002EBLL_003B_002A_003BAccountingServer_002EBLL_002EParsing_002ESubtotalParser_003B_002A/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=AccountingServer_002EBLL_003B_002A_003BAccountingServer_002EBLL_002EParsing_002EQueryLexer_003B_002A/@EntryIndexedValue">False</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=AccountingServer_002EBLL_003B_002A_003BAccountingServer_002EBLL_002EParsing_002EQueryParser_003B_002A/@EntryIndexedValue">False</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=AccountingServer_002EBLL_003B_002A_003BAccountingServer_002EBLL_002EParsing_002ESubtotalLexer_003B_002A/@EntryIndexedValue">False</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=AccountingServer_002EBLL_003B_002A_003BAccountingServer_002EBLL_002EParsing_002ESubtotalParser_003B_002A/@EntryIndexedValue">False</s:Boolean>
 	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=AccountingServer_002EQueryGeneration_003B_002A_003B_002A_003B_002A/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/Environment/Filtering/IncludeCoverageFilters/=AccountingServer_002E_002A_003B_002A_003B_002A_003B_002A/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/Environment/Highlighting/HighlightingEnabled/@EntryValue">False</s:Boolean>

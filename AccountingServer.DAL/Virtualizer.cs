@@ -227,6 +227,7 @@ public class Virtualizer : IDbAdapter, IAsyncDisposable
 
             return Nullable.Equals(x.Date, y.Date) && x.Title == y.Title && x.SubTitle == y.SubTitle &&
                 x.Content == y.Content && x.Remark == y.Remark && x.Currency == y.Currency && x.User == y.User &&
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
                 x.Value == y.Value;
         }
 

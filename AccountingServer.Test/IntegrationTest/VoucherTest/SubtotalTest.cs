@@ -318,6 +318,7 @@ public class SubtotalTest : IAsyncDisposable
         => Assert.Equal(
             value,
             m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query, m_Client)).ToEnumerable()
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
                 .SingleOrDefault(b => b.Value == v)?.Fund);
 
     [Theory]

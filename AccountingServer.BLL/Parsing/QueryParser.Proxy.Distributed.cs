@@ -89,13 +89,13 @@ internal partial class QueryParser
             => Op switch
                 {
                     null => OperatorType.None,
-                        { Text: var x } when distributedQ() == null => x switch
+                    { Text: var x } when distributedQ() == null => x switch
                         {
                             "+" => OperatorType.Identity,
                             "-" => OperatorType.Complement,
                             _ => throw new MemberAccessException("表达式错误"),
                         },
-                        { Text: var x } => x switch
+                    { Text: var x } => x switch
                         {
                             "+" => OperatorType.Union,
                             "-" => OperatorType.Subtract,

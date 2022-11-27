@@ -37,8 +37,13 @@ public static class HttpUtil
             throw new HttpException(413);
 
         var buff = new byte[len];
-        if (len > 0)
-            request.RequestStream.Read(buff, 0, len);
+        var offset = 0;
+        while (len > 0)
+        {
+            var r = request.RequestStream.Read(buff, offset, len);
+            len -= r;
+            offset += r;
+        }
 
         return Encoding.UTF8.GetString(buff);
     }
