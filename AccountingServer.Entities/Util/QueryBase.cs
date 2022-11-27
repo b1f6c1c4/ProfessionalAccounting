@@ -30,6 +30,8 @@ public sealed class DetailQueryUnconstrained : IDetailQueryAtom
 
     public VoucherDetail Filter { get; } = new();
 
+    public bool IsFundBidirectional => false;
+
     public int Dir => 0;
 
     public string ContentPrefix => null;

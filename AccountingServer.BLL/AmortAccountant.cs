@@ -292,6 +292,8 @@ internal class AmortAccountant : DistributedAccountant
 
         public VoucherDetail Filter { get; }
 
+        public bool IsFundBidirectional => false;
+
         public int Dir => 0;
 
         public string ContentPrefix => null;

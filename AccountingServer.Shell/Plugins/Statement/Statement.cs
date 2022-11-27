@@ -261,6 +261,8 @@ internal class Statement : PluginBase
 
         public VoucherDetail Filter { get; }
 
+        public bool IsFundBidirectional => false;
+
         public int Dir => 0;
 
         public string ContentPrefix => null;

@@ -105,6 +105,16 @@ internal partial class QueryParser
         }
 
         /// <inheritdoc />
+        public bool IsFundBidirectional
+            => Floating()?.GetText()?[1] switch
+                {
+                    null => false,
+                    '+' => false,
+                    '-' => false,
+                    _ => true,
+                };
+
+        /// <inheritdoc />
         public int Dir
             => Direction()?.GetText() switch
                 {

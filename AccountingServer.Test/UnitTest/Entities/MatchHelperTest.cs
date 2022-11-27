@@ -159,15 +159,26 @@ public class MatchHelperTest
             MatchHelper.IsMatch(new() { SubTitle = value }, new VoucherDetail { SubTitle = filter }));
 
     [Theory]
-    [InlineData(true, null, null)]
-    [InlineData(true, 123.45, null)]
-    [InlineData(false, null, 123.45)]
-    [InlineData(false, 123.45 + 2 * VoucherDetail.Tolerance, 123.45)]
-    [InlineData(true, 123.45 + 0.5 * VoucherDetail.Tolerance, 123.45)]
-    public void DetailMatchTestFund(bool expected, double? value, double? filter)
-        => Assert.Equal(
-            expected,
-            MatchHelper.IsMatch(new() { Fund = value }, new VoucherDetail { Fund = filter }));
+    [InlineData(true, null, null, false)]
+    [InlineData(true, null, null, true)]
+    [InlineData(true, 123.45, null, false)]
+    [InlineData(true, 123.45, null, true)]
+    [InlineData(false, null, 123.45, false)]
+    [InlineData(false, null, 123.45, true)]
+    [InlineData(false, 123.45 + 2 * VoucherDetail.Tolerance, 123.45, false)]
+    [InlineData(false, 123.45 + 2 * VoucherDetail.Tolerance, 123.45, true)]
+    [InlineData(true, 123.45 + 0.5 * VoucherDetail.Tolerance, 123.45, false)]
+    [InlineData(true, 123.45 + 0.5 * VoucherDetail.Tolerance, 123.45, true)]
+    [InlineData(false, 123.45 + 2 * VoucherDetail.Tolerance, -123.45, false)]
+    [InlineData(false, 123.45 + 2 * VoucherDetail.Tolerance, -123.45, true)]
+    [InlineData(false, 123.45 + 0.5 * VoucherDetail.Tolerance, -123.45, false)]
+    [InlineData(true, 123.45 + 0.5 * VoucherDetail.Tolerance, -123.45, true)]
+    [InlineData(false, -123.45 + 2 * VoucherDetail.Tolerance, 123.45, false)]
+    [InlineData(false, -123.45 + 2 * VoucherDetail.Tolerance, 123.45, true)]
+    [InlineData(false, -123.45 + 0.5 * VoucherDetail.Tolerance, 123.45, false)]
+    [InlineData(true, -123.45 + 0.5 * VoucherDetail.Tolerance, 123.45, true)]
+    public void DetailMatchTestFund(bool expected, double? value, double? filter, bool isBi)
+        => Assert.Equal(expected, MatchHelper.IsMatch(new() { Fund = value }, new() { Fund = filter }, isBi: isBi));
 
     [Theory]
     [InlineData(true, null, null)]

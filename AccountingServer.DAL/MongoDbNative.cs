@@ -179,9 +179,15 @@ internal abstract class MongoDbNativeDetail<T> : MongoDbNativeVisitor<T, IDetail
                     var x => Builders<T>.Filter.Eq($"{p}remark", x),
                 });
         if (query.Filter?.Fund != null)
-            lst.Add(
-                Builders<T>.Filter.Gte($"{p}fund", query.Filter.Fund.Value - VoucherDetail.Tolerance) &
-                Builders<T>.Filter.Lte($"{p}fund", query.Filter.Fund.Value + VoucherDetail.Tolerance));
+        {
+            var f = Builders<T>.Filter.Gte($"{p}fund", query.Filter.Fund.Value - VoucherDetail.Tolerance) &
+                Builders<T>.Filter.Lte($"{p}fund", query.Filter.Fund.Value + VoucherDetail.Tolerance);
+            if (query.IsFundBidirectional)
+                f |= Builders<T>.Filter.Gte($"{p}fund", -query.Filter.Fund.Value - VoucherDetail.Tolerance) &
+                    Builders<T>.Filter.Lte($"{p}fund", -query.Filter.Fund.Value + VoucherDetail.Tolerance);
+            lst.Add(f);
+        }
+
         return And(lst);
     }
 

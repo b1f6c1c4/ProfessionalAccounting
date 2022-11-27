@@ -159,6 +159,11 @@ public interface IDetailQueryAtom : IQueryCompounded<IDetailQueryAtom>
     VoucherDetail Filter { get; }
 
     /// <summary>
+    ///     细目过滤器的金额是否为绝对值
+    /// </summary>
+    bool IsFundBidirectional { get; }
+
+    /// <summary>
     ///     借贷方向
     /// </summary>
     int Dir { get; }

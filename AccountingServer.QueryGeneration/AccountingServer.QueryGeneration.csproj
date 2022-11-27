@@ -17,7 +17,7 @@
         <PackageReference Include="Antlr4.CodeGenerator" Version="4.6.6">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="Antlr4.Runtime" Version="4.6.6"/>
+        <PackageReference Include="Antlr4.Runtime" Version="4.6.6" />
     </ItemGroup>
 
     <ItemGroup>
@@ -31,6 +31,11 @@
             <Listener>False</Listener>
             <Visitor>False</Visitor>
         </Antlr4>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Query.g4" />
+      <None Include="Subtotal.g4" />
     </ItemGroup>
 
     <PropertyGroup>
