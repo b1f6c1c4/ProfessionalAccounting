@@ -46,16 +46,25 @@ internal class Coupling : PluginBase
             yield return ret;
     }
 
-    private static async IAsyncEnumerable<string> ShowEntries(Session session,
-        SortedDictionary<string, List<Couple>> dic, Func<string, string> func, bool hideDetail = false)
+    private static async IAsyncEnumerable<string> ShowEntries(Session session, string verb, string prop,
+        SortedDictionary<string, List<Couple>> dic, bool hideDetail = false)
     {
-        foreach (var (a, lst) in dic)
+        var items = dic.Select(kvp =>
+                (Name: kvp.Key, Detail: kvp.Value, FundPromise:
+                    kvp.Value.ToAsyncEnumerable().SumAwaitAsync(async couple => couple.Fund *
+                        await session.Accountant.Query(couple.Voucher.Date, couple.Currency, BaseCurrency.Now))))
+            .ToList();
+        var total = await items.ToAsyncEnumerable().SumAwaitAsync(static tuple => tuple.FundPromise);
+        var str = $"Total [{verb.ToUpperInvariant()}]: {total.AsCurrency(BaseCurrency.Now)}";
+        yield return $"/**{new string('*', str.Length)}**/\n";
+        yield return $"/* {str} */\n";
+        yield return $"/**{new string('*', str.Length)}**/\n";
+        await foreach (var tuple in items.ToAsyncEnumerable())
         {
-            var fund = await lst.ToAsyncEnumerable().SumAwaitAsync(async couple => couple.Fund *
-                await session.Accountant.Query(couple.Voucher.Date, couple.Currency, BaseCurrency.Now));
-            yield return $"// {func(a)} {fund.AsCurrency(BaseCurrency.Now)}\n";
-            if (!hideDetail || string.IsNullOrEmpty(a))
-                foreach (var couple in lst)
+            var fund = await tuple.FundPromise;
+            yield return $"// {fund / total,5:#0.0%} [{verb.ToUpperInvariant()}] {prop} {tuple.Name,-15} {fund.AsCurrency(BaseCurrency.Now)}\n";
+            if (!hideDetail || string.IsNullOrEmpty(tuple.Name))
+                foreach (var couple in tuple.Detail)
                     yield return $"{couple}\n";
         }
     }
@@ -103,7 +112,7 @@ internal class Coupling : PluginBase
                 case (CashCategory.Cash | CashCategory.IsCouple, CashCategory.ExtraCash):
                 case (CashCategory.Cash | CashCategory.IsCouple, CashCategory.NonCash):
                     if (couple.Debitor.IsMatch(aux))
-                        Add(misaEntries, couple, nameD);
+                        Add(misaEntries, couple, couple.Debitor.User.AsUser());
                     break;
                 // couple spending from individuals' account
                 case (CashCategory.Cash, CashCategory.ExtraCash | CashCategory.IsCouple):
@@ -123,23 +132,23 @@ internal class Coupling : PluginBase
             }
         }
 
-        yield return $"/* {configCouple.User.AsUser()} Account Summary */\n";
-        await foreach (var s in ShowEntries(session, gatherEntries, static a => $"[GATHER] from {a}"))
+        yield return $"/* {configCouple.User.AsUser()} Account Summary during {rng.AsDateRange()} */\n";
+        await foreach (var s in ShowEntries(session, "gather", "from", gatherEntries))
             yield return s;
-        await foreach (var s in ShowEntries(session, scatterEntries, static a => $"[SCATTER] to {a}"))
+        await foreach (var s in ShowEntries(session, "scatter", "to", scatterEntries))
             yield return s;
-        await foreach (var s in ShowEntries(session, reimEntries, static a => $"[REIM] to {a}"))
+        await foreach (var s in ShowEntries(session, "reimburse", "against", reimEntries))
             yield return s;
-        await foreach (var s in ShowEntries(session, misaEntries, static a => $"[MISA] by {a}"))
+        await foreach (var s in ShowEntries(session, "misappropriation", "by", misaEntries))
             yield return s;
-        await foreach (var s in ShowEntries(session, spendEntries, static a => $"[SPEND] using {a}", aux == null))
+        await foreach (var s in ShowEntries(session, "spend", "using", spendEntries, aux == null))
             yield return s;
 
         if (errEntries.Count != 0)
             yield return $"// ignored {errEntries.Count} items\n";
         if (aux != null)
             foreach (var couple in errEntries)
-                yield return $"// ignored: {couple}\n";
+                yield return $"// {couple}\n";
     }
 
     private static IAsyncEnumerable<Couple> GetCouples(Session session, string user, DateFilter rng)
@@ -282,7 +291,7 @@ internal class Coupling : PluginBase
             if (Debitor.Remark != null)
                 d += $" {Debitor.Remark.Quotation('"')}";
             return
-                $"^{Voucher.ID}^ {Voucher.Date.AsDate()} {c.CPadRight(18)} -> {d.CPadRight(51)} @{Currency} {Fund.AsCurrency(Currency)}";
+                $"^{Voucher.ID}^ {Voucher.Date.AsDate()} {c.CPadRight(29)} -> {d.CPadRight(51)} @{Currency} {Fund.AsCurrency(Currency)}";
         }
     }
 }
