@@ -77,8 +77,7 @@ internal class Coupling : PluginBase
             dic[key].Add(couple);
         }
 
-        await foreach (var couple in GetCouples(session, configCouple.User, rng)
-                           .Where(couple => aux == null || couple.Creditor.IsMatch(aux) || couple.Debitor.IsMatch(aux)))
+        await foreach (var couple in GetCouples(session, configCouple.User, rng))
         {
             var (typeC, nameC) = configCouple.Parse(couple.Creditor);
             var (typeD, nameD) = configCouple.Parse(couple.Debitor);
@@ -86,31 +85,37 @@ internal class Coupling : PluginBase
             {
                 // individual give cash to couple's account
                 case (CashCategory.Cash, CashCategory.Cash | CashCategory.IsCouple):
-                    Add(gatherEntries, couple, nameC);
+                    if (couple.Creditor.IsMatch(aux))
+                        Add(gatherEntries, couple, nameC);
                     break;
                 // couple give cash to individual's account
                 case (CashCategory.Cash | CashCategory.IsCouple, CashCategory.Cash):
-                    Add(scatterEntries, couple, nameD);
+                    if (couple.Debitor.IsMatch(aux))
+                        Add(scatterEntries, couple, nameD);
                     break;
                 // couple's revenue goes to to individual's account
                 case (CashCategory.ExtraCash | CashCategory.IsCouple, CashCategory.Cash):
                 case (CashCategory.NonCash | CashCategory.IsCouple, CashCategory.Cash):
-                    Add(reimEntries, couple, nameD);
+                    if (couple.Debitor.IsMatch(aux))
+                        Add(reimEntries, couple, nameD);
                     break;
                 // individuals' spending from couple's account
                 case (CashCategory.Cash | CashCategory.IsCouple, CashCategory.ExtraCash):
                 case (CashCategory.Cash | CashCategory.IsCouple, CashCategory.NonCash):
-                    Add(misaEntries, couple, nameC);
+                    if (couple.Debitor.IsMatch(aux))
+                        Add(misaEntries, couple, nameD);
                     break;
                 // couple spending from individuals' account
                 case (CashCategory.Cash, CashCategory.ExtraCash | CashCategory.IsCouple):
                 case (CashCategory.Cash, CashCategory.NonCash | CashCategory.IsCouple):
-                    Add(spendEntries, couple, nameC);
+                    if (couple.Creditor.IsMatch(aux))
+                        Add(spendEntries, couple, nameC);
                     break;
                 // couple spending from couple's account
                 case (CashCategory.Cash | CashCategory.IsCouple, CashCategory.NonCash | CashCategory.IsCouple):
                 case (CashCategory.ExtraCash | CashCategory.IsCouple, CashCategory.NonCash | CashCategory.IsCouple):
-                    Add(spendEntries, couple, nameC);
+                    if (couple.Creditor.IsMatch(aux))
+                        Add(spendEntries, couple, nameC);
                     break;
                 default:
                     errEntries.Add(couple);
