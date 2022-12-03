@@ -14,7 +14,7 @@
 - 后端
     - 单体架构，业务逻辑使用`C# 10.0`编写
     - 数据库采用MongoDB
-    - 使用`.NET 6.0`平台编译
+    - 使用`.NET 7.0`平台编译
     - 使用nginx反向代理，支持TLSv1.3、HTTP/3
     - 使用docker部署
 - 前端
@@ -194,7 +194,7 @@ docker-compose up -d
 #### 在Linux上构建开发环境
 
 1. 请先安装以下工具：
-    - [.NET 6.0](https://dotnet.microsoft.com/download/dotnet/6.0)
+    - [.NET 7.0](https://dotnet.microsoft.com/download/dotnet/7.0)
     - [JetBrains Rider](https://www.jetbrains.com/rider/)
     - [Docker](https://www.docker.com/)
 1. 启动测试数据库：
@@ -208,7 +208,7 @@ docker-compose up -d
 #### 在Windows上构建开发环境
 
 1. 请先安装以下工具：
-    - [.NET 6.0](https://dotnet.microsoft.com/download/dotnet/6.0)
+    - [.NET 7.0](https://dotnet.microsoft.com/download/dotnet/7.0)
     - [Visual Studio](https://visualstudio.microsoft.com/)
     - [Mongo DB](https://www.mongodb.com/)
 1. 启动测试数据库：在`services.msc`中启动`MongoDB`服务。
