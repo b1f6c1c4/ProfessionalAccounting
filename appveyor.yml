@@ -83,8 +83,8 @@ before_deploy:
   - docker version
 
 deploy_script:
-  - docker build -t b1f6c1c4/accounting-frontend:latest ./nginx
-  - docker build -t b1f6c1c4/accounting-backend:latest ./AccountingServer/bin/Release/net7.0
+  - docker build --pull -t b1f6c1c4/accounting-frontend:latest ./nginx
+  - docker build --pull -t b1f6c1c4/accounting-backend:latest ./AccountingServer/bin/Release/net7.0
   - docker login -u %DOCKER_USER% -p %DOCKER_PASS%
   - docker push b1f6c1c4/accounting-frontend
   - docker push b1f6c1c4/accounting-backend
