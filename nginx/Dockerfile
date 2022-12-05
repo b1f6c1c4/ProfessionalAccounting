@@ -1,4 +1,4 @@
-FROM ranadeeppolavarapu/nginx-http3
+FROM patrikjuvonen/docker-nginx-http3
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY h3.nginx.conf /etc/nginx/conf.d/h3.nginx.conf
