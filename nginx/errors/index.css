@@ -1,0 +1,48 @@
+/*
+  This file is dedicated to public domain.
+*/
+
+* {
+  padding: 0;
+  margin: 0;
+}
+p {
+  margin: 0.3em 0;
+}
+body {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
+}
+#wrapper {
+  text-align: center;
+}
+#sign {
+  position: relative;
+  width: 175px;
+  height: 175px;
+  margin: 0 auto 54px auto;
+}
+#bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform: rotate(45deg);
+  background-color: #ecb829;
+  border: 7px solid #18140e;
+  z-index: -1;
+  border-radius: 4px;
+}
+#txt {
+  position: absolute;
+  transform: translate(-50%,-50%);
+  left: 50%;
+  top: 50%;
+  font-size: 100px;
+}
+h2 {
+  text-transform: uppercase;
+  margin: 0 0 0.3em 0;
+}

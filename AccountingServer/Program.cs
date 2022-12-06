@@ -94,7 +94,7 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
             case "/emptyVoucher":
                 {
                     var response = GenerateHttpResponse(facade.EmptyVoucher(session), "text/plain; charset=utf-8");
-                    response.Header["Cache-Control"] = "public, max-age=30";
+                    response.Header["Cache-Control"] = "public, max-age=86400";
                     response.Header["Vary"] = "X-Serializer, X-Limit";
                     return response;
                 }
