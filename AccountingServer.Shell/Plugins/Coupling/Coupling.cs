@@ -62,7 +62,8 @@ internal class Coupling : PluginBase
         await foreach (var tuple in items.ToAsyncEnumerable())
         {
             var fund = await tuple.FundPromise;
-            yield return $"// {fund / total,5:#0.0%} [{verb.ToUpperInvariant()}] {prop} {tuple.Name,-15} {fund.AsCurrency(BaseCurrency.Now)}\n";
+            yield return
+                $"// {fund / total,5:#0.0%} [{verb.ToUpperInvariant()}] {prop} {tuple.Name,-15} {fund.AsCurrency(BaseCurrency.Now)}\n";
             if (!hideDetail || string.IsNullOrEmpty(tuple.Name))
                 foreach (var couple in tuple.Detail)
                     yield return $"{couple}\n";
@@ -158,6 +159,7 @@ internal class Coupling : PluginBase
 
     private static IEnumerable<Couple> Decouple(Voucher voucher, string primaryUser)
     {
+        var lst = new Dictionary<Couple, double>(new CoupleComparer());
         foreach (var grpC in voucher.Details.GroupBy(static d => d.Currency))
         {
             var ratio = new Dictionary<string, double>();
@@ -255,18 +257,28 @@ internal class Coupling : PluginBase
 
             foreach (var c in creditors) // all cash sources
             foreach (var d in debitors) // all spent destinations
-                yield return new()
+            {
+                var cpl = new Couple
                     {
-                        Voucher = voucher,
-                        Creditor = c,
-                        Debitor = d,
-                        Currency = grpC.Key,
-                        // not all cash of c.User are for others, so {*= ratio[c.User]}
-                        // not all spent of d.User are from others, so {*= ratio[d.User]}
-                        // this destination ows {d.Fund / totalDebits} percent of total money transferred
-                        Fund = -d.Fund!.Value * ratio[d.User]
-                            * c.Fund!.Value * ratio[c.User] / totalDebits,
+                        Voucher = voucher, Creditor = c, Debitor = d, Currency = grpC.Key,
                     };
+                // not all cash of c.User are for others, so {*= ratio[c.User]}
+                // not all spent of d.User are from others, so {*= ratio[d.User]}
+                // this destination ows {d.Fund / totalDebits} percent of total money transferred
+                var fund = -d.Fund!.Value * ratio[d.User]
+                    * c.Fund!.Value * ratio[c.User] / totalDebits;
+                if (lst.ContainsKey(cpl))
+                    lst[cpl] += fund;
+                else
+                    lst.Add(cpl, fund);
+            }
+        }
+
+        foreach (var (k, v) in lst)
+        {
+            var cpl = k;
+            cpl.Fund = v;
+            yield return cpl;
         }
     }
 
@@ -293,5 +305,40 @@ internal class Coupling : PluginBase
             return
                 $"^{Voucher.ID}^ {Voucher.Date.AsDate()} {c.CPadRight(29)} -> {d.CPadRight(51)} @{Currency} {Fund.AsCurrency(Currency)}";
         }
+    }
+
+    private class DetailEqualityComparer : IEqualityComparer<VoucherDetail>
+    {
+        public bool Equals(VoucherDetail x, VoucherDetail y)
+        {
+            if (ReferenceEquals(x, y))
+                return true;
+            if (ReferenceEquals(x, null))
+                return false;
+            if (ReferenceEquals(y, null))
+                return false;
+            if (x.GetType() != y.GetType())
+                return false;
+
+            return x.User == y.User && x.Currency == y.Currency && x.Title == y.Title && x.SubTitle == y.SubTitle &&
+                x.Content == y.Content && x.Remark == y.Remark;
+        }
+
+        public int GetHashCode(VoucherDetail obj)
+            => HashCode.Combine(obj.User, obj.Currency, obj.Title, obj.SubTitle, obj.Content, obj.Remark);
+    }
+
+    private class CoupleComparer : IEqualityComparer<Couple>
+    {
+        private readonly DetailEqualityComparer m_Comparer = new();
+
+        public bool Equals(Couple x, Couple y)
+            => Equals(x.Voucher.ID, y.Voucher.ID) && x.Currency == y.Currency
+                && m_Comparer.Equals(x.Creditor, y.Creditor)
+                && m_Comparer.Equals(x.Debitor, y.Debitor);
+
+        public int GetHashCode(Couple obj)
+            => HashCode.Combine(obj.Voucher.ID, obj.Currency,
+                m_Comparer.GetHashCode(obj.Creditor), m_Comparer.GetHashCode(obj.Debitor));
     }
 }
