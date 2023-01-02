@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -32,8 +33,52 @@ internal class Coupling : PluginBase
     static Coupling()
         => Cfg.RegisterType<CoupleTemplate>("Coupling");
 
+    [AttributeUsage(AttributeTargets.Field)]
+    private class PropAttribute : Attribute
+    {
+        public string Proposition { get; }
+        public string Verb { get; }
+        public bool Collapse { get; }
+
+        public PropAttribute(string p, string v = null, bool collapse = false)
+        {
+            Proposition = p;
+            Verb = v;
+            Collapse = collapse;
+        }
+    }
+
+    private enum Semantics
+    {
+        [Prop("from", "planned gather")]
+        PGather,
+
+        [Prop("from", "gather")]
+        UGather,
+
+        [Prop("to", "planned scatter", collapse: true)]
+        PScatter,
+
+        [Prop("to", "scatter")]
+        UScatter,
+
+        [Prop("against")]
+        Reimburse,
+
+        [Prop("by")]
+        Misappropriation,
+
+        [Prop("using", collapse: true)]
+        Spend,
+
+        [Prop("", collapse: true)]
+        Ignored,
+    }
+
     public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
+        var tok = Parsing.Token(ref expr, false, static s => Enum.TryParse(typeof(Semantics), s, true, out _));
+        var sem = tok == null ? (Semantics?)null : Enum.Parse<Semantics>(tok, true);
         var len = expr.Length;
         var aux = Parsing.PureDetailQuery(ref expr, session.Client);
         if (len == expr.Length)
@@ -42,7 +87,7 @@ internal class Coupling : PluginBase
         Parsing.Eof(expr);
 
         foreach (var configCouple in Cfg.Get<CoupleTemplate>().Couples)
-        await foreach (var ret in AnalyzeCouple(session, configCouple, rng, aux))
+        await foreach (var ret in AnalyzeCouple(session, configCouple, rng, aux, sem))
             yield return ret;
     }
 
@@ -71,93 +116,102 @@ internal class Coupling : PluginBase
     }
 
     private static async IAsyncEnumerable<string> AnalyzeCouple(Session session, ConfigCouple configCouple,
-        DateFilter rng, IQueryCompounded<IDetailQueryAtom> aux)
+        DateFilter rng, IQueryCompounded<IDetailQueryAtom> aux, Semantics? semantics)
     {
-        var pGatherEntries = new SortedDictionary<string, List<Couple>>();
-        var uGatherEntries = new SortedDictionary<string, List<Couple>>();
-        var pScatterEntries = new SortedDictionary<string, List<Couple>>();
-        var uScatterEntries = new SortedDictionary<string, List<Couple>>();
-        var reimEntries = new SortedDictionary<string, List<Couple>>();
-        var misaEntries = new SortedDictionary<string, List<Couple>>();
-        var spendEntries = new SortedDictionary<string, List<Couple>>();
-        var errEntries = new List<Couple>();
-
-        void Add(SortedDictionary<string, List<Couple>> dic, Couple couple, string key)
-        {
-            if (!dic.ContainsKey(key))
-                dic.Add(key, new());
-            dic[key].Add(couple);
-        }
+        var sets = Enum.GetValues<Semantics>()
+            .ToDictionary(static n => n, static _ => new SortedDictionary<string, List<Couple>>());
 
         await foreach (var couple in GetCouples(session, configCouple.User, rng))
         {
             var (typeC, nameC) = configCouple.Parse(couple.Creditor);
             var (typeD, nameD) = configCouple.Parse(couple.Debitor);
+            Semantics ty;
+            string nm;
             switch (typeC, typeD)
             {
                 // individual give cash to couple's account
                 case (CashCategory.Cash, CashCategory.Cash | CashCategory.IsCouple):
-                    if (couple.Creditor.IsMatch(aux))
-                        Add(couple.Voucher.Remark == @"planned" ? pGatherEntries : uGatherEntries,
-                            couple, couple.Creditor.User.AsUser());
+                    if (!couple.Creditor.IsMatch(aux))
+                        continue;
+
+                    ty = couple.Voucher.Remark == @"planned" ? Semantics.PGather : Semantics.UGather;
+                    nm = couple.Creditor.User.AsUser();
                     break;
+
                 // couple give cash to individual's account
                 case (CashCategory.Cash | CashCategory.IsCouple, CashCategory.Cash):
-                    if (couple.Debitor.IsMatch(aux))
-                        Add(couple.Voucher.Remark == @"planned" ? pScatterEntries : uScatterEntries,
-                            couple, couple.Debitor.User.AsUser());
+                    if (!couple.Debitor.IsMatch(aux))
+                        continue;
+
+                    ty = couple.Voucher.Remark == @"planned" ? Semantics.PScatter : Semantics.UScatter;
+                    nm = couple.Debitor.User.AsUser();
                     break;
+
                 // couple's revenue goes to to individual's account
                 case (CashCategory.ExtraCash | CashCategory.IsCouple, CashCategory.Cash):
                 case (CashCategory.NonCash | CashCategory.IsCouple, CashCategory.Cash):
-                    if (couple.Debitor.IsMatch(aux))
-                        Add(reimEntries, couple, couple.Debitor.User.AsUser());
+                    if (!couple.Debitor.IsMatch(aux))
+                        continue;
+
+                    ty = Semantics.Reimburse;
+                    nm = couple.Debitor.User.AsUser();
                     break;
+
                 // individuals' spending from couple's account
                 case (CashCategory.Cash | CashCategory.IsCouple, CashCategory.ExtraCash):
                 case (CashCategory.Cash | CashCategory.IsCouple, CashCategory.NonCash):
-                    if (couple.Debitor.IsMatch(aux))
-                        Add(misaEntries, couple, couple.Debitor.User.AsUser());
+                    if (!couple.Debitor.IsMatch(aux))
+                        continue;
+
+                    ty = Semantics.Misappropriation;
+                    nm = couple.Debitor.User.AsUser();
                     break;
+
                 // couple spending from individuals' account
                 case (CashCategory.Cash, CashCategory.ExtraCash | CashCategory.IsCouple):
                 case (CashCategory.Cash, CashCategory.NonCash | CashCategory.IsCouple):
-                    if (couple.Creditor.IsMatch(aux))
-                        Add(spendEntries, couple, nameC);
+                    if (!couple.Creditor.IsMatch(aux))
+                        continue;
+
+                    ty = Semantics.Spend;
+                    nm = nameC;
                     break;
+
                 // couple spending from couple's account
                 case (CashCategory.Cash | CashCategory.IsCouple, CashCategory.NonCash | CashCategory.IsCouple):
                 case (CashCategory.ExtraCash | CashCategory.IsCouple, CashCategory.NonCash | CashCategory.IsCouple):
-                    if (couple.Creditor.IsMatch(aux))
-                        Add(spendEntries, couple, nameC);
+                    if (!couple.Creditor.IsMatch(aux))
+                        continue;
+
+                    ty = Semantics.Spend;
+                    nm = nameC;
                     break;
                 default:
-                    errEntries.Add(couple);
+                    ty = Semantics.Ignored;
+                    nm = @"items";
                     break;
             }
+
+            var dic = sets[ty];
+            if (!dic.ContainsKey(nm))
+                dic.Add(nm, new());
+            dic[nm].Add(couple);
         }
 
         yield return $"/* {configCouple.User.AsUser()} Account Summary during {rng.AsDateRange()} */\n";
-        await foreach (var s in ShowEntries(session, "gather", "from", uGatherEntries))
-            yield return s;
-        await foreach (var s in ShowEntries(session, "scatter", "to", uScatterEntries))
-            yield return s;
-        await foreach (var s in ShowEntries(session, "reimburse", "against", reimEntries))
-            yield return s;
-        await foreach (var s in ShowEntries(session, "misappropriation", "by", misaEntries))
-            yield return s;
-        await foreach (var s in ShowEntries(session, "spend", "using", spendEntries, aux == null))
-            yield return s;
-        await foreach (var s in ShowEntries(session, "planned gather", "from", pGatherEntries))
-            yield return s;
-        await foreach (var s in ShowEntries(session, "planned scatter", "to", pScatterEntries, aux == null))
-            yield return s;
+        foreach (var (k, v) in sets)
+        {
+            if (semantics != null && k != semantics)
+                continue;
 
-        if (errEntries.Count != 0)
-            yield return $"// ignored {errEntries.Count} items\n";
-        if (aux != null)
-            foreach (var couple in errEntries)
-                yield return $"// {couple}\n";
+            var prop = k.GetType().GetMember(k.ToString())[0]
+                .GetCustomAttribute(typeof(PropAttribute), false) as PropAttribute;
+            var verb = prop?.Verb ?? k.ToString();
+            var hideDetail = ((prop?.Collapse ?? false) && aux == null)
+                || (k == Semantics.Ignored && semantics != k);
+            await foreach (var s in ShowEntries(session, verb, prop?.Proposition, v, hideDetail))
+                yield return s;
+        }
     }
 
     private static IAsyncEnumerable<Couple> GetCouples(Session session, string user, DateFilter rng)
