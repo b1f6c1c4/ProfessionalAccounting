@@ -98,18 +98,20 @@ internal class Coupling : PluginBase
                 // individual give cash to couple's account
                 case (CashCategory.Cash, CashCategory.Cash | CashCategory.IsCouple):
                     if (couple.Creditor.IsMatch(aux))
-                        Add(couple.Voucher.Remark == @"planned" ? pGatherEntries : uGatherEntries, couple, nameC);
+                        Add(couple.Voucher.Remark == @"planned" ? pGatherEntries : uGatherEntries,
+                            couple, couple.Creditor.User.AsUser());
                     break;
                 // couple give cash to individual's account
                 case (CashCategory.Cash | CashCategory.IsCouple, CashCategory.Cash):
                     if (couple.Debitor.IsMatch(aux))
-                        Add(couple.Voucher.Remark == @"planned" ? pScatterEntries : uScatterEntries, couple, nameD);
+                        Add(couple.Voucher.Remark == @"planned" ? pScatterEntries : uScatterEntries,
+                            couple, couple.Debitor.User.AsUser());
                     break;
                 // couple's revenue goes to to individual's account
                 case (CashCategory.ExtraCash | CashCategory.IsCouple, CashCategory.Cash):
                 case (CashCategory.NonCash | CashCategory.IsCouple, CashCategory.Cash):
                     if (couple.Debitor.IsMatch(aux))
-                        Add(reimEntries, couple, nameD);
+                        Add(reimEntries, couple, couple.Debitor.User.AsUser());
                     break;
                 // individuals' spending from couple's account
                 case (CashCategory.Cash | CashCategory.IsCouple, CashCategory.ExtraCash):
@@ -309,7 +311,7 @@ internal class Coupling : PluginBase
             if (Debitor.Remark != null)
                 d += $" {Debitor.Remark.Quotation('"')}";
             return
-                $"^{Voucher.ID}^ {Voucher.Date.AsDate()} {c.CPadRight(29)} -> {d.CPadRight(51)} @{Currency} {Fund.AsCurrency(Currency)}";
+                $"^{Voucher.ID}^ {Voucher.Date.AsDate()} {c.CPadRight(30)} -> {d.CPadRight(51)} @{Currency} {Fund.AsCurrency(Currency)}";
         }
     }
 
