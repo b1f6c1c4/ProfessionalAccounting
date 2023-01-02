@@ -73,8 +73,10 @@ internal class Coupling : PluginBase
     private static async IAsyncEnumerable<string> AnalyzeCouple(Session session, ConfigCouple configCouple,
         DateFilter rng, IQueryCompounded<IDetailQueryAtom> aux)
     {
-        var gatherEntries = new SortedDictionary<string, List<Couple>>();
-        var scatterEntries = new SortedDictionary<string, List<Couple>>();
+        var pGatherEntries = new SortedDictionary<string, List<Couple>>();
+        var uGatherEntries = new SortedDictionary<string, List<Couple>>();
+        var pScatterEntries = new SortedDictionary<string, List<Couple>>();
+        var uScatterEntries = new SortedDictionary<string, List<Couple>>();
         var reimEntries = new SortedDictionary<string, List<Couple>>();
         var misaEntries = new SortedDictionary<string, List<Couple>>();
         var spendEntries = new SortedDictionary<string, List<Couple>>();
@@ -96,12 +98,12 @@ internal class Coupling : PluginBase
                 // individual give cash to couple's account
                 case (CashCategory.Cash, CashCategory.Cash | CashCategory.IsCouple):
                     if (couple.Creditor.IsMatch(aux))
-                        Add(gatherEntries, couple, nameC);
+                        Add(couple.Voucher.Remark == @"planned" ? pGatherEntries : uGatherEntries, couple, nameC);
                     break;
                 // couple give cash to individual's account
                 case (CashCategory.Cash | CashCategory.IsCouple, CashCategory.Cash):
                     if (couple.Debitor.IsMatch(aux))
-                        Add(scatterEntries, couple, nameD);
+                        Add(couple.Voucher.Remark == @"planned" ? pScatterEntries : uScatterEntries, couple, nameD);
                     break;
                 // couple's revenue goes to to individual's account
                 case (CashCategory.ExtraCash | CashCategory.IsCouple, CashCategory.Cash):
@@ -134,15 +136,19 @@ internal class Coupling : PluginBase
         }
 
         yield return $"/* {configCouple.User.AsUser()} Account Summary during {rng.AsDateRange()} */\n";
-        await foreach (var s in ShowEntries(session, "gather", "from", gatherEntries))
+        await foreach (var s in ShowEntries(session, "gather", "from", uGatherEntries))
             yield return s;
-        await foreach (var s in ShowEntries(session, "scatter", "to", scatterEntries))
+        await foreach (var s in ShowEntries(session, "scatter", "to", uScatterEntries))
             yield return s;
         await foreach (var s in ShowEntries(session, "reimburse", "against", reimEntries))
             yield return s;
         await foreach (var s in ShowEntries(session, "misappropriation", "by", misaEntries))
             yield return s;
         await foreach (var s in ShowEntries(session, "spend", "using", spendEntries, aux == null))
+            yield return s;
+        await foreach (var s in ShowEntries(session, "planned gather", "from", pGatherEntries))
+            yield return s;
+        await foreach (var s in ShowEntries(session, "planned scatter", "to", pScatterEntries, aux == null))
             yield return s;
 
         if (errEntries.Count != 0)
