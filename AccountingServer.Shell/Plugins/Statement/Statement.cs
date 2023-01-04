@@ -20,6 +20,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security;
+using System.Text;
+using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -38,10 +40,10 @@ internal class Statement : PluginBase
     {
         var csv = expr;
         expr = ParsingF.Line(ref csv);
-        var parsed = new CsvParser(ParsingF.Optional(ref expr, "-"));
 
         if (ParsingF.Optional(ref expr, "mark"))
         {
+            var parsed = new CsvParser(ParsingF.Optional(ref expr, "-"));
             var filt = ParsingF.DetailQuery(ref expr, session.Client);
             ParsingF.Optional(ref expr, "as");
             var marker = ParsingF.Token(ref expr);
@@ -49,39 +51,51 @@ internal class Statement : PluginBase
             if (string.IsNullOrWhiteSpace(marker))
                 throw new FormatException("格式错误");
 
-            parsed.Parse(csv);
-            yield return $"{parsed.Items.Count} parsed\n";
-            await foreach (var s in RunMark(session, filt, parsed, marker))
-                yield return s;
+            parsed.Parse(ref csv);
+            var sb = new StringBuilder();
+            await RunMark(session, sb, filt, parsed, marker);
+            yield return sb.ToString();
+
+            yield break;
         }
-        else if (ParsingF.Optional(ref expr, "unmark"))
+
+        if (ParsingF.Optional(ref expr, "unmark"))
         {
             var filt = ParsingF.DetailQuery(ref expr, session.Client);
             ParsingF.Eof(expr);
-            await foreach (var s in RunUnmark(session, filt))
-                yield return s;
+            var sb = new StringBuilder();
+            await RunUnmark(session, sb, filt);
+            yield return sb.ToString();
+
+            yield break;
         }
-        else if (ParsingF.Optional(ref expr, "check"))
+
+        if (ParsingF.Optional(ref expr, "check"))
         {
             var filt = ParsingF.DetailQuery(ref expr, session.Client);
+            var tolerance = 1;
+            if (ParsingF.Optional(ref expr, "tol"))
+                tolerance = (int)ParsingF.DoubleF(ref expr);
             ParsingF.Eof(expr);
-            parsed.Parse(csv);
-            yield return $"{parsed.Items.Count} parsed\n";
-            await foreach (var s in RunCheck(session, filt, parsed))
-                yield return s;
+            var sb = new StringBuilder();
+            await RunCheck(session, sb, filt, tolerance);
+            yield return sb.ToString();
         }
-        else
+
         {
-            ParsingF.Optional(ref expr, "auto");
+            var parsed = new CsvParser(ParsingF.Optional(ref expr, "-"));
             var filt = ParsingF.DetailQuery(ref expr, session.Client);
-            ParsingF.Optional(ref expr, "as");
+            if (!ParsingF.Optional(ref expr, "as"))
+                throw new FormatException("格式错误");
             var marker = ParsingF.Token(ref expr);
+            var tolerance = 1;
+            if (ParsingF.Optional(ref expr, "tol"))
+                tolerance = (int)ParsingF.DoubleF(ref expr);
             ParsingF.Eof(expr);
             if (string.IsNullOrWhiteSpace(marker))
                 throw new FormatException("格式错误");
 
-            parsed.Parse(csv);
-            yield return $"{parsed.Items.Count} parsed\n";
+            parsed.Parse(ref csv);
             var markerFilt = new StmtVoucherDetailQuery(
                 filt.VoucherQuery,
                 new IntersectQueries<IDetailQueryAtom>(
@@ -92,28 +106,32 @@ internal class Statement : PluginBase
                 new IntersectQueries<IDetailQueryAtom>(
                     filt.ActualDetailFilter(),
                     new StmtDetailQuery("")));
-            var nmFilt = new StmtVoucherDetailQuery(
-                filt.VoucherQuery,
-                new IntersectQueries<IDetailQueryAtom>(
-                    filt.ActualDetailFilter(),
-                    new UnionQueries<IDetailQueryAtom>(
-                        new StmtDetailQuery(""),
-                        new StmtDetailQuery(marker))));
-            await foreach (var s in RunUnmark(session, markerFilt))
-                yield return s;
-            await foreach (var s in RunMark(session, nullFilt, parsed, marker))
-                yield return s;
-            await foreach (var s in RunCheck(session, nmFilt, parsed))
-                yield return s;
+            var sb = new StringBuilder();
+            sb.AppendLine($"{parsed.Items.Count} parsed");
+            await RunUnmark(session, sb, markerFilt);
+            if (await RunMark(session, sb, nullFilt, parsed, marker)
+                || await RunCheck(session, sb, filt, tolerance))
+            {
+                sb.AppendLine("ABORT, rewind by unmark them back");
+                await RunUnmark(session, sb, markerFilt);
+
+                yield return "\x0c Transaction Aborted \x0c\n";
+                yield return sb.ToString();
+                yield return "\x0c Attached a copy of original CSV, ready for resubmit. \x0c\n";
+                yield return csv;
+            }
+            else
+                yield return sb.ToString();
         }
     }
 
-    private async IAsyncEnumerable<string> RunMark(Session session, IVoucherDetailQuery filt, CsvParser parsed,
-        string marker)
+    private static async ValueTask<bool> RunMark(Session session, StringBuilder sb,
+        IVoucherDetailQuery filt, CsvParser parsed, string marker)
     {
         if (filt.IsDangerous())
             throw new SecurityException("检测到弱检索式");
 
+        var hasViolation = false;
         var marked = 0;
         var remarked = 0;
         var converted = 0;
@@ -125,9 +143,8 @@ internal class Statement : PluginBase
             {
                 var resx = date
                     ? res.Where(v => v.Date == b.Date)
-                    : res.OrderBy(v => v.Date.HasValue
-                        ? Math.Abs((v.Date.Value - b.Date).TotalDays)
-                        : double.PositiveInfinity);
+                    : res.Where(v => v.Date.HasValue && Math.Abs((v.Date.Value - b.Date).TotalDays) <= 60)
+                        .OrderBy(v => Math.Abs((v.Date.Value - b.Date).TotalDays));
                 var voucher = resx
                     .FirstOrDefault(v => v.Details.Any(d
                         => (b.Currency == null || d.Currency == b.Currency) &&
@@ -153,17 +170,21 @@ internal class Statement : PluginBase
             if (Trial(true) || Trial(false))
                 continue;
 
-            yield return $"{b.Raw}\n";
+            hasViolation = true;
+            sb.Append("[No voucher found]: ");
+            sb.AppendLine(b.Raw);
         }
 
         await session.Accountant.UpsertAsync(ops);
 
-        yield return $"{marked} marked\n";
-        yield return $"{remarked} remarked\n";
-        yield return $"{converted} converted\n";
+        sb.AppendLine($"{marked} marked");
+        sb.AppendLine($"{remarked} remarked");
+        sb.AppendLine($"{converted} converted");
+
+        return hasViolation;
     }
 
-    private async IAsyncEnumerable<string> RunUnmark(Session session, IVoucherDetailQuery filt)
+    private static async ValueTask RunUnmark(Session session, StringBuilder sb, IVoucherDetailQuery filt)
     {
         if (filt.IsDangerous())
             throw new SecurityException("检测到弱检索式");
@@ -191,47 +212,90 @@ internal class Statement : PluginBase
         }
 
         await session.Accountant.UpsertAsync(ops);
-        yield return $"{cntAll} selected\n";
-        yield return $"{cnt} unmarked\n";
+        sb.AppendLine($"{cntAll} selected");
+        sb.AppendLine($"{cnt} unmarked");
     }
 
-    private async IAsyncEnumerable<string> RunCheck(Session session, IVoucherDetailQuery filt, CsvParser parsed)
+    private static async ValueTask<bool> RunCheck(Session session, StringBuilder sb,
+        IVoucherDetailQuery filt, int tolerance)
     {
         if (filt.IsDangerous())
             throw new SecurityException("检测到弱检索式");
 
-        var res = session.Accountant.SelectVouchersAsync(filt.VoucherQuery);
-        var lst = new List<BankItem>(parsed.Items);
-        await foreach (var v in res)
-        foreach (var d in v.Details)
+        var res = await session.Accountant.SelectVouchersAsync(filt.VoucherQuery)
+            .SelectMany(v => v.Details.Where(d => d.IsMatch(filt.ActualDetailFilter()))
+                .Select(d => (v.ID, v.Date, Fund: d.Fund.AsCurrency(d.Currency), d.Remark))
+                .ToAsyncEnumerable())
+            .OrderBy(static tuple => tuple.Date).ThenBy(static tuple => tuple.Remark)
+            .ToListAsync();
+
+        var isFirst = true;
+        int? newId = null, violationId = null;
+        DateTime? newDate = null;
+        string oldR = null, newR = null;
+        var noMatch = 0;
+        for (var i = 0; i < res.Count; i++)
         {
-            if (!d.IsMatch(filt.ActualDetailFilter()))
-                continue;
+            if (res[i].Remark == null)
+                noMatch++;
 
-            var obj1 = lst.FirstOrDefault(b
-                => (b.Currency == null || d.Currency == b.Currency) &&
-                (b.Fund - d.Fund!.Value).IsZero() && b.Date == v.Date);
-            if (obj1 != null)
+            var tuple = res[i];
+            if (isFirst)
             {
-                lst.Remove(obj1);
+                isFirst = false;
+                oldR = tuple.Remark;
                 continue;
             }
 
-            var obj2 = lst
-                .Where(b => (b.Currency == null || d.Currency == b.Currency) && (b.Fund - d.Fund!.Value).IsZero())
-                .OrderBy(b => Math.Abs((b.Date - v.Date!.Value).TotalDays))
-                .FirstOrDefault();
-            if (obj2 != null)
+            if (!newId.HasValue)
             {
-                lst.Remove(obj2);
+                if (tuple.Remark == newR)
+                    // do nothing
+                    continue;
+
+                // first change
+                newId = i;
+                newDate = tuple.Date;
+                newR = tuple.Remark;
+
                 continue;
             }
 
-            yield return $"{v.ID.Quotation('^')} {v.Date.AsDate()} {d.Content} {d.Fund.AsCurrency(d.Currency)}\n";
+            if (tuple.Remark == newR)
+                // do nothing
+                continue;
+
+            if (tuple.Remark == oldR)
+            {
+                var diff = (tuple.Date - newDate)?.TotalDays;
+                if (diff > tolerance && violationId != newId)
+                {
+                    violationId = newId;
+                    sb.AppendLine($"VIOLATION: Found between period {oldR.Quotation('"')} and {newR.Quotation('"')} ");
+                    sb.AppendLine($"           Date tolerance = {tolerance}, where date difference = {diff}");
+                    for (var vid = Math.Max(0, newId.Value - 4); vid < Math.Min(res.Count, i + 4); vid++)
+                    {
+                        sb.Append($"{res[vid].ID.Quotation('^')} {res[vid].Date.AsDate()} ");
+                        sb.Append($"{res[vid].Remark.Quotation('"').CPadRight(8)} {res[vid].Fund.CPadLeft(13)}");
+                        if (vid == i || vid == newId)
+                            sb.Append(" (*)");
+                        sb.AppendLine();
+                    }
+                }
+
+                continue;
+            }
+
+            newId = i;
+            newDate = tuple.Date;
+            oldR = newR;
+            newR = tuple.Remark;
         }
 
-        foreach (var b in lst)
-            yield return $"{b.Raw}\n";
+        if (noMatch != 0)
+            sb.AppendLine($"WARNING: {noMatch} vouchers do NOT have a matching entry.");
+
+        return violationId.HasValue;
     }
 
     private sealed class StmtVoucherDetailQuery : IVoucherDetailQuery

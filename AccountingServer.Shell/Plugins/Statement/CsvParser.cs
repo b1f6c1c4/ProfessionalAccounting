@@ -69,9 +69,18 @@ internal class CsvParser
         return f;
     }
 
-    public void Parse(string expr)
+    public void Parse(ref string csv)
     {
+        var expr = csv;
         var headerB = ParsingF.Line(ref expr);
+        if (headerB.StartsWith("\x0c", StringComparison.Ordinal)) // skip the region guarded by ^L
+        {
+            while (!ParsingF.Line(ref expr).StartsWith("\x0c", StringComparison.Ordinal)) { }
+
+            csv = expr;
+            headerB = ParsingF.Line(ref expr);
+        }
+
         var header = headerB;
 
         var dateId = -1;
