@@ -95,12 +95,6 @@ public enum TitleKind
 public interface IQueryCompounded<TAtom> where TAtom : class
 {
     /// <summary>
-    ///     是否包含弱检索式
-    /// </summary>
-    /// <returns>若包含则为<c>true</c>，否则为<c>false</c></returns>
-    bool IsDangerous();
-
-    /// <summary>
     ///     二次分配
     /// </summary>
     /// <typeparam name="T">返回值类型</typeparam>

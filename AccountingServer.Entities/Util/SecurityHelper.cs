@@ -16,62 +16,83 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+using System;
+
 namespace AccountingServer.Entities.Util;
 
 public static class SecurityHelper
 {
-    /// <summary>
-    ///     是否包含弱检索式
-    /// </summary>
-    /// <param name="filter">细目过滤器</param>
-    /// <returns>若包含则为<c>true</c>，否则为<c>false</c></returns>
-    public static bool IsDangerous(this VoucherDetail filter)
+    private class SecurityVisitor
+        : IQueryVisitor<IVoucherQueryAtom, bool>,
+            IQueryVisitor<IDetailQueryAtom, bool>,
+            IQueryVisitor<IDistributedQueryAtom, bool>
     {
-        if (filter.Fund.HasValue)
-            return false;
-        if (!string.IsNullOrEmpty(filter.Content))
-            return false;
-        if (!string.IsNullOrEmpty(filter.Remark))
-            return false;
+        public bool Visit(IVoucherQueryAtom query)
+            => query.VoucherFilter.IsDangerous() && query.Range.IsDangerous() && query.DetailFilter.IsDangerous();
 
-        return true;
+        public bool Visit(IQueryAry<IVoucherQueryAtom> query)
+            => query.Operator switch
+                {
+                    OperatorType.None => query.Filter1.IsDangerous(),
+                    OperatorType.Identity => query.Filter1.IsDangerous(),
+                    OperatorType.Complement => true,
+                    OperatorType.Union => query.Filter1.IsDangerous() || query.Filter2.IsDangerous(),
+                    OperatorType.Subtract => query.Filter1.IsDangerous(),
+                    OperatorType.Intersect => query.Filter1.IsDangerous() && query.Filter2.IsDangerous(),
+                    _ => throw new ArgumentOutOfRangeException(),
+                };
+
+        public bool Visit(IDetailQueryAtom query)
+            => query.Filter.IsDangerous()
+                && string.IsNullOrEmpty(query.ContentPrefix)
+                && string.IsNullOrEmpty(query.RemarkPrefix);
+
+        public bool Visit(IQueryAry<IDetailQueryAtom> query)
+            => query.Operator switch
+                {
+                    OperatorType.None => query.Filter1.IsDangerous(),
+                    OperatorType.Identity => query.Filter1.IsDangerous(),
+                    OperatorType.Complement => true,
+                    OperatorType.Union => query.Filter1.IsDangerous() || query.Filter2.IsDangerous(),
+                    OperatorType.Subtract => query.Filter1.IsDangerous(),
+                    OperatorType.Intersect => query.Filter1.IsDangerous() && query.Filter2.IsDangerous(),
+                    _ => throw new ArgumentOutOfRangeException(),
+                };
+
+        public bool Visit(IDistributedQueryAtom query)
+            => query.Filter.IsDangerous() && query.Range.IsDangerous();
+
+        public bool Visit(IQueryAry<IDistributedQueryAtom> query)
+            => query.Operator switch
+                {
+                    OperatorType.None => query.Filter1.IsDangerous(),
+                    OperatorType.Identity => query.Filter1.IsDangerous(),
+                    OperatorType.Complement => true,
+                    OperatorType.Union => query.Filter1.IsDangerous() || query.Filter2.IsDangerous(),
+                    OperatorType.Subtract => query.Filter1.IsDangerous(),
+                    OperatorType.Intersect => query.Filter1.IsDangerous() && query.Filter2.IsDangerous(),
+                    _ => throw new ArgumentOutOfRangeException(),
+                };
     }
 
-    /// <summary>
-    ///     是否包含弱检索式
-    /// </summary>
-    /// <param name="filter">记账凭证过滤器</param>
-    /// <returns>若包含则为<c>true</c>，否则为<c>false</c></returns>
-    public static bool IsDangerous(this Voucher filter)
-    {
-        if (filter.ID != null)
-            return false;
+    private static bool IsDangerous(this VoucherDetail filter)
+        => !filter.Fund.HasValue && string.IsNullOrEmpty(filter.Content) && string.IsNullOrEmpty(filter.Remark);
 
-        return true;
-    }
+    private static bool IsDangerous(this Voucher filter)
+        => filter.ID == null && string.IsNullOrEmpty(filter.Remark);
 
-    /// <summary>
-    ///     是否包含弱检索式
-    /// </summary>
-    /// <param name="filter">分期过滤器</param>
-    /// <returns>若包含则为<c>true</c>，否则为<c>false</c></returns>
-    public static bool IsDangerous(this IDistributed filter)
-    {
-        if (filter.ID.HasValue)
-            return false;
-        if (filter.Name != null)
-            return false;
-        if (!string.IsNullOrEmpty(filter.Remark))
-            return false;
+    private static bool IsDangerous(this IDistributed filter)
+        => !filter.ID.HasValue && string.IsNullOrEmpty(filter.Name) && string.IsNullOrEmpty(filter.Remark);
 
-        return true;
-    }
+    public static bool IsDangerous(this IQueryCompounded<IVoucherQueryAtom> filter)
+        => filter?.Accept<bool>(new SecurityVisitor()) != false;
 
-    /// <summary>
-    ///     是否包含弱检索式
-    /// </summary>
-    /// <param name="query">记账凭证细目映射检索式</param>
-    /// <returns>若包含则为<c>true</c>，否则为<c>false</c></returns>
+    public static bool IsDangerous(this IQueryCompounded<IDetailQueryAtom> filter)
+        => filter?.Accept<bool>(new SecurityVisitor()) != false;
+
+    public static bool IsDangerous(this IQueryCompounded<IDistributedQueryAtom> filter)
+        => filter?.Accept<bool>(new SecurityVisitor()) != false;
+
     public static bool IsDangerous(this IVoucherDetailQuery query)
         => query.VoucherQuery.IsDangerous() && query.ActualDetailFilter().IsDangerous();
 }

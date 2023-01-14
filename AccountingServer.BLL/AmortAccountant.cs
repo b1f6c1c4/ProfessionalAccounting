@@ -300,8 +300,6 @@ internal class AmortAccountant : DistributedAccountant
 
         public string RemarkPrefix => null;
 
-        public bool IsDangerous() => Filter.IsDangerous();
-
         public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
     }
 
@@ -324,8 +322,6 @@ internal class AmortAccountant : DistributedAccountant
         public DateFilter Range => DateFilter.Unconstrained;
 
         public IQueryCompounded<IDetailQueryAtom> DetailFilter { get; }
-
-        public bool IsDangerous() => VoucherFilter.IsDangerous() && DetailFilter.IsDangerous();
 
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
     }

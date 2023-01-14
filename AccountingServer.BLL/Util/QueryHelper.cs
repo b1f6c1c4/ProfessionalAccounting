@@ -35,8 +35,6 @@ public abstract class BinaryQueries<TAtom> : IQueryAry<TAtom> where TAtom : clas
 
     public IQueryCompounded<TAtom> Filter2 { get; }
 
-    public bool IsDangerous() => (Filter1?.IsDangerous() ?? false) || (Filter2?.IsDangerous() ?? false);
-
     public T Accept<T>(IQueryVisitor<TAtom, T> visitor) => visitor.Visit(this);
 }
 

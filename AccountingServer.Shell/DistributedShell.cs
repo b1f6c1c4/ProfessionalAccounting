@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Security;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
 

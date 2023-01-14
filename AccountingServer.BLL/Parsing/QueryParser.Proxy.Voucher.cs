@@ -19,7 +19,6 @@
 using System;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
-using AccountingServer.Entities.Util;
 
 namespace AccountingServer.BLL.Parsing;
 
@@ -66,10 +65,6 @@ internal partial class QueryParser
             => details().Assign(Client);
 
         /// <inheritdoc />
-        public bool IsDangerous()
-            => VoucherFilter.IsDangerous() && Range.IsDangerous() && DetailFilter.IsDangerous();
-
-        /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
     }
 
@@ -86,9 +81,6 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public IQueryCompounded<IVoucherQueryAtom> Filter2 => throw new MemberAccessException("表达式错误");
-
-        /// <inheritdoc />
-        public bool IsDangerous() => Filter1.IsDangerous();
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
@@ -132,18 +124,6 @@ internal partial class QueryParser
             => vouchers1().Assign(Client);
 
         /// <inheritdoc />
-        public bool IsDangerous()
-            => Operator switch
-                {
-                    OperatorType.None => Filter1.IsDangerous(),
-                    OperatorType.Identity => Filter1.IsDangerous(),
-                    OperatorType.Complement => true,
-                    OperatorType.Union => Filter1.IsDangerous() || Filter2.IsDangerous(),
-                    OperatorType.Subtract => Filter1.IsDangerous(),
-                    _ => throw new ArgumentOutOfRangeException(),
-                };
-
-        /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
     }
 
@@ -163,9 +143,6 @@ internal partial class QueryParser
             => vouchers1().Assign(Client);
 
         /// <inheritdoc />
-        public bool IsDangerous() => Filter1.IsDangerous() && (Filter2?.IsDangerous() ?? true);
-
-        /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
     }
 
@@ -182,9 +159,6 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public IQueryCompounded<IVoucherQueryAtom> Filter2 => null;
-
-        /// <inheritdoc />
-        public bool IsDangerous() => Filter1.IsDangerous();
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);

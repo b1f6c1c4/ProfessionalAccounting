@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
-using static AccountingServer.Entities.Util.SecurityHelper;
 
 namespace AccountingServer.BLL.Parsing;
 
@@ -44,9 +43,6 @@ internal partial class QueryParser
         /// <inheritdoc />
         public DateFilter Range
             => rangeCore().Assign(Client)?.Range ?? DateFilter.Unconstrained;
-
-        /// <inheritdoc />
-        public bool IsDangerous() => Filter.IsDangerous() && Range.IsDangerous(true);
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
@@ -112,18 +108,6 @@ internal partial class QueryParser
             => distributedQ1().Assign(Client);
 
         /// <inheritdoc />
-        public bool IsDangerous()
-            => Operator switch
-                {
-                    OperatorType.None => Filter1.IsDangerous(),
-                    OperatorType.Identity => Filter1.IsDangerous(),
-                    OperatorType.Complement => true,
-                    OperatorType.Union => Filter1.IsDangerous() || Filter2.IsDangerous(),
-                    OperatorType.Subtract => Filter1.IsDangerous(),
-                    _ => throw new ArgumentOutOfRangeException(),
-                };
-
-        /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
     }
 
@@ -143,9 +127,6 @@ internal partial class QueryParser
             => distributedQ1().Assign(Client);
 
         /// <inheritdoc />
-        public bool IsDangerous() => Filter1.IsDangerous() && (Filter2?.IsDangerous() ?? true);
-
-        /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
     }
 
@@ -163,9 +144,6 @@ internal partial class QueryParser
 
         /// <inheritdoc />
         public IQueryCompounded<IDistributedQueryAtom> Filter2 => null;
-
-        /// <inheritdoc />
-        public bool IsDangerous() => Filter1.IsDangerous();
 
         /// <inheritdoc />
         public T Accept<T>(IQueryVisitor<IDistributedQueryAtom, T> visitor) => visitor.Visit(this);
