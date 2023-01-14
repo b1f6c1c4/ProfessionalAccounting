@@ -100,12 +100,12 @@ internal class Statement : PluginBase
                 filt.VoucherQuery,
                 new IntersectQueries<IDetailQueryAtom>(
                     filt.ActualDetailFilter(),
-                    new StmtDetailQuery(marker)));
+                    new SimpleDetailQuery { Filter = new() { Remark = marker } }));
             var nullFilt = new StmtVoucherDetailQuery(
                 filt.VoucherQuery,
                 new IntersectQueries<IDetailQueryAtom>(
                     filt.ActualDetailFilter(),
-                    new StmtDetailQuery("")));
+                    new SimpleDetailQuery { Filter = new() { Remark = "" } }));
             var sb = new StringBuilder();
             sb.AppendLine($"{parsed.Items.Count} parsed");
             await RunUnmark(session, sb, markerFilt);
@@ -236,8 +236,14 @@ internal class Statement : PluginBase
         var noMatch = 0;
         for (var i = 0; i < res.Count; i++)
         {
-            if (res[i].Remark == null)
-                noMatch++;
+            switch (res[i].Remark)
+            {
+                case "reconciliation":
+                    continue;
+                case null:
+                    noMatch++;
+                    break;
+            }
 
             var tuple = res[i];
             if (isFirst)
@@ -314,25 +320,5 @@ internal class Statement : PluginBase
     private class StmtEmit : IEmit
     {
         public IQueryCompounded<IDetailQueryAtom> DetailFilter { get; init; }
-    }
-
-    private sealed class StmtDetailQuery : IDetailQueryAtom
-    {
-        public StmtDetailQuery(string marker)
-            => Filter = new() { Remark = marker };
-
-        public TitleKind? Kind => null;
-
-        public VoucherDetail Filter { get; }
-
-        public bool IsFundBidirectional => false;
-
-        public int Dir => 0;
-
-        public string ContentPrefix => null;
-
-        public string RemarkPrefix => null;
-
-        public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
     }
 }

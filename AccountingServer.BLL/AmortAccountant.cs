@@ -114,7 +114,16 @@ internal class AmortAccountant : DistributedAccountant
         if (amort.Remark == Amortization.IgnoranceMark)
             yield break;
 
-        var queryT = new RegisteringQuery(amort);
+        var queryT = new SimpleVoucherQuery
+            {
+                VoucherFilter = amort.Template,
+                DetailFilter = amort.Template.Details.Aggregate(
+                    (IQueryCompounded<IDetailQueryAtom>)DetailQueryUnconstrained.Instance, static (query, filter)
+                        => new IntersectQueries<IDetailQueryAtom>(
+                            query,
+                            new SimpleDetailQuery { Filter = filter })),
+                ForAll = true,
+            };
         await foreach (var voucher in Db.SelectVouchers(new IntersectQueries<IVoucherQueryAtom>(query, queryT))
                            .Where(static voucher => voucher.Remark != Amortization.IgnoranceMark)
                            .Where(voucher => amort.Schedule.All(item => item.VoucherID != voucher.ID)))
@@ -282,47 +291,5 @@ internal class AmortAccountant : DistributedAccountant
         }
 
         amort.Schedule = lst;
-    }
-
-    private sealed class RegisteringDetailQuery : IDetailQueryAtom
-    {
-        public RegisteringDetailQuery(VoucherDetail filter) => Filter = filter;
-
-        public TitleKind? Kind => null;
-
-        public VoucherDetail Filter { get; }
-
-        public bool IsFundBidirectional => false;
-
-        public int Dir => 0;
-
-        public string ContentPrefix => null;
-
-        public string RemarkPrefix => null;
-
-        public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
-    }
-
-    private sealed class RegisteringQuery : IVoucherQueryAtom
-    {
-        public RegisteringQuery(Amortization amort)
-        {
-            VoucherFilter = amort.Template;
-            DetailFilter = amort.Template.Details.Aggregate(
-                (IQueryCompounded<IDetailQueryAtom>)DetailQueryUnconstrained.Instance, static (query, filter)
-                    => new IntersectQueries<IDetailQueryAtom>(
-                        query,
-                        new RegisteringDetailQuery(filter)));
-        }
-
-        public bool ForAll => true;
-
-        public Voucher VoucherFilter { get; }
-
-        public DateFilter Range => DateFilter.Unconstrained;
-
-        public IQueryCompounded<IDetailQueryAtom> DetailFilter { get; }
-
-        public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
     }
 }

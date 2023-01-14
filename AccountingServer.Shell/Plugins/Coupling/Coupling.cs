@@ -121,7 +121,7 @@ internal class Coupling : PluginBase
         var sets = Enum.GetValues<Semantics>()
             .ToDictionary(static n => n, static _ => new SortedDictionary<string, List<Couple>>());
 
-        await foreach (var couple in GetCouples(session, configCouple.User, rng))
+        await foreach (var couple in GetCouples(session, configCouple.User, rng, aux))
         {
             var (typeC, nameC) = configCouple.Parse(couple.Creditor);
             var (typeD, nameD) = configCouple.Parse(couple.Debitor);
@@ -214,10 +214,17 @@ internal class Coupling : PluginBase
         }
     }
 
-    private static IAsyncEnumerable<Couple> GetCouples(Session session, string user, DateFilter rng)
-        => session.Accountant
-            .SelectVouchersAsync(Parsing.VoucherQuery($"{user.AsUser()} {rng.AsDateRange()}", session.Client))
+    private static IAsyncEnumerable<Couple> GetCouples(Session session, string user, DateFilter rng,
+        IQueryCompounded<IDetailQueryAtom> dq)
+    {
+        var vq0 = Parsing.VoucherQuery($"{user.AsUser()} {rng.AsDateRange()}", session.Client);
+        var vq = dq == null
+            ? vq0
+            : new IntersectQueries<IVoucherQueryAtom>(vq0, new SimpleVoucherQuery { DetailFilter = dq, Range = rng });
+        return session.Accountant
+            .SelectVouchersAsync(vq)
             .SelectMany(v => Decouple(v, user).ToAsyncEnumerable());
+    }
 
     private static IEnumerable<Couple> Decouple(Voucher voucher, string primaryUser)
     {

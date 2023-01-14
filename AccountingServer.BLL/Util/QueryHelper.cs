@@ -53,3 +53,24 @@ public sealed class UnionQueries<TAtom> : BinaryQueries<TAtom> where TAtom : cla
 
     public override OperatorType Operator => OperatorType.Union;
 }
+
+public sealed class SimpleDetailQuery : IDetailQueryAtom
+{
+    public TitleKind? Kind { get; init; }
+    public VoucherDetail Filter { get; init; }
+    public bool IsFundBidirectional { get; init; }
+    public int Dir { get; init; }
+    public string ContentPrefix { get; init; }
+    public string RemarkPrefix { get; init; }
+    public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
+
+}
+
+public sealed class SimpleVoucherQuery : IVoucherQueryAtom
+{
+    public bool ForAll { get; init; } = false;
+    public Voucher VoucherFilter { get; init; } = null;
+    public DateFilter Range { get; init; } = DateFilter.Unconstrained;
+    public IQueryCompounded<IDetailQueryAtom> DetailFilter { get; init; } = null;
+    public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
+}
