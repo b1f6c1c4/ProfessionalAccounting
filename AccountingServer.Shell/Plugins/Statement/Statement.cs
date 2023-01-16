@@ -108,6 +108,7 @@ internal class Statement : PluginBase
                     new SimpleDetailQuery { Filter = new() { Remark = "" } }));
             var sb = new StringBuilder();
             sb.AppendLine($"{parsed.Items.Count} parsed");
+            await using var vir = session.Accountant.Virtualize();
             await RunUnmark(session, sb, markerFilt);
             if (await RunMark(session, sb, nullFilt, parsed, marker)
                 || await RunCheck(session, sb, filt, tolerance))
@@ -117,11 +118,15 @@ internal class Statement : PluginBase
 
                 yield return "\x0c Transaction Aborted \x0c\n";
                 yield return sb.ToString();
+                yield return $"Virtualizer: {vir.CachedVouchers}\n";
                 yield return "\x0c Attached a copy of original CSV, ready for resubmit. \x0c\n";
                 yield return csv;
             }
             else
+            {
                 yield return sb.ToString();
+                yield return $"Virtualizer: {vir.CachedVouchers}\n";
+            }
         }
     }
 

@@ -41,31 +41,35 @@ public interface IDbAdapter
     ///     按检索式查找记账凭证
     /// </summary>
     /// <param name="query">检索式</param>
+    /// <param name="exclude">排除ID范围</param>
     /// <returns>匹配检索式的记账凭证</returns>
-    IAsyncEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query);
+    IAsyncEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query, IEnumerable<string> exclude = null);
 
     /// <summary>
     ///     按检索式查找细目
     /// </summary>
     /// <param name="query">检索式</param>
+    /// <param name="exclude">排除ID范围</param>
     /// <returns>匹配检索式的细目</returns>
-    IAsyncEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query);
+    IAsyncEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query, IEnumerable<string> exclude = null);
 
     /// <summary>
     ///     按检索式执行记账凭证分类汇总
     /// </summary>
     /// <param name="query">检索式</param>
     /// <param name="limit">返回结果数量上限</param>
+    /// <param name="exclude">排除ID范围</param>
     /// <returns>匹配检索式的记账凭证数量</returns>
-    IAsyncEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit = 0);
+    IAsyncEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit = 0, IEnumerable<string> exclude = null);
 
     /// <summary>
     ///     按检索式执行分类汇总
     /// </summary>
     /// <param name="query">检索式</param>
     /// <param name="limit">返回结果数量上限</param>
+    /// <param name="exclude">排除ID范围</param>
     /// <returns>分类汇总结果</returns>
-    IAsyncEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit = 0);
+    IAsyncEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit = 0, IEnumerable<string> exclude = null);
 
     /// <summary>
     ///     查找借贷不平的记账凭证
@@ -88,6 +92,13 @@ public interface IDbAdapter
     /// <param name="id">编号</param>
     /// <returns>是否成功</returns>
     ValueTask<bool> DeleteVoucher(string id);
+
+    /// <summary>
+    ///     按编号删除记账凭证
+    /// </summary>
+    /// <param name="ids">编号</param>
+    /// <returns>已删除的细目总数</returns>
+    ValueTask<long> DeleteVouchers(IEnumerable<string> ids);
 
     /// <summary>
     ///     按检索式删除记账凭证
