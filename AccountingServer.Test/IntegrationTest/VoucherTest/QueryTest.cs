@@ -247,16 +247,16 @@ public class VirtualizedQueryTest : QueryTestBase, IAsyncDisposable
     {
         m_Accountant = new(new(db: "accounting-test"), "b1", DateTime.UtcNow.Date);
 
-        m_Lock = m_Accountant.Virtualize();
         m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance).AsTask().Wait();
+        m_Lock = m_Accountant.Virtualize();
     }
 
     protected override Client Client => m_Accountant.Client;
 
     public async ValueTask DisposeAsync()
     {
-        await m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance);
         await m_Lock.DisposeAsync();
+        await m_Accountant.DeleteVouchersAsync(VoucherQueryUnconstrained.Instance);
     }
 
     protected override async ValueTask PrepareVoucher(Voucher voucher) => await m_Accountant.UpsertAsync(voucher);

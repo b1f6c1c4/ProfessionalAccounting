@@ -138,7 +138,7 @@ public class SubtotalTest : IAsyncDisposable
 
     [Fact]
     public void CachedTest()
-        => Assert.Equal(1, (m_Adapter as Virtualizer)?.CachedVouchers);
+        => Assert.Equal(2, (m_Adapter as Virtualizer)?.CachedVouchers);
 
     [Theory]
     [InlineData(6, "")]
