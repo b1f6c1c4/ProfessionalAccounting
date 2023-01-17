@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
@@ -36,7 +37,7 @@ public class Accountant : IHistoricalExchange
     private readonly AmortAccountant m_AmortAccountant;
 
     private readonly AssetAccountant m_AssetAccountant;
-    private readonly DbSession m_Db;
+    private DbSession m_Db;
 
     public Accountant(DbSession db, string user, DateTime dt)
     {
@@ -52,8 +53,45 @@ public class Accountant : IHistoricalExchange
     /// </summary>
     public int Limit { private get; init; }
 
-    public DbSession.VirtualizeLock Virtualize()
-        => m_Db.Virtualize();
+    public VirtualizeLock Virtualize()
+        => new(this);
+
+    public class VirtualizeLock : IAsyncDisposable
+    {
+        internal VirtualizeLock(Accountant accountant)
+        {
+            m_Accountant = accountant;
+            m_Db = m_Accountant.m_Db;
+            m_Accountant.m_Db = new Virtualizer(m_Db.Db);
+        }
+
+        private readonly Accountant m_Accountant;
+        private readonly DbSession m_Db;
+
+        public int CachedVouchers
+            => m_Accountant.m_Db is Virtualizer v
+                ? v.CachedVouchers
+                : throw new InvalidOperationException("The virtualizer has been aborted");
+
+        public async ValueTask DisposeAsync()
+        {
+            if (m_Accountant.m_Db is Virtualizer v)
+            {
+                await v.DisposeAsync();
+                m_Accountant.m_Db = m_Db;
+            }
+        }
+
+        public async ValueTask Abort()
+        {
+            if (m_Accountant.m_Db is Virtualizer v)
+            {
+                v.Abort();
+                await v!.DisposeAsync();
+                m_Accountant.m_Db = m_Db;
+            }
+        }
+    }
 
     #region Voucher
 
@@ -67,10 +105,18 @@ public class Accountant : IHistoricalExchange
         => m_Db.SelectVoucherDetails(query);
 
     public ValueTask<ISubtotalResult> SelectVoucherDetailsGroupedAsync(IGroupedQuery query)
-        => m_Db.SelectVoucherDetailsGrouped(query, Limit);
+    {
+        var res = m_Db.SelectVoucherDetailsGrouped(query, Limit);
+        var conv = new SubtotalBuilder(query.Subtotal, this);
+        return conv.Build(res);
+    }
 
     public ValueTask<ISubtotalResult> SelectVouchersGroupedAsync(IVoucherGroupedQuery query)
-        => m_Db.SelectVouchersGrouped(query, Limit);
+    {
+        var res = m_Db.SelectVouchersGrouped(query, Limit);
+        var conv = new SubtotalBuilder(query.Subtotal, this);
+        return conv.Build(res);
+    }
 
     public IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchersAsync(
         IQueryCompounded<IVoucherQueryAtom> query)

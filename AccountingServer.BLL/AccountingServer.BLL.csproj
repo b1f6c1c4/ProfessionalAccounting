@@ -12,13 +12,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Antlr4.Runtime" Version="4.6.6"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.2"/>
+        <PackageReference Include="Antlr4.Runtime" Version="4.6.6" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\AccountingServer.DAL\AccountingServer.DAL.csproj"/>
-        <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj"/>
+        <ProjectReference Include="..\AccountingServer.DAL\AccountingServer.DAL.csproj" />
+        <ProjectReference Include="..\AccountingServer.Entities\AccountingServer.Entities.csproj" />
     </ItemGroup>
 
 </Project>

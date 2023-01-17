@@ -18,7 +18,6 @@
 
 using System;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace AccountingServer.DAL;
 
@@ -36,15 +35,5 @@ public static class Facade
             return new MongoDbAdapter(uri, db, x509);
 
         throw new NotSupportedException("Uri无效");
-    }
-
-    public static IDbAdapter Virtualize(IDbAdapter db)
-        => new Virtualizer(db);
-
-    public static async ValueTask<IDbAdapter> UnVirtualize(IDbAdapter db)
-    {
-        var vir = db as Virtualizer ?? throw new InvalidOperationException("Not virtualized");
-        await vir.DisposeAsync();
-        return vir.Db;
     }
 }
