@@ -241,7 +241,7 @@ public class BLLQueryTest : QueryTestBase, IDisposable
 public class VirtualizedQueryTest : QueryTestBase, IAsyncDisposable
 {
     private readonly Accountant m_Accountant;
-    private readonly DbSession.VirtualizeLock m_Lock;
+    private readonly Accountant.VirtualizeLock m_Lock;
 
     public VirtualizedQueryTest()
     {

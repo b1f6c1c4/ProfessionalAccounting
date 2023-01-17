@@ -259,17 +259,14 @@ internal class MongoDbAdapter : IDbAdapter
 
     #region Voucher
 
-    private static FilterDefinition<Voucher> Exclude(IEnumerable<string> exclude)
-        => exclude == null ? Builders<Voucher>.Filter.Empty : Builders<Voucher>.Filter.Nin("_id", exclude);
-
     /// <inheritdoc />
     public async ValueTask<Voucher> SelectVoucher(string id) =>
         (await m_Vouchers.FindAsync(GetNQuery<Voucher>(id))).FirstOrDefault();
 
     /// <inheritdoc />
     public IAsyncEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query, IEnumerable<string> exclude = null) =>
-        m_Vouchers.Find(query.Accept(new MongoDbNativeVoucher()) & Exclude(exclude)).Sort(Builders<Voucher>.Sort.Ascending("date"))
-            .ToAsyncEnumerable();
+        m_Vouchers.Find(query.Accept(new MongoDbNativeVoucher()) & GetXQuery<Voucher>(exclude))
+            .Sort(Builders<Voucher>.Sort.Ascending("date")).ToAsyncEnumerable();
 
     private static FilterDefinition<BsonDocument> GetChk(IVoucherDetailQuery query)
         => query.ActualDetailFilter().Accept(new MongoDbNativeDetailUnwinded());
@@ -277,7 +274,7 @@ internal class MongoDbAdapter : IDbAdapter
     /// <inheritdoc />
     public IAsyncEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query, IEnumerable<string> exclude = null)
     {
-        var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher());
+        var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher()) & GetXQuery<Voucher>(exclude);
         var chk = GetChk(query);
         var srt = Builders<Voucher>.Sort.Ascending("date");
         return m_Vouchers.Aggregate().Match(preF).Sort(srt).Project(ProjectDetails).Unwind("detail").Match(chk)
@@ -289,7 +286,7 @@ internal class MongoDbAdapter : IDbAdapter
     public IAsyncEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit = 0, IEnumerable<string> exclude = null)
     {
         var level = query.Subtotal.PreprocessVoucher();
-        var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher());
+        var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher()) & GetXQuery<Voucher>(exclude);
 
         BsonDocument pprj;
         if (!level.HasFlag(SubtotalLevel.Day))
@@ -319,7 +316,7 @@ internal class MongoDbAdapter : IDbAdapter
     public IAsyncEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit = 0, IEnumerable<string> exclude = null)
     {
         var level = query.Subtotal.PreprocessDetail();
-        var preF = query.VoucherEmitQuery.VoucherQuery.Accept(new MongoDbNativeVoucher());
+        var preF = query.VoucherEmitQuery.VoucherQuery.Accept(new MongoDbNativeVoucher()) & GetXQuery<Voucher>(exclude);
         var chk = GetChk(query.VoucherEmitQuery);
 
         BsonDocument pprj;
@@ -446,7 +443,7 @@ internal class MongoDbAdapter : IDbAdapter
 
     /// <inheritdoc />
     public async ValueTask<long> DeleteVouchers(IEnumerable<string> ids)
-        => (await m_Vouchers.DeleteManyAsync(Builders<Voucher>.Filter.In("_id", ids))).DeletedCount;
+        => (await m_Vouchers.DeleteManyAsync(GetNQuery<Voucher>(ids))).DeletedCount;
 
     /// <inheritdoc />
     public async ValueTask<long> DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)

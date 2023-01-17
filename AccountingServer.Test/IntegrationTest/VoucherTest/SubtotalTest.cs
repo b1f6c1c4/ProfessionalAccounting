@@ -43,7 +43,6 @@ public class SubtotalTest : IAsyncDisposable
 
         m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance).AsTask().Wait();
 
-        m_Adapter = Facade.Virtualize(m_Adapter);
         m_Adapter.Upsert(new Voucher[]
             {
                 new()
@@ -131,14 +130,7 @@ public class SubtotalTest : IAsyncDisposable
     }
 
     public async ValueTask DisposeAsync()
-    {
-        m_Adapter = await Facade.UnVirtualize(m_Adapter);
-        m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance).AsTask().Wait();
-    }
-
-    [Fact]
-    public void CachedTest()
-        => Assert.Equal(2, (m_Adapter as Virtualizer)?.CachedVouchers);
+        => await m_Adapter.DeleteVouchers(VoucherQueryUnconstrained.Instance);
 
     [Theory]
     [InlineData(6, "")]

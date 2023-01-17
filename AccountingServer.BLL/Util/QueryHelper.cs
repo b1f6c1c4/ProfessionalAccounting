@@ -63,7 +63,6 @@ public sealed class SimpleDetailQuery : IDetailQueryAtom
     public string ContentPrefix { get; init; }
     public string RemarkPrefix { get; init; }
     public T Accept<T>(IQueryVisitor<IDetailQueryAtom, T> visitor) => visitor.Visit(this);
-
 }
 
 public sealed class SimpleVoucherQuery : IVoucherQueryAtom

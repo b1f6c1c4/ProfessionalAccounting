@@ -40,6 +40,24 @@ internal static class MongoDbNative
     public static FilterDefinition<T> GetNQuery<T>(string id) => Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
 
     /// <summary>
+    ///     按编号查询<c>ObjectId</c>
+    /// </summary>
+    /// <param name="ids">编号</param>
+    /// <returns>Bson查询</returns>
+    public static FilterDefinition<T> GetNQuery<T>(IEnumerable<string> ids)
+        => Builders<T>.Filter.In("_id", ids.Select(ObjectId.Parse));
+
+    /// <summary>
+    ///     按编号查询<c>ObjectId</c>
+    /// </summary>
+    /// <param name="ids">编号</param>
+    /// <returns>Bson查询</returns>
+    public static FilterDefinition<T> GetXQuery<T>(IEnumerable<string> ids)
+        => ids == null
+            ? Builders<T>.Filter.Empty
+            : Builders<T>.Filter.Nin("_id", ids.Select(ObjectId.Parse));
+
+    /// <summary>
     ///     按编号查询<c>Guid</c>
     /// </summary>
     /// <param name="id">编号</param>
