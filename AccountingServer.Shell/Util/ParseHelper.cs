@@ -196,7 +196,6 @@ public static class ParseHelper
     /// <param name="expr">表达式</param>
     /// <param name="opt">字符串</param>
     /// <returns>是否匹配</returns>
-    // ReSharper disable once UnusedParameter.Global
     public static bool Optional(this FacadeBase facade, ref string expr, string opt)
     {
         expr = expr.TrimStart();
@@ -205,6 +204,26 @@ public static class ParseHelper
 
         expr = expr[opt.Length..];
         return true;
+    }
+
+    /// <summary>
+    ///     匹配可选的非零长度字符串
+    /// </summary>
+    /// <param name="facade">占位符</param>
+    /// <param name="expr">表达式</param>
+    /// <param name="opts">字符串</param>
+    /// <returns>是否匹配</returns>
+    public static string Optional(this FacadeBase facade, ref string expr, params string[] opts)
+    {
+        expr = expr.TrimStart();
+        foreach (var opt in opts)
+            if (expr.StartsWith(opt, StringComparison.Ordinal))
+            {
+                expr = expr[opt.Length..];
+                return opt;
+            }
+
+        return null;
     }
 
     /// <summary>
