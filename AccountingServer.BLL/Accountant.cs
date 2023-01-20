@@ -70,7 +70,12 @@ public class Accountant : IHistoricalExchange
 
         public int CachedVouchers
             => m_Accountant.m_Db is Virtualizer v
-                ? v.CachedVouchers
+                ? v.CachedVouchers()
+                : throw new InvalidOperationException("The virtualizer has been aborted");
+
+        public override string ToString()
+            => m_Accountant.m_Db is Virtualizer v
+                ? v.ToString()
                 : throw new InvalidOperationException("The virtualizer has been aborted");
 
         public async ValueTask DisposeAsync()

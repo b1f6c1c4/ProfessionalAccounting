@@ -128,6 +128,6 @@ internal partial class CarryShell : IShellComponent
                         yield return s;
             }
 
-        yield return $"=== Total vouchers: {vir.CachedVouchers}\n";
+        yield return $"=== Total vouchers: {vir}\n";
     }
 }
