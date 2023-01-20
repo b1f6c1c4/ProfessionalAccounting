@@ -40,9 +40,26 @@ internal class Utilities : PluginBase
     {
         await using var vir = session.Accountant.Virtualize();
         var abbr = Parsing.Token(ref expr);
-        while (!string.IsNullOrWhiteSpace(expr))
+        var cont = Parsing.Optional(ref expr, "++", "--") switch
+            {
+                "++" => 1,
+                "--" => -1,
+                _ => 0,
+            };
+        var dt = cont != 0 ? Parsing.UniqueTime(ref expr, session.Client) : null;
+        for (; !string.IsNullOrWhiteSpace(expr); dt = dt?.AddDays(cont))
         {
-            var (voucher, ee) = await GenerateVoucher(session, abbr, expr);
+            if (dt.HasValue)
+                switch (Parsing.Optional(ref expr, ".", "<"))
+                {
+                    case ".":
+                        continue;
+                    case "<":
+                        dt = dt.Value.AddDays(-2 * cont);
+                        continue;
+                }
+
+            var (voucher, ee) = await GenerateVoucher(session, abbr, expr, dt);
             expr = ee;
             if (voucher == null)
                 continue;
@@ -69,10 +86,12 @@ internal class Utilities : PluginBase
     /// <param name="session">客户端会话</param>
     /// <param name="abbr">常见记账凭证名称</param>
     /// <param name="expr">表达式</param>
+    /// <param name="start">开始日期</param>
     /// <returns>记账凭证</returns>
-    private async ValueTask<(Voucher, string)> GenerateVoucher(Session session, string abbr, string expr)
+    private async ValueTask<(Voucher, string)> GenerateVoucher(Session session, string abbr, string expr,
+        DateTime? start)
     {
-        var time = Parsing.UniqueTime(ref expr, session.Client) ?? session.Client.Today;
+        var time = start ?? Parsing.UniqueTime(ref expr, session.Client) ?? session.Client.Today;
 
         var template = Cfg.Get<UtilTemplates>().Templates.FirstOrDefault(t => t.Name == abbr) ??
             throw new KeyNotFoundException($"找不到常见记账凭证{abbr}");

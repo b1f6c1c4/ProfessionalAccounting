@@ -1,5 +1,11 @@
 Utilities帮助文档
 
 常见记账凭证自动填写插件Utilities
-$u$ nm (dt [value])+
-其中dt表示日期，nm意义如下：（打*的表示要写value）
+
+$u$ <nm> (<dt> [<value>])+
+其中<dt>表示日期
+
+$u$ <nm> "++" <dt> (<value>|".")+
+其中<dt>表示开始日期，连续登记记账凭证，跳过日期填"."
+
+<nm>意义如下：（打*的表示要写<value>）
