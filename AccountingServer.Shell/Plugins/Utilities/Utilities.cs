@@ -39,9 +39,10 @@ internal class Utilities : PluginBase
     public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         await using var vir = session.Accountant.Virtualize();
+        var abbr = Parsing.Token(ref expr);
         while (!string.IsNullOrWhiteSpace(expr))
         {
-            var (voucher, ee) = await GenerateVoucher(session, expr);
+            var (voucher, ee) = await GenerateVoucher(session, abbr, expr);
             expr = ee;
             if (voucher == null)
                 continue;
@@ -49,7 +50,7 @@ internal class Utilities : PluginBase
             await session.Accountant.UpsertAsync(voucher);
         }
 
-        yield return $"{vir.CachedVouchers}\n";
+        yield return $"{vir}\n";
     }
 
     /// <inheritdoc />
@@ -59,19 +60,19 @@ internal class Utilities : PluginBase
             yield return s;
 
         foreach (var util in Cfg.Get<UtilTemplates>().Templates)
-            yield return $"{util.Name,20}{util.Description}\n";
+            yield return $"{util.Name,20}{(util.TemplateType == UtilTemplateType.Fixed ? ' ' : '*')}{util.Description}\n";
     }
 
     /// <summary>
     ///     根据表达式生成记账凭证
     /// </summary>
     /// <param name="session">客户端会话</param>
+    /// <param name="abbr">常见记账凭证名称</param>
     /// <param name="expr">表达式</param>
     /// <returns>记账凭证</returns>
-    private async ValueTask<(Voucher, string)> GenerateVoucher(Session session, string expr)
+    private async ValueTask<(Voucher, string)> GenerateVoucher(Session session, string abbr, string expr)
     {
         var time = Parsing.UniqueTime(ref expr, session.Client) ?? session.Client.Today;
-        var abbr = Parsing.Token(ref expr);
 
         var template = Cfg.Get<UtilTemplates>().Templates.FirstOrDefault(t => t.Name == abbr) ??
             throw new KeyNotFoundException($"找不到常见记账凭证{abbr}");
