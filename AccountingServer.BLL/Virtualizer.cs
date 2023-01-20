@@ -37,6 +37,11 @@ internal class Virtualizer : DbSession, IAsyncDisposable
         private List<Voucher> m_Created = new();
         private readonly HashSet<string> m_Removed = new();
         public int Count => m_Modified.Count + m_Created.Count + m_Removed.Count;
+        private long WriteHits { get; set; }
+        public long ReadHits { get; set; }
+
+        public override string ToString()
+            => $"M{m_Modified.Count}+C{m_Created.Count}+R{m_Removed.Count}=T{Count}; WH{WriteHits}, RH{ReadHits}";
 
         public bool Upsert(Voucher voucher)
         {
@@ -45,9 +50,10 @@ internal class Virtualizer : DbSession, IAsyncDisposable
             else
             {
                 m_Removed.Remove(voucher.ID);
-                m_Modified.Add(voucher.ID, new(voucher));
+                m_Modified[voucher.ID] = new(voucher);
             }
 
+            WriteHits++;
             return true;
         }
 
@@ -61,6 +67,7 @@ internal class Virtualizer : DbSession, IAsyncDisposable
                 return false;
 
             m_Removed.Add(id);
+            WriteHits++;
             return true;
         }
 
@@ -70,7 +77,9 @@ internal class Virtualizer : DbSession, IAsyncDisposable
             m_Created = m_Created.Where(v => query(v)).ToList();
             m_Modified = m_Modified.Where(kvp => query(kvp.Value))
                 .ToDictionary(static kvp => kvp.Key, static kvp => kvp.Value);
-            return m_Created.LongCount() + m_Modified.LongCount() - cnt;
+            var res = m_Created.LongCount() + m_Modified.LongCount() - cnt;
+            WriteHits += res;
+            return res;
         }
 
         public IEnumerable<string> Ex => m_Modified.Keys.Concat(m_Removed);
@@ -86,7 +95,13 @@ internal class Virtualizer : DbSession, IAsyncDisposable
         }
 
         public Voucher this[string id]
-            => m_Modified.ContainsKey(id) ? m_Modified[id] : null;
+        {
+            get
+            {
+                ReadHits++;
+                return m_Modified.ContainsKey(id) ? m_Modified[id] : null;
+            }
+        }
 
         public IEnumerator<Voucher> GetEnumerator()
             => m_Modified.Values.Concat(m_Created).GetEnumerator();
@@ -97,7 +112,11 @@ internal class Virtualizer : DbSession, IAsyncDisposable
 
     private readonly Cache m_Cache = new();
 
-    public int CachedVouchers => m_Cache.Count;
+    public int CachedVouchers()
+        => m_Cache.Count;
+
+    public override string ToString()
+        => m_Cache.ToString();
 
     public void Abort()
         => m_Cache.Materialize();
@@ -114,10 +133,12 @@ internal class Virtualizer : DbSession, IAsyncDisposable
                 throw new ApplicationException("Cannot write-back voucher cache: remove");
     }
 
-    private static async IAsyncEnumerable<T> J<T>(IEnumerable<T> lhs, IAsyncEnumerable<T> rhs)
+    private async IAsyncEnumerable<T> J<T>(IEnumerable<T> lhs, IAsyncEnumerable<T> rhs)
     {
         var lst = await rhs.ToListAsync();
+        var cnt = lst.Count;
         lst.AddRange(lhs);
+        m_Cache.ReadHits += lst.Count - cnt;
         foreach (var item in lst)
             yield return item;
     }

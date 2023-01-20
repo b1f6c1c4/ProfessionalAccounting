@@ -106,6 +106,7 @@ public class VirtualizerTest
             voucher.Remark = "r2";
             voucher.Details[0].Fund = 2;
             Assert.True(await ac.UpsertAsync(voucher));
+            Assert.Equal(1, await ac.UpsertAsync(new[] { voucher }));
             voucher.Remark = "r3";
             voucher.Details[0].Fund = 3;
             Assert.Equal(1, vir.CachedVouchers);

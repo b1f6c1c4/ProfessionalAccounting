@@ -118,14 +118,14 @@ internal class Statement : PluginBase
 
                 yield return "\x0c Transaction Aborted \x0c\n";
                 yield return sb.ToString();
-                yield return $"Virtualizer: {vir.CachedVouchers}\n";
+                yield return $"Virtualizer: {vir}\n";
                 yield return "\x0c Attached a copy of original CSV, ready for resubmit. \x0c\n";
                 yield return csv;
             }
             else
             {
                 yield return sb.ToString();
-                yield return $"Virtualizer: {vir.CachedVouchers}\n";
+                yield return $"Virtualizer: {vir}\n";
             }
         }
     }
