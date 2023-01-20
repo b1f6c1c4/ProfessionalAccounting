@@ -1,6 +1,5 @@
 Utilities帮助文档
 
 常见记账凭证自动填写插件Utilities
-每个参数独立作用，格式为：
-dt nm
-其中dt表示日期，nm意义如下：
+$u$ nm (dt [value])+
+其中dt表示日期，nm意义如下：（打*的表示要写value）
