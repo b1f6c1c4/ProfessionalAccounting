@@ -76,24 +76,21 @@ internal class YieldRateSolver
     /// <returns>收益率</returns>
     public double Solve()
     {
-        var lambda = 1D;
+        var lambda = 1D; // learning rate
 
-        while (true)
+        var credit = 1000000; // avoid dead loop
+        while (credit-- > 0)
         {
-            var b = 1D;
+            var b = 1D; // the searching variable
 
-            var dir = 0;
-            var flag = false;
-            while (true)
+            var dir = 0; // search direction
+            while (credit-- > 0)
             {
                 Value(b, out var v, out var d);
                 if (v.IsZero())
-                {
-                    flag = true;
-                    break;
-                }
+                    return b - 1;
 
-                var del = v / d;
+                var del = v / d; // Newton
                 if (dir > 0)
                 {
                     if (del < 0)
@@ -110,10 +107,9 @@ internal class YieldRateSolver
                 b -= lambda * del;
             }
 
-            if (flag)
-                return b - 1;
-
             lambda /= 2;
         }
+
+        return double.NaN;
     }
 }

@@ -28,18 +28,16 @@
   <title name="原材料" id="1403" dir="2"/>
   <title name="库存商品" id="1405" dir="2"/>
   <title name="包装物及低值易耗品" id="1412" dir="2"/>
-  <title name="贵金属" id="1441" dir="2"/>
-  <title name="持有至到期投资" id="1501" virtual="true">
+  <title name="贵金属" id="1441" virtual="true">
+    <subTitle name="成本" id="1" dir="2"/>
+    <subTitle name="公允价值变动" id="2"/>
+  </title>
+  <title name="债权投资" id="1501" virtual="true">
     <subTitle name="投资成本" id="1" dir="2"/>
     <subTitle name="利息调整" id="2"/>
     <subTitle name="应计利息" id="3"/>
   </title>
-  <title name="持有至到期投资减值准备" id="1502" dir="-2"/>
-  <title name="可供出售金融资产" id="1503" virtual="true">
-    <subTitle name="成本" id="1" dir="2"/>
-    <subTitle name="公允价值变动" id="2"/>
-  </title>
-  <title name="可供出售金融资产减值准备" id="1504" dir="-2"/>
+  <title name="债权投资减值准备" id="1502" dir="-2"/>
   <title name="长期股权投资" id="1511" virtual="true">
     <subTitle name="成本" id="1" dir="2"/>
     <subTitle name="损益调整" id="2"/>
@@ -80,12 +78,12 @@
   <title name="其他业务收入" id="6051" dir="-1"/>
   <title name="公允价值变动损益" id="6101" virtual="true">
     <subTitle name="交易性金融资产" id="1"/>
+    <subTitle name="贵金属" id="4"/>
   </title>
   <title name="投资收益" id="6111" virtual="true">
     <subTitle name="长期股权投资" id="1"/>
     <subTitle name="交易性金融资产" id="2"/>
-    <subTitle name="可供出售金融资产" id="5"/>
-    <subTitle name="持有至到期投资" id="6"/>
+    <subTitle name="债权投资" id="6"/>
   </title>
   <title name="营业外收入" id="6301" virtual="true">
     <subTitle name="处置固定资产利得" id="1" dir="-1"/>
@@ -124,7 +122,7 @@
     <subTitle name="长期投资减值损失" id="4" dir="1"/>
     <subTitle name="固定资产减值损失" id="5" dir="1"/>
     <subTitle name="无形资产减值损失" id="6" dir="1"/>
-    <subTitle name="持有至到期投资减值损失" id="9" dir="1"/>
+    <subTitle name="债权投资减值损失" id="9" dir="1"/>
   </title>
   <title name="营业外支出" id="6711" virtual="true">
     <subTitle name="处置固定资产净损失" id="1" dir="1"/>

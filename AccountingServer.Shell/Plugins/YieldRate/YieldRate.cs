@@ -16,6 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.BLL.Parsing;
@@ -36,19 +37,31 @@ internal class YieldRate : PluginBase
     {
         FacadeF.ParsingF.Eof(expr);
 
-        var result = await session.Accountant.RunGroupedQueryAsync("T1101+T611102+T1501+T611106 G``cd");
-        var resx = await session.Accountant.RunGroupedQueryAsync("T1101+T1501``c");
-        foreach (
-            var (grp, rte) in
-            result.Items.Cast<ISubtotalContent>()
-                .Join(
-                    resx.Items.Cast<ISubtotalContent>(), static grp => grp.Content, static rsx => rsx.Content,
-                    (grp, bal) => (Group: grp,
-                        Rate: GetRate(session,
-                            grp.Items.Cast<ISubtotalDate>().OrderBy(static b => b.Date, new DateComparer()).ToList(),
-                            bal.Fund)))
-                .OrderByDescending(static kvp => kvp.Rate))
-            yield return $"{grp.Content.CPadRight(30)} {$"{rte * 360:P2}",7}\n";
+        var result = await session.Accountant.RunGroupedQueryAsync("Investment-T101204 G``Ccd");
+        var dc = new DateComparer();
+        var lst = new List<Investment>();
+        foreach (var grpC in result.Items.Cast<ISubtotalCurrency>())
+        foreach (var grpc in grpC.Items.Cast<ISubtotalContent>())
+        {
+            var pv = await session.Accountant.RunGroupedQueryAsync(
+                $"@{grpC.Currency} Investment {grpc.Content.Quotation('\'')} * Asset``v");
+            var ti = await session.Accountant.RunGroupedQueryAsync(
+                $"@{grpC.Currency} Investment {grpc.Content.Quotation('\'')} * Asset T000001 > ``v");
+            var days = grpc.Items.Cast<ISubtotalDate>().OrderBy(static b => b.Date, dc).ToList();
+            var daily = GetRate(session, days, pv.Fund);
+            lst.Add(new(
+                grpC.Currency, grpc.Content,
+                days.First().Date!.Value, days.Last().Date!.Value, 0,
+                ti.Fund, pv.Fund - grpc.Fund, pv.Fund, daily, Math.Pow(1 + daily, 365.2425) - 1
+            ));
+        }
+
+        yield return $"{"".CPadRight(30)} Start   ~ EndDate  TotalInvest      NetGain    PresentValue APY\n";
+        foreach (var inv in lst.OrderBy(static inv => -inv.Apy))
+            yield return $"{inv.Content.CPadRight(30)} {inv.StartDate.AsDate()}~{inv.EndDate.AsDate()} "
+                + $"{inv.TotalInvest.AsCurrency(inv.Currency).CPadLeft(13)} {inv.NetGain.AsCurrency(inv.Currency).CPadLeft(13)} "
+                + $"{inv.PresentValue.AsCurrency(inv.Currency).CPadLeft(13)} "
+                + $"{inv.Apy:P5}\n";
     }
 
     /// <summary>
@@ -58,7 +71,7 @@ internal class YieldRate : PluginBase
     /// <param name="lst">现金流</param>
     /// <param name="pv">现值</param>
     /// <returns>实际收益率</returns>
-    private double GetRate(Session session, IReadOnlyList<ISubtotalDate> lst, double pv)
+    private static double GetRate(Session session, IReadOnlyList<ISubtotalDate> lst, double pv)
     {
         if (!pv.IsZero())
             return
@@ -71,4 +84,8 @@ internal class YieldRate : PluginBase
                 lst.Select(b => lst[^1].Date!.Value.Subtract(b.Date!.Value).TotalDays),
                 lst.Select(static b => b.Fund)).Solve();
     }
+
+    private record Investment(string Currency, string Content,
+        DateTime StartDate, DateTime EndDate, int Days,
+        double TotalInvest, double NetGain, double PresentValue, double DailyInterest, double Apy);
 }
