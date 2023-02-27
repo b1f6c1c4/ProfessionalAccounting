@@ -183,8 +183,13 @@ public class MatchHelperTest
     [Theory]
     [InlineData(true, null, null)]
     [InlineData(false, 500, TitleKind.Asset)]
+    [InlineData(false, 500, TitleKind.Liquidity)]
+    [InlineData(true, 1099, TitleKind.Liquidity)]
+    [InlineData(false, 1200, TitleKind.Liquidity)]
     [InlineData(true, 1500, TitleKind.Asset)]
+    [InlineData(false, 1500, TitleKind.Liquidity)]
     [InlineData(false, 2000, TitleKind.Asset)]
+    [InlineData(false, 2000, TitleKind.Liquidity)]
     [InlineData(false, 1500, TitleKind.Liability)]
     [InlineData(true, 2500, TitleKind.Liability)]
     [InlineData(false, 3000, TitleKind.Liability)]
@@ -197,9 +202,20 @@ public class MatchHelperTest
     [InlineData(false, 6300, TitleKind.Expense)]
     [InlineData(true, 6500, TitleKind.Expense)]
     [InlineData(false, 7000, TitleKind.Expense)]
-    public void DetailMatchTestKind(bool expected, int? value, TitleKind? kind)
+    [InlineData(false, 1012, TitleKind.Investment, 00)]
+    [InlineData(true, 1012, TitleKind.Investment, 04)]
+    [InlineData(false, 1100, TitleKind.Investment)]
+    [InlineData(true, 1101, TitleKind.Investment)]
+    [InlineData(true, 1599, TitleKind.Investment)]
+    [InlineData(true, 6199, TitleKind.Investment)]
+    [InlineData(true, 1601, TitleKind.Spending)]
+    [InlineData(false, 1602, TitleKind.Spending)]
+    [InlineData(true, 6401, TitleKind.Spending)]
+    [InlineData(true, 6602, TitleKind.Spending, 00)]
+    [InlineData(false, 6602, TitleKind.Spending, 11)]
+    public void DetailMatchTestKind(bool expected, int? value, TitleKind? kind, int? sub = null)
         => Assert.Equal(expected,
-            MatchHelper.IsMatch(new() { Title = value }, new(), kind));
+            MatchHelper.IsMatch(new() { Title = value, SubTitle = sub}, new(), kind));
 
     [Theory]
     [InlineData(true, null, 0)]

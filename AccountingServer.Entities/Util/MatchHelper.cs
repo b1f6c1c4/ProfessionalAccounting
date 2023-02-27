@@ -93,11 +93,36 @@ public static class MatchHelper
         switch (kind)
         {
             case TitleKind.Asset when voucherDetail.Title is not (>= 1000 and < 2000):
+            case TitleKind.Liquidity when voucherDetail.Title is not (>= 1000 and < 1100):
             case TitleKind.Liability when voucherDetail.Title is not (>= 2000 and < 3000):
             case TitleKind.Equity when voucherDetail.Title is not (>= 4000 and < 5000):
             case TitleKind.Revenue when voucherDetail.Title is not (>= 6000 and < 6400):
             case TitleKind.Expense when voucherDetail.Title is not (>= 6400 and < 7000):
                 return false;
+            case TitleKind.Investment:
+                switch (voucherDetail.Title)
+                {
+                    case 1101 or 1441 or >= 1500 and < 1600 or >= 6100 and < 6200:
+                    case 1012 when voucherDetail.SubTitle is 4:
+                        break;
+                    default:
+                        return false;
+                }
+
+                break;
+            case TitleKind.Spending:
+                switch (voucherDetail.Title)
+                {
+                    case >= 1400 and < 1420:
+                    case 6602 when voucherDetail.SubTitle is not (07 or 11):
+                    case 6401 or 6402 or 6603 or 1601 or 1604 or 1605 or 1701:
+                    case 6711 when voucherDetail.SubTitle is 09:
+                        break;
+                    default:
+                        return false;
+                }
+
+                break;
         }
 
         if (filter == null)

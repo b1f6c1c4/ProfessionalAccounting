@@ -141,6 +141,10 @@ internal abstract class MongoDbNativeDetail<T> : MongoDbNativeVisitor<T, IDetail
                 lst.Add(Builders<T>.Filter.Gte($"{p}title", 1000));
                 lst.Add(Builders<T>.Filter.Lt($"{p}title", 2000));
                 break;
+            case TitleKind.Liquidity:
+                lst.Add(Builders<T>.Filter.Gte($"{p}title", 1000));
+                lst.Add(Builders<T>.Filter.Lt($"{p}title", 1100));
+                break;
             case TitleKind.Liability:
                 lst.Add(Builders<T>.Filter.Gte($"{p}title", 2000));
                 lst.Add(Builders<T>.Filter.Lt($"{p}title", 3000));
@@ -156,6 +160,19 @@ internal abstract class MongoDbNativeDetail<T> : MongoDbNativeVisitor<T, IDetail
             case TitleKind.Expense:
                 lst.Add(Builders<T>.Filter.Gte($"{p}title", 6400));
                 lst.Add(Builders<T>.Filter.Lt($"{p}title", 7000));
+                break;
+            case TitleKind.Investment:
+                lst.Add(Builders<T>.Filter.In($"{p}title", new[] { 1101, 1441 })
+                    | (Builders<T>.Filter.Gte($"{p}title", 1500) & Builders<T>.Filter.Lt($"{p}title", 1600))
+                    | (Builders<T>.Filter.Gte($"{p}title", 6100) & Builders<T>.Filter.Lt($"{p}title", 6200))
+                    | (Builders<T>.Filter.Eq($"{p}title", 1012) & Builders<T>.Filter.Eq($"{p}subtitle", 04)));
+                break;
+            case TitleKind.Spending:
+                lst.Add(Builders<T>.Filter.In($"{p}title", new[] { 6401, 6402, 6603, 1601, 1604, 1605, 1701 })
+                    | (Builders<T>.Filter.Gte($"{p}title", 1400) & Builders<T>.Filter.Lt($"{p}title", 1420))
+                    | (Builders<T>.Filter.Eq($"{p}title", 6602) &
+                        Builders<T>.Filter.Nin($"{p}subtitle", new[] { 07, 11 }))
+                    | (Builders<T>.Filter.Eq($"{p}title", 6711) & Builders<T>.Filter.Eq($"{p}subtitle", 09)));
                 break;
             case null:
                 break;

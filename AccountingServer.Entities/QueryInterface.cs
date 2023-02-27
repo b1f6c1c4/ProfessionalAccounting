@@ -68,6 +68,11 @@ public enum TitleKind
     Asset,
 
     /// <summary>
+    ///     流动资产
+    /// </summary>
+    Liquidity,
+
+    /// <summary>
     ///     负债
     /// </summary>
     Liability,
@@ -86,6 +91,16 @@ public enum TitleKind
     ///     费用
     /// </summary>
     Expense,
+
+    /// <summary>
+    ///     投资
+    /// </summary>
+    Investment,
+
+    /// <summary>
+    ///     消费
+    /// </summary>
+    Spending,
 }
 
 /// <summary>

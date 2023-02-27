@@ -201,7 +201,7 @@ VoucherType
 	;
 
 TitleKind
-	:	'Asset' | 'Liability' | 'Equity' | 'Revenue' | 'Expense'
+	:	'Asset' | 'Liability' | 'Equity' | 'Revenue' | 'Expense' | 'Liquidity' | 'Investment' | 'Spending'
 	;
 
 UserSpec
