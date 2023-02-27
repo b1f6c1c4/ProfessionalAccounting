@@ -73,7 +73,7 @@ detailQuery
 	;
 
 title
-	:	DetailTitle | DetailTitleSubTitle
+	:	DetailTitle | DetailTitleSubTitle | DetailSubTitle
 	;
 
 range
@@ -245,6 +245,10 @@ DetailTitle
 
 DetailTitleSubTitle
 	:	'T' [1-9] [0-9] [0-9] [0-9] [0-9] [0-9]
+	;
+
+DetailSubTitle
+	:	'T0000' [0-9] [0-9]
 	;
 
 AllDate

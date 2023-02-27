@@ -26,7 +26,7 @@ internal partial class QueryParser
 {
     public partial class TitleContext : ITitle
     {
-        public int Title
+        public int? Title
         {
             get
             {
@@ -35,6 +35,9 @@ internal partial class QueryParser
 
                 if (DetailTitleSubTitle() != null)
                     return int.Parse(DetailTitleSubTitle().GetText().TrimStart('T')) / 100;
+
+                if (DetailSubTitle() != null)
+                    return null;
 
                 throw new MemberAccessException("表达式错误");
             }
@@ -49,6 +52,9 @@ internal partial class QueryParser
 
                 if (DetailTitleSubTitle() != null)
                     return int.Parse(DetailTitleSubTitle().GetText().TrimStart('T')) % 100;
+
+                if (DetailSubTitle() != null)
+                    return int.Parse(DetailSubTitle().GetText().TrimStart('T'));
 
                 throw new MemberAccessException("表达式错误");
             }

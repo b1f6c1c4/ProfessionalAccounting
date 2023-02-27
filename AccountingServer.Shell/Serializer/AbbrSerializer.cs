@@ -75,7 +75,7 @@ public class Abbreviation : ITitle
     [DefaultValue(null)]
     public string Content { get; set; }
 
-    public int Title { get; set; }
+    public int? Title { get; set; }
 
     [DefaultValue(null)]
     public int? SubTitle { get; set; }
