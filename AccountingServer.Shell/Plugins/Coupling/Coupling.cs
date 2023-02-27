@@ -75,24 +75,21 @@ internal class Coupling : PluginBase
         Ignored,
     }
 
-    private bool ParseEnum<T>(string s, out T? v) where T : struct
+    private bool ParseEnum<T>(string s, ref T? v) where T : struct
     {
-        v = null;
-        var member = typeof(T).GetMembers(BindingFlags.DeclaredOnly)
-            .SingleOrDefault(m =>
-                string.Equals(s, m.Name, StringComparison.InvariantCultureIgnoreCase) ||
-                string.Equals(s, (m.GetCustomAttribute(typeof(PropAttribute), false) as PropAttribute)?.Proposition));
-        if (member == null)
+        var nm = Enum.GetNames(typeof(T))
+            .SingleOrDefault(m => string.Equals(s, m, StringComparison.InvariantCultureIgnoreCase));
+        if (nm == null)
             return false;
 
-        v = (T?)(member as FieldInfo)?.GetValue(null);
+        v = Enum.Parse<T>(nm);
         return true;
     }
 
     public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         Semantics? sem = null;
-        Parsing.Token(ref expr, false, s => ParseEnum(s, out sem));
+        Parsing.Token(ref expr, false, s => ParseEnum(s, ref sem));
         var len = expr.Length;
         var aux = Parsing.PureDetailQuery(ref expr, session.Client);
         if (len == expr.Length)
