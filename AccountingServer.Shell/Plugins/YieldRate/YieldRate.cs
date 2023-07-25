@@ -52,16 +52,17 @@ internal class YieldRate : PluginBase
             lst.Add(new(
                 grpC.Currency, grpc.Content,
                 days.First().Date!.Value, days.Last().Date!.Value, 0,
-                ti.Fund, pv.Fund - grpc.Fund, pv.Fund, daily, Math.Pow(1 + daily, 365.2425) - 1
+                ti.Fund, pv.Fund - grpc.Fund, pv.Fund,
+                (pv.Fund - grpc.Fund) / ti.Fund, Math.Pow(1 + daily, 365.2425) - 1
             ));
         }
 
-        yield return $"{"".CPadRight(30)} Start   ~ EndDate  TotalInvest      NetGain    PresentValue APY\n";
+        yield return $"{"".CPadRight(30)} Start   ~ EndDate  TotalInvest      NetGain    PresentValue YieldRate  APY\n";
         foreach (var inv in lst.OrderBy(static inv => -inv.Apy))
             yield return $"{inv.Content.CPadRight(30)} {inv.StartDate.AsDate()}~{inv.EndDate.AsDate()} "
                 + $"{inv.TotalInvest.AsCurrency(inv.Currency).CPadLeft(13)} {inv.NetGain.AsCurrency(inv.Currency).CPadLeft(13)} "
                 + $"{inv.PresentValue.AsCurrency(inv.Currency).CPadLeft(13)} "
-                + $"{inv.Apy:P5}\n";
+                + $"{inv.YieldRate:P5}   {inv.Apy:P5}\n";
     }
 
     /// <summary>
@@ -87,5 +88,5 @@ internal class YieldRate : PluginBase
 
     private record Investment(string Currency, string Content,
         DateTime StartDate, DateTime EndDate, int Days,
-        double TotalInvest, double NetGain, double PresentValue, double DailyInterest, double Apy);
+        double TotalInvest, double NetGain, double PresentValue, double YieldRate, double Apy);
 }
