@@ -49,7 +49,7 @@ internal class SpreadSheet : PluginBase
         var cols = Cfg.Get<SheetTemplates>().Templates.Single(t => t.Name == abbr).Columns;
         var queries = cols.Select(col => ParsingF.PureDetailQuery(col.Query, session.Client)).ToList();
         var merged = Enumerable.Zip(cols, queries)
-            .Where(static cq => !cq.First.IsComplex)
+            .Where(static cq => !cq.First.Kind.HasFlag(SheetColumnKind.Auxiliary))
             .Select(static cq => cq.Second)
             .Aggregate(static (q1, q2) => new UnionQueries<IDetailQueryAtom>(q1, q2));
         var voucherF = new IntersectQueries<IVoucherQueryAtom>(filter, new SimpleVoucherQuery { DetailFilter = merged });
@@ -76,27 +76,27 @@ internal class SpreadSheet : PluginBase
                 for (var i = 0; i < cols.Count; i++)
                 {
                     sb.Append("\t");
-                    var flt = grpC.Where(d => d.IsMatch(queries[i]));
-                    if (cols[i].IsComplex)
+                    var flt = grpC.Where(d => d.IsMatch(queries[i])).ToList();
+                    if (cols[i].Kind.HasFlag(SheetColumnKind.Complex))
                     {
                         var flag = true;
+                        sb.Append('\'');
                         foreach (var d in flt)
                         {
                             if (!flag)
                                 sb.Append("; ");
                             flag = false;
-                            if (!string.IsNullOrEmpty(d.Content))
+                            if (!string.IsNullOrEmpty(d.Content) && cols[i].Kind.HasFlag(SheetColumnKind.Content))
                                 sb.Append(d.Content);
-                            else
+                            else if (cols[i].Kind.HasFlag(SheetColumnKind.Title))
                                 sb.Append(TitleManager.GetTitleName(d.Title, d.SubTitle));
                             hasColumn = true;
                         }
                     }
-                    else if (flt.Any())
+                    else if (flt.Count > 0)
                     {
-                        var value = flt.Sum(static d => d.Fund);
-                        sb.Append(value.AsCurrency(grpC.Key));
-                        hasColumn = true;
+                        sb.Append(flt.Sum(static d => d.Fund).AsCurrency(grpC.Key));
+                        hasColumn = !cols[i].Kind.HasFlag(SheetColumnKind.Auxiliary);
                     }
                 }
                 if (!hasColumn)

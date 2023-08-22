@@ -46,11 +46,25 @@ public class SheetTemplate
 }
 
 [Serializable]
+[Flags]
+public enum SheetColumnKind
+{
+    [XmlEnum(Name = "simple")] None = 0b0000_0000,
+    [XmlEnum(Name = "aux")] Auxiliary = 0b1000_0000,
+    [XmlEnum(Name = "cmplx")] Complex = 0b1100_0000,
+    [XmlEnum(Name = "content")] Content = 0b1100_0011,
+    [XmlEnum(Name = "title")] Title = 0b1100_0001,
+}
+
+[Serializable]
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 public class SheetColumn
 {
     [XmlAttribute("name")]
     public string Name { get; set; }
+
+    [XmlAttribute("type")]
+    public SheetColumnKind Kind { get; set; }
 
     [XmlAttribute("complex")]
     public bool IsComplex { get; set; }
