@@ -18,7 +18,7 @@
 
 const notice = `ProfessionalAccounting
 Copyright (C) 2020-2023 b1f6c1c4
-Copyright (C) 2021-2022 Iori Oikawa
+Copyright (C) 2021-2023 Iori Oikawa
 This is free software, licensed under AGPL-v3.0-only.
 See the source code for copying conditions.
 
