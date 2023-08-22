@@ -37,6 +37,7 @@ public class ConfigFilesManager
                 "Coupling",
                 "Util",
                 "Abbr",
+                "Sheet",
             };
         await Task.WhenAll(names.Select(Cfg.RegisterName));
         await foreach (var s in Cfg.ReloadAll())

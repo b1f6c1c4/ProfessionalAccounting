@@ -28,6 +28,7 @@ using AccountingServer.Shell.Plugins.Composite;
 using AccountingServer.Shell.Plugins.Coupling;
 using AccountingServer.Shell.Plugins.CreditCardConvert;
 using AccountingServer.Shell.Plugins.Interest;
+using AccountingServer.Shell.Plugins.SpreadSheet;
 using AccountingServer.Shell.Plugins.Statement;
 using AccountingServer.Shell.Plugins.Utilities;
 using AccountingServer.Shell.Plugins.YieldRate;
@@ -56,6 +57,7 @@ internal class PluginShell : IShellComponent
                 ["ccc"] = new CreditCardConvert(),
                 ["chq"] = new Cheque(),
                 ["cp"] = new Coupling(),
+                ["ss"] = new SpreadSheet(),
                 ["stmt"] = new Statement(),
                 ["u"] = new Utilities(),
                 ["yr"] = new YieldRate(),

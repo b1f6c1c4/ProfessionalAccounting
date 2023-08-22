@@ -1,0 +1,7 @@
+SpreadSheet帮助文档
+
+表格对账插件SpreadSheet
+
+$s$ <nm> [<记账凭证过滤器>]
+
+<nm>意义如下：

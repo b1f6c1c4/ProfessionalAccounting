@@ -56,6 +56,7 @@
     - `Cash.xml` - 现金流插件相关配置
     - `Composite.xml` - 常用检索式列表
     - `Util.xml` - 快速登记记账凭证插件的配置
+    - `SpreadSheet.xml` - 表格形式对账插件的配置
 
 ### 配置服务器和客户端x509证书
 
@@ -175,6 +176,7 @@ docker-compose up -d
 - [现金流预估](AccountingServer.Shell/Plugins/CashFlow)
 - [信用卡外币交易入账](AccountingServer.Shell/Plugins/CreditCardConvert)
 - [信用卡对账](AccountingServer.Shell/Plugins/Statement)
+- [表格对账统计](AccountingServer.Shell/Plugins/SpreadSheet)
 
 ## 开发
 
