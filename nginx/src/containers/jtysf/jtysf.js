@@ -52,7 +52,7 @@ export default function Jtysf() {
 
         if (fund) {
             form.push(html`<${FlatSelector} title="payer" value=${payer} onValue=${setPayer}
-                isDisabled=${isLoading || isFinished} query=${`rps ${cf} : U T101201 G !U`} />`);
+                isDisabled=${isLoading || isFinished} query=${`rps ${cf} G : U T101201 !U`} />`);
 
             if (payer) {
                 form.push(html`<${FlatSelector} title="card" value=${card} onValue=${setCard}
