@@ -1,0 +1,4 @@
+FROM b1f6c1c4/accounting-frontend
+
+RUN rm /etc/nginx/conf.d/h3.nginx.conf
+COPY h1.nginx.conf /etc/nginx/conf.d/

@@ -24,11 +24,15 @@
 
 ## 安装与配置
 
+本项目提供两种部署方式：
+1. 本地/内网调试（无TLS，无客户端认证，无可靠数据存储）
+1. 网络部署（TLS，客户端证书，MongoDB Atlas数据库后端）
+
 ### 准备
 
 首先准备一台Linux服务器，安装以下软件：
 - docker，推荐采用[get.docker.com](https://get.docker.com/)
-- openssl（请自行Google安装方法）
+- （仅限网络部署）openssl（请自行检索安装方法）
 
 ### 配置记账系统功能
 
@@ -36,11 +40,12 @@
 此处推荐大家使用[git-get](https://github.com/b1f6c1c4/git-get)来下载。
 
 1. ssh登录*服务器*
-1. 下载`docker-compose.yml`文件：
+1. 下载`docker-compose.yml`文件（网络部署）或者`docker-compose.local.yml`（本地部署）：
     ```bash
     git get b1f6c1c4/ProfessionalAccounting -- docker-compose.yml
+    git get b1f6c1c4/ProfessionalAccounting -- docker-compose.local.yml
     ```
-1. 下载示例配置文件夹，放在`/data/accounting/config.d/`：
+1. 下载示例配置文件夹，放在`/data/accounting/config.d/`（网络部署）：
     ```bash
     mkdir -p /data/accounting
     git get -o /data/accounting/config.d b1f6c1c4/ProfessionalAccounting -- example/config.d/
@@ -58,7 +63,7 @@
     - `Util.xml` - 快速登记记账凭证插件的配置
     - `SpreadSheet.xml` - 表格形式对账插件的配置
 
-### 配置服务器和客户端x509证书
+### 配置服务器和客户端x509证书（仅限网络部署）
 
 1. 将服务器证书和私钥（`server.crt`，`server.key`）放在服务器的`/data/accounting/certs`目录下
     1. 如果你没有服务器证书，推荐使用 [acme.sh](https://github.com/acmesh-official/acme.sh/wiki/%E8%AF%B4%E6%98%8E) 来免费获得一个
@@ -85,13 +90,20 @@
 1. 在客户端上安装证书：
     1. 恕不赘述，请自行Google `install p12 certificate on XXX`（`XXX`=Linux/FreeBSD/Windows/MacOS/iOS/iPadOS/...）
 
-### 启动
+### 启动、停止
 
 直接使用docker-compose启动，将在18080端口侦听请求：
 
-```bash
-docker-compose up -d
-```
+- 本地部署：
+    ```bash
+    docker compose -f docker-compose.local.yml up -d   # start
+    docker compose down     # stop
+    ```
+- 网络部署：
+    ```bash
+    docker compose up -d    # start
+    docker compose down     # stop
+    ```
 
 ## 基本使用方法
 
@@ -99,7 +111,7 @@ docker-compose up -d
 
 ![记账过程](example/create.gif)
 
-1. 在客户端上使用浏览器访问服务器的18080端口：`https://<server>:18080/`
+1. 在客户端上使用浏览器访问服务器的18080端口：`http://<server>:18080/`（本地）或`https://<server>:18080/`（网络）
 1. 可以看到用户界面分为两部分：上面的一行命令框和下面的编辑器
 1. 在命令框中，输入命令：`login <username>`并按回车
     - `<username>`是你在记账系统中的用户名

@@ -1,0 +1,49 @@
+version: "2.3"
+services:
+
+  nginx:
+    image: b1f6c1c4/accounting-frontend:local
+    ports:
+      - "18080:80/tcp"
+      - "18080:80/udp"
+    volumes:
+      - nginx-cache:/var/cache/nginx
+      - nginx-pid:/var/run
+    depends_on:
+      - server
+    networks:
+      - local
+
+  server:
+    image: b1f6c1c4/accounting-backend
+    read_only: true
+    environment:
+      MONGO_URI: mongodb://mongo/accounting
+    volumes:
+      - config:/opt/accounting/config.d:ro
+    depends_on:
+      - mongo
+    networks:
+      - local
+
+  mongo:
+    image: mongo
+    volumes:
+      - db:/data/db
+    command: --smallfiles
+    networks:
+      - local
+
+networks:
+  local:
+    driver: bridge
+
+volumes:
+  nginx-cache:
+    driver: local
+  nginx-pid:
+    driver: local
+  config:
+    driver: local
+  db:
+    driver: local
