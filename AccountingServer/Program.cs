@@ -53,12 +53,14 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
             return GenerateHttpResponse(File.OpenRead(fn), fn.Split(".")[^1] switch
                 {
                     "html" => "text/html",
-                    "js" => "application/javascript",
+                    "js" => "text/javascript",
                     "css" => "text/css",
                     "png" => "image/png",
+                    "jpg" or "jpeg" => "image/jpeg",
                     "ico" => "image/x-icon",
                     "txt" => "text/plain",
                     "xml" => "application/xml",
+                    "webmanifest" => "application/manifest+json",
                     _ => "application/octet-stream",
                 });
 
