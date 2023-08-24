@@ -47,6 +47,7 @@ internal class SpreadSheet : PluginBase
         Parsing.Eof(expr);
 
         var cols = Cfg.Get<SheetTemplates>().Templates.Single(t => t.Name == abbr).Columns;
+        var sum = new Dictionary<string, double[]>();
         var queries = cols.Select(col => ParsingF.PureDetailQuery(col.Query, session.Client)).ToList();
         var merged = Enumerable.Zip(cols, queries)
             .Where(static cq => !cq.First.Kind.HasFlag(SheetColumnKind.Auxiliary))
@@ -95,14 +96,50 @@ internal class SpreadSheet : PluginBase
                     }
                     else if (flt.Count > 0)
                     {
-                        sb.Append(flt.Sum(static d => d.Fund).AsCurrency(grpC.Key));
+                        var value = flt.Sum(static d => d.Fund!.Value);
+                        sb.Append(value.AsCurrency(grpC.Key));
                         hasColumn = !cols[i].Kind.HasFlag(SheetColumnKind.Auxiliary);
+
+                        if (!sum.ContainsKey(grpC.Key))
+                        {
+                            var arr = new double[cols.Count];
+                            for (var j = 0; j < cols.Count; j++)
+                                arr[j] = double.NaN;
+                            arr[i] = value;
+                            sum[grpC.Key] = arr;
+                        } else if (double.IsNaN(sum[grpC.Key][i])) {
+                            sum[grpC.Key][i] = value;
+                        } else {
+                            sum[grpC.Key][i] += value;
+                        }
                     }
                 }
                 if (!hasColumn)
                     break;
                 isFirst = false;
-                sb.Append("\n");
+                sb.Append('\n');
+                yield return sb.ToString();
+            }
+        }
+
+        {
+            var isFirst = true;
+            foreach (var (k, v) in sum)
+            {
+                sb.Clear();
+                if (isFirst)
+                    sb.Append("Total\t");
+                else
+                    sb.Append('\t');
+                isFirst = false;
+                sb.Append(k);
+                for (var i = 0; i < cols.Count; i++)
+                {
+                    sb.Append('\t');
+                    if (!double.IsNaN(v[i]))
+                        sb.Append(v[i].AsCurrency(k));
+                }
+                sb.Append('\n');
                 yield return sb.ToString();
             }
         }

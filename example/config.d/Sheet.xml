@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Templates>
+  <!-- <Template name="sabrina" desc="Transaction b/w Sabrina and me">
+    <Column name="Sabrina">(U Sabrina) * (U Asset + U Liability)</Column>
+    <Column name="[Amount]" type="aux">U T1001 + U T1002 + U T224101</Column>
+    <Column name="[Liq.]" type="content">U T1001 + U T1002 + U T2001 + U T224101</Column>
+    <Column name="[Non-Liq.]" type="content">
+        U T1403 > +
+        U T1405 > +
+        U T1412 > +
+        U T1601 > +
+        U T1604 > +
+        U T1605 > +
+        U T1701 > +
+        U Expense -
+        U T671109 -
+        U T660300</Column>
+  </Template> -->
+</Templates>
