@@ -30,7 +30,6 @@ services:
     image: mongo
     volumes:
       - db:/data/db
-    command: --smallfiles
     networks:
       - local
 
