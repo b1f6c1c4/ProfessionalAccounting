@@ -19,6 +19,8 @@
 import * as Api from '../app/api.js';
 import { without, uniq } from 'lodash-es';
 
+const theUser = window.localStorage.getItem('user') || 'anonymous';
+
 export default class Selector {
     constructor(p, store, options) {
         this.p = p;
@@ -80,7 +82,7 @@ export default class Selector {
         try {
             const queries = this.query(this.input ? this.input.value() : '');
             for (const q of queries) {
-                const { data } = await Api.safeApi('rps ' + q);
+                const { data } = await Api.safeApi('rps ' + q, theUser);
                 tmp.push(...data
                     .split('\n')
                     .filter((s) => s)
