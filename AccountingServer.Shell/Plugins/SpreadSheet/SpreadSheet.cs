@@ -152,6 +152,6 @@ internal class SpreadSheet : PluginBase
             yield return s;
 
         foreach (var util in Cfg.Get<SheetTemplates>().Templates)
-            yield return $"{util.Name,20}{util.Description}\n";
+            yield return $"{util.Name,20} {util.Description}\n";
     }
 }

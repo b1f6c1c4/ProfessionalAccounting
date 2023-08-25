@@ -77,7 +77,7 @@ internal class Utilities : PluginBase
             yield return s;
 
         foreach (var util in Cfg.Get<UtilTemplates>().Templates)
-            yield return $"{util.Name,20}{(util.TemplateType == UtilTemplateType.Fixed ? ' ' : '*')}{util.Description}\n";
+            yield return $"{util.Name,20} {(util.TemplateType == UtilTemplateType.Fixed ? ' ' : '*')} {util.Description}\n";
     }
 
     /// <summary>
