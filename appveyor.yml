@@ -21,9 +21,9 @@ clone_depth: 1
 environment:
   BUILD_DIR: /data/accounting-build
   PRIVATE_KEY_PASSWORD:
-    secure: P4dfTh3tMeCUoNqkI6sL4lLPpYiC6Fnt3SOD/0Jq600=
+    secure: nbaZlhNJOSaf9Yv6Vn/2NRTMYLLrrerd48SX58e+GLk=
   DOCKER_HOST:
-    secure: 7Q8pmbTRGhC5XfAK+0tWopI12mMdS4ceKOGiebJZxws=
+    secure: VkkxNLf0DKs10u8LpvNl5Tg8gmlq17OIwBGN5scO0YI=
   DOCKER_CERT_PATH: c:\projects\accounting\certs
   DOCKER_TLS_VERIFY: YES
   DOCKER_MACHINE_NAME: accounting
