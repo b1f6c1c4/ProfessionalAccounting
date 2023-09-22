@@ -92,7 +92,7 @@ internal class Composite : PluginBase
         await foreach (var s in base.ListHelp())
             yield return s;
         foreach (var tmp in Cfg.Get<CompositeTemplates>().Templates)
-            yield return tmp.Name;
+            yield return $"{tmp.Name}\n";
     }
 
     /// <summary>
@@ -183,23 +183,25 @@ internal class InquiriesVisitor : IInquiryVisitor<ValueTask<double>>
 
                 val += theFmt.GetFund(grp.Fund);
 
-                m_Sb.Append(
+                await foreach (var s in
                     new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), theFmt, inq.HideContent)
                             {
                                 Client = m_Session.Client,
                             }
-                        .PresentSubtotal(grp, query.Subtotal, m_Session.Serializer));
+                        .PresentSubtotal(grp, query.Subtotal, m_Session.Serializer))
+                    m_Sb.Append(s);
             }
         else
         {
             val += fmt.GetFund(gq.Fund);
 
-            m_Sb.Append(
+            await foreach (var s in
                 new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), fmt, inq.HideContent)
                         {
                             Client = m_Session.Client,
                         }
-                    .PresentSubtotal(gq, query.Subtotal, m_Session.Serializer));
+                    .PresentSubtotal(gq, query.Subtotal, m_Session.Serializer))
+                m_Sb.Append(s);
         }
 
         return val;
