@@ -230,6 +230,7 @@ public class SubtotalBuilder
                 SubtotalLevel.Day => Invoke(new SubtotalDateFactory(level)),
                 SubtotalLevel.Week => Invoke(new SubtotalDateFactory(level)),
                 SubtotalLevel.Month => Invoke(new SubtotalDateFactory(level)),
+                SubtotalLevel.Quarter => Invoke(new SubtotalDateFactory(level)),
                 SubtotalLevel.Year => Invoke(new SubtotalDateFactory(level)),
                 SubtotalLevel.Value => Invoke(new SubtotalValueFactory()),
                 _ => throw new ArgumentOutOfRangeException(),
@@ -333,6 +334,8 @@ public class SubtotalBuilder
                     : dt.AddDays(-6 - (int)dt.DayOfWeek),
                 SubtotalLevel.Month =>
                     new DateTime(dt.Year, dt.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-1),
+                SubtotalLevel.Quarter =>
+                    new DateTime(dt.Year, dt.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-1 - (dt.Month - 1) % 3),
                 SubtotalLevel.Year => new(dt.Year - 1, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 _ => throw new ArgumentOutOfRangeException(),
             };
@@ -349,6 +352,7 @@ public class SubtotalBuilder
                 SubtotalLevel.Day => dt.AddDays(1),
                 SubtotalLevel.Week => dt.AddDays(7),
                 SubtotalLevel.Month => dt.AddMonths(1),
+                SubtotalLevel.Quarter => dt.AddMonths(3),
                 SubtotalLevel.Year => dt.AddYears(1),
                 _ => throw new ArgumentOutOfRangeException(),
             };

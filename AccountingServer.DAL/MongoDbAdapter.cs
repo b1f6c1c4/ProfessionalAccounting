@@ -59,10 +59,12 @@ internal class MongoDbAdapter : IDbAdapter
         };
 
     private static readonly BsonDocument ProjectYear;
+    private static readonly BsonDocument ProjectQuarter;
     private static readonly BsonDocument ProjectMonth;
     private static readonly BsonDocument ProjectWeek;
 
     private static readonly BsonDocument ProjectNothingButYear;
+    private static readonly BsonDocument ProjectNothingButQuarter;
     private static readonly BsonDocument ProjectNothingButMonth;
     private static readonly BsonDocument ProjectNothingButWeek;
 
@@ -88,7 +90,7 @@ internal class MongoDbAdapter : IDbAdapter
         BsonSerializer.RegisterSerializer(new BalanceSerializer());
         BsonSerializer.RegisterSerializer(new ExchangeSerializer());
 
-        static BsonDocument MakeProject(BsonValue days, bool detail)
+        static BsonDocument MakeProject(BsonValue subs, bool detail)
         {
             var proj = new BsonDocument
                 {
@@ -117,16 +119,7 @@ internal class MongoDbAdapter : IDbAdapter
                                         },
                                     ["default"] = new BsonDocument
                                         {
-                                            ["$subtract"] =
-                                                new BsonArray
-                                                    {
-                                                        "$date",
-                                                        new BsonDocument
-                                                            {
-                                                                ["$multiply"] =
-                                                                    new BsonArray { days, 24 * 60 * 60 * 1000 },
-                                                            },
-                                                    },
+                                            ["$dateSubtract"] = subs,
                                         },
                                 },
                         },
@@ -138,32 +131,87 @@ internal class MongoDbAdapter : IDbAdapter
 
         var year = new BsonDocument
             {
-                ["$subtract"] = new BsonArray { new BsonDocument { ["$dayOfYear"] = "$date" }, 1 },
+                ["startDate"] = "$date",
+                ["unit"] = "day",
+                ["amount"] = new BsonDocument
+                    {
+                        ["$subtract"] = new BsonArray { new BsonDocument { ["$dayOfYear"] = "$date" }, 1 },
+                    },
+            };
+        var monthOfYear = new BsonDocument
+            {
+                ["$getField"] = new BsonDocument
+                    {
+                        ["field"] = "month",
+                        ["input"] = new BsonDocument
+                            {
+                                ["$dateToParts"] = new BsonDocument { ["date"] = "$date" },
+                            }
+                    }
+            };
+        var quarter = new BsonDocument
+            {
+                ["startDate"] = new BsonDocument
+                    {
+                        ["$dateSubtract"] = new BsonDocument
+                            {
+                                ["startDate"] = "$date",
+                                ["unit"] = "day",
+                                ["amount"] = new BsonDocument
+                                {
+                                    ["$subtract"] = new BsonArray { new BsonDocument { ["$dayOfMonth"] = "$date" }, 1 },
+                                },
+                            },
+                    },
+                ["unit"] = "month",
+                ["amount"] = new BsonDocument
+                    {
+                        ["$mod"] = new BsonArray
+                            {
+                                new BsonDocument
+                                    {
+                                        ["$subtract"] = new BsonArray { monthOfYear, 1 },
+                                    },
+                                3,
+                            },
+                    },
             };
         var month = new BsonDocument
             {
-                ["$subtract"] = new BsonArray { new BsonDocument { ["$dayOfMonth"] = "$date" }, 1 },
+                ["startDate"] = "$date",
+                ["unit"] = "day",
+                ["amount"] = new BsonDocument
+                    {
+                        ["$subtract"] = new BsonArray { new BsonDocument { ["$dayOfMonth"] = "$date" }, 1 },
+                    },
             };
         var week = new BsonDocument
             {
-                ["$mod"] = new BsonArray
+                ["startDate"] = "$date",
+                ["unit"] = "day",
+                ["amount"] = new BsonDocument
                     {
-                        new BsonDocument
+                        ["$mod"] = new BsonArray
                             {
-                                ["$add"] = new BsonArray
+                                new BsonDocument
                                     {
-                                        new BsonDocument { ["$dayOfWeek"] = "$date" }, 5,
+                                        ["$add"] = new BsonArray
+                                            {
+                                                new BsonDocument { ["$dayOfWeek"] = "$date" }, 5,
+                                            },
                                     },
+                                7,
                             },
-                        7,
                     },
             };
 
         ProjectYear = MakeProject(year, true);
+        ProjectQuarter = MakeProject(quarter, true);
         ProjectMonth = MakeProject(month, true);
         ProjectWeek = MakeProject(week, true);
 
         ProjectNothingButYear = MakeProject(year, false);
+        ProjectNothingButQuarter = MakeProject(quarter, false);
         ProjectNothingButMonth = MakeProject(month, false);
         ProjectNothingButWeek = MakeProject(week, false);
     }
@@ -295,6 +343,8 @@ internal class MongoDbAdapter : IDbAdapter
             pprj = ProjectNothingButDate;
         else if (level.HasFlag(SubtotalLevel.Year))
             pprj = ProjectNothingButYear;
+        else if (level.HasFlag(SubtotalLevel.Quarter))
+            pprj = ProjectNothingButQuarter;
         else if (level.HasFlag(SubtotalLevel.Month))
             pprj = ProjectNothingButMonth;
         else // if (level.HasFlag(SubtotalLevel.Week))
@@ -326,6 +376,8 @@ internal class MongoDbAdapter : IDbAdapter
             pprj = ProjectDate;
         else if (level.HasFlag(SubtotalLevel.Year))
             pprj = ProjectYear;
+        else if (level.HasFlag(SubtotalLevel.Quarter))
+            pprj = ProjectQuarter;
         else if (level.HasFlag(SubtotalLevel.Month))
             pprj = ProjectMonth;
         else // if (level.HasFlag(SubtotalLevel.Week))

@@ -98,6 +98,7 @@ internal class JsonSubtotal : ISubtotalVisitor<JProperty>, ISubtotalStringify
                     SubtotalLevel.Day => "date",
                     SubtotalLevel.Week => "date",
                     SubtotalLevel.Month => "date",
+                    SubtotalLevel.Quarter => "date",
                     SubtotalLevel.Year => "date",
                     _ => throw new ArgumentOutOfRangeException(),
                 }

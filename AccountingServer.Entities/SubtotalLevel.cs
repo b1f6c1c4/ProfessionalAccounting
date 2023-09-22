@@ -78,6 +78,11 @@ public enum SubtotalLevel
     Month = 0b0000_1110_0000,
 
     /// <summary>
+    ///     按季度分类
+    /// </summary>
+    Quarter = 0b0001_0110_0000,
+
+    /// <summary>
     ///     按年分类
     /// </summary>
     Year = 0b0010_0110_0000,

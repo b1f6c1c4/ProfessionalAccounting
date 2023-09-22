@@ -234,6 +234,7 @@ public class ParseTest
     [Theory]
     [InlineData("!!v")]
     [InlineData("!!y", SubtotalLevel.Year)]
+    [InlineData("!!q", SubtotalLevel.Quarter)]
     [InlineData("!!", SubtotalLevel.Currency, SubtotalLevel.Title, SubtotalLevel.SubTitle, SubtotalLevel.User,
         SubtotalLevel.Content)]
     public void VoucherGroupedQueryTest(string s, params SubtotalLevel[] levels)

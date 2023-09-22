@@ -88,7 +88,7 @@ CountMark
 	;
 
 SubtotalField
-	:	[tscrdwmyCUV]
+	:	[tscrdwmqyCUV]
 	;
 
 SubtotalNoField
@@ -147,7 +147,7 @@ Tilde
 	;
 
 AggrMark
-	:	[DWMY]
+	:	[DWMQY]
 	;
 EquiMark
 	:	'X'

@@ -178,6 +178,7 @@ public static class DataFormatter
                 SubtotalLevel.Day => value.AsDate(),
                 SubtotalLevel.Week => value.AsDate(),
                 SubtotalLevel.Month => $"{value.Year:D4}{value.Month:D2}",
+                SubtotalLevel.Quarter => $"{value.Year:D4}Q{(value.Month + 2) / 3}",
                 SubtotalLevel.Year => $"{value.Year:D4}",
                 _ => throw new ArgumentException("分类层次并非基于日期", nameof(level)),
             };

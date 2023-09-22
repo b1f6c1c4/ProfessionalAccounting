@@ -76,6 +76,10 @@ public class DataFormatterTest
     [InlineData("2021-02-10", SubtotalLevel.Day, "20210210")]
     [InlineData("2021-02-08", SubtotalLevel.Week, "20210208")]
     [InlineData("2021-02-01", SubtotalLevel.Month, "202102")]
+    [InlineData("2021-02-28", SubtotalLevel.Quarter, "2021Q1")]
+    [InlineData("2021-03-31", SubtotalLevel.Quarter, "2021Q1")]
+    [InlineData("2021-04-01", SubtotalLevel.Quarter, "2021Q2")]
+    [InlineData("2021-06-11", SubtotalLevel.Quarter, "2021Q2")]
     [InlineData("2021-01-01", SubtotalLevel.Year, "2021")]
     public void AsDateTest(string value, SubtotalLevel level, string fmt)
         => Assert.Equal(fmt, value.ToDateTime().AsDate(level));

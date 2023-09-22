@@ -292,6 +292,18 @@ public class SubtotalTest : IAsyncDisposable
                 .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
 
     [Theory]
+    [InlineData(null, null, "``q")]
+    [InlineData("2016-01-01", null, ":T1234 ``q")]
+    [InlineData("2016-12-31", null, ":T1234 ``q")]
+    [InlineData("2016-10-01", 123.45, ":T1234 ``q")]
+    [InlineData("2017-01-01", 78.53 + 66.66, ":T1234 ``q")]
+    public void RunTestQuarter(string dt, double? value, string query)
+        => Assert.Equal(
+            value,
+            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query, m_Client)).ToEnumerable()
+                .SingleOrDefault(b => b.Date == dt.ToDateTime())?.Fund);
+
+    [Theory]
     [InlineData(null, null, "``y")]
     [InlineData("2016-12-31", null, ":T1234 ``y")]
     [InlineData("2016-01-01", 123.45, ":T1234 ``y")]

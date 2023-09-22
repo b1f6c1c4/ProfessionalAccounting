@@ -77,6 +77,8 @@ public static class SubtotalPreprocessor
             return dt;
         if (level.HasFlag(SubtotalLevel.Year))
             return new(dt!.Value.Year, 1, 1);
+        if (level.HasFlag(SubtotalLevel.Quarter))
+            return new(dt!.Value.Year, (dt!.Value.Month + 2) / 3 * 3, 1);
         if (level.HasFlag(SubtotalLevel.Month))
             return new(dt!.Value.Year, dt!.Value.Month, 1);
         // if (level.HasFlag(SubtotalLevel.Week))
