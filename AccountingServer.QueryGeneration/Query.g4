@@ -107,6 +107,7 @@ rangePoint
 
 rangeCertainPoint
 	:	rangeYear
+	|	rangeQuarter
 	|	rangeMonth
 	|	rangeWeek
 	|	rangeDay
@@ -114,6 +115,10 @@ rangeCertainPoint
 
 rangeYear
 	:	RangeAYear
+	;
+
+rangeQuarter
+	:	(RangeAQuarter | RangeDeltaQuarter)
 	;
 
 rangeMonth
@@ -176,6 +181,14 @@ RangeAllNotNull
 
 RangeAYear
 	:	'20' [1-2] [0-9]
+	;
+RangeAQuarter
+	:	'20' [1-2] [0-9] 'Q' [1-4]
+	;
+RangeDeltaQuarter
+	:	'Q' '0'
+	|	'Q' [1-4]
+	|	'Q' '-' [1-9] [0-9]*
 	;
 RangeAMonth
 	:	'20' [1-2] [0-9] '0' [1-9]

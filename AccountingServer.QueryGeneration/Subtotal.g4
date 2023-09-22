@@ -54,6 +54,7 @@ rangeCore
 
 rangeCertainPoint
 	:	rangeYear
+	|	rangeQuarter
 	|	rangeMonth
 	|	rangeWeek
 	|	rangeDay
@@ -61,6 +62,10 @@ rangeCertainPoint
 
 rangeYear
 	:	RangeAYear
+	;
+
+rangeQuarter
+	:	(RangeAQuarter | RangeDeltaQuarter)
 	;
 
 rangeMonth
@@ -107,17 +112,26 @@ RangeAllNotNull
 	;
 
 RangeAYear
-	:	'201' [0-9]
+	:	'20' [1-2] [0-9]
+	;
+RangeAQuarter
+	:	'20' [1-2] [0-9] 'Q' [1-4]
+	;
+RangeDeltaQuarter
+	:	'Q' '0'
+	|	'Q' '-' [1-9] [0-9]*
 	;
 RangeAMonth
-	:	[1-2] [0-9] [0-9] [0-9] [0-1] [0-9]
+	:	'20' [1-2] [0-9] '0' [1-9]
+	|	'20' [1-2] [0-9] '1' [0-2]
 	;
 RangeDeltaMonth
 	:	'0'
 	|	'-' [1-9] [0-9]*
 	;
 RangeADay
-	:	[1-2] [0-9] [0-9] [0-9] [0-1] [0-9] [0-3] [0-9]
+	:	'20' [1-2] [0-9] '0' [1-9] [0-3] [0-9]
+	|	'20' [1-2] [0-9] '1' [0-2] [0-3] [0-9]
 	;
 RangeDeltaDay
 	:	'.'+

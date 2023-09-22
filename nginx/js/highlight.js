@@ -52,10 +52,13 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         regex: /[$¥€][-+]?(?:\.[0-9]+|[0-9,]+\.?[0-9]*)(?:[eE][+-]?[0-9]+)?\b/,
       }, {
         token: 'constant.numeric.date',
-        regex: /\b[1-2][0-9][0-9][0-9][0-1][0-9][0-3][0-9](?![-.,])/,
+        regex: /\b20[1-2][0-9](?:0[1-9]|1[0-2])[0-3][0-9](?![-.,])/,
+      }, {
+        token: 'constant.numeric.date',
+        regex: /\b20[1-2][0-9]Q[1-4]/,
       }, {
         token: 'markup.list.numbered.title',
-        regex: /\b[12346][0-9][0-9][0-9](?:[0-9][0-9])?(?![-.,])\b/,
+        regex: /\b[123456][0-9][0-9][0-9](?:[0-9][0-9])?(?![-.,])\b/,
       }, {
         token: 'markup.list.numbered.subtitle',
         regex: /\b[0-9][0-9](?![-.,])\b/,
@@ -92,7 +95,7 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         regex: /\b(Currency)(\s*)(=)(\s*)(@?'[A-Z][A-Z][A-Z]')/,
       }, {
         token: ['entity.name.function', 'text', 'keyword.operator', 'text', 'markup.list.numbered.title'],
-        regex: /\b(Title)(\s*)(=)(\s*)([12346][0-9][0-9][0-9])/,
+        regex: /\b(Title)(\s*)(=)(\s*)([123456][0-9][0-9][0-9])/,
       }, {
         token: ['entity.name.function', 'text', 'keyword.operator', 'text', 'markup.list.numbered.subtitle'],
         regex: /\b(SubTitle)(\s*)(=)(\s*)([0-9][0-9])/,
@@ -113,7 +116,7 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         regex: /@[a-zA-Z][a-zA-Z][a-zA-Z]\b/,
       }, {
         token: 'markup.list.numbered.title',
-        regex: /\bT[12346][0-9][0-9][0-9](?:[0-9][0-9])?\b/,
+        regex: /\bT[123456][0-9][0-9][0-9](?:[0-9][0-9])?\b/,
       }, {
         token: 'support.constant.null',
         regex: /[-+]?(?:\.[0-9]+|[0-9]+\.?[0-9]*)(?:[eE][+-]?[0-9]+)?\b/,

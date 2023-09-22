@@ -92,6 +92,38 @@ internal partial class QueryParser
         }
     }
 
+    public partial class RangeQuarterContext : IClientDependable, IDateRange
+    {
+        public Client Client { private get; set; }
+
+        /// <inheritdoc />
+        public DateFilter Range
+        {
+            get
+            {
+                DateTime dt;
+                if (RangeDeltaQuarter() != null)
+                {
+                    var delta = int.Parse(RangeDeltaQuarter().GetText().TrimStart('Q'));
+                    var q = (Client.Today.Month + 2) / 3 + 1;
+                    if (delta > 0)
+                        q = delta;
+                    else
+                        q -= delta;
+                    dt = new(Client.Today.Year, 3 * q - 2, 1, 0, 0, 0, DateTimeKind.Utc);
+                }
+                else
+                {
+                    var year = int.Parse(RangeAQuarter().GetText()[0..4]);
+                    var q = int.Parse(RangeAQuarter().GetText()[5..]);
+                    dt = new(year, 3 * q - 2, 1, 0, 0, 0, DateTimeKind.Utc);
+                }
+
+                return new(dt, dt.AddMonths(3).AddDays(-1));
+            }
+        }
+    }
+
     public partial class RangeYearContext : IDateRange
     {
         /// <inheritdoc />
@@ -122,6 +154,8 @@ internal partial class QueryParser
                     return rangeWeek().Assign(Client).Range;
                 if (rangeMonth() != null)
                     return rangeMonth().Assign(Client).Range;
+                if (rangeQuarter() != null)
+                    return rangeQuarter().Assign(Client).Range;
                 if (rangeYear() != null)
                     return rangeYear().Range;
 
