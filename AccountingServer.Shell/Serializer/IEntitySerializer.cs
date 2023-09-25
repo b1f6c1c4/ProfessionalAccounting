@@ -35,6 +35,14 @@ public interface IEntitySerializer
     string PresentVoucher(Voucher voucher);
 
     /// <summary>
+    ///     将记账凭证表示，并嵌入任意字符串
+    /// </summary>
+    /// <param name="voucher">记账凭证</param>
+    /// <param name="inject">嵌入字符串</param>
+    /// <returns>表示</returns>
+    string PresentVoucher(Voucher voucher, string inject);
+
+    /// <summary>
     ///     从表示中取得记账凭证
     /// </summary>
     /// <param name="str">表示</param>
@@ -155,6 +163,7 @@ internal class TrivialEntitiesSerializer : IEntitiesSerializer
         => amorts.Select(amort => m_Serializer.PresentAmort(amort).Wrap());
 
     public string PresentVoucher(Voucher voucher) => m_Serializer.PresentVoucher(voucher);
+    public string PresentVoucher(Voucher voucher, string inject) => m_Serializer.PresentVoucher(voucher, inject);
     public Voucher ParseVoucher(string str) => m_Serializer.ParseVoucher(str);
     public string PresentVoucherDetail(VoucherDetail detail) => m_Serializer.PresentVoucherDetail(detail);
     public string PresentVoucherDetail(VoucherDetailR detail) => m_Serializer.PresentVoucherDetail(detail);

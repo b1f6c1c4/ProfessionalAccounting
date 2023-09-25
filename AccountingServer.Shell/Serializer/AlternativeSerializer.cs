@@ -41,6 +41,7 @@ internal class AlternativeSerializer : IEntitySerializer
     }
 
     public string PresentVoucher(Voucher voucher) => Run(s => s.PresentVoucher(voucher));
+    public string PresentVoucher(Voucher voucher, string inject) => Run(s => s.PresentVoucher(voucher, inject));
     public Voucher ParseVoucher(string str) => Run(s => s.ParseVoucher(str));
     public string PresentVoucherDetail(VoucherDetail detail) => Run(s => s.PresentVoucherDetail(detail));
     public string PresentVoucherDetail(VoucherDetailR detail) => Run(s => s.PresentVoucherDetail(detail));

@@ -72,17 +72,31 @@ internal class AccountingShell : IShellComponent
         else if (ParsingF.Token(ref expr, false, static t => t == "raw") != null)
         {
             type |= ExprType.GroupedQueries | ExprType.DetailQuery;
-            visitor = new RawSubtotal();
+            visitor = new RawSubtotal(0);
         }
         else if (ParsingF.Token(ref expr, false, static t => t == "sraw") != null)
         {
             type |= ExprType.GroupedQueries | ExprType.DetailRQuery;
-            visitor = new RawSubtotal(true);
+            visitor = new RawSubtotal(0);
         }
         else if (ParsingF.Token(ref expr, false, static t => t == "fancy") != null)
         {
             type |= ExprType.FancyQuery;
             visitor = null;
+        }
+        else if (ParsingF.Token(ref expr, false, static t => t.StartsWith("raw", StringComparison.OrdinalIgnoreCase)) is var t && t != null)
+        {
+            type |= ExprType.GroupedQueries;
+            visitor = new RawSubtotal(int.Parse(t[4..]))
+                {
+                    Ratio = t[3] switch
+                        {
+                            '+' => +1.0,
+                            '-' => -1.0,
+                            _ => throw new ApplicationException("Unknown raw ratio specifier."),
+                        },
+                    Inject = ParsingF.Quoted(ref expr, '@'),
+                };
         }
         else
         {

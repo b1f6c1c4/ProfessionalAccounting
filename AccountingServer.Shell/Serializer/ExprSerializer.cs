@@ -39,6 +39,10 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
 
     /// <inheritdoc />
     public string PresentVoucher(Voucher voucher)
+        => PresentVoucher(voucher, null);
+
+    /// <inheritdoc />
+    public string PresentVoucher(Voucher voucher, string inject)
     {
         var sb = new StringBuilder();
         sb.Append(TheToken);
@@ -50,12 +54,16 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
         else
         {
             sb.Append($"{voucher.ID?.Quotation('^')}\n");
-            sb.Append($"{voucher.Date.AsDate()}\n");
+            if (voucher.Date.HasValue || inject == null)
+                sb.Append($"{voucher.Date.AsDate()}\n");
             if (voucher.Remark != null)
                 sb.Append($"{voucher.Remark.Quotation('%')}\n");
             if (voucher.Type.HasValue &&
                 voucher.Type != VoucherType.Ordinary)
                 sb.Append($"{voucher.Type}\n");
+
+            if (inject != null)
+                sb.Append($"{inject}\n");
 
             foreach (var d in voucher.Details)
                 sb.Append(PresentVoucherDetail(d));

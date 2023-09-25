@@ -40,6 +40,9 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
     public string PresentVoucher(Voucher voucher) => throw new NotImplementedException();
 
     /// <inheritdoc />
+    public string PresentVoucher(Voucher voucher, string inject) => throw new NotImplementedException();
+
+    /// <inheritdoc />
     public string PresentVoucherDetail(VoucherDetail detail) => throw new NotImplementedException();
 
     /// <inheritdoc />

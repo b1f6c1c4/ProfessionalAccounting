@@ -134,6 +134,9 @@ public class CsvSerializer : IEntitiesSerializer
     }
 
     /// <inheritdoc />
+    public string PresentVoucher(Voucher voucher, string inject) => throw new NotImplementedException();
+
+    /// <inheritdoc />
     public string PresentVoucherDetail(VoucherDetail detail)
     {
         var sb = new StringBuilder();

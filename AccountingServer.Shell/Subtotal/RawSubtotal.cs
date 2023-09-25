@@ -16,53 +16,68 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.Entities;
+using AccountingServer.Shell.Serializer;
 
 namespace AccountingServer.Shell.Subtotal;
 
 /// <summary>
-///     原始报告结果处理器
+///     记账凭证式报告结果处理器
 /// </summary>
 internal class RawSubtotal : StringSubtotalVisitor
 {
-    private readonly VoucherDetailR m_Path = new(new(), new());
-    private readonly bool m_Separate;
-    private List<VoucherDetailR> m_History;
+    private readonly VoucherDetail m_Path = new();
+    private readonly int m_Level;
+    private readonly Voucher m_Template;
+    public double Ratio { private get; init; } = 1.0;
+    public string Inject { private get; init; } = null;
 
-    public RawSubtotal(bool separate = false) => m_Separate = separate;
+    public RawSubtotal(int level)
+    {
+        m_Level = level;
+        m_Template = new();
+    }
 
     private async IAsyncEnumerable<string> ShowSubtotal(ISubtotalResult sub)
     {
-        if (sub.Items == null)
+        DateTime? dt = null;
+        if (Depth == m_Level)
         {
-            m_Path.Fund = sub.Fund;
-            if (m_Separate)
-                yield return Serializer.PresentVoucherDetail(m_Path);
-            else
-                m_History.Add(new(m_Path));
+            dt = m_Template.Date;
+            m_Template.Details = new();
         }
 
-        await foreach (var s in VisitChildren(sub))
-            yield return s;
-    }
+        if (sub.Items == null)
+        {
+            m_Path.Fund = sub.Fund * Ratio;
+            if (m_Template.Details != null)
+                m_Template.Details.Add(new(m_Path));
+        }
+        else
+        {
+            await foreach (var s in VisitChildren(sub))
+                yield return s;
+        }
 
-    protected override IAsyncEnumerable<string> Pre()
-    {
-        m_History = new();
-        return base.Pre();
-    }
+        if (Depth == m_Level)
+        {
+            yield return Serializer.PresentVoucher(m_Template, Inject).Wrap();
 
-    protected override IAsyncEnumerable<string> Post()
-        => Serializer.PresentVoucherDetails(m_History.ToAsyncEnumerable());
+            m_Template.Date = dt;
+            m_Template.Details = null;
+        }
+    }
 
     public override IAsyncEnumerable<string> Visit(ISubtotalRoot sub)
         => ShowSubtotal(sub);
 
     public override IAsyncEnumerable<string> Visit(ISubtotalDate sub)
     {
-        m_Path.Voucher.Date = sub.Date;
+        if (DateHelper.CompareDate(m_Template.Date, sub.Date) < 0)
+            m_Template.Date = sub.Date;
         return ShowSubtotal(sub);
     }
 

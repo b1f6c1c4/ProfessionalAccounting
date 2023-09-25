@@ -179,6 +179,9 @@ public class CSharpSerializer : IEntitySerializer
     }
 
     /// <inheritdoc />
+    public string PresentVoucher(Voucher voucher, string inject) => throw new NotImplementedException();
+
+    /// <inheritdoc />
     public Voucher ParseVoucher(string str)
     {
         try

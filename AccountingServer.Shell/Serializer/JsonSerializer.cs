@@ -58,6 +58,9 @@ public class JsonSerializer : IEntitiesSerializer
     }
 
     /// <inheritdoc />
+    public string PresentVoucher(Voucher voucher, string inject) => throw new NotImplementedException();
+
+    /// <inheritdoc />
     public VoucherDetail ParseVoucherDetail(string str) => ParseVoucherDetail(ParseJson(str));
 
     /// <inheritdoc />

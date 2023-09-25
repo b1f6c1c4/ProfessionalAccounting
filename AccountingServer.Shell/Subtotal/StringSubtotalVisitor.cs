@@ -52,13 +52,9 @@ internal abstract class StringSubtotalVisitor
         Cu = par.EquivalentCurrency;
         Serializer = serializer;
         Depth = 0;
-        await foreach (var s in Pre())
-            yield return s;
         if (raw != null)
             await foreach (var s in raw.Accept(this))
                 yield return s;
-        await foreach (var s in Post())
-            yield return s;
     }
 
     public abstract IAsyncEnumerable<string> Visit(ISubtotalRoot sub);
@@ -70,9 +66,6 @@ internal abstract class StringSubtotalVisitor
     public abstract IAsyncEnumerable<string> Visit(ISubtotalContent sub);
     public abstract IAsyncEnumerable<string> Visit(ISubtotalRemark sub);
     public abstract IAsyncEnumerable<string> Visit(ISubtotalValue sub);
-
-    protected virtual IAsyncEnumerable<string> Pre() => AsyncEnumerable.Empty<string>();
-    protected virtual IAsyncEnumerable<string> Post() => AsyncEnumerable.Empty<string>();
 
     protected async IAsyncEnumerable<string> VisitChildren(ISubtotalResult sub)
     {
