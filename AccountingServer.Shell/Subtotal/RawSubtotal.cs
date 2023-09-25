@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Shell.Serializer;
 
@@ -29,7 +30,7 @@ namespace AccountingServer.Shell.Subtotal;
 /// </summary>
 internal class RawSubtotal : StringSubtotalVisitor
 {
-    private readonly VoucherDetail m_Path = new();
+    private VoucherDetail m_Path;
     private readonly int m_Level;
     private readonly Voucher m_Template;
     public double Ratio { private get; init; } = 1.0;
@@ -46,15 +47,16 @@ internal class RawSubtotal : StringSubtotalVisitor
         DateTime? dt = null;
         if (Depth == m_Level)
         {
+            m_Path = new() { User = Client.User, Currency = BaseCurrency.Now };
             dt = m_Template.Date;
             m_Template.Details = new();
         }
 
         if (sub.Items == null)
         {
-            m_Path.Fund = sub.Fund * Ratio;
-            if (m_Template.Details != null)
-                m_Template.Details.Add(new(m_Path));
+            if (m_Path != null)
+                m_Path.Fund = sub.Fund * Ratio;
+            m_Template.Details?.Add(new(m_Path));
         }
         else
         {
@@ -66,6 +68,7 @@ internal class RawSubtotal : StringSubtotalVisitor
         {
             yield return Serializer.PresentVoucher(m_Template, Inject).Wrap();
 
+            m_Path = null;
             m_Template.Date = dt;
             m_Template.Details = null;
         }
@@ -76,44 +79,57 @@ internal class RawSubtotal : StringSubtotalVisitor
 
     public override IAsyncEnumerable<string> Visit(ISubtotalDate sub)
     {
-        if (DateHelper.CompareDate(m_Template.Date, sub.Date) < 0)
-            m_Template.Date = sub.Date;
+        if (m_Path == null)
+            m_Template.Date = (sub.Level & SubtotalLevel.Subtotal) switch
+                {
+                    SubtotalLevel.Day => sub.Date,
+                    SubtotalLevel.Week => sub.Date?.AddDays(6),
+                    SubtotalLevel.Month => sub.Date?.AddMonths(1).AddDays(-1),
+                    SubtotalLevel.Quarter => sub.Date?.AddMonths(3).AddDays(-1),
+                    SubtotalLevel.Year => sub.Date?.AddYears(1).AddDays(-1),
+                };
         return ShowSubtotal(sub);
     }
 
     public override IAsyncEnumerable<string> Visit(ISubtotalUser sub)
     {
-        m_Path.User = sub.User;
+        if (m_Path != null)
+            m_Path.User = sub.User;
         return ShowSubtotal(sub);
     }
 
     public override IAsyncEnumerable<string> Visit(ISubtotalCurrency sub)
     {
-        m_Path.Currency = sub.Currency;
+        if (m_Path != null)
+            m_Path.Currency = sub.Currency;
         return ShowSubtotal(sub);
     }
 
     public override IAsyncEnumerable<string> Visit(ISubtotalTitle sub)
     {
-        m_Path.Title = sub.Title;
+        if (m_Path != null)
+            m_Path.Title = sub.Title;
         return ShowSubtotal(sub);
     }
 
     public override IAsyncEnumerable<string> Visit(ISubtotalSubTitle sub)
     {
-        m_Path.SubTitle = sub.SubTitle;
+        if (m_Path != null)
+            m_Path.SubTitle = sub.SubTitle;
         return ShowSubtotal(sub);
     }
 
     public override IAsyncEnumerable<string> Visit(ISubtotalContent sub)
     {
-        m_Path.Content = sub.Content;
+        if (m_Path != null)
+            m_Path.Content = sub.Content;
         return ShowSubtotal(sub);
     }
 
     public override IAsyncEnumerable<string> Visit(ISubtotalRemark sub)
     {
-        m_Path.Remark = sub.Remark;
+        if (m_Path != null)
+            m_Path.Remark = sub.Remark;
         return ShowSubtotal(sub);
     }
 

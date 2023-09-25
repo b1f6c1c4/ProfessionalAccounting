@@ -41,7 +41,7 @@ internal abstract class StringSubtotalVisitor
     private ISubtotal m_Par;
     protected IEntitiesSerializer Serializer;
 
-    public Client Client { private get; set; }
+    public Client Client { protected get; set; }
 
     /// <inheritdoc />
     public async IAsyncEnumerable<string> PresentSubtotal(ISubtotalResult raw, ISubtotal par,
