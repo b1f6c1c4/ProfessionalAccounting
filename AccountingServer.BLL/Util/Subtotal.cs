@@ -335,7 +335,7 @@ public class SubtotalBuilder
                 SubtotalLevel.Month =>
                     new DateTime(dt.Year, dt.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-1),
                 SubtotalLevel.Quarter =>
-                    new DateTime(dt.Year, dt.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-1 - (dt.Month - 1) % 3),
+                    new DateTime(dt.Year, dt.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-3 - (dt.Month - 1) % 3),
                 SubtotalLevel.Year => new(dt.Year - 1, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 _ => throw new ArgumentOutOfRangeException(),
             };
