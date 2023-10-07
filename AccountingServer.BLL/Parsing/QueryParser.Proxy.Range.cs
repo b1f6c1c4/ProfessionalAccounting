@@ -104,13 +104,14 @@ internal partial class QueryParser
                 DateTime dt;
                 if (RangeDeltaQuarter() != null)
                 {
-                    var delta = int.Parse(RangeDeltaQuarter().GetText().TrimStart('Q'));
-                    var q = (Client.Today.Month + 2) / 3 + 1;
+                    var delta = int.Parse(RangeDeltaQuarter().GetText()[1..]);
+                    var q = (Client.Today.Month + 2) / 3;
                     if (delta > 0)
                         q = delta;
                     else
-                        q -= delta;
-                    dt = new(Client.Today.Year, 3 * q - 2, 1, 0, 0, 0, DateTimeKind.Utc);
+                        q += delta;
+                    dt = new(Client.Today.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                    dt = dt.AddMonths(3 * q - 3);
                 }
                 else
                 {
