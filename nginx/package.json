@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.6.2",
-    "axios": "^1.4.0",
+    "axios": "^1.6.0",
     "dayjs": "^1.10.7",
     "lodash-es": "^4.17.21",
     "modern-normalize": "^2.0.0",
