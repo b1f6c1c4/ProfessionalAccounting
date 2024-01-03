@@ -22,8 +22,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
+using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Facade;
+using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.Shell.Plugins.Utilities;
 
@@ -39,35 +41,66 @@ internal class Utilities : PluginBase
     public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
         await using var vir = session.Accountant.Virtualize();
+        var body = expr;
+        expr = ParsingF.Line(ref body);
+
+        var dt = string.IsNullOrWhiteSpace(body)
+            ? Parsing.UniqueTime(ref expr, session.Client)
+            : session.Client.Today;
+
         var abbr = Parsing.Token(ref expr);
-        var cont = Parsing.Optional(ref expr, "++", "--") switch
-            {
-                "++" => 1,
-                "--" => -1,
-                _ => 0,
-            };
-        var dt = cont != 0 ? Parsing.UniqueTime(ref expr, session.Client) : null;
-        for (; !string.IsNullOrWhiteSpace(expr); dt = dt?.AddDays(cont))
+        var template = Cfg.Get<UtilTemplates>().Templates.FirstOrDefault(t => t.Name == abbr) ??
+            throw new KeyNotFoundException($"找不到常见记账凭证{abbr}");
+
+        if (!string.IsNullOrWhiteSpace(body))
         {
-            if (dt.HasValue)
-                switch (Parsing.Optional(ref expr, ".", "<"))
+            ParsingF.Eof(expr);
+
+            while (!string.IsNullOrWhiteSpace(body))
+            {
+                var line = ParsingF.Line(ref body);
+                switch (Parsing.Optional(ref line, "=", "+", "-"))
                 {
-                    case ".":
-                        continue;
-                    case "<":
-                        dt = dt.Value.AddDays(-2 * cont);
-                        continue;
+                    case "+":
+                        dt = dt?.AddDays(1);
+                        break;
+                    case "-":
+                        dt = dt?.AddDays(1);
+                        break;
+                    case "=":
+                        break;
+                    default:
+                        dt = Parsing.UniqueTime(ref line, session.Client);
+                        break;
                 }
+                while (!string.IsNullOrWhiteSpace(line))
+                {
+                    var (voucher, ee) = await GenerateVoucher(session, template, line, dt, false);
+                    line = ee;
+                    if (voucher == null)
+                        continue;
 
-            var (voucher, ee) = await GenerateVoucher(session, abbr, expr, dt);
+                    await session.Accountant.UpsertAsync(voucher);
+                    yield return session.Serializer.PresentVoucher(voucher).Wrap();
+                }
+                ParsingF.Eof(line);
+            }
+            ParsingF.Eof(body);
+        }
+        else
+        {
+            var (voucher, ee) = await GenerateVoucher(session, template, expr, dt, true);
             expr = ee;
-            if (voucher == null)
-                continue;
-
-            await session.Accountant.UpsertAsync(voucher);
+            if (voucher != null)
+            {
+                await session.Accountant.UpsertAsync(voucher);
+                yield return session.Serializer.PresentVoucher(voucher).Wrap();
+            }
         }
 
-        yield return $"{vir}\n";
+        ParsingF.Eof(expr);
+
+        yield return $"// {vir}\n";
     }
 
     /// <inheritdoc />
@@ -80,27 +113,25 @@ internal class Utilities : PluginBase
             yield return $"{util.Name,20} {(util.TemplateType == UtilTemplateType.Fixed ? ' ' : '*')} {util.Description}\n";
     }
 
-    /// <summary>
-    ///     根据表达式生成记账凭证
-    /// </summary>
-    /// <param name="session">客户端会话</param>
-    /// <param name="abbr">常见记账凭证名称</param>
-    /// <param name="expr">表达式</param>
-    /// <param name="start">开始日期</param>
-    /// <returns>记账凭证</returns>
-    private async ValueTask<(Voucher, string)> GenerateVoucher(Session session, string abbr, string expr,
-        DateTime? start)
+    private async ValueTask<(Voucher, string)> GenerateVoucher(Session session, UtilTemplate template, string expr,
+        DateTime? time, bool allowEmpty = true)
     {
-        var time = start ?? Parsing.UniqueTime(ref expr, session.Client) ?? session.Client.Today;
-
-        var template = Cfg.Get<UtilTemplates>().Templates.FirstOrDefault(t => t.Name == abbr) ??
-            throw new KeyNotFoundException($"找不到常见记账凭证{abbr}");
-
         var num = 1D;
         if (template.TemplateType is UtilTemplateType.Value or UtilTemplateType.Fill)
         {
-            var valt = Parsing.Double(ref expr);
-            var val = valt ?? (template.Default ?? throw new ApplicationException($"常见记账凭证{template.Name}没有默认值"));
+            double val;
+            if (allowEmpty)
+            {
+                var valt = Parsing.Double(ref expr);
+                val = valt ?? (template.Default ?? throw new ApplicationException($"常见记账凭证{template.Name}没有默认值"));
+            }
+            else
+            {
+                if (!Parsing.Optional(ref expr, "."))
+                    val = ParsingF.Double(ref expr)!.Value;
+                else
+                    val = template.Default ?? throw new ApplicationException($"常见记账凭证{template.Name}没有默认值");
+            }
 
             if (template.TemplateType == UtilTemplateType.Value)
                 num = val;
@@ -110,6 +141,11 @@ internal class Utilities : PluginBase
                     .Fund;
                 num = arr - val;
             }
+        }
+        else if (!allowEmpty)
+        {
+            if (!Parsing.Optional(ref expr, "."))
+                return (null, expr);
         }
 
         return (num.IsZero() ? null : MakeVoucher(template, num, time), expr);
