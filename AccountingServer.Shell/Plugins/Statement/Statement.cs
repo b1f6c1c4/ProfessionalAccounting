@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
@@ -35,6 +36,9 @@ namespace AccountingServer.Shell.Plugins.Statement;
 /// </summary>
 internal class Statement : PluginBase
 {
+    static Statement()
+        => Cfg.RegisterType<StmtTargets>("Statement");
+
     /// <inheritdoc />
     public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
@@ -43,9 +47,12 @@ internal class Statement : PluginBase
 
         if (ParsingF.Optional(ref expr, "mark"))
         {
-            var parsed = new CsvParser(ParsingF.Optional(ref expr, "-"));
-            var filt = ParsingF.DetailQuery(ref expr, session.Client);
-            ParsingF.Optional(ref expr, "as");
+            var nm = ParsingF.Token(ref expr);
+            var tgt = Cfg.Get<StmtTargets>().Targets.Single(t => t.Name == nm);
+            var parsed = new CsvParser(tgt.Reversed);
+            var filt = ParsingF.DetailQuery(tgt.Query, session.Client);
+            if (!ParsingF.Optional(ref expr, "as"))
+                throw new FormatException("格式错误");
             var marker = ParsingF.Token(ref expr);
             ParsingF.Eof(expr);
             if (string.IsNullOrWhiteSpace(marker))
@@ -61,7 +68,9 @@ internal class Statement : PluginBase
 
         if (ParsingF.Optional(ref expr, "unmark"))
         {
-            var filt = ParsingF.DetailQuery(ref expr, session.Client);
+            var nm = ParsingF.Token(ref expr);
+            var tgt = Cfg.Get<StmtTargets>().Targets.Single(t => t.Name == nm);
+            var filt = ParsingF.DetailQuery(tgt.Query, session.Client);
             ParsingF.Eof(expr);
             var sb = new StringBuilder();
             await RunUnmark(session, sb, filt);
@@ -72,36 +81,35 @@ internal class Statement : PluginBase
 
         if (ParsingF.Optional(ref expr, "check"))
         {
-            var filt = ParsingF.DetailQuery(ref expr, session.Client);
-            var tolerance = 1;
-            if (ParsingF.Optional(ref expr, "tol"))
-                tolerance = (int)ParsingF.DoubleF(ref expr);
+            var nm = ParsingF.Token(ref expr);
+            var tgt = Cfg.Get<StmtTargets>().Targets.Single(t => t.Name == nm);
+            var filt = ParsingF.DetailQuery(tgt.Query, session.Client);
             ParsingF.Eof(expr);
             var sb = new StringBuilder();
-            await RunCheck(session, sb, filt, tolerance);
+            await RunCheck(session, sb, filt, tgt);
             yield return sb.ToString();
         }
 
         {
-            var parsed = new CsvParser(ParsingF.Optional(ref expr, "-"));
-            var filt = ParsingF.DetailQuery(ref expr, session.Client);
+            var nm = ParsingF.Token(ref expr);
+            var tgt = Cfg.Get<StmtTargets>().Targets.Single(t => t.Name == nm);
+            var parsed = new CsvParser(tgt.Reversed);
+            var filt = ParsingF.DetailQuery(tgt.Query, session.Client);
             if (!ParsingF.Optional(ref expr, "as"))
                 throw new FormatException("格式错误");
             var marker = ParsingF.Token(ref expr);
-            var tolerance = 1;
-            if (ParsingF.Optional(ref expr, "tol"))
-                tolerance = (int)ParsingF.DoubleF(ref expr);
+            var force = ParsingF.Optional(ref expr, "--force");
             ParsingF.Eof(expr);
             if (string.IsNullOrWhiteSpace(marker))
                 throw new FormatException("格式错误");
 
             parsed.Parse(ref csv);
-            var markerFilt = new StmtVoucherDetailQuery(
+            var markerFilt = new VoucherDetailQuery(
                 filt.VoucherQuery,
                 new IntersectQueries<IDetailQueryAtom>(
                     filt.ActualDetailFilter(),
                     new SimpleDetailQuery { Filter = new() { Remark = marker } }));
-            var nullFilt = new StmtVoucherDetailQuery(
+            var nullFilt = new VoucherDetailQuery(
                 filt.VoucherQuery,
                 new IntersectQueries<IDetailQueryAtom>(
                     filt.ActualDetailFilter(),
@@ -111,7 +119,7 @@ internal class Statement : PluginBase
             await using var vir = session.Accountant.Virtualize();
             await RunUnmark(session, sb, markerFilt);
             if (await RunMark(session, sb, nullFilt, parsed, marker)
-                || await RunCheck(session, sb, filt, tolerance))
+                || await RunCheck(session, sb, filt, tgt) && !force)
             {
                 sb.AppendLine("ABORT, rewind by unmark them back");
                 await RunUnmark(session, sb, markerFilt);
@@ -128,6 +136,16 @@ internal class Statement : PluginBase
                 yield return $"Virtualizer: {vir}\n";
             }
         }
+    }
+
+    /// <inheritdoc />
+    public override async IAsyncEnumerable<string> ListHelp()
+    {
+        await foreach (var s in base.ListHelp())
+            yield return s;
+
+        foreach (var tgt in Cfg.Get<StmtTargets>().Targets)
+            yield return $"{tgt.Name,4} {(tgt.Reversed ? '-' : ' ')} {tgt.Query}\n";
     }
 
     private static async ValueTask<bool> RunMark(Session session, StringBuilder sb,
@@ -221,100 +239,297 @@ internal class Statement : PluginBase
         sb.AppendLine($"{cnt} unmarked");
     }
 
-    private static async ValueTask<bool> RunCheck(Session session, StringBuilder sb,
-        IVoucherDetailQuery filt, int tolerance)
+    [Flags]
+    public enum IncidentType
+    {
+        None = 0,
+        Error = 0x1000,
+
+        // Errors
+        NonMonotonic = 0x1004,
+        PeriodTooLong = 0x1003,
+        OverlapTooMuch = 0x1002,
+        UnknownVoucher = 0x1001, // "" found otherwise
+
+        // Warnings
+        PeriodUnmarked = 0x2, // "" found between two non-adjacent period
+        FinalOverlap = 0x1, // "" found before last period ends (but after 2nd last period ends)
+    };
+
+    public readonly record struct Incident(IncidentType Ty, int From, int To, int? Tol, string Period);
+
+    public static List<Incident> CalculateIncidents(List<(string, DateTime)> lst, Target tgt)
+    {
+        var incidents = new List<Incident>();
+
+        // Obtain period range (both inclusive)
+        string lbs = null, ubs = null;
+        var reg = new Regex(@"^20[1-2][0-9](?:0[1-9]|1[0-2])%");
+        foreach (var (r, _) in lst)
+        {
+            if (string.IsNullOrEmpty(r))
+                continue;
+            if (!reg.IsMatch(r))
+                throw new ApplicationException($"Invalid remark: {r}");
+            if (string.Compare(lbs, r) > 0)
+                lbs = r;
+            if (string.Compare(ubs, r) < 0)
+                ubs = r;
+        }
+        if (lbs == null || ubs == null)
+            return new();
+
+        // Create buckets for each period
+        var lb = DateTimeParser.ParseExact($"{lbs}01", "yyyyMMdd");
+        var ub = DateTimeParser.ParseExact($"{ubs}01", "yyyyMMdd");
+        var rngs = new List<(string, int?, int?)>{ (null, null, null) }; // inclusive
+        for (var c = lb; c <= ub; c = c.AddMonths(1))
+            rngs.Add(($"{c:yyyyMM}", null, null));
+
+        // Obtain range for each period
+        for (var i = 0; i < lst.Count; i++)
+        {
+            var (r, _) = lst[i];
+            if (string.IsNullOrEmpty(r))
+                continue;
+            var c = DateTimeParser.ParseExact($"{r}01", "yyyyMMdd");
+            int id;
+            for (id = 0; id < rngs.Count; id++)
+                if (c == lb.AddMonths(id))
+                    break;
+            var (period, lbi, ubi) = rngs[id];
+            if (!lbi.HasValue)
+                lbi = ubi = i;
+            else if (lbi > i)
+                lbi = i;
+            else if (ubi < i)
+                ubi = i;
+            rngs[id] = (period, lbi, ubi);
+        }
+
+        // Check for monotonicity
+        var last_lb = -1;
+        var last_ub = -1;
+        var last_last_ub = -1;
+        foreach (var (period, lbi, ubi) in rngs)
+        {
+            if (!lbi.HasValue)
+                continue;
+
+            if (last_ub > ubi!.Value || last_lb > lbi!.Value)
+                incidents.Add(new Incident(IncidentType.NonMonotonic, lbi.Value, last_ub, null, period));
+            else if (last_last_ub >= lbi)
+                incidents.Add(new Incident(IncidentType.NonMonotonic, last_last_ub, lbi.Value, null, period));
+
+            last_last_ub = last_ub;
+            last_lb = lbi.Value;
+            last_ub = ubi.Value;
+        }
+        if (!incidents.Any())
+            return incidents;
+
+        // Estimate empty periods, detect ""s, check overlap
+        for (var j = 0; j < rngs.Count; j++)
+        {
+            var (period1, lbi1, ubi1) = rngs[j];
+            if (!lbi1.HasValue)
+                continue;
+
+            var lbd1 = lst[lbi1!.Value].Item2;
+            var ubd1 = lst[ubi1!.Value].Item2;
+
+            var ubi0 = j >= 1 ? rngs[j - 1].Item3 : lbi1!.Value - 1;
+            var lbi2 = j <= rngs.Count - 1 ? rngs[j + 1].Item2 : ubi1!.Value + 1;
+
+            //       <==>
+            // 000000    111111
+            if (ubi0.HasValue && ubi0.Value < lbi1!.Value - 1)
+                incidents.Add(new Incident(IncidentType.UnknownVoucher, ubi0!.Value + 1, lbi1!.Value - 1, null, period1));
+
+            //     <====>
+            // 00001110001111
+            if (j >= 1)
+            {
+                var (period0, lbi0, _) = rngs[j - 1];
+                var ubd0 = lst[ubi0!.Value].Item2;
+                var d = (int)(ubd0 - lbd1).TotalDays;
+                var tol = tgt.Overlaps.SingleOrDefault(p => p.From == period0 && p.To == period1)?.Tolerance ?? 1;
+                if (d > tol)
+                    incidents.Add(new Incident(IncidentType.OverlapTooMuch, ubi0.Value, lbi1.Value, d, $"{period0}~{period1}"));
+            }
+
+            int center;
+            if (!ubi0.HasValue && !lbi2.HasValue) // LH + RH
+            {
+                var d = lbd1 + (ubd1 - lbd1) / 2;
+                var l = lbi1.Value;
+                var r = ubi1.Value + 1;
+                center = l;
+                while (r - l > 1)
+                {
+                    center = (l + r) / 2;
+                    if (lst[center].Item2 >= d)
+                        r = center;
+                    else
+                        l = center;
+                }
+            }
+            else if (ubi0.HasValue && !lbi2.HasValue) // RH
+                center = ubi0.Value;
+            else if (!ubi0.HasValue && lbi2.HasValue) // LH
+            {
+                center = lbi2.Value;
+                //          *
+                //    111112 122222
+                for (var i = lbi2.Value; i < ubi1.Value; i++)
+                    if (lst[i].Item1 == null)
+                        incidents.Add(new Incident(IncidentType.UnknownVoucher, i, i, null, period1));
+            }
+            else
+            {
+                //         *
+                // 00001111 1112222
+                for (var i = ubi0.Value; i < lbi1.Value; i++)
+                    if (lst[i].Item1 == null)
+                        incidents.Add(new Incident(IncidentType.UnknownVoucher, i, i, null, period1));
+                //           *
+                // 0000111112 12222
+                for (var i = lbi2.Value; i < ubi1.Value; i++)
+                    if (lst[i].Item1 == null)
+                        incidents.Add(new Incident(IncidentType.UnknownVoucher, i, i, null, period1));
+
+                continue;
+            }
+
+            if (!lbi2.HasValue) // RH
+            {
+                for (var i = center + 1; i < ubi1.Value; i++)
+                {
+                    var (r, d) = lst[i];
+                    if (r == null)
+                    {
+                        //        <==>
+                        // ~~~1111  11     2
+                        var days = (int)(ubd1 - d).TotalDays;
+                        var tol = tgt.Overlaps.SingleOrDefault(p => p.From == period1 && p.To == "")?.Tolerance ?? 1;
+                        if (days > tol)
+                            incidents.Add(new Incident(
+                                        j == rngs.Count - 1 ? IncidentType.FinalOverlap : IncidentType.OverlapTooMuch,
+                                        i, lbi1.Value, days, $"{period1}~"));
+                        break;
+                    }
+                }
+            }
+            if (!ubi0.HasValue) // LH
+            {
+                for (var i = center - 1; i > lbi1.Value; i--)
+                {
+                    var (r, d) = lst[i];
+                    if (r == null)
+                    {
+                        //       <==>
+                        // 0     11  1111~~~~
+                        var days = (int)(d - lbd1).TotalDays;
+                        var tol = tgt.Overlaps.SingleOrDefault(p => p.From == "" && p.To == period1)?.Tolerance ?? 1;
+                        if (days > tol)
+                            incidents.Add(new Incident(IncidentType.OverlapTooMuch, lbi1.Value, i, days, $"~{period1}"));
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Check long periods
+        foreach (var (period, lbi, ubi) in rngs)
+        {
+            if (!lbi.HasValue)
+                continue;
+
+            var lbd = lst[lbi!.Value].Item2;
+            var ubd = lst[ubi!.Value].Item2;
+            var d = (int)(ubd - lbd).TotalDays;
+            var tol = tgt.Lengths.SingleOrDefault(p => p.Period == period)?.Tolerance ?? 1;
+            var c = DateTimeParser.ParseExact($"{period}01", "yyyyMMdd");
+            var days = (int)(c.AddMonths(1) - c).TotalDays;
+            if (d > days + tol)
+                incidents.Add(new Incident(IncidentType.PeriodTooLong, lbi.Value, ubi.Value, d - days, period));
+        }
+
+        // Check empty periods
+        for (var j = 0; j < rngs.Count; j++)
+        {
+            var (period1, lbi1, ubi1) = rngs[j];
+            if (lbi1.HasValue)
+                continue;
+
+            var (period0, lbi0, ubi0) = rngs[j - 1];
+
+            int k;
+            for (k = j + 1; k < rngs.Count; k++)
+                if (rngs[k].Item2.HasValue)
+                    break;
+
+            var (period2, lbi2, ubi2) = rngs[k - 1];
+
+            if (period1 == period2)
+                incidents.Add(new Incident(IncidentType.PeriodUnmarked, ubi0!.Value + 1, rngs[k].Item2!.Value - 1, null, $"{period1}"));
+            else
+                incidents.Add(new Incident(IncidentType.PeriodUnmarked, ubi0!.Value + 1, rngs[k].Item2!.Value - 1, null, $"{period1}~{period2}"));
+        }
+
+        return incidents;
+    }
+
+    private async ValueTask<bool> RunCheck(Session session, StringBuilder sb,
+        IVoucherDetailQuery filt, Target tgt)
     {
         if (filt.IsDangerous())
             throw new SecurityException("检测到弱检索式");
 
         var res = await session.Accountant.SelectVouchersAsync(filt.VoucherQuery)
+            .Where(static v => !v.Date.HasValue)
             .SelectMany(v => v.Details.Where(d => d.IsMatch(filt.ActualDetailFilter()))
+                .Where(d => d.Remark != "reconcillation" && tgt.Skips.Contains(d.Remark))
                 .Select(d => (v.ID, v.Date, Fund: d.Fund.AsCurrency(d.Currency), d.Remark))
                 .ToAsyncEnumerable())
             .OrderBy(static tuple => tuple.Date).ThenBy(static tuple => tuple.Remark)
             .ToListAsync();
 
-        var isFirst = true;
-        int? newId = null, violationId = null;
-        DateTime? newDate = null;
-        string oldR = null, newR = null;
-        var noMatch = 0;
-        for (var i = 0; i < res.Count; i++)
+        var flag = false;
+        foreach (var incident in CalculateIncidents(res.Select(static f => (f.Remark, f.Date!.Value)).ToList(), tgt))
         {
-            switch (res[i].Remark)
+            if (incident.Ty.HasFlag(IncidentType.Error))
             {
-                case "reconciliation":
-                    continue;
-                case null:
-                    noMatch++;
-                    break;
+                sb.Append("VIOLATION: ");
+                flag = true;
             }
+            else
+                sb.Append("WARNING: ");
 
-            var tuple = res[i];
-            if (isFirst)
+            sb.Append($"{incident.Ty} at {incident.Period}");
+            if (incident.Tol.HasValue)
+                sb.Append($", consider increase tolerance to {incident.Tol}");
+
+            sb.AppendLine();
+            for (var i = Math.Max(0, incident.From - 4); i < Math.Min(res.Count, incident.To + 5); i++)
             {
-                isFirst = false;
-                oldR = tuple.Remark;
-                continue;
+                sb.Append($"{res[i].ID.Quotation('^')} {res[i].Date.AsDate()} ");
+                sb.Append($"{res[i].Remark.Quotation('"').CPadRight(8)} {res[i].Fund.CPadLeft(13)}");
+                if (i == incident.From || i == incident.To)
+                    sb.Append(" (*)");
+                sb.AppendLine();
             }
-
-            if (!newId.HasValue)
-            {
-                if (tuple.Remark == newR)
-                    // do nothing
-                    continue;
-
-                // first change
-                newId = i;
-                newDate = tuple.Date;
-                newR = tuple.Remark;
-
-                continue;
-            }
-
-            if (tuple.Remark == newR)
-                // do nothing
-                continue;
-
-            if (tuple.Remark == oldR)
-            {
-                var diff = (tuple.Date - newDate)?.TotalDays;
-                if (diff > tolerance && violationId != newId)
-                {
-                    violationId = newId;
-                    sb.AppendLine($"VIOLATION: Found between period {oldR.Quotation('"')} and {newR.Quotation('"')} ");
-                    sb.AppendLine($"           Date tolerance = {tolerance}, where date difference = {diff}");
-                    for (var vid = Math.Max(0, newId.Value - 4); vid < Math.Min(res.Count, i + 4); vid++)
-                    {
-                        sb.Append($"{res[vid].ID.Quotation('^')} {res[vid].Date.AsDate()} ");
-                        sb.Append($"{res[vid].Remark.Quotation('"').CPadRight(8)} {res[vid].Fund.CPadLeft(13)}");
-                        if (vid == i || vid == newId)
-                            sb.Append(" (*)");
-                        sb.AppendLine();
-                    }
-                }
-
-                continue;
-            }
-
-            newId = i;
-            newDate = tuple.Date;
-            oldR = newR;
-            newR = tuple.Remark;
         }
 
-        if (noMatch != 0)
-            sb.AppendLine($"WARNING: {noMatch} vouchers do NOT have a matching entry.");
-
-        return violationId.HasValue;
+        return flag;
     }
 
-    private sealed class StmtVoucherDetailQuery : IVoucherDetailQuery
+    private sealed class VoucherDetailQuery : IVoucherDetailQuery
     {
-        public StmtVoucherDetailQuery(IQueryCompounded<IVoucherQueryAtom> v, IQueryCompounded<IDetailQueryAtom> d)
+        public VoucherDetailQuery(IQueryCompounded<IVoucherQueryAtom> v, IQueryCompounded<IDetailQueryAtom> d)
         {
             VoucherQuery = v;
-            DetailEmitFilter = new StmtEmit { DetailFilter = d };
+            DetailEmitFilter = new Emit { DetailFilter = d };
         }
 
         public IQueryCompounded<IVoucherQueryAtom> VoucherQuery { get; }
@@ -322,7 +537,7 @@ internal class Statement : PluginBase
         public IEmit DetailEmitFilter { get; }
     }
 
-    private class StmtEmit : IEmit
+    private class Emit : IEmit
     {
         public IQueryCompounded<IDetailQueryAtom> DetailFilter { get; init; }
     }

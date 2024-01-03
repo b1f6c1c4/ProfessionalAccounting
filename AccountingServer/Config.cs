@@ -38,6 +38,7 @@ public class ConfigFilesManager
                 "Util",
                 "Abbr",
                 "Sheet",
+                "Statement",
             };
         await Task.WhenAll(names.Select(Cfg.RegisterName));
         await foreach (var s in Cfg.ReloadAll())
