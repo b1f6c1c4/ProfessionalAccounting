@@ -75,7 +75,7 @@ artifacts:
   - path: 'AccountingServer.BLL\Parsing'
     name: Parsing
     type: zip
-  - path: 'AccountingServer\bin\Release\net7.0'
+  - path: 'AccountingServer\bin\Release\net8.0'
     name: AccountingServer
     type: zip
 
@@ -85,8 +85,8 @@ before_deploy:
 deploy_script:
   - docker build --pull -t b1f6c1c4/accounting-frontend:latest ./nginx
   - docker build -f nginx/Dockerfile.local -t b1f6c1c4/accounting-frontend:local ./nginx
-  - cp -r example/config.d ./AccountingServer/bin/Release/net7.0/
-  - docker build --pull -t b1f6c1c4/accounting-backend:latest ./AccountingServer/bin/Release/net7.0
+  - cp -r example/config.d ./AccountingServer/bin/Release/net8.0/
+  - docker build --pull -t b1f6c1c4/accounting-backend:latest ./AccountingServer/bin/Release/net8.0
   - docker login -u %DOCKER_USER% -p %DOCKER_PASS%
   - docker push b1f6c1c4/accounting-frontend
   - docker push b1f6c1c4/accounting-backend

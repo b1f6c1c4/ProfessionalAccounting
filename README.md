@@ -208,7 +208,7 @@
 #### 在Linux上构建开发环境
 
 1. 请先安装以下工具：
-    - [.NET 7.0](https://dotnet.microsoft.com/download/dotnet/7.0)
+    - [.NET 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
     - [JetBrains Rider](https://www.jetbrains.com/rider/)
     - [Docker](https://www.docker.com/)
 1. 启动测试数据库：
@@ -222,7 +222,7 @@
 #### 在Windows上构建开发环境
 
 1. 请先安装以下工具：
-    - [.NET 7.0](https://dotnet.microsoft.com/download/dotnet/7.0)
+    - [.NET 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
     - [Visual Studio](https://visualstudio.microsoft.com/)
     - [Mongo DB](https://www.mongodb.com/)
 1. 启动测试数据库：在`services.msc`中启动`MongoDB`服务。
