@@ -37,7 +37,7 @@ namespace AccountingServer.Shell.Plugins.Statement;
 /// <summary>
 ///     自动对账
 /// </summary>
-internal class Statement : PluginBase
+public class Statement : PluginBase
 {
     static Statement()
         => Cfg.RegisterType<StmtTargets>("Statement");
@@ -342,12 +342,12 @@ internal class Statement : PluginBase
             if (last_ub > ubi!.Value || last_lb > lbi!.Value)
             {
                 flag = true;
-                yield return new Incident(IncidentType.NonMonotonic, lbi.Value, last_ub, null);
+                yield return new(IncidentType.NonMonotonic, lbi.Value, last_ub, null);
             }
             else if (last_last_ub >= lbi)
             {
                 flag = true;
-                yield return new Incident(IncidentType.NonMonotonic, last_last_ub, lbi.Value, null);
+                yield return new(IncidentType.NonMonotonic, last_last_ub, lbi.Value, null);
             }
 
             last_last_ub = last_ub;
@@ -373,18 +373,18 @@ internal class Statement : PluginBase
             //       <==>
             // 000000    111111
             if (ubi0.HasValue && ubi0.Value < lbi1!.Value - 1)
-                yield return new Incident(IncidentType.UnknownVoucher, ubi0!.Value + 1, lbi1!.Value - 1, null);
+                yield return new(IncidentType.UnknownVoucher, ubi0!.Value + 1, lbi1!.Value - 1, null);
 
             //     <====>
             // 00001110001111
-            if (j >= 1)
+            if (ubi0.HasValue)
             {
                 var (period0, _, _) = rngs[j - 1];
-                var ubd0 = lst[ubi0!.Value].Item2;
+                var ubd0 = lst[ubi0.Value].Item2;
                 var d = (int)(ubd0 - lbd1).TotalDays;
                 var tol = tgt.Overlaps.SingleOrDefault(p => p.From == period0 && p.To == period1)?.Tolerance ?? 1;
                 if (d > tol)
-                    yield return new Incident(IncidentType.OverlapTooMuch,
+                    yield return new(IncidentType.OverlapTooMuch,
                             lbi1.Value, ubi0.Value, new OverlapSpec { From = period0, To = period1, Tolerance = d });
             }
 
@@ -413,7 +413,7 @@ internal class Statement : PluginBase
                 //    111112 122222
                 for (var i = lbi2.Value; i < ubi1.Value; i++)
                     if (lst[i].Item1 == null)
-                        yield return new Incident(IncidentType.UnknownVoucher, i, i, null);
+                        yield return new(IncidentType.UnknownVoucher, i, i, null);
             }
             else
             {
@@ -423,7 +423,7 @@ internal class Statement : PluginBase
                 // 0000111112 12222
                 for (var i = Math.Max(ubi0.Value, lbi1.Value); i < ubi1.Value; i++)
                     if (lst[i].Item1 == null)
-                        yield return new Incident(IncidentType.UnknownVoucher, i, i, null);
+                        yield return new(IncidentType.UnknownVoucher, i, i, null);
 
                 continue;
             }
@@ -440,7 +440,7 @@ internal class Statement : PluginBase
                         var days = (int)(ubd1 - d).TotalDays;
                         var tol = tgt.Overlaps.SingleOrDefault(p => p.From == period1 && string.IsNullOrEmpty(p.To))?.Tolerance ?? 1;
                         if (days > tol)
-                            yield return new Incident(
+                            yield return new(
                                         j == rngs.Count - 1 ? IncidentType.FinalOverlap : IncidentType.OverlapTooMuch,
                                         i, ubi1.Value, new OverlapSpec { From = period1, Tolerance = days });
                         break;
@@ -459,7 +459,7 @@ internal class Statement : PluginBase
                         var days = (int)(d - lbd1).TotalDays;
                         var tol = tgt.Overlaps.SingleOrDefault(p => string.IsNullOrEmpty(p.From) && p.To == period1)?.Tolerance ?? 1;
                         if (days > tol)
-                            yield return new Incident(
+                            yield return new(
                                     IncidentType.OverlapTooMuch, lbi1.Value, i, new OverlapSpec { To = period1, Tolerance = days });
                         break;
                     }
@@ -475,12 +475,10 @@ internal class Statement : PluginBase
 
             var lbd = lst[lbi!.Value].Item2;
             var ubd = lst[ubi!.Value].Item2;
-            var d = (int)(ubd - lbd).TotalDays;
+            var d = (int)(ubd - lbd).TotalDays + 1; // both inclusive
             var tol = tgt.Lengths.SingleOrDefault(p => p.Period == period)?.Tolerance ?? 1;
-            var c = DateTimeParser.ParseExact($"{period}01", "yyyyMMdd");
-            var days = (int)(c.AddMonths(1) - c).TotalDays;
-            if (d > days + tol)
-                yield return new Incident(IncidentType.PeriodTooLong, lbi.Value, ubi.Value, new LengthSpec { Period = period, Tolerance = d - days });
+            if (d > 31 + tol)
+                yield return new(IncidentType.PeriodTooLong, lbi.Value, ubi.Value, new LengthSpec { Period = period, Tolerance = d - 31 });
         }
 
         // Check empty periods
@@ -490,16 +488,19 @@ internal class Statement : PluginBase
             if (lbi1.HasValue)
                 continue;
 
-            var (period0, _, ubi0) = rngs[j - 1];
+            var (period0, _, ubi0) = rngs[j - 1]; // last period, guaranteed non-empty
 
             int k;
             for (k = j + 1; k < rngs.Count; k++)
                 if (rngs[k].Item2.HasValue)
                     break;
 
-            var (period2, lbi2, ubi2) = rngs[k - 1];
+            var (period2, lbi2, ubi2) = rngs[k]; // first non-empty period after this
 
-            yield return new Incident(IncidentType.PeriodUnmarked, ubi0!.Value + 1, rngs[k].Item2!.Value - 1, null);
+            if (lbi2!.Value - ubi0!.Value > 1)
+                yield return new(IncidentType.PeriodUnmarked, ubi0!.Value + 1, lbi2!.Value - 1, null);
+
+            j = k;
         }
     }
 

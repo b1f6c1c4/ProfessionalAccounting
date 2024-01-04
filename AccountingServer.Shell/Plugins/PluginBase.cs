@@ -24,7 +24,7 @@ namespace AccountingServer.Shell.Plugins;
 /// <summary>
 ///     插件基类
 /// </summary>
-internal abstract class PluginBase
+public abstract class PluginBase
 {
     /// <summary>
     ///     执行插件表达式
