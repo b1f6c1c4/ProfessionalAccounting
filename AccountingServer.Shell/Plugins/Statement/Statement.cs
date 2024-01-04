@@ -18,11 +18,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Serialization;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
@@ -88,6 +91,25 @@ internal class Statement : PluginBase
             var sb = new StringBuilder();
             await RunCheck(session, sb, filt, tgt);
             yield return sb.ToString();
+
+            yield break;
+        }
+
+        if (ParsingF.Optional(ref expr, "xml"))
+        {
+            var filt = ParsingF.DetailQuery(ref expr, session.Client);
+            ParsingF.Eof(expr);
+            var sb = new StringBuilder();
+            var tgt = new Target()
+                {
+                    Lengths = new(),
+                    Overlaps = new(),
+                    Skips = new(),
+                };
+            await RunCheck(session, sb, filt, tgt, true);
+            yield return sb.ToString();
+
+            yield break;
         }
 
         {
@@ -256,9 +278,9 @@ internal class Statement : PluginBase
         FinalOverlap = 0x1, // "" found before last period ends (but after 2nd last period ends)
     };
 
-    public readonly record struct Incident(IncidentType Ty, int From, int To, int? Tol, string Period);
+    public readonly record struct Incident(IncidentType Ty, int From, int To, ISpec Spec);
 
-    public static List<Incident> CalculateIncidents(List<(string, DateTime)> lst, Target tgt)
+    public static IEnumerable<Incident> CalculateIncidents(IList<(string, DateTime)> lst, Target tgt)
     {
         var incidents = new List<Incident>();
 
@@ -277,7 +299,7 @@ internal class Statement : PluginBase
                 ubs = r;
         }
         if (lbs == null || ubs == null)
-            return new();
+            yield break;
 
         // Create buckets for each period
         var lb = DateTimeParser.ParseExact($"{lbs}01", "yyyyMMdd");
@@ -311,22 +333,29 @@ internal class Statement : PluginBase
         var last_lb = -1;
         var last_ub = -1;
         var last_last_ub = -1;
+        var flag = false;
         foreach (var (period, lbi, ubi) in rngs)
         {
             if (!lbi.HasValue)
                 continue;
 
             if (last_ub > ubi!.Value || last_lb > lbi!.Value)
-                incidents.Add(new Incident(IncidentType.NonMonotonic, lbi.Value, last_ub, null, period));
+            {
+                flag = true;
+                yield return new Incident(IncidentType.NonMonotonic, lbi.Value, last_ub, null);
+            }
             else if (last_last_ub >= lbi)
-                incidents.Add(new Incident(IncidentType.NonMonotonic, last_last_ub, lbi.Value, null, period));
+            {
+                flag = true;
+                yield return new Incident(IncidentType.NonMonotonic, last_last_ub, lbi.Value, null);
+            }
 
             last_last_ub = last_ub;
             last_lb = lbi.Value;
             last_ub = ubi.Value;
         }
-        if (incidents.Any())
-            return incidents;
+        if (flag)
+            yield break;
 
         // Estimate empty periods, detect ""s, check overlap
         for (var j = 0; j < rngs.Count; j++)
@@ -344,7 +373,7 @@ internal class Statement : PluginBase
             //       <==>
             // 000000    111111
             if (ubi0.HasValue && ubi0.Value < lbi1!.Value - 1)
-                incidents.Add(new Incident(IncidentType.UnknownVoucher, ubi0!.Value + 1, lbi1!.Value - 1, null, period1));
+                yield return new Incident(IncidentType.UnknownVoucher, ubi0!.Value + 1, lbi1!.Value - 1, null);
 
             //     <====>
             // 00001110001111
@@ -355,7 +384,8 @@ internal class Statement : PluginBase
                 var d = (int)(ubd0 - lbd1).TotalDays;
                 var tol = tgt.Overlaps.SingleOrDefault(p => p.From == period0 && p.To == period1)?.Tolerance ?? 1;
                 if (d > tol)
-                    incidents.Add(new Incident(IncidentType.OverlapTooMuch, lbi1.Value, ubi0.Value, d, $"{period0}~{period1}"));
+                    yield return new Incident(IncidentType.OverlapTooMuch,
+                            lbi1.Value, ubi0.Value, new OverlapSpec { From = period0, To = period1, Tolerance = d });
             }
 
             int center;
@@ -383,20 +413,17 @@ internal class Statement : PluginBase
                 //    111112 122222
                 for (var i = lbi2.Value; i < ubi1.Value; i++)
                     if (lst[i].Item1 == null)
-                        incidents.Add(new Incident(IncidentType.UnknownVoucher, i, i, null, period1));
+                        yield return new Incident(IncidentType.UnknownVoucher, i, i, null);
             }
             else
             {
                 //         *
                 // 00001111 1112222
-                for (var i = ubi0.Value; i < lbi1.Value; i++)
-                    if (lst[i].Item1 == null)
-                        incidents.Add(new Incident(IncidentType.UnknownVoucher, i, i, null, period1));
                 //           *
                 // 0000111112 12222
-                for (var i = lbi2.Value; i < ubi1.Value; i++)
+                for (var i = Math.Max(ubi0.Value, lbi1.Value); i < ubi1.Value; i++)
                     if (lst[i].Item1 == null)
-                        incidents.Add(new Incident(IncidentType.UnknownVoucher, i, i, null, period1));
+                        yield return new Incident(IncidentType.UnknownVoucher, i, i, null);
 
                 continue;
             }
@@ -411,11 +438,11 @@ internal class Statement : PluginBase
                         //        <==>
                         // ~~~1111  11     2
                         var days = (int)(ubd1 - d).TotalDays;
-                        var tol = tgt.Overlaps.SingleOrDefault(p => p.From == period1 && p.To == "")?.Tolerance ?? 1;
+                        var tol = tgt.Overlaps.SingleOrDefault(p => p.From == period1 && string.IsNullOrEmpty(p.To))?.Tolerance ?? 1;
                         if (days > tol)
-                            incidents.Add(new Incident(
+                            yield return new Incident(
                                         j == rngs.Count - 1 ? IncidentType.FinalOverlap : IncidentType.OverlapTooMuch,
-                                        i, ubi1.Value, days, $"{period1}~"));
+                                        i, ubi1.Value, new OverlapSpec { From = period1, Tolerance = days });
                         break;
                     }
                 }
@@ -430,9 +457,10 @@ internal class Statement : PluginBase
                         //       <==>
                         // 0     11  1111~~~~
                         var days = (int)(d - lbd1).TotalDays;
-                        var tol = tgt.Overlaps.SingleOrDefault(p => p.From == "" && p.To == period1)?.Tolerance ?? 1;
+                        var tol = tgt.Overlaps.SingleOrDefault(p => string.IsNullOrEmpty(p.From) && p.To == period1)?.Tolerance ?? 1;
                         if (days > tol)
-                            incidents.Add(new Incident(IncidentType.OverlapTooMuch, lbi1.Value, i, days, $"~{period1}"));
+                            yield return new Incident(
+                                    IncidentType.OverlapTooMuch, lbi1.Value, i, new OverlapSpec { To = period1, Tolerance = days });
                         break;
                     }
                 }
@@ -452,7 +480,7 @@ internal class Statement : PluginBase
             var c = DateTimeParser.ParseExact($"{period}01", "yyyyMMdd");
             var days = (int)(c.AddMonths(1) - c).TotalDays;
             if (d > days + tol)
-                incidents.Add(new Incident(IncidentType.PeriodTooLong, lbi.Value, ubi.Value, d - days, period));
+                yield return new Incident(IncidentType.PeriodTooLong, lbi.Value, ubi.Value, new LengthSpec { Period = period, Tolerance = d - days });
         }
 
         // Check empty periods
@@ -471,33 +499,52 @@ internal class Statement : PluginBase
 
             var (period2, lbi2, ubi2) = rngs[k - 1];
 
-            if (period1 == period2)
-                incidents.Add(new Incident(IncidentType.PeriodUnmarked, ubi0!.Value + 1, rngs[k].Item2!.Value - 1, null, $"{period1}"));
-            else
-                incidents.Add(new Incident(IncidentType.PeriodUnmarked, ubi0!.Value + 1, rngs[k].Item2!.Value - 1, null, $"{period1}~{period2}"));
+            yield return new Incident(IncidentType.PeriodUnmarked, ubi0!.Value + 1, rngs[k].Item2!.Value - 1, null);
         }
-
-        return incidents;
     }
 
     private async ValueTask<bool> RunCheck(Session session, StringBuilder sb,
-        IVoucherDetailQuery filt, Target tgt)
+        IVoucherDetailQuery filt, Target tgt, bool pure = false)
     {
         if (filt.IsDangerous())
             throw new SecurityException("检测到弱检索式");
 
         var res = await session.Accountant.SelectVouchersAsync(filt.VoucherQuery)
+            .Where(v => !tgt.Skips.Any(s => s.ID == v.ID))
             .Where(static v => v.Date.HasValue)
             .SelectMany(v => v.Details.Where(d => d.IsMatch(filt.ActualDetailFilter()))
-                .Where(d => d.Remark != "reconcillation" && !tgt.Skips.Contains(d.Remark))
+                .Where(d => d.Remark != "reconciliation")
                 .Select(d => (v.ID, v.Date, Fund: d.Fund.AsCurrency(d.Currency), d.Remark))
                 .ToAsyncEnumerable())
             .OrderBy(static tuple => tuple.Date).ThenBy(static tuple => tuple.Remark)
             .ToListAsync();
 
+        string Serialize(ISpec spec)
+        {
+            var en = new XmlSerializerNamespaces(new[] { XmlQualifiedName.Empty });
+            var settings = new XmlWriterSettings { Indent = true, OmitXmlDeclaration = true };
+            var xs = new XmlSerializer(spec.GetType());
+            using var sw = new StringWriter();
+            using var w = XmlWriter.Create(sw, settings);
+            xs.Serialize(w, spec, en);
+            return sw.ToString();
+        }
+
+        if (pure)
+            sb.AppendLine("  <Target name=\"\" query=\"\">");
+
         var flag = false;
         foreach (var incident in CalculateIncidents(res.Select(static f => (f.Remark, f.Date!.Value)).ToList(), tgt))
         {
+            if (pure)
+            {
+                if (incident.Spec == null)
+                    sb.AppendLine($"    <!-- {incident.Ty} -->");
+                else
+                    sb.AppendLine($"    {Serialize(incident.Spec)}");
+                continue;
+            }
+
             if (incident.Ty.HasFlag(IncidentType.Error))
             {
                 sb.Append("VIOLATION: ");
@@ -506,20 +553,30 @@ internal class Statement : PluginBase
             else
                 sb.Append("WARNING: ");
 
-            sb.Append($"{incident.Ty} at {incident.Period}");
-            if (incident.Tol.HasValue)
-                sb.Append($", consider increase tolerance to {incident.Tol}");
+            sb.Append(incident.Ty.ToString());
+            if (incident.Spec != null)
+                sb.AppendLine($"    {Serialize(incident.Spec)}");
+            else
+                sb.AppendLine();
 
-            sb.AppendLine();
             for (var i = Math.Max(0, incident.From - 4); i < Math.Min(res.Count, incident.To + 5); i++)
             {
                 sb.Append($"{res[i].ID.Quotation('^')} {res[i].Date.AsDate()} ");
                 sb.Append($"{res[i].Remark.Quotation('"').CPadRight(8)} {res[i].Fund.CPadLeft(13)}");
-                if (i == incident.From || i == incident.To)
+                if (i == incident.From && i == incident.To)
                     sb.Append(" (*)");
+                if (i == incident.From)
+                    sb.Append("  ^");
+                else if (i == incident.To)
+                    sb.Append("  v");
+                else if (i > incident.From && i < incident.To)
+                    sb.Append("  |");
                 sb.AppendLine();
             }
         }
+
+        if (pure)
+            sb.AppendLine($"  </Target>");
 
         return flag;
     }

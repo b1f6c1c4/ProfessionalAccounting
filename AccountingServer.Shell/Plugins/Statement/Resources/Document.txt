@@ -25,4 +25,7 @@ stmt unmark <nm>
 stmt check <nm>
 检查所有对账问题
 
+stmt xml 细目映射过滤器
+检查所有对账问题，生成XML
+
 对账目标<nm>包括：

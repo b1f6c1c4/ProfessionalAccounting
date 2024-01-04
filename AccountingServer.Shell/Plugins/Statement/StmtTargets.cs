@@ -50,11 +50,14 @@ public class Target
     public List<OverlapSpec> Overlaps { get; set; }
 
     [XmlElement("Skip")]
-    public List<string> Skips { get; set; }
+    public List<SkipSpec> Skips { get; set; }
 }
 
+public interface ISpec { }
+
 [Serializable]
-public class LengthSpec
+[XmlType(TypeName="Length")]
+public class LengthSpec : ISpec
 {
     [XmlAttribute("period")]
     public string Period { get; set; }
@@ -64,7 +67,8 @@ public class LengthSpec
 }
 
 [Serializable]
-public class OverlapSpec
+[XmlType(TypeName="Overlap")]
+public class OverlapSpec : ISpec
 {
     [XmlAttribute("from")]
     public string From { get; set; }
@@ -74,4 +78,12 @@ public class OverlapSpec
 
     [XmlText]
     public int Tolerance { get; set; }
+}
+
+[Serializable]
+[XmlType(TypeName="Skip")]
+public class SkipSpec : ISpec
+{
+    [XmlText]
+    public string ID { get; set; }
 }
