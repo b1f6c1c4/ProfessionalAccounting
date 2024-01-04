@@ -264,16 +264,16 @@ internal class Statement : PluginBase
 
         // Obtain period range (both inclusive)
         string lbs = null, ubs = null;
-        var reg = new Regex(@"^20[1-2][0-9](?:0[1-9]|1[0-2])%");
+        var reg = new Regex(@"^20[1-2][0-9](?:0[1-9]|1[0-2])$");
         foreach (var (r, _) in lst)
         {
             if (string.IsNullOrEmpty(r))
                 continue;
             if (!reg.IsMatch(r))
                 throw new ApplicationException($"Invalid remark: {r}");
-            if (string.Compare(lbs, r) > 0)
+            if (lbs == null || string.Compare(lbs, r) > 0)
                 lbs = r;
-            if (string.Compare(ubs, r) < 0)
+            if (ubs == null || string.Compare(ubs, r) < 0)
                 ubs = r;
         }
         if (lbs == null || ubs == null)
@@ -282,7 +282,7 @@ internal class Statement : PluginBase
         // Create buckets for each period
         var lb = DateTimeParser.ParseExact($"{lbs}01", "yyyyMMdd");
         var ub = DateTimeParser.ParseExact($"{ubs}01", "yyyyMMdd");
-        var rngs = new List<(string, int?, int?)>{ (null, null, null) }; // inclusive
+        var rngs = new List<(string, int?, int?)>(); // inclusive
         for (var c = lb; c <= ub; c = c.AddMonths(1))
             rngs.Add(($"{c:yyyyMM}", null, null));
 
@@ -325,7 +325,7 @@ internal class Statement : PluginBase
             last_lb = lbi.Value;
             last_ub = ubi.Value;
         }
-        if (!incidents.Any())
+        if (incidents.Any())
             return incidents;
 
         // Estimate empty periods, detect ""s, check overlap
@@ -338,8 +338,8 @@ internal class Statement : PluginBase
             var lbd1 = lst[lbi1!.Value].Item2;
             var ubd1 = lst[ubi1!.Value].Item2;
 
-            var ubi0 = j >= 1 ? rngs[j - 1].Item3 : lbi1!.Value - 1;
-            var lbi2 = j <= rngs.Count - 1 ? rngs[j + 1].Item2 : ubi1!.Value + 1;
+            var ubi0 = j >= 1 ? rngs[j - 1].Item3 : null;
+            var lbi2 = j < rngs.Count - 1 ? rngs[j + 1].Item2 : null;
 
             //       <==>
             // 000000    111111
@@ -350,12 +350,12 @@ internal class Statement : PluginBase
             // 00001110001111
             if (j >= 1)
             {
-                var (period0, lbi0, _) = rngs[j - 1];
+                var (period0, _, _) = rngs[j - 1];
                 var ubd0 = lst[ubi0!.Value].Item2;
                 var d = (int)(ubd0 - lbd1).TotalDays;
                 var tol = tgt.Overlaps.SingleOrDefault(p => p.From == period0 && p.To == period1)?.Tolerance ?? 1;
                 if (d > tol)
-                    incidents.Add(new Incident(IncidentType.OverlapTooMuch, ubi0.Value, lbi1.Value, d, $"{period0}~{period1}"));
+                    incidents.Add(new Incident(IncidentType.OverlapTooMuch, lbi1.Value, ubi0.Value, d, $"{period0}~{period1}"));
             }
 
             int center;
@@ -403,7 +403,7 @@ internal class Statement : PluginBase
 
             if (!lbi2.HasValue) // RH
             {
-                for (var i = center + 1; i < ubi1.Value; i++)
+                for (var i = center; i < ubi1.Value; i++)
                 {
                     var (r, d) = lst[i];
                     if (r == null)
@@ -415,14 +415,14 @@ internal class Statement : PluginBase
                         if (days > tol)
                             incidents.Add(new Incident(
                                         j == rngs.Count - 1 ? IncidentType.FinalOverlap : IncidentType.OverlapTooMuch,
-                                        i, lbi1.Value, days, $"{period1}~"));
+                                        i, ubi1.Value, days, $"{period1}~"));
                         break;
                     }
                 }
             }
             if (!ubi0.HasValue) // LH
             {
-                for (var i = center - 1; i > lbi1.Value; i--)
+                for (var i = center; i > lbi1.Value; i--)
                 {
                     var (r, d) = lst[i];
                     if (r == null)
@@ -462,7 +462,7 @@ internal class Statement : PluginBase
             if (lbi1.HasValue)
                 continue;
 
-            var (period0, lbi0, ubi0) = rngs[j - 1];
+            var (period0, _, ubi0) = rngs[j - 1];
 
             int k;
             for (k = j + 1; k < rngs.Count; k++)
@@ -487,9 +487,9 @@ internal class Statement : PluginBase
             throw new SecurityException("检测到弱检索式");
 
         var res = await session.Accountant.SelectVouchersAsync(filt.VoucherQuery)
-            .Where(static v => !v.Date.HasValue)
+            .Where(static v => v.Date.HasValue)
             .SelectMany(v => v.Details.Where(d => d.IsMatch(filt.ActualDetailFilter()))
-                .Where(d => d.Remark != "reconcillation" && tgt.Skips.Contains(d.Remark))
+                .Where(d => d.Remark != "reconcillation" && !tgt.Skips.Contains(d.Remark))
                 .Select(d => (v.ID, v.Date, Fund: d.Fund.AsCurrency(d.Currency), d.Remark))
                 .ToAsyncEnumerable())
             .OrderBy(static tuple => tuple.Date).ThenBy(static tuple => tuple.Remark)

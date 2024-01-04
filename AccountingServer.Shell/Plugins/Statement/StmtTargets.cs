@@ -40,7 +40,7 @@ public class Target
     [XmlAttribute("reversed")]
     public bool Reversed { get; set; }
 
-    [XmlElement("Query")]
+    [XmlAttribute("query")]
     public string Query { get; set; }
 
     [XmlElement("Length")]
