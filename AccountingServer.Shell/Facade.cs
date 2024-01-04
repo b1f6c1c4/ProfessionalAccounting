@@ -260,7 +260,7 @@ public class Facade
                 => new VoucherDetail
                     {
                         User = key.User, Currency = key.Currency, Title = key.Title, Fund = res.Sum(static d => d.Fund),
-                    }));
+                    }).Where(static d => !d.Fund!.Value.IsZero()));
         }
 
         if (!await session.Accountant.UpsertAsync(voucher))
