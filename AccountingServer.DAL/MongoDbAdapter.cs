@@ -338,7 +338,7 @@ internal class MongoDbAdapter : IDbAdapter
         var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher()) & GetXQuery<Voucher>(exclude);
 
         var prj = new BsonDocument();
-        if (level.HasFlag(SubtotalLevel.Remark))
+        if (level.HasFlag(SubtotalLevel.VoucherRemark))
             prj["vremark"] = "$remark";
         if (level.HasFlag(SubtotalLevel.Day))
             prj["date"] = "$date";
@@ -359,7 +359,7 @@ internal class MongoDbAdapter : IDbAdapter
         var chk = GetChk(query.VoucherEmitQuery);
 
         var prj = new BsonDocument();
-        if (level.HasFlag(SubtotalLevel.Remark))
+        if (level.HasFlag(SubtotalLevel.VoucherRemark))
             prj["vremark"] = "$remark";
         if (level.HasFlag(SubtotalLevel.Day))
             prj["date"] = "$date";

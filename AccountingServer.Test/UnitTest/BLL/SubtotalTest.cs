@@ -811,6 +811,44 @@ public class SubtotalTest
     }
 
     [Fact]
+    public async Task TestVoucherRemark()
+    {
+        var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`R", m_Client).Subtotal, m_Exchange);
+
+        var bal = new Balance[]
+            {
+                new() { VoucherRemark = "JPY", Fund = 8 },
+                new() { VoucherRemark = "CNY", Fund = 1 },
+                new() { VoucherRemark = "USD", Fund = 4 },
+                new() { VoucherRemark = "CNY", Fund = 2 },
+            };
+
+        var res = await builder.Build(bal.ToAsyncEnumerable());
+        Assert.IsAssignableFrom<ISubtotalRoot>(res);
+        var resx = (ISubtotalRoot)res;
+
+        var lst = new List<Balance>();
+        foreach (var item in resx.Items)
+        {
+            Assert.IsAssignableFrom<ISubtotalVoucherRemark>(item);
+            var resxx = (ISubtotalVoucherRemark)item;
+            Assert.Null(resxx.Items);
+            lst.Add(new() { VoucherRemark = resxx.VoucherRemark, Fund = resxx.Fund });
+        }
+
+        Assert.Equal(bal.Sum(static b => b.Fund), res.Fund);
+        Assert.Equal(
+            new List<Balance>
+                {
+                    new() { VoucherRemark = "JPY", Fund = 8 },
+                    new() { VoucherRemark = "CNY", Fund = 3 },
+                    new() { VoucherRemark = "USD", Fund = 4 },
+                },
+            lst,
+            new BalanceEqualityComparer());
+    }
+
+    [Fact]
     public async Task TestUser()
     {
         var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`U", m_Client).Subtotal, m_Exchange);

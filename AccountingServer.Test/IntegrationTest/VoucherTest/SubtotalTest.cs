@@ -171,6 +171,19 @@ public class SubtotalTest : IAsyncDisposable
                 .SingleOrDefault()?.Fund);
 
     [Theory]
+    [InlineData(null, null, "``R")]
+    [InlineData("xrmk1", 0.0, "``R")]
+    [InlineData("xrmk2", 0.0, "``R")]
+    [InlineData(null, null, "<``R")]
+    [InlineData("xrmk1", -123.45, "<``R")]
+    [InlineData("xrmk2", -78.53 - 66.66, "<``R")]
+    public void RunTestVoucherRemark(string user, double? value, string query)
+        => Assert.Equal(
+            value,
+            m_Adapter.SelectVoucherDetailsGrouped(ParsingF.GroupedQuery(query, m_Client)).ToEnumerable()
+                .SingleOrDefault(b => b.VoucherRemark == user)?.Fund);
+
+    [Theory]
     [InlineData("b2", null, "``U")]
     [InlineData("b1", 0.0, "``U")]
     [InlineData("b1&b2", null, "``U")]
@@ -345,6 +358,16 @@ public class SubtotalTest : IAsyncDisposable
             value,
             m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query, m_Client)).ToEnumerable()
                 .SingleOrDefault()?.Fund);
+
+    [Theory]
+    [InlineData(null, null, "!!R")]
+    [InlineData("xrmk1", 1L, "!!R")]
+    [InlineData("xrmk2", 1L, "!!R")]
+    public void RunVTestVoucherRemark(string vrmk, long? value, string query)
+        => Assert.Equal(
+            value,
+            m_Adapter.SelectVouchersGrouped(ParsingF.VoucherGroupedQuery(query, m_Client)).ToEnumerable()
+                .SingleOrDefault(b => b.VoucherRemark == vrmk)?.Fund);
 
     [Theory]
     [InlineData(null, null, "!!d")]

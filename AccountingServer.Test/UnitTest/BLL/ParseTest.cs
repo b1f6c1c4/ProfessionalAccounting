@@ -234,6 +234,7 @@ public class ParseTest
     [Theory]
     [InlineData("!!v")]
     [InlineData("!!y", SubtotalLevel.Year)]
+    [InlineData("!!mR", SubtotalLevel.Month, SubtotalLevel.VoucherRemark)]
     [InlineData("!!q", SubtotalLevel.Quarter)]
     [InlineData("!!", SubtotalLevel.Currency, SubtotalLevel.Title, SubtotalLevel.SubTitle, SubtotalLevel.User,
         SubtotalLevel.Content)]
@@ -277,9 +278,10 @@ public class ParseTest
     [InlineData("``Czryz", GatheringType.Sum, SubtotalLevel.Currency | SubtotalLevel.NonZero, SubtotalLevel.Remark,
         SubtotalLevel.Year | SubtotalLevel.NonZero)]
     [InlineData("!!v", GatheringType.VoucherCount)]
-    [InlineData("`dC", GatheringType.Sum, SubtotalLevel.Day | SubtotalLevel.NonZero,
+    [InlineData("`RdC", GatheringType.Sum, SubtotalLevel.VoucherRemark | SubtotalLevel.NonZero,
+        SubtotalLevel.Day | SubtotalLevel.NonZero,
         SubtotalLevel.Currency | SubtotalLevel.NonZero)]
-    [InlineData("!!wy", GatheringType.VoucherCount, SubtotalLevel.Week, SubtotalLevel.Year)]
+    [InlineData("!!wR", GatheringType.VoucherCount, SubtotalLevel.Week, SubtotalLevel.VoucherRemark)]
     [InlineData("``", GatheringType.Sum, SubtotalLevel.Currency, SubtotalLevel.Title, SubtotalLevel.SubTitle,
         SubtotalLevel.User, SubtotalLevel.Content)]
     [InlineData("`", GatheringType.Sum, SubtotalLevel.Currency | SubtotalLevel.NonZero,

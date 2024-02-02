@@ -91,6 +91,10 @@ public class BalanceEqualityComparer : IEqualityComparer<Balance>
         if (x == null ||
             y == null)
             return false;
+        if (x.Date != y.Date)
+            return false;
+        if (x.VoucherRemark != y.VoucherRemark)
+            return false;
         if (x.User != y.User)
             return false;
         if (x.Currency != y.Currency)
