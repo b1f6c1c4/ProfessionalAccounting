@@ -82,7 +82,7 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         regex: /@?"(?:[^"]|"")*"/,
       }, {
         token: 'string.quoted',
-        regex: /%(?:[^%]|%%)*"/,
+        regex: /%(?:[^%]|%%)*%/,
       }, {
         token: ['keyword.control', 'markup.bold'],
         regex: /(\}@)(\*\/)?/,
