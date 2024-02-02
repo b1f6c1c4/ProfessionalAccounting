@@ -70,6 +70,20 @@ internal class SubtotalDateFactory : SubtotalResultFactory<DateTime?>
     public override SubtotalResult Create(IAsyncGrouping<DateTime?, Balance> grp) => new SubtotalDate(grp.Key, m_Level);
 }
 
+internal class SubtotalVoucherRemark : SubtotalResult, ISubtotalVoucherRemark
+{
+    public SubtotalVoucherRemark(string user) => VoucherRemark = user;
+    public string VoucherRemark { get; }
+
+    public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
+}
+
+internal class SubtotalVoucherRemarkFactory : SubtotalResultFactory<string>
+{
+    public override string Selector(Balance b) => b.VoucherRemark;
+    public override SubtotalResult Create(IAsyncGrouping<string, Balance> grp) => new SubtotalVoucherRemark(grp.Key);
+}
+
 internal class SubtotalUser : SubtotalResult, ISubtotalUser
 {
     public SubtotalUser(string user) => User = user;
@@ -221,6 +235,7 @@ public class SubtotalBuilder
         m_Flags = level & SubtotalLevel.Flags;
         sub.TheItems = await ((level & SubtotalLevel.Subtotal) switch
             {
+                SubtotalLevel.VoucherRemark => Invoke(new SubtotalVoucherRemarkFactory()),
                 SubtotalLevel.Title => Invoke(new SubtotalTitleFactory()),
                 SubtotalLevel.SubTitle => Invoke(new SubtotalSubTitleFactory()),
                 SubtotalLevel.Content => Invoke(new SubtotalContentFactory()),

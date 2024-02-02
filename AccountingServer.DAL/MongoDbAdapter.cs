@@ -41,12 +41,6 @@ internal class MongoDbAdapter : IDbAdapter
 {
     private static readonly BsonDocument ProjectDetails = new() { ["_id"] = false, ["detail"] = true };
 
-    private static readonly BsonDocument ProjectDate = new() { ["_id"] = false, ["detail"] = true, ["date"] = true };
-
-    private static readonly BsonDocument ProjectNothing = new() { ["_id"] = false };
-
-    private static readonly BsonDocument ProjectNothingButDate = new() { ["_id"] = false, ["date"] = true };
-
     private static readonly BsonDocument ProjectDetail = new()
         {
             ["user"] = "$detail.user",
@@ -62,11 +56,6 @@ internal class MongoDbAdapter : IDbAdapter
     private static readonly BsonDocument ProjectQuarter;
     private static readonly BsonDocument ProjectMonth;
     private static readonly BsonDocument ProjectWeek;
-
-    private static readonly BsonDocument ProjectNothingButYear;
-    private static readonly BsonDocument ProjectNothingButQuarter;
-    private static readonly BsonDocument ProjectNothingButMonth;
-    private static readonly BsonDocument ProjectNothingButWeek;
 
     private static readonly BsonDocument FilterNonZero = new()
         {
@@ -89,45 +78,6 @@ internal class MongoDbAdapter : IDbAdapter
         BsonSerializer.RegisterSerializer(new AmortItemSerializer());
         BsonSerializer.RegisterSerializer(new BalanceSerializer());
         BsonSerializer.RegisterSerializer(new ExchangeSerializer());
-
-        static BsonDocument MakeProject(BsonValue subs, bool detail)
-        {
-            var proj = new BsonDocument
-                {
-                    ["_id"] = false,
-                    ["date"] = new BsonDocument
-                        {
-                            ["$switch"] = new BsonDocument
-                                {
-                                    ["branches"] = new BsonArray
-                                        {
-                                            new BsonDocument
-                                                {
-                                                    ["case"] = new BsonDocument
-                                                        {
-                                                            ["$eq"] = new BsonArray
-                                                                {
-                                                                    new BsonDocument
-                                                                        {
-                                                                            ["$type"] = "$date",
-                                                                        },
-                                                                    "missing",
-                                                                },
-                                                        },
-                                                    ["then"] = BsonNull.Value,
-                                                },
-                                        },
-                                    ["default"] = new BsonDocument
-                                        {
-                                            ["$dateSubtract"] = subs,
-                                        },
-                                },
-                        },
-                };
-            if (detail)
-                proj["detail"] = true;
-            return proj;
-        }
 
         var year = new BsonDocument
             {
@@ -205,15 +155,10 @@ internal class MongoDbAdapter : IDbAdapter
                     },
             };
 
-        ProjectYear = MakeProject(year, true);
-        ProjectQuarter = MakeProject(quarter, true);
-        ProjectMonth = MakeProject(month, true);
-        ProjectWeek = MakeProject(week, true);
-
-        ProjectNothingButYear = MakeProject(year, false);
-        ProjectNothingButQuarter = MakeProject(quarter, false);
-        ProjectNothingButMonth = MakeProject(month, false);
-        ProjectNothingButWeek = MakeProject(week, false);
+        ProjectYear = year;
+        ProjectQuarter = quarter;
+        ProjectMonth = month;
+        ProjectWeek = week;
     }
 
     public MongoDbAdapter(string uri, string db = null, string x509 = null)
@@ -330,33 +275,77 @@ internal class MongoDbAdapter : IDbAdapter
             .Select(static b => BsonSerializer.Deserialize<VoucherDetail>(b));
     }
 
+    private static BsonDocument ProjectVoucher(SubtotalLevel level, bool detail)
+    {
+        var pprj = new BsonDocument { ["_id"] = false };
+        if (detail)
+            pprj["detail"] = true;
+        if (level.HasFlag(SubtotalLevel.VoucherRemark))
+            pprj["remark"] = true;
+        if (!level.HasFlag(SubtotalLevel.Day))
+            return pprj;
+        if (!level.HasFlag(SubtotalLevel.Week))
+        {
+            pprj["date"] = true;
+            return pprj;
+        }
+
+        BsonDocument subs;
+        if (level.HasFlag(SubtotalLevel.Year))
+            subs = ProjectYear;
+        else if (level.HasFlag(SubtotalLevel.Quarter))
+            subs = ProjectQuarter;
+        else if (level.HasFlag(SubtotalLevel.Month))
+            subs = ProjectMonth;
+        else // if (level.HasFlag(SubtotalLevel.Week))
+            subs = ProjectWeek;
+
+        pprj["date"] = new BsonDocument
+            {
+                ["$switch"] = new BsonDocument
+                    {
+                        ["branches"] = new BsonArray
+                            {
+                                new BsonDocument
+                                    {
+                                        ["case"] = new BsonDocument
+                                            {
+                                                ["$eq"] = new BsonArray
+                                                    {
+                                                        new BsonDocument
+                                                            {
+                                                                ["$type"] = "$date",
+                                                            },
+                                                        "missing",
+                                                    },
+                                            },
+                                        ["then"] = BsonNull.Value,
+                                    },
+                            },
+                        ["default"] = new BsonDocument
+                            {
+                                ["$dateSubtract"] = subs,
+                            },
+                    },
+            };
+        return pprj;
+    }
+
     /// <inheritdoc />
     public IAsyncEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit = 0, IEnumerable<string> exclude = null)
     {
         var level = query.Subtotal.PreprocessVoucher();
         var preF = query.VoucherQuery.Accept(new MongoDbNativeVoucher()) & GetXQuery<Voucher>(exclude);
 
-        BsonDocument pprj;
-        if (!level.HasFlag(SubtotalLevel.Day))
-            pprj = ProjectNothing;
-        else if (!level.HasFlag(SubtotalLevel.Week))
-            pprj = ProjectNothingButDate;
-        else if (level.HasFlag(SubtotalLevel.Year))
-            pprj = ProjectNothingButYear;
-        else if (level.HasFlag(SubtotalLevel.Quarter))
-            pprj = ProjectNothingButQuarter;
-        else if (level.HasFlag(SubtotalLevel.Month))
-            pprj = ProjectNothingButMonth;
-        else // if (level.HasFlag(SubtotalLevel.Week))
-            pprj = ProjectNothingButWeek;
-
         var prj = new BsonDocument();
+        if (level.HasFlag(SubtotalLevel.Remark))
+            prj["vremark"] = "$remark";
         if (level.HasFlag(SubtotalLevel.Day))
             prj["date"] = "$date";
 
         var grp = new BsonDocument { ["_id"] = prj, ["count"] = new BsonDocument { ["$sum"] = 1 } };
 
-        var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Group(grp);
+        var fluent = m_Vouchers.Aggregate().Match(preF).Project(ProjectVoucher(level, false)).Group(grp);
         if (limit > 0)
             fluent = fluent.Sort(new SortDefinitionBuilder<BsonDocument>().Descending("count")).Limit(limit);
         return fluent.ToAsyncEnumerable().Select(static b => BsonSerializer.Deserialize<Balance>(b));
@@ -369,21 +358,9 @@ internal class MongoDbAdapter : IDbAdapter
         var preF = query.VoucherEmitQuery.VoucherQuery.Accept(new MongoDbNativeVoucher()) & GetXQuery<Voucher>(exclude);
         var chk = GetChk(query.VoucherEmitQuery);
 
-        BsonDocument pprj;
-        if (!level.HasFlag(SubtotalLevel.Day))
-            pprj = ProjectDetails;
-        else if (!level.HasFlag(SubtotalLevel.Week))
-            pprj = ProjectDate;
-        else if (level.HasFlag(SubtotalLevel.Year))
-            pprj = ProjectYear;
-        else if (level.HasFlag(SubtotalLevel.Quarter))
-            pprj = ProjectQuarter;
-        else if (level.HasFlag(SubtotalLevel.Month))
-            pprj = ProjectMonth;
-        else // if (level.HasFlag(SubtotalLevel.Week))
-            pprj = ProjectWeek;
-
         var prj = new BsonDocument();
+        if (level.HasFlag(SubtotalLevel.Remark))
+            prj["vremark"] = "$remark";
         if (level.HasFlag(SubtotalLevel.Day))
             prj["date"] = "$date";
         if (level.HasFlag(SubtotalLevel.User))
@@ -410,7 +387,7 @@ internal class MongoDbAdapter : IDbAdapter
         else
             grp = new() { ["_id"] = prj, ["total"] = new BsonDocument { ["$sum"] = "$detail.fund" } };
 
-        var fluent = m_Vouchers.Aggregate().Match(preF).Project(pprj).Unwind("detail").Match(chk).Group(grp);
+        var fluent = m_Vouchers.Aggregate().Match(preF).Project(ProjectVoucher(level, true)).Unwind("detail").Match(chk).Group(grp);
         if (query.Subtotal.ShouldAvoidZero())
             fluent = fluent.Match(FilterNonZero);
         if (limit > 0)

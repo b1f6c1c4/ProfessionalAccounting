@@ -91,6 +91,13 @@ internal class RawSubtotal : StringSubtotalVisitor
         return ShowSubtotal(sub);
     }
 
+    public override IAsyncEnumerable<string> Visit(ISubtotalVoucherRemark sub)
+    {
+        if (m_Path == null)
+            m_Template.Remark = sub.VoucherRemark;
+        return ShowSubtotal(sub);
+    }
+
     public override IAsyncEnumerable<string> Visit(ISubtotalUser sub)
     {
         if (m_Path != null)

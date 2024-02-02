@@ -299,6 +299,12 @@ internal class SubtotalVisitor : StringSubtotalVisitor
         return ShowSubtotal(sub);
     }
 
+    public override IAsyncEnumerable<string> Visit(ISubtotalVoucherRemark sub)
+    {
+        Depth++; // Hack
+        return ShowSubtotal(sub);
+    }
+
     public override IAsyncEnumerable<string> Visit(ISubtotalCurrency sub)
     {
         Depth++; // Hack

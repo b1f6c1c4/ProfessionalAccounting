@@ -47,6 +47,7 @@ internal class BalanceSerializer : BaseSerializer<Balance>
                             var bal =
                                 new Balance
                                     {
+                                        VoucherRemark = bR.ReadString("vremark", ref read),
                                         Date = bR.ReadDateTime("date", ref read),
                                         User = bR.ReadString("user", ref read),
                                         Currency = bR.ReadString("currency", ref read),

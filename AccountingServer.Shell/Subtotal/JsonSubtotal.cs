@@ -59,6 +59,9 @@ internal class JsonSubtotal : ISubtotalVisitor<JProperty>, ISubtotalStringify
     JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalDate sub)
         => new(sub.Date.AsDate(sub.Level), VisitChildren(sub));
 
+    JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalVoucherRemark sub)
+        => new(sub.VoucherRemark, VisitChildren(sub));
+
     JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalUser sub)
         => new(sub.User, VisitChildren(sub));
 
@@ -89,6 +92,7 @@ internal class JsonSubtotal : ISubtotalVisitor<JProperty>, ISubtotalStringify
         var field = m_Depth < m_Par.Levels.Count
             ? (m_Par.Levels[m_Depth] & SubtotalLevel.Subtotal) switch
                 {
+                    SubtotalLevel.VoucherRemark => "vremark",
                     SubtotalLevel.Title => "title",
                     SubtotalLevel.SubTitle => "subtitle",
                     SubtotalLevel.Content => "content",

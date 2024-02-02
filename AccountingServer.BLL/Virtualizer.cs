@@ -176,6 +176,7 @@ internal class Virtualizer : DbSession, IAsyncDisposable
                 .Where(d => d.IsMatch(query.VoucherEmitQuery.ActualDetailFilter()))
                 .Select(d => new Balance
                     {
+                        VoucherRemark = level.HasFlag(SubtotalLevel.VoucherRemark) ? d.Voucher.Remark : null,
                         Date = d.Voucher.Date.Project(level),
                         User = level.HasFlag(SubtotalLevel.User) ? d.User : null,
                         Currency = level.HasFlag(SubtotalLevel.Currency) ? d.Currency : null,
@@ -244,10 +245,11 @@ internal class Virtualizer : DbSession, IAsyncDisposable
             return Nullable.Equals(x.Date, y.Date) && x.Title == y.Title && x.SubTitle == y.SubTitle &&
                 x.Content == y.Content && x.Remark == y.Remark && x.Currency == y.Currency && x.User == y.User &&
                 // ReSharper disable once CompareOfFloatsByEqualityOperator
-                x.Value == y.Value;
+                x.Value == y.Value && x.VoucherRemark == y.VoucherRemark;
         }
 
         public int GetHashCode(Balance obj)
-            => HashCode.Combine(obj.Date, obj.Title, obj.SubTitle, obj.Content, obj.Remark, obj.Currency, obj.User);
+            => HashCode.Combine(obj.Date, obj.Title, obj.SubTitle, obj.Content, obj.Remark, obj.Currency, obj.User,
+                obj.VoucherRemark);
     }
 }

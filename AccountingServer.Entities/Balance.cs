@@ -26,6 +26,11 @@ namespace AccountingServer.Entities;
 public class Balance
 {
     /// <summary>
+    ///     记账凭证备注
+    /// </summary>
+    public string VoucherRemark { get; init; }
+
+    /// <summary>
     ///     日期
     /// </summary>
     public DateTime? Date { get; init; }

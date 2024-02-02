@@ -41,6 +41,7 @@ Ctrl+Alt+Shift+Delete		全部删除
 分类汇总层次：
 (空)							CtsUc
 v							（全部汇总）
+R							记账凭证备注
 t							一级科目
 s							二级科目
 c							内容

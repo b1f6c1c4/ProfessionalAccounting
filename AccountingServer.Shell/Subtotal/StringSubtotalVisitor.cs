@@ -59,6 +59,7 @@ internal abstract class StringSubtotalVisitor
 
     public abstract IAsyncEnumerable<string> Visit(ISubtotalRoot sub);
     public abstract IAsyncEnumerable<string> Visit(ISubtotalDate sub);
+    public abstract IAsyncEnumerable<string> Visit(ISubtotalVoucherRemark sub);
     public abstract IAsyncEnumerable<string> Visit(ISubtotalUser sub);
     public abstract IAsyncEnumerable<string> Visit(ISubtotalCurrency sub);
     public abstract IAsyncEnumerable<string> Visit(ISubtotalTitle sub);
@@ -79,6 +80,8 @@ internal abstract class StringSubtotalVisitor
                 .GetStringComparer(CompareOptions.StringSort);
             items = (m_Par.Levels[Depth] & SubtotalLevel.Subtotal) switch
                 {
+                    SubtotalLevel.VoucherRemark => sub.Items.Cast<ISubtotalVoucherRemark>()
+                        .OrderBy(static s => s.VoucherRemark),
                     SubtotalLevel.Title => sub.Items.Cast<ISubtotalTitle>().OrderBy(static s => s.Title),
                     SubtotalLevel.SubTitle => sub.Items.Cast<ISubtotalSubTitle>().OrderBy(static s => s.SubTitle),
                     SubtotalLevel.Content => sub.Items.Cast<ISubtotalContent>()

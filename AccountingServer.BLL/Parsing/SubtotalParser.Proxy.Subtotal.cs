@@ -79,6 +79,7 @@ internal partial class SubtotalParser
                                     : SubtotalLevel.NonZero);
                                 return ch switch
                                     {
+                                        'R' => zz | SubtotalLevel.VoucherRemark,
                                         't' => zz | SubtotalLevel.Title,
                                         's' => zz | SubtotalLevel.SubTitle,
                                         'c' => zz | SubtotalLevel.Content,
