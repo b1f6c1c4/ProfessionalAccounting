@@ -26,11 +26,17 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         token: 'comment',
         regex: /\/\/.*$/,
       }, {
+        token: 'string.interpolated',
+        regex: /\^[0-9a-f]+\^/,
+      }, {
         token: 'string.single',
         regex: /'(?:[^']|'')*'/,
       }, {
         token: 'string.double',
         regex: /"(?:[^"]|"")*"/,
+      }, {
+        token: 'string.quoted',
+        regex: /%(?:[^%]|%%)*%/,
       }, {
         token: 'text',
         regex: /[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}/,
