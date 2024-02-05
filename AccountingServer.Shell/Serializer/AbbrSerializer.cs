@@ -50,6 +50,8 @@ public class AbbrSerializer : ExprSerializer
         title = d;
         if (!d.Editable)
             lst.Add(d.Content);
+        if (d.Remark != null)
+            lst.Add(d.Remark);
         return true;
     }
 }
@@ -74,6 +76,9 @@ public class Abbreviation : ITitle
 
     [DefaultValue(null)]
     public string Content { get; set; }
+
+    [DefaultValue(null)]
+    public string Remark { get; set; }
 
     public int? Title { get; set; }
 
