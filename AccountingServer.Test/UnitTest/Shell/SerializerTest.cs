@@ -427,7 +427,7 @@ dnull
         var voucher = Serializer.ParseVoucher(
             @"new Voucher {
 ! @usd
-T1001 + ! T1002 : 1000-0.1-49.9 9500+500*0.1 ;
+T1001 + ! T1002 : 1000-.1-49.9 9500+500*.1 ;
 ! aaa + T100366 hei ha : 1000 ;
 t2
 d40

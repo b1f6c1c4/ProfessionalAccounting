@@ -104,7 +104,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
 
         var d = (double?)0D;
         var t = (double?)0D;
-        var reg = new Regex(@"(?<dt>[dt])(?<num>[0-9]+(?:\.[0-9]{1,2})?|null)");
+        var reg = new Regex(@"(?<dt>[dt])(?<num>\.[0-9]+|[0-9]+(?:\.[0-9]+)?|null)");
         while (true)
         {
             var res = Parsing.Token(ref expr, false, reg.IsMatch);
@@ -262,7 +262,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
         var resLst = new List<Item>();
 
         var reg = new Regex(
-            @"(?<num>[0-9]+(?:\.[0-9]+)?)(?:(?<equals>=[0-9]+(?:\.[0-9]+)?)|(?<plus>(?:\+[0-9]+(?:\.[0-9]+)?)+)|(?<minus>(?:-[0-9]+(?:\.[0-9]+)?)+))?(?<times>\*[0-9]+(?:\.[0-9]+)?)?");
+            @"(?<num>\.[0-9]+|[0-9]+(?:\.[0-9]+)?)(?:(?<equals>=\.[0-9]+|=[0-9]+(?:\.[0-9]+)?)|(?<plus>(?:\+\.[0-9]+|\+[0-9]+(?:\.[0-9]+)?)+)|(?<minus>(?:-\.[0-9]+|-[0-9]+(?:\.[0-9]+)?)+))?(?<times>\*\.[0-9]+|\*[0-9]+(?:\.[0-9]+)?)?");
         while (true)
         {
             var res = Parsing.Token(ref expr, false, reg.IsMatch);
@@ -276,14 +276,14 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
                 fundd = fund0 - Convert.ToDouble(m.Groups["equals"].Value[1..]);
             else if (m.Groups["plus"].Success)
             {
-                var sreg = new Regex(@"\+[0-9]+(?:\.[0-9]+)?");
+                var sreg = new Regex(@"\+\.[0-9]+|\+[0-9]+(?:\.[0-9]+)?");
                 foreach (Match sm in sreg.Matches(m.Groups["plus"].Value))
                     fundd += Convert.ToDouble(sm.Value);
                 fund0 += fundd;
             }
             else if (m.Groups["minus"].Success)
             {
-                var sreg = new Regex(@"-[0-9]+(?:\.[0-9]+)?");
+                var sreg = new Regex(@"-\.[0-9]+|-[0-9]+(?:\.[0-9]+)?");
                 foreach (Match sm in sreg.Matches(m.Groups["minus"].Value))
                     fundd -= Convert.ToDouble(sm.Value);
             }
