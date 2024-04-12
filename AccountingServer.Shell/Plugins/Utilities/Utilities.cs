@@ -40,7 +40,6 @@ internal class Utilities : PluginBase
     /// <inheritdoc />
     public override async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
-        await using var vir = session.Accountant.Virtualize();
         var body = expr;
         expr = ParsingF.Line(ref body);
 
@@ -99,8 +98,6 @@ internal class Utilities : PluginBase
         }
 
         ParsingF.Eof(expr);
-
-        yield return $"// {vir}\n";
     }
 
     /// <inheritdoc />
@@ -166,6 +163,7 @@ internal class Utilities : PluginBase
                     d =>
                         new VoucherDetail
                             {
+                                User = d.User,
                                 Currency = d.Currency,
                                 Title = d.Title,
                                 SubTitle = d.SubTitle,
