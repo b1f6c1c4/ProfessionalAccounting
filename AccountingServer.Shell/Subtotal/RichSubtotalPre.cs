@@ -67,7 +67,7 @@ internal class RichSubtotalPre : StringSubtotalVisitor
     public override async IAsyncEnumerable<string> Visit(ISubtotalCurrency sub)
     {
         m_Currency = sub.Currency;
-        await foreach (var s in ShowSubtotal(sub, $"@{sub.Currency}"))
+        await foreach (var s in ShowSubtotal(sub, sub.Currency.AsCurrency()))
             yield return s;
         m_Currency = null;
     }

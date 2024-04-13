@@ -255,7 +255,7 @@ internal class Coupling : PluginBase
             {
                 if (!grpU.Sum(static d => d.Fund!.Value).IsZero())
                     throw new ApplicationException(
-                        $"Unbalanced Voucher ^{voucher.ID}^ {grpU.Key.AsUser()} @{grpC.Key}, run chk 1 first");
+                        $"Unbalanced Voucher ^{voucher.ID}^ {grpU.Key.AsUser()} {grpC.Key.AsCurrency()}, run chk 1 first");
 
                 double t3998;
                 try
@@ -265,7 +265,7 @@ internal class Coupling : PluginBase
                 catch (Exception e)
                 {
                     throw new ApplicationException(
-                        $"Error during Decoupling Voucher ^{voucher.ID}^ {grpU.Key.AsUser()} @{grpC.Key}", e);
+                        $"Error during Decoupling Voucher ^{voucher.ID}^ {grpU.Key.AsUser()} {grpC.Key.AsCurrency()}", e);
                 }
 
                 if (grpU.Key == primaryUser)
@@ -287,7 +287,7 @@ internal class Coupling : PluginBase
 
                     if (!(primaryCredits + primaryDebits).IsZero())
                         throw new ApplicationException(
-                            $"Unbalanced Voucher ^{voucher.ID}^ @{grpC.Key}, run chk 1 first");
+                            $"Unbalanced Voucher ^{voucher.ID}^ {grpC.Key.AsCurrency()}, run chk 1 first");
 
                     if (!primaryCredits.IsZero())
                         foreach (var c in primaryCreditors) // all my cash sources
@@ -330,7 +330,7 @@ internal class Coupling : PluginBase
 
             if (!(totalCredits + totalDebits).IsZero())
                 throw new ApplicationException(
-                    $"Unbalanced Voucher ^{voucher.ID}^ @{grpC.Key}, run chk 1 first");
+                    $"Unbalanced Voucher ^{voucher.ID}^ {grpC.Key.AsCurrency()}, run chk 1 first");
 
             if (totalCredits.IsZero())
                 continue;
@@ -383,7 +383,7 @@ internal class Coupling : PluginBase
             if (Debitor.Remark != null)
                 d += $" {Debitor.Remark.Quotation('"')}";
             return
-                $"^{Voucher.ID}^ {Voucher.Date.AsDate()} {c.CPadRight(30)} -> {d.CPadRight(51)} @{Currency} {Fund.AsFund(Currency)}";
+                $"^{Voucher.ID}^ {Voucher.Date.AsDate()} {c.CPadRight(30)} -> {d.CPadRight(51)} {Currency.AsCurrency()} {Fund.AsFund(Currency)}";
         }
     }
 

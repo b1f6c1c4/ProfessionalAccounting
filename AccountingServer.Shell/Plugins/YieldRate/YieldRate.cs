@@ -44,9 +44,9 @@ internal class YieldRate : PluginBase
         foreach (var grpc in grpC.Items.Cast<ISubtotalContent>())
         {
             var pv = await session.Accountant.RunGroupedQueryAsync(
-                $"@{grpC.Currency} Investment {grpc.Content.Quotation('\'')} * Asset``v");
+                $"{grpC.Currency.AsCurrency()} Investment {grpc.Content.Quotation('\'')} * Asset``v");
             var ti = await session.Accountant.RunGroupedQueryAsync(
-                $"@{grpC.Currency} Investment {grpc.Content.Quotation('\'')} * Asset T000001 > ``v");
+                $"{grpC.Currency.AsCurrency()} Investment {grpc.Content.Quotation('\'')} * Asset T000001 > ``v");
             var days = grpc.Items.Cast<ISubtotalDate>().OrderBy(static b => b.Date, dc).ToList();
             var daily = GetRate(session, days, pv.Fund);
             lst.Add(new(

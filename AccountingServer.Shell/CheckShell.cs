@@ -62,7 +62,7 @@ internal class CheckShell : IShellComponent
                 yield return session.Serializer.PresentVoucher(old).Wrap();
             old = voucher;
 
-            yield return $"/* {user.AsUser()} @{curr}: Debit - Credit = {v:R} */\n";
+            yield return $"/* {user.AsUser()} {curr.AsCurrency()}: Debit - Credit = {v:R} */\n";
         }
 
         if (old != null)
@@ -127,7 +127,7 @@ internal class CheckShell : IShellComponent
                 case < 0 when grpd.Fund.IsNonPositive():
                     continue;
                 default:
-                    yield return $"{grpd.Date:yyyyMMdd} {info} {grpc.Content}:@{grpC.Currency} {grpd.Fund:R}\n";
+                    yield return $"{grpd.Date:yyyyMMdd} {info} {grpc.Content}:{grpC.Currency.AsCurrency()} {grpd.Fund:R}\n";
                     break;
             }
     }

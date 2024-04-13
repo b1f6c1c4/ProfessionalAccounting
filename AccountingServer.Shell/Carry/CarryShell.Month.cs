@@ -88,8 +88,8 @@ internal partial class CarryShell
             if (!total.IsZero())
             {
                 yield return total < 0
-                    ? $"{dt.AsDate(SubtotalLevel.Month)} CurrencyCarry Gain @{baseCur} {(-total).AsFund(baseCur)}\n"
-                    : $"{dt.AsDate(SubtotalLevel.Month)} CurrencyCarry Lost @{baseCur} {(+total).AsFund(baseCur)}\n";
+                    ? $"{dt.AsDate(SubtotalLevel.Month)} CurrencyCarry Gain {baseCur.AsCurrency()} {(-total).AsFund(baseCur)}\n"
+                    : $"{dt.AsDate(SubtotalLevel.Month)} CurrencyCarry Lost {baseCur.AsCurrency()} {(+total).AsFund(baseCur)}\n";
                 await session.Accountant.UpsertAsync(new Voucher
                     {
                         Date = ed,
@@ -152,14 +152,14 @@ internal partial class CarryShell
         var baseCur = BaseCurrency.At(ed);
         var res =
             await session.Accountant.RunGroupedQueryAsync(
-                $"({target.Query}) {(baseCurrency ? '*' : '-')}@{baseCur} {rng.AsDateRange()}`Ctscr");
+                $"({target.Query}) {(baseCurrency ? '*' : '-')}{baseCur.AsCurrency()} {rng.AsDateRange()}`Ctscr");
         var flag = 0;
         foreach (var grpC in res.Items.Cast<ISubtotalCurrency>())
         {
             flag++;
             var b = grpC.Fund;
             yield return
-                $"{rng.StartDate.AsDate(SubtotalLevel.Month)} PartialCarry => @{grpC.Currency} {b.AsFund(grpC.Currency)} (S={task.Target.IsSpecial})\n";
+                $"{rng.StartDate.AsDate(SubtotalLevel.Month)} PartialCarry => {grpC.Currency.AsCurrency()} {b.AsFund(grpC.Currency)} (S={task.Target.IsSpecial})\n";
             foreach (var grpt in grpC.Items.Cast<ISubtotalTitle>())
             foreach (var grps in grpt.Items.Cast<ISubtotalSubTitle>())
             foreach (var grpc in grps.Items.Cast<ISubtotalContent>())

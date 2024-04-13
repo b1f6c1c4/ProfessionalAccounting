@@ -85,7 +85,7 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
         if (detail.User != Client.User)
             sb.Append($"{detail.User.AsUser()} ");
         if (detail.Currency != BaseCurrency.Now)
-            sb.Append($"@{detail.Currency} ");
+            sb.Append($"{detail.Currency.AsCurrency()} ");
         sb.Append($"{detail.Title.AsTitle()}{detail.SubTitle.AsSubTitle()} ");
         if (detail.Content == null &&
             detail.Remark != null)

@@ -54,7 +54,7 @@ internal class CashFlow : PluginBase
         for (var i = 0; i < n; i++)
         {
             aggs[i] = (await session.Accountant.RunGroupedQueryAsync(
-                $"{accts[i].User.AsUser()} @{accts[i].Currency}*({accts[i].QuickAsset}) [~.]``v")).Fund;
+                $"{accts[i].User.AsUser()} {accts[i].Currency.AsCurrency()}*({accts[i].QuickAsset}) [~.]``v")).Fund;
 
             foreach (var (date, value) in GetItems(accts[i], session, until).ToEnumerable())
             {
@@ -171,7 +171,7 @@ internal class CashFlow : PluginBase
         DateTime until)
     {
         var user = account.User.AsUser();
-        var curr = $"@{account.Currency}";
+        var curr = account.Currency.AsCurrency();
 
         if (account.Reimburse != null)
         {

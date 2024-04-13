@@ -106,6 +106,19 @@ public static class DataFormatter
     }
 
     /// <summary>
+    ///     格式化币种
+    /// </summary>
+    /// <param name="value">币种</param>
+    /// <returns>格式化后的币种</returns>
+    public static string AsCurrency(this string value)
+    {
+        if (value == null)
+            return "";
+
+        return $"@{value}";
+    }
+
+    /// <summary>
     ///     格式化金额，用空格代替末尾的零
     /// </summary>
     /// <param name="value">金额</param>

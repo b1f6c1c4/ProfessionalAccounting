@@ -346,13 +346,13 @@ internal abstract class InterestBase : PluginBase
         public double Rate { get; init; }
 
         public string QueryMajor() =>
-            $"(@{Currency} {Title.AsTitle()} {Content.Quotation('\'')})*({Remark.Quotation('"')}+{(Remark + "-利息").Quotation('"')})";
+            $"({Currency.AsCurrency()} {Title.AsTitle()} {Content.Quotation('\'')})*({Remark.Quotation('"')}+{(Remark + "-利息").Quotation('"')})";
 
         public string QueryCapital() =>
-            $"@{Currency} {Title.AsTitle()} {Content.Quotation('\'')} {Remark.Quotation('"')}";
+            $"{Currency.AsCurrency()} {Title.AsTitle()} {Content.Quotation('\'')} {Remark.Quotation('"')}";
 
         public string QueryInterest() =>
-            $"@{Currency} {Title.AsTitle()} {Content.Quotation('\'')} {(Remark + "-利息").Quotation('"')}";
+            $"{Currency.AsCurrency()} {Title.AsTitle()} {Content.Quotation('\'')} {(Remark + "-利息").Quotation('"')}";
 
         public VoucherDetail AsCapital(double? fund = null)
             => new()

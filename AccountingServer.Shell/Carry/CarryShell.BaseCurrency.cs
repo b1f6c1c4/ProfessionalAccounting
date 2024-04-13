@@ -37,7 +37,7 @@ internal partial class CarryShell
     {
         foreach (var info in BaseCurrency.History)
             if (info.Date.Within(rng))
-                yield return $"{info.Date.AsDate(),8} @{info.Currency}\n";
+                yield return $"{info.Date.AsDate(),8} {info.Currency.AsCurrency()}\n";
     }
 
     /// <summary>
@@ -57,14 +57,14 @@ internal partial class CarryShell
     /// <param name="to">目标币种</param>
     private async IAsyncEnumerable<string> ConvertEquity(Session session, DateTime dt, string to)
     {
-        var rst = await session.Accountant.RunGroupedQueryAsync($"T4101+T4103-@{to} [~{dt.AsDate()}]`Cts");
+        var rst = await session.Accountant.RunGroupedQueryAsync($"T4101+T4103-{to.AsCurrency()} [~{dt.AsDate()}]`Cts");
 
         foreach (var grpC in rst.Items.Cast<ISubtotalCurrency>())
         {
             var rate = await session.Accountant.Query(dt, grpC.Currency, to);
             var dst = rate * grpC.Fund;
             yield return
-                $"=== {dt.AsDate()} @{grpC.Currency} {grpC.Fund.AsFund(grpC.Currency)} => @{to} {dst.AsFund(to)}\n";
+                $"=== {dt.AsDate()} {grpC.Currency} {grpC.Fund.AsFund(grpC.Currency)} => {to.AsCurrency()} {dst.AsFund(to)}\n";
 
             foreach (var grpt in grpC.Items.Cast<ISubtotalTitle>())
             foreach (var grps in grpt.Items.Cast<ISubtotalSubTitle>())
