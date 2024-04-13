@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using AccountingServer.BLL;
@@ -223,7 +224,7 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
         var currency = BaseCurrency.Now;
         if (Parsing.Token(ref expr, false, m_SimpleCurrency.IsMatch) is var t && t != null)
             currency = t.ParseCurrency();
-        else if (expr[0] == '@')
+        else if (expr.FirstOrDefault() == '@')
         {
             expr = expr[1..];
             currency = Parsing.Quoted(ref expr, '#') + '#';

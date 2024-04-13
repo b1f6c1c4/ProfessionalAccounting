@@ -60,7 +60,7 @@ internal class RichSubtotalPre : StringSubtotalVisitor
 
     public override async IAsyncEnumerable<string> Visit(ISubtotalRoot sub)
     {
-        yield return $"{Idents}{Ts(sub.Fund)}\n";
+        yield return $"{Idents}{sub.Fund.AsFund(Cu ?? m_Currency)}\n";
         await foreach (var s in VisitChildren(sub))
             yield return s;
     }

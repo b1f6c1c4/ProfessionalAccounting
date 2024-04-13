@@ -408,6 +408,13 @@ internal class MongoDbAdapter : IDbAdapter
                 })
             .Match(new BsonDocument
                 {
+                    ["_id.currency"] = new BsonDocument
+                        {
+                            ["$not"] = new BsonRegularExpression(@"#$"),
+                        },
+                })
+            .Match(new BsonDocument
+                {
                     ["$expr"] = new BsonDocument
                         {
                             ["$gt"] = new BsonArray
