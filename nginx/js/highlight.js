@@ -112,6 +112,9 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         token: 'support.type',
         regex: /^(?:Ordinary|General|Carry|Depreciation|Devalue|AnnualCarry|Uncertain|Amortization)$/,
       }, {
+        token: 'support.type',
+        regex: /\b(?:Asset|Liability|Mutual|Equity|Cost|Revenue|Expense|Static|Dynamic|Liquidity|Investment|Spending)\b/,
+      }, {
         token: 'support.class',
         regex: /\b(?:Voucher|Asset|Amortization|VoucherDetail|List|AcquisationItem|DepreciateItem|DevalueItem|DispositionItem|AmortItem)\b/,
       }, {
