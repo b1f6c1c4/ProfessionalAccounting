@@ -214,7 +214,10 @@ VoucherType
 	;
 
 TitleKind
-	:	'Asset' | 'Liability' | 'Equity' | 'Revenue' | 'Expense' | 'Liquidity' | 'Investment' | 'Spending'
+	:	'Asset' | 'Liability' | 'Mutual' | 'Equity'
+	|	'Cost' | 'Revenue' | 'Expense'
+	|	'Static' | 'Dynamic'
+	|	'Liquidity' | 'Investment' | 'Spending'
 	;
 
 UserSpec

@@ -68,19 +68,24 @@ public enum TitleKind
     Asset,
 
     /// <summary>
-    ///     流动资产
-    /// </summary>
-    Liquidity,
-
-    /// <summary>
     ///     负债
     /// </summary>
     Liability,
 
     /// <summary>
+    ///     共同
+    /// </summary>
+    Mutual,
+
+    /// <summary>
     ///     所有者权益
     /// </summary>
     Equity,
+
+    /// <summary>
+    ///     成本
+    /// </summary>
+    Cost,
 
     /// <summary>
     ///     收入
@@ -91,6 +96,21 @@ public enum TitleKind
     ///     费用
     /// </summary>
     Expense,
+
+    /// <summary>
+    ///     静态
+    /// </summary>
+    Static,
+
+    /// <summary>
+    ///     动态
+    /// </summary>
+    Dynamic,
+
+    /// <summary>
+    ///     流动资产
+    /// </summary>
+    Liquidity,
 
     /// <summary>
     ///     投资

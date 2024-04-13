@@ -93,12 +93,36 @@ public static class MatchHelper
         switch (kind)
         {
             case TitleKind.Asset when voucherDetail.Title is not (>= 1000 and < 2000):
-            case TitleKind.Liquidity when voucherDetail.Title is not (>= 1000 and < 1100):
             case TitleKind.Liability when voucherDetail.Title is not (>= 2000 and < 3000):
+            case TitleKind.Mutual when voucherDetail.Title is not (>= 3000 and < 4000):
             case TitleKind.Equity when voucherDetail.Title is not (>= 4000 and < 5000):
-            case TitleKind.Revenue when voucherDetail.Title is not (>= 6000 and < 6400):
-            case TitleKind.Expense when voucherDetail.Title is not (>= 6400 and < 7000):
+            case TitleKind.Static when voucherDetail.Title is >= 5000:
+            case TitleKind.Dynamic when voucherDetail.Title is < 5000:
+            case TitleKind.Cost when voucherDetail.Title is not (>= 5000 and < 6000):
+            case TitleKind.Liquidity when voucherDetail.Title is not (>= 1000 and < 1100):
                 return false;
+            case TitleKind.Revenue:
+                switch (voucherDetail.Title)
+                {
+                    case >= 6000 and < 6400:
+                    case 6603 when voucherDetail.SubTitle is 2:
+                        break;
+                    default:
+                        return false;
+                }
+
+                break;
+            case TitleKind.Expense:
+                switch (voucherDetail.Title)
+                {
+                    case 6603 when voucherDetail.SubTitle is 2:
+                    default:
+                        return false;
+                    case >= 6400 and < 7000:
+                        break;
+                }
+
+                break;
             case TitleKind.Investment:
                 switch (voucherDetail.Title)
                 {

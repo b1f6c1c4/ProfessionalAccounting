@@ -141,25 +141,39 @@ internal abstract class MongoDbNativeDetail<T> : MongoDbNativeVisitor<T, IDetail
                 lst.Add(Builders<T>.Filter.Gte($"{p}title", 1000));
                 lst.Add(Builders<T>.Filter.Lt($"{p}title", 2000));
                 break;
-            case TitleKind.Liquidity:
-                lst.Add(Builders<T>.Filter.Gte($"{p}title", 1000));
-                lst.Add(Builders<T>.Filter.Lt($"{p}title", 1100));
-                break;
             case TitleKind.Liability:
                 lst.Add(Builders<T>.Filter.Gte($"{p}title", 2000));
                 lst.Add(Builders<T>.Filter.Lt($"{p}title", 3000));
+                break;
+            case TitleKind.Mutual:
+                lst.Add(Builders<T>.Filter.Gte($"{p}title", 3000));
+                lst.Add(Builders<T>.Filter.Lt($"{p}title", 4000));
                 break;
             case TitleKind.Equity:
                 lst.Add(Builders<T>.Filter.Gte($"{p}title", 4000));
                 lst.Add(Builders<T>.Filter.Lt($"{p}title", 5000));
                 break;
+            case TitleKind.Static:
+                lst.Add(Builders<T>.Filter.Lt($"{p}title", 5000));
+                break;
+            case TitleKind.Dynamic:
+                lst.Add(Builders<T>.Filter.Gte($"{p}title", 5000));
+                break;
+            case TitleKind.Cost:
+                lst.Add(Builders<T>.Filter.Gte($"{p}title", 5000));
+                lst.Add(Builders<T>.Filter.Lt($"{p}title", 6000));
+                break;
             case TitleKind.Revenue:
-                lst.Add(Builders<T>.Filter.Gte($"{p}title", 6000));
-                lst.Add(Builders<T>.Filter.Lt($"{p}title", 6400));
+                lst.Add((Builders<T>.Filter.Gte($"{p}title", 6000) & Builders<T>.Filter.Lt($"{p}title", 6400))
+                    | (Builders<T>.Filter.Eq($"{p}title", 6603) & Builders<T>.Filter.Eq($"{p}subtitle", 02)));
                 break;
             case TitleKind.Expense:
-                lst.Add(Builders<T>.Filter.Gte($"{p}title", 6400));
-                lst.Add(Builders<T>.Filter.Lt($"{p}title", 7000));
+                lst.Add(Builders<T>.Filter.Gte($"{p}title", 6400) & Builders<T>.Filter.Lt($"{p}title", 7000)
+                    & !(Builders<T>.Filter.Eq($"{p}title", 6603) & Builders<T>.Filter.Eq($"{p}subtitle", 02)));
+                break;
+            case TitleKind.Liquidity:
+                lst.Add(Builders<T>.Filter.Gte($"{p}title", 1000));
+                lst.Add(Builders<T>.Filter.Lt($"{p}title", 1100));
                 break;
             case TitleKind.Investment:
                 lst.Add(Builders<T>.Filter.In($"{p}title", new[] { 1101, 1441 })
