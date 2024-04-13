@@ -101,7 +101,7 @@ internal class AccountingShell : IShellComponent
         else
         {
             type |= ExprType.GroupedQueries | ExprType.VoucherQuery;
-            visitor = new RichSubtotalPre();
+            visitor = new RichSubtotalPre(ParsingF.Token(ref expr, false, static t => t == "force") != null);
         }
 
         (visitor as IClientDependable).Assign(client);

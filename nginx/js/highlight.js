@@ -51,8 +51,8 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         token: 'variable.parameter.currency',
         regex: /@[A-Z]{3,4}\b/,
       }, {
-        token: 'markup.bold.pseudo',
-        regex: /@#(?:[^#]|##)*#/,
+        token: ['variable.parameter.currency', 'markup.bold.pseudo'],
+        regex: /(@)(#(?:[^#]|##)*#)/,
       }, {
         token: 'markup.bold.numeric',
         regex: /[$¥€][-+]?(?:\.[0-9]+|[0-9,]+\.?[0-9]*)(?:[eE][+-]?[0-9]+)?\b/,
@@ -124,8 +124,8 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         token: 'variable.parameter.currency',
         regex: /@[a-zA-Z]{3,4}\b/,
       }, {
-        token: 'markup.bold.pseudo',
-        regex: /@#(?:[^#]|##)*#/,
+        token: ['variable.parameter.currency', 'markup.bold.pseudo'],
+        regex: /(@)(#(?:[^#]|##)*#)/,
       }, {
         token: 'markup.list.numbered.title',
         regex: /\bT[123456][0-9][0-9][0-9](?:[0-9][0-9])?\b/,

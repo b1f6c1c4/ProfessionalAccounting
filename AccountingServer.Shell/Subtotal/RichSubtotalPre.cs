@@ -29,15 +29,16 @@ internal class RichSubtotalPre : StringSubtotalVisitor
 {
     private const int Ident = 4;
 
+    private bool m_Force;
     private string m_Currency;
 
     private int? m_Title;
     private string Idents => new(' ', (Depth > 0 ? Depth - 1 : 0) * Ident);
 
-    private static string F(double? value, string curr)
+    private string F(double? value, string curr)
     {
         if (curr == null)
-            return $"{value.AsFund()} (!)";
+            return m_Force ? value.AsFund() : "*";
         if (curr.EndsWith('#'))
             return $"{value.AsFund()} (#)";
         return value.AsFund(curr);
@@ -53,6 +54,9 @@ internal class RichSubtotalPre : StringSubtotalVisitor
         await foreach (var s in VisitChildren(sub))
             yield return s;
     }
+
+    public RichSubtotalPre(bool force)
+        => m_Force = force;
 
     public override async IAsyncEnumerable<string> Visit(ISubtotalRoot sub)
     {
