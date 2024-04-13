@@ -131,9 +131,12 @@ public static class DataFormatter
     /// <returns>格式化后的金额</returns>
     public static string AsFund(this double value, string curr = null)
     {
-        var sym = curr == null
-            ? ""
-            : Cfg.Get<CurrencySymbols>().Symbols.SingleOrDefault(cs => cs.Currency == curr)?.Symbol ?? $"{curr} ";
+        var sym = curr switch
+        {
+            null => "",
+            _ when curr.EndsWith('#') => curr.AsCurrency(),
+            _ => Cfg.Get<CurrencySymbols>().Symbols.SingleOrDefault(cs => cs.Currency == curr)?.Symbol ?? $"{curr} ",
+        };
         var s = $"{sym}{value:N4}";
         return s.TrimEnd('0').CPadRight(s.Length);
     }

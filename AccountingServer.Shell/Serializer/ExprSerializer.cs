@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
@@ -210,6 +211,8 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
         }
     }
 
+    private Regex m_SimpleCurrency = new(@"^@[a-zA-Z]+$");
+
     public VoucherDetail ParseVoucherDetail(ref string expr)
     {
         var lst = new List<string>();
@@ -217,8 +220,14 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
         Parsing.TrimStartComment(ref expr);
         var user = Parsing.Token(ref expr, false, static t => t.StartsWith("U", StringComparison.Ordinal))
             .ParseUserSpec(Client);
-        var currency = Parsing.Token(ref expr, false, static t => t.StartsWith("@", StringComparison.Ordinal))?
-            .ParseCurrency() ?? BaseCurrency.Now;
+        var currency = BaseCurrency.Now;
+        if (Parsing.Token(ref expr, false, m_SimpleCurrency.IsMatch) is var t && t != null)
+            currency = t.ParseCurrency();
+        else if (expr[0] == '@')
+        {
+            expr = expr[1..];
+            currency = Parsing.Quoted(ref expr, '#') + '#';
+        }
         Parsing.TrimStartComment(ref expr);
         var title = Parsing.Title(ref expr);
         if (title == null)

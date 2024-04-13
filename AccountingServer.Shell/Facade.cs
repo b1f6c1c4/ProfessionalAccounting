@@ -202,8 +202,9 @@ public class Facade
     public async ValueTask<string> ExecuteVoucherUpsert(Session session, string str)
     {
         var voucher = session.Serializer.ParseVoucher(str);
-        var grpCs = voucher.Details.GroupBy(static d => d.Currency ?? BaseCurrency.Now).ToList();
-        var grpUs = voucher.Details.GroupBy(d => d.User ?? session.Client.User).ToList();
+        var details = voucher.Details.Where(static d => !d.Currency.EndsWith('#')).ToList();
+        var grpCs = details.GroupBy(static d => d.Currency ?? BaseCurrency.Now).ToList();
+        var grpUs = details.GroupBy(d => d.User ?? session.Client.User).ToList();
         foreach (var grpC in grpCs)
         {
             var unc = grpC.SingleOrDefault(static d => !d.Fund.HasValue);
@@ -212,11 +213,11 @@ public class Facade
         }
 
         // Automatically append T3998 and T3999 entries
-        if (grpCs.Count == 1 && grpUs.Count == 1) // single current, single users: nothing
+        if (grpCs.Count == 1 && grpUs.Count == 1) // single currency, single users: nothing
         {
             // do nothing
         }
-        else if (grpCs.Count == 1 && grpUs.Count > 1) // single current, multiple users: T3998
+        else if (grpCs.Count == 1 && grpUs.Count > 1) // single currency, multiple users: T3998
             foreach (var grpU in grpUs)
             {
                 var sum = grpU.Sum(static d => d.Fund!.Value);
@@ -238,7 +239,7 @@ public class Facade
             }
         else // multiple user, multiple currencies: T3998 on payer, T3998/T3999 on payee
         {
-            var grpUCs = voucher.Details.GroupBy(d => (d.User ?? session.Client.User, d.Currency ?? BaseCurrency.Now))
+            var grpUCs = details.GroupBy(d => (d.User ?? session.Client.User, d.Currency ?? BaseCurrency.Now))
                 .ToList();
             // list of payees (debit)
             var ps = grpUCs.Where(static grp => !grp.Sum(static d => d.Fund!.Value).IsNonPositive()).ToList();

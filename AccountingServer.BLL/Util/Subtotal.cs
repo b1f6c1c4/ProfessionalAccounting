@@ -404,7 +404,7 @@ public class SubtotalBuilder
 
     private ValueTask<double> BuildEquiPhase(IAsyncEnumerable<Balance> raw) => m_Par.EquivalentDate.HasValue
         ? raw.SumAwaitAsync(
-            async b => b.Fund
+            async b => b.Currency.EndsWith('#') ? 0 : b.Fund
                 * await m_Exchange.Query(m_Par.EquivalentDate.Value, b.Currency, m_Par.EquivalentCurrency))
         : raw.SumAsync(static b => b.Fund);
 }

@@ -34,9 +34,18 @@ internal class RichSubtotalPre : StringSubtotalVisitor
     private int? m_Title;
     private string Idents => new(' ', (Depth > 0 ? Depth - 1 : 0) * Ident);
 
+    private static string F(double? value, string curr)
+    {
+        if (curr == null)
+            return $"{value.AsFund()} (!)";
+        if (curr.EndsWith('#'))
+            return $"{value.AsFund()} (#)";
+        return value.AsFund(curr);
+    }
+
     private string Ts(double f) => Ga is GatheringType.Count or GatheringType.VoucherCount
         ? f.ToString("N0")
-        : f.AsFund(Cu ?? m_Currency);
+        : F(f, Cu ?? m_Currency);
 
     private async IAsyncEnumerable<string> ShowSubtotal(ISubtotalResult sub, string str)
     {
@@ -88,5 +97,6 @@ internal class RichSubtotalPre : StringSubtotalVisitor
         => ShowSubtotal(sub, sub.Remark.Quotation('"'));
 
     public override IAsyncEnumerable<string> Visit(ISubtotalValue sub)
-        => ShowSubtotal(sub, sub.Value.AsFund(m_Currency));
+        => ShowSubtotal(sub, (m_Currency == null ? "(!)" : "")
+                + F(sub.Value, m_Currency.EndsWith('#') ? null : m_Currency));
 }

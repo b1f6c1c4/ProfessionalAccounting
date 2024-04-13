@@ -49,10 +49,10 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         regex: /\bU[A-Za-z0-9_]+(&[A-Za-z0-9_]+)*\b/,
       }, {
         token: 'variable.parameter.currency',
-        regex: /@[A-Z][A-Z][A-Z]\b/,
+        regex: /@[A-Z]{3,4}\b/,
       }, {
-        token: 'variable.parameter.currency',
-        regex: /\b[A-Z][A-Z][A-Z](?=\s|$)/,
+        token: 'markup.bold.pseudo',
+        regex: /@#(?:[^#]|##)*#/,
       }, {
         token: 'markup.bold.numeric',
         regex: /[$¥€][-+]?(?:\.[0-9]+|[0-9,]+\.?[0-9]*)(?:[eE][+-]?[0-9]+)?\b/,
@@ -122,7 +122,10 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         regex: /\bU[A-Za-z0-9_]+(&[A-Za-z0-9_]+)*\b/,
       }, {
         token: 'variable.parameter.currency',
-        regex: /@[a-zA-Z][a-zA-Z][a-zA-Z]\b/,
+        regex: /@[a-zA-Z]{3,4}\b/,
+      }, {
+        token: 'markup.bold.pseudo',
+        regex: /@#(?:[^#]|##)*#/,
       }, {
         token: 'markup.list.numbered.title',
         regex: /\bT[123456][0-9][0-9][0-9](?:[0-9][0-9])?\b/,

@@ -84,7 +84,7 @@ Ub2 T3998\s+10
     [Fact]
     public void CornerTest()
     {
-        var res = m_Facade.ExecuteVoucherUpsert(m_Session, "new Voucher { Ub1 @XXX T123456 100 Ub2 @#y##n# T654321 -1 }").AsTask().Result;
+        var res = m_Facade.ExecuteVoucherUpsert(m_Session, "new Voucher { Ub1 @XXX T123456 100 Ub2 @xyn T654321 -1 Ub3 @#y##n# T114514 -5 }").AsTask().Result;
         Assert.Matches(@"@new Voucher {\^[0-9a-f]{24}\^
 [0-9]{8}
 // sth-
@@ -92,13 +92,15 @@ Ub2 T3998\s+10
 // hd
 @XXX\s+T3999\s+-100
 // kyh
-@#y##n#\s+T3998\s+-1
+@XYN\s+T3998\s+-1
 // hd
-@#y##n#\s+T3999\s+1
+@XYN\s+T3999\s+1
 // kyh
-Ub2\s+@#y##n#\s+T3998\s+1
+Ub2\s+@XYN\s+T3998\s+1
 // -
-Ub2\s+@#y##n#\s+T654321\s+-1
+Ub2\s+@XYN\s+T654321\s+-1
+// -
+Ub3\s+@#y##n#\s+T114514\s+-5
 }@
 ", res);
         Assert.True(m_Facade.ExecuteVoucherRemoval(m_Session, res.Substring(1, res.Length - 3)).AsTask().Result);
