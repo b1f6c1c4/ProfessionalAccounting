@@ -183,6 +183,11 @@ public interface IDetailQueryAtom : IQueryCompounded<IDetailQueryAtom>
     TitleKind? Kind { get; }
 
     /// <summary>
+    ///     币种是否为伪币
+    /// </summary>
+    bool? IsPseudoCurrency { get; }
+
+    /// <summary>
     ///     细目过滤器
     /// </summary>
     VoucherDetail Filter { get; }

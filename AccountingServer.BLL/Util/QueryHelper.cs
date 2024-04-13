@@ -58,6 +58,7 @@ public sealed class SimpleDetailQuery : IDetailQueryAtom
 {
     public TitleKind? Kind { get; init; }
     public VoucherDetail Filter { get; init; }
+    public bool? IsPseudoCurrency { get; init; }
     public bool IsFundBidirectional { get; init; }
     public int Dir { get; init; }
     public string ContentPrefix { get; init; }

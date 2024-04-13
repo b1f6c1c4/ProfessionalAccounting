@@ -57,8 +57,24 @@ public class DataFormatterTest
     [InlineData(null, null)]
     [InlineData("@@", "CNY")]
     [InlineData("@mXn", "MXN")]
+    [InlineData("@#mXn#", "mXn#")]
+    [InlineData("@#y@##n#", "y@#n#")]
+    [InlineData("@###yYn#", "#yYn#")]
+    [InlineData("@##", "#")]
+    [InlineData("@####", "##")]
     public void ParseCurrencyTest(string value, string fmt)
         => Assert.Equal(fmt, value.ParseCurrency());
+
+    [Theory]
+    [InlineData(null, "")]
+    [InlineData("cNy", "@cNy")]
+    [InlineData("@@", "@@@")]
+    [InlineData("##", "@####")]
+    [InlineData("#mXn", "@#mXn")]
+    [InlineData("#mXn#", "@###mXn#")]
+    [InlineData("m@n#", "@#m@n#")]
+    public void AsCurrencyTest(string value, string fmt)
+        => Assert.Equal(fmt, value.AsCurrency());
 
     [Theory]
     [InlineData(null, null, "")]

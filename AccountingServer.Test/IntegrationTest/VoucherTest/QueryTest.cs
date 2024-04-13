@@ -87,7 +87,7 @@ public abstract class QueryTestBase
                         new()
                             {
                                 User = "b1&b2",
-                                Currency = "EUR",
+                                Currency = "eur#",
                                 Title = 1111,
                                 SubTitle = 22,
                                 Fund = 114514,
@@ -119,11 +119,11 @@ public abstract class QueryTestBase
                 new object[] { true, "@USD T3456'cont4'\"remk4\"=+77.66" },
                 new object[] { true, "{(T1234+T345605)*(''+'cont3')}-{Depreciation}-{Carry}" },
                 new object[] { false, "T1002+'  '''+\" rmk\"+=77.66001" },
-                new object[] { true, "(@USD+@JPY)*(=-123.45+>)+T2345+Ub1&b2@EUR A" },
-                new object[] { false, "(@USD+@JPY)*=-123.45+T2345+Ub1&b2@EUR A" },
-                new object[] { true, "{T1001+(T1234+(T2345)+T3456)+Ub1&b2@EUR A}-{AnnualCarry}" },
-                new object[] { true, "+(T1001+(T1234+T2345))+T3456+Ub1&b2@EUR A" },
-                new object[] { true, "{((<+>)*())+=1*=2+Ub1&b2@EUR A}-{Ordinary}" },
+                new object[] { true, "(@USD+@JPY)*(=-123.45+>)+T2345+Ub1&b2@#eur# A" },
+                new object[] { false, "(@USD+@JPY)*=-123.45+T2345+Ub1&b2@#eur# A" },
+                new object[] { true, "{T1001+(T1234+(T2345)+T3456)+Ub1&b2@#eur# A}-{AnnualCarry}" },
+                new object[] { true, "+(T1001+(T1234+T2345))+T3456+Ub1&b2@#eur# A" },
+                new object[] { true, "{((<+>)*())+=1*=2+Ub1&b2@#eur# A}-{Ordinary}" },
                 new object[] { true, "U-=1*=2 A" },
                 new object[] { true, "-=1*=2 A" },
                 new object[] { true, "{T1001 null Uncertain}*{T2345 G}-{T3456 A}" },
@@ -133,7 +133,7 @@ public abstract class QueryTestBase
                 new object[] { true, "-" },
                 new object[] { false, "U- A" },
                 new object[] { false, "- A" },
-                new object[] { true, "U@EUR\"\"" },
+                new object[] { true, "U@#eur#\"\"" },
                 new object[] { true, "U'b1&b2'" },
                 new object[] { true, "Ub1+Ub1&b2 A" },
                 new object[] { true, "U A" },
@@ -143,6 +143,8 @@ public abstract class QueryTestBase
                 new object[] { false, "%%" },
                 new object[] { true, "U 'ConT'.**U\"rEMk\".*" },
                 new object[] { false, "U 'cont\\'.*+U\"remk#\".*" },
+                new object[] { true, "Ub1&b2 @#@" },
+                new object[] { false, "Ub1&b2 @##@" },
             };
 
         public IEnumerator<object[]> GetEnumerator() => Data.GetEnumerator();

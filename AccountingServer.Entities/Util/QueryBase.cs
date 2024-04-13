@@ -28,6 +28,8 @@ public sealed class DetailQueryUnconstrained : IDetailQueryAtom
 
     public TitleKind? Kind => null;
 
+    public bool? IsPseudoCurrency => null;
+
     public VoucherDetail Filter { get; } = new();
 
     public bool IsFundBidirectional => false;

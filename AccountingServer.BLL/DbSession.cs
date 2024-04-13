@@ -210,7 +210,8 @@ public class DbSession : IHistoricalExchange
         {
             _ = d.User ?? throw new ApplicationException("User must be specified before passing to DbSession");
             _ = d.Currency ?? throw new ApplicationException("Currency must be specified before passing to DbSession");
-            d.Currency = d.Currency.ToUpperInvariant();
+            if (!d.Currency.EndsWith('#'))
+                d.Currency = d.Currency.ToUpperInvariant();
             d.Fund = Regularize(d.Fund);
         }
 

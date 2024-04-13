@@ -98,10 +98,12 @@ public static class DataFormatter
     {
         if (value == null)
             return null;
-        if (!value.StartsWith("@", StringComparison.Ordinal))
+        if (!value.StartsWith('@'))
             throw new MemberAccessException("表达式错误");
         if (value == "@@")
             return BaseCurrency.Now;
+        if (value.EndsWith('#'))
+            return value[1..].Dequotation() + "#";
         return value[1..].ToUpperInvariant();
     }
 
@@ -114,6 +116,9 @@ public static class DataFormatter
     {
         if (value == null)
             return "";
+
+        if (value.EndsWith('#'))
+            return $"@{value[..^1].Quotation('#')}";
 
         return $"@{value}";
     }

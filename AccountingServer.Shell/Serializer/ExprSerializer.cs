@@ -217,9 +217,8 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
         Parsing.TrimStartComment(ref expr);
         var user = Parsing.Token(ref expr, false, static t => t.StartsWith("U", StringComparison.Ordinal))
             .ParseUserSpec(Client);
-        var currency = Parsing.Token(ref expr, false, static t => t.StartsWith("@", StringComparison.Ordinal))?[1..]
-                .ToUpperInvariant()
-            ?? BaseCurrency.Now;
+        var currency = Parsing.Token(ref expr, false, static t => t.StartsWith("@", StringComparison.Ordinal))?
+            .ParseCurrency() ?? BaseCurrency.Now;
         Parsing.TrimStartComment(ref expr);
         var title = Parsing.Title(ref expr);
         if (title == null)

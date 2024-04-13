@@ -270,7 +270,7 @@ public class DbSessionTest
                 Details = new()
                     {
                         new() { User = "b1", Currency = "jPy" },
-                        new() { User = "b2", Currency = "cnY" },
+                        new() { User = "b2", Currency = "cnY#" },
                         new() { User = "b1", Currency = "Cny", Fund = 0.30000000000000004 },
                     },
             };
@@ -285,7 +285,7 @@ public class DbSessionTest
         Assert.Equal("b1", voucher.Details[1].User);
         Assert.Equal("JPY", voucher.Details[1].Currency);
         Assert.Equal("b2", voucher.Details[2].User);
-        Assert.Equal("CNY", voucher.Details[2].Currency);
+        Assert.Equal("cnY#", voucher.Details[2].Currency);
 
         voucher.Date = null;
         voucher.Details = null;

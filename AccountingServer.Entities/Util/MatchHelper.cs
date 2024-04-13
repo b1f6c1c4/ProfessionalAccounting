@@ -82,13 +82,14 @@ public static class MatchHelper
     /// <param name="voucherDetail">细目</param>
     /// <param name="filter">细目过滤器</param>
     /// <param name="kind">科目类型</param>
+    /// <param name="isPC">是否为伪币</param>
     /// <param name="isBi">细目过滤器的金额是否为绝对值</param>
     /// <param name="dir">借贷方向</param>
     /// <param name="contentPrefix">内容前缀</param>
     /// <param name="remarkPrefix">备注前缀</param>
     /// <returns>是否符合</returns>
     public static bool IsMatch(this VoucherDetail voucherDetail, VoucherDetail filter, TitleKind? kind = null,
-        bool isBi = false, int dir = 0, string contentPrefix = null, string remarkPrefix = null)
+        bool? isPC = null, bool isBi = false, int dir = 0, string contentPrefix = null, string remarkPrefix = null)
     {
         switch (kind)
         {
@@ -148,6 +149,9 @@ public static class MatchHelper
 
                 break;
         }
+
+        if (isPC.HasValue && (isPC.Value ^ (voucherDetail.Currency?.EndsWith('#') ?? false)))
+            return false;
 
         if (filter == null)
             return true;
@@ -218,8 +222,8 @@ public static class MatchHelper
     }
 
     public static bool IsMatch(this VoucherDetail voucherDetail, IQueryCompounded<IDetailQueryAtom> query)
-        => IsMatch(query, q => IsMatch(voucherDetail, q.Filter, q.Kind, q.IsFundBidirectional,
-            q.Dir, contentPrefix: q.ContentPrefix, remarkPrefix: q.RemarkPrefix));
+        => IsMatch(query, q => IsMatch(voucherDetail, q.Filter, q.Kind, q.IsPseudoCurrency,
+            q.IsFundBidirectional, q.Dir, contentPrefix: q.ContentPrefix, remarkPrefix: q.RemarkPrefix));
 
     /// <summary>
     ///     判断记账凭证是否符合记账凭证检索式

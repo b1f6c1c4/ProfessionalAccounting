@@ -231,8 +231,8 @@ fragment US
 	;
 
 VoucherCurrency
-	:	'@' [a-zA-Z]+
-	|	'@@'
+	:	'@' [a-zA-Z]+ |	'@@'
+	|	'@#' ('##'|~('#'))* '#' | '@#@' | '@##@'
 	;
 
 CaretQuotedString

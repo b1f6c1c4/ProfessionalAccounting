@@ -78,6 +78,15 @@ internal partial class QueryParser
                 };
 
         /// <inheritdoc />
+        public bool? IsPseudoCurrency
+            => VoucherCurrency()?.GetText() switch
+                {
+                    "@#@" => true,
+                    "@##@" => false,
+                    _ => null,
+                };
+
+        /// <inheritdoc />
         public VoucherDetail Filter
         {
             get
@@ -86,7 +95,12 @@ internal partial class QueryParser
                 var filter = new VoucherDetail
                     {
                         User = (UserSpec()?.GetText()).ParseUserSpec(Client ?? new()), // workaround IsDangerous
-                        Currency = VoucherCurrency()?.GetText().ParseCurrency(),
+                        Currency = VoucherCurrency()?.GetText() switch
+                            {
+                                "@#@" => null,
+                                "@##@" => null,
+                                var a => a.ParseCurrency(),
+                            },
                         Title = t?.Title,
                         SubTitle = t?.SubTitle,
                         Content = token()?.GetPureText(),

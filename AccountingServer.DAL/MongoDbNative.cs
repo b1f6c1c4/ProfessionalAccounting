@@ -194,6 +194,16 @@ internal abstract class MongoDbNativeDetail<T> : MongoDbNativeVisitor<T, IDetail
                 throw new ArgumentOutOfRangeException();
         }
 
+        switch (query.IsPseudoCurrency)
+        {
+            case true:
+                lst.Add(Builders<T>.Filter.Regex($"{p}currency", "#$"));
+                break;
+            case false:
+                lst.Add(!Builders<T>.Filter.Regex($"{p}currency", "#$"));
+                break;
+        }
+
         if (query.Dir != 0)
             lst.Add(
                 query.Dir > 0

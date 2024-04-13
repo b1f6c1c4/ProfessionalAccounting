@@ -240,6 +240,23 @@ public class MatchHelperTest
             MatchHelper.IsMatch(new() { Title = value, SubTitle = sub}, new(), kind));
 
     [Theory]
+    [InlineData(true, null, null)]
+    [InlineData(true, "a", null)]
+    [InlineData(true, "#", null)]
+    [InlineData(true, "a#", null)]
+    [InlineData(false, null, true)]
+    [InlineData(false, "a", true)]
+    [InlineData(true, "#", true)]
+    [InlineData(true, "a#", true)]
+    [InlineData(true, null, false)]
+    [InlineData(true, "a", false)]
+    [InlineData(false, "#", false)]
+    [InlineData(false, "a#", false)]
+    public void DetailMatchTestPseudo(bool expected, string value, bool? isPC)
+        => Assert.Equal(expected,
+            MatchHelper.IsMatch(new() { Currency = value }, new(), isPC: isPC));
+
+    [Theory]
     [InlineData(true, null, 0)]
     [InlineData(true, 123.45, 0)]
     [InlineData(false, null, +1)]
