@@ -76,7 +76,8 @@ public static class SecurityHelper
     }
 
     private static bool IsDangerous(this VoucherDetail filter)
-        => !filter.Fund.HasValue && string.IsNullOrEmpty(filter.Content) && string.IsNullOrEmpty(filter.Remark);
+        => !filter.Fund.HasValue && string.IsNullOrEmpty(filter.Content) && string.IsNullOrEmpty(filter.Remark)
+            && !(filter.Currency?.EndsWith('#') ?? false);
 
     private static bool IsDangerous(this Voucher filter)
         => filter.ID == null && string.IsNullOrEmpty(filter.Remark);
