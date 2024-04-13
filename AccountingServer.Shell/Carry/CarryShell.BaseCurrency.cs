@@ -64,7 +64,7 @@ internal partial class CarryShell
             var rate = await session.Accountant.Query(dt, grpC.Currency, to);
             var dst = rate * grpC.Fund;
             yield return
-                $"=== {dt.AsDate()} @{grpC.Currency} {grpC.Fund.AsCurrency(grpC.Currency)} => @{to} {dst.AsCurrency(to)}\n";
+                $"=== {dt.AsDate()} @{grpC.Currency} {grpC.Fund.AsFund(grpC.Currency)} => @{to} {dst.AsFund(to)}\n";
 
             foreach (var grpt in grpC.Items.Cast<ISubtotalTitle>())
             foreach (var grps in grpt.Items.Cast<ISubtotalSubTitle>())

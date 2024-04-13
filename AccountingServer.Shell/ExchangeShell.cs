@@ -76,7 +76,7 @@ internal class ExchangeShell : IShellComponent
             ? await session.Accountant.SaveHistoricalRate(dt!.Value, from, to)
             : await session.Accountant.Query(dt, from, to);
         var v = value * rate;
-        return $"{dt.AsDate()} @{from} {value.AsCurrency(from)} = @{to} {v.AsCurrency(to)} ({v:R})\n";
+        return $"{dt.AsDate()} @{from} {value.AsFund(from)} = @{to} {v.AsFund(to)} ({v:R})\n";
     }
 
     /// <summary>

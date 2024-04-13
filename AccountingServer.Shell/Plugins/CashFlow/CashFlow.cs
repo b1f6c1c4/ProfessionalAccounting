@@ -103,10 +103,10 @@ internal class CashFlow : PluginBase
 
                 sb.Append("".PadLeft(15));
                 sb.Append("".PadLeft(15));
-                sb.Append(aggs[i].AsCurrency(accts[i].Currency).PadLeft(15));
+                sb.Append(aggs[i].AsFund(accts[i].Currency).PadLeft(15));
             }
 
-            sb.Append(sum.AsCurrency(BaseCurrency.Now).PadLeft(15));
+            sb.Append(sum.AsFund(BaseCurrency.Now).PadLeft(15));
             sb.Append("\n");
             yield return sb.ToString();
             sb.Clear();
@@ -125,19 +125,19 @@ internal class CashFlow : PluginBase
                 sum += aggs[i] * await session.Accountant.Query(kvp.Key, accts[i].Currency, BaseCurrency.Now);
 
                 if (!kvp.Value[i, 0].IsZero())
-                    sb.Append(kvp.Value[i, 0].AsCurrency(accts[i].Currency).PadLeft(15));
+                    sb.Append(kvp.Value[i, 0].AsFund(accts[i].Currency).PadLeft(15));
                 else
                     sb.Append("".PadLeft(15));
 
                 if (!kvp.Value[i, 1].IsZero())
-                    sb.Append(kvp.Value[i, 1].AsCurrency(accts[i].Currency).PadLeft(15));
+                    sb.Append(kvp.Value[i, 1].AsFund(accts[i].Currency).PadLeft(15));
                 else
                     sb.Append("".PadLeft(15));
 
-                sb.Append(aggs[i].AsCurrency(accts[i].Currency).PadLeft(15));
+                sb.Append(aggs[i].AsFund(accts[i].Currency).PadLeft(15));
             }
 
-            sb.Append(sum.AsCurrency(BaseCurrency.Now).PadLeft(15));
+            sb.Append(sum.AsFund(BaseCurrency.Now).PadLeft(15));
             sb.Append("\n");
             yield return sb.ToString();
             sb.Clear();

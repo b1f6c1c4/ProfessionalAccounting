@@ -36,7 +36,7 @@ internal class RichSubtotalPre : StringSubtotalVisitor
 
     private string Ts(double f) => Ga is GatheringType.Count or GatheringType.VoucherCount
         ? f.ToString("N0")
-        : f.AsCurrency(Cu ?? m_Currency);
+        : f.AsFund(Cu ?? m_Currency);
 
     private async IAsyncEnumerable<string> ShowSubtotal(ISubtotalResult sub, string str)
     {
@@ -88,5 +88,5 @@ internal class RichSubtotalPre : StringSubtotalVisitor
         => ShowSubtotal(sub, sub.Remark.Quotation('"'));
 
     public override IAsyncEnumerable<string> Visit(ISubtotalValue sub)
-        => ShowSubtotal(sub, sub.Value.AsCurrency(m_Currency));
+        => ShowSubtotal(sub, sub.Value.AsFund(m_Currency));
 }

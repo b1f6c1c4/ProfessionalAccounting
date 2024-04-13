@@ -515,7 +515,7 @@ public class Statement : PluginBase
             .Where(static v => v.Date.HasValue)
             .SelectMany(v => v.Details.Where(d => d.IsMatch(filt.ActualDetailFilter()))
                 .Where(d => d.Remark != "reconciliation")
-                .Select(d => (v.ID, v.Date, Fund: d.Fund.AsCurrency(d.Currency), d.Remark))
+                .Select(d => (v.ID, v.Date, Fund: d.Fund.AsFund(d.Currency), d.Remark))
                 .ToAsyncEnumerable())
             .OrderBy(static tuple => tuple.Date).ThenBy(static tuple => tuple.Remark)
             .ToListAsync();

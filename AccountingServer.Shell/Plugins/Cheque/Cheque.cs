@@ -174,7 +174,7 @@ internal class Cheque : PluginBase
                     + " paid "
                     + (cd.Payee?.User.AsUser() ?? "someone").CPadLeft(7)
                     + " "
-                    + (cd.Payee?.Fund ?? -cd.Payer!.Fund).AsCurrency(obj.Currency).CPadLeft(14);
+                    + (cd.Payee?.Fund ?? -cd.Payer!.Fund).AsFund(obj.Currency).CPadLeft(14);
 
                 if (cd.Payer != null)
                     if (cd.PayerWithdraw == null)

@@ -67,8 +67,8 @@ public class DataFormatterTest
     [InlineData("DOGE", null, "")]
     [InlineData("DOGE", 123.45, "#123.45  ")]
     [InlineData("DOGE", 0.00235, "#0.0024")]
-    public void AsCurrencyTest(string value, double? v, string fmt)
-        => Assert.Equal(fmt, v.AsCurrency(value));
+    public void AsFundTest(string value, double? v, string fmt)
+        => Assert.Equal(fmt, v.AsFund(value));
 
     [Theory]
     [InlineData(null, SubtotalLevel.None, "[null]")]

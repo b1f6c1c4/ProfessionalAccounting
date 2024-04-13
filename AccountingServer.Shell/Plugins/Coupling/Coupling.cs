@@ -111,7 +111,7 @@ internal class Coupling : PluginBase
                         await session.Accountant.Query(couple.Voucher.Date, couple.Currency, BaseCurrency.Now))))
             .ToList();
         var total = await items.ToAsyncEnumerable().SumAwaitAsync(static tuple => tuple.FundPromise);
-        var str = $"Total [{verb.ToUpperInvariant()}]: {total.AsCurrency(BaseCurrency.Now)}";
+        var str = $"Total [{verb.ToUpperInvariant()}]: {total.AsFund(BaseCurrency.Now)}";
         yield return $"/**{new string('*', str.Length)}**/\n";
         yield return $"/* {str} */\n";
         yield return $"/**{new string('*', str.Length)}**/\n";
@@ -119,7 +119,7 @@ internal class Coupling : PluginBase
         {
             var fund = await tuple.FundPromise;
             yield return
-                $"// {fund / total,5:#0.0%} [{verb.ToUpperInvariant()}] {prop} {tuple.Name,-15} {fund.AsCurrency(BaseCurrency.Now)}\n";
+                $"// {fund / total,5:#0.0%} [{verb.ToUpperInvariant()}] {prop} {tuple.Name,-15} {fund.AsFund(BaseCurrency.Now)}\n";
             if (!hideDetail || string.IsNullOrEmpty(tuple.Name))
                 foreach (var couple in tuple.Detail)
                     yield return $"{couple}\n";
@@ -383,7 +383,7 @@ internal class Coupling : PluginBase
             if (Debitor.Remark != null)
                 d += $" {Debitor.Remark.Quotation('"')}";
             return
-                $"^{Voucher.ID}^ {Voucher.Date.AsDate()} {c.CPadRight(30)} -> {d.CPadRight(51)} @{Currency} {Fund.AsCurrency(Currency)}";
+                $"^{Voucher.ID}^ {Voucher.Date.AsDate()} {c.CPadRight(30)} -> {d.CPadRight(51)} @{Currency} {Fund.AsFund(Currency)}";
         }
     }
 

@@ -90,10 +90,10 @@ public static class DataFormatter
     }
 
     /// <summary>
-    ///     解析金额
+    ///     解析币种
     /// </summary>
-    /// <param name="value">格式化后的金额</param>
-    /// <returns>金额</returns>
+    /// <param name="value">格式化后的币种</param>
+    /// <returns>币种</returns>
     public static string ParseCurrency(this string value)
     {
         if (value == null)
@@ -111,7 +111,7 @@ public static class DataFormatter
     /// <param name="value">金额</param>
     /// <param name="curr">币种</param>
     /// <returns>格式化后的金额</returns>
-    public static string AsCurrency(this double value, string curr = null)
+    public static string AsFund(this double value, string curr = null)
     {
         var sym = curr == null
             ? ""
@@ -126,8 +126,8 @@ public static class DataFormatter
     /// <param name="value">金额</param>
     /// <param name="curr">币种</param>
     /// <returns>格式化后的金额</returns>
-    public static string AsCurrency(this double? value, string curr = null) =>
-        value.HasValue ? AsCurrency(value.Value, curr) : string.Empty;
+    public static string AsFund(this double? value, string curr = null) =>
+        value.HasValue ? AsFund(value.Value, curr) : string.Empty;
 
     /// <summary>
     ///     格式化一级科目编号

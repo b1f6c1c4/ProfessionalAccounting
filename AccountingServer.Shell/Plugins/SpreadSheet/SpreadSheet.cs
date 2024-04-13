@@ -97,7 +97,7 @@ internal class SpreadSheet : PluginBase
                     else if (flt.Count > 0)
                     {
                         var value = flt.Sum(static d => d.Fund!.Value);
-                        sb.Append(value.AsCurrency(grpC.Key));
+                        sb.Append(value.AsFund(grpC.Key));
                         hasColumn = !cols[i].Kind.HasFlag(SheetColumnKind.Auxiliary);
 
                         if (!sum.ContainsKey(grpC.Key))
@@ -137,7 +137,7 @@ internal class SpreadSheet : PluginBase
                 {
                     sb.Append('\t');
                     if (!double.IsNaN(v[i]))
-                        sb.Append(v[i].AsCurrency(k));
+                        sb.Append(v[i].AsFund(k));
                 }
                 sb.Append('\n');
                 yield return sb.ToString();

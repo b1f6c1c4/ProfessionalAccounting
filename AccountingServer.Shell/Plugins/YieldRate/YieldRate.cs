@@ -60,8 +60,8 @@ internal class YieldRate : PluginBase
         yield return $"{"".CPadRight(30)} Start   ~ EndDate  TotalInvest      NetGain    PresentValue YieldRate  APY\n";
         foreach (var inv in lst.OrderBy(static inv => -inv.Apy))
             yield return $"{inv.Content.CPadRight(30)} {inv.StartDate.AsDate()}~{inv.EndDate.AsDate()} "
-                + $"{inv.TotalInvest.AsCurrency(inv.Currency).CPadLeft(13)} {inv.NetGain.AsCurrency(inv.Currency).CPadLeft(13)} "
-                + $"{inv.PresentValue.AsCurrency(inv.Currency).CPadLeft(13)} "
+                + $"{inv.TotalInvest.AsFund(inv.Currency).CPadLeft(13)} {inv.NetGain.AsFund(inv.Currency).CPadLeft(13)} "
+                + $"{inv.PresentValue.AsFund(inv.Currency).CPadLeft(13)} "
                 + $"{inv.YieldRate:P5}   {inv.Apy:P5}\n";
     }
 

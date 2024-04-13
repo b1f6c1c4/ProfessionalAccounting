@@ -154,9 +154,9 @@ internal class CreditCardConvert : PluginBase
         foreach (var conv in convs)
         {
             sb.Append(conv.Date.AsDate());
-            sb.Append($" @{conv.OriginCurrency} {conv.OriginFund.AsCurrency().CPadLeft(15)}");
+            sb.Append($" @{conv.OriginCurrency} {conv.OriginFund.AsFund().CPadLeft(15)}");
             sb.Append(
-                $" {conv.Date.AsDate()} @{conv.TargetCurrency} {conv.TargetFund.AsCurrency().CPadLeft(15)} !!!\n");
+                $" {conv.Date.AsDate()} @{conv.TargetCurrency} {conv.TargetFund.AsFund().CPadLeft(15)} !!!\n");
             yield return sb.ToString();
             sb.Clear();
         }
@@ -166,10 +166,10 @@ internal class CreditCardConvert : PluginBase
         foreach (var tran in trans.Concat(rebates).OrderByDescending(static t => t.Date))
         {
             sb.Append(tran.Date.AsDate());
-            sb.Append($" @{tran.RawCurrency} {tran.RawFund.AsCurrency().CPadLeft(15)}");
+            sb.Append($" @{tran.RawCurrency} {tran.RawFund.AsFund().CPadLeft(15)}");
             if (tran.TheConversion != null)
                 sb.Append(
-                    $" {tran.TheConversion.Date.AsDate()} @{tran.TheConversion.TargetCurrency} {tran.TheConversion.TargetFund.AsCurrency().CPadLeft(15)}\n");
+                    $" {tran.TheConversion.Date.AsDate()} @{tran.TheConversion.TargetCurrency} {tran.TheConversion.TargetFund.AsFund().CPadLeft(15)}\n");
             else
                 sb.Append("\n");
             yield return sb.ToString();

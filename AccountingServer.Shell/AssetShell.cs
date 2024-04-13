@@ -242,9 +242,9 @@ internal class AssetShell : DistributedShell
 
         sb.Append($"{asset.StringID} {asset.Name.CPadRight(35)}{asset.Date:yyyyMMdd}" +
             $"{asset.User.AsUser().CPadRight(6)} " +
-            asset.Value.AsCurrency(asset.Currency).CPadLeft(13) +
-            (dt.HasValue ? bookValue.AsCurrency(asset.Currency).CPadLeft(13) : "-".CPadLeft(13)) +
-            asset.Salvage.AsCurrency(asset.Currency).CPadLeft(13) +
+            asset.Value.AsFund(asset.Currency).CPadLeft(13) +
+            (dt.HasValue ? bookValue.AsFund(asset.Currency).CPadLeft(13) : "-".CPadLeft(13)) +
+            asset.Salvage.AsFund(asset.Currency).CPadLeft(13) +
             asset.Title.AsTitle().CPadLeft(6) +
             asset.DepreciationTitle.AsTitle().CPadLeft(6) +
             asset.DevaluationTitle.AsTitle().CPadLeft(6) +
@@ -278,27 +278,27 @@ internal class AssetShell : DistributedShell
                 AcquisitionItem acq => string.Format(
                     "   {0:yyyMMdd} ACQ:{1} ={3} ({2})\n",
                     assetItem.Date,
-                    acq.OrigValue.AsCurrency().CPadLeft(13),
+                    acq.OrigValue.AsFund().CPadLeft(13),
                     assetItem.VoucherID,
-                    assetItem.Value.AsCurrency().CPadLeft(13)),
+                    assetItem.Value.AsFund().CPadLeft(13)),
                 DepreciateItem dep => string.Format(
                     "   {0:yyyMMdd} DEP:{1} ={3} ({2})\n",
                     assetItem.Date,
-                    dep.Amount.AsCurrency().CPadLeft(13),
+                    dep.Amount.AsFund().CPadLeft(13),
                     assetItem.VoucherID,
-                    assetItem.Value.AsCurrency().CPadLeft(13)),
+                    assetItem.Value.AsFund().CPadLeft(13)),
                 DevalueItem dev => string.Format(
                     "   {0:yyyMMdd} DEV:{1} ={3} ({2})\n",
                     assetItem.Date,
-                    dev.Amount.AsCurrency().CPadLeft(13),
+                    dev.Amount.AsFund().CPadLeft(13),
                     assetItem.VoucherID,
-                    assetItem.Value.AsCurrency().CPadLeft(13)),
+                    assetItem.Value.AsFund().CPadLeft(13)),
                 DispositionItem => string.Format(
                     "   {0:yyyMMdd} DSP:{1} ={3} ({2})\n",
                     assetItem.Date,
                     "ALL".CPadLeft(13),
                     assetItem.VoucherID,
-                    assetItem.Value.AsCurrency().CPadLeft(13)),
+                    assetItem.Value.AsFund().CPadLeft(13)),
                 _ => null,
             };
 

@@ -230,7 +230,7 @@ internal class AmortizationShell : DistributedShell
         sb.Append(
             $"{amort.StringID} {amort.Name.CPadRight(35)}{amort.Date:yyyyMMdd}" +
             $"{amort.User.AsUser().CPadRight(6)} " +
-            $"{amort.Value.AsCurrency().CPadLeft(13)}{(dt.HasValue ? bookValue.AsCurrency().CPadLeft(13) : "-".CPadLeft(13))}" +
+            $"{amort.Value.AsFund().CPadLeft(13)}{(dt.HasValue ? bookValue.AsFund().CPadLeft(13) : "-".CPadLeft(13))}" +
             $"{(amort.TotalDays?.ToString(CultureInfo.InvariantCulture) ?? "-").CPadLeft(4)}{amort.Interval.ToString().CPadLeft(20)}\n");
 
         if (showSchedule && amort.Schedule != null)
@@ -254,10 +254,10 @@ internal class AmortizationShell : DistributedShell
         => string.Format(
             "   {0:yyyMMdd} AMO:{1} ={3} ({2})\n",
             amortItem.Date,
-            amortItem.Amount.AsCurrency()
+            amortItem.Amount.AsFund()
                 .CPadLeft(13),
             amortItem.VoucherID,
-            amortItem.Value.AsCurrency()
+            amortItem.Value.AsFund()
                 .CPadLeft(13));
 
     /// <summary>
