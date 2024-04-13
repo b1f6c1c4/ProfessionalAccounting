@@ -62,6 +62,9 @@ internal class JsonSubtotal : ISubtotalVisitor<JProperty>, ISubtotalStringify
     JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalVoucherRemark sub)
         => new(sub.VoucherRemark, VisitChildren(sub));
 
+    JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalTitleKind sub)
+        => new($"{sub.Kind}", VisitChildren(sub));
+
     JProperty ISubtotalVisitor<JProperty>.Visit(ISubtotalUser sub)
         => new(sub.User, VisitChildren(sub));
 

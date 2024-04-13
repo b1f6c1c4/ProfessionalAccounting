@@ -721,6 +721,57 @@ public class SubtotalTest
             new BalanceEqualityComparer());
     }
 
+    private record TitleKindFund(TitleKind? Kind, double Fund);
+
+    [Fact]
+    public async Task TestTitleKind()
+    {
+        var builder = new SubtotalBuilder(ParsingF.GroupedQuery("`K", m_Client).Subtotal, m_Exchange);
+
+        var bal = new Balance[]
+            {
+                new() { Title = 1234, Fund = 1 },
+                new() { Title = 1600, Fund = 2 },
+                new() { Title = 2000, Fund = -6 },
+                new() { Title = 3998, Fund = 7 },
+                new() { Title = 4567, Fund = -8 },
+                new() { Title = 5827, Fund = 9 },
+                new() { Title = 6002, Fund = -10 },
+                new() { Title = 6543, Fund = 4 },
+                new() { Title = 6603, SubTitle = 01, Fund = 2 },
+                new() { Title = 6603, SubTitle = 02, Fund = -5 },
+                new() { Title = 9999, Fund = -4 },
+            };
+
+        var res = await builder.Build(bal.ToAsyncEnumerable());
+        Assert.IsAssignableFrom<ISubtotalRoot>(res);
+        var resx = (ISubtotalRoot)res;
+
+        var lst = new List<TitleKindFund>();
+        foreach (var item in resx.Items)
+        {
+            Assert.IsAssignableFrom<ISubtotalTitleKind>(item);
+            var resxx = (ISubtotalTitleKind)item;
+            Assert.Null(resxx.Items);
+            lst.Add(new(resxx.Kind, resxx.Fund));
+        }
+
+        Assert.Equal(bal.Sum(static b => b.Fund), res.Fund);
+        Assert.Equal(
+            new List<TitleKindFund>
+                {
+                    new(TitleKind.Asset, 1 + 2),
+                    new(TitleKind.Liability, -6),
+                    new(TitleKind.Mutual, 7),
+                    new(TitleKind.Equity, -8),
+                    new(TitleKind.Cost, 9),
+                    new(TitleKind.Revenue, -5 + -10),
+                    new(TitleKind.Expense, 2 + 4),
+                    new(null, -4),
+                },
+            lst);
+    }
+
     [Fact]
     public async Task TestTitle()
     {

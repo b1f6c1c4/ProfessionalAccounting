@@ -93,7 +93,7 @@ CountMark
 	;
 
 SubtotalField
-	:	[RtscrdwmqyCUV]
+	:	[RKtscrdwmqyCUV]
 	;
 
 SubtotalNoField

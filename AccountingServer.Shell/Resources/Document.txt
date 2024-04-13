@@ -42,6 +42,7 @@ Ctrl+Alt+Shift+Delete		全部删除
 (空)							CtsUc
 v							（全部汇总）
 R							记账凭证备注
+K							记账凭证类型
 t							一级科目
 s							二级科目
 c							内容

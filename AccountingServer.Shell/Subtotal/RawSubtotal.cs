@@ -98,6 +98,9 @@ internal class RawSubtotal : StringSubtotalVisitor
         return ShowSubtotal(sub);
     }
 
+    public override IAsyncEnumerable<string> Visit(ISubtotalTitleKind sub)
+        => ShowSubtotal(sub);
+
     public override IAsyncEnumerable<string> Visit(ISubtotalUser sub)
     {
         if (m_Path != null)

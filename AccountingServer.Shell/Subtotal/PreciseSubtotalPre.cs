@@ -81,6 +81,15 @@ internal class PreciseSubtotalPre : StringSubtotalVisitor
         m_Path = prev;
     }
 
+    public override async IAsyncEnumerable<string> Visit(ISubtotalTitleKind sub)
+    {
+        var prev = m_Path;
+        m_Path = Merge(m_Path, $"{sub.Kind}");
+        await foreach (var s in ShowSubtotal(sub))
+            yield return s;
+        m_Path = prev;
+    }
+
     public override async IAsyncEnumerable<string> Visit(ISubtotalUser sub)
     {
         var prev = m_Path;

@@ -72,7 +72,7 @@ internal class SubtotalDateFactory : SubtotalResultFactory<DateTime?>
 
 internal class SubtotalVoucherRemark : SubtotalResult, ISubtotalVoucherRemark
 {
-    public SubtotalVoucherRemark(string user) => VoucherRemark = user;
+    public SubtotalVoucherRemark(string vremark) => VoucherRemark = vremark;
     public string VoucherRemark { get; }
 
     public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
@@ -82,6 +82,34 @@ internal class SubtotalVoucherRemarkFactory : SubtotalResultFactory<string>
 {
     public override string Selector(Balance b) => b.VoucherRemark;
     public override SubtotalResult Create(IAsyncGrouping<string, Balance> grp) => new SubtotalVoucherRemark(grp.Key);
+}
+
+internal class SubtotalTitleKind : SubtotalResult, ISubtotalTitleKind
+{
+    public SubtotalTitleKind(TitleKind? kind) => Kind = kind;
+    public TitleKind? Kind { get; }
+
+    public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
+}
+
+internal class SubtotalTitleKindFactory : SubtotalResultFactory<TitleKind?>
+{
+    public override TitleKind? Selector(Balance b)
+        => b.Title switch {
+            (< 1000) => null,
+            (< 2000) => TitleKind.Asset,
+            (< 3000) => TitleKind.Liability,
+            (< 4000) => TitleKind.Mutual,
+            (< 5000) => TitleKind.Equity,
+            (< 6000) => TitleKind.Cost,
+            (< 6400) => TitleKind.Revenue,
+            6603 when b.SubTitle == 02 => TitleKind.Revenue,
+            6603 when b.SubTitle != 02 => TitleKind.Expense,
+            (< 7000) => TitleKind.Expense,
+            _ => null,
+        };
+
+    public override SubtotalResult Create(IAsyncGrouping<TitleKind?, Balance> grp) => new SubtotalTitleKind(grp.Key);
 }
 
 internal class SubtotalUser : SubtotalResult, ISubtotalUser
@@ -236,6 +264,7 @@ public class SubtotalBuilder
         sub.TheItems = await ((level & SubtotalLevel.Subtotal) switch
             {
                 SubtotalLevel.VoucherRemark => Invoke(new SubtotalVoucherRemarkFactory()),
+                SubtotalLevel.TitleKind => Invoke(new SubtotalTitleKindFactory()),
                 SubtotalLevel.Title => Invoke(new SubtotalTitleFactory()),
                 SubtotalLevel.SubTitle => Invoke(new SubtotalSubTitleFactory()),
                 SubtotalLevel.Content => Invoke(new SubtotalContentFactory()),

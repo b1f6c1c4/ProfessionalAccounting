@@ -38,6 +38,11 @@ public enum SubtotalLevel
     VoucherRemark = 0b1_0000_0000_0000,
 
     /// <summary>
+    ///     按类型分类
+    /// </summary>
+    TitleKind = 0b0000_0000_0011,
+
+    /// <summary>
     ///     按一级科目分类
     /// </summary>
     Title = 0b0000_0000_0001,
@@ -151,6 +156,11 @@ public interface ISubtotalVoucherRemark : ISubtotalResult
     string VoucherRemark { get; }
 }
 
+public interface ISubtotalTitleKind : ISubtotalResult
+{
+    TitleKind? Kind { get; }
+}
+
 public interface ISubtotalUser : ISubtotalResult
 {
     string User { get; }
@@ -195,6 +205,7 @@ public interface ISubtotalVisitor<out T>
     T Visit(ISubtotalRoot sub);
     T Visit(ISubtotalDate sub);
     T Visit(ISubtotalVoucherRemark sub);
+    T Visit(ISubtotalTitleKind sub);
     T Visit(ISubtotalUser sub);
     T Visit(ISubtotalCurrency sub);
     T Visit(ISubtotalTitle sub);
