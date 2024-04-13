@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -28,6 +29,7 @@ using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Carry;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
+using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.Shell;
 
@@ -101,7 +103,31 @@ public class Facade
                 return ListVersions().ToAsyncEnumerable();
         }
 
-        return m_Composer.Execute(expr, session);
+        var repetition = ParsingF.Optional(ref expr, "time ") ? (ulong?)ParsingF.DoubleF(ref expr) : null;
+        return ExecuteNormal(session, expr, repetition);
+    }
+
+    private async IAsyncEnumerable<string> ExecuteNormal(Session session, string expr, ulong? repetition)
+    {
+        var sw = new Stopwatch();
+        var output = (repetition ?? 1) == 1;
+
+        for (var i = 0UL; i < (repetition ?? 1UL); i++)
+        {
+            sw.Start();
+            await foreach (var s in m_Composer.Execute(expr, session))
+                if (output)
+                    yield return s;
+
+            sw.Stop();
+            if (!output)
+                yield return ".";
+        }
+        if (!output)
+            yield return "\n";
+
+        if (repetition.HasValue)
+            yield return $"time = {(double)sw.ElapsedMilliseconds / repetition.Value}ms\n";
     }
 
     /// <summary>

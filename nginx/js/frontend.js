@@ -52,18 +52,25 @@ const freeze = (f) => {
   cmdLine.setReadOnly(f);
 };
 
+// success: true | false | { first: true | false }
+// insert: true | false
 const finalize = (answer, success, insert) => {
-  if (insert) {
-    editor.selection.setSelectionRange({
-      start: { row: editor.selection.getCursor().row, column: 0 },
-      end: { row: editor.selection.getCursor().row, column: 0 },
-    }, false);
+  if (typeof success === 'object' && !success.first) {
+    // do nothing
   } else {
-    editor.setValue('');
+    if (insert) {
+      editor.selection.setSelectionRange({
+        start: { row: editor.selection.getCursor().row, column: 0 },
+        end: { row: editor.selection.getCursor().row, column: 0 },
+      }, false);
+    } else if (answer !== undefined) {
+      editor.setValue('');
+    }
   }
   const original = editor.selection.getCursor();
-  editor.insert(answer);
-  if (success != null) {
+  if (answer !== undefined)
+    editor.insert(answer);
+  if (typeof success !== 'object') {
     editor.selection.setSelectionRange({
       start: original,
       end: original,
@@ -214,16 +221,18 @@ const doExecuteFactory = (app) => () => {
     return;
   }
   freeze(true);
+  let first = true;
   execute(command, (res, err, done) => {
     if (err) {
       finalize(err, false, app);
       editor.renderer.scrollCursorIntoView();
     } else if (done) {
-      finalize(res, true, app);
+      finalize(res === undefined && first ? '' : undefined, true, app);
       editor.focus();
       editor.renderer.scrollCursorIntoView();
-    } else if (!app) {
-      finalize(res, null, app);
+    } else {
+      finalize(res, { first }, app);
+      first = false;
       editor.renderer.scrollCursorIntoView();
     }
   });

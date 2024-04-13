@@ -16,6 +16,20 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+ReadableStream.prototype[Symbol.asyncIterator] = async function* () {
+  const reader = this.getReader()
+  try {
+    while (true) {
+      const {done, value} = await reader.read()
+      if (done) return
+      yield value
+    }
+  }
+  finally {
+    reader.releaseLock()
+  }
+};
+
 let theUser = window.localStorage.getItem('user') || 'anonymous';
 
 const login = (u) => {
@@ -24,48 +38,41 @@ const login = (u) => {
   window.localStorage.setItem('user', u);
 };
 
-const send = (xhr) => (method, url, spec, payload) => {
-  xhr.open(method, url, true);
+const send = (method, url, spec, body) => {
   const d = new Date();
   const ld = new Date(+d - 1000*60*d.getTimezoneOffset());
   const ldt = ld.toISOString().replace(/Z$/, '');
-  xhr.setRequestHeader('X-User', theUser);
-  xhr.setRequestHeader('X-ClientDateTime', ldt);
+  const headers = {
+    'Content-Type': 'text/plain',
+    'X-User': theUser,
+    'X-ClientDateTime': ldt,
+  };
   if (spec)
-    xhr.setRequestHeader('X-Serializer', spec);
-  xhr.send(payload);
+    headers['X-Serializer'] = spec;
+  return fetch(url, { method, body, headers });
 };
 
-const fancyxhr = (cb) => {
-  const xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function () {
-    if (this.readyState === XMLHttpRequest.DONE) {
-      if (this.status === 200 || this.status === 204) {
-        cb(this.responseText, undefined, true);
-      } else {
-        cb(undefined, 'HTTP ' + this.status + '\n' + this.responseText);
-      }
-    }
-  };
-  xhr.onprogress = function (e) {
-    cb(this.responseText, undefined, false);
-  };
-  return send(xhr);
+const fancyxhr = (cb) => async (...args) => {
+  const resp = await send(...args);
+  if (!resp.ok) {
+    cb(undefined, 'HTTP ' + resp.status + '\n' + await resp.text());
+  } else {
+    const decoder = new TextDecoderStream();
+    resp.body.pipeTo(decoder.writable);
+    for await (const chunk of decoder.readable)
+      cb(chunk, undefined, false);
+    cb(undefined, undefined, true);
+  }
 };
 
-const xhr = (...args) => new Promise((resolve, reject) => {
-  const xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function () {
-    if (this.readyState === XMLHttpRequest.DONE) {
-      if (this.status === 200 || this.status === 204) {
-        resolve(this.responseText);
-      } else {
-        reject('HTTP ' + this.status + '\n' + this.responseText);
-      }
-    }
-  };
-  send(xhr)(...args);
-});
+const xhr = async (...args) => {
+  const resp = await send(...args);
+  if (!resp.ok) {
+    throw 'HTTP ' + resp.status + '\n' + await resp.text();
+  } else {
+    return resp.text();
+  }
+};
 
 const execute = (cmd, cb) => {
   if (cmd === '') {
