@@ -252,4 +252,10 @@ public class DbSession : IHistoricalExchange
 
         return Db.Upsert(entity);
     }
+
+    public ValueTask<bool> StartProfiler(int slow)
+        => Db.StartProfiler(slow);
+
+    public IAsyncEnumerable<string> StopProfiler()
+        => Db.StopProfiler();
 }

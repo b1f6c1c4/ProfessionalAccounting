@@ -179,6 +179,7 @@ internal class MongoDbAdapter : IDbAdapter
         m_Assets = m_Db.GetCollection<Asset>("asset");
         m_Amortizations = m_Db.GetCollection<Amortization>("amortization");
         m_Records = m_Db.GetCollection<ExchangeRecord>("exchangeRecord");
+        m_Profile = m_Db.GetCollection<BsonDocument>("system.profile");
     }
 
     private static async ValueTask<bool> Upsert<T, TId>(IMongoCollection<T> collection, T entity,
@@ -247,6 +248,11 @@ internal class MongoDbAdapter : IDbAdapter
     ///     汇率集合
     /// </summary>
     private readonly IMongoCollection<ExchangeRecord> m_Records;
+
+    /// <summary>
+    ///     性能分析集合
+    /// </summary>
+    private readonly IMongoCollection<BsonDocument> m_Profile;
 
     #endregion
 
@@ -593,6 +599,37 @@ internal class MongoDbAdapter : IDbAdapter
         {
             return false;
         }
+    }
+
+    #endregion
+
+    #region Profiling
+
+    private readonly static JsonWriterSettings ProfileSettings = new()
+        {
+            Indent = true,
+            NewLineChars = "\n",
+            OutputMode = JsonOutputMode.Shell,
+        };
+
+    /// <inheritdoc />
+    public async ValueTask<bool> StartProfiler(int slow)
+    {
+        await m_Db.RunCommandAsync<BsonDocument>(new BsonDocument("profile", 0));
+        await m_Db.DropCollectionAsync("system.profile");
+        var doc = new BsonDocument("profile", slow <= 0 ? 2 : 1);
+        if (slow > 0)
+            doc["slowms"] = slow;
+        var res = await m_Db.RunCommandAsync<BsonDocument>(doc);
+        return res.GetValue("ok").AsDouble == 1.0;
+    }
+
+    /// <inheritdoc />
+    public async IAsyncEnumerable<string> StopProfiler()
+    {
+        await m_Db.RunCommandAsync<BsonDocument>(new BsonDocument("profile", 0));
+        await foreach (var b in m_Profile.Find(FilterDefinition<BsonDocument>.Empty).ToAsyncEnumerable())
+            yield return $"**************\n{b.ToJson(ProfileSettings)}\n";
     }
 
     #endregion

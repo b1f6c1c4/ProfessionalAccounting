@@ -222,4 +222,21 @@ public interface IDbAdapter
     ValueTask<bool> Upsert(ExchangeRecord record);
 
     #endregion
+
+    #region Profiling
+
+    /// <summary>
+    ///     启用性能分析工具
+    /// </summary>
+    /// <param name="slow">时长阈值，单位：ms</param>
+    /// <returns>是否成功</returns>
+    ValueTask<bool> StartProfiler(int slow);
+
+    /// <summary>
+    ///     禁用性能分析工具，获得分析结果
+    /// </summary>
+    /// <returns>分析结果</returns>
+    IAsyncEnumerable<string> StopProfiler();
+
+    #endregion
 }

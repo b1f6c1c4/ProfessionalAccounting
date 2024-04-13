@@ -103,8 +103,34 @@ public class Facade
                 return ListVersions().ToAsyncEnumerable();
         }
 
-        var repetition = ParsingF.Optional(ref expr, "time ") ? (ulong?)ParsingF.DoubleF(ref expr) : null;
-        return ExecuteNormal(session, expr, repetition);
+        switch (ParsingF.Optional(ref expr, "time ", "slow "))
+        {
+            case "time ":
+                var repetition = (ulong)ParsingF.DoubleF(ref expr);
+                return ExecuteNormal(session, expr, repetition);
+            case "slow ":
+                var slow = (int)ParsingF.DoubleF(ref expr);
+                return ExecuteProfile(session, expr, slow);
+            default:
+                return ExecuteNormal(session, expr, null);
+        }
+    }
+
+    private async IAsyncEnumerable<string> ExecuteProfile(Session session, string expr, int slow)
+    {
+        if (!await m_Db.StartProfiler(slow))
+            throw new ApplicationException("Failed to start profiler");
+
+        try
+        {
+            await foreach (var s in m_Composer.Execute(expr, session));
+            await foreach (var p in m_Db.StopProfiler())
+                yield return p;
+        }
+        finally
+        {
+            m_Db.StopProfiler();
+        }
     }
 
     private async IAsyncEnumerable<string> ExecuteNormal(Session session, string expr, ulong? repetition)
