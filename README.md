@@ -1,26 +1,48 @@
 # ProfessionalAccounting
 
-> 使用借贷记帐法的记账软件
+> 使用借贷记帐法的记账软件 Accounting software with debit and credit
 
 [![Appveyor Build](https://img.shields.io/appveyor/build/b1f6c1c4/ProfessionalAccounting?style=flat-square)](https://ci.appveyor.com/project/b1f6c1c4/professionalaccounting)
 [![Appveyor Tests](https://img.shields.io/appveyor/tests/b1f6c1c4/ProfessionalAccounting?style=flat-square)](https://ci.appveyor.com/project/b1f6c1c4/professionalaccounting/build/tests)
 [![Coveralls](https://img.shields.io/coveralls/github/b1f6c1c4/ProfessionalAccounting?style=flat-square)](https://coveralls.io/github/b1f6c1c4/ProfessionalAccounting)
 
-## 简介
+## 简介 Introduction
 
-- 基于[借贷记账法](https://en.wikipedia.org/wiki/Double-entry_bookkeeping)
-- C/S架构
-- 使用DSL（Domain Specfic Langauge）来增删改查
-- 后端
-    - 单体架构，业务逻辑使用`C# 10.0`编写
-    - 数据库采用MongoDB
-    - 使用`.NET 8.0`平台编译
-    - 使用nginx反向代理，支持TLSv1.3、HTTP/3
-    - 使用docker部署
-- 前端
-    - 使用Redux状态管理
-    - 使用p5.js绘制UI
-    - 使用webpack打包
+- [Double-entry bookkeeping](https://en.wikipedia.org/wiki/Double-entry_bookkeeping)
+- Client/Server architecture
+- DSL (Domain Specfic Langauge) for CRUD
+- Backend
+    - Monolithic architecture, business logic `C# 10.0`编写
+    - Uses MongoDB as the database
+    - Compiled on the `.NET 8.0` platform
+    - Uses nginx as a reverse proxy, supports TLSv1.3、HTTP/3
+    - Deployed using Docker
+- Frontend
+    - Uses Redux for state management
+    - Uses p5.js for UI rendering
+    - Uses webpack for bundling
+
+### 功能 Functionalities
+
+- Fast entry of common vouchers [常见记账凭证的快速录入](AccountingServer.Shell/Serializer/AbbrSerializer.cs)
+- Fast entry of split bill expenses [AA制消费的快速录入](AccountingServer.Shell/Serializer/DiscountSerializer.cs)
+- Multi-currency accounting, even within a single voucher [多币种记账](AccountingServer.Entities/Voucher.cs#L153-L157)（支持一张记账凭证多个币种共存）
+- Exchange rate inquiry / conversion [汇率查询与自动转换](AccountingServer.BLL/Util/Exchange.cs)（在分类汇总时可按本位币显示外币）
+- Multi-users, transferring money to each other [多用户互相转账](AccountingServer.Entities/Voucher.cs#L147-L151)（支持一张记账凭证多个用户共存）
+- Mutable accounting base currency [记账本位币变动](AccountingServer.Shell/Carry/BaseCurrencyShell.cs)（所有者权益币种变动）
+- Fixed asset management [固定资产管理](AccountingServer.Shell/AssetShell.cs)（购置登记、折旧、贬值与处置）
+- Automatic amortization [自动摊销](AccountingServer.Shell/AmortizationShell.cs)
+- Monthly / annually revenue carrying [期末结转](AccountingServer.Shell/Carry/CarryShell.cs)
+- JSON/CSV import / export [导入/导出](AccountingServer.Shell/Serializer)
+- Joint property and cash flow for spouses / partners [（妻妻）共同财产现金流分析](AccountingServer.Shell/Plugins/Coupling)
+- Cheque management [支票管理](AccountingServer.Shell/Plugins/Cheque)
+- Interest calulation of debt [利息收入与费用计算](AccountingServer.Shell/Plugins/Interest)
+- Investment return calculation [投资收益率计算](AccountingServer.Shell/Plugins/YieldRate)
+- Interest calculation of deposit [活期存款利息计算](AccountingServer.Shell/Plugins/BankBalance)
+- Cash flow forecasting [现金流预估](AccountingServer.Shell/Plugins/CashFlow)
+- Entry of foreign currency transactions on credit cards [信用卡外币交易入账](AccountingServer.Shell/Plugins/CreditCardConvert)
+- Credit card statement reconciliation [信用卡对账](AccountingServer.Shell/Plugins/Statement)
+- Spreadsheet reconciliation & statistics [表格对账统计](AccountingServer.Shell/Plugins/SpreadSheet)
 
 ## 安装与配置
 
@@ -167,28 +189,6 @@
 - `` 0 ` `` - 我这个月的资金变动情况
 - `` ~-1 ` `` - 我上个月的基本财务报表
 - 关于分类汇总检索式（DSL）的具体语法，可以在命令框中输入`?`命令调出帮助文档
-
-### 其他功能
-
-- [常见记账凭证的快速录入](AccountingServer.Shell/Serializer/AbbrSerializer.cs)
-- [AA制消费的快速录入](AccountingServer.Shell/Serializer/DiscountSerializer.cs)
-- [多币种记账](AccountingServer.Entities/Voucher.cs#L153-L157)（支持一张记账凭证多个币种共存）
-- [汇率查询与自动转换](AccountingServer.BLL/Util/Exchange.cs)（在分类汇总时可按本位币显示外币）
-- [多用户互相转账](AccountingServer.Entities/Voucher.cs#L147-L151)（支持一张记账凭证多个用户共存）
-- [记账本位币变动](AccountingServer.Shell/Carry/BaseCurrencyShell.cs)（所有者权益币种变动）
-- [固定资产管理](AccountingServer.Shell/AssetShell.cs)（购置登记、折旧、贬值与处置）
-- [自动摊销](AccountingServer.Shell/AmortizationShell.cs)
-- [期末结转](AccountingServer.Shell/Carry/CarryShell.cs)
-- [JSON/CSV格式导入/导出](AccountingServer.Shell/Serializer)
-- [（妻妻）共同财产现金流分析](AccountingServer.Shell/Plugins/Coupling)
-- [支票管理](AccountingServer.Shell/Plugins/Cheque)
-- [利息收入与费用计算](AccountingServer.Shell/Plugins/Interest)
-- [投资收益率计算](AccountingServer.Shell/Plugins/YieldRate)
-- [活期存款利息计算](AccountingServer.Shell/Plugins/BankBalance)
-- [现金流预估](AccountingServer.Shell/Plugins/CashFlow)
-- [信用卡外币交易入账](AccountingServer.Shell/Plugins/CreditCardConvert)
-- [信用卡对账](AccountingServer.Shell/Plugins/Statement)
-- [表格对账统计](AccountingServer.Shell/Plugins/SpreadSheet)
 
 ## 开发
 
