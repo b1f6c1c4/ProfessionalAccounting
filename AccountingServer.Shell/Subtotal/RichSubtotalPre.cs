@@ -101,6 +101,7 @@ internal class RichSubtotalPre : StringSubtotalVisitor
         => ShowSubtotal(sub, sub.Remark.Quotation('"'));
 
     public override IAsyncEnumerable<string> Visit(ISubtotalValue sub)
-        => ShowSubtotal(sub, (m_Currency == null ? "(!)" : "")
-                + F(sub.Value, m_Currency.EndsWith('#') ? null : m_Currency));
+        => ShowSubtotal(sub, m_Currency == null
+                ? "(!)" + F(sub.Value, null)
+                : F(sub.Value, m_Currency.EndsWith('#') ? null : m_Currency));
 }
