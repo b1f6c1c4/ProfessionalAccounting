@@ -129,8 +129,8 @@ Ub2 T3998\s+10
     }
 
     [Fact]
-    public void SafeSrawTest()
-        => Assert.ThrowsAny<Exception>(() => m_Facade.Execute(m_Session, "sraw Ub2"));
+    public async Task SafeSrawTest()
+        => await Assert.ThrowsAnyAsync<Exception>(() => m_Facade.Execute(m_Session, "sraw Ub2").JoinA());
 
     [Fact]
     public async Task UnsafeSrawTest()
@@ -144,8 +144,8 @@ Ub2 T3998\s+10
     }
 
     [Fact]
-    public void InvalidTest()
-        => Assert.ThrowsAny<Exception>(() => m_Facade.Execute(m_Session, "invalid command"));
+    public async Task InvalidTest()
+        => await Assert.ThrowsAnyAsync<Exception>(() => m_Facade.Execute(m_Session, "invalid command").JoinA());
 
     [Fact]
     public async Task SubtotalTest()

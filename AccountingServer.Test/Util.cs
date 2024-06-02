@@ -36,4 +36,12 @@ public static class Util
             sb.Append(e);
         return sb.ToString();
     }
+
+    public static async Task<string> JoinA(this IAsyncEnumerable<string> iae)
+    {
+        var sb = new StringBuilder();
+        await foreach (var e in iae)
+            sb.Append(e);
+        return sb.ToString();
+    }
 }
