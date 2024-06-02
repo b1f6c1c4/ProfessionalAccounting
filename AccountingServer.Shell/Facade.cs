@@ -259,9 +259,16 @@ public class Facade
         var grpUs = details.GroupBy(d => d.User ?? session.Client.User).ToList();
         foreach (var grpC in grpCs)
         {
-            var unc = grpC.SingleOrDefault(static d => !d.Fund.HasValue);
-            if (unc != null)
-                unc.Fund = -grpC.Sum(static d => d.Fund ?? 0D);
+            var cnt = grpC.Count(static d => !d.Fund.HasValue);
+            if (cnt == 1)
+                grpC.Single(static d => !d.Fund.HasValue).Fund = -grpC.Sum(static d => d.Fund ?? 0D);
+            else if (cnt > 1)
+                foreach (var grpU in grpC.GroupBy(static d => d.User))
+                {
+                    var uunc = grpU.SingleOrDefault(static d => !d.Fund.HasValue);
+                    if (uunc != null)
+                        uunc.Fund = -grpU.Sum(static d => d.Fund ?? 0D);
+                }
         }
 
         // Automatically append T3998 and T3999 entries
