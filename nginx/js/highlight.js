@@ -116,7 +116,7 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         regex: /\b(?:Asset|Liability|Mutual|Equity|Cost|Revenue|Expense|Static|Dynamic|Liquidity|Investment|Spending)\b/,
       }, {
         token: 'support.class',
-        regex: /\b(?:Voucher|Asset|Amortization|VoucherDetail|List|AcquisationItem|DepreciateItem|DevalueItem|DispositionItem|AmortItem)\b/,
+        regex: /\b(?:Voucher|Asset|Amortization|VoucherDetail|List|AcquisitionItem|DepreciateItem|DevalueItem|DispositionItem|AmortItem)\b/,
       }, {
         token: 'variable.parameter.user',
         regex: /\bU[A-Za-z0-9_]+(&[A-Za-z0-9_]+)*\b/,
