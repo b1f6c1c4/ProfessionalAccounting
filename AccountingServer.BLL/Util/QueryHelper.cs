@@ -71,6 +71,7 @@ public sealed class SimpleVoucherQuery : IVoucherQueryAtom
     public bool ForAll { get; init; } = false;
     public Voucher VoucherFilter { get; init; } = null;
     public DateFilter Range { get; init; } = DateFilter.Unconstrained;
+    public string RemarkPrefix { get; init; } = null;
     public IQueryCompounded<IDetailQueryAtom> DetailFilter { get; init; } = null;
     public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
 }

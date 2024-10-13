@@ -106,7 +106,9 @@ public abstract class QueryTestBase
         private static readonly List<object[]> Data = new()
             {
                 new object[] { true, "" },
-                new object[] { true, "[null]Uncertain%rmk%" },
+                new object[] { false, "[null]Uncertain%rmk%" },
+                new object[] { false, "[null]Uncertain%rMk1%" },
+                new object[] { true, "[null]Uncertain%rMk%.*" },
                 new object[] { true, "{}-{null}*{{Devalue}+{Amortization}}" },
                 new object[] { true, "-{%rrr%}+{20170101}" },
                 new object[] { false, "{^59278b516c2f021e80f51911^}+{G}*{%asdf%}" },

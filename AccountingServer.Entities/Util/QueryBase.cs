@@ -56,6 +56,8 @@ public sealed class VoucherQueryUnconstrained : IVoucherQueryAtom
 
     public DateFilter Range => DateFilter.Unconstrained;
 
+    public string RemarkPrefix => null;
+
     public IQueryCompounded<IDetailQueryAtom> DetailFilter => DetailQueryUnconstrained.Instance;
 
     public bool IsDangerous() => true;

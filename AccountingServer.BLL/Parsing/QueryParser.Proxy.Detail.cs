@@ -143,9 +143,11 @@ internal partial class QueryParser
                     _ => throw new MemberAccessException("表达式错误"),
                 };
 
+        /// <inheritdoc />
         public string ContentPrefix
             => DecideEtc().Item1 ? ContentText : null;
 
+        /// <inheritdoc />
         public string RemarkPrefix
             => DecideEtc().Item2 ? RemarkText : null;
 

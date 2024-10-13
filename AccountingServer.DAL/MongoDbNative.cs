@@ -121,6 +121,14 @@ internal abstract class MongoDbNativeVisitor<T, TAtom> : IQueryVisitor<TAtom, Fi
             ? Builders<T>.Filter.Exists("date", false) | gather
             : Builders<T>.Filter.Exists("date") & gather;
     }
+
+    /// <summary>
+    ///     获取前缀正则表达式
+    /// </summary>
+    /// <param name="s">前缀字符串</param>
+    /// <returns>前缀正则表达式</returns>
+    protected static BsonRegularExpression PrefixRegex(string s)
+        => new($"^{Regex.Escape(s)}", "i");
 }
 
 internal abstract class MongoDbNativeDetail<T> : MongoDbNativeVisitor<T, IDetailQueryAtom>
@@ -249,14 +257,6 @@ internal abstract class MongoDbNativeDetail<T> : MongoDbNativeVisitor<T, IDetail
 
         return And(lst);
     }
-
-    /// <summary>
-    ///     获取前缀正则表达式
-    /// </summary>
-    /// <param name="s">前缀字符串</param>
-    /// <returns>前缀正则表达式</returns>
-    private static BsonRegularExpression PrefixRegex(string s)
-        => new($"^{Regex.Escape(s)}", "i");
 }
 
 internal class MongoDbNativeDetail : MongoDbNativeDetail<VoucherDetail> { }
@@ -315,6 +315,8 @@ internal class MongoDbNativeVoucher : MongoDbNativeVisitor<Voucher, IVoucherQuer
             {
                 GetNativeFilter(query.VoucherFilter), GetNativeFilter(query.Range),
             };
+        if (query.RemarkPrefix != null)
+            lst.Add(Builders<Voucher>.Filter.Regex("remark", PrefixRegex(query.RemarkPrefix)));
         var v = query.DetailFilter.Accept(new MongoDbNativeDetail());
         if (query.ForAll)
             lst.Add(!Builders<Voucher>.Filter.ElemMatch("detail", !v));

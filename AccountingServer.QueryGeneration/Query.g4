@@ -51,7 +51,7 @@ vouchers0
 	;
 
 voucherQuery
-	:	details? MatchAllMark? range? CaretQuotedString? PercentQuotedString? VoucherType?
+	:	details? MatchAllMark? range? CaretQuotedString? (PercentQuotedString Etc?)? VoucherType?
 	;
 
 details

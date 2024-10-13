@@ -237,6 +237,9 @@ public static class MatchHelper
             return false;
         if (!voucher.Date.Within(query.Range))
             return false;
+        if (query.RemarkPrefix != null)
+            if (voucher.Remark?.StartsWith(query.RemarkPrefix, StringComparison.InvariantCultureIgnoreCase) != true)
+                return false;
 
         return query.ForAll
             ? voucher.Details.All(d => d.IsMatch(query.DetailFilter))

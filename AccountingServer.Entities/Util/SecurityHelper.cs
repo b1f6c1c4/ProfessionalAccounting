@@ -28,7 +28,10 @@ public static class SecurityHelper
             IQueryVisitor<IDistributedQueryAtom, bool>
     {
         public bool Visit(IVoucherQueryAtom query)
-            => query.VoucherFilter.IsDangerous() && query.Range.IsDangerous() && query.DetailFilter.IsDangerous();
+            => query.VoucherFilter.IsDangerous()
+                && query.Range.IsDangerous()
+                && string.IsNullOrEmpty(query.RemarkPrefix)
+                && query.DetailFilter.IsDangerous();
 
         public bool Visit(IQueryAry<IVoucherQueryAtom> query)
             => query.Operator switch

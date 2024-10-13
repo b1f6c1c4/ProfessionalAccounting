@@ -39,7 +39,7 @@ internal partial class QueryParser
                 var vfilter = new Voucher
                     {
                         ID = CaretQuotedString()?.GetText().Dequotation(),
-                        Remark = PercentQuotedString()?.GetText().Dequotation(),
+                        Remark = Etc() != null ? null : PercentQuotedString()?.GetText().Dequotation(),
                     };
                 if (VoucherType() != null)
                 {
@@ -59,6 +59,10 @@ internal partial class QueryParser
         /// <inheritdoc />
         public DateFilter Range
             => range().Assign(Client)?.Range ?? DateFilter.Unconstrained;
+
+        /// <inheritdoc />
+        public string RemarkPrefix
+            => Etc() != null ? PercentQuotedString()?.GetText().Dequotation() : null;
 
         /// <inheritdoc />
         public IQueryCompounded<IDetailQueryAtom> DetailFilter

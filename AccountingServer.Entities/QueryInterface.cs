@@ -234,6 +234,11 @@ public interface IVoucherQueryAtom : IQueryCompounded<IVoucherQueryAtom>
     DateFilter Range { get; }
 
     /// <summary>
+    ///     备注前缀
+    /// </summary>
+    string RemarkPrefix { get; }
+
+    /// <summary>
     ///     细目检索式
     /// </summary>
     IQueryCompounded<IDetailQueryAtom> DetailFilter { get; }
