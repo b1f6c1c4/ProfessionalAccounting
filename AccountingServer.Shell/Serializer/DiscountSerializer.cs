@@ -93,6 +93,8 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
             // ignore
         }
 
+        var vremark = Parsing.Quoted(ref expr, '%');
+
         var currency = Parsing.Token(ref expr, false, static s => s.StartsWith("@", StringComparison.Ordinal))?[1..]
                 .ToUpperInvariant()
             ?? BaseCurrency.Now;
@@ -187,7 +189,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
                 resLst.Add(
                     new() { User = kvp.Key, Currency = currency, Title = 6603, Fund = -kvp.Value });
 
-        return new() { Type = VoucherType.Ordinary, Date = date, Details = resLst };
+        return new() { Type = VoucherType.Ordinary, Date = date, Remark = vremark, Details = resLst };
     }
 
     private VoucherDetail ParseVoucherDetail(string currency, ref string expr)
