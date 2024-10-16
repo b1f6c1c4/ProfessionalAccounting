@@ -185,11 +185,14 @@ async function navigateToSpecialOrder(direction, saved) {
     document.querySelector('#searchModal .tui-modal-button').click();
     const pg = document.querySelector('#searchModal .tui-progress')
 
+    const res = await apiCall(`/safe?q=json%20U%20A%20%taobao-%.*!!R`, { json: true });
+    pg.style.width = '50%';
+
     const inc = direction === 'forward' ? 1 : -1;
     for (let i = 1; i <= theOrders.length; i++) {
         pg.style.width = `${100 * i / theOrders.length}%`;
         const id = (currOrderIndex + theOrders.length + i * inc) % theOrders.length;
-        if (saved === !!await fetchVoucher(theOrders[id])) {
+        if (saved === !!res.vremark[`taobao-${theOrders[id].orderNumber}`]) {
             newIndex = id;
             found = true;
             break;
@@ -211,7 +214,7 @@ async function fetchVoucher(order) {
     const orderNumber = order.orderNumber;
 
     // Perform an API call to check if the order exists in the database
-    const apiUrl = `/safe?q=U%20%taobao-${orderNumber}%`;
+    const apiUrl = `/safe?q=U%20A%20%taobao-${orderNumber}%`;
 
     return apiCall(apiUrl);
 }
