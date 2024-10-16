@@ -1,0 +1,237 @@
+<!--
+    Copyright (C) 2024 b1f6c1c4
+
+    This file is part of ProfessionalAccounting.
+
+    ProfessionalAccounting is free software: you can redistribute it and/or
+    modify it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, version 3.
+
+    ProfessionalAccounting is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+    for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with ProfessionalAccounting.  If not, see
+    <https://www.gnu.org/licenses/>.
+-->
+
+<!DOCTYPE html>
+<html lang="en" class="tui-bg-blue-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accounting System</title>
+    <link rel="stylesheet" href="node_modules/tuicss/dist/tuicss.min.css">
+    <style>
+        html, textarea {
+            line-height: 1em;
+        }
+        .hidden {
+            display: none;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+        }
+        main {
+            display: flex !important;
+            flex-direction: column;
+            height: calc(100% - 23px);
+            margin-top: 23px;
+        }
+        main > fieldset:first-child {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 0;
+            gap: 0.5em;
+        }
+        .top {
+            display: flex;
+            justify-content: space-between;
+        }
+        .preview-area {
+            display: flex;
+            gap: 1em;
+            min-height: 8em;
+            padding-right: 1em;
+        }
+        #itemsTable {
+            width: 100%;
+        }
+        #errorModal pre {
+            max-width: 80vw;
+            max-height: 80vh;
+            overflow: auto;
+        }
+        .scroller {
+            overflow-y: scroll;
+            flex: 1;
+            height: 0;
+        }
+        tr > :nth-child(5) {
+            width: 4em;
+        }
+        tr > :nth-child(6) {
+            width: 6em;
+        }
+        #preview {
+            flex: 1;
+            overflow-y: scroll;
+            resize: none;
+        }
+        .align-right {
+            text-align: right;
+        }
+        .warning {
+            background-color: red;
+        }
+    </style>
+</head>
+<body class="tui-screen-1024-768 bordered white-168 tui-bg-yellow-white">
+
+    <!-- Navigation Menu -->
+    <nav class="tui-nav">
+        <ul>
+            <li class="tui-dropdown">
+                <span>File</span>
+                <div class="tui-dropdown-content">
+                    <ul>
+                        <li><a href="#" class="tui-modal-button" data-modal="uploadModal">Open...</a></li>
+                        <li><a href="/">Quit</a></li>
+                    </ul>
+                </div>
+            </li>
+            <li class="tui-dropdown">
+                <span>Order</span>
+                <div class="tui-dropdown-content">
+                    <ul>
+                        <li><a href="#" id="lastUnsaved">Last Unsaved</a></li>
+                        <li><a href="#" id="lastSaved">Last Saved</a></li>
+                        <li><a href="#" id="lastOrder">Last</a></li>
+                        <li><a href="#" id="nextOrder">Next</a></li>
+                        <li><a href="#" id="nextSaved">Next Saved</a></li>
+                        <li><a href="#" id="nextUnsaved">Next Unsaved</a></li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Modal for File Upload -->
+    <div class="tui-overlap"></div>
+    <div id="uploadModal" class="tui-modal">
+        <form id="uploadForm" class="tui-window" action="#">
+            <fieldset class="tui-fieldset">
+                <legend class="red-255 yellow-255-text">Open CSV</legend>
+                <input class="tui-input" type="file" id="csvFile" accept=".csv">
+                <br>
+                <button type="submit" class="tui-button tui-modal-close-button right" data-modal="uploadModal">Open</button>
+                <button type="cancel" class="tui-button tui-modal-close-button right" data-modal="uploadModal">Cancel</button>
+            </fieldset>
+        </form>
+    </div>
+
+    <div id="searchModal" class="tui-modal">
+        <form class="tui-window" action="#">
+            <fieldset class="tui-fieldset">
+                <legend class="red-255 yellow-255-text">Searching</legend>
+                <div class="tui-progress-bar">
+                    <span class="tui-progress"></span>
+                </div>
+                <br>
+                <button class="hidden tui-modal-close-button" data-modal="searchModal"></button>
+                <button class="hidden tui-modal-button" data-modal="searchModal"></button>
+            </fieldset>
+        </form>
+    </div>
+
+    <div id="errorModal" class="tui-modal">
+        <form class="tui-window" action="#">
+            <fieldset class="tui-fieldset">
+                <legend class="red-255 yellow-255-text">Alert</legend>
+                <pre></pre>
+                <br>
+                <button type="submit" class="tui-button tui-modal-close-button right" data-modal="errorModal">OK</button>
+                <button class="hidden tui-modal-button" data-modal="errorModal"></button>
+            </fieldset>
+        </form>
+    </div>
+
+    <!-- Main Content Section -->
+    <main class="tui-window bordered full-width tui-no-shadow">
+        <fieldset class="tui-fieldset">
+            <legend class="center">Order Details [<span id="orderIndex"></span>]</legend>
+
+            <div class="top">
+                <div>
+                    <label for="orderNumber">Order:</label>
+                    <input type="text" id="orderNumber" readonly class="tui-input">
+                    <br>
+                    <label for="storeName">Store:</label>
+                    <input type="text" id="storeName" readonly class="tui-input">
+                    <br>
+                    <label for="orderStatus">Stat.:</label>
+                    <input type="text" id="orderStatus" readonly class="tui-input">
+                </div>
+
+                <div>
+                    <label for="orderDate">Date:</label>
+                    <input type="text" id="orderDate" readonly class="tui-input align-right">
+                    <br>
+                    <label for="orderDiff">Adj.:</label>
+                    <input type="text" id="orderDiff" readonly class="tui-input align-right">
+                    <br>
+                    <label for="orderAmount">Paid:</label>
+                    <input type="text" id="orderAmount" readonly class="tui-input align-right">
+                </div>
+
+                <div>
+                    <label for="payer">Payer.........:</label>
+                    <select class="tui-input" id="payer"></select>
+                    <br>
+                    <label for="paymentMethod">Payment Method:</label>
+                    <select class="tui-input" id="paymentMethod"></select>
+                    <br>
+                    <input type="text" id="customPaymentMethod" class="tui-input hidden" placeholder="??">
+                </div>
+            </div>
+
+            <!-- Item Details -->
+            <div class="scroller">
+                <table id="itemsTable" class="tui-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Style</th>
+                            <th>CNY</th>
+                            <th>qty</th>
+                            <th>User</th>
+                            <th>VD</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsBody">
+                        <!-- Dynamically populated items go here -->
+                    </tbody>
+                </table>
+            </div>
+
+        </fieldset>
+        <!-- Preview and Control Buttons -->
+        <fieldset class="tui-fieldset">
+            <legend class="center">Preview</legend>
+            <div class="preview-area">
+                <textarea class="tui-textarea" id="preview"></textarea>
+                <div class="controls">
+                    <button type="button" class="tui-button" id="saveBtn">Save</button>
+                    <button type="button" class="tui-button" id="nextBtn">Next</button>
+                    <button type="button" class="tui-button red-168" id="rescindBtn">Rescind</button>
+                </div>
+            </div>
+        </fieldset>
+    </main>
+</body>
+</html>

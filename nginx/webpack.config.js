@@ -33,6 +33,11 @@ const plugins = [
         template: 'gui-jtysf.html',
         chunks: ['jtysf'],
     }),
+    new HtmlWebpackPlugin({
+        filename: 'gui-taobao.html',
+        template: 'gui-taobao.html',
+        chunks: ['taobao'],
+    }),
     new webpack.EnvironmentPlugin({
         API_URL: '/api',
     }),
@@ -59,6 +64,7 @@ module.exports = {
     entry: {
         discount: ['./src/gui-discount.js'],
         jtysf: ['./src/gui-jtysf.js'],
+        taobao: ['./src/gui-taobao.js'],
     },
     output: {
         filename: '[name].bundle.js',
