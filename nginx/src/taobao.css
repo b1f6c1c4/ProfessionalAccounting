@@ -1,0 +1,99 @@
+/* Copyright (C) 2024 b1f6c1c4
+ *
+ * This file is part of ProfessionalAccounting.
+ *
+ * ProfessionalAccounting is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, version 3.
+ *
+ * ProfessionalAccounting is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with ProfessionalAccounting.  If not, see
+ * <https://www.gnu.org/licenses/>.
+ */
+
+* {
+    line-height: 1em !important;
+    vertical-align: middle;
+}
+.tui-window {
+    background-color: #555;
+}
+html, body {
+    width: 100% !important;
+    height: 100% !important;
+}
+textarea {
+    width: 100% !important;
+}
+input, select {
+    padding: 1px 0;
+}
+.hidden {
+    display: none;
+}
+.controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+main {
+    display: flex !important;
+    flex-direction: column;
+    height: calc(100% - 23px);
+    margin-top: 23px;
+}
+main > fieldset:first-child {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 0;
+    gap: 0.5em;
+}
+.top {
+    columns: 15em 4;
+    column-gap: 0.5em;
+}
+.preview-area {
+    display: flex;
+    gap: 1em;
+    min-height: calc(min(8em, 30vh));
+    padding-right: 1em;
+}
+#itemsTable {
+    width: 100%;
+}
+#errorModal pre {
+    max-width: 80vw;
+    max-height: 80vh;
+    overflow: auto;
+}
+.scroller {
+    overflow-y: scroll;
+    flex: 1;
+    height: 0;
+}
+tr > :nth-child(5) {
+    width: 4em;
+}
+tr > :nth-child(6) {
+    width: 8em;
+}
+#preview {
+    flex: 1;
+    overflow-y: scroll;
+    resize: none;
+}
+.align-right {
+    text-align: right;
+}
+.warning {
+    background-color: red;
+}
+fieldset:focus-within {
+    border-color: yellow;
+}

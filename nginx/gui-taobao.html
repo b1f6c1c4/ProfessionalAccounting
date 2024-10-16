@@ -18,81 +18,26 @@
 -->
 
 <!DOCTYPE html>
-<html lang="en" class="tui-bg-blue-white">
+<html lang="en" dir="ltr" class="tui-bg-blue-white">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accounting System</title>
-    <link rel="stylesheet" href="node_modules/tuicss/dist/tuicss.min.css">
-    <style>
-        html, textarea {
-            line-height: 1em;
-        }
-        .hidden {
-            display: none;
-        }
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 1em;
-        }
-        main {
-            display: flex !important;
-            flex-direction: column;
-            height: calc(100% - 23px);
-            margin-top: 23px;
-        }
-        main > fieldset:first-child {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            height: 0;
-            gap: 0.5em;
-        }
-        .top {
-            display: flex;
-            justify-content: space-between;
-        }
-        .preview-area {
-            display: flex;
-            gap: 1em;
-            min-height: 8em;
-            padding-right: 1em;
-        }
-        #itemsTable {
-            width: 100%;
-        }
-        #errorModal pre {
-            max-width: 80vw;
-            max-height: 80vh;
-            overflow: auto;
-        }
-        .scroller {
-            overflow-y: scroll;
-            flex: 1;
-            height: 0;
-        }
-        tr > :nth-child(5) {
-            width: 4em;
-        }
-        tr > :nth-child(6) {
-            width: 8em;
-        }
-        #preview {
-            flex: 1;
-            overflow-y: scroll;
-            resize: none;
-        }
-        .align-right {
-            text-align: right;
-        }
-        .warning {
-            background-color: red;
-        }
-        fieldset:focus-within {
-            border-color: yellow;
-        }
-    </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=595, initial-scale=1.0">
+    <meta content="ie=edge" http-equiv="x-ua-compatible">
+    <meta name="description" content="专业记账系统">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="apple-mobile-web-app-title" content="专业记账系统">
+    <meta name="application-name" content="专业记账系统">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <title>专业记账系统</title>
+
+    <link rel="stylesheet" href="/modern-normalize.css">
+    <link rel="stylesheet" href="/tuicss.min.css">
+    <link rel="stylesheet" href="/taobao.css">
 </head>
 <body class="tui-screen-1024-768 bordered white-168 tui-bg-yellow-white">
 
@@ -173,29 +118,32 @@
                 <div>
                     <label for="orderNumber">Order:</label>
                     <input type="text" id="orderNumber" readonly class="tui-input">
-                    <br>
+                </div>
+                <div>
                     <label for="storeName">Store:</label>
                     <input type="text" id="storeName" readonly class="tui-input">
-                    <br>
+                </div>
+                <div>
                     <label for="orderStatus">Stat.:</label>
                     <input type="text" id="orderStatus" readonly class="tui-input">
                 </div>
-
                 <div>
-                    <label for="orderDate">Date:</label>
+                    <label for="orderDate">Date.:</label>
                     <input type="text" id="orderDate" readonly class="tui-input align-right">
-                    <br>
-                    <label for="orderDiff">Adj.:</label>
+                </div>
+                <div>
+                    <label for="orderDiff">Adj..:</label>
                     <input type="text" id="orderDiff" readonly class="tui-input align-right">
-                    <br>
-                    <label for="orderAmount">Paid:</label>
+                </div>
+                <div>
+                    <label for="orderAmount">Paid.:</label>
                     <input type="text" id="orderAmount" readonly class="tui-input align-right">
                 </div>
-
                 <div>
                     <label for="payer">Payer:</label>
                     <select class="tui-input" id="payer"></select>
-                    <br>
+                </div>
+                <div>
                     <label for="paymentMethod">Pmt M:</label>
                     <input id="paymentMethod" class="tui-input" list="paymentMethods">
                 </div>
@@ -207,11 +155,11 @@
                     <thead>
                         <tr>
                             <th>Item</th>
-                            <th>Style</th>
+                            <th>S</th>
                             <th>CNY</th>
-                            <th>qty</th>
+                            <th>q</th>
                             <th>User</th>
-                            <th>VD</th>
+                            <th>Entry</th>
                         </tr>
                     </thead>
                     <tbody id="itemsBody">

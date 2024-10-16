@@ -22,6 +22,7 @@ window.addEventListener('load', () => {
     <li><a href="/"><span>CLI</span></a></li>
     <li><a href="/gui-discount.html"><span>!</span></a></li>
     <li><a href="/gui-jtysf.html"><span>jtysf</span></a></li>
+    <li><a href="/gui-taobao.html"><span>taobao</span></a></li>
 `;
     lst.classList.add('hide');
     lst.classList.add('swap');

@@ -25,7 +25,6 @@ const theOrders = []; // Array to hold order objects
 let currOrderIndex = 0; // Current order index
 
 // Constants for API headers
-const API_URL = process.env.API_URL || ''; // Set your API base URL here
 const user = localStorage.getItem('user') || 'anonymous'; // Get user from localStorage
 const headers = () => {
     const d = new Date();
@@ -43,7 +42,7 @@ async function apiCall(url, options = {}) {
         ...options.headers,
         ...headers()
     };
-    const response = await fetch(`${API_URL}${url}`, options);
+    const response = await fetch(`${process.env.API_URL}${url}`, options);
     if (!response.ok) {
         throw new Error(await response.text());
     }
@@ -116,8 +115,10 @@ document.addEventListener('keydown', (e) => {
         if (isSaved === true)
             handleRescind();
     } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
         navigateOrder(currOrderIndex - 1);
     } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
         navigateOrder(currOrderIndex + 1);
     }
 });
@@ -130,13 +131,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Fetch predefined categories, beneficiaries, and payers
 async function fetchPredefinedOptions() {
     try {
-        const categories = await apiCall('/api/safe?q=raw%20U%20%3E%20%25taobao-%25.*!tscr', {
+        const categories = await apiCall('/safe?q=raw%20U%20%3E%20%25taobao-%25.*!tscr', {
             headers: { 'X-Limit': 50 },
         });
-        const paymentMethods = await apiCall('/api/safe?q=raw%20U%20%3C%20%25taobao-%25.*!tscr', {
+        const paymentMethods = await apiCall('/safe?q=raw%20U%20%3C%20%25taobao-%25.*!tscr', {
             headers: { 'X-Limit': 50 },
         });
-        const beneficiaryPayerData = await apiCall('/api/safe?q=json%20U!U', {
+        const beneficiaryPayerData = await apiCall('/safe?q=json%20U!U', {
             headers: { 'X-Limit': 50 },
             json: true,
         });
@@ -210,7 +211,7 @@ async function fetchVoucher(order) {
     const orderNumber = order.orderNumber;
 
     // Perform an API call to check if the order exists in the database
-    const apiUrl = `/api/safe?q=U%20%taobao-${orderNumber}%`;
+    const apiUrl = `/safe?q=U%20%taobao-${orderNumber}%`;
 
     return apiCall(apiUrl);
 }
@@ -327,6 +328,7 @@ function compilePreviewContent() {
 
 // Handle file upload button click
 document.getElementById('uploadForm').addEventListener('submit', handleCsvUpload);
+document.querySelectorAll('form:not(#uploadForm)').forEach(s => s.addEventListener('submit', e => e.preventDefault()));
 
 // Handle CSV file upload and process it
 async function handleCsvUpload(e) {
@@ -431,7 +433,7 @@ async function handleSave() {
     paymentMethodsDatalist.innerHTML = getOptionHtml(predefinedPaymentMethods, true);
     categoriesDatalist.innerHTML = getOptionHtml(predefinedCategories, true);
     try {
-        previewTextarea.value = await apiCall('/api/voucherUpsert', {
+        previewTextarea.value = await apiCall('/voucherUpsert', {
             method: 'POST',
             headers: {
                 'Content-Type': 'text/plain'
@@ -448,7 +450,7 @@ saveBtn.addEventListener('click', handleSave);
 // Handle Rescind button click
 async function handleRescind() {
     try {
-        await apiCall('/api/voucherRemoval', {
+        await apiCall('/voucherRemoval', {
             method: 'POST',
             headers: {
                 'Content-Type': 'text/plain'

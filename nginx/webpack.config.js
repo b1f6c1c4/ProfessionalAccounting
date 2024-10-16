@@ -46,9 +46,15 @@ const plugins = [
             { from: 'index-desktop.html', to: '.' },
             { from: 'index-mobile.html', to: '.' },
             { from: 'src/index.css', to: '.' },
+            { from: 'src/taobao.css', to: '.' },
+            { from: 'art/', to: '.' },
+            { from: 'js/', to: 'js' },
+            { from: 'public/', to: 'public' },
             { from: 'node_modules/p5/lib/p5.min.js', to: '.' },
             { from: 'node_modules/dayjs/dayjs.min.js', to: '.' },
             { from: 'node_modules/modern-normalize/modern-normalize.css', to: '.' },
+            { from: 'node_modules/tuicss/dist/tuicss.min.css', to: '.' },
+            { from: 'node_modules/tuicss/dist/images/', to: 'images' },
         ],
     }),
 ];
@@ -83,6 +89,7 @@ module.exports = {
             'src/',
             'node_modules/p5/lib/',
             'node_modules/dayjs/',
+            'node_modules/tuicss/dist/',
         ],
     },
 };
