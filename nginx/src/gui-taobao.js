@@ -16,6 +16,8 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+"use strict";
+
 require('tuicss/dist/tuicss.min.js');
 
 // JavaScript for Accounting System
@@ -54,25 +56,26 @@ let predefinedUsers = [];
 let predefinedPaymentMethods = [];
 
 // Elements
-const uploadForm = document.getElementById('uploadForm');
 const previewTextarea = document.getElementById('preview');
 const saveBtn = document.getElementById('saveBtn');
 const rescindBtn = document.getElementById('rescindBtn');
 const customCategoryInput = document.getElementById('customCategory');
-const paymentMethodSelect = document.getElementById('paymentMethod');
-const customPaymentMethodInput = document.getElementById('customPaymentMethod');
+const paymentMethodInput = document.getElementById('paymentMethod');
+const paymentMethodsDatalist = document.getElementById('paymentMethods');
+const categoriesDatalist = document.getElementById('categories');
 const beneficiarySelect = document.getElementById('beneficiary');
 const payerSelect = document.getElementById('payer');
 
 function showError(e) {
     document.querySelector('#errorModal pre').innerText = e;
     document.querySelector('#errorModal .tui-modal-button').click();
+    document.querySelector('#errorModal .tui-modal-close-button').focus();
 }
 
+let isSaved = undefined;
 // true: saved, never touched
 // null: being touched
 // false: never saved
-let isSaved = undefined;
 function setIsSaved(v) {
     const dis = (b, d) => {
         b.disabled = d;
@@ -87,17 +90,37 @@ function setIsSaved(v) {
             dis(saveBtn, false);
             dis(rescindBtn, true);
         }
+        previewTextarea.style.color = 'orange';
     } else {
         if (v) {
             dis(saveBtn, true);
             dis(rescindBtn, false);
+            previewTextarea.style.color = '#00ff00';
         } else {
             dis(saveBtn, false);
             dis(rescindBtn, true);
+            previewTextarea.style.removeProperty('color');
         }
         isSaved = v;
     }
 }
+
+document.addEventListener('keydown', (e) => {
+    if (!e.altKey)
+        return;
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        handleSave();
+    } else if (e.key === 'Delete') {
+        e.preventDefault();
+        if (isSaved === true)
+            handleRescind();
+    } else if (e.key === 'ArrowLeft') {
+        navigateOrder(currOrderIndex - 1);
+    } else if (e.key === 'ArrowRight') {
+        navigateOrder(currOrderIndex + 1);
+    }
+});
 
 // Initial data fetching
 document.addEventListener('DOMContentLoaded', async () => {
@@ -126,19 +149,19 @@ async function fetchPredefinedOptions() {
         predefinedPaymentMethods = process(paymentMethods);
 
         payerSelect.innerHTML = getOptionHtml(predefinedUsers);
-        paymentMethodSelect.innerHTML = getOptionHtml(predefinedPaymentMethods);
+        paymentMethodsDatalist.innerHTML = getOptionHtml(predefinedPaymentMethods, true);
+        categoriesDatalist.innerHTML = getOptionHtml(predefinedCategories, true);
     } catch (e) {
         showError(e);
     }
 }
 
 // Helper function to populate select dropdowns
-function getOptionHtml(optionsArray) {
+function getOptionHtml(optionsArray, isDatalist) {
     let html = '';
-    if (!optionsArray.length)
-        `<option value="default">Select</option>\n`;
     optionsArray.forEach(option => {
-        html += `<option value="${option}">${option}</option>\n`;
+        const enc = option.replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+        html += `<option value="${enc}">${isDatalist ? '' : enc}</option>\n`;
     });
     return html;
 }
@@ -152,7 +175,7 @@ document.getElementById('nextSaved').addEventListener('click', () => navigateToS
 document.getElementById('nextUnsaved').addEventListener('click', () => navigateToSpecialOrder('forward', false));
 document.getElementById('nextBtn').addEventListener('click', () => navigateOrder(currOrderIndex + 1));
 
-previewTextarea.addEventListener('change', () => setIsSaved(null));
+previewTextarea.addEventListener('input', () => setIsSaved(null));
 
 // Function to navigate to the next or previous saved/unsaved order
 async function navigateToSpecialOrder(direction, saved) {
@@ -196,7 +219,7 @@ async function navigateOrder(newIndex) {
     if (newIndex === -1)
         newIndex = theOrders.length - 1;
     else if (newIndex === theOrders.length)
-        newindex = 0;
+        newIndex = 0;
     if (newIndex < 0 || newIndex >= theOrders.length) {
         showError('Invalid order index');
         return;
@@ -228,7 +251,7 @@ async function navigateOrder(newIndex) {
         const row = document.createElement('tr');
         row.setAttribute('data-id', id);
         let html = `
-            <td><a href=${item.link} target="_blank">${item.name}</a></td>
+            <td><a tabindex="-1" href=${item.link} target="_blank">${item.name}</a></td>
             <td>${item.style}</td>
             <td>¥${item.price.toFixed(2)}</td>
             <td>${item.quantity}</td>
@@ -245,18 +268,16 @@ async function navigateOrder(newIndex) {
                     </select>
                 </td>
                 <td>
-                    <select class="tui-input full-width">
-                        ${getOptionHtml(predefinedCategories)}
-                        <option value="custom">Custom</option>
-                    </select>
-                    <input type="text" class="tui-input full-width hidden" placeholder="??">
+                    <input class="tui-input full-width" list="categories">
                 </td>
             `;
         row.innerHTML = html;
         itemsBody.appendChild(row);
-        row.querySelectorAll('select').forEach(s => s.addEventListener('change', handleFieldChange));
-        row.querySelector('input')?.addEventListener('change', handleFieldChange);
+        row.querySelectorAll('select, input')
+            .forEach(s => s.addEventListener('input', compilePreviewContent));
     });
+
+    paymentMethodInput.focus();
 
     // Inspect if the order is already saved in the database
     const voucher = await fetchVoucher(currentOrder);
@@ -265,6 +286,7 @@ async function navigateOrder(newIndex) {
         previewTextarea.value = voucher;
         setIsSaved(true);
     } else {
+        setIsSaved(false);
         // If the order is not found, compile the content from user inputs
         compilePreviewContent();
     }
@@ -272,6 +294,10 @@ async function navigateOrder(newIndex) {
 
 // Compile preview content based on the selected or input data
 function compilePreviewContent() {
+    if (isSaved === true) {
+        showError('You must rescind first if you want to make chages.');
+        return;
+    }
     const orderData = theOrders[currOrderIndex]; // Get the current order data
     const payer = document.getElementById('payer').value;
     const paymentMethod = document.getElementById('paymentMethod').value;
@@ -286,11 +312,8 @@ function compilePreviewContent() {
             return;
         }
         const row = body.children[id];
-        const beneficiary = row.querySelector('td:nth-child(5) select').value;
-        let category = row.querySelector('td:nth-child(6) select').value;
-        const customCategory = row.querySelector('td:nth-child(6) input').value;
-        if (category === 'custom')
-            category = customCategory;
+        const beneficiary = row.querySelector('select').value;
+        const category = row.querySelector('input').value;
         previewContent += `U${beneficiary} ${category} : ${item.price}*${item.quantity} ;\n`;
     });
     if (orderData.orderDiff < 0)
@@ -303,7 +326,7 @@ function compilePreviewContent() {
 }
 
 // Handle file upload button click
-uploadForm.addEventListener('submit', handleCsvUpload);
+document.getElementById('uploadForm').addEventListener('submit', handleCsvUpload);
 
 // Handle CSV file upload and process it
 async function handleCsvUpload(e) {
@@ -397,7 +420,16 @@ function getVoucher() {
 }
 
 // Handle Save button click
-saveBtn.addEventListener('click', async () => {
+async function handleSave() {
+    const pd = (list, v) => {
+        const t = v.trim();
+        if (!list.includes(t))
+            list.splice(0, 0, t);
+    };
+    pd(predefinedPaymentMethods, paymentMethodInput.value);
+    document.querySelectorAll('#itemsBody input').forEach(i => pd(predefinedCategories, i.value));
+    paymentMethodsDatalist.innerHTML = getOptionHtml(predefinedPaymentMethods, true);
+    categoriesDatalist.innerHTML = getOptionHtml(predefinedCategories, true);
     try {
         previewTextarea.value = await apiCall('/api/voucherUpsert', {
             method: 'POST',
@@ -410,10 +442,11 @@ saveBtn.addEventListener('click', async () => {
     } catch (e) {
         showError(e);
     }
-});
+}
+saveBtn.addEventListener('click', handleSave);
 
 // Handle Rescind button click
-rescindBtn.addEventListener('click', async () => {
+async function handleRescind() {
     try {
         await apiCall('/api/voucherRemoval', {
             method: 'POST',
@@ -422,35 +455,14 @@ rescindBtn.addEventListener('click', async () => {
             },
             body: getVoucher(),
         });
+        isSaved = false;
         compilePreviewContent();
     } catch (e) {
         showError(e);
     }
-});
+}
+rescindBtn.addEventListener('click', handleRescind);
 
 // Monitor field changes and update preview content
-payerSelect.addEventListener('change', handleFieldChange);
-paymentMethodSelect.addEventListener('change', handleFieldChange);
-
-// Handle field changes to recompile preview content
-function handleFieldChange(e) {
-    if (e.target instanceof HTMLSelectElement) {
-        if (e.target.value === 'custom') {
-            showCustomInput(e.target);
-        } else {
-            hideCustomInput(e.target);
-        }
-    }
-    compilePreviewContent();
-}
-
-// Show custom input fields based on selection
-function showCustomInput(select) {
-    select.parentElement.querySelector('input')?.classList.remove('hidden');
-}
-
-// Hide custom input fields
-function hideCustomInput(select) {
-    select.parentElement.querySelector('input')?.classList.add('hidden');
-}
-
+payerSelect.addEventListener('input', compilePreviewContent);
+paymentMethodInput.addEventListener('input', compilePreviewContent);

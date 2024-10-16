@@ -76,7 +76,7 @@
             width: 4em;
         }
         tr > :nth-child(6) {
-            width: 6em;
+            width: 8em;
         }
         #preview {
             flex: 1;
@@ -88,6 +88,9 @@
         }
         .warning {
             background-color: red;
+        }
+        fieldset:focus-within {
+            border-color: yellow;
         }
     </style>
 </head>
@@ -129,8 +132,7 @@
                 <legend class="red-255 yellow-255-text">Open CSV</legend>
                 <input class="tui-input" type="file" id="csvFile" accept=".csv">
                 <br>
-                <button type="submit" class="tui-button tui-modal-close-button right" data-modal="uploadModal">Open</button>
-                <button type="cancel" class="tui-button tui-modal-close-button right" data-modal="uploadModal">Cancel</button>
+                <input type="submit" class="tui-button tui-modal-close-button right" data-modal="uploadModal" value="Open"/>
             </fieldset>
         </form>
     </div>
@@ -155,7 +157,8 @@
                 <legend class="red-255 yellow-255-text">Alert</legend>
                 <pre></pre>
                 <br>
-                <button type="submit" class="tui-button tui-modal-close-button right" data-modal="errorModal">OK</button>
+                <input type="submit" class="tui-button tui-modal-close-button right" data-modal="errorModal" value="OK"/>
+                <input type="cancel" class="hidden tui-modal-close-button" data-modal="errorModal" value="OK"/>
                 <button class="hidden tui-modal-button" data-modal="errorModal"></button>
             </fieldset>
         </form>
@@ -190,13 +193,11 @@
                 </div>
 
                 <div>
-                    <label for="payer">Payer.........:</label>
+                    <label for="payer">Payer:</label>
                     <select class="tui-input" id="payer"></select>
                     <br>
-                    <label for="paymentMethod">Payment Method:</label>
-                    <select class="tui-input" id="paymentMethod"></select>
-                    <br>
-                    <input type="text" id="customPaymentMethod" class="tui-input hidden" placeholder="??">
+                    <label for="paymentMethod">Pmt M:</label>
+                    <input id="paymentMethod" class="tui-input" list="paymentMethods">
                 </div>
             </div>
 
@@ -226,12 +227,15 @@
             <div class="preview-area">
                 <textarea class="tui-textarea" id="preview"></textarea>
                 <div class="controls">
-                    <button type="button" class="tui-button" id="saveBtn">Save</button>
-                    <button type="button" class="tui-button" id="nextBtn">Next</button>
-                    <button type="button" class="tui-button red-168" id="rescindBtn">Rescind</button>
+                    <button class="tui-button disabled white-168" disabled id="saveBtn">Save</button>
+                    <button class="tui-button orange-168" id="nextBtn">Next</button>
+                    <button class="tui-button red-168 disabled white-168" disabled id="rescindBtn">Rescind</button>
                 </div>
             </div>
         </fieldset>
     </main>
+
+    <datalist id="paymentMethods"></datalist>
+    <datalist id="categories"></datalist>
 </body>
 </html>
