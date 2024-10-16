@@ -100,8 +100,9 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
             ?? BaseCurrency.Now;
 
         var lst = new List<Item>();
+        var guids = new List<string>();
         List<Item> ds;
-        while ((ds = ParseItem(currency, ref expr))?.Any() == true)
+        while ((ds = ParseItem(currency, ref expr, guids))?.Any() == true)
             lst.AddRange(ds);
 
         var d = (double?)0D;
@@ -123,6 +124,12 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
 
         if (!d.HasValue && !t.HasValue)
             throw new ApplicationException("不定项过多");
+
+        guids.Sort();
+        var id = 0;
+        foreach (var it in lst)
+            if (it.Content == "G()")
+                it.Content = guids[id++];
 
         var resLst = new List<VoucherDetail>();
         VoucherDetail vd;
@@ -192,7 +199,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
         return new() { Type = VoucherType.Ordinary, Date = date, Remark = vremark, Details = resLst };
     }
 
-    private VoucherDetail ParseVoucherDetail(string currency, ref string expr)
+    private VoucherDetail ParseVoucherDetail(string currency, ref string expr, List<string> guids)
     {
         var lst = new List<string>();
 
@@ -227,7 +234,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
         var remark = lst.Count >= 2 ? lst[1] : null;
 
         if (content == "G()")
-            content = Guid.NewGuid().ToString().ToUpperInvariant();
+            guids.Add(Guid.NewGuid().ToString().ToUpperInvariant());
 
         if (remark == "G()")
             remark = Guid.NewGuid().ToString().ToUpperInvariant();
@@ -244,14 +251,14 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
             };
     }
 
-    private List<Item> ParseItem(string currency, ref string expr)
+    private List<Item> ParseItem(string currency, ref string expr, List<string> guids)
     {
         var lst = new List<(VoucherDetail Detail, bool Actual)>();
 
         while (true)
         {
             var actual = Parsing.Optional(ref expr, "!");
-            var vd = ParseVoucherDetail(currency, ref expr);
+            var vd = ParseVoucherDetail(currency, ref expr, guids);
             if (vd == null)
                 break;
 
