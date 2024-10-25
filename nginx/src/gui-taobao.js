@@ -37,6 +37,9 @@ const headers = () => {
 };
 
 // Helper function to make API calls with proper headers
+function apiCallSafe(q, options) {
+    return apiCall(`/safe?q=${encodeURIComponent(q)}`, options);
+}
 async function apiCall(url, options = {}) {
     options.headers = {
         ...options.headers,
@@ -131,13 +134,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Fetch predefined categories, beneficiaries, and payers
 async function fetchPredefinedOptions() {
     try {
-        const categories = await apiCall('/safe?q=raw%20U%20%3E%20%25taobao-%25.*!tscr', {
+        const categories = await apiCallSafe('raw U > - U T1601 %taobao-%.*!tscr', {
             headers: { 'X-Limit': 50 },
         });
-        const paymentMethods = await apiCall('/safe?q=raw%20U%20%3C%20%25taobao-%25.*!tscr', {
+        const paymentMethods = await apiCallSafe('raw U < %taobao-%.*!tscr', {
             headers: { 'X-Limit': 50 },
         });
-        const beneficiaryPayerData = await apiCall('/safe?q=json%20U!U', {
+        const beneficiaryPayerData = await apiCallSafe('json U %taobao-%.*!U', {
             headers: { 'X-Limit': 50 },
             json: true,
         });
@@ -185,7 +188,7 @@ async function navigateToSpecialOrder(direction, saved) {
     document.querySelector('#searchModal .tui-modal-button').click();
     const pg = document.querySelector('#searchModal .tui-progress')
 
-    const res = await apiCall(`/safe?q=json%20U%20A%20%taobao-%.*!!R`, { json: true });
+    const res = await apiCallSafe('json U A %taobao-%.*!!R', { json: true });
     pg.style.width = '50%';
 
     const inc = direction === 'forward' ? 1 : -1;
@@ -214,9 +217,7 @@ async function fetchVoucher(order) {
     const orderNumber = order.orderNumber;
 
     // Perform an API call to check if the order exists in the database
-    const apiUrl = `/safe?q=U%20A%20%taobao-${orderNumber}%`;
-
-    return apiCall(apiUrl);
+    return apiCallSafe(`U A %taobao-${orderNumber}%`);
 }
 
 async function navigateOrder(newIndex) {
