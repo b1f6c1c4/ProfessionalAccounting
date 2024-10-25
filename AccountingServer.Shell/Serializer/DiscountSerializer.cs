@@ -126,10 +126,9 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
             throw new ApplicationException("不定项过多");
 
         guids.Sort();
-        var id = 0;
         foreach (var it in lst)
-            if (it.Content == "G()")
-                it.Content = guids[id++];
+            if (it.Content?.StartsWith("G()", StringComparison.InvariantCulture) == true)
+                it.Content = guids[Convert.ToInt32(it.Content[3..])];
 
         var resLst = new List<VoucherDetail>();
         VoucherDetail vd;
@@ -234,7 +233,10 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
         var remark = lst.Count >= 2 ? lst[1] : null;
 
         if (content == "G()")
+        {
+            content = $"G(){guids.Count}";
             guids.Add(Guid.NewGuid().ToString().ToUpperInvariant());
+        }
 
         if (remark == "G()")
             remark = Guid.NewGuid().ToString().ToUpperInvariant();
