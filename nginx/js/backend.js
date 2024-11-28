@@ -81,9 +81,41 @@ const execute = (cmd, cb) => {
   if (cmd === '??') {
     const t = `客户端帮助文档
 
-??                          客户端帮助文档
-login|user ...              选择用户
-SPEC -- ...                 临时选择序列化器
+特殊命令：
+?                           显示控制台帮助文档
+??                          显示此客户端帮助文档
+login <用户>                选择用户
+user  <用户>                选择用户
+
+以其他方式显示记账凭证：
+csharp -- ...               使用C#序列化器显示记账凭证
+json   -- ...               使用Json序列化器显示记账凭证
+csv '<分隔符>' [<字段>...] -- ...     使用CSV序列化器显示记账凭证，其中<字段>含义如下：
+  id         编号
+  d|date     日期
+  type       类型
+  U|user     用户
+  C|currency 币种
+  t|title    一级科目代码
+  t'         一级科目备注
+  s|subtitle 二级科目代码
+  s'         二级科目备注
+  c|content  内容
+  r|remark   备注
+  v|fund     金额
+  若不指定，默认为 csv '	' id d U C t t' s s' c r v
+
+命令窗口快捷键：
+Enter                       执行
+Shift+Enter                 执行并将结果添加在后方
+Ctrl+Alt+Enter              执行需要上传内容的命令，如$stmt$等
+
+编辑窗口快捷键：
+Alt+Enter                   保存
+Alt+Delete                  删除
+Ctrl+Alt+Shift+Enter        全部保存
+Ctrl+Alt+Shift+Delete       全部删除
+Ctrl+Alt+Enter              执行需要上传内容的命令，如$stmt$等
 `;
     if (cb) return cb(t, undefined, true);
     else return Promise.resolve(t);
