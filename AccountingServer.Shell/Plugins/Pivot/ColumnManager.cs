@@ -30,12 +30,12 @@ internal struct Property
 {
     public string Path;
     public string Currency;
-    public ISubtotalValue Sub;
+    public ISubtotalResult Sub;
 
     public override string ToString() => Path;
 }
 
-internal class Stringifier : ISubtotalVisitor<IEnumerable<Property>>
+internal class Stringifier : ISubtotalVisitor<IReadOnlyList<Property>>
 {
     private ISubtotal m_Par;
     private int m_Depth;
@@ -50,7 +50,7 @@ internal class Stringifier : ISubtotalVisitor<IEnumerable<Property>>
         m_Currency = null;
     }
 
-    private IEnumerable<Property> NextA(string token, ISubtotalResult sub)
+    private IReadOnlyList<Property> NextA(string token, ISubtotalResult sub)
     {
         var prev = m_Path;
         m_Path = m_Path.Length == 0 ? token : $"{m_Path}:{token}";
@@ -59,10 +59,13 @@ internal class Stringifier : ISubtotalVisitor<IEnumerable<Property>>
         return res;
     }
 
-    private IEnumerable<Property> VisitChildrenA(ISubtotalResult sub)
+    private IReadOnlyList<Property> VisitChildrenA(ISubtotalResult sub)
     {
         if (sub.Items == null)
-            yield break;
+            return new List<Property>()
+                {
+                    new() { Path = m_Path, Currency = m_Currency, Sub = sub },
+                };
 
         IEnumerable<ISubtotalResult> items;
         if (m_Depth < m_Par.Levels.Count)
@@ -96,80 +99,82 @@ internal class Stringifier : ISubtotalVisitor<IEnumerable<Property>>
             items = sub.Items;
 
         m_Depth++;
+        var res = new List<Property>();
         foreach (var item in items)
-            foreach (var x in item.Accept(this))
-                yield return x;
+            res.AddRange(item.Accept(this));
 
         m_Depth--;
+        return res;
     }
 
-    IEnumerable<Property> ISubtotalVisitor<IEnumerable<Property>>.Visit(ISubtotalRoot sub)
+    IReadOnlyList<Property> ISubtotalVisitor<IReadOnlyList<Property>>.Visit(ISubtotalRoot sub)
         => NextA("", sub);
 
-    IEnumerable<Property> ISubtotalVisitor<IEnumerable<Property>>.Visit(ISubtotalDate sub)
+    IReadOnlyList<Property> ISubtotalVisitor<IReadOnlyList<Property>>.Visit(ISubtotalDate sub)
         => NextA(sub.Date.AsDate(sub.Level), sub);
 
-    IEnumerable<Property> ISubtotalVisitor<IEnumerable<Property>>.Visit(ISubtotalVoucherRemark sub)
+    IReadOnlyList<Property> ISubtotalVisitor<IReadOnlyList<Property>>.Visit(ISubtotalVoucherRemark sub)
         => NextA(sub.VoucherRemark.Quotation('%'), sub);
 
-    IEnumerable<Property> ISubtotalVisitor<IEnumerable<Property>>.Visit(ISubtotalTitleKind sub)
+    IReadOnlyList<Property> ISubtotalVisitor<IReadOnlyList<Property>>.Visit(ISubtotalTitleKind sub)
         => NextA($"{sub.Kind}", sub);
 
-    IEnumerable<Property> ISubtotalVisitor<IEnumerable<Property>>.Visit(ISubtotalUser sub)
+    IReadOnlyList<Property> ISubtotalVisitor<IReadOnlyList<Property>>.Visit(ISubtotalUser sub)
         => NextA(sub.User.AsUser(), sub);
 
-    IEnumerable<Property> ISubtotalVisitor<IEnumerable<Property>>.Visit(ISubtotalCurrency sub)
+    IReadOnlyList<Property> ISubtotalVisitor<IReadOnlyList<Property>>.Visit(ISubtotalCurrency sub)
     {
         var prev = m_Currency;
         m_Currency = sub.Currency;
-        var res = NextA(sub.Currency.AsUser(), sub);
+        var res = NextA(sub.Currency.AsCurrency(), sub);
         m_Currency = prev;
         return res;
     }
 
-    IEnumerable<Property> ISubtotalVisitor<IEnumerable<Property>>.Visit(ISubtotalTitle sub)
+    IReadOnlyList<Property> ISubtotalVisitor<IReadOnlyList<Property>>.Visit(ISubtotalTitle sub)
         => NextA(sub.Title.AsTitle(), sub);
 
-    IEnumerable<Property> ISubtotalVisitor<IEnumerable<Property>>.Visit(ISubtotalSubTitle sub)
+    IReadOnlyList<Property> ISubtotalVisitor<IReadOnlyList<Property>>.Visit(ISubtotalSubTitle sub)
         => NextA(sub.SubTitle.AsSubTitle(), sub);
 
-    IEnumerable<Property> ISubtotalVisitor<IEnumerable<Property>>.Visit(ISubtotalContent sub)
+    IReadOnlyList<Property> ISubtotalVisitor<IReadOnlyList<Property>>.Visit(ISubtotalContent sub)
         => NextA(sub.Content.Quotation('\''), sub);
 
-    IEnumerable<Property> ISubtotalVisitor<IEnumerable<Property>>.Visit(ISubtotalRemark sub)
+    IReadOnlyList<Property> ISubtotalVisitor<IReadOnlyList<Property>>.Visit(ISubtotalRemark sub)
         => NextA(sub.Remark.Quotation('"'), sub);
 
-    IEnumerable<Property> ISubtotalVisitor<IEnumerable<Property>>.Visit(ISubtotalValue sub)
-    {
-        yield return new() { Path = m_Path, Currency = m_Currency, Sub = sub };
-    }
+    IReadOnlyList<Property> ISubtotalVisitor<IReadOnlyList<Property>>.Visit(ISubtotalValue sub)
+        => NextA($"{sub.Value:R}", sub);
 }
 
 internal class ColumnManager
 {
     private List<Property> m_Columns;
 
-    private List<List<double?>> m_Array;
+    private Stringifier m_Sgf;
+
+    private List<double?[]> m_Array;
 
     public ColumnManager(ISubtotalResult isr, ISubtotal col)
     {
         m_Columns = new();
-        foreach (var p in isr.Accept(new Stringifier(col)))
+        m_Sgf = new(col);
+        foreach (var p in isr.Accept(m_Sgf))
             m_Columns.Add(p);
 
         m_Array = new();
     }
 
-    public void Add(ISubtotalResult isr, ISubtotal row)
+    public void Add(ISubtotalResult isr)
     {
-        var lst = new List<double?>(Width);
-        foreach (var p in isr.Accept(new Stringifier(row)))
+        var lst = new double?[Width];
+        foreach (var p in isr.Accept(m_Sgf))
         {
             var id = m_Columns.FindIndex(0, (q) => q.Path == p.Path);
             if (id == -1)
                 throw new ApplicationException($"Unknown path of {p.Path}");
 
-            lst[id] = p.Sub.Value;
+            lst[id] = p.Sub.Fund;
         }
         m_Array.Add(lst);
     }

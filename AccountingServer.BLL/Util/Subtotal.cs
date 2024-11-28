@@ -31,6 +31,7 @@ internal abstract class SubtotalResult : ISubtotalResult
     public double Fund { get; set; }
 
     public IEnumerable<ISubtotalResult> Items => TheItems?.AsReadOnly();
+    public IAsyncEnumerable<Balance> Balances { get; set; }
 
     public abstract T Accept<T>(ISubtotalVisitor<T> visitor);
 }
@@ -38,7 +39,13 @@ internal abstract class SubtotalResult : ISubtotalResult
 internal abstract class SubtotalResultFactory<T>
 {
     public abstract T Selector(Balance b);
-    public abstract SubtotalResult Create(IAsyncGrouping<T, Balance> grp);
+    public SubtotalResult Create(IAsyncGrouping<T, Balance> grp)
+    {
+        var obj = DoCreate(grp);
+        obj.Balances = grp;
+        return obj;
+    }
+    protected abstract SubtotalResult DoCreate(IAsyncGrouping<T, Balance> grp);
 }
 
 internal class SubtotalRoot : SubtotalResult, ISubtotalRoot
@@ -67,7 +74,7 @@ internal class SubtotalDateFactory : SubtotalResultFactory<DateTime?>
     public SubtotalDateFactory(SubtotalLevel level) => m_Level = level;
 
     public override DateTime? Selector(Balance b) => b.Date;
-    public override SubtotalResult Create(IAsyncGrouping<DateTime?, Balance> grp) => new SubtotalDate(grp.Key, m_Level);
+    protected override SubtotalResult DoCreate(IAsyncGrouping<DateTime?, Balance> grp) => new SubtotalDate(grp.Key, m_Level);
 }
 
 internal class SubtotalVoucherRemark : SubtotalResult, ISubtotalVoucherRemark
@@ -81,7 +88,7 @@ internal class SubtotalVoucherRemark : SubtotalResult, ISubtotalVoucherRemark
 internal class SubtotalVoucherRemarkFactory : SubtotalResultFactory<string>
 {
     public override string Selector(Balance b) => b.VoucherRemark;
-    public override SubtotalResult Create(IAsyncGrouping<string, Balance> grp) => new SubtotalVoucherRemark(grp.Key);
+    protected override SubtotalResult DoCreate(IAsyncGrouping<string, Balance> grp) => new SubtotalVoucherRemark(grp.Key);
 }
 
 internal class SubtotalTitleKind : SubtotalResult, ISubtotalTitleKind
@@ -109,7 +116,7 @@ internal class SubtotalTitleKindFactory : SubtotalResultFactory<TitleKind?>
             _ => null,
         };
 
-    public override SubtotalResult Create(IAsyncGrouping<TitleKind?, Balance> grp) => new SubtotalTitleKind(grp.Key);
+    protected override SubtotalResult DoCreate(IAsyncGrouping<TitleKind?, Balance> grp) => new SubtotalTitleKind(grp.Key);
 }
 
 internal class SubtotalUser : SubtotalResult, ISubtotalUser
@@ -123,7 +130,7 @@ internal class SubtotalUser : SubtotalResult, ISubtotalUser
 internal class SubtotalUserFactory : SubtotalResultFactory<string>
 {
     public override string Selector(Balance b) => b.User;
-    public override SubtotalResult Create(IAsyncGrouping<string, Balance> grp) => new SubtotalUser(grp.Key);
+    protected override SubtotalResult DoCreate(IAsyncGrouping<string, Balance> grp) => new SubtotalUser(grp.Key);
 }
 
 internal class SubtotalCurrency : SubtotalResult, ISubtotalCurrency
@@ -137,7 +144,7 @@ internal class SubtotalCurrency : SubtotalResult, ISubtotalCurrency
 internal class SubtotalCurrencyFactory : SubtotalResultFactory<string>
 {
     public override string Selector(Balance b) => b.Currency;
-    public override SubtotalResult Create(IAsyncGrouping<string, Balance> grp) => new SubtotalCurrency(grp.Key);
+    protected override SubtotalResult DoCreate(IAsyncGrouping<string, Balance> grp) => new SubtotalCurrency(grp.Key);
 }
 
 internal class SubtotalTitle : SubtotalResult, ISubtotalTitle
@@ -151,7 +158,7 @@ internal class SubtotalTitle : SubtotalResult, ISubtotalTitle
 internal class SubtotalTitleFactory : SubtotalResultFactory<int?>
 {
     public override int? Selector(Balance b) => b.Title;
-    public override SubtotalResult Create(IAsyncGrouping<int?, Balance> grp) => new SubtotalTitle(grp.Key);
+    protected override SubtotalResult DoCreate(IAsyncGrouping<int?, Balance> grp) => new SubtotalTitle(grp.Key);
 }
 
 internal class SubtotalSubTitle : SubtotalResult, ISubtotalSubTitle
@@ -165,7 +172,7 @@ internal class SubtotalSubTitle : SubtotalResult, ISubtotalSubTitle
 internal class SubtotalSubTitleFactory : SubtotalResultFactory<int?>
 {
     public override int? Selector(Balance b) => b.SubTitle;
-    public override SubtotalResult Create(IAsyncGrouping<int?, Balance> grp) => new SubtotalSubTitle(grp.Key);
+    protected override SubtotalResult DoCreate(IAsyncGrouping<int?, Balance> grp) => new SubtotalSubTitle(grp.Key);
 }
 
 internal class SubtotalContent : SubtotalResult, ISubtotalContent
@@ -179,7 +186,7 @@ internal class SubtotalContent : SubtotalResult, ISubtotalContent
 internal class SubtotalContentFactory : SubtotalResultFactory<string>
 {
     public override string Selector(Balance b) => b.Content;
-    public override SubtotalResult Create(IAsyncGrouping<string, Balance> grp) => new SubtotalContent(grp.Key);
+    protected override SubtotalResult DoCreate(IAsyncGrouping<string, Balance> grp) => new SubtotalContent(grp.Key);
 }
 
 internal class SubtotalRemark : SubtotalResult, ISubtotalRemark
@@ -193,16 +200,12 @@ internal class SubtotalRemark : SubtotalResult, ISubtotalRemark
 internal class SubtotalRemarkFactory : SubtotalResultFactory<string>
 {
     public override string Selector(Balance b) => b.Remark;
-    public override SubtotalResult Create(IAsyncGrouping<string, Balance> grp) => new SubtotalRemark(grp.Key);
+    protected override SubtotalResult DoCreate(IAsyncGrouping<string, Balance> grp) => new SubtotalRemark(grp.Key);
 }
 
 internal class SubtotalValue : SubtotalResult, ISubtotalValue
 {
-    public SubtotalValue(double? value, IAsyncEnumerable<Balance> vals)
-    {
-        Value = value;
-        Values = vals;
-    }
+    public SubtotalValue(double? value) => Value = value;
     public double? Value { get; }
     public IAsyncEnumerable<Balance> Values { get; }
 
@@ -212,7 +215,7 @@ internal class SubtotalValue : SubtotalResult, ISubtotalValue
 internal class SubtotalValueFactory : SubtotalResultFactory<double?>
 {
     public override double? Selector(Balance b) => b.Value;
-    public override SubtotalResult Create(IAsyncGrouping<double?, Balance> grp) => new SubtotalValue(grp.Key, grp);
+    protected override SubtotalResult DoCreate(IAsyncGrouping<double?, Balance> grp) => new SubtotalValue(grp.Key);
 }
 
 /// <summary>

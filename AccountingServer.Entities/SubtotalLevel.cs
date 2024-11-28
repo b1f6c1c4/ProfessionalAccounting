@@ -134,6 +134,11 @@ public interface ISubtotalResult
     IEnumerable<ISubtotalResult> Items { get; }
 
     /// <summary>
+    ///     所有所属分类的项目
+    /// </summary>
+    IAsyncEnumerable<Balance> Balances { get; }
+
+    /// <summary>
     ///     二次分配
     /// </summary>
     /// <typeparam name="T">返回值类型</typeparam>
@@ -194,8 +199,6 @@ public interface ISubtotalRemark : ISubtotalResult
 public interface ISubtotalValue : ISubtotalResult
 {
     double? Value { get; }
-
-    IAsyncEnumerable<Balance> Values { get; }
 }
 
 /// <summary>

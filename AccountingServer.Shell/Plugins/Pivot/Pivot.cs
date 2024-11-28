@@ -33,44 +33,48 @@ internal class Pivot : PluginBase
     {
         IVoucherDetailQuery dquery = null;
         IQueryCompounded<IVoucherQueryAtom> vquery = null;
-        CombinedSubtotal sub = null;
+        ISubtotal row = null, col = null;
         try
         {
             dquery = ParsingF.DetailQuery(ref expr, session.Client);
-            var row = ParsingF.Subtotal(ref expr, session.Client);
-            var col = ParsingF.Subtotal(ref expr, session.Client);
+            row = ParsingF.Subtotal(ref expr, session.Client);
+            col = ParsingF.Subtotal(ref expr, session.Client);
+            ParsingF.Eof(expr);
             if (row.GatherType == GatheringType.VoucherCount
                     || col.GatherType == GatheringType.VoucherCount)
-                throw new FormatException();
-            ParsingF.Eof(expr);
-            sub = new CombinedSubtotal(row, col);
+                dquery = null;
         }
         catch (Exception)
         {
             dquery = null;
         }
         if (dquery != null)
+        {
+            var sub = new CombinedSubtotal(row, col);
             return PostProcess(session.Accountant.SelectVoucherDetailsGroupedDirectAsync(
                         new GroupedQueryStub{ VoucherEmitQuery = dquery, Subtotal = sub }), sub, session);
+        }
 
         try
         {
             vquery = ParsingF.VoucherQuery(ref expr, session.Client);
-            var row = ParsingF.Subtotal(ref expr, session.Client);
-            var col = ParsingF.Subtotal(ref expr, session.Client);
+            row = ParsingF.Subtotal(ref expr, session.Client);
+            col = ParsingF.Subtotal(ref expr, session.Client);
+            ParsingF.Eof(expr);
             if (row.GatherType != GatheringType.VoucherCount
                 || col.GatherType != GatheringType.VoucherCount)
-                throw new FormatException();
-            ParsingF.Eof(expr);
-            sub = new CombinedSubtotal(row, col);
+                vquery = null;
         }
         catch (Exception)
         {
             vquery = null;
         }
         if (vquery != null)
+        {
+            var sub = new CombinedSubtotal(row, col);
             return PostProcess(session.Accountant.SelectVouchersGroupedDirectAsync(
                         new VoucherGroupedQueryStub{ VoucherQuery = vquery, Subtotal = sub }), sub, session);
+        }
 
         throw new FormatException();
     }
@@ -79,54 +83,64 @@ internal class Pivot : PluginBase
     {
         public CombinedSubtotal(ISubtotal r, ISubtotal c)
         {
+            if (r == null)
+                throw new ApplicationException("r is null");
+            if (c == null)
+                throw new ApplicationException("c is null");
+
             if (r.GatherType != c.GatherType)
-                throw new FormatException();
+                throw new ApplicationException($"Mismatching GatherType: {r.GatherType} vs {c.GatherType}");
 
             GatherType = r.GatherType;
 
-            var lvl = SubtotalLevel.None;
-            foreach (var l in r.Levels)
-                lvl |= l;
-            lvl &= ~SubtotalLevel.NonZero;
-            foreach (var l in c.Levels)
-                if ((lvl & l) != SubtotalLevel.None)
-                    throw new FormatException();
-            foreach (var l in c.Levels)
-                lvl |= l;
-            lvl &= ~SubtotalLevel.NonZero;
-            Levels = new List<SubtotalLevel>() { lvl };
+            if (r.EquivalentCurrency != c.EquivalentCurrency)
+                throw new ApplicationException($"Mismatching equi: {r.EquivalentCurrency} vs {c.EquivalentCurrency}");
+            if (r.EquivalentDate != c.EquivalentDate)
+                throw new ApplicationException($"Mismatching equi: {r.EquivalentDate} vs {c.EquivalentDate}");
 
-            if (r.EquivalentCurrency != null && c.EquivalentCurrency != null)
-            {
-                if (r.EquivalentCurrency != c.EquivalentCurrency)
-                    throw new FormatException();
-                if (r.EquivalentDate != c.EquivalentDate)
-                    throw new FormatException();
-
-                EquivalentCurrency = r.EquivalentCurrency;
-                EquivalentDate = r.EquivalentDate;
-            }
+            EquivalentCurrency = r.EquivalentCurrency;
+            EquivalentDate = r.EquivalentDate;
 
             if (r.AggrType != AggregationType.None
                 && c.AggrType != AggregationType.None)
-                throw new FormatException();
+                throw new ApplicationException($"Mismatching AggrType: {r.AggrType} vs {c.AggrType}");
 
             if (r.AggrType != AggregationType.None)
             {
                 Row = c;
                 Col = r;
                 AggrInterval = r.AggrInterval;
-                EveryDayRange = r.EveryDayRange;
+                if (r.AggrType == AggregationType.EveryDay)
+                    EveryDayRange = r.EveryDayRange;
                 Flipped = true;
+            }
+            else if (c.AggrType != AggregationType.None)
+            {
+                Row = r;
+                Col = c;
+                AggrInterval = c.AggrInterval;
+                if (c.AggrType == AggregationType.EveryDay)
+                    EveryDayRange = c.EveryDayRange;
+                Flipped = false;
             }
             else
             {
                 Row = r;
                 Col = c;
-                AggrInterval = c.AggrInterval;
-                EveryDayRange = c.EveryDayRange;
                 Flipped = false;
             }
+
+            var lvl = AggrInterval;
+            foreach (var l in r.Levels)
+                lvl |= l;
+            lvl &= ~SubtotalLevel.NonZero;
+            foreach (var l in c.Levels)
+                if ((lvl & l) != SubtotalLevel.None)
+                    throw new ApplicationException($"Duplicating Levels: 0b{(int)lvl:b} vs 0b{(int)l:b}");
+            foreach (var l in c.Levels)
+                lvl |= l;
+            lvl &= ~SubtotalLevel.NonZero;
+            Levels = new List<SubtotalLevel>() { lvl };
         }
 
         public ISubtotal Row { get; }
@@ -171,31 +185,39 @@ internal class Pivot : PluginBase
 
     private async IAsyncEnumerable<string> PostProcess(IAsyncEnumerable<Balance> raw, CombinedSubtotal sub, Session session)
     {
+        var data = (await raw.ToListAsync()).ToAsyncEnumerable();
         var cconv = new SubtotalBuilder(sub.Col, session.Accountant);
         var rconv = new SubtotalBuilder(sub.Row, session.Accountant);
-        var mgr = new ColumnManager(await cconv.Build(raw), sub.Col);
+        var mgr = new ColumnManager(await cconv.Build(data), sub.Col);
         var head = new List<Property>();
-        foreach (var p in (await rconv.Build(raw)).Accept(new Stringifier(sub.Row)))
+        var curr = (double? v, string c) => {
+            if (sub.EquivalentCurrency != null)
+                return v.AsFund(sub.EquivalentCurrency);
+            if (sub.GatherType != GatheringType.Sum)
+                return v?.ToString("N0");
+            return v.AsFund(c);
+        };
+        foreach (var p in (await rconv.Build(data)).Accept(new Stringifier(sub.Row)))
         {
             head.Add(p);
-            mgr.Add(p.Sub, sub.Row);
+            mgr.Add(await cconv.Build(p.Sub.Balances));
         }
         if (!sub.Flipped)
         {
-            yield return $"\t{string.Join("\t", mgr.Header)}";
+            yield return $"\t{string.Join("\t", mgr.Header)}\n";
             for (var i = 0; i < mgr.Height; i++)
             {
-                var txt = mgr.Header.Zip(mgr.Row(i), static (p, v) => v.AsFund(p.Currency));
-                yield return $"{head[i]}\t{string.Join("\t", txt)}";
+                var txt = mgr.Header.Zip(mgr.Row(i), (p, v) => curr(v, p.Currency ?? head[i].Currency));
+                yield return $"{head[i]}\t{string.Join("\t", txt)}\n";
             }
         }
         else
         {
-            yield return $"\t{string.Join("\t", head)}";
+            yield return $"\t{string.Join("\t", head)}\n";
             for (var i = 0; i < mgr.Width; i++)
             {
-                var txt = head.Zip(mgr.Col(i), static (p, v) => v.AsFund(p.Currency));
-                yield return $"{mgr.Header[i]}\t{string.Join("\t", txt)}";
+                var txt = head.Zip(mgr.Col(i), (p, v) => curr(v, p.Currency ?? mgr.Header[i].Currency));
+                yield return $"{mgr.Header[i]}\t{string.Join("\t", txt)}\n";
             }
         }
     }
