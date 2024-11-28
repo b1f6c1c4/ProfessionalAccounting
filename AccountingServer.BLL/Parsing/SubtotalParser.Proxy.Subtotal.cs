@@ -47,7 +47,7 @@ internal partial class SubtotalParser
             get
             {
                 var z = Mark.Text == "`" ? SubtotalLevel.NonZero : SubtotalLevel.None;
-                if (subtotalFields() == null)
+                if (subtotalFields() == null && subtotalAggr() == null)
                     if (subtotalEqui() == null)
                         return new[]
                             {
@@ -66,7 +66,7 @@ internal partial class SubtotalParser
                                 z | SubtotalLevel.Content,
                             };
 
-                if (subtotalFields().SubtotalNoField() != null)
+                if (subtotalFields() == null || subtotalFields().SubtotalNoField() != null)
                     return Array.Empty<SubtotalLevel>();
 
                 return subtotalFields().subtotalField()
