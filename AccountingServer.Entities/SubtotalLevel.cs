@@ -194,6 +194,8 @@ public interface ISubtotalRemark : ISubtotalResult
 public interface ISubtotalValue : ISubtotalResult
 {
     double? Value { get; }
+
+    IAsyncEnumerable<Balance> Values { get; }
 }
 
 /// <summary>

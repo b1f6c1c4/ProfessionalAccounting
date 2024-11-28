@@ -198,8 +198,13 @@ internal class SubtotalRemarkFactory : SubtotalResultFactory<string>
 
 internal class SubtotalValue : SubtotalResult, ISubtotalValue
 {
-    public SubtotalValue(double? value) => Value = value;
+    public SubtotalValue(double? value, IAsyncEnumerable<Balance> vals)
+    {
+        Value = value;
+        Values = vals;
+    }
     public double? Value { get; }
+    public IAsyncEnumerable<Balance> Values { get; }
 
     public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
 }
@@ -207,7 +212,7 @@ internal class SubtotalValue : SubtotalResult, ISubtotalValue
 internal class SubtotalValueFactory : SubtotalResultFactory<double?>
 {
     public override double? Selector(Balance b) => b.Value;
-    public override SubtotalResult Create(IAsyncGrouping<double?, Balance> grp) => new SubtotalValue(grp.Key);
+    public override SubtotalResult Create(IAsyncGrouping<double?, Balance> grp) => new SubtotalValue(grp.Key, grp);
 }
 
 /// <summary>

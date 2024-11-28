@@ -37,6 +37,8 @@
         <EmbeddedResource Include="Plugins\CreditCardConvert\Resources\Document.txt" />
         <None Remove="Plugins\Interest\Resources\Document.txt" />
         <EmbeddedResource Include="Plugins\Interest\Resources\Document.txt" />
+        <None Remove="Plugins\Pivot\Resources\Document.txt" />
+        <EmbeddedResource Include="Plugins\Pivot\Resources\Document.txt" />
         <None Remove="Plugins\Statement\Resources\Document.txt" />
         <EmbeddedResource Include="Plugins\Statement\Resources\Document.txt" />
         <None Remove="Plugins\Utilities\Resources\Document.txt" />

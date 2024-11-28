@@ -109,12 +109,18 @@ public class Accountant : IHistoricalExchange
     public IAsyncEnumerable<VoucherDetail> SelectVoucherDetailsAsync(IVoucherDetailQuery query)
         => m_Db.SelectVoucherDetails(query);
 
+    public IAsyncEnumerable<Balance> SelectVoucherDetailsGroupedDirectAsync(IGroupedQuery query)
+        => m_Db.SelectVoucherDetailsGrouped(query, Limit);
+
     public ValueTask<ISubtotalResult> SelectVoucherDetailsGroupedAsync(IGroupedQuery query)
     {
         var res = m_Db.SelectVoucherDetailsGrouped(query, Limit);
         var conv = new SubtotalBuilder(query.Subtotal, this);
         return conv.Build(res);
     }
+
+    public IAsyncEnumerable<Balance> SelectVouchersGroupedDirectAsync(IVoucherGroupedQuery query)
+        => m_Db.SelectVouchersGrouped(query, Limit);
 
     public ValueTask<ISubtotalResult> SelectVouchersGroupedAsync(IVoucherGroupedQuery query)
     {
