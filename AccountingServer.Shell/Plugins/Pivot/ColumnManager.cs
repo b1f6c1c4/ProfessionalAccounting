@@ -169,14 +169,17 @@ internal class ColumnManager
     {
         var lst = new double?[Width];
         foreach (var p in isr.Accept(m_Sgf))
-        {
-            var id = m_Columns.FindIndex(0, (q) => q.Path == p.Path);
-            if (id == -1)
-                throw new ApplicationException($"Unknown path of {p.Path}");
-
-            lst[id] = p.Sub.Fund;
-        }
+            lst[IndexOf(p)] = p.Sub.Fund;
         m_Array.Add(lst);
+    }
+
+    public int IndexOf(Property p)
+    {
+        var id = m_Columns.FindIndex(0, (q) => q.Path == p.Path);
+        if (id == -1)
+            throw new ApplicationException($"Unknown path of {p.Path}");
+
+        return id;
     }
 
     public int Width => m_Columns.Count;
@@ -188,4 +191,6 @@ internal class ColumnManager
         foreach (var l in m_Array)
             yield return l[i];
     }
+
+    public void Clear() => m_Array.Clear();
 }
