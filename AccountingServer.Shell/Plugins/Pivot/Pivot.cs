@@ -49,8 +49,7 @@ internal class Pivot : PluginBase
                 }
                 catch (Exception)
                 {
-                    if (!string.IsNullOrWhiteSpace(expr))
-                        goto next1;
+                    // ignored
                 }
             }
             if (col.GatherType == GatheringType.VoucherCount)
@@ -63,7 +62,6 @@ internal class Pivot : PluginBase
         if (dqueries != null)
             return PostProcess(CombinedSubtotal.Query(dqueries, col, session), col, session);
 
-next1:
         try
         {
             while (true)
@@ -78,8 +76,7 @@ next1:
                 }
                 catch (Exception)
                 {
-                    if (!string.IsNullOrWhiteSpace(expr))
-                        goto next2;
+                    // ignored
                 }
             }
             if (col.GatherType != GatheringType.VoucherCount)
@@ -142,8 +139,6 @@ next2:
                     shuffler[mgr.IndexOf(p)] = id++;
                     lmgr.Add(await lcconv.Build(p.Sub.Balances));
                 }
-                foreach (var x in shuffler)
-                    Console.WriteLine($"{x}");
                 for (var i = 0; i < lmgr.Width; i++)
                 {
                     var values = shuffler.Select(id => id > 0 ? lmgr.Row(id - 1)[i] : null);

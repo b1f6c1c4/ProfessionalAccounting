@@ -23,8 +23,8 @@ grammar Subtotal;
  */
 
 subtotal
-	:	Mark=SumMark subtotalFields? subtotalAggr? subtotalEqui?
-	|	Mark=CountMark subtotalFields? subtotalAggr?
+	:	WS* Mark=SumMark subtotalFields? subtotalAggr? subtotalEqui?
+	|	WS* Mark=CountMark subtotalFields? subtotalAggr?
 	;
 
 subtotalFields
@@ -168,5 +168,5 @@ EquiMark
 	;
 
 WS
-	:	[ \n\r\t] -> channel(HIDDEN)
+	:	[ \n\r\t]
 	;
