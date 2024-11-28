@@ -227,7 +227,7 @@ const doExecuteFactory = (app) => () => {
       finalize(err, false, app);
       editor.renderer.scrollCursorIntoView();
     } else if (done) {
-      finalize(res === undefined && first ? '' : undefined, true, app);
+      finalize(res === undefined && first ? '' : res, true, app);
       editor.focus();
       editor.renderer.scrollCursorIntoView();
     } else {
