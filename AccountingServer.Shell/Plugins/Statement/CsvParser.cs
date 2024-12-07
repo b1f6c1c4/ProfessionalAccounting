@@ -86,10 +86,14 @@ internal class CsvParser
         var dateId = -1;
         var currId = -1;
         var fundId = -1;
+        var debitId = -1;
+        var creditId = -1;
 
         var dateReg = new Regex(@"^trans(?:\.|action)\s+date$", RegexOptions.IgnoreCase);
         var currReg = new Regex(@"^trans(?:\.|action)\s+curr(?:\.|ency)$", RegexOptions.IgnoreCase);
         var fundReg = new Regex(@"^(?:amount|fund|value)$", RegexOptions.IgnoreCase);
+        var debitReg = new Regex(@"^debit$", RegexOptions.IgnoreCase);
+        var creditReg = new Regex(@"^credit$", RegexOptions.IgnoreCase);
         for (var i = 0; !string.IsNullOrWhiteSpace(header); i++)
         {
             var f = Next(ref header);
@@ -99,6 +103,10 @@ internal class CsvParser
                 currId = i;
             else if (fundReg.IsMatch(f))
                 fundId = i;
+            else if (debitReg.IsMatch(f))
+                debitId = i;
+            else if (creditReg.IsMatch(f))
+                creditId = i;
         }
 
         if (dateId < 0)
@@ -118,8 +126,10 @@ internal class CsvParser
                 throw new ApplicationException("找不到日期字段");
         }
 
-        if (fundId < 0)
+        if (fundId < 0 && (debitId < 0 || creditId < 0))
             throw new ApplicationException("找不到金额字段");
+        if (fundId >= 0 && (debitId >= 0 && creditId >= 0))
+            throw new ApplicationException("多于一个金额字段");
 
         Items = new();
         while (!string.IsNullOrWhiteSpace(expr))
@@ -134,6 +144,10 @@ internal class CsvParser
                 else if (i == currId)
                     item.Currency = f;
                 else if (i == fundId)
+                    item.Fund = m_Dir * Convert.ToDouble(f);
+                else if (i == debitId && !string.IsNullOrWhiteSpace(f))
+                    item.Fund = m_Dir * Convert.ToDouble(f);
+                else if (i == creditId && !string.IsNullOrWhiteSpace(f))
                     item.Fund = m_Dir * Convert.ToDouble(f);
             }
 
