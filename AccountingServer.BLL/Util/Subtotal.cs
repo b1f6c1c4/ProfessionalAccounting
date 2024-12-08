@@ -243,7 +243,7 @@ public class SubtotalBuilder
     {
         m_Depth = 0;
         m_Flags = SubtotalLevel.None;
-        return Build(new SubtotalRoot(), raw);
+        return Build(new SubtotalRoot() { Balances = raw }, raw);
     }
 
     private async ValueTask<ISubtotalResult> Build(SubtotalResult sub, IAsyncEnumerable<Balance> raw)
