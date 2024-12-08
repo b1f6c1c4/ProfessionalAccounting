@@ -35,6 +35,8 @@ internal class Pivot : PluginBase
         List<IGroupedQuery> dqueries = new();
         List<IVoucherGroupedQuery> vqueries = new();
         ISubtotal col = null;
+        var transpose = false;
+        var fitting = false;
         try
         {
             while (true)
@@ -44,6 +46,8 @@ internal class Pivot : PluginBase
                 try
                 {
                     col = ParsingF.Subtotal(ref expr, session.Client);
+                    transpose = ParsingF.Optional(ref expr, "t");
+                    fitting = ParsingF.Optional(ref expr, "f");
                     ParsingF.Eof(expr);
                     break;
                 }
@@ -60,7 +64,7 @@ internal class Pivot : PluginBase
             dqueries = null;
         }
         if (dqueries != null)
-            return PostProcess(CombinedSubtotal.Query(dqueries, col, session), col, session);
+            return PostProcess(CombinedSubtotal.Query(dqueries, col, session), col, transpose, fitting, session);
 
         try
         {
@@ -71,6 +75,8 @@ internal class Pivot : PluginBase
                 try
                 {
                     col = ParsingF.Subtotal(ref expr, session.Client);
+                    transpose = ParsingF.Optional(ref expr, "t");
+                    fitting = ParsingF.Optional(ref expr, "f");
                     ParsingF.Eof(expr);
                     break;
                 }
@@ -87,14 +93,14 @@ internal class Pivot : PluginBase
             vqueries = null;
         }
         if (vqueries != null)
-            return PostProcess(CombinedSubtotal.Query(vqueries, col, session), col, session);
+            return PostProcess(CombinedSubtotal.Query(vqueries, col, session), col, transpose, fitting, session);
 
-next2:
         throw new FormatException();
     }
 
     private async IAsyncEnumerable<string> PostProcess(
-            ValueTask<(List<List<Balance>>, List<CombinedSubtotal>, bool)> task, ISubtotal col, Session session)
+            ValueTask<(List<List<Balance>>, List<CombinedSubtotal>, bool)> task,
+            ISubtotal col, bool transpose, bool fitting, Session session)
     {
         var (data, subs, flipped) = await task;
         var cconv = new SubtotalBuilder(col, session.Accountant);
@@ -106,7 +112,15 @@ next2:
             return v.AsFund(c);
         };
         var mgr = new ColumnManager(await cconv.Build(data.SelectMany(static d => d).ToAsyncEnumerable()), col);
-        yield return $"\t{string.Join("\t", mgr.Header)}\n";
+        List<string> headers = null;
+        List<List<string>> texts = null;
+        if (!transpose && !fitting)
+            yield return $"\t{string.Join("\t", mgr.Header)}\n";
+        else
+        {
+            headers = new();
+            texts = new();
+        }
         if (!flipped)
         {
             foreach (var (dat, sub) in data.Zip(subs))
@@ -122,7 +136,13 @@ next2:
                 for (var i = 0; i < mgr.Height; i++)
                 {
                     var txt = mgr.Header.Zip(mgr.Row(i), (p, v) => curr(v, p.Currency ?? head[i].Currency));
-                    yield return $"{head[i]}\t{string.Join("\t", txt)}\n";
+                    if (!transpose && !fitting)
+                        yield return $"{head[i]}\t{string.Join("\t", txt)}\n";
+                    else
+                    {
+                        headers.Add(head[i].ToString());
+                        texts.Add(txt.ToList());
+                    }
                 }
             }
         }
@@ -143,9 +163,41 @@ next2:
                 {
                     var values = shuffler.Select(id => id > 0 ? lmgr.Row(id - 1)[i] : null);
                     var txt = mgr.Header.Zip(values, (p, v) => curr(v, p.Currency ?? lmgr.Header[i].Currency));
-                    yield return $"{lmgr.Header[i]}\t{string.Join("\t", txt)}\n";
+                    if (!transpose && !fitting)
+                        yield return $"{lmgr.Header[i]}\t{string.Join("\t", txt)}\n";
+                    else
+                    {
+                        headers.Add(lmgr.Header[i].ToString());
+                        texts.Add(txt.ToList());
+                    }
                 }
             }
+        }
+        Func<string, int, string> fit = static (s, w) => s.CPadLeft(w);
+        if (transpose && !fitting)
+        {
+            yield return $"\t{string.Join("\t", headers)}\n";
+            for (var i = 0; i < mgr.Width; i++)
+                yield return $"{mgr.Header[i]}\t{string.Join("\t", texts.Select(txt => txt[i]))}\n";
+        }
+        else if (transpose && fitting)
+        {
+            var wh = mgr.Header.Max(static s => s.ToString().CLength());
+            var wt = headers.Zip(texts, static (h, txt)
+                    => Math.Max(h.CLength(), txt.Max(StringFormatter.CLength)));
+            yield return $"{fit("", wh)} {string.Join(" ", headers.Zip(wt, fit))}\n";
+            for (var i = 0; i < mgr.Width; i++)
+                yield return $"{fit(mgr.Header[i].ToString(), wh)} {string.Join("\t",
+                      texts.Zip(wt, (txt, w) => fit(txt[i], w)))}\n";
+        }
+        else // if (!transpose && fitting)
+        {
+            var wh = headers.Max(StringFormatter.CLength);
+            var wt = mgr.Header.Select((p, i) =>
+                    Math.Max(p.ToString().CLength(), texts.Max(txt => txt[i].CLength())));
+            yield return $"{fit("", wh)} {string.Join(" ", mgr.Header.Zip(wt, (h, w) => fit(h.ToString(), w)))}\n";
+            foreach (var (h, txt) in headers.Zip(texts))
+                yield return $"{fit(h, wh)} {string.Join(" ", txt.Zip(wt, fit))}\n";
         }
     }
 }

@@ -28,6 +28,18 @@ public static class StringFormatter
     private static readonly Regex Reg = new(@"[\uFF00-\uFFFF\u4e00-\u9fa5￥]");
 
     /// <summary>
+    ///     计算字符串长度
+    /// </summary>
+    /// <param name="s">字符串</param>
+    /// <returns>长度</returns>
+    public static int CLength(this string s)
+    {
+        s ??= string.Empty;
+
+        return s.Length + Reg.Matches(s).Count;
+    }
+
+    /// <summary>
     ///     左对齐补至指定长度
     /// </summary>
     /// <param name="s">待格式化的字符串</param>
