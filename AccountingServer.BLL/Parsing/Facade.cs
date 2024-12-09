@@ -167,6 +167,19 @@ public abstract class FacadeBase
         => (IQueryCompounded<IDistributedQueryAtom>)QueryParse(ref s, static p => p.distributedQ(), client) ??
             DistributedQueryUnconstrained.Instance;
 
+    public string Regex(string s)
+        => Regex(ref s);
+
+    public string Regex(ref string s)
+    {
+        var ctx = QueryParse(ref s, static p => p.regex(), null);
+        if (ctx == null)
+            return null;
+
+        var res = ctx.GetText();
+        return res.Substring(1, res.Length - 2);
+    }
+
     private sealed class VoucherGroupedQueryStub : IVoucherGroupedQuery
     {
         public IQueryCompounded<IVoucherQueryAtom> VoucherQuery { get; init; }

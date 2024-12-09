@@ -160,6 +160,10 @@ token
 	:	(SingleQuotedString | Guid | Token)
 	;
 
+regex
+	: RegexString
+	;
+
 /*
  * Lexer Rules
  */

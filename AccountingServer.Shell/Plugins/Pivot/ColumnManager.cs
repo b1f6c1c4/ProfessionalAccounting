@@ -42,11 +42,11 @@ internal class Stringifier : ISubtotalVisitor<IReadOnlyList<Property>>
     private string m_Path;
     private string m_Currency;
 
-    public Stringifier(ISubtotal par)
+    public Stringifier(ISubtotal par, string prefix)
     {
         m_Par = par;
         m_Depth = 0;
-        m_Path = "";
+        m_Path = prefix ?? "";
         m_Currency = null;
     }
 
@@ -158,7 +158,7 @@ internal class ColumnManager
     public ColumnManager(ISubtotalResult isr, ISubtotal col)
     {
         m_Columns = new();
-        m_Sgf = new(col);
+        m_Sgf = new(col, "");
         foreach (var p in isr.Accept(m_Sgf))
             m_Columns.Add(p);
 
