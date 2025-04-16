@@ -118,6 +118,12 @@ public class Voucher
     /// </summary>
     [DefaultValue(VoucherType.Ordinary)]
     public VoucherType? Type { get; set; }
+
+    /// <summary>
+    ///     部分屏蔽了的记账凭证
+    /// </summary>
+    [XmlAttribute("redacted")]
+    public bool Redacted { get; set; }
 }
 
 /// <summary>

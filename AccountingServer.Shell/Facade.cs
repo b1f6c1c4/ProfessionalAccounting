@@ -67,8 +67,8 @@ public class Facade
                 };
     }
 
-    public Session CreateSession(string user, DateTime dt, string spec = null, int limit = 0)
-        => new(m_Db, user, dt, spec, limit);
+    public Session CreateSession(string user, DateTime dt, Predicate<LoginEntry> idp, string spec = null, int limit = 0)
+        => new(m_Db, user, dt, ACLManager.Parse(idp), spec, limit);
 
     /// <summary>
     ///     空记账凭证的表示

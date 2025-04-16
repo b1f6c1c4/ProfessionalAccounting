@@ -76,6 +76,17 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     if (string.IsNullOrEmpty(user))
         return new() { ResponseCode = 401 };
 
+    var ssl_subject = "";
+    var ssl_cn = "";
+    var ssl_issuer = "";
+    var ssl_serial = "";
+    var ssl_fingerprint = "";
+    request.Header.TryGetValue("x-ssl-subject", out ssl_subject);
+    request.Header.TryGetValue("x-ssl-cn", out ssl_cn);
+    request.Header.TryGetValue("x-ssl-issuer", out ssl_issuer);
+    request.Header.TryGetValue("x-ssl-serial", out ssl_serial);
+    request.Header.TryGetValue("x-ssl-fingerprint", out ssl_fingerprint);
+
     if (!request.Header.ContainsKey("X-ClientDateTime".ToLowerInvariant()) ||
         !DateTimeParser.TryParse(request.Header["X-ClientDateTime".ToLowerInvariant()], out var dt))
         return new() { ResponseCode = 400 };
@@ -88,7 +99,14 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     if (request.Header.ContainsKey("x-serializer"))
         spec = request.Header["x-serializer"];
 
-    var session = facade.CreateSession(user, dt, spec, limit);
+    var session = facade.CreateSession(user, dt, (le) => {
+        if (le.Subject != null && ssl_subject != le.Subject) return false;
+        if (le.CN != null && ssl_cn != le.CN) return false;
+        if (le.Issuer != null && ssl_issuer != le.Issuer) return false;
+        if (le.Serial != null && ssl_serial != le.Serial) return false;
+        if (le.Fingerprint != null && ssl_fingerprint != le.Fingerprint) return false;
+        return true;
+    }, spec, limit);
 
     if (request.Method == "GET")
         switch (request.BaseUri)

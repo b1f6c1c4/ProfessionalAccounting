@@ -1,5 +1,6 @@
 using System;
 using AccountingServer.BLL;
+using AccountingServer.BLL.Util;
 using AccountingServer.Shell.Serializer;
 
 namespace AccountingServer.Shell;
@@ -9,10 +10,12 @@ namespace AccountingServer.Shell;
 /// </summary>
 public class Session
 {
-    internal Session(DbSession db, string user = "anonymous", DateTime? dt = null, string spec = null, int limit = 0)
+    internal Session(DbSession db, string user = "anonymous", DateTime? dt = null,
+            Identity id = null, string spec = null, int limit = 0)
     {
         Accountant = new(db, user, dt ?? DateTime.UtcNow.Date) { Limit = limit };
         Serializer = new SerializerFactory(Client).GetSerializer(spec);
+        Identity = id;
     }
 
     /// <summary>
@@ -29,4 +32,9 @@ public class Session
     ///     客户端
     /// </summary>
     public Client Client => Accountant.Client ?? throw new ApplicationException("Client should have been set");
+
+    /// <summary>
+    ///     客户端身份
+    /// </summary>
+    public Identity Identity { get; }
 }
