@@ -16,7 +16,10 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Generic;
+using System.Linq;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 
 namespace AccountingServer.BLL.Util;
 
@@ -54,6 +57,14 @@ public sealed class UnionQueries<TAtom> : BinaryQueries<TAtom> where TAtom : cla
     public override OperatorType Operator => OperatorType.Union;
 }
 
+public sealed class SubtractQueries<TAtom> : BinaryQueries<TAtom> where TAtom : class
+{
+    public SubtractQueries(IQueryCompounded<TAtom> filter1,
+        IQueryCompounded<TAtom> filter2) : base(filter1, filter2) { }
+
+    public override OperatorType Operator => OperatorType.Subtract;
+}
+
 public sealed class SimpleDetailQuery : IDetailQueryAtom
 {
     public TitleKind? Kind { get; init; }
@@ -74,4 +85,38 @@ public sealed class SimpleVoucherQuery : IVoucherQueryAtom
     public string RemarkPrefix { get; init; } = null;
     public IQueryCompounded<IDetailQueryAtom> DetailFilter { get; init; } = null;
     public T Accept<T>(IQueryVisitor<IVoucherQueryAtom, T> visitor) => visitor.Visit(this);
+}
+
+public static class QueryHelper
+{
+    public static IQueryCompounded<TAtom> QueryAny<TAtom>(
+            this IReadOnlyList<IQueryCompounded<TAtom>> lst) where TAtom : class
+        => lst.Count == 0 ? null : lst[0].QueryAny(lst.Skip(1));
+
+    public static IQueryCompounded<IDetailQueryAtom> QueryAll(
+            this IReadOnlyList<IQueryCompounded<IDetailQueryAtom>> lst)
+        => lst.Count == 0 ? DetailQueryUnconstrained.Instance : lst[0].QueryAll(lst.Skip(1));
+
+    public static IQueryCompounded<IVoucherQueryAtom> QueryAll(
+            this IReadOnlyList<IQueryCompounded<IVoucherQueryAtom>> lst)
+        => lst.Count == 0 ? VoucherQueryUnconstrained.Instance : lst[0].QueryAll(lst.Skip(1));
+
+    public static IQueryCompounded<IDistributedQueryAtom> QueryAll(
+            this IReadOnlyList<IQueryCompounded<IDistributedQueryAtom>> lst)
+        => lst.Count == 0 ? DistributedQueryUnconstrained.Instance : lst[0].QueryAll(lst.Skip(1));
+
+    public static IQueryCompounded<TAtom> QueryAny<TAtom>(
+            this IQueryCompounded<TAtom> b,
+            IEnumerable<IQueryCompounded<TAtom>> lst) where TAtom : class
+        => lst.Aggregate(b, (q, v) => new UnionQueries<TAtom>(q, v));
+
+    public static IQueryCompounded<TAtom> QueryAll<TAtom>(
+            this IQueryCompounded<TAtom> b,
+            IEnumerable<IQueryCompounded<TAtom>> lst) where TAtom : class
+        => lst.Aggregate(b, (q, v) => new IntersectQueries<TAtom>(q, v));
+
+    public static IQueryCompounded<TAtom> QueryBut<TAtom>(
+            this IQueryCompounded<TAtom> b,
+            IEnumerable<IQueryCompounded<TAtom>> lst) where TAtom : class
+        => lst.Aggregate(b, (q, v) => new SubtractQueries<TAtom>(q, v));
 }

@@ -581,22 +581,4 @@ public class Statement : PluginBase
 
         return flag;
     }
-
-    private sealed class VoucherDetailQuery : IVoucherDetailQuery
-    {
-        public VoucherDetailQuery(IQueryCompounded<IVoucherQueryAtom> v, IQueryCompounded<IDetailQueryAtom> d)
-        {
-            VoucherQuery = v;
-            DetailEmitFilter = new Emit { DetailFilter = d };
-        }
-
-        public IQueryCompounded<IVoucherQueryAtom> VoucherQuery { get; }
-
-        public IEmit DetailEmitFilter { get; }
-    }
-
-    private class Emit : IEmit
-    {
-        public IQueryCompounded<IDetailQueryAtom> DetailFilter { get; init; }
-    }
 }
