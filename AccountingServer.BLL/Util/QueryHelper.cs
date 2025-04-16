@@ -16,6 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AccountingServer.Entities;
@@ -90,33 +91,39 @@ public sealed class SimpleVoucherQuery : IVoucherQueryAtom
 public static class QueryHelper
 {
     public static IQueryCompounded<TAtom> QueryAny<TAtom>(
-            this IReadOnlyList<IQueryCompounded<TAtom>> lst) where TAtom : class
-        => lst.Count == 0 ? null : lst[0].QueryAny(lst.Skip(1));
+            this IEnumerable<IQueryCompounded<TAtom>> lst) where TAtom : class
+        => !lst.Any() ? null : lst.First().QueryAny(lst.Skip(1));
 
-    public static IQueryCompounded<IDetailQueryAtom> QueryAll(
-            this IReadOnlyList<IQueryCompounded<IDetailQueryAtom>> lst)
-        => lst.Count == 0 ? DetailQueryUnconstrained.Instance : lst[0].QueryAll(lst.Skip(1));
+    public static IQueryCompounded<TAtom> QueryAll<TAtom>(
+            this IEnumerable<IQueryCompounded<TAtom>> lst) where TAtom : class
+    {
+        if (lst.Any())
+            lst.First().QueryAll(lst.Skip(1));
 
-    public static IQueryCompounded<IVoucherQueryAtom> QueryAll(
-            this IReadOnlyList<IQueryCompounded<IVoucherQueryAtom>> lst)
-        => lst.Count == 0 ? VoucherQueryUnconstrained.Instance : lst[0].QueryAll(lst.Skip(1));
+        if (lst is IEnumerable<IQueryCompounded<IDetailQueryAtom>>)
+            return (IQueryCompounded<TAtom>)DetailQueryUnconstrained.Instance;
 
-    public static IQueryCompounded<IDistributedQueryAtom> QueryAll(
-            this IReadOnlyList<IQueryCompounded<IDistributedQueryAtom>> lst)
-        => lst.Count == 0 ? DistributedQueryUnconstrained.Instance : lst[0].QueryAll(lst.Skip(1));
+        if (lst is IEnumerable<IQueryCompounded<IVoucherQueryAtom>>)
+            return (IQueryCompounded<TAtom>)VoucherQueryUnconstrained.Instance;
+
+        if (lst is IEnumerable<IQueryCompounded<IDistributedQueryAtom>>)
+            return (IQueryCompounded<TAtom>)DistributedQueryUnconstrained.Instance;
+
+        throw new NotImplementedException();
+    }
 
     public static IQueryCompounded<TAtom> QueryAny<TAtom>(
             this IQueryCompounded<TAtom> b,
             IEnumerable<IQueryCompounded<TAtom>> lst) where TAtom : class
-        => lst.Aggregate(b, (q, v) => new UnionQueries<TAtom>(q, v));
+        => b == null ? lst.QueryAny() : lst.Aggregate(b, (q, v) => new UnionQueries<TAtom>(q, v));
 
     public static IQueryCompounded<TAtom> QueryAll<TAtom>(
             this IQueryCompounded<TAtom> b,
             IEnumerable<IQueryCompounded<TAtom>> lst) where TAtom : class
-        => lst.Aggregate(b, (q, v) => new IntersectQueries<TAtom>(q, v));
+        => b == null ? null : lst.Aggregate(b, (q, v) => new IntersectQueries<TAtom>(q, v));
 
     public static IQueryCompounded<TAtom> QueryBut<TAtom>(
             this IQueryCompounded<TAtom> b,
             IEnumerable<IQueryCompounded<TAtom>> lst) where TAtom : class
-        => lst.Aggregate(b, (q, v) => new SubtractQueries<TAtom>(q, v));
+        => b == null ? null : lst.Aggregate(b, (q, v) => new SubtractQueries<TAtom>(q, v));
 }

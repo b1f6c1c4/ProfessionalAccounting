@@ -22,7 +22,7 @@ using System.Xml.Serialization;
 namespace AccountingServer.Entities.Util;
 
 [Serializable]
-public class LoginEntry
+public class IdPEntry
 {
     [XmlElement("Subject")]
     public string Subject { get; set; }

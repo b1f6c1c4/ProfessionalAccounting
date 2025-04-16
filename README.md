@@ -28,7 +28,9 @@
 - Fast entry of split bill expenses [AA制消费的快速录入](AccountingServer.Shell/Serializer/DiscountSerializer.cs)
 - Multi-currency accounting, even within a single voucher [多币种记账](AccountingServer.Entities/Voucher.cs#L153-L157)（支持一张记账凭证多个币种共存）
 - Exchange rate inquiry / conversion [汇率查询与自动转换](AccountingServer.BLL/Util/Exchange.cs)（在分类汇总时可按本位币显示外币）
-- Multi-users, transferring money to each other [多用户互相转账](AccountingServer.Entities/Voucher.cs#L147-L151)（支持一张记账凭证多个用户共存）
+- Multi-entities, transferring money to each other [多记账主体互相转账](AccountingServer.Entities/Voucher.cs#L147-L151)（支持一张记账凭证多个记账主体共存）
+- TLSv1.3 certificate-based authentication [基于TLSv1.3客户端证书的身份认证](nginx/proxy.nginx.conf)
+- Fine-grained identity/role-based authorization [基于身份和角色的细粒度鉴权](AccountingServer.BLL/Util/ACL.cs)
 - Mutable accounting base currency [记账本位币变动](AccountingServer.Shell/Carry/BaseCurrencyShell.cs)（所有者权益币种变动）
 - Fixed asset management [固定资产管理](AccountingServer.Shell/AssetShell.cs)（购置登记、折旧、贬值与处置）
 - Automatic amortization [自动摊销](AccountingServer.Shell/AmortizationShell.cs)
@@ -135,10 +137,10 @@
 
 1. 在客户端上使用浏览器访问服务器的18080端口：`http://<server>:18080/`（本地）或`https://<server>:18080/`（网络）
 1. 可以看到用户界面分为两部分：上面的一行命令框和下面的编辑器
-1. 在命令框中，输入命令：`login <username>`并按回车
-    - `<username>`是你在记账系统中的用户名
-    - 无需注册，没有密码，用户名只是个代号而已
-    - 用户名会在前端存储在localstorage中，无需每次`login`
+1. 在命令框中，输入命令：`login <entity>`并按回车
+    - `<entity>`是你在记账系统中的记账主体
+    - 无需注册，没有密码，记账主体只是个代号而已
+    - 当前操作的记账主体存储在浏览器的localstorage中，无需每次`login`
 1. 按tab可以在命令框和编辑器之间切换
 1. 执行空白命令会在编辑器中添加一个空的记账凭证模板（`@new Voucher { }@`）
 1. 在模板中需要填写记账凭证的内容，也就是**谁**、**用什么货币**、**关于什么**、交易了**多少钱**

@@ -27,6 +27,7 @@ public class ConfigFilesManager
     {
         var names = new[]
             {
+                "ACL",
                 "BaseCurrency",
                 "Symbol",
                 "Exchange",

@@ -32,19 +32,19 @@ public class ACL
 {
     [XmlElement("Identity")]
     public List<Identity> Identities { get; set; }
+
+    [XmlElement("Role")]
+    public List<Role> Roles { get; set; }
 }
 
 [Serializable]
-public class Identity
+public class Role
 {
     [XmlAttribute("name")]
     public string Name { get; set; }
 
-    [XmlElement("Inherit")]
+    [XmlElement("Role")]
     public List<string> Inherits { get; set; }
-
-    [XmlElement("Login")]
-    public Login Login { get; set; }
 
     [XmlElement("User")]
     public List<string> Users { get; set; }
@@ -58,48 +58,57 @@ public class Identity
     [XmlElement("Reject")]
     public List<Permission> Rejects { get; set; }
 
-    public IQueryCompounded<IDetailQueryAtom> DetailQueryView;
+    [XmlIgnore]
+    public (IQueryCompounded<IDetailQueryAtom>,IQueryCompounded<IDetailQueryAtom>) View, Edit;
 
-    public IQueryCompounded<IDetailQueryAtom> DetailQueryViewRejects;
-
-    public IQueryCompounded<IDetailQueryAtom> DetailQueryEdit;
-
-    public IQueryCompounded<IDetailQueryAtom> DetailQueryEditRejects;
+    [XmlIgnore]
+    public (IQueryCompounded<IVoucherQueryAtom>,IQueryCompounded<IVoucherQueryAtom>) Voucher;
 }
 
 [Serializable]
-public class Login : LoginEntry
+public class Identity : Role
+{
+    [XmlElement("IdP")]
+    public IdentityProvider IdP { get; set; }
+}
+
+[Serializable]
+public class IdentityProvider : IdPEntry
 {
     [XmlElement("OR")]
-    public List<LoginEntry> ORs { get; set; }
+    public List<IdPEntry> ORs { get; set; }
 }
 
+[Flags]
 [Serializable]
-public enum Action
+public enum Verb
 {
+    None = 0b0000_0000,
+
     [XmlEnum("view")]
-    View,
+    View = 0b0000_0001,
 
     [XmlEnum("edit")]
-    Edit,
+    Edit = 0b0000_0011,
+
+    [XmlEnum("imba")]
+    Imbalance = 0b0000_0100,
+
+    [XmlEnum("voucher")]
+    Voucher = 0b0000_1000,
 
     [XmlEnum("invoke")]
-    Invoke,
+    Invoke = 0b0001_0000,
 }
 
 [Serializable]
 public class Permission
 {
     [XmlAttribute("action")]
-    public Action Action { get; set; }
+    public Verb Action { get; set; }
 
     [XmlText]
     public string Query { get; set; }
-
-    private IQueryCompounded<IDetailQueryAtom> m_DetailQuery;
-
-    public IQueryCompounded<IDetailQueryAtom> DetailQuery
-        => m_DetailQuery ?? (m_DetailQuery = ParsingF.PureDetailQuery(Query, new()));
 }
 
 public static class ACLManager
@@ -111,52 +120,65 @@ public static class ACLManager
     {
         var id = Cfg.Get<ACL>().Identities.SingleOrDefault((id) => id.Name == name)
             ?? Cfg.Get<ACL>().Identities.Single((id) => id.Name == null);
-
-        if (id.DetailQueryView != null)
-            return id;
-
-        if (id.Inherits.Count == 0)
-        {
-            id.DetailQueryView = DetailQueryUnconstrained.Instance
-                .QueryBut(id.Denies.Where(static (p) => p.Action == Action.View).Select(static (p) => p.DetailQuery))
-                .QueryBut(id.Rejects.Where(static (p) => p.Action == Action.View).Select(static (p) => p.DetailQuery));
-            id.DetailQueryViewRejects = id.Rejects.Where(static (p) => p.Action == Action.View)
-                .Select(static (p) => p.DetailQuery).ToList().QueryAny();
-            id.DetailQueryEdit = DetailQueryUnconstrained.Instance
-                .QueryBut(id.Denies.Where(static (p) => p.Action == Action.Edit).Select(static (p) => p.DetailQuery))
-                .QueryBut(id.Rejects.Where(static (p) => p.Action == Action.Edit).Select(static (p) => p.DetailQuery));
-            id.DetailQueryEditRejects = id.Rejects.Where(static (p) => p.Action == Action.Edit)
-                .Select(static (p) => p.DetailQuery).ToList().QueryAny();
-        }
-        else
-        {
-            var lst = id.Inherits.Select((nm) => GetIdentity(nm).DetailQueryViewRejects)
-                .Where(static (q) => q != null).ToList();
-            lst.AddRange(id.Rejects.Select(static (p) => p.DetailQuery));
-            id.DetailQueryViewRejects = lst.QueryAny();
-            id.DetailQueryView = id.Inherits.Select((nm) => GetIdentity(nm).DetailQueryView).ToList().QueryAny()
-                .QueryAny(id.Grants.Where(static (p) => p.Action == Action.View).Select(static (g) => g.DetailQuery))
-                .QueryBut(id.Denies.Where(static (p) => p.Action == Action.View).Select(static (d) => d.DetailQuery))
-                .QueryBut(lst);
-            lst = id.Inherits.Select((nm) => GetIdentity(nm).DetailQueryEditRejects)
-                .Where(static (q) => q != null).ToList();
-            lst.AddRange(id.Rejects.Select(static (p) => p.DetailQuery));
-            id.DetailQueryEditRejects = lst.QueryAny();
-            id.DetailQueryEdit = id.Inherits.Select((nm) => GetIdentity(nm).DetailQueryEdit).ToList().QueryAny()
-                .QueryAny(id.Grants.Where(static (p) => p.Action == Action.Edit).Select(static (g) => g.DetailQuery))
-                .QueryBut(id.Denies.Where(static (p) => p.Action == Action.Edit).Select(static (d) => d.DetailQuery))
-                .QueryBut(lst);
-        }
-
+        PrepareRole(id);
         return id;
+    }
+
+    public static Role GetRole(string name)
+    {
+        var id = Cfg.Get<ACL>().Roles.Single((id) => id.Name == name);
+        PrepareRole(id);
+        return id;
+    }
+
+    private static bool Flags(this Verb a, Verb b)
+        => (a & b) != Verb.None;
+
+    public static void PrepareRole(Role id)
+    {
+        if (id.View.Item1 != null)
+            return;
+
+        (IQueryCompounded<T>,IQueryCompounded<T>) Compute<T>(Verb f,
+                Func<Permission, IQueryCompounded<T>> proj,
+                Func<Role, (IQueryCompounded<T>,IQueryCompounded<T>)> proj2)
+            where T : class
+        {
+            if (id.Inherits.Count == 0)
+            {
+                return (id.Rejects.Where((p) => p.Action.Flags(f)).Select(proj).QueryAny(),
+                        id.Grants.Where((p) => p.Action.HasFlag(f)).Select(proj).QueryAny()
+                        .QueryBut(id.Denies.Where((p) => p.Action.Flags(f)).Select(proj))
+                        .QueryBut(id.Rejects.Where((p) => p.Action.Flags(f)).Select(proj)));
+            }
+            else
+            {
+                var lst = id.Inherits.Select((nm) => proj2(GetRole(nm)).Item1)
+                    .Concat(id.Rejects.Where((p) => p.Action.Flags(f)).Select(proj)).ToList();
+                return (lst.QueryAny(),
+                        id.Inherits.Select((nm) => proj2(GetRole(nm)).Item2).QueryAny()
+                        .QueryAny(id.Grants.Where((p) => p.Action.HasFlag(f)).Select(proj))
+                        .QueryBut(id.Denies.Where((p) => p.Action.Flags(f)).Select(proj))
+                        .QueryBut(lst));
+            }
+        }
+
+        var dq = static (Permission p) => ParsingF.PureDetailQuery(p.Query, new());
+        var vq = static (Permission p) => ParsingF.VoucherQuery(p.Query, new());
+        id.View = Compute(Verb.View, dq, (r) => r.View);
+        id.Edit = Compute(Verb.Edit, dq, (r) => r.Edit);
+        id.Voucher = Compute(Verb.Voucher, vq, (r) => r.Voucher);
     }
 
     private static bool Recursive(Predicate<Identity> pred, Identity id0)
         => id0 != null && (pred(id0) || id0.Inherits.Any((nm) => Recursive(pred,
                         Cfg.Get<ACL>().Identities.SingleOrDefault((id) => id.Name == nm))));
 
-    public static bool IsMatch(Login login, Predicate<LoginEntry> pred)
+    public static bool IsMatch(IdentityProvider login, Predicate<IdPEntry> pred)
     {
+        if (login == null)
+            return false;
+
         if (!pred(login))
             return false;
 
@@ -166,11 +188,11 @@ public static class ACLManager
         return true;
     }
 
-    public static Identity Parse(Predicate<LoginEntry> pred)
+    public static Identity Parse(Predicate<IdPEntry> pred)
     {
-        var lst = Cfg.Get<ACL>().Identities.Where((id) => IsMatch(id.Login, pred)).ToList();
+        var lst = Cfg.Get<ACL>().Identities.Where((id) => IsMatch(id.IdP, pred)).ToList();
         if (lst.Count == 0)
-            return GetIdentity("anonymous");
+            return GetIdentity(null);
 
         if (lst.Count == 1)
             return lst[0];
@@ -179,12 +201,18 @@ public static class ACLManager
     }
 
     public static bool CanLogin(this Identity id0, string user)
-        => id0 != null && Recursive((id) => id.Users.Contains(user), id0);
+        => id0 != null && Recursive((id) => id.Users.Contains("*") || id.Users.Contains(user), id0);
+
+    public static bool CanInvoke(this Identity id0, string expr)
+        => id0 != null && Recursive((id) =>
+                id.Grants.Any((p) => p.Action.HasFlag(Verb.Invoke) && expr.StartsWith(p.Query, StringComparison.Ordinal))
+                && !id.Denies.Any((p) => p.Action.Flags(Verb.Invoke) && expr.StartsWith(p.Query, StringComparison.Ordinal)), id0)
+            && !Recursive((id) => id.Rejects.Any((p) => p.Action.Flags(Verb.Invoke) && expr.StartsWith(p.Query, StringComparison.Ordinal)), id0);
 
     public static void Redact(this Identity id, Voucher v)
     {
-        var lst = v.Details.Where((d) => d.IsMatch(id.DetailQueryView)).ToList();
-        if (lst.Count == v.Details.Count)
+        var lst = v.Details.Where((d) => d.IsMatch(id.View.Item2)).ToList();
+        if (lst.Count() == v.Details.Count())
             return;
 
         v.Redacted = true;
@@ -193,5 +221,5 @@ public static class ACLManager
 
     public static IVoucherDetailQuery Redact(this Identity id, IVoucherDetailQuery vdq)
         => new VoucherDetailQuery(vdq.VoucherQuery,
-                new IntersectQueries<IDetailQueryAtom>(vdq.ActualDetailFilter(), id.DetailQueryView));
+                new IntersectQueries<IDetailQueryAtom>(vdq.ActualDetailFilter(), id.View.Item2));
 }

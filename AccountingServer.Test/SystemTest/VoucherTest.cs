@@ -61,8 +61,23 @@ public class VoucherTest
 
         Cfg.Assign(new Abbreviations { Abbrs = new() { new() { Abbr = "aaa", Title = 5678, Editable = false } } });
 
+        var acl = new ACL
+            {
+                Identities = new()
+                    {
+                        new()
+                            {
+                                Grants = new()
+                                    {
+                                        new() { Action = Verb.Edit, Query = "U" },
+                                        new() { Action = Verb.Invoke, Query = "" },
+                                    },
+                            },
+                    },
+            };
+
         m_Facade = new(db: "accounting-test");
-        m_Session = m_Facade.CreateSession("b1", DateTime.UtcNow.Date);
+        m_Session = m_Facade.CreateSession("b1", DateTime.UtcNow.Date, static (le) => true);
 
         var res = m_Facade.ExecuteVoucherUpsert(m_Session, "new Voucher { Ub2 T123401 whatever / aaa huh 10 }").AsTask()
             .Result;

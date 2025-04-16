@@ -67,7 +67,7 @@ public class Facade
                 };
     }
 
-    public Session CreateSession(string user, DateTime dt, Predicate<LoginEntry> idp, string spec = null, int limit = 0)
+    public Session CreateSession(string user, DateTime dt, Predicate<IdPEntry> idp, string spec = null, int limit = 0)
         => new(m_Db, user, dt, ACLManager.Parse(idp), spec, limit);
 
     /// <summary>
@@ -101,6 +101,8 @@ public class Facade
                 break;
             case "version":
                 return ListVersions().ToAsyncEnumerable();
+            case "me":
+                return ListIdentity(session);
         }
 
         switch (ParsingF.Optional(ref expr, "time ", "slow "))
@@ -189,6 +191,15 @@ public class Facade
             await Task.Delay(250);
             yield return $"{ch}";
         }
+    }
+
+    private static async IAsyncEnumerable<string> ListIdentity(Session session)
+    {
+        yield return $"Authenticated Identity: {session.Identity.Name.Quotation('"')}\n";
+        var roles = session.Identity.Inherits.Select(static (s) => s.Quotation('"'));
+        yield return $"Associated Roles: {string.Join(", ", roles)}\n";
+        yield return $"Accounting Entity: {session.Client.User.AsUser()}\n";
+        yield return $"Client Date: {session.Client.Today.AsDate()}\n";
     }
 
     #region Exchange
