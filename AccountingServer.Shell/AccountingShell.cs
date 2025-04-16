@@ -26,6 +26,7 @@ using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Subtotal;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.FacadeF;
+using static AccountingServer.BLL.Parsing.Synthesizer;
 
 namespace AccountingServer.Shell;
 
@@ -50,6 +51,8 @@ internal class AccountingShell : IShellComponent
     {
         var type = ExprType.None;
         ISubtotalStringify visitor;
+
+        var explain = ParsingF.Token(ref expr, false, static t => t == "explain") != null;
 
         if (ParsingF.Token(ref expr, false, static t => t == "unsafe") != null)
             type |= ExprType.Unsafe;
@@ -109,7 +112,7 @@ internal class AccountingShell : IShellComponent
         if (type.HasFlag(ExprType.GroupedQuery))
             try
             {
-                return TryGroupedQuery(expr, visitor, client);
+                return TryGroupedQuery(expr, visitor, client, explain);
             }
             catch (Exception)
             {
@@ -119,7 +122,7 @@ internal class AccountingShell : IShellComponent
         if (type.HasFlag(ExprType.VoucherGroupedQuery))
             try
             {
-                return TryVoucherGroupedQuery(expr, visitor, client);
+                return TryVoucherGroupedQuery(expr, visitor, client, explain);
             }
             catch (Exception)
             {
@@ -128,12 +131,18 @@ internal class AccountingShell : IShellComponent
 
         return (type & ExprType.NonGroupedQueries) switch
             {
-                ExprType.VoucherQuery => TryVoucherQuery(expr, !type.HasFlag(ExprType.Unsafe), client),
-                ExprType.DetailQuery => TryDetailQuery(expr, !type.HasFlag(ExprType.Unsafe), client),
-                ExprType.DetailRQuery => TryDetailRQuery(expr, !type.HasFlag(ExprType.Unsafe), client),
-                ExprType.FancyQuery => TryFancyQuery(expr, !type.HasFlag(ExprType.Unsafe), client),
+                ExprType.VoucherQuery => TryVoucherQuery(expr, !type.HasFlag(ExprType.Unsafe), client, explain),
+                ExprType.DetailQuery => TryDetailQuery(expr, !type.HasFlag(ExprType.Unsafe), client, explain),
+                ExprType.DetailRQuery => TryDetailRQuery(expr, !type.HasFlag(ExprType.Unsafe), client, explain),
+                ExprType.FancyQuery => TryFancyQuery(expr, !type.HasFlag(ExprType.Unsafe), client, explain),
                 _ => throw new InvalidOperationException("表达式无效"),
             };
+    }
+
+    private async IAsyncEnumerable<string> Present(params string[] ss)
+    {
+        foreach (var s in ss)
+            yield return $"{s}\n";
     }
 
     /// <summary>
@@ -143,10 +152,13 @@ internal class AccountingShell : IShellComponent
     /// <param name="safe">仅限强检索式</param>
     /// <param name="client">客户端</param>
     /// <returns>执行结果</returns>
-    private Func<Session, IAsyncEnumerable<string>> TryVoucherQuery(string expr, bool safe, Client client)
+    private Func<Session, IAsyncEnumerable<string>> TryVoucherQuery(string expr, bool safe, Client client, bool explain)
     {
         var res = ParsingF.VoucherQuery(ref expr, client);
         ParsingF.Eof(expr);
+        if (explain)
+            return session => Present("IQueryCompounded<IVoucherQueryAtom>", Synth(res));
+
         if (res.IsDangerous() && safe)
             throw new SecurityException("检测到弱检索式");
 
@@ -160,10 +172,14 @@ internal class AccountingShell : IShellComponent
     /// <param name="trav">呈现器</param>
     /// <param name="client">客户端</param>
     /// <returns>执行结果</returns>
-    private Func<Session, IAsyncEnumerable<string>> TryGroupedQuery(string expr, ISubtotalStringify trav, Client client)
+    private Func<Session, IAsyncEnumerable<string>> TryGroupedQuery(string expr, ISubtotalStringify trav, Client client,
+            bool explain)
     {
         var res = ParsingF.GroupedQuery(ref expr, client);
         ParsingF.Eof(expr);
+        if (explain)
+            return session => Present("IGroupedQuery", Synth(res));
+
         return session => PresentSubtotal(res, trav, session);
     }
 
@@ -175,10 +191,13 @@ internal class AccountingShell : IShellComponent
     /// <param name="client">客户端</param>
     /// <returns>执行结果</returns>
     private Func<Session, IAsyncEnumerable<string>> TryVoucherGroupedQuery(string expr, ISubtotalStringify trav,
-        Client client)
+        Client client, bool explain)
     {
         var res = ParsingF.VoucherGroupedQuery(ref expr, client);
         ParsingF.Eof(expr);
+        if (explain)
+            return session => Present("IVoucherGroupedQuery", Synth(res));
+
         return session => PresentSubtotal(res, trav, session);
     }
 
@@ -198,10 +217,13 @@ internal class AccountingShell : IShellComponent
     /// <param name="safe">仅限强检索式</param>
     /// <param name="client">客户端</param>
     /// <returns>执行结果</returns>
-    private Func<Session, IAsyncEnumerable<string>> TryDetailQuery(string expr, bool safe, Client client)
+    private Func<Session, IAsyncEnumerable<string>> TryDetailQuery(string expr, bool safe, Client client, bool explain)
     {
         var res = ParsingF.DetailQuery(ref expr, client);
         ParsingF.Eof(expr);
+        if (explain)
+            return session => Present("IVoucherDetailQuery", Synth(res));
+
         if (res.IsDangerous() && safe)
             throw new SecurityException("检测到弱检索式");
 
@@ -224,10 +246,13 @@ internal class AccountingShell : IShellComponent
     /// <param name="safe">仅限强检索式</param>
     /// <param name="client">客户端</param>
     /// <returns>执行结果</returns>
-    private Func<Session, IAsyncEnumerable<string>> TryDetailRQuery(string expr, bool safe, Client client)
+    private Func<Session, IAsyncEnumerable<string>> TryDetailRQuery(string expr, bool safe, Client client, bool explain)
     {
         var res = ParsingF.DetailQuery(ref expr, client);
         ParsingF.Eof(expr);
+        if (explain)
+            return session => Present("IVoucherDetailQuery", Synth(res));
+
         if (res.IsDangerous() && safe)
             throw new SecurityException("检测到弱检索式");
 
@@ -253,10 +278,13 @@ internal class AccountingShell : IShellComponent
     /// <param name="safe">仅限强检索式</param>
     /// <param name="client">客户端</param>
     /// <returns>执行结果</returns>
-    private Func<Session, IAsyncEnumerable<string>> TryFancyQuery(string expr, bool safe, Client client)
+    private Func<Session, IAsyncEnumerable<string>> TryFancyQuery(string expr, bool safe, Client client, bool explain)
     {
         var res = ParsingF.DetailQuery(ref expr, client);
         ParsingF.Eof(expr);
+        if (explain)
+            return session => Present("IVoucherDetailQuery", Synth(res));
+
         if (res.IsDangerous() && safe)
             throw new SecurityException("检测到弱检索式");
 
