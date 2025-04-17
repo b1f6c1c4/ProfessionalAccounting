@@ -96,8 +96,10 @@ public class Facade
             case "?":
                 return ListHelp();
             case "reload":
+                session.Identity.WillInvoke("reload");
                 return Cfg.ReloadAll();
             case "die":
+                session.Identity.WillInvoke("die");
                 Environment.Exit(0);
                 break;
             case "version":
@@ -106,12 +108,16 @@ public class Facade
                 return ListIdentity(session);
         }
 
+        session.Identity.WillLogin(session.Client.User);
+
         switch (ParsingF.Optional(ref expr, "time ", "slow "))
         {
             case "time ":
+                session.Identity.WillInvoke("time");
                 var repetition = (ulong)ParsingF.DoubleF(ref expr);
                 return ExecuteNormal(session, expr, repetition);
             case "slow ":
+                session.Identity.WillInvoke("slow");
                 var slow = (int)ParsingF.DoubleF(ref expr);
                 return ExecuteProfile(session, expr, slow);
             default:
@@ -183,6 +189,8 @@ public class Facade
                 return ListIdentity(session);
         }
 
+        session.Identity.WillLogin(session.Client.User);
+
         return m_AccountingShell.Execute(expr, session);
     }
 
@@ -199,11 +207,18 @@ public class Facade
     private static async IAsyncEnumerable<string> ListIdentity(Session session)
     {
         yield return $"Authenticated Identity: {session.Identity.Name.Quotation('"')}\n";
+
         var roles = session.Identity.Inherits.Select(static (s) => s.Quotation('"'));
         yield return $"Associated Roles: {string.Join(", ", roles)}\n";
+
         var users = session.Identity.Users.Select(static (s) => s.AsUser());
         yield return $"Associated Entities: {string.Join(", ", users)}\n";
-        yield return $"Selected Entity: {session.Client.User.AsUser()}\n";
+
+        if (session.Identity.CanLogin(session.Client.User))
+            yield return $"Selected Entity: {session.Client.User.AsUser()}\n";
+        else
+            yield return $"!!Access to {session.Client.User.AsUser()} denied, try `login` one of the above!!\n";
+
         yield return $"Current Date: {session.Client.Today.AsDate()}\n";
         yield return $"Allowable View: {Synth(session.Identity.View.Item2)}\n";
         yield return $"Allowable Edit: {Synth(session.Identity.Edit.Item2)}\n";

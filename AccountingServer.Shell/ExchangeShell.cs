@@ -46,10 +46,14 @@ internal class ExchangeShell : IShellComponent
 
     public async IAsyncEnumerable<string> Execute(string expr, Session session)
     {
+        session.Identity.WillInvoke("?e");
         expr = expr.Rest();
         var isAccurate = expr.Initial() == "acc";
         if (isAccurate)
+        {
+            session.Identity.WillInvoke("?e-acc");
             expr = expr.Rest();
+        }
         var from = Parsing.Token(ref expr).ToUpperInvariant();
         var val = Parsing.DoubleF(ref expr);
         var to = Parsing.Token(ref expr)?.ToUpperInvariant() ?? BaseCurrency.Now;

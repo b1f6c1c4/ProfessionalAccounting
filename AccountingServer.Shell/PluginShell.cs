@@ -85,6 +85,7 @@ internal class PluginShell : IShellComponent
             return GetHelp(plgName);
         }
 
+        session.Identity.WillInvoke($"${plgName}$");
         return GetPlugin(plgName).Execute(expr, session);
     }
 

@@ -224,11 +224,23 @@ public static class ACLManager
     public static bool CanLogin(this Identity id0, string user)
         => id0 != null && Recursive((id) => id.Users.Contains("*") || id.Users.Contains(user), id0);
 
-    public static bool CanInvoke(this Identity id0, string expr)
+    public static void WillLogin(this Identity id0, string user)
+    {
+        if (!CanLogin(id0, user))
+            throw new ApplicationException($"Login of {user} denied for identity \"{id0.Name}\"");
+    }
+
+    public static bool CanInvoke(this Identity id0, string term)
         => id0 != null && Recursive((id) =>
-                id.Grants.Any((p) => p.Action.HasFlag(Verb.Invoke) && expr.StartsWith(p.Query, StringComparison.Ordinal))
-                && !id.Denies.Any((p) => p.Action.Flags(Verb.Invoke) && expr.StartsWith(p.Query, StringComparison.Ordinal)), id0)
-            && !Recursive((id) => id.Rejects.Any((p) => p.Action.Flags(Verb.Invoke) && expr.StartsWith(p.Query, StringComparison.Ordinal)), id0);
+                id.Grants.Any((p) => p.Action.HasFlag(Verb.Invoke) && term.StartsWith(p.Query, StringComparison.Ordinal))
+                && !id.Denies.Any((p) => p.Action.Flags(Verb.Invoke) && term.StartsWith(p.Query, StringComparison.Ordinal)), id0)
+            && !Recursive((id) => id.Rejects.Any((p) => p.Action.Flags(Verb.Invoke) && term.StartsWith(p.Query, StringComparison.Ordinal)), id0);
+
+    public static void WillInvoke(this Identity id0, string term)
+    {
+        if (!CanInvoke(id0, term))
+            throw new ApplicationException($"Access to \"{term}\" denied for identity \"{id0.Name}\"");
+    }
 
     public static bool CanRead(this Identity id, Voucher v)
         => v.IsMatch(id.Voucher.Item2);
