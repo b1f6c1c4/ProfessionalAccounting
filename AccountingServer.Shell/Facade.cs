@@ -420,6 +420,8 @@ public class Facade
     {
         var asset = session.Serializer.ParseAsset(str);
 
+        session.Identity.WillAccess(asset);
+        session.Identity.WillAccess(await session.Accountant.SelectAssetAsync(asset.ID));
         if (!await session.Accountant.UpsertAsync(asset))
             throw new ApplicationException("更新或添加失败");
 
@@ -436,6 +438,8 @@ public class Facade
     {
         var amort = session.Serializer.ParseAmort(str);
 
+        session.Identity.WillAccess(amort);
+        session.Identity.WillAccess(await session.Accountant.SelectAmortizationAsync(amort.ID));
         if (!await session.Accountant.UpsertAsync(amort))
             throw new ApplicationException("更新或添加失败");
 
@@ -476,6 +480,7 @@ public class Facade
         if (!asset.ID.HasValue)
             throw new ApplicationException("编号未知");
 
+        session.Identity.WillAccess(await session.Accountant.SelectAssetAsync(asset.ID.Value));
         return await session.Accountant.DeleteAssetAsync(asset.ID.Value);
     }
 
@@ -492,6 +497,7 @@ public class Facade
         if (!amort.ID.HasValue)
             throw new ApplicationException("编号未知");
 
+        session.Identity.WillAccess(await session.Accountant.SelectAmortizationAsync(amort.ID.Value));
         return await session.Accountant.DeleteAmortizationAsync(amort.ID.Value);
     }
 

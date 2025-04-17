@@ -119,7 +119,7 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         regex: /\b(?:Voucher|Asset|Amortization|VoucherDetail|List|AcquisitionItem|DepreciateItem|DevalueItem|DispositionItem|AmortItem)\b/,
       }, {
         token: 'variable.parameter.user',
-        regex: /\bU[A-Za-z0-9_]+(&[A-Za-z0-9_]+)*\b/,
+        regex: /\bU(?!ncertain)[A-Za-z0-9_]+(&[A-Za-z0-9_]+)*\b/,
       }, {
         token: 'variable.parameter.currency',
         regex: /@[a-zA-Z]{3,4}\b/,

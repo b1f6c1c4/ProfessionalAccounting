@@ -87,6 +87,12 @@ public class Role
 
     [XmlIgnore]
     public (IQueryCompounded<IVoucherQueryAtom>,IQueryCompounded<IVoucherQueryAtom>) Voucher { get; internal set; }
+
+    [XmlIgnore]
+    public (IQueryCompounded<IDistributedQueryAtom>,IQueryCompounded<IDistributedQueryAtom>) Asset { get; internal set; }
+
+    [XmlIgnore]
+    public (IQueryCompounded<IDistributedQueryAtom>,IQueryCompounded<IDistributedQueryAtom>) Amort { get; internal set; }
 }
 
 [Serializable]
@@ -142,6 +148,12 @@ public enum Verb
 
     [XmlEnum("invoke")]
     Invoke = 0b0001_0000,
+
+    [XmlEnum("asset")]
+    Asset = 0b0010_0000,
+
+    [XmlEnum("amort")]
+    Amort = 0b0100_0000,
 }
 
 [Serializable]
@@ -228,9 +240,12 @@ public static class ACLManager
 
         var dq = static (Permission p) => ParsingF.PureDetailQuery(p.Query, new());
         var vq = static (Permission p) => ParsingF.VoucherQuery(p.Query, new());
+        var aq = static (Permission p) => ParsingF.DistributedQuery(p.Query, new());
         id.View = Compute(Verb.View, dq, (r) => r.View);
         id.Edit = Compute(Verb.Edit, dq, (r) => r.Edit);
         id.Voucher = Compute(Verb.Voucher, vq, (r) => r.Voucher);
+        id.Asset = Compute(Verb.Asset, aq, (r) => r.Asset);
+        id.Amort = Compute(Verb.Amort, aq, (r) => r.Amort);
         id.Prepared = true;
         Console.WriteLine($"Prepared identity {id.Name}");
     }
@@ -298,7 +313,7 @@ public static class ACLManager
 
     public static Identity Assume(this Identity id0, string req)
     {
-        if (req == null)
+        if (string.IsNullOrEmpty(req))
             return id0;
 
         if (id0 == null)
@@ -401,8 +416,42 @@ public static class ACLManager
         throw new ApplicationException(sb.ToString());
     }
 
+    public static bool CanAccess(this Identity id, Asset a)
+        => a.IsMatch(id.Asset.Item2);
+
+    public static void WillAccess(this Identity id, Asset a)
+    {
+        if (a == null)
+            return;
+
+        var nm = id.Name.Quotation('"');
+
+        if (!id.CanAccess(a))
+            throw new ApplicationException($"Access to {a.ID} denied for identity {nm}");
+    }
+
+    public static bool CanAccess(this Identity id, Amortization a)
+        => a.IsMatch(id.Amort.Item2);
+
+    public static void WillAccess(this Identity id, Amortization a)
+    {
+        if (a == null)
+            return;
+
+        var nm = id.Name.Quotation('"');
+
+        if (!id.CanAccess(a))
+            throw new ApplicationException($"Access to {a.ID} denied for identity {nm}");
+    }
+
     public static IQueryCompounded<IVoucherQueryAtom> Refine(this Identity id, IQueryCompounded<IVoucherQueryAtom> vq)
         => id.Voucher.Item2 == null ? null : new IntersectQueries<IVoucherQueryAtom>(vq, id.Voucher.Item2);
+
+    public static IQueryCompounded<IDistributedQueryAtom> RefineAsset(this Identity id, IQueryCompounded<IDistributedQueryAtom> vq)
+        => id.Asset.Item2 == null ? null : new IntersectQueries<IDistributedQueryAtom>(vq, id.Asset.Item2);
+
+    public static IQueryCompounded<IDistributedQueryAtom> RefineAmort(this Identity id, IQueryCompounded<IDistributedQueryAtom> vq)
+        => id.Amort.Item2 == null ? null : new IntersectQueries<IDistributedQueryAtom>(vq, id.Amort.Item2);
 
     public static IVoucherDetailQuery Refine(this Identity id, IVoucherDetailQuery vdq)
         => id.Voucher.Item2 == null || id.View.Item2 == null ? null :new VoucherDetailQuery(

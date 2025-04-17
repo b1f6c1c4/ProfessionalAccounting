@@ -159,8 +159,8 @@ public class Accountant : IHistoricalExchange
 
     #region Asset
 
-    public async ValueTask<Asset> SelectAssetAsync(Guid id)
-        => AssetAccountant.InternalRegular(await m_Db.SelectAsset(id));
+    public async ValueTask<Asset> SelectAssetAsync(Guid? id)
+        => id.HasValue ? AssetAccountant.InternalRegular(await m_Db.SelectAsset(id.Value)) : null;
 
     public IAsyncEnumerable<Asset> SelectAssetsAsync(IQueryCompounded<IDistributedQueryAtom> filter)
         => m_Db.SelectAssets(filter).Select(AssetAccountant.InternalRegular);
@@ -188,8 +188,8 @@ public class Accountant : IHistoricalExchange
 
     #region Amort
 
-    public async ValueTask<Amortization> SelectAmortizationAsync(Guid id)
-        => AmortAccountant.InternalRegular(await m_Db.SelectAmortization(id));
+    public async ValueTask<Amortization> SelectAmortizationAsync(Guid? id)
+        => id.HasValue ? AmortAccountant.InternalRegular(await m_Db.SelectAmortization(id.Value)) : null;
 
     public IAsyncEnumerable<Amortization> SelectAmortizationsAsync(IQueryCompounded<IDistributedQueryAtom> filter)
         => m_Db.SelectAmortizations(filter).Select(AmortAccountant.InternalRegular);

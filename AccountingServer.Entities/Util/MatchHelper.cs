@@ -19,6 +19,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace AccountingServer.Entities.Util;
 
@@ -249,6 +250,36 @@ public static class MatchHelper
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public static bool IsMatch(this Voucher voucher, IQueryCompounded<IVoucherQueryAtom> query)
         => IsMatch(query, q => IsMatch(voucher, q));
+
+    /// <summary>
+    ///     判断分期是否符合分期检索式
+    /// </summary>
+    /// <param name="dist">分期</param>
+    /// <param name="query">分期检索式</param>
+    /// <returns>是否符合</returns>
+    public static bool IsMatch(this IDistributed dist, IDistributedQueryAtom query)
+    {
+        if (query.Filter.ID != null)
+            if (query.Filter.ID != dist.ID)
+                return false;
+
+        if (query.Filter.Remark != null)
+            if (query.Filter.Remark != dist.Remark)
+                return false;
+
+        if (query.Filter.Name != null)
+            if (new Regex(query.Filter.Name).Match(dist.Name) == null)
+                return false;
+
+        if (!dist.Date.Within(query.Range))
+            return false;
+
+        return false;
+    }
+
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
+    public static bool IsMatch(this IDistributed dist, IQueryCompounded<IDistributedQueryAtom> query)
+        => IsMatch(query, q => IsMatch(dist, q));
 
     /// <summary>
     ///     判断一般检索式是否成立
