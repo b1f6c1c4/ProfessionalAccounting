@@ -205,7 +205,8 @@ public class Synthesizer
         static string Q(string s, bool cond)
             => cond ? $"({s})" : s;
 
-        var (f1, l1) = query.Filter1.Accept<(string, int)>(this);
+        var (f1, l1) = query.Filter1 == null ? ("(null)", -99)
+            : query.Filter1.Accept<(string, int)>(this);
         switch (query.Operator)
         {
             case OperatorType.None:
@@ -214,7 +215,9 @@ public class Synthesizer
             case OperatorType.Complement:
                 return ($"-{Q(f1, l1 <= -1)}", -2);
         }
-        var (f2, l2) = query.Filter2.Accept<(string, int)>(this);
+
+        var (f2, l2) = query.Filter2 == null ? ("(null)", -99)
+            : query.Filter2.Accept<(string, int)>(this);
         switch (query.Operator)
         {
             case OperatorType.Union:
@@ -233,7 +236,8 @@ public class Synthesizer
         static string Q(string s, bool cond)
             => cond ? $"{{{s}}}" : s;
 
-        var (f1, l1) = query.Filter1.Accept<(string, int)>(this);
+        var (f1, l1) = query.Filter1 == null ? ("(null)", -99)
+            : query.Filter1.Accept<(string, int)>(this);
         switch (query.Operator)
         {
             case OperatorType.None:
@@ -242,7 +246,9 @@ public class Synthesizer
             case OperatorType.Complement:
                 return ($"-{Q(f1, l1 <= 2)}", 1);
         }
-        var (f2, l2) = query.Filter2.Accept<(string, int)>(this);
+
+        var (f2, l2) = query.Filter2 == null ? ("(null)", -99)
+            : query.Filter2.Accept<(string, int)>(this);
         switch (query.Operator)
         {
             case OperatorType.Union:

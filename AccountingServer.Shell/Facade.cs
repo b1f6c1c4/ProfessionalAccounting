@@ -68,8 +68,12 @@ public class Facade
                 };
     }
 
-    public Session CreateSession(string user, DateTime dt, Predicate<IdPEntry> idp, string spec = null, int limit = 0)
-        => new(m_Db, user, dt, ACLManager.Parse(idp), spec, limit);
+    public Session CreateSession(string user, DateTime dt, IdPEntry idp,
+            string assume = null, string spec = null, int limit = 0)
+    {
+        var id = ACLManager.Authenticate(idp, assume);
+        return new(m_Db, user, dt, id.Assume(assume), id, spec, limit);
+    }
 
     /// <summary>
     ///     空记账凭证的表示
@@ -204,18 +208,38 @@ public class Facade
 
     private static async IAsyncEnumerable<string> ListIdentity(Session session)
     {
-        yield return $"Authenticated Identity: {session.Identity.Name.Quotation('"')}\n";
+        yield return $"Authenticated Identity: {session.TrueIdentity.Name.Quotation('"')}\n";
 
-        var roles = session.Identity.Inherits.Select(static (s) => s.Quotation('"'));
-        yield return $"Associated Roles: {string.Join(", ", roles)}\n";
+        if (session.TrueIdentity.AllAssumes == null)
+            yield return "Assumable Identies: *\n";
+        else
+        {
+            var assumes = session.TrueIdentity.AllAssumes.Select(static (s) => s.Quotation('"'));
+            yield return $"Assumable Identies: {string.Join(", ", assumes)}\n";
+        }
 
-        var users = session.Identity.Users.Select(static (s) => s.AsUser());
-        yield return $"Associated Entities: {string.Join(", ", users)}\n";
+        yield return $"Assume Identity: {session.Identity.Name.Quotation('"')}\n";
+
+        if (session.Identity.AllRoles == null)
+            yield return "Associated Roles: *\n";
+        else
+        {
+            var roles = session.Identity.AllRoles.Select(static (r) => r.Name.Quotation('"'));
+            yield return $"Associated Roles: {string.Join(", ", roles)}\n";
+        }
+
+        if (session.Identity.AllUsers == null)
+            yield return "Associated Entities: *\n";
+        else
+        {
+            var users = session.Identity.AllUsers.Select(static (s) => s.AsUser());
+            yield return $"Associated Entities: {string.Join(", ", users)}\n";
+        }
 
         if (session.Identity.CanLogin(session.Client.User))
             yield return $"Selected Entity: {session.Client.User.AsUser()}\n";
         else
-            yield return $"!!Access to {session.Client.User.AsUser()} denied, try `login` one of the above!!\n";
+            yield return $"!!Access to {session.Client.User.AsUser()} denied, try `entity` + one of the above!!\n";
 
         yield return $"Current Date: {session.Client.Today.AsDate()}\n";
         yield return $"Allowable View: {Synth(session.Identity.View.Item2)}\n";

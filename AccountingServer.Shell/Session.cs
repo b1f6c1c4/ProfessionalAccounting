@@ -10,11 +10,12 @@ namespace AccountingServer.Shell;
 public class Session
 {
     internal Session(DbSession db, string user = "anonymous", DateTime? dt = null,
-            Identity id = null, string spec = null, int limit = 0)
+            Identity id = null, Identity tid = null, string spec = null, int limit = 0)
     {
         Accountant = new(db, user, dt ?? DateTime.UtcNow.Date) { Limit = limit };
         Serializer = new SerializerFactory(Client).GetSerializer(spec);
         Identity = id;
+        TrueIdentity = tid;
     }
 
     /// <summary>
@@ -36,4 +37,9 @@ public class Session
     ///     客户端身份
     /// </summary>
     public Identity Identity { get; }
+
+    /// <summary>
+    ///     客户端真实身份
+    /// </summary>
+    public Identity TrueIdentity { get; }
 }

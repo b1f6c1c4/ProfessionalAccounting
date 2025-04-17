@@ -49,8 +49,11 @@ public class Role
     [XmlElement("Role")]
     public List<string> Inherits { get; set; }
 
-    [XmlElement("Login")]
+    [XmlElement("Entity")]
     public List<string> Users { get; set; }
+
+    [XmlElement("Assume")]
+    public List<string> Assumes { get; set; }
 
     [XmlElement("Grant")]
     public List<Permission> Grants { get; set; }
@@ -63,6 +66,18 @@ public class Role
 
     [XmlIgnore]
     public bool Prepared { get; internal set; }
+
+    [XmlIgnore]
+    public bool Imba { get; internal set; }
+
+    [XmlIgnore]
+    public HashSet<Role> AllRoles { get; internal set; }
+
+    [XmlIgnore]
+    public HashSet<string> AllUsers { get; internal set; }
+
+    [XmlIgnore]
+    public HashSet<string> AllAssumes { get; internal set; }
 
     [XmlIgnore]
     public (IQueryCompounded<IDetailQueryAtom>,IQueryCompounded<IDetailQueryAtom>) View { get; internal set; }
@@ -85,19 +100,19 @@ public class Identity : Role
 public class IdPEntry
 {
     [XmlElement("Subject")]
-    public string Subject { get; set; }
+    public string Subject;
 
     [XmlElement("CN")]
-    public string CN { get; set; }
+    public string CN;
 
     [XmlElement("Issuer")]
-    public string Issuer { get; set; }
+    public string Issuer;
 
     [XmlElement("Serial")]
-    public string Serial { get; set; }
+    public string Serial;
 
     [XmlElement("Fingerprint")]
-    public string Fingerprint { get; set; }
+    public string Fingerprint;
 }
 
 [Serializable]
@@ -159,6 +174,34 @@ public static class ACLManager
         if (id.Prepared)
             return;
 
+        id.AllRoles = new();
+        id.AllUsers = new();
+        id.AllAssumes = new();
+
+        void Process(Role r)
+        {
+            if (!id.AllRoles.Add(r))
+                return;
+
+            foreach (var u in r.Users)
+                id.AllUsers.Add(u);
+            foreach (var a in r.Assumes)
+                id.AllAssumes.Add(a);
+            foreach (var nm in r.Inherits)
+                Process(GetRole(nm));
+        }
+        Process(id);
+        id.AllRoles.Remove(id);
+        if (id.AllUsers.Contains("*"))
+            id.AllUsers = null;
+        if (id.AllAssumes.Contains("*"))
+            id.AllAssumes = null;
+
+        id.Imba = Recursive((id) =>
+                id.Grants.Any((p) => p.Action.HasFlag(Verb.Imbalance))
+                && !id.Denies.Any((p) => p.Action.Flags(Verb.Imbalance)), id)
+            && !Recursive((id) => id.Rejects.Any((p) => p.Action.Flags(Verb.Imbalance)), id);
+
         (IQueryCompounded<T>,IQueryCompounded<T>) Compute<T>(Verb f,
                 Func<Permission, IQueryCompounded<T>> proj,
                 Func<Role, (IQueryCompounded<T>,IQueryCompounded<T>)> proj2)
@@ -192,62 +235,106 @@ public static class ACLManager
         Console.WriteLine($"Prepared identity {id.Name}");
     }
 
-    private static bool Recursive(Predicate<Identity> pred, Identity id0)
+    private static bool Recursive(Predicate<Role> pred, Role id0)
         => id0 != null && (pred(id0) || id0.Inherits.Any((nm) => Recursive(pred,
-                        Cfg.Get<ACL>().Identities.SingleOrDefault((id) => id.Name == nm))));
+                        Cfg.Get<ACL>().Roles.SingleOrDefault((id) => id.Name == nm))));
 
-    public static bool IsMatch(IdentityProvider login, Predicate<IdPEntry> pred)
+    public static bool IsMatch(IdentityProvider login, IdPEntry idp)
     {
         if (login == null)
             return false;
 
-        if (!pred(login))
+        bool Compare(string a, string b)
+        {
+            if (a == null)
+                return true;
+
+            if (a == "")
+                return string.IsNullOrWhiteSpace(b);
+
+            return a.Equals(b, StringComparison.Ordinal);
+        }
+
+        bool Compares(IdPEntry tmpl)
+        {
+            if (!Compare(tmpl.Subject, idp.Subject)) return false;
+            if (!Compare(tmpl.CN, idp.CN)) return false;
+            if (!Compare(tmpl.Issuer, idp.Issuer)) return false;
+            if (!Compare(tmpl.Serial, idp.Serial)) return false;
+            if (!Compare(tmpl.Fingerprint, idp.Fingerprint)) return false;
+            return true;
+        }
+
+        if (!Compares(login))
             return false;
 
         if (login.ORs != null && login.ORs.Count > 0)
-            return login.ORs.Any((v) => pred(v));
+            return login.ORs.Any(Compares);
 
         return true;
     }
 
-    public static Identity Parse(Predicate<IdPEntry> pred)
+    public static Identity Authenticate(IdPEntry idp, string req = null)
     {
-        var lst = Cfg.Get<ACL>().Identities.Where((id) => IsMatch(id.IdP, pred)).ToList();
+        var lst = Cfg.Get<ACL>().Identities.Where((id) => IsMatch(id.IdP, idp)).ToList();
         if (lst.Count == 0)
-            lst = new() { Cfg.Get<ACL>().Identities.Single((id) => id.Name == null) };
+            throw new ApplicationException("Authentication failure: no identity matches your credential");
 
         if (lst.Count > 1)
-            throw new ApplicationException($"Multiple identities matched: {string.Join(", ", lst)}");
+        {
+            var tmp = lst.Where((id) => id.Name == req).ToList();
+            if (tmp.Count != 1)
+            {
+                var nms = string.Join(", ", lst.Select(static (id) => id.Name));
+                throw new ApplicationException($"Authentication failure: multiple identities: {nms}");
+            }
+            else
+                lst = tmp;
+        }
 
         PrepareRole(lst[0]);
         return lst[0];
     }
 
+    public static Identity Assume(this Identity id0, string req)
+    {
+        if (req == null)
+            return id0;
+
+        if (id0 == null)
+            throw new ApplicationException($"Assume identity of {req.Quotation('"')} denied for unknown identity");
+
+        var nm = id0.Name.Quotation('"');
+        if (id0.AllAssumes != null && !id0.AllAssumes.Contains(req))
+            throw new ApplicationException($"Assume identity of {req.Quotation('"')} denied for identity {nm}");
+
+        var res = Cfg.Get<ACL>().Identities.SingleOrDefault((id) => id.Name == req);
+        if (res == null)
+            throw new ApplicationException($"Assume identity of {req.Quotation('"')} granted, but does not exist");
+
+        PrepareRole(res);
+        return res;
+    }
+
     public static bool CanLogin(this Identity id0, string user)
-        => id0 != null && Recursive((id) => id.Users.Contains("*") || id.Users.Contains(user), id0);
+        => id0.AllUsers == null || id0.AllUsers.Contains(user);
 
     public static void WillLogin(this Identity id0, string user)
     {
         if (!CanLogin(id0, user))
-            throw new ApplicationException($"Login of {user} denied for identity \"{id0.Name}\"");
+            throw new ApplicationException($"Login of {user} denied for identity {id0.Name.Quotation('"')}");
     }
-
-    public static bool CanImba(this Identity id0)
-        => id0 != null && Recursive((id) =>
-                id.Grants.Any((p) => p.Action.HasFlag(Verb.Imbalance))
-                && !id.Denies.Any((p) => p.Action.Flags(Verb.Imbalance)), id0)
-            && !Recursive((id) => id.Rejects.Any((p) => p.Action.Flags(Verb.Imbalance)), id0);
 
     public static bool CanInvoke(this Identity id0, string term)
         => id0 != null && Recursive((id) =>
-                id.Grants.Any((p) => p.Action.HasFlag(Verb.Invoke) && term.StartsWith(p.Query, StringComparison.Ordinal))
-                && !id.Denies.Any((p) => p.Action.Flags(Verb.Invoke) && term.StartsWith(p.Query, StringComparison.Ordinal)), id0)
-            && !Recursive((id) => id.Rejects.Any((p) => p.Action.Flags(Verb.Invoke) && term.StartsWith(p.Query, StringComparison.Ordinal)), id0);
+                id.Grants.Any((p) => p.Action.HasFlag(Verb.Invoke) && term.StartsWith(p.Query ?? "", StringComparison.Ordinal))
+                && !id.Denies.Any((p) => p.Action.Flags(Verb.Invoke) && term.StartsWith(p.Query ?? "", StringComparison.Ordinal)), id0)
+            && !Recursive((id) => id.Rejects.Any((p) => p.Action.Flags(Verb.Invoke) && term.StartsWith(p.Query ?? "", StringComparison.Ordinal)), id0);
 
     public static void WillInvoke(this Identity id0, string term)
     {
         if (!CanInvoke(id0, term))
-            throw new ApplicationException($"Access to \"{term}\" denied for identity \"{id0.Name}\"");
+            throw new ApplicationException($"Access to \"{term}\" denied for identity {id0.Name.Quotation('"')}");
     }
 
     public static bool CanRead(this Identity id, Voucher v)
@@ -261,18 +348,20 @@ public static class ACLManager
         if (v == null)
             return;
 
+        var nm = id.Name.Quotation('"');
+
         if (v.Details.GroupBy(static (d) => d.Currency).Any(static (g) =>
-                    Math.Abs(g.Sum(static (d) => d.Fund!.Value)) >= VoucherDetail.Tolerance) && !id.CanImba())
-            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity \"{id.Name}\"" + '\n' +
+                    Math.Abs(g.Sum(static (d) => d.Fund!.Value)) >= VoucherDetail.Tolerance) && !id.Imba)
+            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity {nm}\n" +
                     "Reason: Debit/Credit imbalance");
 
         if (Math.Abs(v.Details.Where(static (d) => d.Title == 3998)
-                    .Sum(static (d) => d.Fund!.Value)) >= VoucherDetail.Tolerance && !id.CanImba())
-            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity \"{id.Name}\"" + '\n' +
+                    .Sum(static (d) => d.Fund!.Value)) >= VoucherDetail.Tolerance && !id.Imba)
+            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity {nm}\n" +
                     "Reason: T3998 imbalance");
 
         if (!v.IsMatch(id.Voucher.Item2))
-            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity \"{id.Name}\"" + '\n' +
+            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity {nm}\n" +
                     "Reason: You are not authorized to do anything on such a voucher");
 
         var flag = false;
@@ -289,7 +378,7 @@ public static class ACLManager
         }
 
         var sb = new StringBuilder();
-        sb.Append($"Write to {v.ID.Quotation('^')} denied for identity \"{id.Name}\"\n");
+        sb.Append($"Write to {v.ID.Quotation('^')} denied for identity {nm}\n");
         if (userInput)
             sb.Append("Reason: attempting to write to unauthorized accounts\n");
         else

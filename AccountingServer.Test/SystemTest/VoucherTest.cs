@@ -77,7 +77,7 @@ public class VoucherTest
             };
 
         m_Facade = new(db: "accounting-test");
-        m_Session = m_Facade.CreateSession("b1", DateTime.UtcNow.Date, static (le) => true);
+        m_Session = m_Facade.CreateSession("b1", DateTime.UtcNow.Date, new());
 
         var res = m_Facade.ExecuteVoucherUpsert(m_Session, "new Voucher { Ub2 T123401 whatever / aaa huh 10 }").AsTask()
             .Result;

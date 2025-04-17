@@ -31,11 +31,30 @@ ReadableStream.prototype[Symbol.asyncIterator] = async function* () {
 };
 
 let theUser = window.localStorage.getItem('user') || 'anonymous';
+let theAssume = window.localStorage.getItem('assume') || undefined;
+
+const updateUA = () => {
+  if (theAssume)
+    document.getElementById('user').innerText = `${theAssume}|${theUser}`;
+  else
+    document.getElementById('user').innerText = `${theUser}`;
+};
+updateUA();
 
 const login = (u) => {
   theUser = u;
-  document.getElementById('user').innerText = u;
+  updateUA();
   window.localStorage.setItem('user', u);
+};
+
+const assume = (u) => {
+  if (u) {
+    theAssume = u;
+    window.localStorage.setItem('assume', u);
+  } else {
+    window.localStorage.removeItem('assume');
+  }
+  updateUA();
 };
 
 const send = (method, url, spec, body) => {
@@ -45,6 +64,7 @@ const send = (method, url, spec, body) => {
   const headers = {
     'Content-Type': 'text/plain',
     'X-User': theUser,
+    'X-Assume-Identity': theAssume,
     'X-ClientDateTime': ldt,
   };
   if (spec)
@@ -84,8 +104,9 @@ const execute = (cmd, cb) => {
 特殊命令：
 ?                           显示控制台帮助文档
 ??                          显示此客户端帮助文档
-login <用户>                选择用户
-user  <用户>                选择用户
+entity  <记账主体>          选择记账主体
+login   <记账主体>          选择记账主体
+assume  <身份>              代入其它身份（限系统管理员使用）
 
 以其他方式显示记账凭证：
 csharp -- ...               使用C#序列化器显示记账凭证
@@ -121,10 +142,18 @@ Ctrl+Alt+Enter              执行需要上传内容的命令，如$stmt$等
     else return Promise.resolve(t);
   }
 
-  const mx = cmd.match(/^(?:login|user) (.*)$/);
-  if (mx) {
-    login(mx[1]);
+  const matchL = cmd.match(/^(?:entity|login) (.*)$/);
+  if (matchL) {
+    login(matchL[1]);
     const t = `Login as ${theUser}`;
+    if (cb) return cb(t, undefined, true);
+    else return Promise.resolve(t);
+  }
+
+  const matchA = cmd.match(/^assume(?: (.*))?$/);
+  if (matchA) {
+    assume(matchA[1]);
+    const t = `Assume as ${theAssume}`;
     if (cb) return cb(t, undefined, true);
     else return Promise.resolve(t);
   }
