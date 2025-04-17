@@ -33,7 +33,7 @@ namespace AccountingServer.Shell.Carry;
 internal partial class CarryShell : IShellComponent
 {
     /// <inheritdoc />
-    public async IAsyncEnumerable<string> Execute(string expr, Session session)
+    public async IAsyncEnumerable<string> Execute(string expr, Session session, string term)
     {
         expr = expr.Rest();
         DateFilter rng;

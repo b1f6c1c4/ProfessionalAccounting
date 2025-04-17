@@ -33,8 +33,9 @@ internal interface IShellComponent
     /// </summary>
     /// <param name="expr">表达式</param>
     /// <param name="session">客户端会话</param>
+    /// <param name="term">表达式头</param>
     /// <returns>执行结果</returns>
-    IAsyncEnumerable<string> Execute(string expr, Session session);
+    IAsyncEnumerable<string> Execute(string expr, Session session, string term);
 
     /// <summary>
     ///     粗略判断表达式是否可执行
@@ -66,8 +67,44 @@ internal class ShellComponent : IShellComponent
     }
 
     /// <inheritdoc />
-    public IAsyncEnumerable<string> Execute(string expr, Session session)
-        => m_Action(m_Initial == null ? expr : expr.Rest(), session);
+    public IAsyncEnumerable<string> Execute(string expr, Session session, string term)
+    {
+        if (m_Initial == null)
+            return m_Action(expr, session);
+
+        session.Identity.WillInvoke(string.IsNullOrEmpty(term) ? m_Initial : $"{term}-{m_Initial}");
+        return m_Action(expr.Rest(), session);
+    }
+
+    /// <inheritdoc />
+    public bool IsExecutable(string expr) => m_Initial == null || expr.Initial() == m_Initial;
+}
+
+internal class ComponentAdapter : IShellComponent
+{
+    /// <summary>
+    ///     首段字符串
+    /// </summary>
+    private readonly string m_Initial;
+
+    private readonly IShellComponent m_Component;
+
+    public ComponentAdapter(string initial, IShellComponent component)
+    {
+        m_Initial = initial;
+        m_Component = component;
+    }
+
+    /// <inheritdoc />
+    public IAsyncEnumerable<string> Execute(string expr, Session session, string term)
+    {
+        if (m_Initial == null)
+            return m_Component.Execute(expr, session, term);
+
+        var next = string.IsNullOrEmpty(term) ? m_Initial : $"{term}-{m_Initial}";
+        session.Identity.WillInvoke(next);
+        return m_Component.Execute(expr.Rest(), session, next);
+    }
 
     /// <inheritdoc />
     public bool IsExecutable(string expr) => m_Initial == null || expr.Initial() == m_Initial;
@@ -84,8 +121,8 @@ internal sealed class ShellComposer : IShellComponent, IEnumerable
     public IEnumerator GetEnumerator() => m_Components.GetEnumerator();
 
     /// <inheritdoc />
-    public IAsyncEnumerable<string> Execute(string expr, Session session)
-        => FirstExecutable(expr).Execute(expr, session);
+    public IAsyncEnumerable<string> Execute(string expr, Session session, string term)
+        => FirstExecutable(expr).Execute(expr, session, term);
 
     /// <inheritdoc />
     public bool IsExecutable(string expr) => m_Components.Any(s => s.IsExecutable(expr));

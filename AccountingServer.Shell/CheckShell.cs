@@ -34,7 +34,7 @@ namespace AccountingServer.Shell;
 internal class CheckShell : IShellComponent
 {
     /// <inheritdoc />
-    public IAsyncEnumerable<string> Execute(string expr, Session session)
+    public IAsyncEnumerable<string> Execute(string expr, Session session, string term)
         => expr.Rest() switch
             {
                 "1" => BasicCheck(session),
@@ -54,6 +54,7 @@ internal class CheckShell : IShellComponent
     /// <returns>有误的会计记账凭证表达式</returns>
     private async IAsyncEnumerable<string> BasicCheck(Session session)
     {
+        session.Identity.WillInvoke("chk-1");
         Voucher old = null;
         await foreach (var (voucher, user, curr, v) in
                        session.Accountant.SelectUnbalancedVouchersAsync(VoucherQueryUnconstrained.Instance))
@@ -76,6 +77,7 @@ internal class CheckShell : IShellComponent
     /// <returns>发生错误的信息</returns>
     private async IAsyncEnumerable<string> AdvancedCheck(Session session)
     {
+        session.Identity.WillInvoke("chk-2");
         foreach (var title in TitleManager.Titles)
         {
             if (!title.IsVirtual)
@@ -146,6 +148,7 @@ internal class CheckShell : IShellComponent
 
     private async IAsyncEnumerable<string> UpsertCheck(Session session)
     {
+        session.Identity.WillInvoke("chk-3");
         yield return "Reading...\n";
         var lst = await session.Accountant.RunVoucherQueryAsync("U A").ToListAsync();
         yield return $"Read {lst.Count} vouchers, writing...\n";
@@ -155,6 +158,7 @@ internal class CheckShell : IShellComponent
 
     private async IAsyncEnumerable<string> DuplicationCheck(Session session, string expr)
     {
+        session.Identity.WillInvoke("chk-4");
         var query = Parsing.VoucherQuery(ref expr, session.Client);
         Parsing.Eof(expr);
         await foreach (var (v, ids) in session.Accountant.SelectDuplicatedVouchersAsync(query))

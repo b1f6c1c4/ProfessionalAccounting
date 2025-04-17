@@ -109,7 +109,6 @@ public class Facade
         }
 
         session.Identity.WillLogin(session.Client.User);
-
         switch (ParsingF.Optional(ref expr, "time ", "slow "))
         {
             case "time ":
@@ -132,7 +131,7 @@ public class Facade
 
         try
         {
-            await foreach (var s in m_Composer.Execute(expr, session));
+            await foreach (var s in m_Composer.Execute(expr, session, ""));
             await foreach (var p in m_Db.StopProfiler())
                 yield return p;
         }
@@ -150,7 +149,7 @@ public class Facade
         for (var i = 0UL; i < (repetition ?? 1UL); i++)
         {
             sw.Start();
-            await foreach (var s in m_Composer.Execute(expr, session))
+            await foreach (var s in m_Composer.Execute(expr, session, ""))
                 if (output)
                     yield return s;
 
@@ -190,8 +189,7 @@ public class Facade
         }
 
         session.Identity.WillLogin(session.Client.User);
-
-        return m_AccountingShell.Execute(expr, session);
+        return m_AccountingShell.Execute(expr, session, "");
     }
 
     private static async IAsyncEnumerable<string> HelloWorld()

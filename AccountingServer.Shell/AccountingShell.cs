@@ -37,7 +37,8 @@ namespace AccountingServer.Shell;
 internal class AccountingShell : IShellComponent
 {
     /// <inheritdoc />
-    public IAsyncEnumerable<string> Execute(string expr, Session session) => Parse(expr, session.Client)(session);
+    public IAsyncEnumerable<string> Execute(string expr, Session session, string term)
+        => Parse(expr, session.Client)(session);
 
     /// <inheritdoc />
     public bool IsExecutable(string expr) => true;

@@ -137,7 +137,7 @@ internal abstract class DistributedShell : IShellComponent
                                 Parsing.Eof(expr);
                                 return ExecuteRecal(dist, session);
                             }),
-                    new ShellComponent("rst", (expr, session) => resetComposer.Execute(expr, session)),
+                    new ComponentAdapter("rst", resetComposer),
                     new ShellComponent(
                         "ap",
                         (expr, session) =>
@@ -174,8 +174,12 @@ internal abstract class DistributedShell : IShellComponent
     protected abstract string Initial { get; }
 
     /// <inheritdoc />
-    public IAsyncEnumerable<string> Execute(string expr, Session session)
-        => m_Composer.Execute(expr.Rest(), session);
+    public IAsyncEnumerable<string> Execute(string expr, Session session, string term)
+    {
+        var next = string.IsNullOrEmpty(term) ? Initial : $"{term}-{Initial}";
+        session.Identity.WillInvoke(next);
+        return m_Composer.Execute(expr.Rest(), session, next);
+    }
 
     /// <inheritdoc />
     public bool IsExecutable(string expr) => expr.Initial() == Initial;

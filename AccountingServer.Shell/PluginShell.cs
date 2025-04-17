@@ -66,7 +66,7 @@ internal class PluginShell : IShellComponent
             };
 
     /// <inheritdoc />
-    public IAsyncEnumerable<string> Execute(string expr, Session session)
+    public IAsyncEnumerable<string> Execute(string expr, Session session, string term)
     {
         var help = false;
         if (expr.StartsWith("?", StringComparison.Ordinal))

@@ -44,7 +44,7 @@ internal class ExchangeShell : IShellComponent
     public ExchangeShell()
         => m_Timer.Elapsed += OnTimedEvent;
 
-    public async IAsyncEnumerable<string> Execute(string expr, Session session)
+    public async IAsyncEnumerable<string> Execute(string expr, Session session, string term)
     {
         session.Identity.WillInvoke("?e");
         expr = expr.Rest();
