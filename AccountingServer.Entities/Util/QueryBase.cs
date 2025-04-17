@@ -113,3 +113,29 @@ public sealed class VoucherDetailQuery : IVoucherDetailQuery
         public IQueryCompounded<IDetailQueryAtom> DetailFilter { get; init; }
     }
 }
+
+public sealed class GroupedQuery : IGroupedQuery
+{
+    public GroupedQuery(IVoucherDetailQuery vdq, ISubtotal s)
+    {
+        VoucherEmitQuery = vdq;
+        Subtotal = s;
+    }
+
+    public IVoucherDetailQuery VoucherEmitQuery { get; init; }
+
+    public ISubtotal Subtotal { get; init; }
+}
+
+public sealed class VoucherGroupedQuery : IVoucherGroupedQuery
+{
+    public VoucherGroupedQuery(IQueryCompounded<IVoucherQueryAtom> vq, ISubtotal s)
+    {
+        VoucherQuery = vq;
+        Subtotal = s;
+    }
+
+    public IQueryCompounded<IVoucherQueryAtom> VoucherQuery { get; init; }
+
+    public ISubtotal Subtotal { get; init; }
+}

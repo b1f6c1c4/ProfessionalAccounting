@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AccountingServer.Entities;
+using AccountingServer.Entities.Util;
 using AccountingServer.Shell;
 
 internal class CombinedSubtotal : ISubtotal
@@ -39,7 +40,7 @@ internal class CombinedSubtotal : ISubtotal
                 : new CombinedSubtotal(gq.Subtotal, col);
             subs.Add(sub);
             ress.Add(await session.Accountant.SelectVoucherDetailsGroupedDirectAsync(
-                    new GroupedQueryStub { VoucherEmitQuery = gq.VoucherEmitQuery, Subtotal = sub }).ToListAsync());
+                    new GroupedQuery(gq.VoucherEmitQuery, sub)).ToListAsync());
         }
 
         return (ress, subs, flipped);
@@ -59,24 +60,10 @@ internal class CombinedSubtotal : ISubtotal
                 : new CombinedSubtotal(vgq.Subtotal, col);
             subs.Add(sub);
             ress.Add(await session.Accountant.SelectVouchersGroupedDirectAsync(
-                    new VoucherGroupedQueryStub { VoucherQuery = vgq.VoucherQuery, Subtotal = sub }).ToListAsync());
+                    new VoucherGroupedQuery(vgq.VoucherQuery, sub)).ToListAsync());
         }
 
         return (ress, subs, flipped);
-    }
-
-    private sealed class GroupedQueryStub : IGroupedQuery
-    {
-        public IVoucherDetailQuery VoucherEmitQuery { get; init; }
-
-        public ISubtotal Subtotal { get; init; }
-    }
-
-    private sealed class VoucherGroupedQueryStub : IVoucherGroupedQuery
-    {
-        public IQueryCompounded<IVoucherQueryAtom> VoucherQuery { get; init; }
-
-        public ISubtotal Subtotal { get; init; }
     }
 
     public ISubtotal LocalRow { get; }

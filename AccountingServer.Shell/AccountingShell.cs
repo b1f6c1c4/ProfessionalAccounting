@@ -157,13 +157,12 @@ internal class AccountingShell : IShellComponent
     {
         var res = ParsingF.VoucherQuery(ref expr, client);
         ParsingF.Eof(expr);
-        if (explain)
-            return session => Present("IQueryCompounded<IVoucherQueryAtom>", Synth(res));
-
-        if (res.IsDangerous() && safe)
+        if (res.IsDangerous() && safe && !explain)
             throw new SecurityException("检测到弱检索式");
 
-        return session => PresentVoucherQuery(res, session);
+        return session => explain
+            ? Present("IQueryCompounded<IVoucherQueryAtom>", Synth(res), Synth(session.Identity.Refine(res)))
+            : PresentVoucherQuery(session.Identity.Refine(res), session);
     }
 
     /// <summary>
@@ -178,10 +177,9 @@ internal class AccountingShell : IShellComponent
     {
         var res = ParsingF.GroupedQuery(ref expr, client);
         ParsingF.Eof(expr);
-        if (explain)
-            return session => Present("IGroupedQuery", Synth(res));
-
-        return session => PresentSubtotal(res, trav, session);
+        return session => explain
+            ? Present("IGroupedQuery", Synth(res), Synth(session.Identity.Refine(res)))
+            : PresentSubtotal(session.Identity.Refine(res), trav, session);
     }
 
     /// <summary>
@@ -196,10 +194,9 @@ internal class AccountingShell : IShellComponent
     {
         var res = ParsingF.VoucherGroupedQuery(ref expr, client);
         ParsingF.Eof(expr);
-        if (explain)
-            return session => Present("IVoucherGroupedQuery", Synth(res));
-
-        return session => PresentSubtotal(res, trav, session);
+        return session => explain
+            ? Present("IVoucherGroupedQuery", Synth(res), Synth(session.Identity.Refine(res)))
+            : PresentSubtotal(session.Identity.Refine(res), trav, session);
     }
 
     /// <summary>
@@ -223,13 +220,12 @@ internal class AccountingShell : IShellComponent
     {
         var res = ParsingF.DetailQuery(ref expr, client);
         ParsingF.Eof(expr);
-        if (explain)
-            return session => Present("IVoucherDetailQuery", Synth(res));
-
-        if (res.IsDangerous() && safe)
+        if (res.IsDangerous() && safe && !explain)
             throw new SecurityException("检测到弱检索式");
 
-        return session => PresentDetailQuery(res, session);
+        return session => explain
+            ? Present("IVoucherDetailQuery", Synth(res), Synth(session.Identity.Refine(res)))
+            : PresentDetailQuery(session.Identity.Refine(res), session);
     }
 
     /// <summary>
@@ -252,13 +248,12 @@ internal class AccountingShell : IShellComponent
     {
         var res = ParsingF.DetailQuery(ref expr, client);
         ParsingF.Eof(expr);
-        if (explain)
-            return session => Present("IVoucherDetailQuery", Synth(res));
-
-        if (res.IsDangerous() && safe)
+        if (res.IsDangerous() && safe && !explain)
             throw new SecurityException("检测到弱检索式");
 
-        return session => PresentDetailRQuery(res, session);
+        return session => explain
+            ? Present("IVoucherDetailQuery", Synth(res), Synth(session.Identity.Refine(res)))
+            : PresentDetailRQuery(session.Identity.Refine(res), session);
     }
 
     /// <summary>
@@ -284,13 +279,12 @@ internal class AccountingShell : IShellComponent
     {
         var res = ParsingF.DetailQuery(ref expr, client);
         ParsingF.Eof(expr);
-        if (explain)
-            return session => Present("IVoucherDetailQuery", Synth(res));
-
-        if (res.IsDangerous() && safe)
+        if (res.IsDangerous() && safe && !explain)
             throw new SecurityException("检测到弱检索式");
 
-        return session => PresentFancyQuery(res, session);
+        return session => explain
+            ? Present("IVoucherDetailQuery", Synth(res), Synth(session.Identity.Refine(res)))
+            : PresentFancyQuery(session.Identity.Refine(res), session);
     }
 
     /// <summary>

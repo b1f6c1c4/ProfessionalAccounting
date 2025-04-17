@@ -59,6 +59,7 @@ public class Role
     [XmlElement("Reject")]
     public List<Permission> Rejects { get; set; }
 
+    [XmlIgnore]
     public bool Prepared { get; internal set; }
 
     [XmlIgnore]
@@ -236,12 +237,18 @@ public static class ACLManager
         => v.IsMatch(id.Voucher.Item2) && v.Details.All((d) => d.IsMatch(id.Edit.Item2));
 
     public static IQueryCompounded<IVoucherQueryAtom> Refine(this Identity id, IQueryCompounded<IVoucherQueryAtom> vq)
-        => new IntersectQueries<IVoucherQueryAtom>(vq, id.Voucher.Item2);
+        => id.Voucher.Item2 == null ? null : new IntersectQueries<IVoucherQueryAtom>(vq, id.Voucher.Item2);
 
     public static IVoucherDetailQuery Refine(this Identity id, IVoucherDetailQuery vdq)
-        => new VoucherDetailQuery(
+        => id.Voucher.Item2 == null || id.View.Item2 == null ? null :new VoucherDetailQuery(
                 new IntersectQueries<IVoucherQueryAtom>(vdq.VoucherQuery, id.Voucher.Item2),
                 new IntersectQueries<IDetailQueryAtom>(vdq.ActualDetailFilter(), id.View.Item2));
+
+    public static IGroupedQuery Refine(this Identity id, IGroupedQuery gq)
+        => new GroupedQuery(id.Refine(gq.VoucherEmitQuery), gq.Subtotal);
+
+    public static IVoucherGroupedQuery Refine(this Identity id, IVoucherGroupedQuery vgq)
+        => new VoucherGroupedQuery(id.Refine(vgq.VoucherQuery), vgq.Subtotal);
 
     public static Voucher RedactDetails(this Identity id, Voucher v)
     {

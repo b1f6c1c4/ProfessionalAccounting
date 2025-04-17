@@ -154,34 +154,44 @@ public class DbSession : IHistoricalExchange
 
     #endregion
 
+    private static async IAsyncEnumerable<T> E<T>()
+    {
+        yield break;
+    }
+
     public virtual ValueTask<Voucher> SelectVoucher(string id)
         => Db.SelectVoucher(id);
 
     public virtual IAsyncEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-        => Db.SelectVouchers(query);
+        => query == null ? E<Voucher>() : Db.SelectVouchers(query);
 
     public virtual IAsyncEnumerable<VoucherDetail> SelectVoucherDetails(IVoucherDetailQuery query)
-        => Db.SelectVoucherDetails(query);
+        => query == null ? E<VoucherDetail>() : Db.SelectVoucherDetails(query);
 
     public virtual IAsyncEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit)
-        => Db.SelectVouchersGrouped(query, limit);
+        => query == null ? E<Balance>() : Db.SelectVouchersGrouped(query, limit);
 
     public virtual IAsyncEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit)
-        => Db.SelectVoucherDetailsGrouped(query, limit);
+        => query == null ? E<Balance>() : Db.SelectVoucherDetailsGrouped(query, limit);
 
     public virtual IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
         IQueryCompounded<IVoucherQueryAtom> query)
-        => Db.SelectUnbalancedVouchers(query);
+        => query == null ? E<(Voucher, string, string, double)>() : Db.SelectUnbalancedVouchers(query);
 
     public virtual IAsyncEnumerable<(Voucher, List<string>)> SelectDuplicatedVouchers(
         IQueryCompounded<IVoucherQueryAtom> query)
-        => Db.SelectDuplicatedVouchers(query);
+        => query == null ? E<(Voucher, List<string>)>() : Db.SelectDuplicatedVouchers(query);
 
     public virtual ValueTask<bool> DeleteVoucher(string id)
         => Db.DeleteVoucher(id);
 
-    public virtual ValueTask<long> DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
-        => Db.DeleteVouchers(query);
+    public virtual async ValueTask<long> DeleteVouchers(IQueryCompounded<IVoucherQueryAtom> query)
+    {
+        if (query == null)
+            return 0;
+
+        return await Db.DeleteVouchers(query);
+    }
 
     public virtual ValueTask<bool> Upsert(Voucher entity)
         => Db.Upsert(Regularize(entity));
@@ -223,13 +233,18 @@ public class DbSession : IHistoricalExchange
         => Db.SelectAsset(id);
 
     public IAsyncEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter)
-        => Db.SelectAssets(filter);
+        => filter == null ? E<Asset>() : Db.SelectAssets(filter);
 
     public ValueTask<bool> DeleteAsset(Guid id)
         => Db.DeleteAsset(id);
 
-    public ValueTask<long> DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
-        => Db.DeleteAssets(filter);
+    public async ValueTask<long> DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
+    {
+        if (filter == null)
+            return 0;
+
+        return await Db.DeleteAssets(filter);
+    }
 
     public ValueTask<bool> Upsert(Asset entity)
         => Db.Upsert(entity);
@@ -238,13 +253,18 @@ public class DbSession : IHistoricalExchange
         => Db.SelectAmortization(id);
 
     public IAsyncEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
-        => Db.SelectAmortizations(filter);
+        => filter == null ? E<Amortization>() : Db.SelectAmortizations(filter);
 
     public ValueTask<bool> DeleteAmortization(Guid id)
         => Db.DeleteAmortization(id);
 
-    public ValueTask<long> DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
-        => Db.DeleteAmortizations(filter);
+    public async ValueTask<long> DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
+    {
+        if (filter == null)
+            return 0;
+
+        return await Db.DeleteAmortizations(filter);
+    }
 
     public ValueTask<bool> Upsert(Amortization entity)
     {

@@ -36,7 +36,7 @@ public class Synthesizer
     public static string Synth(IQueryCompounded<IVoucherQueryAtom> vq) => vq == null ? "{-U}"
         : vq.Accept<(string, int)>(new Synthesizer()).Item1;
 
-    public static string Synth(IVoucherDetailQuery vdq) => vdq.DetailEmitFilter == null
+    public static string Synth(IVoucherDetailQuery vdq) => vdq == null ? "-U : -U" : vdq.DetailEmitFilter == null
         ? Synth(vdq.ActualDetailFilter())
         : $"{Synth(vdq.VoucherQuery)} {Synth(vdq.DetailEmitFilter)}";
 
@@ -214,7 +214,7 @@ public class Synthesizer
             case OperatorType.Complement:
                 return ($"-{Q(f1, l1 <= -1)}", -2);
         }
-        var (f2, l2) = (query.Filter2 ?? query.Filter1).Accept<(string, int)>(this);
+        var (f2, l2) = query.Filter2.Accept<(string, int)>(this);
         switch (query.Operator)
         {
             case OperatorType.Union:
@@ -242,7 +242,7 @@ public class Synthesizer
             case OperatorType.Complement:
                 return ($"-{Q(f1, l1 <= 2)}", 1);
         }
-        var (f2, l2) = (query.Filter2 ?? query.Filter1).Accept<(string, int)>(this);
+        var (f2, l2) = query.Filter2.Accept<(string, int)>(this);
         switch (query.Operator)
         {
             case OperatorType.Union:

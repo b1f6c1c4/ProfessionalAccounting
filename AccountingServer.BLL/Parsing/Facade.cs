@@ -140,7 +140,7 @@ public abstract class FacadeBase
             throw new FormatException();
         }
 
-        return new VoucherGroupedQueryStub { VoucherQuery = query, Subtotal = subtotal };
+        return new VoucherGroupedQuery(query, subtotal);
     }
 
     public IGroupedQuery GroupedQuery(string s, Client client)
@@ -157,7 +157,7 @@ public abstract class FacadeBase
             throw new FormatException();
         }
 
-        return new GroupedQueryStub { VoucherEmitQuery = query, Subtotal = subtotal };
+        return new GroupedQuery(query, subtotal);
     }
 
     public IQueryCompounded<IDistributedQueryAtom> DistributedQuery(string s, Client client)
@@ -178,20 +178,6 @@ public abstract class FacadeBase
 
         var res = ctx.GetText();
         return res.Substring(1, res.Length - 2);
-    }
-
-    private sealed class VoucherGroupedQueryStub : IVoucherGroupedQuery
-    {
-        public IQueryCompounded<IVoucherQueryAtom> VoucherQuery { get; init; }
-
-        public ISubtotal Subtotal { get; init; }
-    }
-
-    private sealed class GroupedQueryStub : IGroupedQuery
-    {
-        public IVoucherDetailQuery VoucherEmitQuery { get; init; }
-
-        public ISubtotal Subtotal { get; init; }
     }
 }
 
