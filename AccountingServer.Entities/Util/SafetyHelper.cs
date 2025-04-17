@@ -20,9 +20,9 @@ using System;
 
 namespace AccountingServer.Entities.Util;
 
-public static class SecurityHelper
+public static class SafetyHelper
 {
-    private class SecurityVisitor
+    private class SafetyVisitor
         : IQueryVisitor<IVoucherQueryAtom, bool>,
             IQueryVisitor<IDetailQueryAtom, bool>,
             IQueryVisitor<IDistributedQueryAtom, bool>
@@ -89,13 +89,13 @@ public static class SecurityHelper
         => !filter.ID.HasValue && string.IsNullOrEmpty(filter.Name) && string.IsNullOrEmpty(filter.Remark);
 
     public static bool IsDangerous(this IQueryCompounded<IVoucherQueryAtom> filter)
-        => filter?.Accept<bool>(new SecurityVisitor()) != false;
+        => filter?.Accept<bool>(new SafetyVisitor()) != false;
 
     public static bool IsDangerous(this IQueryCompounded<IDetailQueryAtom> filter)
-        => filter?.Accept<bool>(new SecurityVisitor()) != false;
+        => filter?.Accept<bool>(new SafetyVisitor()) != false;
 
     public static bool IsDangerous(this IQueryCompounded<IDistributedQueryAtom> filter)
-        => filter?.Accept<bool>(new SecurityVisitor()) != false;
+        => filter?.Accept<bool>(new SafetyVisitor()) != false;
 
     public static bool IsDangerous(this IVoucherDetailQuery query)
         => query.VoucherQuery.IsDangerous() && query.ActualDetailFilter().IsDangerous();

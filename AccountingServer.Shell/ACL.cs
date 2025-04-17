@@ -20,11 +20,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
+using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
-namespace AccountingServer.BLL.Util;
+namespace AccountingServer.Shell;
 
 [Serializable]
 [XmlRoot("ACL")]
@@ -75,6 +76,25 @@ public class Identity : Role
 {
     [XmlElement("IdP")]
     public IdentityProvider IdP { get; set; }
+}
+
+[Serializable]
+public class IdPEntry
+{
+    [XmlElement("Subject")]
+    public string Subject { get; set; }
+
+    [XmlElement("CN")]
+    public string CN { get; set; }
+
+    [XmlElement("Issuer")]
+    public string Issuer { get; set; }
+
+    [XmlElement("Serial")]
+    public string Serial { get; set; }
+
+    [XmlElement("Fingerprint")]
+    public string Fingerprint { get; set; }
 }
 
 [Serializable]
