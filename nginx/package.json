@@ -32,6 +32,8 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.1.0",
+    "ace-builds": "^1.40.0",
+    "autosize": "^6.0.1",
     "axios": "^1.6.0",
     "dayjs": "^1.10.7",
     "lodash-es": "^4.17.21",

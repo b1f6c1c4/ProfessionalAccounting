@@ -55,6 +55,9 @@ const plugins = [
             { from: 'node_modules/modern-normalize/modern-normalize.css', to: '.' },
             { from: 'node_modules/tuicss/dist/tuicss.min.css', to: '.' },
             { from: 'node_modules/tuicss/dist/images/', to: 'images' },
+            { from: 'node_modules/autosize/dist/autosize.min.js', to: '.' },
+            { from: 'node_modules/ace-builds/src-min/ace.js', to: '.' },
+            { from: 'node_modules/ace-builds/src-min/theme-chrome.js', to: '.' },
         ],
     }),
 ];

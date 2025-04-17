@@ -115,15 +115,18 @@ public static class QueryHelper
     public static IQueryCompounded<TAtom> QueryAny<TAtom>(
             this IQueryCompounded<TAtom> b,
             IEnumerable<IQueryCompounded<TAtom>> lst) where TAtom : class
-        => b == null ? lst.QueryAny() : lst.Aggregate(b, (q, v) => new UnionQueries<TAtom>(q, v));
+        => b == null ? lst.QueryAny()
+            : lst.Where(static (c) => c != null).Aggregate(b, (q, v) => new UnionQueries<TAtom>(q, v));
 
     public static IQueryCompounded<TAtom> QueryAll<TAtom>(
             this IQueryCompounded<TAtom> b,
             IEnumerable<IQueryCompounded<TAtom>> lst) where TAtom : class
-        => b == null ? null : lst.Aggregate(b, (q, v) => new IntersectQueries<TAtom>(q, v));
+        => b == null ? null
+            : lst.Where(static (c) => c != null).Aggregate(b, (q, v) => new IntersectQueries<TAtom>(q, v));
 
     public static IQueryCompounded<TAtom> QueryBut<TAtom>(
             this IQueryCompounded<TAtom> b,
             IEnumerable<IQueryCompounded<TAtom>> lst) where TAtom : class
-        => b == null ? null : lst.Aggregate(b, (q, v) => new SubtractQueries<TAtom>(q, v));
+        => b == null ? null
+            : lst.Where(static (c) => c != null).Aggregate(b, (q, v) => new SubtractQueries<TAtom>(q, v));
 }

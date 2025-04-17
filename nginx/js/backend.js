@@ -52,6 +52,7 @@ const assume = (u) => {
     theAssume = u;
     window.localStorage.setItem('assume', u);
   } else {
+    theAssume = undefined;
     window.localStorage.removeItem('assume');
   }
   updateUA();
@@ -64,7 +65,7 @@ const send = (method, url, spec, body) => {
   const headers = {
     'Content-Type': 'text/plain',
     'X-User': theUser,
-    'X-Assume-Identity': theAssume,
+    'X-Assume-Identity': theAssume ?? '',
     'X-ClientDateTime': ldt,
   };
   if (spec)

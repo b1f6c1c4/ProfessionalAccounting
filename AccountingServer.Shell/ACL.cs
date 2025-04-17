@@ -364,18 +364,22 @@ public static class ACLManager
             throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity {nm}\n" +
                     "Reason: You are not authorized to do anything on such a voucher");
 
-        var flag = false;
+        var noEdit = false;
+        var noView = false;
         var lst = new List<VoucherDetail>();
         foreach (var d in v.Details)
         {
             if (d.IsMatch(id.Edit.Item2))
                 continue;
 
+            noEdit = true;
             if (d.IsMatch(id.View.Item2) || userInput)
                 lst.Add(d);
             else
-                flag = true;
+                noView = true;
         }
+        if (!noEdit)
+            return;
 
         var sb = new StringBuilder();
         sb.Append($"Write to {v.ID.Quotation('^')} denied for identity {nm}\n");
@@ -389,9 +393,9 @@ public static class ACLManager
             var ser = new ExprSerializer();
             foreach (var d in lst)
                 sb.Append(ser.PresentVoucherDetail(d));
-            if (flag)
+            if (noView)
                 sb.Append("Note: this is not a complete list -- you are not authorized to view the rest.\n");
-        } else if (flag)
+        } else if (noView)
             sb.Append("... and you are not even authorized to view these details!\n");
 
         throw new ApplicationException(sb.ToString());

@@ -86,7 +86,7 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
             detail.SubTitle.HasValue
                 ? $"// {t}-{TitleManager.GetTitleName(detail.Title, detail.SubTitle)}\n"
                 : $"// {t}\n");
-        if (detail.User != Client.User)
+        if (Client == null || detail.User != Client.User)
             sb.Append($"{detail.User.AsUser()} ");
         if (detail.Currency != BaseCurrency.Now)
             sb.Append($"{detail.Currency.AsCurrency()} ");
