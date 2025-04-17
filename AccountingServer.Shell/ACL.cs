@@ -19,10 +19,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Xml.Serialization;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
+using AccountingServer.Shell.Serializer;
 using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.Shell;
@@ -230,6 +232,12 @@ public static class ACLManager
             throw new ApplicationException($"Login of {user} denied for identity \"{id0.Name}\"");
     }
 
+    public static bool CanImba(this Identity id0)
+        => id0 != null && Recursive((id) =>
+                id.Grants.Any((p) => p.Action.HasFlag(Verb.Imbalance))
+                && !id.Denies.Any((p) => p.Action.Flags(Verb.Imbalance)), id0)
+            && !Recursive((id) => id.Rejects.Any((p) => p.Action.Flags(Verb.Imbalance)), id0);
+
     public static bool CanInvoke(this Identity id0, string term)
         => id0 != null && Recursive((id) =>
                 id.Grants.Any((p) => p.Action.HasFlag(Verb.Invoke) && term.StartsWith(p.Query, StringComparison.Ordinal))
@@ -246,7 +254,59 @@ public static class ACLManager
         => v.IsMatch(id.Voucher.Item2);
 
     public static bool CanWrite(this Identity id, Voucher v)
-        => v.IsMatch(id.Voucher.Item2) && v.Details.All((d) => d.IsMatch(id.Edit.Item2));
+        => v == null || v.IsMatch(id.Voucher.Item2) && v.Details.All((d) => d.IsMatch(id.Edit.Item2));
+
+    public static void WillWrite(this Identity id, Voucher v, bool userInput = false)
+    {
+        if (v == null)
+            return;
+
+        if (v.Details.GroupBy(static (d) => d.Currency).Any(static (g) =>
+                    Math.Abs(g.Sum(static (d) => d.Fund!.Value)) >= VoucherDetail.Tolerance) && !id.CanImba())
+            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity \"{id.Name}\"" + '\n' +
+                    "Reason: Debit/Credit imbalance");
+
+        if (Math.Abs(v.Details.Where(static (d) => d.Title == 3998)
+                    .Sum(static (d) => d.Fund!.Value)) >= VoucherDetail.Tolerance && !id.CanImba())
+            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity \"{id.Name}\"" + '\n' +
+                    "Reason: T3998 imbalance");
+
+        if (!v.IsMatch(id.Voucher.Item2))
+            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity \"{id.Name}\"" + '\n' +
+                    "Reason: You are not authorized to do anything on such a voucher");
+
+        var flag = false;
+        var lst = new List<VoucherDetail>();
+        foreach (var d in v.Details)
+        {
+            if (d.IsMatch(id.Edit.Item2))
+                continue;
+
+            if (d.IsMatch(id.View.Item2) || userInput)
+                lst.Add(d);
+            else
+                flag = true;
+        }
+
+        var sb = new StringBuilder();
+        sb.Append($"Write to {v.ID.Quotation('^')} denied for identity \"{id.Name}\"\n");
+        if (userInput)
+            sb.Append("Reason: attempting to write to unauthorized accounts\n");
+        else
+            sb.Append("Reason: attempting to modify unauthorized accounts\n");
+        if (lst.Count > 0)
+        {
+            sb.Append("Note: affected details are:\n");
+            var ser = new ExprSerializer();
+            foreach (var d in lst)
+                sb.Append(ser.PresentVoucherDetail(d));
+            if (flag)
+                sb.Append("Note: this is not a complete list -- you are not authorized to view the rest.\n");
+        } else if (flag)
+            sb.Append("... and you are not even authorized to view these details!\n");
+
+        throw new ApplicationException(sb.ToString());
+    }
 
     public static IQueryCompounded<IVoucherQueryAtom> Refine(this Identity id, IQueryCompounded<IVoucherQueryAtom> vq)
         => id.Voucher.Item2 == null ? null : new IntersectQueries<IVoucherQueryAtom>(vq, id.Voucher.Item2);

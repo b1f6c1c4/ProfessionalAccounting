@@ -159,8 +159,13 @@ public class DbSession : IHistoricalExchange
         yield break;
     }
 
-    public virtual ValueTask<Voucher> SelectVoucher(string id)
-        => Db.SelectVoucher(id);
+    public virtual async ValueTask<Voucher> SelectVoucher(string id)
+    {
+        if (id == null)
+            return null;
+
+        return await Db.SelectVoucher(id);
+    }
 
     public virtual IAsyncEnumerable<Voucher> SelectVouchers(IQueryCompounded<IVoucherQueryAtom> query)
         => query == null ? E<Voucher>() : Db.SelectVouchers(query);
@@ -169,10 +174,10 @@ public class DbSession : IHistoricalExchange
         => query == null ? E<VoucherDetail>() : Db.SelectVoucherDetails(query);
 
     public virtual IAsyncEnumerable<Balance> SelectVouchersGrouped(IVoucherGroupedQuery query, int limit)
-        => query == null ? E<Balance>() : Db.SelectVouchersGrouped(query, limit);
+        => query == null || query.VoucherQuery == null ? E<Balance>() : Db.SelectVouchersGrouped(query, limit);
 
     public virtual IAsyncEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit)
-        => query == null ? E<Balance>() : Db.SelectVoucherDetailsGrouped(query, limit);
+        => query == null || query.VoucherEmitQuery == null ? E<Balance>() : Db.SelectVoucherDetailsGrouped(query, limit);
 
     public virtual IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
         IQueryCompounded<IVoucherQueryAtom> query)

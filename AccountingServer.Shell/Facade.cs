@@ -355,6 +355,8 @@ public class Facade
                     }).Where(static d => !d.Fund!.Value.IsZero()));
         }
 
+        session.Identity.WillWrite(voucher, true);
+        session.Identity.WillWrite(await session.Accountant.SelectVoucherAsync(voucher.ID));
         if (!await session.Accountant.UpsertAsync(voucher))
             throw new ApplicationException("更新或添加失败");
 
@@ -433,6 +435,7 @@ public class Facade
         if (voucher.ID == null)
             throw new ApplicationException("编号未知");
 
+        session.Identity.WillWrite(await session.Accountant.SelectVoucherAsync(voucher.ID));
         return await session.Accountant.DeleteVoucherAsync(voucher.ID);
     }
 
