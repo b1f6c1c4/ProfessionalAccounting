@@ -170,7 +170,10 @@ public class CSharpSerializer : IEntitySerializer
             sb.Append($"    Type = VoucherType.{voucher.Type},\n");
         if (voucher.Remark != null)
             sb.Append($"    Remark = {ProcessString(voucher.Remark)},\n");
-        sb.Append("    Details = new() {\n");
+        if (voucher.Redacted)
+            sb.Append("    Details = new() { // [[REDACTED]]\n");
+        else
+            sb.Append("    Details = new() {\n");
         foreach (var detail in voucher.Details)
             sb.Append(PresentVoucherDetail(detail));
 

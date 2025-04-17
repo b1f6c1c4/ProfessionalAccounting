@@ -66,6 +66,8 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
 
             if (inject != null)
                 sb.Append($"{inject}\n");
+            if (voucher.Redacted)
+                sb.Append("[[REDACTED]]\n");
 
             foreach (var d in voucher.Details)
                 sb.Append(PresentVoucherDetail(d));

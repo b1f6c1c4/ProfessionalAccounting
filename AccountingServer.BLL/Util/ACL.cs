@@ -46,7 +46,7 @@ public class Role
     [XmlElement("Role")]
     public List<string> Inherits { get; set; }
 
-    [XmlElement("User")]
+    [XmlElement("Login")]
     public List<string> Users { get; set; }
 
     [XmlElement("Grant")]
@@ -58,11 +58,16 @@ public class Role
     [XmlElement("Reject")]
     public List<Permission> Rejects { get; set; }
 
-    [XmlIgnore]
-    public (IQueryCompounded<IDetailQueryAtom>,IQueryCompounded<IDetailQueryAtom>) View, Edit;
+    public bool Prepared { get; internal set; }
 
     [XmlIgnore]
-    public (IQueryCompounded<IVoucherQueryAtom>,IQueryCompounded<IVoucherQueryAtom>) Voucher;
+    public (IQueryCompounded<IDetailQueryAtom>,IQueryCompounded<IDetailQueryAtom>) View { get; internal set; }
+
+    [XmlIgnore]
+    public (IQueryCompounded<IDetailQueryAtom>,IQueryCompounded<IDetailQueryAtom>) Edit { get; internal set; }
+
+    [XmlIgnore]
+    public (IQueryCompounded<IVoucherQueryAtom>,IQueryCompounded<IVoucherQueryAtom>) Voucher { get; internal set; }
 }
 
 [Serializable]
@@ -116,14 +121,6 @@ public static class ACLManager
     static ACLManager()
         => Cfg.RegisterType<ACL>("ACL");
 
-    public static Identity GetIdentity(string name)
-    {
-        var id = Cfg.Get<ACL>().Identities.SingleOrDefault((id) => id.Name == name)
-            ?? Cfg.Get<ACL>().Identities.Single((id) => id.Name == null);
-        PrepareRole(id);
-        return id;
-    }
-
     public static Role GetRole(string name)
     {
         var id = Cfg.Get<ACL>().Roles.Single((id) => id.Name == name);
@@ -136,7 +133,7 @@ public static class ACLManager
 
     public static void PrepareRole(Role id)
     {
-        if (id.View.Item1 != null)
+        if (id.Prepared)
             return;
 
         (IQueryCompounded<T>,IQueryCompounded<T>) Compute<T>(Verb f,
@@ -168,6 +165,8 @@ public static class ACLManager
         id.View = Compute(Verb.View, dq, (r) => r.View);
         id.Edit = Compute(Verb.Edit, dq, (r) => r.Edit);
         id.Voucher = Compute(Verb.Voucher, vq, (r) => r.Voucher);
+        id.Prepared = true;
+        Console.WriteLine($"Prepared identity {id.Name}");
     }
 
     private static bool Recursive(Predicate<Identity> pred, Identity id0)
@@ -192,12 +191,13 @@ public static class ACLManager
     {
         var lst = Cfg.Get<ACL>().Identities.Where((id) => IsMatch(id.IdP, pred)).ToList();
         if (lst.Count == 0)
-            return GetIdentity(null);
+            lst = new() { Cfg.Get<ACL>().Identities.Single((id) => id.Name == null) };
 
-        if (lst.Count == 1)
-            return lst[0];
+        if (lst.Count > 1)
+            throw new ApplicationException($"Multiple identities matched: {string.Join(", ", lst)}");
 
-        throw new ApplicationException($"Multiple identities matched: {string.Join(", ", lst)}");
+        PrepareRole(lst[0]);
+        return lst[0];
     }
 
     public static bool CanLogin(this Identity id0, string user)
@@ -209,17 +209,33 @@ public static class ACLManager
                 && !id.Denies.Any((p) => p.Action.Flags(Verb.Invoke) && expr.StartsWith(p.Query, StringComparison.Ordinal)), id0)
             && !Recursive((id) => id.Rejects.Any((p) => p.Action.Flags(Verb.Invoke) && expr.StartsWith(p.Query, StringComparison.Ordinal)), id0);
 
-    public static void Redact(this Identity id, Voucher v)
+    public static bool CanRead(this Identity id, Voucher v)
+        => v.IsMatch(id.Voucher.Item2);
+
+    public static bool CanWrite(this Identity id, Voucher v)
+        => v.IsMatch(id.Voucher.Item2) && v.Details.All((d) => d.IsMatch(id.Edit.Item2));
+
+    public static IQueryCompounded<IVoucherQueryAtom> Refine(this Identity id, IQueryCompounded<IVoucherQueryAtom> vq)
+        => new IntersectQueries<IVoucherQueryAtom>(vq, id.Voucher.Item2);
+
+    public static IVoucherDetailQuery Refine(this Identity id, IVoucherDetailQuery vdq)
+        => new VoucherDetailQuery(
+                new IntersectQueries<IVoucherQueryAtom>(vdq.VoucherQuery, id.Voucher.Item2),
+                new IntersectQueries<IDetailQueryAtom>(vdq.ActualDetailFilter(), id.View.Item2));
+
+    public static Voucher RedactDetails(this Identity id, Voucher v)
     {
         var lst = v.Details.Where((d) => d.IsMatch(id.View.Item2)).ToList();
         if (lst.Count() == v.Details.Count())
-            return;
+            return v;
 
-        v.Redacted = true;
-        v.Details = lst;
+        return new()
+            {
+                ID = v.ID,
+                Date = v.Date,
+                Type = v.Type,
+                Redacted = true,
+                Details = lst,
+            };
     }
-
-    public static IVoucherDetailQuery Redact(this Identity id, IVoucherDetailQuery vdq)
-        => new VoucherDetailQuery(vdq.VoucherQuery,
-                new IntersectQueries<IDetailQueryAtom>(vdq.ActualDetailFilter(), id.View.Item2));
 }

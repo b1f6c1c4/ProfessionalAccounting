@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security;
 using AccountingServer.BLL;
+using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell.Subtotal;
@@ -208,7 +209,8 @@ internal class AccountingShell : IShellComponent
     /// <param name="session">客户端会话</param>
     /// <returns>记账凭证表达式</returns>
     private IAsyncEnumerable<string> PresentVoucherQuery(IQueryCompounded<IVoucherQueryAtom> query, Session session)
-        => session.Serializer.PresentVouchers(session.Accountant.SelectVouchersAsync(query));
+        => session.Serializer.PresentVouchers(session.Accountant.SelectVouchersAsync(query)
+                .Select(session.Identity.RedactDetails));
 
     /// <summary>
     ///     按细目检索式解析

@@ -30,6 +30,7 @@ using AccountingServer.Shell.Carry;
 using AccountingServer.Shell.Serializer;
 using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.FacadeF;
+using static AccountingServer.BLL.Parsing.Synthesizer;
 
 namespace AccountingServer.Shell;
 
@@ -178,6 +179,8 @@ public class Facade
                 return ListHelp();
             case "version":
                 return ListVersions().ToAsyncEnumerable();
+            case "me":
+                return ListIdentity(session);
         }
 
         return m_AccountingShell.Execute(expr, session);
@@ -198,8 +201,13 @@ public class Facade
         yield return $"Authenticated Identity: {session.Identity.Name.Quotation('"')}\n";
         var roles = session.Identity.Inherits.Select(static (s) => s.Quotation('"'));
         yield return $"Associated Roles: {string.Join(", ", roles)}\n";
-        yield return $"Accounting Entity: {session.Client.User.AsUser()}\n";
-        yield return $"Client Date: {session.Client.Today.AsDate()}\n";
+        var users = session.Identity.Users.Select(static (s) => s.AsUser());
+        yield return $"Associated Entities: {string.Join(", ", users)}\n";
+        yield return $"Selected Entity: {session.Client.User.AsUser()}\n";
+        yield return $"Current Date: {session.Client.Today.AsDate()}\n";
+        yield return $"Allowable View: {Synth(session.Identity.View.Item2)}\n";
+        yield return $"Allowable Edit: {Synth(session.Identity.Edit.Item2)}\n";
+        yield return $"Allowable Voucher: {Synth(session.Identity.Voucher.Item2)}\n";
     }
 
     #region Exchange

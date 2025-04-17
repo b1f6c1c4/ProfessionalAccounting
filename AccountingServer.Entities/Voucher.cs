@@ -86,6 +86,7 @@ public class Voucher
         Date = v.Date;
         Remark = v.Remark;
         Type = v.Type;
+        Redacted = v.Redacted;
         if (v.Details != null)
             Details = v.Details.Select(static d => new VoucherDetail(d)).ToList();
     }
