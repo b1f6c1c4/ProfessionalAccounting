@@ -26,7 +26,8 @@ namespace AccountingServer.BLL.Parsing;
 
 public class Synthesizer
     : IQueryVisitor<IDetailQueryAtom, (string, int)>,
-      IQueryVisitor<IVoucherQueryAtom, (string, int)>
+      IQueryVisitor<IVoucherQueryAtom, (string, int)>,
+      IQueryVisitor<IDistributedQueryAtom, (string, int)>
 {
     private Synthesizer() { }
 
@@ -35,6 +36,9 @@ public class Synthesizer
 
     public static string Synth(IQueryCompounded<IVoucherQueryAtom> vq) => vq == null ? "{-U}"
         : vq.Accept<(string, int)>(new Synthesizer()).Item1;
+
+    public static string Synth(IQueryCompounded<IDistributedQueryAtom> dq) => dq == null ? "{-U}"
+        : dq.Accept<(string, int)>(new Synthesizer()).Item1;
 
     public static string Synth(IVoucherDetailQuery vdq) => vdq == null ? "-U : -U" : vdq.DetailEmitFilter == null
         ? Synth(vdq.ActualDetailFilter())
@@ -178,7 +182,7 @@ public class Synthesizer
         if (query.ForAll)
             sb.Append("A ");
 
-        if (query.Range.StartDate.HasValue || query.Range.EndDate.HasValue || query.Range.NullOnly)
+        if (!query.Range.IsUnconstrained())
             sb.Append($"{Synth(query.Range)} ");
 
         if (query.VoucherFilter.ID != null)
@@ -195,6 +199,31 @@ public class Synthesizer
                 sb.Append("G ");
             else
                 sb.Append($"{query.VoucherFilter.Type} ");
+
+        sb.Remove(sb.Length - 1, 1);
+        return (sb.ToString(), 0);
+    }
+
+    public (string, int) Visit(IDistributedQueryAtom query)
+    {
+        var sb = new StringBuilder();
+
+        if (query.Filter.User != null)
+            sb.Append($"{query.Filter.User.AsUser()} ");
+        else
+            sb.Append("U ");
+
+        if (query.Filter.ID != null)
+            sb.Append($"{query.Filter.ID} ");
+
+        if (query.Filter.Name != null)
+            sb.Append($"{query.Filter.Name.Replace("/", @"\/").Quotation('/')} ");
+
+        if (query.Filter.Remark != null)
+            sb.Append($"{query.Filter.Remark.Quotation('%')} ");
+
+        if (!query.Range.IsUnconstrained())
+            sb.Append($"[{query.Range.AsDateRange()}] ");
 
         sb.Remove(sb.Length - 1, 1);
         return (sb.ToString(), 0);
@@ -232,6 +261,37 @@ public class Synthesizer
     }
 
     public (string, int) Visit(IQueryAry<IVoucherQueryAtom> query)
+    {
+        static string Q(string s, bool cond)
+            => cond ? $"{{{s}}}" : s;
+
+        var (f1, l1) = query.Filter1 == null ? ("(null)", -99)
+            : query.Filter1.Accept<(string, int)>(this);
+        switch (query.Operator)
+        {
+            case OperatorType.None:
+            case OperatorType.Identity:
+                return (f1, l1);
+            case OperatorType.Complement:
+                return ($"-{Q(f1, l1 <= 2)}", 1);
+        }
+
+        var (f2, l2) = query.Filter2 == null ? ("(null)", -99)
+            : query.Filter2.Accept<(string, int)>(this);
+        switch (query.Operator)
+        {
+            case OperatorType.Union:
+                return ($"{Q(f1, l1 <= 0)} + {Q(f2, l2 <= 0)}", 2);
+            case OperatorType.Subtract:
+                return ($"{Q(f1, l1 <= 0)} - {Q(f2, l2 <= 2)}", 1);
+            case OperatorType.Intersect:
+                return ($"{Q(f1, l1 <= 2)} * {Q(f2, l2 <= 2)}", 3);
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    public (string, int) Visit(IQueryAry<IDistributedQueryAtom> query)
     {
         static string Q(string s, bool cond)
             => cond ? $"{{{s}}}" : s;

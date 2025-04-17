@@ -28,6 +28,7 @@ using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using Xunit;
 using static AccountingServer.BLL.Parsing.FacadeF;
+using static AccountingServer.BLL.Parsing.Synthesizer;
 
 namespace AccountingServer.Test.IntegrationTest.VoucherTest;
 
@@ -101,7 +102,7 @@ public abstract class QueryTestBase
         await ResetVouchers();
     }
 
-    protected class DataProvider : IEnumerable<object[]>
+    internal protected class DataProvider : IEnumerable<object[]>
     {
         private static readonly List<object[]> Data = new()
             {
@@ -154,6 +155,21 @@ public abstract class QueryTestBase
 
         public IEnumerator<object[]> GetEnumerator() => Data.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => Data.GetEnumerator();
+    }
+}
+
+public class SynthTest
+{
+    [Theory]
+    [ClassData(typeof(QueryTestBase.DataProvider))]
+    public void Matches(bool _, string query)
+    {
+        var client = new Client { User = "uuu", Today = DateTime.UtcNow.Date };
+        var q1 = ParsingF.VoucherQuery(query, client);
+        var s1 = Synth(q1);
+        var q2 = ParsingF.VoucherQuery(s1, client);
+        var s2 = Synth(q2);
+        Assert.Equal(s1, s2);
     }
 }
 

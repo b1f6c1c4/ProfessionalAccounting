@@ -265,8 +265,8 @@ internal class AccountingShell : IShellComponent
     /// <returns>执行结果</returns>
     private IAsyncEnumerable<string> PresentDetailRQuery(IVoucherDetailQuery query, Session session)
         => session.Serializer.PresentVoucherDetails(
-            session.Accountant.SelectVouchersAsync(query.VoucherQuery).SelectMany(
-                v => v.Details.Where(d => d.IsMatch(query.ActualDetailFilter()))
+            session.Accountant.SelectVouchersAsync(query?.VoucherQuery).SelectMany(
+                v => v.Details.Where(d => d.IsMatch(query?.ActualDetailFilter()))
                     .Select(d => new VoucherDetailR(v, d)).ToAsyncEnumerable()));
 
     /// <summary>
@@ -296,9 +296,9 @@ internal class AccountingShell : IShellComponent
     /// <returns>执行结果</returns>
     private IAsyncEnumerable<string> PresentFancyQuery(IVoucherDetailQuery query, Session session)
         => session.Serializer.PresentVouchers(
-            session.Accountant.SelectVouchersAsync(query.VoucherQuery).Select(v =>
+            session.Accountant.SelectVouchersAsync(query?.VoucherQuery).Select(v =>
                 {
-                    v.Details.RemoveAll(d => !d.IsMatch(query.ActualDetailFilter()));
+                    v.Details.RemoveAll(d => !d.IsMatch(query?.ActualDetailFilter()));
                     return v;
                 }));
 

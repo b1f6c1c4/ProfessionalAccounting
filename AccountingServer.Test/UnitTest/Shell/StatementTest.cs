@@ -48,7 +48,7 @@ public class StatementTest
     public void EmptyTest()
     {
         var inc = Statement.CalculateIncidents(L(new()), Target).ToList();
-        Assert.Equal(0, inc.Count);
+        Assert.Empty(inc);
     }
 
     [Theory]

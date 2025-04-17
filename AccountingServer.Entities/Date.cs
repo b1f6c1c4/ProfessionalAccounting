@@ -70,6 +70,13 @@ public class DateFilter
     public static DateFilter TheNotNull { get; } = new(null, null) { Nullable = false };
 
     /// <summary>
+    ///     是否无限制
+    /// </summary>
+    /// <returns>若无任何限制则为<c>true</c>，否则为<c>false</c></returns>
+    public bool IsUnconstrained()
+        => !StartDate.HasValue && !EndDate.HasValue && Nullable && !NullOnly;
+
+    /// <summary>
     ///     是否包含弱检索式
     /// </summary>
     /// <param name="loose">允许大范围</param>

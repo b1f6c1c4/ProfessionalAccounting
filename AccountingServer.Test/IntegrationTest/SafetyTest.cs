@@ -25,8 +25,8 @@ using static AccountingServer.BLL.Parsing.FacadeF;
 
 namespace AccountingServer.Test.IntegrationTest;
 
-[Collection("SecurityTestCollection")]
-public class SecurityTest
+[Collection("SafetyTestCollection")]
+public class SafetyTest
 {
     private readonly Client m_Client = new() { User = "b1", Today = DateTime.UtcNow.Date };
 

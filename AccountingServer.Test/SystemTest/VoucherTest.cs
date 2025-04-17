@@ -61,20 +61,29 @@ public class VoucherTest
 
         Cfg.Assign(new Abbreviations { Abbrs = new() { new() { Abbr = "aaa", Title = 5678, Editable = false } } });
 
-        var acl = new ACL
+        Cfg.Assign(new ACL
             {
                 Identities = new()
                     {
                         new()
                             {
+                                Name = "1",
+                                IdP = new(),
+                                Users = new() { "*" },
+                                Assumes = new(),
+                                Inherits = new(),
                                 Grants = new()
                                     {
                                         new() { Action = Verb.Edit, Query = "U" },
+                                        new() { Action = Verb.Imbalance },
                                         new() { Action = Verb.Invoke, Query = "" },
+                                        new() { Action = Verb.Voucher, Query = "{U A}" },
                                     },
+                                Denies = new(),
+                                Rejects = new(),
                             },
                     },
-            };
+            });
 
         m_Facade = new(db: "accounting-test");
         m_Session = m_Facade.CreateSession("b1", DateTime.UtcNow.Date, new());
