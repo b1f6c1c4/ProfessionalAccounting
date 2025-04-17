@@ -24,13 +24,17 @@ using AccountingServer.Entities.Util;
 
 namespace AccountingServer.BLL.Parsing;
 
-public class Synthesizer : IQueryVisitor<IDetailQueryAtom, string>, IQueryVisitor<IVoucherQueryAtom, string>
+public class Synthesizer
+    : IQueryVisitor<IDetailQueryAtom, (string, int)>,
+      IQueryVisitor<IVoucherQueryAtom, (string, int)>
 {
     private Synthesizer() { }
 
-    public static string Synth(IQueryCompounded<IDetailQueryAtom> dq) => dq.Accept<string>(new Synthesizer());
+    public static string Synth(IQueryCompounded<IDetailQueryAtom> dq) => dq == null ? "(-U)"
+        : dq.Accept<(string, int)>(new Synthesizer()).Item1;
 
-    public static string Synth(IQueryCompounded<IVoucherQueryAtom> vq) => vq.Accept<string>(new Synthesizer());
+    public static string Synth(IQueryCompounded<IVoucherQueryAtom> vq) => vq == null ? "{-U}"
+        : vq.Accept<(string, int)>(new Synthesizer()).Item1;
 
     public static string Synth(IVoucherDetailQuery vdq) => vdq.DetailEmitFilter == null
         ? Synth(vdq.ActualDetailFilter())
@@ -110,12 +114,14 @@ public class Synthesizer : IQueryVisitor<IDetailQueryAtom, string>, IQueryVisito
         return sb.ToString();
     }
 
-    public string Visit(IDetailQueryAtom query)
+    public (string, int) Visit(IDetailQueryAtom query)
     {
         var sb = new StringBuilder();
 
         if (query.Filter.User != null)
             sb.Append($"{query.Filter.User.AsUser()} ");
+        else
+            sb.Append("U ");
 
         if (query.Filter.Currency != null)
             sb.Append($"{query.Filter.Currency.AsCurrency()} ");
@@ -160,34 +166,14 @@ public class Synthesizer : IQueryVisitor<IDetailQueryAtom, string>, IQueryVisito
             sb.Append("< ");
 
         sb.Remove(sb.Length - 1, 1);
-        return sb.ToString();
+        return (sb.ToString(), 0);
     }
 
-    public string Visit(IQueryAry<IDetailQueryAtom> query)
-    {
-        switch (query.Operator)
-        {
-            case OperatorType.None:
-            case OperatorType.Identity:
-                return query.Filter1.Accept<string>(this);
-            case OperatorType.Complement:
-                return $"-{query.Filter1.Accept<string>(this)}";
-            case OperatorType.Union:
-                return $"({query.Filter1.Accept<string>(this)}) + ({query.Filter2.Accept<string>(this)})";
-            case OperatorType.Subtract:
-                return $"({query.Filter1.Accept<string>(this)}) - ({query.Filter2.Accept<string>(this)})";
-            case OperatorType.Intersect:
-                return $"({query.Filter1.Accept<string>(this)}) * ({query.Filter2.Accept<string>(this)})";
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-    }
-
-    public string Visit(IVoucherQueryAtom query)
+    public (string, int) Visit(IVoucherQueryAtom query)
     {
         var sb = new StringBuilder();
 
-        sb.Append($"{query.DetailFilter.Accept<string>(this)} ");
+        sb.Append($"{query.DetailFilter.Accept<(string, int)>(this).Item1} ");
 
         if (query.ForAll)
             sb.Append("A ");
@@ -211,24 +197,60 @@ public class Synthesizer : IQueryVisitor<IDetailQueryAtom, string>, IQueryVisito
                 sb.Append($"{query.VoucherFilter.Type} ");
 
         sb.Remove(sb.Length - 1, 1);
-        return sb.ToString();
+        return (sb.ToString(), 0);
     }
 
-    public string Visit(IQueryAry<IVoucherQueryAtom> query)
+    public (string, int) Visit(IQueryAry<IDetailQueryAtom> query)
     {
+        static string Q(string s, bool cond)
+            => cond ? $"({s})" : s;
+
+        var (f1, l1) = query.Filter1.Accept<(string, int)>(this);
         switch (query.Operator)
         {
             case OperatorType.None:
             case OperatorType.Identity:
-                return query.Filter1.Accept<string>(this);
+                return (f1, l1);
             case OperatorType.Complement:
-                return $"-{{{query.Filter1.Accept<string>(this)}}}";
+                return ($"-{Q(f1, l1 <= -1)}", -2);
+        }
+        var (f2, l2) = (query.Filter2 ?? query.Filter1).Accept<(string, int)>(this);
+        switch (query.Operator)
+        {
             case OperatorType.Union:
-                return $"{{{query.Filter1.Accept<string>(this)}}} + {{{query.Filter2.Accept<string>(this)}}}";
+                return ($"{Q(f1, l1 <= -2)} + {Q(f2, l2 <= -2)}", -1);
             case OperatorType.Subtract:
-                return $"{{{query.Filter1.Accept<string>(this)}}} - {{{query.Filter2.Accept<string>(this)}}}";
+                return ($"{Q(f1, l1 <= -2)} - {Q(f2, l2 <= -1)}", -2);
             case OperatorType.Intersect:
-                return $"{{{query.Filter1.Accept<string>(this)}}} * {{{query.Filter2.Accept<string>(this)}}}";
+                return ($"{Q(f1, l1 <= -1)} * {Q(f2, l2 <= -1)}", 1);
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    public (string, int) Visit(IQueryAry<IVoucherQueryAtom> query)
+    {
+        static string Q(string s, bool cond)
+            => cond ? $"{{{s}}}" : s;
+
+        var (f1, l1) = query.Filter1.Accept<(string, int)>(this);
+        switch (query.Operator)
+        {
+            case OperatorType.None:
+            case OperatorType.Identity:
+                return (f1, l1);
+            case OperatorType.Complement:
+                return ($"-{Q(f1, l1 <= 2)}", 1);
+        }
+        var (f2, l2) = (query.Filter2 ?? query.Filter1).Accept<(string, int)>(this);
+        switch (query.Operator)
+        {
+            case OperatorType.Union:
+                return ($"{Q(f1, l1 <= 0)} + {Q(f2, l2 <= 0)}", 2);
+            case OperatorType.Subtract:
+                return ($"{Q(f1, l1 <= 0)} - {Q(f2, l2 <= 2)}", 1);
+            case OperatorType.Intersect:
+                return ($"{Q(f1, l1 <= 2)} * {Q(f2, l2 <= 2)}", 3);
             default:
                 throw new ArgumentOutOfRangeException();
         }
