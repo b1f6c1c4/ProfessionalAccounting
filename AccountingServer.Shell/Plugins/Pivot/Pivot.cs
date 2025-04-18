@@ -31,7 +31,7 @@ namespace AccountingServer.Shell.Plugins.Pivot;
 internal class Pivot : PluginBase
 {
     /// <inheritdoc />
-    public override IAsyncEnumerable<string> Execute(string expr, Session session)
+    public override IAsyncEnumerable<string> Execute(string expr, Context ctx)
     {
         List<string> prefixes = null;
         List<IGroupedQuery> dqueries;
@@ -46,10 +46,10 @@ internal class Pivot : PluginBase
             while (true)
             {
                 prefixes.Add(Parsing.Regex(ref expr));
-                dqueries.Add(ParsingF.GroupedQuery(ref expr, session.Client));
+                dqueries.Add(ParsingF.GroupedQuery(ref expr, ctx.Client));
                 try
                 {
-                    col = ParsingF.Subtotal(ref expr, session.Client);
+                    col = ParsingF.Subtotal(ref expr, ctx.Client);
                     transpose = ParsingF.Optional(ref expr, "t");
                     fitting = ParsingF.Optional(ref expr, "f");
                     ParsingF.Eof(expr);
@@ -68,8 +68,8 @@ internal class Pivot : PluginBase
             dqueries = null;
         }
         if (dqueries != null)
-            return PostProcess(CombinedSubtotal.Query(dqueries, col, session),
-                    prefixes, col, transpose, fitting, session);
+            return PostProcess(CombinedSubtotal.Query(dqueries, col, ctx),
+                    prefixes, col, transpose, fitting, ctx);
 
         try
         {
@@ -78,10 +78,10 @@ internal class Pivot : PluginBase
             while (true)
             {
                 prefixes.Add(Parsing.Regex(ref expr));
-                vqueries.Add(ParsingF.VoucherGroupedQuery(ref expr, session.Client));
+                vqueries.Add(ParsingF.VoucherGroupedQuery(ref expr, ctx.Client));
                 try
                 {
-                    col = ParsingF.Subtotal(ref expr, session.Client);
+                    col = ParsingF.Subtotal(ref expr, ctx.Client);
                     transpose = ParsingF.Optional(ref expr, "t");
                     fitting = ParsingF.Optional(ref expr, "f");
                     ParsingF.Eof(expr);
@@ -100,18 +100,18 @@ internal class Pivot : PluginBase
             vqueries = null;
         }
         if (vqueries != null)
-            return PostProcess(CombinedSubtotal.Query(vqueries, col, session),
-                    prefixes, col, transpose, fitting, session);
+            return PostProcess(CombinedSubtotal.Query(vqueries, col, ctx),
+                    prefixes, col, transpose, fitting, ctx);
 
         throw new FormatException();
     }
 
     private async IAsyncEnumerable<string> PostProcess(
             ValueTask<(List<List<Balance>>, List<CombinedSubtotal>, bool)> task,
-            List<string> prefixes, ISubtotal col, bool transpose, bool fitting, Session session)
+            List<string> prefixes, ISubtotal col, bool transpose, bool fitting, Context ctx)
     {
         var (data, subs, flipped) = await task;
-        var cconv = new SubtotalBuilder(col, session.Accountant);
+        var cconv = new SubtotalBuilder(col, ctx.Accountant);
         var curr = (double? v, string c) => {
             if (col.EquivalentCurrency != null)
                 return v.AsFund(col.EquivalentCurrency);
@@ -133,7 +133,7 @@ internal class Pivot : PluginBase
         {
             foreach (var ((dat, sub), prefix) in data.Zip(subs).Zip(prefixes))
             {
-                var rconv = new SubtotalBuilder(sub.LocalRow, session.Accountant);
+                var rconv = new SubtotalBuilder(sub.LocalRow, ctx.Accountant);
                 var head = new List<Property>();
                 mgr.Clear();
                 var sgf = new Stringifier(sub.LocalRow, prefix);
@@ -159,7 +159,7 @@ internal class Pivot : PluginBase
         {
             foreach (var ((dat, sub), prefix) in data.Zip(subs).Zip(prefixes))
             {
-                var lcconv = new SubtotalBuilder(sub.LocalCol, session.Accountant);
+                var lcconv = new SubtotalBuilder(sub.LocalCol, ctx.Accountant);
                 var lmgr = new ColumnManager(await lcconv.Build(dat.ToAsyncEnumerable()), sub.LocalCol);
                 var shuffler = new int[mgr.Width];
                 var id = 1;

@@ -66,7 +66,7 @@ internal class PluginShell : IShellComponent
             };
 
     /// <inheritdoc />
-    public IAsyncEnumerable<string> Execute(string expr, Session session, string term)
+    public IAsyncEnumerable<string> Execute(string expr, Context ctx, string term)
     {
         var help = false;
         if (expr.StartsWith("?", StringComparison.Ordinal))
@@ -85,8 +85,8 @@ internal class PluginShell : IShellComponent
             return GetHelp(plgName);
         }
 
-        session.Identity.WillInvoke($"${plgName}$");
-        return GetPlugin(plgName).Execute(expr, session);
+        ctx.Identity.WillInvoke($"${plgName}$");
+        return GetPlugin(plgName).Execute(expr, ctx);
     }
 
     /// <inheritdoc />

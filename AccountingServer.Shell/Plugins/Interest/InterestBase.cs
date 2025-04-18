@@ -52,15 +52,15 @@ internal abstract class InterestBase : PluginBase
     protected abstract int MinorSubTitle();
 
     /// <inheritdoc />
-    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Context ctx)
     {
         var remark = Parsing.Token(ref expr);
         var rate = Parsing.DoubleF(ref expr) / 10000D;
         var all = Parsing.Optional(ref expr, "all");
-        var endDate = !all ? Parsing.UniqueTime(ref expr, session.Client) : null;
+        var endDate = !all ? Parsing.UniqueTime(ref expr, ctx.Client) : null;
         Parsing.Eof(expr);
 
-        var loans = (await session.Accountant.RunGroupedQueryAsync($"({MajorFilter()})-\"\" ``rtcC")).Items
+        var loans = (await ctx.Accountant.RunGroupedQueryAsync($"({MajorFilter()})-\"\" ``rtcC")).Items
             .Cast<ISubtotalRemark>()
             .ToList();
         var rmkObj =
@@ -83,35 +83,35 @@ internal abstract class InterestBase : PluginBase
                 Rate = rate,
             };
 
-        await using var vir = session.Accountant.Virtualize();
+        await using var vir = ctx.Accountant.Virtualize();
         if ((!all && !endDate.HasValue) ||
             endDate.HasValue)
         {
-            var lastD = (await session.Accountant.RunVoucherQueryAsync(info.QueryInterest())
+            var lastD = (await ctx.Accountant.RunVoucherQueryAsync(info.QueryInterest())
                     .OrderByDescending(static v => v.Date, new DateComparer())
                     .FirstOrDefaultAsync())
                 ?.Date ??
-                (await session.Accountant.RunVoucherQueryAsync(info.QueryCapital())
+                (await ctx.Accountant.RunVoucherQueryAsync(info.QueryCapital())
                     .OrderBy(static v => v.Date, new DateComparer())
                     .FirstAsync())
                 .Date!.Value;
             var capQuery = $"{info.QueryCapital()} [~{lastD.AsDate()}]``v";
             var intQuery = $"{info.QueryInterest()} [~{lastD.AsDate()}]``v";
-            var (capitalIntegral, interestIntegral) = await Regularize(session, info,
-                (await session.Accountant.RunGroupedQueryAsync(capQuery)).Fund,
-                (await session.Accountant.RunGroupedQueryAsync(intQuery)).Fund,
+            var (capitalIntegral, interestIntegral) = await Regularize(ctx, info,
+                (await ctx.Accountant.RunGroupedQueryAsync(capQuery)).Fund,
+                (await ctx.Accountant.RunGroupedQueryAsync(intQuery)).Fund,
                 lastD,
-                endDate ?? session.Client.Today);
+                endDate ?? ctx.Client.Today);
             yield return $"capitalIntegral={capitalIntegral:R}\n";
             yield return $"interestIntegral={interestIntegral:R}\n";
         }
         else
         {
-            var (capitalIntegral, interestIntegral) = await Regularize(session, info,
+            var (capitalIntegral, interestIntegral) = await Regularize(ctx, info,
                 0D,
                 0D,
                 null,
-                session.Client.Today);
+                ctx.Client.Today);
             yield return $"capitalIntegral={capitalIntegral:R}\n";
             yield return $"interestIntegral={interestIntegral:R}\n";
         }
@@ -120,13 +120,13 @@ internal abstract class InterestBase : PluginBase
     /// <summary>
     ///     从上次计息日后一日起计算单利利息并整理还款
     /// </summary>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <param name="info">借款信息</param>
     /// <param name="capitalIntegral">剩余本金</param>
     /// <param name="interestIntegral">剩余利息</param>
     /// <param name="lastSettlement">上次计息日</param>
     /// <param name="finalDay">截止日期</param>
-    private async ValueTask<(double, double)> Regularize(Session session, LoanInfo info, double capitalIntegral,
+    private async ValueTask<(double, double)> Regularize(Context ctx, LoanInfo info, double capitalIntegral,
         double interestIntegral,
         DateTime? lastSettlement, DateTime finalDay)
     {
@@ -136,7 +136,7 @@ internal abstract class InterestBase : PluginBase
             ? new(lastSettlement.Value.AddDays(1), finalDay)
             : new(null, finalDay);
         await foreach (var grp in
-                       session.Accountant
+                       ctx.Accountant
                            .RunVoucherQueryAsync($"{info.QueryMajor()} {rng.AsDateRange()}")
                            .GroupBy(static v => v.Date)
                            .OrderBy(static grp => grp.Key, new DateComparer()))
@@ -146,7 +146,7 @@ internal abstract class InterestBase : PluginBase
             lastSettlement ??= key;
 
             // Settle Interest
-            interestIntegral += await SettleInterest(session, info,
+            interestIntegral += await SettleInterest(ctx, info,
                 capitalIntegral,
                 key.Subtract(lastSettlement.Value).Days,
                 await grp.SingleOrDefaultAsync(v => v.Details.Any(d => d.IsMatch(interestPattern, dir: Dir())))
@@ -174,12 +174,12 @@ internal abstract class InterestBase : PluginBase
                         .Sum();
                 if ((Dir() * (-value + interestIntegral)).IsNonNegative())
                 {
-                    await RegularizeVoucherDetail(session, info, voucher, 0, value);
+                    await RegularizeVoucherDetail(ctx, info, voucher, 0, value);
                     interestIntegral -= value;
                 }
                 else
                 {
-                    await RegularizeVoucherDetail(session, info, voucher, value - interestIntegral, interestIntegral);
+                    await RegularizeVoucherDetail(ctx, info, voucher, value - interestIntegral, interestIntegral);
                     capitalIntegral -= value - interestIntegral;
                     interestIntegral = 0;
                 }
@@ -190,7 +190,7 @@ internal abstract class InterestBase : PluginBase
             throw new ApplicationException("无法处理无穷长时间以前的利息收入");
 
         if (lastSettlement != finalDay)
-            interestIntegral += await SettleInterest(session, info,
+            interestIntegral += await SettleInterest(ctx, info,
                 capitalIntegral,
                 finalDay.Subtract(lastSettlement.Value).Days,
                 new() { Date = finalDay, Details = new() });
@@ -201,13 +201,13 @@ internal abstract class InterestBase : PluginBase
     /// <summary>
     ///     计算利息
     /// </summary>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <param name="info">借款信息</param>
     /// <param name="capitalIntegral">剩余本金</param>
     /// <param name="delta">间隔日数</param>
     /// <param name="voucher">记账凭证</param>
     /// <returns>利息</returns>
-    private async ValueTask<double> SettleInterest(Session session, LoanInfo info, double capitalIntegral, int delta,
+    private async ValueTask<double> SettleInterest(Context ctx, LoanInfo info, double capitalIntegral, int delta,
         Voucher voucher)
     {
         var interest = delta * info.Rate * capitalIntegral;
@@ -222,7 +222,7 @@ internal abstract class InterestBase : PluginBase
                 if (!voucher.Details.All(d => d.IsMatch(info.AsInterest()) || d.IsMatch(info.AsMinor(this))))
                     throw new ArgumentException("该记账凭证包含计息以外的细目", nameof(voucher));
 
-                await session.Accountant.DeleteVoucherAsync(voucher.ID);
+                await ctx.Accountant.DeleteVoucherAsync(voucher.ID);
             }
 
             return 0;
@@ -231,7 +231,7 @@ internal abstract class InterestBase : PluginBase
         if (detail == null)
         {
             voucher.Details = create;
-            await session.Accountant.UpsertAsync(voucher);
+            await ctx.Accountant.UpsertAsync(voucher);
         }
         else if (!(detail.Fund!.Value - interest).IsZero())
         {
@@ -239,7 +239,7 @@ internal abstract class InterestBase : PluginBase
                 throw new ArgumentException("该记账凭证包含计息以外的细目", nameof(voucher));
 
             voucher.Details = create;
-            await session.Accountant.UpsertAsync(voucher);
+            await ctx.Accountant.UpsertAsync(voucher);
         }
 
         return interest;
@@ -248,12 +248,12 @@ internal abstract class InterestBase : PluginBase
     /// <summary>
     ///     正确登记还款
     /// </summary>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <param name="info">借款信息</param>
     /// <param name="voucher">记账凭证</param>
     /// <param name="capVol">本金还款额</param>
     /// <param name="intVol">利息还款额</param>
-    private async ValueTask RegularizeVoucherDetail(Session session, LoanInfo info, Voucher voucher, double capVol,
+    private async ValueTask RegularizeVoucherDetail(Context ctx, LoanInfo info, Voucher voucher, double capVol,
         double intVol)
     {
         var flag = false;
@@ -315,7 +315,7 @@ internal abstract class InterestBase : PluginBase
         }
 
         if (flag)
-            await session.Accountant.UpsertAsync(voucher);
+            await ctx.Accountant.UpsertAsync(voucher);
     }
 
     private sealed class LoanInfo

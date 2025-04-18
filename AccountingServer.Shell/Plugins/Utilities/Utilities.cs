@@ -38,14 +38,14 @@ internal class Utilities : PluginBase
         => Cfg.RegisterType<UtilTemplates>("Util");
 
     /// <inheritdoc />
-    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Context ctx)
     {
         var body = expr;
         expr = ParsingF.Line(ref body);
 
         var dt = string.IsNullOrWhiteSpace(body)
-            ? Parsing.UniqueTime(ref expr, session.Client)
-            : session.Client.Today;
+            ? Parsing.UniqueTime(ref expr, ctx.Client)
+            : ctx.Client.Today;
 
         var abbr = Parsing.Token(ref expr);
         var template = Cfg.Get<UtilTemplates>().Templates.FirstOrDefault(t => t.Name == abbr) ??
@@ -69,18 +69,18 @@ internal class Utilities : PluginBase
                     case "=":
                         break;
                     default:
-                        dt = Parsing.UniqueTime(ref line, session.Client);
+                        dt = Parsing.UniqueTime(ref line, ctx.Client);
                         break;
                 }
                 while (!string.IsNullOrWhiteSpace(line))
                 {
-                    var (voucher, ee) = await GenerateVoucher(session, template, line, dt, false);
+                    var (voucher, ee) = await GenerateVoucher(ctx, template, line, dt, false);
                     line = ee;
                     if (voucher == null)
                         continue;
 
-                    await session.Accountant.UpsertAsync(voucher);
-                    yield return session.Serializer.PresentVoucher(voucher).Wrap();
+                    await ctx.Accountant.UpsertAsync(voucher);
+                    yield return ctx.Serializer.PresentVoucher(voucher).Wrap();
                 }
                 ParsingF.Eof(line);
             }
@@ -88,12 +88,12 @@ internal class Utilities : PluginBase
         }
         else
         {
-            var (voucher, ee) = await GenerateVoucher(session, template, expr, dt, true);
+            var (voucher, ee) = await GenerateVoucher(ctx, template, expr, dt, true);
             expr = ee;
             if (voucher != null)
             {
-                await session.Accountant.UpsertAsync(voucher);
-                yield return session.Serializer.PresentVoucher(voucher).Wrap();
+                await ctx.Accountant.UpsertAsync(voucher);
+                yield return ctx.Serializer.PresentVoucher(voucher).Wrap();
             }
         }
 
@@ -110,7 +110,7 @@ internal class Utilities : PluginBase
             yield return $"{util.Name,20} {(util.TemplateType == UtilTemplateType.Fixed ? ' ' : '*')} {util.Description}\n";
     }
 
-    private async ValueTask<(Voucher, string)> GenerateVoucher(Session session, UtilTemplate template, string expr,
+    private async ValueTask<(Voucher, string)> GenerateVoucher(Context ctx, UtilTemplate template, string expr,
         DateTime? time, bool allowEmpty = true)
     {
         var num = 1D;
@@ -134,7 +134,7 @@ internal class Utilities : PluginBase
                 num = val;
             else
             {
-                var arr = (await session.Accountant.RunGroupedQueryAsync($"{template.Query} [~{time:yyyyMMdd}] ``v"))
+                var arr = (await ctx.Accountant.RunGroupedQueryAsync($"{template.Query} [~{time:yyyyMMdd}] ``v"))
                     .Fund;
                 num = arr - val;
             }

@@ -41,7 +41,7 @@ internal class Composite : PluginBase
         => Cfg.RegisterType<CompositeTemplates>("Composite");
 
     /// <inheritdoc />
-    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Context ctx)
     {
         Template temp = null;
         if (ParsingF.Token(ref expr, true, t => (temp = GetTemplate(t)) != null) == null)
@@ -54,14 +54,14 @@ internal class Composite : PluginBase
 
         DateFilter the;
         if (string.IsNullOrWhiteSpace(expr))
-            the = DateRange(temp.Day, session.Client.Today);
+            the = DateRange(temp.Day, ctx.Client.Today);
         else
         {
-            the = ParsingF.Range(ref expr, session.Client) ?? throw new ArgumentException("语法错误", nameof(expr));
+            the = ParsingF.Range(ref expr, ctx.Client) ?? throw new ArgumentException("语法错误", nameof(expr));
             ParsingF.Eof(expr);
         }
 
-        yield return (await DoInquiry(the, temp, currency, session)).Item1;
+        yield return (await DoInquiry(the, temp, currency, ctx)).Item1;
     }
 
     public static Template GetTemplate(string name) => Cfg.Get<CompositeTemplates>().Templates.SingleOrDefault(
@@ -101,12 +101,12 @@ internal class Composite : PluginBase
     /// <param name="rng">日期过滤器</param>
     /// <param name="inq">查询</param>
     /// <param name="baseCurrency">记账本位币</param>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <returns>执行结果</returns>
     public async ValueTask<(string, double)> DoInquiry(DateFilter rng, BaseInquiry inq, string baseCurrency,
-        Session session)
+        Context ctx)
     {
-        var visitor = new InquiriesVisitor(session, rng, baseCurrency);
+        var visitor = new InquiriesVisitor(ctx, rng, baseCurrency);
         var val = await inq.Accept(visitor);
         return (visitor.Result, val);
     }
@@ -132,13 +132,13 @@ internal class InquiriesVisitor : IInquiryVisitor<ValueTask<double>>
     private readonly string m_BaseCurrency;
     private readonly DateFilter m_Rng;
     private readonly StringBuilder m_Sb = new();
-    private readonly Session m_Session;
+    private readonly Context m_Ctx;
 
     private string m_Path = "";
 
-    public InquiriesVisitor(Session session, DateFilter rng, string baseCurrency)
+    public InquiriesVisitor(Context ctx, DateFilter rng, string baseCurrency)
     {
-        m_Session = session;
+        m_Ctx = ctx;
         m_BaseCurrency = baseCurrency;
         m_Rng = rng;
     }
@@ -171,13 +171,13 @@ internal class InquiriesVisitor : IInquiryVisitor<ValueTask<double>>
             $"[{(inq.IsLeftExtended ? "" : m_Rng.StartDate.AsDate())}~{m_Rng.EndDate.AsDate()}] {(inq.General ? "G" : "")}";
         var query = ParsingF.GroupedQuery(
             $"{gen(o)}`{(inq.ByCurrency ? "C" : "")}{(inq.ByTitle ? "t" : "")}{(inq.BySubTitle ? "s" : "")}{(inq.ByContent ? "c" : "")}{(inq.ByRemark ? "r" : "")}{(inq.ByCurrency || inq.ByTitle || inq.BySubTitle || inq.ByContent || inq.ByRemark ? "" : "v")}{(!inq.ByCurrency ? "X" : "")}",
-            m_Session.Client);
-        var gq = await m_Session.Accountant.SelectVoucherDetailsGroupedAsync(query);
+            m_Ctx.Client);
+        var gq = await m_Ctx.Accountant.SelectVoucherDetailsGroupedAsync(query);
         if (inq.ByCurrency)
             foreach (var grp in gq.Items.Cast<ISubtotalCurrency>())
             {
                 var curr = grp.Currency;
-                var ratio = await m_Session.Accountant.Query(m_Rng.EndDate!.Value, curr, m_BaseCurrency);
+                var ratio = await m_Ctx.Accountant.Query(m_Rng.EndDate!.Value, curr, m_BaseCurrency);
 
                 var theFmt = new CurrencyDecorator(fmt, curr, ratio);
 
@@ -186,9 +186,9 @@ internal class InquiriesVisitor : IInquiryVisitor<ValueTask<double>>
                 await foreach (var s in
                     new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), theFmt, inq.HideContent)
                             {
-                                Client = m_Session.Client,
+                                Client = m_Ctx.Client,
                             }
-                        .PresentSubtotal(grp, query.Subtotal, m_Session.Serializer))
+                        .PresentSubtotal(grp, query.Subtotal, m_Ctx.Serializer))
                     m_Sb.Append(s);
             }
         else
@@ -198,9 +198,9 @@ internal class InquiriesVisitor : IInquiryVisitor<ValueTask<double>>
             await foreach (var s in
                 new SubtotalVisitor(Composite.Merge(m_Path, inq.Name), fmt, inq.HideContent)
                         {
-                            Client = m_Session.Client,
+                            Client = m_Ctx.Client,
                         }
-                    .PresentSubtotal(gq, query.Subtotal, m_Session.Serializer))
+                    .PresentSubtotal(gq, query.Subtotal, m_Ctx.Serializer))
                 m_Sb.Append(s);
         }
 

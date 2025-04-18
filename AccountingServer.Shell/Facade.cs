@@ -71,7 +71,7 @@ public class Facade
                 };
     }
 
-    public Session CreateSession(string user, DateTime dt, IdPEntry idp,
+    public Context CreateSession(string user, DateTime dt, IdPEntry idp,
             string assume = null, string spec = null, int limit = 0)
     {
         var id = ACLManager.Authenticate(idp, assume);
@@ -82,15 +82,15 @@ public class Facade
     ///     空记账凭证的表示
     /// </summary>
     // ReSharper disable once MemberCanBeMadeStatic.Global
-    public string EmptyVoucher(Session session) => session.Serializer.PresentVoucher(null).Wrap();
+    public string EmptyVoucher(Context ctx) => ctx.Serializer.PresentVoucher(null).Wrap();
 
     /// <summary>
     ///     执行表达式
     /// </summary>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <param name="expr">表达式</param>
     /// <returns>执行结果</returns>
-    public IAsyncEnumerable<string> Execute(Session session, string expr)
+    public IAsyncEnumerable<string> Execute(Context ctx, string expr)
     {
         switch (expr)
         {
@@ -103,48 +103,48 @@ public class Facade
             case "?":
                 return ListHelp();
             case "reload":
-                session.Identity.WillInvoke("reload");
+                ctx.Identity.WillInvoke("reload");
                 return Cfg.ReloadAll();
             case "die":
-                session.Identity.WillInvoke("die");
+                ctx.Identity.WillInvoke("die");
                 Environment.Exit(0);
                 break;
             case "version":
                 return ListVersions().ToAsyncEnumerable();
             case "me":
-                return ListIdentity(session);
+                return ListIdentity(ctx);
         }
 
         if (expr.Initial() == "invite")
         {
-            session.Identity.WillInvoke("invite");
+            ctx.Identity.WillInvoke("invite");
             return m_Auth.CreateAttestationOptions(expr.Rest());
         }
 
-        session.Identity.WillLogin(session.Client.User);
+        ctx.Identity.WillLogin(ctx.Client.User);
         switch (ParsingF.Optional(ref expr, "time ", "slow "))
         {
             case "time ":
-                session.Identity.WillInvoke("time");
+                ctx.Identity.WillInvoke("time");
                 var repetition = (ulong)ParsingF.DoubleF(ref expr);
-                return ExecuteNormal(session, expr, repetition);
+                return ExecuteNormal(ctx, expr, repetition);
             case "slow ":
-                session.Identity.WillInvoke("slow");
+                ctx.Identity.WillInvoke("slow");
                 var slow = (int)ParsingF.DoubleF(ref expr);
-                return ExecuteProfile(session, expr, slow);
+                return ExecuteProfile(ctx, expr, slow);
             default:
-                return ExecuteNormal(session, expr, null);
+                return ExecuteNormal(ctx, expr, null);
         }
     }
 
-    private async IAsyncEnumerable<string> ExecuteProfile(Session session, string expr, int slow)
+    private async IAsyncEnumerable<string> ExecuteProfile(Context ctx, string expr, int slow)
     {
         if (!await m_Db.StartProfiler(slow))
             throw new ApplicationException("Failed to start profiler");
 
         try
         {
-            await foreach (var s in m_Composer.Execute(expr, session, ""));
+            await foreach (var s in m_Composer.Execute(expr, ctx, ""));
             await foreach (var p in m_Db.StopProfiler())
                 yield return p;
         }
@@ -154,7 +154,7 @@ public class Facade
         }
     }
 
-    private async IAsyncEnumerable<string> ExecuteNormal(Session session, string expr, ulong? repetition)
+    private async IAsyncEnumerable<string> ExecuteNormal(Context ctx, string expr, ulong? repetition)
     {
         var sw = new Stopwatch();
         var output = (repetition ?? 1) == 1;
@@ -162,7 +162,7 @@ public class Facade
         for (var i = 0UL; i < (repetition ?? 1UL); i++)
         {
             sw.Start();
-            await foreach (var s in m_Composer.Execute(expr, session, ""))
+            await foreach (var s in m_Composer.Execute(expr, ctx, ""))
                 if (output)
                     yield return s;
 
@@ -180,10 +180,10 @@ public class Facade
     /// <summary>
     ///     执行基础表达式
     /// </summary>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <param name="expr">表达式</param>
     /// <returns>执行结果</returns>
-    public IAsyncEnumerable<string> SafeExecute(Session session, string expr)
+    public IAsyncEnumerable<string> SafeExecute(Context ctx, string expr)
     {
         switch (expr)
         {
@@ -198,11 +198,11 @@ public class Facade
             case "version":
                 return ListVersions().ToAsyncEnumerable();
             case "me":
-                return ListIdentity(session);
+                return ListIdentity(ctx);
         }
 
-        session.Identity.WillLogin(session.Client.User);
-        return m_AccountingShell.Execute(expr, session, "");
+        ctx.Identity.WillLogin(ctx.Client.User);
+        return m_AccountingShell.Execute(expr, ctx, "");
     }
 
     private static async IAsyncEnumerable<string> HelloWorld()
@@ -215,70 +215,70 @@ public class Facade
         }
     }
 
-    private static async IAsyncEnumerable<string> ListIdentity(Session session)
+    private static async IAsyncEnumerable<string> ListIdentity(Context ctx)
     {
-        yield return $"Authenticated Identity: {session.TrueIdentity.Name.AsId()}\n";
+        yield return $"Authenticated Identity: {ctx.TrueIdentity.Name.AsId()}\n";
 
-        if (session.TrueIdentity.P.AllAssumes == null)
+        if (ctx.TrueIdentity.P.AllAssumes == null)
             yield return "Assumable Identies: *\n";
         else
         {
-            var assumes = session.TrueIdentity.P.AllAssumes.Select(static (s) => s.AsId());
+            var assumes = ctx.TrueIdentity.P.AllAssumes.Select(static (s) => s.AsId());
             yield return $"Assumable Identies: {string.Join(", ", assumes)}\n";
         }
 
-        yield return $"Assume Identity: {session.Identity.Name.AsId()}\n";
+        yield return $"Assume Identity: {ctx.Identity.Name.AsId()}\n";
 
-        if (session.Identity.P.AllKnowns == null)
+        if (ctx.Identity.P.AllKnowns == null)
             yield return "Known Identies: *\n";
         else
         {
-            var knowns = session.Identity.P.AllKnowns.Select(static (s) => s.AsId());
+            var knowns = ctx.Identity.P.AllKnowns.Select(static (s) => s.AsId());
             yield return $"Known Identies: {string.Join(", ", knowns)}\n";
         }
 
-        if (session.Identity.P.AllRoles == null)
+        if (ctx.Identity.P.AllRoles == null)
             yield return "Associated Roles: *\n";
         else
         {
-            var roles = session.Identity.P.AllRoles.Select(static (r) => r.Name.AsId());
+            var roles = ctx.Identity.P.AllRoles.Select(static (r) => r.Name.AsId());
             yield return $"Associated Roles: {string.Join(", ", roles)}\n";
         }
 
-        if (session.Identity.P.AllUsers == null)
+        if (ctx.Identity.P.AllUsers == null)
             yield return "Associated Entities: *\n";
         else
         {
-            var users = session.Identity.P.AllUsers.Select(static (s) => s.AsUser());
+            var users = ctx.Identity.P.AllUsers.Select(static (s) => s.AsUser());
             yield return $"Associated Entities: {string.Join(", ", users)}\n";
         }
 
-        if (session.Identity.CanLogin(session.Client.User))
-            yield return $"Selected Entity: {session.Client.User.AsUser()}\n";
+        if (ctx.Identity.CanLogin(ctx.Client.User))
+            yield return $"Selected Entity: {ctx.Client.User.AsUser()}\n";
         else
-            yield return $"!!Access to {session.Client.User.AsUser()} denied, try `entity` + one of the above!!\n";
+            yield return $"!!Access to {ctx.Client.User.AsUser()} denied, try `entity` + one of the above!!\n";
 
-        yield return $"Current Date: {session.Client.Today.AsDate()}\n";
+        yield return $"Current Date: {ctx.Client.Today.AsDate()}\n";
 
-        yield return $"Allowable View: {Synth(session.Identity.P.View.Grant)}\n";
-        yield return $"Allowable Edit: {Synth(session.Identity.P.Edit.Grant)}\n";
-        yield return $"Allowable Voucher: {Synth(session.Identity.P.Voucher.Grant)}\n";
-        yield return $"Allowable Asset: {Synth(session.Identity.P.Asset.Grant)}\n";
-        yield return $"Allowable Amort: {Synth(session.Identity.P.Amort.Grant)}\n";
+        yield return $"Allowable View: {Synth(ctx.Identity.P.View.Grant)}\n";
+        yield return $"Allowable Edit: {Synth(ctx.Identity.P.Edit.Grant)}\n";
+        yield return $"Allowable Voucher: {Synth(ctx.Identity.P.Voucher.Grant)}\n";
+        yield return $"Allowable Asset: {Synth(ctx.Identity.P.Asset.Grant)}\n";
+        yield return $"Allowable Amort: {Synth(ctx.Identity.P.Amort.Grant)}\n";
 
-        var invokes = session.Identity.P.GrantInvokes.Select(static (r) => r.Quotation('"'));
+        var invokes = ctx.Identity.P.GrantInvokes.Select(static (r) => r.Quotation('"'));
         yield return $"Allowable Invokes: {string.Join(", ", invokes)}\n";
 
-        yield return $"Debit/Credit Imbalance: {(session.Identity.P.Imba ? "Granted" : "Denied")}\n";
-        yield return $"Reflect on Denies: {(session.Identity.P.Reflect ? "Granted" : "Denied")}\n";
+        yield return $"Debit/Credit Imbalance: {(ctx.Identity.P.Imba ? "Granted" : "Denied")}\n";
+        yield return $"Reflect on Denies: {(ctx.Identity.P.Reflect ? "Granted" : "Denied")}\n";
 
-        if (session.Identity.P.Reflect)
+        if (ctx.Identity.P.Reflect)
         {
-            yield return $"Full View: {Synth(session.Identity.P.View.Query)}\n";
-            yield return $"Full Edit: {Synth(session.Identity.P.Edit.Query)}\n";
-            yield return $"Full Voucher: {Synth(session.Identity.P.Voucher.Query)}\n";
-            yield return $"Full Asset: {Synth(session.Identity.P.Asset.Query)}\n";
-            yield return $"Full Amort: {Synth(session.Identity.P.Amort.Query)}\n";
+            yield return $"Full View: {Synth(ctx.Identity.P.View.Query)}\n";
+            yield return $"Full Edit: {Synth(ctx.Identity.P.Edit.Query)}\n";
+            yield return $"Full Voucher: {Synth(ctx.Identity.P.Voucher.Query)}\n";
+            yield return $"Full Asset: {Synth(ctx.Identity.P.Asset.Query)}\n";
+            yield return $"Full Amort: {Synth(ctx.Identity.P.Amort.Query)}\n";
         }
     }
 
@@ -339,15 +339,15 @@ public class Facade
     /// <summary>
     ///     更新或添加记账凭证
     /// </summary>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <param name="str">记账凭证的表达式</param>
     /// <returns>新记账凭证的表达式</returns>
-    public async ValueTask<string> ExecuteVoucherUpsert(Session session, string str)
+    public async ValueTask<string> ExecuteVoucherUpsert(Context ctx, string str)
     {
-        var voucher = session.Serializer.ParseVoucher(str);
+        var voucher = ctx.Serializer.ParseVoucher(str);
         var details = voucher.Details.Where(static d => !d.Currency.EndsWith('#')).ToList();
         var grpCs = details.GroupBy(static d => d.Currency ?? BaseCurrency.Now).ToList();
-        var grpUs = details.GroupBy(d => d.User ?? session.Client.User).ToList();
+        var grpUs = details.GroupBy(d => d.User ?? ctx.Client.User).ToList();
         foreach (var grpC in grpCs)
         {
             var cnt = grpC.Count(static d => !d.Fund.HasValue);
@@ -389,7 +389,7 @@ public class Facade
             }
         else // multiple user, multiple currencies: T3998 on payer, T3998/T3999 on payee
         {
-            var grpUCs = details.GroupBy(d => (d.User ?? session.Client.User, d.Currency ?? BaseCurrency.Now))
+            var grpUCs = details.GroupBy(d => (d.User ?? ctx.Client.User, d.Currency ?? BaseCurrency.Now))
                 .ToList();
             // list of payees (debit)
             var ps = grpUCs.Where(static grp => !grp.Sum(static d => d.Fund!.Value).IsNonPositive()).ToList();
@@ -414,12 +414,12 @@ public class Facade
                     }).Where(static d => !d.Fund!.Value.IsZero()));
         }
 
-        session.Identity.WillWrite(voucher, true);
-        session.Identity.WillWrite(await session.Accountant.SelectVoucherAsync(voucher.ID));
-        if (!await session.Accountant.UpsertAsync(voucher))
+        ctx.Identity.WillWrite(voucher, true);
+        ctx.Identity.WillWrite(await ctx.Accountant.SelectVoucherAsync(voucher.ID));
+        if (!await ctx.Accountant.UpsertAsync(voucher))
             throw new ApplicationException("更新或添加失败");
 
-        return session.Serializer.PresentVoucher(voucher).Wrap();
+        return ctx.Serializer.PresentVoucher(voucher).Wrap();
     }
 
     /// <summary>
@@ -448,37 +448,37 @@ public class Facade
     /// <summary>
     ///     更新或添加资产
     /// </summary>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <param name="str">资产表达式</param>
     /// <returns>新资产表达式</returns>
-    public async ValueTask<string> ExecuteAssetUpsert(Session session, string str)
+    public async ValueTask<string> ExecuteAssetUpsert(Context ctx, string str)
     {
-        var asset = session.Serializer.ParseAsset(str);
+        var asset = ctx.Serializer.ParseAsset(str);
 
-        session.Identity.WillAccess(asset);
-        session.Identity.WillAccess(await session.Accountant.SelectAssetAsync(asset.ID));
-        if (!await session.Accountant.UpsertAsync(asset))
+        ctx.Identity.WillAccess(asset);
+        ctx.Identity.WillAccess(await ctx.Accountant.SelectAssetAsync(asset.ID));
+        if (!await ctx.Accountant.UpsertAsync(asset))
             throw new ApplicationException("更新或添加失败");
 
-        return session.Serializer.PresentAsset(asset).Wrap();
+        return ctx.Serializer.PresentAsset(asset).Wrap();
     }
 
     /// <summary>
     ///     更新或添加摊销
     /// </summary>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <param name="str">摊销表达式</param>
     /// <returns>新摊销表达式</returns>
-    public async ValueTask<string> ExecuteAmortUpsert(Session session, string str)
+    public async ValueTask<string> ExecuteAmortUpsert(Context ctx, string str)
     {
-        var amort = session.Serializer.ParseAmort(str);
+        var amort = ctx.Serializer.ParseAmort(str);
 
-        session.Identity.WillAccess(amort);
-        session.Identity.WillAccess(await session.Accountant.SelectAmortizationAsync(amort.ID));
-        if (!await session.Accountant.UpsertAsync(amort))
+        ctx.Identity.WillAccess(amort);
+        ctx.Identity.WillAccess(await ctx.Accountant.SelectAmortizationAsync(amort.ID));
+        if (!await ctx.Accountant.UpsertAsync(amort))
             throw new ApplicationException("更新或添加失败");
 
-        return session.Serializer.PresentAmort(amort).Wrap();
+        return ctx.Serializer.PresentAmort(amort).Wrap();
     }
 
     #endregion
@@ -488,52 +488,52 @@ public class Facade
     /// <summary>
     ///     删除记账凭证
     /// </summary>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <param name="str">记账凭证表达式</param>
     /// <returns>是否成功</returns>
-    public async ValueTask<bool> ExecuteVoucherRemoval(Session session, string str)
+    public async ValueTask<bool> ExecuteVoucherRemoval(Context ctx, string str)
     {
-        var voucher = session.Serializer.ParseVoucher(str);
+        var voucher = ctx.Serializer.ParseVoucher(str);
 
         if (voucher.ID == null)
             throw new ApplicationException("编号未知");
 
-        session.Identity.WillWrite(await session.Accountant.SelectVoucherAsync(voucher.ID));
-        return await session.Accountant.DeleteVoucherAsync(voucher.ID);
+        ctx.Identity.WillWrite(await ctx.Accountant.SelectVoucherAsync(voucher.ID));
+        return await ctx.Accountant.DeleteVoucherAsync(voucher.ID);
     }
 
     /// <summary>
     ///     删除资产
     /// </summary>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <param name="str">资产表达式</param>
     /// <returns>是否成功</returns>
-    public async ValueTask<bool> ExecuteAssetRemoval(Session session, string str)
+    public async ValueTask<bool> ExecuteAssetRemoval(Context ctx, string str)
     {
-        var asset = session.Serializer.ParseAsset(str);
+        var asset = ctx.Serializer.ParseAsset(str);
 
         if (!asset.ID.HasValue)
             throw new ApplicationException("编号未知");
 
-        session.Identity.WillAccess(await session.Accountant.SelectAssetAsync(asset.ID.Value));
-        return await session.Accountant.DeleteAssetAsync(asset.ID.Value);
+        ctx.Identity.WillAccess(await ctx.Accountant.SelectAssetAsync(asset.ID.Value));
+        return await ctx.Accountant.DeleteAssetAsync(asset.ID.Value);
     }
 
     /// <summary>
     ///     删除摊销
     /// </summary>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <param name="str">摊销表达式</param>
     /// <returns>是否成功</returns>
-    public async ValueTask<bool> ExecuteAmortRemoval(Session session, string str)
+    public async ValueTask<bool> ExecuteAmortRemoval(Context ctx, string str)
     {
-        var amort = session.Serializer.ParseAmort(str);
+        var amort = ctx.Serializer.ParseAmort(str);
 
         if (!amort.ID.HasValue)
             throw new ApplicationException("编号未知");
 
-        session.Identity.WillAccess(await session.Accountant.SelectAmortizationAsync(amort.ID.Value));
-        return await session.Accountant.DeleteAmortizationAsync(amort.ID.Value);
+        ctx.Identity.WillAccess(await ctx.Accountant.SelectAmortizationAsync(amort.ID.Value));
+        return await ctx.Accountant.DeleteAmortizationAsync(amort.ID.Value);
     }
 
     #endregion

@@ -33,7 +33,7 @@ public class VoucherTest
     private readonly Facade m_Facade;
 
     private readonly string m_ID;
-    private readonly Session m_Session;
+    private readonly Context m_Ctx;
 
     public VoucherTest()
     {
@@ -87,9 +87,9 @@ public class VoucherTest
             });
 
         m_Facade = new(db: "accounting-test");
-        m_Session = m_Facade.CreateSession("b1", DateTime.UtcNow.Date, new());
+        m_Ctx = m_Facade.CreateSession("b1", DateTime.UtcNow.Date, new());
 
-        var res = m_Facade.ExecuteVoucherUpsert(m_Session, "new Voucher { Ub2 T123401 whatever / aaa huh 10 }").AsTask()
+        var res = m_Facade.ExecuteVoucherUpsert(m_Ctx, "new Voucher { Ub2 T123401 whatever / aaa huh 10 }").AsTask()
             .Result;
         Assert.Matches(@"@new Voucher {\^[0-9a-f]{24}\^
 [0-9]{8}
@@ -109,7 +109,7 @@ Ub2 T3998\s+10
     [Fact]
     public void CornerTest()
     {
-        var res = m_Facade.ExecuteVoucherUpsert(m_Session, "new Voucher { Ub1 @XXX T123456 100 Ub2 @xyn T654321 -1 Ub3 @#y##n# T114514 -5 }").AsTask().Result;
+        var res = m_Facade.ExecuteVoucherUpsert(m_Ctx, "new Voucher { Ub1 @XXX T123456 100 Ub2 @xyn T654321 -1 Ub3 @#y##n# T114514 -5 }").AsTask().Result;
         Assert.Matches(@"@new Voucher {\^[0-9a-f]{24}\^
 [0-9]{8}
 // sth-
@@ -128,17 +128,17 @@ Ub2\s+@XYN\s+T654321\s+-1
 Ub3\s+@#y##n#\s+T114514\s+-5
 }@
 ", res);
-        Assert.True(m_Facade.ExecuteVoucherRemoval(m_Session, res.Substring(1, res.Length - 3)).AsTask().Result);
+        Assert.True(m_Facade.ExecuteVoucherRemoval(m_Ctx, res.Substring(1, res.Length - 3)).AsTask().Result);
     }
 
     [Fact]
     public void EmptyTest()
-        => Assert.Equal("@new Voucher {\n\n}@\n", m_Facade.EmptyVoucher(m_Session));
+        => Assert.Equal("@new Voucher {\n\n}@\n", m_Facade.EmptyVoucher(m_Ctx));
 
     [Fact]
     public async Task SimpleTest()
     {
-        var res = await m_Facade.Execute(m_Session, "\"huh\"").Join();
+        var res = await m_Facade.Execute(m_Ctx, "\"huh\"").Join();
         Assert.Matches(@"@new Voucher {\^[0-9a-f]{24}\^
 [0-9]{8}
 // kyh
@@ -155,12 +155,12 @@ Ub2 T3998\s+10
 
     [Fact]
     public async Task SafeSrawTest()
-        => await Assert.ThrowsAnyAsync<Exception>(() => m_Facade.Execute(m_Session, "sraw Ub2").JoinA());
+        => await Assert.ThrowsAnyAsync<Exception>(() => m_Facade.Execute(m_Ctx, "sraw Ub2").JoinA());
 
     [Fact]
     public async Task UnsafeSrawTest()
     {
-        var res = await m_Facade.Execute(m_Session, "unsafe sraw Ub2").Join();
+        var res = await m_Facade.Execute(m_Ctx, "unsafe sraw Ub2").Join();
         Assert.Matches(@"[0-9]{8} // sth-obj
 Ub2 T123401 'whatever'\s+-10
 [0-9]{8} // kyh
@@ -170,12 +170,12 @@ Ub2 T3998\s+10
 
     [Fact]
     public async Task InvalidTest()
-        => await Assert.ThrowsAnyAsync<Exception>(() => m_Facade.Execute(m_Session, "invalid command").JoinA());
+        => await Assert.ThrowsAnyAsync<Exception>(() => m_Facade.Execute(m_Ctx, "invalid command").JoinA());
 
     [Fact]
     public async Task SubtotalTest()
     {
-        var res = await m_Facade.Execute(m_Session, "json U > `t").Join();
+        var res = await m_Facade.Execute(m_Ctx, "json U > `t").Join();
         Assert.Matches(@"{
   ""value"": 20\.0,
   ""title"": {
@@ -192,7 +192,7 @@ Ub2 T3998\s+10
     [Fact]
     public async Task FancyTest()
     {
-        var res = await m_Facade.Execute(m_Session, "unsafe fancy U T3998").Join();
+        var res = await m_Facade.Execute(m_Ctx, "unsafe fancy U T3998").Join();
         Assert.Matches(@"@new Voucher {\^[0-9a-f]{24}\^
 [0-9]{8}
 // kyh
@@ -206,14 +206,14 @@ Ub2 T3998\s+10
     [Fact]
     public async Task ChkTest()
     {
-        var res = await m_Facade.Execute(m_Session, "chk-1").Join();
+        var res = await m_Facade.Execute(m_Ctx, "chk-1").Join();
         Assert.Equal("", res);
     }
 
     [Fact]
     public async Task RemoveTest()
     {
-        Assert.True(await m_Facade.ExecuteVoucherRemoval(m_Session, $"new Voucher {{ {m_ID} }}"));
-        Assert.False(await m_Facade.ExecuteVoucherRemoval(m_Session, $"new Voucher {{ {m_ID} }}"));
+        Assert.True(await m_Facade.ExecuteVoucherRemoval(m_Ctx, $"new Voucher {{ {m_ID} }}"));
+        Assert.False(await m_Facade.ExecuteVoucherRemoval(m_Ctx, $"new Voucher {{ {m_ID} }}"));
     }
 }

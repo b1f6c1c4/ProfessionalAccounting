@@ -43,32 +43,32 @@ internal partial class CarryShell
     /// <summary>
     ///     取消摊销
     /// </summary>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <param name="rng">过滤器</param>
     /// <returns>执行结果</returns>
-    private ValueTask<long> ResetConversion(Session session, DateFilter rng)
-        => session.Accountant.DeleteVouchersAsync($"{rng.AsDateRange()} %equity conversion% AnnualCarry");
+    private ValueTask<long> ResetConversion(Context ctx, DateFilter rng)
+        => ctx.Accountant.DeleteVouchersAsync($"{rng.AsDateRange()} %equity conversion% AnnualCarry");
 
     /// <summary>
     ///     所有者权益币种转换
     /// </summary>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <param name="dt">日期</param>
     /// <param name="to">目标币种</param>
-    private async IAsyncEnumerable<string> ConvertEquity(Session session, DateTime dt, string to)
+    private async IAsyncEnumerable<string> ConvertEquity(Context ctx, DateTime dt, string to)
     {
-        var rst = await session.Accountant.RunGroupedQueryAsync($"T4101+T4103-{to.AsCurrency()} [~{dt.AsDate()}]`Cts");
+        var rst = await ctx.Accountant.RunGroupedQueryAsync($"T4101+T4103-{to.AsCurrency()} [~{dt.AsDate()}]`Cts");
 
         foreach (var grpC in rst.Items.Cast<ISubtotalCurrency>())
         {
-            var rate = await session.Accountant.Query(dt, grpC.Currency, to);
+            var rate = await ctx.Accountant.Query(dt, grpC.Currency, to);
             var dst = rate * grpC.Fund;
             yield return
                 $"=== {dt.AsDate()} {grpC.Currency} {grpC.Fund.AsFund(grpC.Currency)} => {to.AsCurrency()} {dst.AsFund(to)}\n";
 
             foreach (var grpt in grpC.Items.Cast<ISubtotalTitle>())
             foreach (var grps in grpt.Items.Cast<ISubtotalSubTitle>())
-                await session.Accountant.UpsertAsync(new Voucher
+                await ctx.Accountant.UpsertAsync(new Voucher
                     {
                         Date = dt,
                         Type = VoucherType.AnnualCarry,

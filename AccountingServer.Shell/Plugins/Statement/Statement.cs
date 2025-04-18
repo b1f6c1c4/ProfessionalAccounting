@@ -43,7 +43,7 @@ public class Statement : PluginBase
         => Cfg.RegisterType<StmtTargets>("Statement");
 
     /// <inheritdoc />
-    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Context ctx)
     {
         var csv = expr;
         expr = ParsingF.Line(ref csv);
@@ -53,7 +53,7 @@ public class Statement : PluginBase
             var nm = ParsingF.Token(ref expr);
             var tgt = Cfg.Get<StmtTargets>().Targets.Single(t => t.Name == nm);
             var parsed = new CsvParser(tgt.Reversed);
-            var filt = ParsingF.DetailQuery(tgt.Query, session.Client);
+            var filt = ParsingF.DetailQuery(tgt.Query, ctx.Client);
             if (!ParsingF.Optional(ref expr, "as"))
                 throw new FormatException("格式错误");
             var marker = ParsingF.Token(ref expr);
@@ -63,8 +63,8 @@ public class Statement : PluginBase
 
             parsed.Parse(ref csv);
             var sb = new StringBuilder();
-            session.Identity.WillInvoke($"$stmt$ {nm}");
-            await RunMark(session, sb, filt, parsed, marker);
+            ctx.Identity.WillInvoke($"$stmt$ {nm}");
+            await RunMark(ctx, sb, filt, parsed, marker);
             yield return sb.ToString();
 
             yield break;
@@ -74,11 +74,11 @@ public class Statement : PluginBase
         {
             var nm = ParsingF.Token(ref expr);
             var tgt = Cfg.Get<StmtTargets>().Targets.Single(t => t.Name == nm);
-            var filt = ParsingF.DetailQuery(tgt.Query, session.Client);
+            var filt = ParsingF.DetailQuery(tgt.Query, ctx.Client);
             ParsingF.Eof(expr);
             var sb = new StringBuilder();
-            session.Identity.WillInvoke($"$stmt$ {nm}");
-            await RunUnmark(session, sb, filt);
+            ctx.Identity.WillInvoke($"$stmt$ {nm}");
+            await RunUnmark(ctx, sb, filt);
             yield return sb.ToString();
 
             yield break;
@@ -88,11 +88,11 @@ public class Statement : PluginBase
         {
             var nm = ParsingF.Token(ref expr);
             var tgt = Cfg.Get<StmtTargets>().Targets.Single(t => t.Name == nm);
-            var filt = ParsingF.DetailQuery(tgt.Query, session.Client);
+            var filt = ParsingF.DetailQuery(tgt.Query, ctx.Client);
             ParsingF.Eof(expr);
             var sb = new StringBuilder();
-            session.Identity.WillInvoke($"$stmt$ {nm}");
-            await RunCheck(session, sb, filt, tgt);
+            ctx.Identity.WillInvoke($"$stmt$ {nm}");
+            await RunCheck(ctx, sb, filt, tgt);
             yield return sb.ToString();
 
             yield break;
@@ -100,7 +100,7 @@ public class Statement : PluginBase
 
         if (ParsingF.Optional(ref expr, "xml"))
         {
-            var filt = ParsingF.DetailQuery(ref expr, session.Client);
+            var filt = ParsingF.DetailQuery(ref expr, ctx.Client);
             ParsingF.Eof(expr);
             var sb = new StringBuilder();
             var tgt = new Target()
@@ -109,8 +109,8 @@ public class Statement : PluginBase
                     Overlaps = new(),
                     Skips = new(),
                 };
-            session.Identity.WillInvoke("$stmt$ xml");
-            await RunCheck(session, sb, filt, tgt, true);
+            ctx.Identity.WillInvoke("$stmt$ xml");
+            await RunCheck(ctx, sb, filt, tgt, true);
             yield return sb.ToString();
 
             yield break;
@@ -120,7 +120,7 @@ public class Statement : PluginBase
             var nm = ParsingF.Token(ref expr);
             var tgt = Cfg.Get<StmtTargets>().Targets.Single(t => t.Name == nm);
             var parsed = new CsvParser(tgt.Reversed);
-            var filt = ParsingF.DetailQuery(tgt.Query, session.Client);
+            var filt = ParsingF.DetailQuery(tgt.Query, ctx.Client);
             if (!ParsingF.Optional(ref expr, "as"))
                 throw new FormatException("格式错误");
             var marker = ParsingF.Token(ref expr);
@@ -142,14 +142,14 @@ public class Statement : PluginBase
                     new SimpleDetailQuery { Filter = new() { Remark = "" } }));
             var sb = new StringBuilder();
             sb.AppendLine($"{parsed.Items.Count} parsed");
-            session.Identity.WillInvoke($"$stmt$ {nm}");
-            await using var vir = session.Accountant.Virtualize();
-            await RunUnmark(session, sb, markerFilt);
-            if (await RunMark(session, sb, nullFilt, parsed, marker)
-                || await RunCheck(session, sb, filt, tgt) && !force)
+            ctx.Identity.WillInvoke($"$stmt$ {nm}");
+            await using var vir = ctx.Accountant.Virtualize();
+            await RunUnmark(ctx, sb, markerFilt);
+            if (await RunMark(ctx, sb, nullFilt, parsed, marker)
+                || await RunCheck(ctx, sb, filt, tgt) && !force)
             {
                 sb.AppendLine("ABORT, rewind by unmark them back");
-                await RunUnmark(session, sb, markerFilt);
+                await RunUnmark(ctx, sb, markerFilt);
 
                 yield return "\x0c Transaction Aborted \x0c\n";
                 yield return sb.ToString();
@@ -175,7 +175,7 @@ public class Statement : PluginBase
             yield return $"{tgt.Name,4} {(tgt.Reversed ? '-' : ' ')} {tgt.Query}\n";
     }
 
-    private static async ValueTask<bool> RunMark(Session session, StringBuilder sb,
+    private static async ValueTask<bool> RunMark(Context ctx, StringBuilder sb,
         IVoucherDetailQuery filt, CsvParser parsed, string marker)
     {
         if (filt.IsDangerous())
@@ -185,7 +185,7 @@ public class Statement : PluginBase
         var marked = 0;
         var remarked = 0;
         var converted = 0;
-        var res = await session.Accountant.SelectVouchersAsync(filt.VoucherQuery).ToListAsync();
+        var res = await ctx.Accountant.SelectVouchersAsync(filt.VoucherQuery).ToListAsync();
         var ops = new List<Voucher>();
         foreach (var b in parsed.Items)
         {
@@ -225,7 +225,7 @@ public class Statement : PluginBase
             sb.AppendLine(b.Raw);
         }
 
-        await session.Accountant.UpsertAsync(ops);
+        await ctx.Accountant.UpsertAsync(ops);
 
         sb.AppendLine($"{marked} marked");
         sb.AppendLine($"{remarked} remarked");
@@ -234,14 +234,14 @@ public class Statement : PluginBase
         return hasViolation;
     }
 
-    private static async ValueTask RunUnmark(Session session, StringBuilder sb, IVoucherDetailQuery filt)
+    private static async ValueTask RunUnmark(Context ctx, StringBuilder sb, IVoucherDetailQuery filt)
     {
         if (filt.IsDangerous())
             throw new SecurityException("检测到弱检索式");
 
         var cnt = 0;
         var cntAll = 0;
-        var res = session.Accountant.SelectVouchersAsync(filt.VoucherQuery);
+        var res = ctx.Accountant.SelectVouchersAsync(filt.VoucherQuery);
         var ops = new List<Voucher>();
         await foreach (var v in res)
         {
@@ -261,7 +261,7 @@ public class Statement : PluginBase
             ops.Add(v);
         }
 
-        await session.Accountant.UpsertAsync(ops);
+        await ctx.Accountant.UpsertAsync(ops);
         sb.AppendLine($"{cntAll} selected");
         sb.AppendLine($"{cnt} unmarked");
     }
@@ -509,13 +509,13 @@ public class Statement : PluginBase
         }
     }
 
-    private async ValueTask<bool> RunCheck(Session session, StringBuilder sb,
+    private async ValueTask<bool> RunCheck(Context ctx, StringBuilder sb,
         IVoucherDetailQuery filt, Target tgt, bool pure = false)
     {
         if (filt.IsDangerous())
             throw new SecurityException("检测到弱检索式");
 
-        var res = await session.Accountant.SelectVouchersAsync(filt.VoucherQuery)
+        var res = await ctx.Accountant.SelectVouchersAsync(filt.VoucherQuery)
             .Where(v => !tgt.Skips.Any(s => s.ID == v.ID))
             .Where(static v => v.Date.HasValue)
             .SelectMany(v => v.Details.Where(d => d.IsMatch(filt.ActualDetailFilter()))

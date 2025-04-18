@@ -32,10 +32,10 @@ internal interface IShellComponent
     ///     执行表达式
     /// </summary>
     /// <param name="expr">表达式</param>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <param name="term">表达式头</param>
     /// <returns>执行结果</returns>
-    IAsyncEnumerable<string> Execute(string expr, Session session, string term);
+    IAsyncEnumerable<string> Execute(string expr, Context ctx, string term);
 
     /// <summary>
     ///     粗略判断表达式是否可执行
@@ -53,27 +53,27 @@ internal class ShellComponent : IShellComponent
     /// <summary>
     ///     操作
     /// </summary>
-    private readonly Func<string, Session, IAsyncEnumerable<string>> m_Action;
+    private readonly Func<string, Context, IAsyncEnumerable<string>> m_Action;
 
     /// <summary>
     ///     首段字符串
     /// </summary>
     private readonly string m_Initial;
 
-    public ShellComponent(string initial, Func<string, Session, IAsyncEnumerable<string>> action)
+    public ShellComponent(string initial, Func<string, Context, IAsyncEnumerable<string>> action)
     {
         m_Initial = initial;
         m_Action = action;
     }
 
     /// <inheritdoc />
-    public IAsyncEnumerable<string> Execute(string expr, Session session, string term)
+    public IAsyncEnumerable<string> Execute(string expr, Context ctx, string term)
     {
         if (m_Initial == null)
-            return m_Action(expr, session);
+            return m_Action(expr, ctx);
 
-        session.Identity.WillInvoke(string.IsNullOrEmpty(term) ? m_Initial : $"{term}-{m_Initial}");
-        return m_Action(expr.Rest(), session);
+        ctx.Identity.WillInvoke(string.IsNullOrEmpty(term) ? m_Initial : $"{term}-{m_Initial}");
+        return m_Action(expr.Rest(), ctx);
     }
 
     /// <inheritdoc />
@@ -96,14 +96,14 @@ internal class ComponentAdapter : IShellComponent
     }
 
     /// <inheritdoc />
-    public IAsyncEnumerable<string> Execute(string expr, Session session, string term)
+    public IAsyncEnumerable<string> Execute(string expr, Context ctx, string term)
     {
         if (m_Initial == null)
-            return m_Component.Execute(expr, session, term);
+            return m_Component.Execute(expr, ctx, term);
 
         var next = string.IsNullOrEmpty(term) ? m_Initial : $"{term}-{m_Initial}";
-        session.Identity.WillInvoke(next);
-        return m_Component.Execute(expr.Rest(), session, next);
+        ctx.Identity.WillInvoke(next);
+        return m_Component.Execute(expr.Rest(), ctx, next);
     }
 
     /// <inheritdoc />
@@ -121,8 +121,8 @@ internal sealed class ShellComposer : IShellComponent, IEnumerable
     public IEnumerator GetEnumerator() => m_Components.GetEnumerator();
 
     /// <inheritdoc />
-    public IAsyncEnumerable<string> Execute(string expr, Session session, string term)
-        => FirstExecutable(expr).Execute(expr, session, term);
+    public IAsyncEnumerable<string> Execute(string expr, Context ctx, string term)
+        => FirstExecutable(expr).Execute(expr, ctx, term);
 
     /// <inheritdoc />
     public bool IsExecutable(string expr) => m_Components.Any(s => s.IsExecutable(expr));

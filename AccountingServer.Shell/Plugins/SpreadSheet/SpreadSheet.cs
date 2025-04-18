@@ -40,15 +40,15 @@ internal class SpreadSheet : PluginBase
         => Cfg.RegisterType<SheetTemplates>("Sheet");
 
     /// <inheritdoc />
-    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Context ctx)
     {
         var abbr = Parsing.Token(ref expr);
-        var filter = Parsing.VoucherQuery(ref expr, session.Client);
+        var filter = Parsing.VoucherQuery(ref expr, ctx.Client);
         Parsing.Eof(expr);
 
         var cols = Cfg.Get<SheetTemplates>().Templates.Single(t => t.Name == abbr).Columns;
         var sum = new Dictionary<string, double[]>();
-        var queries = cols.Select(col => ParsingF.PureDetailQuery(col.Query, session.Client)).ToList();
+        var queries = cols.Select(col => ParsingF.PureDetailQuery(col.Query, ctx.Client)).ToList();
         var merged = Enumerable.Zip(cols, queries)
             .Where(static cq => !cq.First.Kind.HasFlag(SheetColumnKind.Auxiliary))
             .Select(static cq => cq.Second)
@@ -62,7 +62,7 @@ internal class SpreadSheet : PluginBase
         sb.Append("\n");
         yield return sb.ToString();
 
-        await foreach (var v in session.Accountant.SelectVouchersAsync(voucherF))
+        await foreach (var v in ctx.Accountant.SelectVouchersAsync(voucherF))
         {
             var isFirst = true;
             foreach (var grpC in v.Details.GroupBy(static d => d.Currency))

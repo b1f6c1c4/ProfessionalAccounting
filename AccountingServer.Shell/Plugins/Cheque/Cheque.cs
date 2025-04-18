@@ -31,17 +31,17 @@ namespace AccountingServer.Shell.Plugins.Cheque;
 internal class Cheque : PluginBase
 {
     /// <inheritdoc />
-    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Context ctx)
     {
         if (string.IsNullOrWhiteSpace(expr))
         {
-            await foreach (var s in PresentSummary(session))
+            await foreach (var s in PresentSummary(ctx))
                 yield return s;
 
             yield break;
         }
 
-        var date = Parsing.UniqueTime(ref expr, session.Client) ?? session.Client.Today;
+        var date = Parsing.UniqueTime(ref expr, ctx.Client) ?? ctx.Client.Today;
         var tok1 = Parsing.Token(ref expr);
         Voucher voucher;
         if (tok1.StartsWith(@"U", StringComparison.Ordinal))
@@ -75,13 +75,13 @@ internal class Cheque : PluginBase
                     case "deposit":
                     case "dep":
                     case "d":
-                        voucher.Details.Add(await Bank(session, tok1, chq, 1121));
+                        voucher.Details.Add(await Bank(ctx, tok1, chq, 1121));
                         break;
                     case "withdraw":
                     case "wd":
                     case "w":
                         Parsing.Eof(expr);
-                        voucher.Details.Add(await Bank(session, tok1, chq, 2201));
+                        voucher.Details.Add(await Bank(ctx, tok1, chq, 2201));
                         break;
                     default:
                         goto fmt;
@@ -100,8 +100,8 @@ internal class Cheque : PluginBase
                     });
         }
 
-        await session.Accountant.UpsertAsync(voucher);
-        yield return session.Serializer.PresentVoucher(voucher).Wrap();
+        await ctx.Accountant.UpsertAsync(voucher);
+        yield return ctx.Serializer.PresentVoucher(voucher).Wrap();
 
         yield break;
 
@@ -109,10 +109,10 @@ internal class Cheque : PluginBase
         throw new FormatException("Unknown input expr format");
     }
 
-    private static async IAsyncEnumerable<string> PresentSummary(Session session)
+    private static async IAsyncEnumerable<string> PresentSummary(Context ctx)
     {
         var dic = new Dictionary<string, ChequeDescriptor>();
-        await foreach (var voucher in session.Accountant.RunVoucherQueryAsync("U T112101 + U T220101"))
+        await foreach (var voucher in ctx.Accountant.RunVoucherQueryAsync("U T112101 + U T220101"))
         foreach (var detail in voucher.Details.Where(static detail
                      => detail.SubTitle == 01 && detail.Title is 1121 or 2201))
         {
@@ -227,9 +227,9 @@ internal class Cheque : PluginBase
                     },
             };
 
-    private static async ValueTask<string> ResolveAccountUser(Session session, string acct)
+    private static async ValueTask<string> ResolveAccountUser(Context ctx, string acct)
     {
-        var res = await session.Accountant.RunGroupedQueryAsync($"U T1002 {acct.Quotation('\'')} !U");
+        var res = await ctx.Accountant.RunGroupedQueryAsync($"U T1002 {acct.Quotation('\'')} !U");
         return res.Items.Count() switch
             {
                 0 => throw new ApplicationException($"Cannot find bank account {acct}"),
@@ -238,12 +238,12 @@ internal class Cheque : PluginBase
             };
     }
 
-    private static async ValueTask<VoucherDetail> Bank(Session session, string acct, string cheque, int title)
+    private static async ValueTask<VoucherDetail> Bank(Context ctx, string acct, string cheque, int title)
     {
-        var user = await ResolveAccountUser(session, acct);
+        var user = await ResolveAccountUser(ctx, acct);
         try
         {
-            var detail = (await session.Accountant
+            var detail = (await ctx.Accountant
                     .RunVoucherQueryAsync($"{user.AsUser()} {title.AsTitle()}01 {cheque.Quotation('\'')}")
                     .SingleAsync()).Details
                 .Single(d => d.User == user && d.Title == title && d.SubTitle == 01 && d.Content == cheque);

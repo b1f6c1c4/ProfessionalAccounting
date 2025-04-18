@@ -33,22 +33,22 @@ namespace AccountingServer.Shell.Plugins.YieldRate;
 internal class YieldRate : PluginBase
 {
     /// <inheritdoc />
-    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Context ctx)
     {
         FacadeF.ParsingF.Eof(expr);
 
-        var result = await session.Accountant.RunGroupedQueryAsync("Investment-T101204 G``Ccd");
+        var result = await ctx.Accountant.RunGroupedQueryAsync("Investment-T101204 G``Ccd");
         var dc = new DateComparer();
         var lst = new List<Investment>();
         foreach (var grpC in result.Items.Cast<ISubtotalCurrency>())
         foreach (var grpc in grpC.Items.Cast<ISubtotalContent>())
         {
-            var pv = await session.Accountant.RunGroupedQueryAsync(
+            var pv = await ctx.Accountant.RunGroupedQueryAsync(
                 $"{grpC.Currency.AsCurrency()} Investment {grpc.Content.Quotation('\'')} * Asset``v");
-            var ti = await session.Accountant.RunGroupedQueryAsync(
+            var ti = await ctx.Accountant.RunGroupedQueryAsync(
                 $"{grpC.Currency.AsCurrency()} Investment {grpc.Content.Quotation('\'')} * Asset T000001 > ``v");
             var days = grpc.Items.Cast<ISubtotalDate>().OrderBy(static b => b.Date, dc).ToList();
-            var daily = GetRate(session, days, pv.Fund);
+            var daily = GetRate(ctx, days, pv.Fund);
             lst.Add(new(
                 grpC.Currency, grpc.Content,
                 days.First().Date!.Value, days.Last().Date!.Value, 0,
@@ -68,16 +68,16 @@ internal class YieldRate : PluginBase
     /// <summary>
     ///     计算实际收益率
     /// </summary>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <param name="lst">现金流</param>
     /// <param name="pv">现值</param>
     /// <returns>实际收益率</returns>
-    private static double GetRate(Session session, IReadOnlyList<ISubtotalDate> lst, double pv)
+    private static double GetRate(Context ctx, IReadOnlyList<ISubtotalDate> lst, double pv)
     {
         if (!pv.IsZero())
             return
                 new YieldRateSolver(
-                    lst.Select(b => session.Client.Today.Subtract(b.Date!.Value).TotalDays).Concat(new[] { 0D }),
+                    lst.Select(b => ctx.Client.Today.Subtract(b.Date!.Value).TotalDays).Concat(new[] { 0D }),
                     lst.Select(static b => b.Fund).Concat(new[] { -pv })).Solve();
 
         return

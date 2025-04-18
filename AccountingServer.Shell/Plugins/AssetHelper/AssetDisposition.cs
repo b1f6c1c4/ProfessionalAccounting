@@ -32,7 +32,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper;
 internal class AssetDisposition : PluginBase
 {
     /// <inheritdoc />
-    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Context ctx)
     {
         var voucherID = Parsing.Token(ref expr);
         var guids = new List<string>();
@@ -42,14 +42,14 @@ internal class AssetDisposition : PluginBase
             guids.Add(guidT.ToString());
         Parsing.Eof(expr);
 
-        var voucher = await session.Accountant.SelectVoucherAsync(voucherID);
+        var voucher = await ctx.Accountant.SelectVoucherAsync(voucherID);
         if (voucher == null)
             throw new ApplicationException("找不到记账凭证");
 
         foreach (var detail in voucher.Details.Where(static vd => vd.Title is 1601 or 1701)
                      .Where(detail => guids.Count == 0 || guids.Contains(detail.Content)))
         {
-            var asset = await session.Accountant.SelectAssetAsync(Guid.Parse(detail.Content));
+            var asset = await ctx.Accountant.SelectAssetAsync(Guid.Parse(detail.Content));
             foreach (var item in asset.Schedule)
             {
                 if (item is DispositionItem)
@@ -72,8 +72,8 @@ internal class AssetDisposition : PluginBase
                 asset.Schedule.RemoveRange(id, asset.Schedule.Count - id);
 
             asset.Schedule.Add(new DispositionItem { Date = voucher.Date, VoucherID = voucher.ID });
-            yield return session.Serializer.PresentAsset(asset).Wrap();
-            await session.Accountant.UpsertAsync(asset);
+            yield return ctx.Serializer.PresentAsset(asset).Wrap();
+            await ctx.Accountant.UpsertAsync(asset);
         }
     }
 }

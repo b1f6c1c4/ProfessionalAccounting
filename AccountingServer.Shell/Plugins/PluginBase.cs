@@ -30,9 +30,9 @@ public abstract class PluginBase
     ///     执行插件表达式
     /// </summary>
     /// <param name="expr">表达式</param>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <returns>执行结果</returns>
-    public abstract IAsyncEnumerable<string> Execute(string expr, Session session);
+    public abstract IAsyncEnumerable<string> Execute(string expr, Context ctx);
 
     /// <summary>
     ///     显示插件帮助

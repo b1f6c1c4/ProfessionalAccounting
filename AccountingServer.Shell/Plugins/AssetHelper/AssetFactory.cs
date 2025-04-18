@@ -33,7 +33,7 @@ namespace AccountingServer.Shell.Plugins.AssetHelper;
 internal class AssetFactory : PluginBase
 {
     /// <inheritdoc />
-    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Context ctx)
     {
         var voucherID = Parsing.Token(ref expr);
         Guid? guid = null;
@@ -45,7 +45,7 @@ internal class AssetFactory : PluginBase
         var lifeT = Parsing.Double(ref expr);
         Parsing.Eof(expr);
 
-        var voucher = await session.Accountant.SelectVoucherAsync(voucherID);
+        var voucher = await ctx.Accountant.SelectVoucherAsync(voucherID);
         if (voucher == null)
             throw new ApplicationException("找不到记账凭证");
 
@@ -86,11 +86,11 @@ internal class AssetFactory : PluginBase
                     },
             };
 
-        await session.Accountant.UpsertAsync(asset);
-        asset = await session.Accountant.SelectAssetAsync(asset.ID!.Value);
+        await ctx.Accountant.UpsertAsync(asset);
+        asset = await ctx.Accountant.SelectAssetAsync(asset.ID!.Value);
         Accountant.Depreciate(asset);
-        await session.Accountant.UpsertAsync(asset);
+        await ctx.Accountant.UpsertAsync(asset);
 
-        yield return session.Serializer.PresentAsset(asset).Wrap();
+        yield return ctx.Serializer.PresentAsset(asset).Wrap();
     }
 }

@@ -35,24 +35,24 @@ namespace AccountingServer.Shell.Plugins.CreditCardConvert;
 internal class CreditCardConvert : PluginBase
 {
     /// <inheritdoc />
-    public override IAsyncEnumerable<string> Execute(string expr, Session session)
+    public override IAsyncEnumerable<string> Execute(string expr, Context ctx)
     {
         var content = Parsing.Token(ref expr);
 
         return ParsingF.Optional(ref expr, "q")
-            ? Query(content, expr, session)
-            : Create(content, expr, session);
+            ? Query(content, expr, ctx)
+            : Create(content, expr, ctx);
     }
 
-    private async IAsyncEnumerable<string> Query(string content, string expr, Session session)
+    private async IAsyncEnumerable<string> Query(string content, string expr, Context ctx)
     {
-        var rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
+        var rng = Parsing.Range(ref expr, ctx.Client) ?? DateFilter.Unconstrained;
 
         var trans = new List<Trans>();
         var rebates = new List<Rebate>();
         var convs = new List<Conversion>();
         await foreach (var voucher in
-                       session.Accountant.RunVoucherQueryAsync(
+                       ctx.Accountant.RunVoucherQueryAsync(
                            $"T224101 {content.Quotation('\'')} {rng.AsDateRange()}"))
         {
             var ds = voucher.Details.Where(d => d.Title == 2241 && d.SubTitle == 01 && d.Content == content)
@@ -103,7 +103,7 @@ internal class CreditCardConvert : PluginBase
         }
 
 
-        await foreach (var voucher in session.Accountant.RunVoucherQueryAsync(
+        await foreach (var voucher in ctx.Accountant.RunVoucherQueryAsync(
                            $"{{T224101 {content.Quotation('\'')}}}*{{T660300}}*{{T224101 {content.Quotation('\'')} +T3999+T660300 A {rng.AsDateRange()}}}"))
         {
             // Assume proper ordering here
@@ -177,15 +177,15 @@ internal class CreditCardConvert : PluginBase
         }
     }
 
-    private async IAsyncEnumerable<string> Create(string content, string expr, Session session)
+    private async IAsyncEnumerable<string> Create(string content, string expr, Context ctx)
     {
         var currency = Parsing.Token(ref expr, false);
         var baseCurrency = Parsing.Token(ref expr, false);
 
-        await using var vir = session.Accountant.Virtualize();
+        await using var vir = ctx.Accountant.Virtualize();
         while (!string.IsNullOrWhiteSpace(expr))
         {
-            var date = Parsing.UniqueTime(ref expr, session.Client);
+            var date = Parsing.UniqueTime(ref expr, ctx.Client);
             if (!date.HasValue)
             {
                 var dayF = ParsingF.DoubleF(ref expr);
@@ -194,7 +194,7 @@ internal class CreditCardConvert : PluginBase
                 if (day != dayF)
                     throw new ApplicationException("非整数日期");
 
-                var today = session.Client.Today;
+                var today = ctx.Client.Today;
                 date = today.Day < day
                     ? today.AddMonths(-1).AddDays(day - today.Day)
                     : today.AddDays(day - today.Day);
@@ -202,7 +202,7 @@ internal class CreditCardConvert : PluginBase
 
             var from = ParsingF.DoubleF(ref expr);
             var to = ParsingF.DoubleF(ref expr);
-            await session.Accountant.UpsertAsync(new Voucher
+            await ctx.Accountant.UpsertAsync(new Voucher
                 {
                     Date = date.Value,
                     Details = new()

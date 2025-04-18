@@ -28,7 +28,7 @@ internal class CombinedSubtotal : ISubtotal
 {
     public static async ValueTask<(List<List<Balance>>, List<CombinedSubtotal>, bool)> Query(
             IReadOnlyList<IGroupedQuery> dqueries,
-            ISubtotal col, Session session)
+            ISubtotal col, Context ctx)
     {
         var ress = new List<List<Balance>>();
         var subs = new List<CombinedSubtotal>();
@@ -39,7 +39,7 @@ internal class CombinedSubtotal : ISubtotal
                 ? new CombinedSubtotal(col, gq.Subtotal)
                 : new CombinedSubtotal(gq.Subtotal, col);
             subs.Add(sub);
-            ress.Add(await session.Accountant.SelectVoucherDetailsGroupedDirectAsync(
+            ress.Add(await ctx.Accountant.SelectVoucherDetailsGroupedDirectAsync(
                     new GroupedQuery(gq.VoucherEmitQuery, sub)).ToListAsync());
         }
 
@@ -48,7 +48,7 @@ internal class CombinedSubtotal : ISubtotal
 
     public static async ValueTask<(List<List<Balance>>, List<CombinedSubtotal>, bool)> Query(
             IReadOnlyList<IVoucherGroupedQuery> vqueries,
-            ISubtotal col, Session session)
+            ISubtotal col, Context ctx)
     {
         var ress = new List<List<Balance>>();
         var subs = new List<CombinedSubtotal>();
@@ -59,7 +59,7 @@ internal class CombinedSubtotal : ISubtotal
                 ? new CombinedSubtotal(col, vgq.Subtotal)
                 : new CombinedSubtotal(vgq.Subtotal, col);
             subs.Add(sub);
-            ress.Add(await session.Accountant.SelectVouchersGroupedDirectAsync(
+            ress.Add(await ctx.Accountant.SelectVouchersGroupedDirectAsync(
                     new VoucherGroupedQuery(vgq.VoucherQuery, sub)).ToListAsync());
         }
 

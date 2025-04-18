@@ -86,29 +86,29 @@ internal class Coupling : PluginBase
         return true;
     }
 
-    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Context ctx)
     {
         Semantics? sem = null;
         Parsing.Token(ref expr, false, s => ParseEnum(s, ref sem));
         var len = expr.Length;
-        var aux = Parsing.PureDetailQuery(ref expr, session.Client);
+        var aux = Parsing.PureDetailQuery(ref expr, ctx.Client);
         if (len == expr.Length)
             aux = null;
-        var rng = Parsing.Range(ref expr, session.Client) ?? DateFilter.Unconstrained;
+        var rng = Parsing.Range(ref expr, ctx.Client) ?? DateFilter.Unconstrained;
         Parsing.Eof(expr);
 
         foreach (var configCouple in Cfg.Get<CoupleTemplate>().Couples)
-        await foreach (var ret in AnalyzeCouple(session, configCouple, rng, aux, sem))
+        await foreach (var ret in AnalyzeCouple(ctx, configCouple, rng, aux, sem))
             yield return ret;
     }
 
-    private static async IAsyncEnumerable<string> ShowEntries(Session session, string verb, string prop,
+    private static async IAsyncEnumerable<string> ShowEntries(Context ctx, string verb, string prop,
         SortedDictionary<string, List<Couple>> dic, bool hideDetail = false)
     {
         var items = dic.Select(kvp =>
                 (Name: kvp.Key, Detail: kvp.Value, FundPromise:
                     kvp.Value.ToAsyncEnumerable().SumAwaitAsync(async couple => couple.Fund *
-                        await session.Accountant.Query(couple.Voucher.Date, couple.Currency, BaseCurrency.Now))))
+                        await ctx.Accountant.Query(couple.Voucher.Date, couple.Currency, BaseCurrency.Now))))
             .ToList();
         var total = await items.ToAsyncEnumerable().SumAwaitAsync(static tuple => tuple.FundPromise);
         var str = $"Total [{verb.ToUpperInvariant()}]: {total.AsFund(BaseCurrency.Now)}";
@@ -126,13 +126,13 @@ internal class Coupling : PluginBase
         }
     }
 
-    private static async IAsyncEnumerable<string> AnalyzeCouple(Session session, ConfigCouple configCouple,
+    private static async IAsyncEnumerable<string> AnalyzeCouple(Context ctx, ConfigCouple configCouple,
         DateFilter rng, IQueryCompounded<IDetailQueryAtom> aux, Semantics? semantics)
     {
         var sets = Enum.GetValues<Semantics>()
             .ToDictionary(static n => n, static _ => new SortedDictionary<string, List<Couple>>());
 
-        await foreach (var couple in GetCouples(session, configCouple.User, rng, aux))
+        await foreach (var couple in GetCouples(ctx, configCouple.User, rng, aux))
         {
             var (typeC, nameC) = configCouple.Parse(couple.Creditor);
             var (typeD, nameD) = configCouple.Parse(couple.Debitor);
@@ -220,19 +220,19 @@ internal class Coupling : PluginBase
             var verb = prop?.Verb ?? k.ToString();
             var hideDetail = ((prop?.Collapse ?? false) && aux == null)
                 || (k == Semantics.Ignored && semantics != k);
-            await foreach (var s in ShowEntries(session, verb, prop?.Proposition, v, hideDetail))
+            await foreach (var s in ShowEntries(ctx, verb, prop?.Proposition, v, hideDetail))
                 yield return s;
         }
     }
 
-    private static IAsyncEnumerable<Couple> GetCouples(Session session, string user, DateFilter rng,
+    private static IAsyncEnumerable<Couple> GetCouples(Context ctx, string user, DateFilter rng,
         IQueryCompounded<IDetailQueryAtom> dq)
     {
-        var vq0 = Parsing.VoucherQuery($"{user.AsUser()} {rng.AsDateRange()}", session.Client);
+        var vq0 = Parsing.VoucherQuery($"{user.AsUser()} {rng.AsDateRange()}", ctx.Client);
         var vq = dq == null
             ? vq0
             : new IntersectQueries<IVoucherQueryAtom>(vq0, new SimpleVoucherQuery { DetailFilter = dq, Range = rng });
-        return session.Accountant
+        return ctx.Accountant
             .SelectVouchersAsync(vq)
             .SelectMany(v => Decouple(v, user).ToAsyncEnumerable());
     }

@@ -28,15 +28,15 @@ namespace AccountingServer.Shell.Carry;
 
 internal partial class CarryShell
 {
-    private ValueTask<long> ResetCarryYear(Session session, DateFilter rng)
-        => session.Accountant.DeleteVouchersAsync($"{rng.AsDateRange()} AnnualCarry");
+    private ValueTask<long> ResetCarryYear(Context ctx, DateFilter rng)
+        => ctx.Accountant.DeleteVouchersAsync($"{rng.AsDateRange()} AnnualCarry");
 
     /// <summary>
     ///     年末结转
     /// </summary>
-    /// <param name="session">客户端会话</param>
+    /// <param name="ctx">客户端上下文</param>
     /// <param name="dt">年，若为<c>null</c>则表示对无日期进行结转</param>
-    private async IAsyncEnumerable<string> CarryYear(Session session, DateTime? dt)
+    private async IAsyncEnumerable<string> CarryYear(Context ctx, DateTime? dt)
     {
         DateTime? ed;
         DateFilter rng;
@@ -52,13 +52,13 @@ internal partial class CarryShell
             rng = DateFilter.TheNullOnly;
         }
 
-        foreach (var grpC in (await session.Accountant.RunGroupedQueryAsync(
+        foreach (var grpC in (await ctx.Accountant.RunGroupedQueryAsync(
                      $"T4103 {rng.AsDateRange()}`Cs")).Items.Cast<ISubtotalCurrency>())
         {
             yield return
                 $"{dt.AsDate(SubtotalLevel.Month)} CarryYear => {grpC.Currency.AsCurrency()} {grpC.Fund.AsFund(grpC.Currency)}\n";
             foreach (var grps in grpC.Items.Cast<ISubtotalSubTitle>())
-                await session.Accountant.UpsertAsync(new Voucher
+                await ctx.Accountant.UpsertAsync(new Voucher
                     {
                         Date = ed,
                         Type = VoucherType.AnnualCarry,

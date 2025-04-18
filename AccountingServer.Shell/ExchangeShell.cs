@@ -44,41 +44,41 @@ internal class ExchangeShell : IShellComponent
     public ExchangeShell()
         => m_Timer.Elapsed += OnTimedEvent;
 
-    public async IAsyncEnumerable<string> Execute(string expr, Session session, string term)
+    public async IAsyncEnumerable<string> Execute(string expr, Context ctx, string term)
     {
-        session.Identity.WillInvoke("?e");
+        ctx.Identity.WillInvoke("?e");
         expr = expr.Rest();
         var isAccurate = expr.Initial() == "acc";
         if (isAccurate)
         {
-            session.Identity.WillInvoke("?e-acc");
+            ctx.Identity.WillInvoke("?e-acc");
             expr = expr.Rest();
         }
         var from = Parsing.Token(ref expr).ToUpperInvariant();
         var val = Parsing.DoubleF(ref expr);
         var to = Parsing.Token(ref expr)?.ToUpperInvariant() ?? BaseCurrency.Now;
 
-        if (Parsing.UniqueTime(ref expr, session.Client) is var date && date.HasValue)
-            yield return await Inquiry(session, date.Value, from, to, val, isAccurate);
-        else if (Parsing.Range(ref expr, session.Client) is var rng && rng != null)
+        if (Parsing.UniqueTime(ref expr, ctx.Client) is var date && date.HasValue)
+            yield return await Inquiry(ctx, date.Value, from, to, val, isAccurate);
+        else if (Parsing.Range(ref expr, ctx.Client) is var rng && rng != null)
             for (var dt = rng.StartDate!.Value; dt <= rng.EndDate; dt = dt.AddMonths(1))
-                yield return await Inquiry(session, DateHelper.LastDayOfMonth(dt.Year, dt.Month), from, to, val,
+                yield return await Inquiry(ctx, DateHelper.LastDayOfMonth(dt.Year, dt.Month), from, to, val,
                     isAccurate);
         else if (isAccurate)
-            yield return await Inquiry(session, null, from, to, val, true);
+            yield return await Inquiry(ctx, null, from, to, val, true);
         else
-            yield return await Inquiry(session, DateTime.UtcNow.AddMinutes(-30), from, to, val, false);
+            yield return await Inquiry(ctx, DateTime.UtcNow.AddMinutes(-30), from, to, val, false);
         Parsing.Eof(expr);
     }
 
     public bool IsExecutable(string expr) => expr.Initial() == "?e";
 
-    private async ValueTask<string> Inquiry(Session session, DateTime? dt, string from, string to, double value,
+    private async ValueTask<string> Inquiry(Context ctx, DateTime? dt, string from, string to, double value,
         bool isAccurate)
     {
         var rate = isAccurate
-            ? await session.Accountant.SaveHistoricalRate(dt!.Value, from, to)
-            : await session.Accountant.Query(dt, from, to);
+            ? await ctx.Accountant.SaveHistoricalRate(dt!.Value, from, to)
+            : await ctx.Accountant.Query(dt, from, to);
         var v = value * rate;
         return $"{dt.AsDate()} {from.AsCurrency()} {value.AsFund(from)} = {to.AsCurrency()} {v.AsFund(to)} ({v:R})\n";
     }
@@ -136,15 +136,15 @@ internal class ExchangeShell : IShellComponent
             m_TimerSession.ExchangeLogger(log, false);
         else
             Console.WriteLine(log);
-        var session = new Session(m_TimerSession);
+        var ctx = new Context(m_TimerSession);
         try
         {
-            Task.WhenAll((await session.Accountant.RunGroupedQueryAsync("U - U Revenue - U Expense !C"))
+            Task.WhenAll((await ctx.Accountant.RunGroupedQueryAsync("U - U Revenue - U Expense !C"))
                 .Items.Cast<ISubtotalCurrency>()
-                .Concat((await session.Accountant.RunGroupedQueryAsync("U Revenue + U Expense 0 !C"))
+                .Concat((await ctx.Accountant.RunGroupedQueryAsync("U Revenue + U Expense 0 !C"))
                     .Items.Cast<ISubtotalCurrency>())
                 .Select(grpC =>
-                    session.Accountant.Query(date, grpC.Currency, BaseCurrency.Now).AsTask())).Wait();
+                    ctx.Accountant.Query(date, grpC.Currency, BaseCurrency.Now).AsTask())).Wait();
         }
         catch (Exception err)
         {

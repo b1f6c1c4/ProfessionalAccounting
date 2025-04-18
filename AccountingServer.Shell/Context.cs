@@ -5,11 +5,11 @@ using AccountingServer.Shell.Serializer;
 namespace AccountingServer.Shell;
 
 /// <summary>
-///     客户端会话
+///     客户端上下文
 /// </summary>
-public class Session
+public class Context
 {
-    internal Session(DbSession db, string user = "anonymous", DateTime? dt = null,
+    internal Context(DbSession db, string user = "anonymous", DateTime? dt = null,
             Identity id = null, Identity tid = null, string spec = null, int limit = 0)
     {
         Accountant = new(db, user, dt ?? DateTime.UtcNow.Date) { Limit = limit };

@@ -34,16 +34,16 @@ namespace AccountingServer.Shell.Plugins.BankBalance;
 internal class AverageDailyBalance : PluginBase
 {
     /// <inheritdoc />
-    public override async IAsyncEnumerable<string> Execute(string expr, Session session)
+    public override async IAsyncEnumerable<string> Execute(string expr, Context ctx)
     {
         var content = Parsing.Token(ref expr);
         var avg = Parsing.DoubleF(ref expr);
         Parsing.Eof(expr);
 
-        var tdy = session.Client.Today;
+        var tdy = ctx.Client.Today;
         var ldom = DateHelper.LastDayOfMonth(tdy.Year, tdy.Month);
         var srng = new DateFilter(new(tdy.Year, tdy.Month, 1, 0, 0, 0, DateTimeKind.Utc), tdy);
-        var balance = await session.Accountant.RunGroupedQueryAsync(
+        var balance = await ctx.Accountant.RunGroupedQueryAsync(
             $"T1002 {content.Quotation('\'')} [~{tdy.AsDate()}]`vD{srng.AsDateRange()}");
 
         var bal = 0D;

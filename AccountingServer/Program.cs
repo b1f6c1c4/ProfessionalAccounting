@@ -171,14 +171,14 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     if (request.Header.ContainsKey("x-serializer"))
         spec = request.Header["x-serializer"];
 
-    var session = facade.CreateSession(user, dt, idp, assume, spec, limit);
+    var ctx = facade.CreateSession(user, dt, idp, assume, spec, limit);
 
     if (request.Method == "GET")
         switch (request.BaseUri)
         {
             case "/emptyVoucher":
                 {
-                    var response = GenerateHttpResponse(facade.EmptyVoucher(session), "text/plain; charset=utf-8");
+                    var response = GenerateHttpResponse(facade.EmptyVoucher(ctx), "text/plain; charset=utf-8");
                     response.Header["Cache-Control"] = "public, max-age=86400";
                     response.Header["Vary"] = "X-Serializer, X-Limit";
                     return response;
@@ -186,7 +186,7 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
             case "/safe":
                 {
                     var expr = request.Parameters?["q"];
-                    var res = facade.SafeExecute(session, expr);
+                    var res = facade.SafeExecute(ctx, expr);
                     var response = GenerateHttpResponse(res, "text/plain; charset=utf-8");
                     response.Header["Cache-Control"] = "public, max-age=30";
                     response.Header["Vary"] = "X-User, X-Serializer, X-ClientDateTime, X-Limit";
@@ -204,46 +204,46 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
         case "/execute":
             {
                 var expr = request.ReadToEnd();
-                var res = facade.Execute(session, expr);
+                var res = facade.Execute(ctx, expr);
                 return GenerateHttpResponse(res, "text/plain; charset=utf-8");
             }
 
         case "/voucherUpsert":
             {
                 var code = request.ReadToEnd();
-                var res = await facade.ExecuteVoucherUpsert(session, code);
+                var res = await facade.ExecuteVoucherUpsert(ctx, code);
                 return GenerateHttpResponse(res, "text/plain; charset=utf-8");
             }
         case "/voucherRemoval":
             {
                 var code = request.ReadToEnd();
-                var res = await facade.ExecuteVoucherRemoval(session, code);
+                var res = await facade.ExecuteVoucherRemoval(ctx, code);
                 return new() { ResponseCode = res ? 204 : 404 };
             }
 
         case "/assetUpsert":
             {
                 var code = request.ReadToEnd();
-                var res = await facade.ExecuteAssetUpsert(session, code);
+                var res = await facade.ExecuteAssetUpsert(ctx, code);
                 return GenerateHttpResponse(res, "text/plain; charset=utf-8");
             }
         case "/assetRemoval":
             {
                 var code = request.ReadToEnd();
-                var res = await facade.ExecuteAssetRemoval(session, code);
+                var res = await facade.ExecuteAssetRemoval(ctx, code);
                 return new() { ResponseCode = res ? 204 : 404 };
             }
 
         case "/amortUpsert":
             {
                 var code = request.ReadToEnd();
-                var res = await facade.ExecuteAmortUpsert(session, code);
+                var res = await facade.ExecuteAmortUpsert(ctx, code);
                 return GenerateHttpResponse(res, "text/plain; charset=utf-8");
             }
         case "/amortRemoval":
             {
                 var code = request.ReadToEnd();
-                var res = await facade.ExecuteAmortRemoval(session, code);
+                var res = await facade.ExecuteAmortRemoval(ctx, code);
                 return new() { ResponseCode = res ? 204 : 404 };
             }
         default:
