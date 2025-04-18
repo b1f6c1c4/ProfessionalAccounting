@@ -31,6 +31,11 @@ public class Balance
     public string VoucherRemark { get; init; }
 
     /// <summary>
+    ///     记账凭证类型
+    /// </summary>
+    public VoucherType VoucherType { get; init; }
+
+    /// <summary>
     ///     日期
     /// </summary>
     public DateTime? Date { get; init; }

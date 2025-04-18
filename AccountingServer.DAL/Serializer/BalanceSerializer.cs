@@ -48,6 +48,16 @@ internal class BalanceSerializer : BaseSerializer<Balance>
                                 new Balance
                                     {
                                         VoucherRemark = bR.ReadString("vremark", ref read),
+                                        VoucherType = bR.ReadString("vspecial", ref read) switch
+                                            {
+                                                "amorz" => VoucherType.Amortization,
+                                                "acarry" => VoucherType.AnnualCarry,
+                                                "carry" => VoucherType.Carry,
+                                                "dep" => VoucherType.Depreciation,
+                                                "dev" => VoucherType.Devalue,
+                                                "unc" => VoucherType.Uncertain,
+                                                _ => VoucherType.Ordinary,
+                                            },
                                         Date = bR.ReadDateTime("date", ref read),
                                         User = bR.ReadString("user", ref read),
                                         Currency = bR.ReadString("currency", ref read),

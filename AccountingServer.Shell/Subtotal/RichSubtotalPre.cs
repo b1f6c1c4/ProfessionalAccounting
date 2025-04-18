@@ -71,6 +71,9 @@ internal class RichSubtotalPre : StringSubtotalVisitor
     public override IAsyncEnumerable<string> Visit(ISubtotalVoucherRemark sub)
         => ShowSubtotal(sub, sub.VoucherRemark.Quotation('%'));
 
+    public override IAsyncEnumerable<string> Visit(ISubtotalVoucherType sub)
+        => ShowSubtotal(sub, $"{sub.Type}");
+
     public override IAsyncEnumerable<string> Visit(ISubtotalTitleKind sub)
         => ShowSubtotal(sub, $"{sub.Kind}");
 

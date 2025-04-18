@@ -91,6 +91,20 @@ internal class SubtotalVoucherRemarkFactory : SubtotalResultFactory<string>
     protected override SubtotalResult DoCreate(IAsyncGrouping<string, Balance> grp) => new SubtotalVoucherRemark(grp.Key);
 }
 
+internal class SubtotalVoucherType : SubtotalResult, ISubtotalVoucherType
+{
+    public SubtotalVoucherType(VoucherType ty) => Type = ty;
+    public VoucherType? Type { get; }
+
+    public override T Accept<T>(ISubtotalVisitor<T> visitor) => visitor.Visit(this);
+}
+
+internal class SubtotalVoucherTypeFactory : SubtotalResultFactory<VoucherType>
+{
+    public override VoucherType Selector(Balance b) => b.VoucherType;
+    protected override SubtotalResult DoCreate(IAsyncGrouping<VoucherType, Balance> grp) => new SubtotalVoucherType(grp.Key);
+}
+
 internal class SubtotalTitleKind : SubtotalResult, ISubtotalTitleKind
 {
     public SubtotalTitleKind(TitleKind? kind) => Kind = kind;
@@ -272,6 +286,7 @@ public class SubtotalBuilder
         sub.TheItems = await ((level & SubtotalLevel.Subtotal) switch
             {
                 SubtotalLevel.VoucherRemark => Invoke(new SubtotalVoucherRemarkFactory()),
+                SubtotalLevel.VoucherType => Invoke(new SubtotalVoucherTypeFactory()),
                 SubtotalLevel.TitleKind => Invoke(new SubtotalTitleKindFactory()),
                 SubtotalLevel.Title => Invoke(new SubtotalTitleFactory()),
                 SubtotalLevel.SubTitle => Invoke(new SubtotalSubTitleFactory()),

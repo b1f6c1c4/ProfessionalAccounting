@@ -288,6 +288,8 @@ internal class MongoDbAdapter : IDbAdapter
             pprj["detail"] = true;
         if (level.HasFlag(SubtotalLevel.VoucherRemark))
             pprj["remark"] = true;
+        if (level.HasFlag(SubtotalLevel.VoucherType))
+            pprj["special"] = true;
         if (!level.HasFlag(SubtotalLevel.Day))
             return pprj;
         if (!level.HasFlag(SubtotalLevel.Week))
@@ -346,6 +348,8 @@ internal class MongoDbAdapter : IDbAdapter
         var prj = new BsonDocument();
         if (level.HasFlag(SubtotalLevel.VoucherRemark))
             prj["vremark"] = "$remark";
+        if (level.HasFlag(SubtotalLevel.VoucherType))
+            prj["vspecial"] = "$special";
         if (level.HasFlag(SubtotalLevel.Day))
             prj["date"] = "$date";
 
@@ -367,6 +371,8 @@ internal class MongoDbAdapter : IDbAdapter
         var prj = new BsonDocument();
         if (level.HasFlag(SubtotalLevel.VoucherRemark))
             prj["vremark"] = "$remark";
+        if (level.HasFlag(SubtotalLevel.VoucherType))
+            prj["vspecial"] = "$special";
         if (level.HasFlag(SubtotalLevel.Day))
             prj["date"] = "$date";
         if (level.HasFlag(SubtotalLevel.User))

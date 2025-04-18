@@ -76,6 +76,8 @@ internal class Stringifier : ISubtotalVisitor<IReadOnlyList<Property>>
                 {
                     SubtotalLevel.VoucherRemark => sub.Items.Cast<ISubtotalVoucherRemark>()
                         .OrderBy(static s => s.VoucherRemark),
+                    SubtotalLevel.VoucherType => sub.Items.Cast<ISubtotalVoucherType>()
+                        .OrderBy(static s => s.Type),
                     SubtotalLevel.TitleKind => sub.Items.Cast<ISubtotalTitleKind>().OrderBy(static s => s.Kind),
                     SubtotalLevel.Title => sub.Items.Cast<ISubtotalTitle>().OrderBy(static s => s.Title),
                     SubtotalLevel.SubTitle => sub.Items.Cast<ISubtotalSubTitle>().OrderBy(static s => s.SubTitle),
@@ -115,6 +117,9 @@ internal class Stringifier : ISubtotalVisitor<IReadOnlyList<Property>>
 
     IReadOnlyList<Property> ISubtotalVisitor<IReadOnlyList<Property>>.Visit(ISubtotalVoucherRemark sub)
         => NextA(sub.VoucherRemark.Quotation('%'), sub);
+
+    IReadOnlyList<Property> ISubtotalVisitor<IReadOnlyList<Property>>.Visit(ISubtotalVoucherType sub)
+        => NextA($"{sub.Type}", sub);
 
     IReadOnlyList<Property> ISubtotalVisitor<IReadOnlyList<Property>>.Visit(ISubtotalTitleKind sub)
         => NextA($"{sub.Kind}", sub);
