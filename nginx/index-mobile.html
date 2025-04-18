@@ -44,7 +44,12 @@
   <body class="mobile">
 
     <div id="wrapper">
+      <div id="assume"></div>
       <div id="user"></div>
+      <script>
+        document.getElementById('user').innerText = window.localStorage.getItem('user') || 'anonymous';
+        document.getElementById('assume').innerText = window.localStorage.getItem('assume') || '';
+      </script>
       <input id="cmdLine" type="text"></div>
     </div>
     <div id="tools">

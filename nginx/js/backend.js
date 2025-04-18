@@ -34,10 +34,8 @@ let theUser = window.localStorage.getItem('user') || 'anonymous';
 let theAssume = window.localStorage.getItem('assume') || undefined;
 
 const updateUA = () => {
-  if (theAssume)
-    document.getElementById('user').innerText = `${theAssume}|${theUser}`;
-  else
-    document.getElementById('user').innerText = `${theUser}`;
+  document.getElementById('assume').innerText = theAssume || '';
+  document.getElementById('user').innerText = theUser;
 };
 updateUA();
 

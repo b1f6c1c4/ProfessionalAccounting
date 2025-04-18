@@ -103,11 +103,20 @@ ul.swap a {
     flex-direction: row;
     border-bottom: gray 1.5px solid;
 }
+#assume {
+    background-color: #faa;
+}
+#assume:empty {
+    padding: 0;
+}
 #user {
+    background-color: #ddd;
+}
+#assume, #user {
+    white-space: pre;
     font-size: 15px;
     line-height: 17px;
     padding: 0 3px;
-    background-color: #ddd;
     font-family: monospace;
 }
 .mobile #cmdLine {

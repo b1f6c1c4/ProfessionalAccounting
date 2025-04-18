@@ -44,9 +44,11 @@
   <body class="desktop">
 
     <div id="wrapper">
+      <div id="assume"></div>
       <div id="user"></div>
       <script>
         document.getElementById('user').innerText = window.localStorage.getItem('user') || 'anonymous';
+        document.getElementById('assume').innerText = window.localStorage.getItem('assume') || '';
       </script>
       <div id="cmdLine"></div>
     </div>
