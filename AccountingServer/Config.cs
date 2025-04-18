@@ -28,6 +28,7 @@ public class ConfigFilesManager
         var names = new[]
             {
                 "ACL",
+                "Authn",
                 "BaseCurrency",
                 "Symbol",
                 "Exchange",

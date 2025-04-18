@@ -142,6 +142,16 @@ internal static class SerializationHelper
         => ReadStruct(bsonReader, expected, ref read, bsonReader.ReadInt32);
 
     /// <summary>
+    ///     安全地读入<c>UInt32</c>类型的字段
+    /// </summary>
+    /// <param name="bsonReader">Bson读取器</param>
+    /// <param name="expected">字段名</param>
+    /// <param name="read">字段名缓存</param>
+    /// <returns>读取结果</returns>
+    public static uint? ReadUInt32(this IBsonReader bsonReader, string expected, ref string read)
+        => ReadStruct(bsonReader, expected, ref read, () => (uint)bsonReader.ReadInt64());
+
+    /// <summary>
     ///     安全地读入<c>Double</c>类型的字段
     /// </summary>
     /// <param name="bsonReader">Bson读取器</param>
@@ -185,6 +195,16 @@ internal static class SerializationHelper
             ref read,
             () =>
                 BsonUtils.ToDateTimeFromMillisecondsSinceEpoch(bsonReader.ReadDateTime()).ToUniversalTime());
+
+    /// <summary>
+    ///     安全地读入<c>BinData</c>类型的字段
+    /// </summary>
+    /// <param name="bsonReader">Bson读取器</param>
+    /// <param name="expected">字段名</param>
+    /// <param name="read">字段名缓存</param>
+    /// <returns>读取结果</returns>
+    public static byte[] ReadBinaryData(this IBsonReader bsonReader, string expected, ref string read)
+        => ReadClass(bsonReader, expected, ref read, () => bsonReader.ReadBinaryData().AsByteArray);
 
     /// <summary>
     ///     安全地读入<c>null</c>类型的字段
@@ -253,6 +273,21 @@ internal static class SerializationHelper
     }
 
     /// <summary>
+    ///     安全地写入<c>byte[]</c>类型的字段
+    /// </summary>
+    /// <param name="bsonWriter">Bson读取器</param>
+    /// <param name="name">字段名</param>
+    /// <param name="value">字段值</param>
+    /// <param name="force">是否强制写入<c>null</c>值</param>
+    public static void Write(this IBsonWriter bsonWriter, string name, byte[] value, bool force = false)
+    {
+        if (value != null)
+            bsonWriter.WriteBinaryData(name, value);
+        else if (force)
+            bsonWriter.WriteNull(name);
+    }
+
+    /// <summary>
     ///     安全地写入<c>Guid</c>类型的字段
     /// </summary>
     /// <param name="bsonWriter">Bson读取器</param>
@@ -278,6 +313,21 @@ internal static class SerializationHelper
     {
         if (value.HasValue)
             bsonWriter.WriteInt32(name, value.Value);
+        else if (force)
+            bsonWriter.WriteNull(name);
+    }
+
+    /// <summary>
+    ///     安全地写入<c>uint</c>类型的字段
+    /// </summary>
+    /// <param name="bsonWriter">Bson读取器</param>
+    /// <param name="name">字段名</param>
+    /// <param name="value">字段值</param>
+    /// <param name="force">是否强制写入<c>null</c>值</param>
+    public static void Write(this IBsonWriter bsonWriter, string name, uint? value, bool force = false)
+    {
+        if (value.HasValue)
+            bsonWriter.WriteInt64(name, value.Value);
         else if (force)
             bsonWriter.WriteNull(name);
     }

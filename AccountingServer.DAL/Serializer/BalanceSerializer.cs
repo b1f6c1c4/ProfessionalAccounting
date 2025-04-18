@@ -27,7 +27,7 @@ namespace AccountingServer.DAL.Serializer;
 /// </summary>
 internal class BalanceSerializer : BaseSerializer<Balance>
 {
-    public override void Serialize(IBsonWriter bsonWriter, Balance voucher)
+    public override void Serialize(IBsonWriter bsonWriter, Balance _)
         => throw new InvalidOperationException();
 
     public override Balance Deserialize(IBsonReader bsonReader)

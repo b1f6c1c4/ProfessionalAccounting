@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register with WebAuthn</title>
+</head>
+<body>
+  <h1>Register your security key</h1>
+
+  <script>
+    // Example user handle from the path, e.g., /invite/johndoe
+    const userHandle = window.location.pathname.split("/").pop();
+
+    async function register() {
+      // Embedded options from the backend - replace this with actual template rendering
+      const options = JSON.parse(document.getElementById('webauthn-options').textContent);
+
+      try {
+        // Decode base64url to Uint8Array
+        function decodeBase64url(base64url) {
+          const padding = '='.repeat((4 - base64url.length % 4) % 4);
+          const base64 = (base64url + padding).replace(/-/g, '+').replace(/_/g, '/');
+          return Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+        }
+
+        // Prepare PublicKeyCredentialCreationOptions
+        const publicKey = {
+          ...options,
+          challenge: decodeBase64url(options.challenge),
+          user: {
+            ...options.user,
+            id: decodeBase64url(options.user.id)
+          },
+          excludeCredentials: options.excludeCredentials?.map(cred => ({
+            ...cred,
+            id: decodeBase64url(cred.id)
+          })),
+          authenticatorSelection: {
+            residentKey: "required",
+            userVerification: "preferred"
+          },
+          attestation: 'direct'
+        };
+
+        const credential = await navigator.credentials.create({ publicKey });
+
+        const credentialJSON = {
+          id: credential.id,
+          rawId: btoa(String.fromCharCode(...new Uint8Array(credential.rawId))),
+          type: credential.type,
+          response: {
+            attestationObject: btoa(String.fromCharCode(...new Uint8Array(credential.response.attestationObject))),
+            clientDataJSON: btoa(String.fromCharCode(...new Uint8Array(credential.response.clientDataJSON)))
+          }
+        };
+
+        const res = await fetch(`/webauthn/register/${userHandle}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(credentialJSON)
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          alert("Registration successful!");
+          window.location.href = "/login";
+        } else {
+          alert("Registration failed: " + result.error);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error during registration: " + err.message);
+      }
+    }
+
+    window.onload = register;
+  </script>
+
+  <!-- Replace this with server-side rendering of options -->
+  <script type="application/json" id="webauthn-options">

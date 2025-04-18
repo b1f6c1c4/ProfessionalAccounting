@@ -278,6 +278,15 @@ public class DbSession : IHistoricalExchange
         return Db.Upsert(entity);
     }
 
+    public ValueTask<AuthIdentity> SelectAuth(byte[] id)
+        => Db.SelectAuth(id);
+
+    public ValueTask<AuthIdentity> SelectAuthCredential(byte[] id)
+        => Db.SelectAuthCredential(id);
+
+    public ValueTask<bool> Upsert(AuthIdentity entity)
+        => Db.Upsert(entity);
+
     public ValueTask<bool> StartProfiler(int slow)
         => Db.StartProfiler(slow);
 

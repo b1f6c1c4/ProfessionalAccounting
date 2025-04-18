@@ -17,12 +17,14 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell;
+using AccountingServer.Shell.Util;
 using Http;
 using static Http.HttpUtil;
 
@@ -41,6 +43,18 @@ facade.EnableTimer();
 var server = new HttpServer(IPAddress.Any, 30000);
 server.OnHttpRequest += Server_OnHttpRequest;
 server.Start();
+
+async IAsyncEnumerable<string> ServeInviteHTML(string userHandle)
+{
+    var ao = await facade.GetAttestationOptions(userHandle);
+
+    await foreach (var s in ResourceHelper.ReadResource("Resources.invite.html", typeof(Program)))
+        yield return s;
+
+    yield return ao;
+
+    yield return "\n  </script>\n</body>\n</html>\n";
+}
 
 async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
 {
@@ -67,6 +81,13 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     if (request.BaseUri.StartsWith("/api", StringComparison.Ordinal))
         request.BaseUri = request.BaseUri[4..];
 #endif
+
+    if (request.Method == "GET" && request.BaseUri.StartsWith("/invite/"))
+    {
+        var response = GenerateHttpResponse(ServeInviteHTML(request.BaseUri.Substring(8)), "text/html");
+        response.Header["Cache-Control"] = "public, max-age=3600";
+        return response;
+    }
 
     string user;
     if (request.Header.ContainsKey("x-user"))

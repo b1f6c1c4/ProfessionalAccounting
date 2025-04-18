@@ -50,11 +50,14 @@ public class Facade
 
     private readonly ExchangeShell m_ExchangeShell;
 
+    private readonly Authentication m_Auth;
+
     public Facade(string uri = null, string db = null)
     {
         m_Db = new(uri, db);
         m_AccountingShell = new();
         m_ExchangeShell = new();
+        m_Auth = new(m_Db);
         m_Composer =
             new()
                 {
@@ -110,6 +113,9 @@ public class Facade
                 return ListVersions().ToAsyncEnumerable();
             case "me":
                 return ListIdentity(session);
+            case "invite":
+                session.Identity.WillInvoke("invite");
+                return m_Auth.CreateAttestationOptions();
         }
 
         session.Identity.WillLogin(session.Client.User);
@@ -526,6 +532,13 @@ public class Facade
         session.Identity.WillAccess(await session.Accountant.SelectAmortizationAsync(amort.ID.Value));
         return await session.Accountant.DeleteAmortizationAsync(amort.ID.Value);
     }
+
+    #endregion
+
+    #region Authentication
+
+    public async ValueTask<string> GetAttestationOptions(string name)
+        => (await m_Db.SelectAuth(new AuthIdentity { StringID = name }.ID))?.AttestationOptions;
 
     #endregion
 }

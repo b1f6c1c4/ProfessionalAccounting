@@ -77,6 +77,7 @@ internal class MongoDbAdapter : IDbAdapter
         BsonSerializer.RegisterSerializer(new AmortizationSerializer());
         BsonSerializer.RegisterSerializer(new AmortItemSerializer());
         BsonSerializer.RegisterSerializer(new BalanceSerializer());
+        BsonSerializer.RegisterSerializer(new AuthIdentitySerializer());
         BsonSerializer.RegisterSerializer(new ExchangeSerializer());
 
         var year = new BsonDocument
@@ -179,6 +180,7 @@ internal class MongoDbAdapter : IDbAdapter
         m_Assets = m_Db.GetCollection<Asset>("asset");
         m_Amortizations = m_Db.GetCollection<Amortization>("amortization");
         m_Records = m_Db.GetCollection<ExchangeRecord>("exchangeRecord");
+        m_Auths = m_Db.GetCollection<AuthIdentity>("authIdentity");
         m_Profile = m_Db.GetCollection<BsonDocument>("system.profile");
     }
 
@@ -248,6 +250,11 @@ internal class MongoDbAdapter : IDbAdapter
     ///     汇率集合
     /// </summary>
     private readonly IMongoCollection<ExchangeRecord> m_Records;
+
+    /// <summary>
+    ///     身份认证凭证集合
+    /// </summary>
+    private readonly IMongoCollection<AuthIdentity> m_Auths;
 
     /// <summary>
     ///     性能分析集合
@@ -602,6 +609,31 @@ internal class MongoDbAdapter : IDbAdapter
             return true;
         }
         catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    #endregion
+
+    #region Authentication
+
+    public async ValueTask<AuthIdentity> SelectAuth(byte[] id)
+        => (await m_Auths.Find(Builders<AuthIdentity>.Filter.Eq("_id", id))
+                .ToCursorAsync()).SingleOrDefault();
+
+    public async ValueTask<AuthIdentity> SelectAuthCredential(byte[] id)
+        => (await m_Auths.Find(Builders<AuthIdentity>.Filter.Eq("credentialId", id))
+                .ToCursorAsync()).SingleOrDefault();
+
+    public async ValueTask<bool> Upsert(AuthIdentity aid)
+    {
+        try
+        {
+            await m_Auths.InsertOneAsync(aid);
+            return true;
+        }
+        catch (Exception e)
         {
             return false;
         }

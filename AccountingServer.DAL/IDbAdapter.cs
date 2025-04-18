@@ -223,6 +223,16 @@ public interface IDbAdapter
 
     #endregion
 
+    #region Authentication
+
+    ValueTask<AuthIdentity> SelectAuth(byte[] id);
+
+    ValueTask<AuthIdentity> SelectAuthCredential(byte[] id);
+
+    ValueTask<bool> Upsert(AuthIdentity aid);
+
+    #endregion
+
     #region Profiling
 
     /// <summary>
