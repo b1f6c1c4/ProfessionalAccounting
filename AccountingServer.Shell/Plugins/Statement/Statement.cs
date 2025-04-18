@@ -63,6 +63,7 @@ public class Statement : PluginBase
 
             parsed.Parse(ref csv);
             var sb = new StringBuilder();
+            session.Identity.WillInvoke($"$stmt$ {nm}");
             await RunMark(session, sb, filt, parsed, marker);
             yield return sb.ToString();
 
@@ -76,6 +77,7 @@ public class Statement : PluginBase
             var filt = ParsingF.DetailQuery(tgt.Query, session.Client);
             ParsingF.Eof(expr);
             var sb = new StringBuilder();
+            session.Identity.WillInvoke($"$stmt$ {nm}");
             await RunUnmark(session, sb, filt);
             yield return sb.ToString();
 
@@ -89,6 +91,7 @@ public class Statement : PluginBase
             var filt = ParsingF.DetailQuery(tgt.Query, session.Client);
             ParsingF.Eof(expr);
             var sb = new StringBuilder();
+            session.Identity.WillInvoke($"$stmt$ {nm}");
             await RunCheck(session, sb, filt, tgt);
             yield return sb.ToString();
 
@@ -106,6 +109,7 @@ public class Statement : PluginBase
                     Overlaps = new(),
                     Skips = new(),
                 };
+            session.Identity.WillInvoke("$stmt$ xml");
             await RunCheck(session, sb, filt, tgt, true);
             yield return sb.ToString();
 
@@ -138,6 +142,7 @@ public class Statement : PluginBase
                     new SimpleDetailQuery { Filter = new() { Remark = "" } }));
             var sb = new StringBuilder();
             sb.AppendLine($"{parsed.Items.Count} parsed");
+            session.Identity.WillInvoke($"$stmt$ {nm}");
             await using var vir = session.Accountant.Virtualize();
             await RunUnmark(session, sb, markerFilt);
             if (await RunMark(session, sb, nullFilt, parsed, marker)

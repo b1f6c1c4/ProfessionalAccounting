@@ -162,7 +162,7 @@ internal class AccountingShell : IShellComponent
             throw new SecurityException("检测到弱检索式");
 
         return session => explain
-            ? Present("IQueryCompounded<IVoucherQueryAtom>", Synth(res), Synth(session.Identity.Refine(res)))
+            ? Present("IQueryCompounded<IVoucherQueryAtom>", Synth(res), Synth(session.Identity.Refine(res, true)))
             : PresentVoucherQuery(session.Identity.Refine(res), session);
     }
 
@@ -179,7 +179,7 @@ internal class AccountingShell : IShellComponent
         var res = ParsingF.GroupedQuery(ref expr, client);
         ParsingF.Eof(expr);
         return session => explain
-            ? Present("IGroupedQuery", Synth(res), Synth(session.Identity.Refine(res)))
+            ? Present("IGroupedQuery", Synth(res), Synth(session.Identity.Refine(res, true)))
             : PresentSubtotal(session.Identity.Refine(res), trav, session);
     }
 
@@ -196,7 +196,7 @@ internal class AccountingShell : IShellComponent
         var res = ParsingF.VoucherGroupedQuery(ref expr, client);
         ParsingF.Eof(expr);
         return session => explain
-            ? Present("IVoucherGroupedQuery", Synth(res), Synth(session.Identity.Refine(res)))
+            ? Present("IVoucherGroupedQuery", Synth(res), Synth(session.Identity.Refine(res, true)))
             : PresentSubtotal(session.Identity.Refine(res), trav, session);
     }
 
@@ -225,7 +225,7 @@ internal class AccountingShell : IShellComponent
             throw new SecurityException("检测到弱检索式");
 
         return session => explain
-            ? Present("IVoucherDetailQuery", Synth(res), Synth(session.Identity.Refine(res)))
+            ? Present("IVoucherDetailQuery", Synth(res), Synth(session.Identity.Refine(res, true)))
             : PresentDetailQuery(session.Identity.Refine(res), session);
     }
 
@@ -253,7 +253,7 @@ internal class AccountingShell : IShellComponent
             throw new SecurityException("检测到弱检索式");
 
         return session => explain
-            ? Present("IVoucherDetailQuery", Synth(res), Synth(session.Identity.Refine(res)))
+            ? Present("IVoucherDetailQuery", Synth(res), Synth(session.Identity.Refine(res, true)))
             : PresentDetailRQuery(session.Identity.Refine(res), session);
     }
 
@@ -284,7 +284,7 @@ internal class AccountingShell : IShellComponent
             throw new SecurityException("检测到弱检索式");
 
         return session => explain
-            ? Present("IVoucherDetailQuery", Synth(res), Synth(session.Identity.Refine(res)))
+            ? Present("IVoucherDetailQuery", Synth(res), Synth(session.Identity.Refine(res, true)))
             : PresentFancyQuery(session.Identity.Refine(res), session);
     }
 

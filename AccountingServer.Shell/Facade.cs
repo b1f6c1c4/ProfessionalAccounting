@@ -210,29 +210,29 @@ public class Facade
     {
         yield return $"Authenticated Identity: {session.TrueIdentity.Name.Quotation('"')}\n";
 
-        if (session.TrueIdentity.AllAssumes == null)
+        if (session.TrueIdentity.P.AllAssumes == null)
             yield return "Assumable Identies: *\n";
         else
         {
-            var assumes = session.TrueIdentity.AllAssumes.Select(static (s) => s.Quotation('"'));
+            var assumes = session.TrueIdentity.P.AllAssumes.Select(static (s) => s.Quotation('"'));
             yield return $"Assumable Identies: {string.Join(", ", assumes)}\n";
         }
 
         yield return $"Assume Identity: {session.Identity.Name.Quotation('"')}\n";
 
-        if (session.Identity.AllRoles == null)
+        if (session.Identity.P.AllRoles == null)
             yield return "Associated Roles: *\n";
         else
         {
-            var roles = session.Identity.AllRoles.Select(static (r) => r.Name.Quotation('"'));
+            var roles = session.Identity.P.AllRoles.Select(static (r) => r.Name.Quotation('"'));
             yield return $"Associated Roles: {string.Join(", ", roles)}\n";
         }
 
-        if (session.Identity.AllUsers == null)
+        if (session.Identity.P.AllUsers == null)
             yield return "Associated Entities: *\n";
         else
         {
-            var users = session.Identity.AllUsers.Select(static (s) => s.AsUser());
+            var users = session.Identity.P.AllUsers.Select(static (s) => s.AsUser());
             yield return $"Associated Entities: {string.Join(", ", users)}\n";
         }
 
@@ -242,9 +242,27 @@ public class Facade
             yield return $"!!Access to {session.Client.User.AsUser()} denied, try `entity` + one of the above!!\n";
 
         yield return $"Current Date: {session.Client.Today.AsDate()}\n";
-        yield return $"Allowable View: {Synth(session.Identity.View.Item2)}\n";
-        yield return $"Allowable Edit: {Synth(session.Identity.Edit.Item2)}\n";
-        yield return $"Allowable Voucher: {Synth(session.Identity.Voucher.Item2)}\n";
+
+        yield return $"Allowable View: {Synth(session.Identity.P.View.Grant)}\n";
+        yield return $"Allowable Edit: {Synth(session.Identity.P.Edit.Grant)}\n";
+        yield return $"Allowable Voucher: {Synth(session.Identity.P.Voucher.Grant)}\n";
+        yield return $"Allowable Asset: {Synth(session.Identity.P.Asset.Grant)}\n";
+        yield return $"Allowable Amort: {Synth(session.Identity.P.Amort.Grant)}\n";
+
+        var invokes = session.Identity.P.GrantInvokes.Select(static (r) => r.Quotation('"'));
+        yield return $"Allowable Invokes: {string.Join(", ", invokes)}\n";
+
+        yield return $"Debit/Credit Imbalance: {(session.Identity.P.Imba ? "Granted" : "Denied")}\n";
+        yield return $"Reflect on Denies: {(session.Identity.P.Reflect ? "Granted" : "Denied")}\n";
+
+        if (session.Identity.P.Reflect)
+        {
+            yield return $"Full View: {Synth(session.Identity.P.View.Query)}\n";
+            yield return $"Full Edit: {Synth(session.Identity.P.Edit.Query)}\n";
+            yield return $"Full Voucher: {Synth(session.Identity.P.Voucher.Query)}\n";
+            yield return $"Full Asset: {Synth(session.Identity.P.Asset.Query)}\n";
+            yield return $"Full Amort: {Synth(session.Identity.P.Amort.Query)}\n";
+        }
     }
 
     #region Exchange

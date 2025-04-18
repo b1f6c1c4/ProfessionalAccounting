@@ -38,6 +38,9 @@ public class ACL
 
     [XmlElement("Role")]
     public List<Role> Roles { get; set; }
+
+    [XmlIgnore]
+    internal Dictionary<string, Role> Matrix { get; set; }
 }
 
 [Serializable]
@@ -65,34 +68,29 @@ public class Role
     public List<Permission> Rejects { get; set; }
 
     [XmlIgnore]
-    public bool Prepared { get; internal set; }
+    public Permissions P { get; internal set; }
+}
 
-    [XmlIgnore]
+public class Permissions
+{
     public bool Imba { get; internal set; }
-
-    [XmlIgnore]
+    public bool Reflect { get; internal set; }
     public HashSet<Role> AllRoles { get; internal set; }
-
-    [XmlIgnore]
     public HashSet<string> AllUsers { get; internal set; }
-
-    [XmlIgnore]
     public HashSet<string> AllAssumes { get; internal set; }
+    public List<string> GrantInvokes { get; internal set; }
+    public ACLQuery<IDetailQueryAtom> View { get; internal set; }
+    public ACLQuery<IDetailQueryAtom> Edit { get; internal set; }
+    public ACLQuery<IVoucherQueryAtom> Voucher { get; internal set; }
+    public ACLQuery<IDistributedQueryAtom> Asset { get; internal set; }
+    public ACLQuery<IDistributedQueryAtom> Amort { get; internal set; }
+}
 
-    [XmlIgnore]
-    public (IQueryCompounded<IDetailQueryAtom>,IQueryCompounded<IDetailQueryAtom>) View { get; internal set; }
-
-    [XmlIgnore]
-    public (IQueryCompounded<IDetailQueryAtom>,IQueryCompounded<IDetailQueryAtom>) Edit { get; internal set; }
-
-    [XmlIgnore]
-    public (IQueryCompounded<IVoucherQueryAtom>,IQueryCompounded<IVoucherQueryAtom>) Voucher { get; internal set; }
-
-    [XmlIgnore]
-    public (IQueryCompounded<IDistributedQueryAtom>,IQueryCompounded<IDistributedQueryAtom>) Asset { get; internal set; }
-
-    [XmlIgnore]
-    public (IQueryCompounded<IDistributedQueryAtom>,IQueryCompounded<IDistributedQueryAtom>) Amort { get; internal set; }
+public struct ACLQuery<TAtom> where TAtom : class
+{
+    internal IQueryCompounded<TAtom> Reject { get; set; }
+    public IQueryCompounded<TAtom> Query { get; internal set; } // used for actual filteration
+    public IQueryCompounded<TAtom> Grant { get; internal set; } // visible to non-reflect users
 }
 
 [Serializable]
@@ -154,6 +152,9 @@ public enum Verb
 
     [XmlEnum("amort")]
     Amort = 0b0100_0000,
+
+    [XmlEnum("reflect")]
+    Reflect = 0b1000_0000,
 }
 
 [Serializable]
@@ -171,9 +172,20 @@ public static class ACLManager
     static ACLManager()
         => Cfg.RegisterType<ACL>("ACL");
 
+    private static Permissions Stub = new();
+
     public static Role GetRole(string name)
     {
-        var id = Cfg.Get<ACL>().Roles.Single((id) => id.Name == name);
+        var acl = Cfg.Get<ACL>();
+        if (acl.Matrix == null)
+        {
+            var dict = new Dictionary<string, Role>();
+            foreach (var role in acl.Roles)
+                dict.Add(role.Name, role);
+
+            acl.Matrix = dict;
+        }
+        var id = acl.Matrix[name];
         PrepareRole(id);
         return id;
     }
@@ -183,71 +195,94 @@ public static class ACLManager
 
     public static void PrepareRole(Role id)
     {
-        if (id.Prepared)
+        if (id.P == Stub)
+            throw new ApplicationException($"Loop detected processing {id.Name.Quotation('"')} in ACL.xml");
+
+        if (id.P != null)
             return;
 
-        id.AllRoles = new();
-        id.AllUsers = new();
-        id.AllAssumes = new();
+        id.P = Stub;
 
-        void Process(Role r)
+        var p = new Permissions();
+        p.AllRoles = new();
+        p.AllUsers = new(id.Users);
+        p.AllAssumes = new(id.Assumes);
+        p.GrantInvokes = id.Grants.Where(static (p) => p.Action.HasFlag(Verb.Invoke))
+            .Select(static (p) => p.Query).ToList();
+
+        foreach (var nm in id.Inherits)
         {
-            if (!id.AllRoles.Add(r))
-                return;
-
-            foreach (var u in r.Users)
-                id.AllUsers.Add(u);
-            foreach (var a in r.Assumes)
-                id.AllAssumes.Add(a);
-            foreach (var nm in r.Inherits)
-                Process(GetRole(nm));
+            var role = GetRole(nm);
+            p.AllRoles.Add(role);
+            p.GrantInvokes.AddRange(role.P.GrantInvokes);
+            foreach (var v in role.P.AllRoles)
+                p.AllRoles.Add(v);
+            if (role.P.AllUsers != null)
+                foreach (var v in role.P.AllUsers)
+                    p.AllUsers.Add(v);
+            if (role.P.AllAssumes != null)
+                foreach (var v in role.P.AllAssumes)
+                    p.AllAssumes.Add(v);
         }
-        Process(id);
-        id.AllRoles.Remove(id);
-        if (id.AllUsers.Contains("*"))
-            id.AllUsers = null;
-        if (id.AllAssumes.Contains("*"))
-            id.AllAssumes = null;
+        if (p.AllUsers.Contains("*"))
+            p.AllUsers = null;
+        if (p.AllAssumes.Contains("*"))
+            p.AllAssumes = null;
 
-        id.Imba = Recursive((id) =>
-                id.Grants.Any((p) => p.Action.HasFlag(Verb.Imbalance))
-                && !id.Denies.Any((p) => p.Action.Flags(Verb.Imbalance)), id)
-            && !Recursive((id) => id.Rejects.Any((p) => p.Action.Flags(Verb.Imbalance)), id);
+        bool ComputeB(Verb f)
+            => Recursive((id) =>
+                id.Grants.Any((p) => p.Action.HasFlag(f))
+                && !id.Denies.Any((p) => p.Action.Flags(f)), id)
+            && !Recursive((id) => id.Rejects.Any((p) => p.Action.Flags(f)), id);
+        p.Imba = ComputeB(Verb.Imbalance);
+        p.Reflect = ComputeB(Verb.Reflect);
 
-        (IQueryCompounded<T>,IQueryCompounded<T>) Compute<T>(Verb f,
-                Func<Permission, IQueryCompounded<T>> proj,
-                Func<Role, (IQueryCompounded<T>,IQueryCompounded<T>)> proj2)
+        ACLQuery<T> Compute<T>(Verb f, Func<Permission, IQueryCompounded<T>> proj, Func<Role, ACLQuery<T>> proj2)
             where T : class
         {
             if (id.Inherits.Count == 0)
             {
-                return (id.Rejects.Where((p) => p.Action.Flags(f)).Select(proj).QueryAny(),
-                        id.Grants.Where((p) => p.Action.HasFlag(f)).Select(proj).QueryAny()
-                        .QueryBut(id.Denies.Where((p) => p.Action.Flags(f)).Select(proj))
-                        .QueryBut(id.Rejects.Where((p) => p.Action.Flags(f)).Select(proj)));
+                var g = id.Grants.Where((p) => p.Action.HasFlag(f)).Select(proj).QueryAny();
+                return new()
+                    {
+                        Grant = g,
+                        Reject = id.Rejects.Where((p) => p.Action.Flags(f)).Select(proj).QueryAny(),
+                        Query = g
+                            .QueryBut(id.Denies.Where((p) => p.Action.Flags(f)).Select(proj))
+                            .QueryBut(id.Rejects.Where((p) => p.Action.Flags(f)).Select(proj)),
+                    };
             }
             else
             {
-                var lst = id.Inherits.Select((nm) => proj2(GetRole(nm)).Item1)
+                var lst = id.Inherits.Select((nm) => proj2(GetRole(nm)).Reject)
                     .Concat(id.Rejects.Where((p) => p.Action.Flags(f)).Select(proj)).ToList();
-                return (lst.QueryAny(),
-                        id.Inherits.Select((nm) => proj2(GetRole(nm)).Item2).QueryAny()
-                        .QueryAny(id.Grants.Where((p) => p.Action.HasFlag(f)).Select(proj))
-                        .QueryBut(id.Denies.Where((p) => p.Action.Flags(f)).Select(proj))
-                        .QueryBut(lst));
+                return new()
+                    {
+                        Reject = lst.QueryAny(),
+                        Grant = id.Inherits.Select((nm) => proj2(GetRole(nm)).Grant).QueryAny()
+                            .QueryAny(id.Grants.Where((p) => p.Action.HasFlag(f)).Select(proj)),
+                        Query = id.Inherits.Select((nm) => proj2(GetRole(nm)).Query).QueryAny()
+                            .QueryAny(id.Grants.Where((p) => p.Action.HasFlag(f)).Select(proj))
+                            .QueryBut(id.Denies.Where((p) => p.Action.Flags(f)).Select(proj))
+                            .QueryBut(lst),
+                    };
             }
         }
 
         var dq = static (Permission p) => ParsingF.PureDetailQuery(p.Query, new());
         var vq = static (Permission p) => ParsingF.VoucherQuery(p.Query, new());
         var aq = static (Permission p) => ParsingF.DistributedQuery(p.Query, new());
-        id.View = Compute(Verb.View, dq, (r) => r.View);
-        id.Edit = Compute(Verb.Edit, dq, (r) => r.Edit);
-        id.Voucher = Compute(Verb.Voucher, vq, (r) => r.Voucher);
-        id.Asset = Compute(Verb.Asset, aq, (r) => r.Asset);
-        id.Amort = Compute(Verb.Amort, aq, (r) => r.Amort);
-        id.Prepared = true;
-        Console.WriteLine($"Prepared identity {id.Name}");
+        p.View = Compute(Verb.View, dq, (r) => r.P.View);
+        p.Edit = Compute(Verb.Edit, dq, (r) => r.P.Edit);
+        p.Voucher = Compute(Verb.Voucher, vq, (r) => r.P.Voucher);
+        p.Asset = Compute(Verb.Asset, aq, (r) => r.P.Asset);
+        p.Amort = Compute(Verb.Amort, aq, (r) => r.P.Amort);
+
+        id.P = p;
+        if (id is Identity)
+            Console.WriteLine($"Prepared identity {id.Name}");
+        else
+            Console.WriteLine($"Prepared role {id.Name}");
     }
 
     private static bool Recursive(Predicate<Role> pred, Role id0)
@@ -320,7 +355,7 @@ public static class ACLManager
             throw new ApplicationException($"Assume identity of {req.Quotation('"')} denied for unknown identity");
 
         var nm = id0.Name.Quotation('"');
-        if (id0.AllAssumes != null && !id0.AllAssumes.Contains(req))
+        if (id0.P.AllAssumes != null && !id0.P.AllAssumes.Contains(req))
             throw new ApplicationException($"Assume identity of {req.Quotation('"')} denied for identity {nm}");
 
         var res = Cfg.Get<ACL>().Identities.SingleOrDefault((id) => id.Name == req);
@@ -332,7 +367,7 @@ public static class ACLManager
     }
 
     public static bool CanLogin(this Identity id0, string user)
-        => id0.AllUsers == null || id0.AllUsers.Contains(user);
+        => id0.P.AllUsers == null || id0.P.AllUsers.Contains(user);
 
     public static void WillLogin(this Identity id0, string user)
     {
@@ -353,10 +388,10 @@ public static class ACLManager
     }
 
     public static bool CanRead(this Identity id, Voucher v)
-        => v.IsMatch(id.Voucher.Item2);
+        => v.IsMatch(id.P.Voucher.Query);
 
     public static bool CanWrite(this Identity id, Voucher v)
-        => v == null || v.IsMatch(id.Voucher.Item2) && v.Details.All((d) => d.IsMatch(id.Edit.Item2));
+        => v == null || v.IsMatch(id.P.Voucher.Query) && v.Details.All((d) => d.IsMatch(id.P.Edit.Query));
 
     public static void WillWrite(this Identity id, Voucher v, bool userInput = false)
     {
@@ -366,16 +401,16 @@ public static class ACLManager
         var nm = id.Name.Quotation('"');
 
         if (v.Details.GroupBy(static (d) => d.Currency).Any(static (g) =>
-                    Math.Abs(g.Sum(static (d) => d.Fund!.Value)) >= VoucherDetail.Tolerance) && !id.Imba)
+                    Math.Abs(g.Sum(static (d) => d.Fund!.Value)) >= VoucherDetail.Tolerance) && !id.P.Imba)
             throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity {nm}\n" +
                     "Reason: Debit/Credit imbalance");
 
         if (Math.Abs(v.Details.Where(static (d) => d.Title == 3998)
-                    .Sum(static (d) => d.Fund!.Value)) >= VoucherDetail.Tolerance && !id.Imba)
+                    .Sum(static (d) => d.Fund!.Value)) >= VoucherDetail.Tolerance && !id.P.Imba)
             throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity {nm}\n" +
                     "Reason: T3998 imbalance");
 
-        if (!v.IsMatch(id.Voucher.Item2))
+        if (!v.IsMatch(id.P.Voucher.Query))
             throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity {nm}\n" +
                     "Reason: You are not authorized to do anything on such a voucher");
 
@@ -384,11 +419,11 @@ public static class ACLManager
         var lst = new List<VoucherDetail>();
         foreach (var d in v.Details)
         {
-            if (d.IsMatch(id.Edit.Item2))
+            if (d.IsMatch(id.P.Edit.Query))
                 continue;
 
             noEdit = true;
-            if (d.IsMatch(id.View.Item2) || userInput)
+            if (d.IsMatch(id.P.View.Query) || userInput)
                 lst.Add(d);
             else
                 noView = true;
@@ -417,7 +452,7 @@ public static class ACLManager
     }
 
     public static bool CanAccess(this Identity id, Asset a)
-        => a.IsMatch(id.Asset.Item2);
+        => a.IsMatch(id.P.Asset.Query);
 
     public static void WillAccess(this Identity id, Asset a)
     {
@@ -431,7 +466,7 @@ public static class ACLManager
     }
 
     public static bool CanAccess(this Identity id, Amortization a)
-        => a.IsMatch(id.Amort.Item2);
+        => a.IsMatch(id.P.Amort.Query);
 
     public static void WillAccess(this Identity id, Amortization a)
     {
@@ -444,29 +479,36 @@ public static class ACLManager
             throw new ApplicationException($"Access to {a.ID} denied for identity {nm}");
     }
 
-    public static IQueryCompounded<IVoucherQueryAtom> Refine(this Identity id, IQueryCompounded<IVoucherQueryAtom> vq)
-        => id.Voucher.Item2 == null ? null : new IntersectQueries<IVoucherQueryAtom>(vq, id.Voucher.Item2);
+    private static IQueryCompounded<TAtom> I<TAtom>(bool redact, IQueryCompounded<TAtom> a, ACLQuery<TAtom> q)
+        where TAtom : class
+    {
+        var b = redact ? q.Grant : q.Query;
+        return b == null ? null : new IntersectQueries<TAtom>(a, b);
+    }
 
-    public static IQueryCompounded<IDistributedQueryAtom> RefineAsset(this Identity id, IQueryCompounded<IDistributedQueryAtom> vq)
-        => id.Asset.Item2 == null ? null : new IntersectQueries<IDistributedQueryAtom>(vq, id.Asset.Item2);
+    public static IQueryCompounded<IVoucherQueryAtom> Refine(this Identity id, IQueryCompounded<IVoucherQueryAtom> vq, bool synth = false)
+        => I(!id.P.Reflect && synth, vq, id.P.Voucher);
 
-    public static IQueryCompounded<IDistributedQueryAtom> RefineAmort(this Identity id, IQueryCompounded<IDistributedQueryAtom> vq)
-        => id.Amort.Item2 == null ? null : new IntersectQueries<IDistributedQueryAtom>(vq, id.Amort.Item2);
+    public static IQueryCompounded<IDistributedQueryAtom> RefineAsset(this Identity id, IQueryCompounded<IDistributedQueryAtom> aq, bool synth = false)
+        => I(!id.P.Reflect && synth, aq, id.P.Asset);
 
-    public static IVoucherDetailQuery Refine(this Identity id, IVoucherDetailQuery vdq)
-        => id.Voucher.Item2 == null || id.View.Item2 == null ? null :new VoucherDetailQuery(
-                new IntersectQueries<IVoucherQueryAtom>(vdq.VoucherQuery, id.Voucher.Item2),
-                new IntersectQueries<IDetailQueryAtom>(vdq.ActualDetailFilter(), id.View.Item2));
+    public static IQueryCompounded<IDistributedQueryAtom> RefineAmort(this Identity id, IQueryCompounded<IDistributedQueryAtom> aq, bool synth = false)
+        => I(!id.P.Reflect && synth, aq, id.P.Amort);
 
-    public static IGroupedQuery Refine(this Identity id, IGroupedQuery gq)
-        => new GroupedQuery(id.Refine(gq.VoucherEmitQuery), gq.Subtotal);
+    public static IVoucherDetailQuery Refine(this Identity id, IVoucherDetailQuery vdq, bool synth = false)
+        => new VoucherDetailQuery(
+            I(!id.P.Reflect && synth, vdq.VoucherQuery, id.P.Voucher),
+            I(!id.P.Reflect && synth, vdq.ActualDetailFilter(), id.P.View));
 
-    public static IVoucherGroupedQuery Refine(this Identity id, IVoucherGroupedQuery vgq)
-        => new VoucherGroupedQuery(id.Refine(vgq.VoucherQuery), vgq.Subtotal);
+    public static IGroupedQuery Refine(this Identity id, IGroupedQuery gq, bool synth = false)
+        => new GroupedQuery(id.Refine(gq.VoucherEmitQuery, synth), gq.Subtotal);
+
+    public static IVoucherGroupedQuery Refine(this Identity id, IVoucherGroupedQuery vgq, bool synth = false)
+        => new VoucherGroupedQuery(id.Refine(vgq.VoucherQuery, synth), vgq.Subtotal);
 
     public static Voucher RedactDetails(this Identity id, Voucher v)
     {
-        var lst = v.Details.Where((d) => d.IsMatch(id.View.Item2)).ToList();
+        var lst = v.Details.Where((d) => d.IsMatch(id.P.View.Query)).ToList();
         if (lst.Count() == v.Details.Count())
             return v;
 
