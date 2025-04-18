@@ -626,17 +626,13 @@ internal class MongoDbAdapter : IDbAdapter
         => (await m_Auths.Find(Builders<AuthIdentity>.Filter.Eq("credentialId", id))
                 .ToCursorAsync()).SingleOrDefault();
 
-    public async ValueTask<bool> Upsert(AuthIdentity aid)
+    public async ValueTask<bool> Upsert(AuthIdentity entity)
     {
-        try
-        {
-            await m_Auths.InsertOneAsync(aid);
-            return true;
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
+        var res = await m_Auths.ReplaceOneAsync(
+            Builders<AuthIdentity>.Filter.Eq("_id", entity.ID),
+            entity,
+            new ReplaceOptions { IsUpsert = true });
+        return res.ModifiedCount <= 1;
     }
 
     #endregion

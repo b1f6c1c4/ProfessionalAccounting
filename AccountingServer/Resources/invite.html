@@ -16,7 +16,6 @@
       // Embedded options from the backend - replace this with actual template rendering
       const options = JSON.parse(document.getElementById('webauthn-options').textContent);
 
-      try {
         // Decode base64url to Uint8Array
         function decodeBase64url(base64url) {
           const padding = '='.repeat((4 - base64url.length % 4) % 4);
@@ -45,17 +44,20 @@
 
         const credential = await navigator.credentials.create({ publicKey });
 
+        const b64url = (o) => btoa(String.fromCharCode(...new Uint8Array(o)))
+              .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
         const credentialJSON = {
           id: credential.id,
-          rawId: btoa(String.fromCharCode(...new Uint8Array(credential.rawId))),
+          rawId: b64url(credential.rawId),
           type: credential.type,
           response: {
-            attestationObject: btoa(String.fromCharCode(...new Uint8Array(credential.response.attestationObject))),
-            clientDataJSON: btoa(String.fromCharCode(...new Uint8Array(credential.response.clientDataJSON)))
+            attestationObject: b64url(credential.response.attestationObject),
+            clientDataJSON: b64url(credential.response.clientDataJSON),
           }
         };
 
-        const res = await fetch(`/webauthn/register/${userHandle}`, {
+        const res = await fetch(`/invite/${userHandle}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -71,10 +73,6 @@
         } else {
           alert("Registration failed: " + result.error);
         }
-      } catch (err) {
-        console.error(err);
-        alert("Error during registration: " + err.message);
-      }
     }
 
     window.onload = register;

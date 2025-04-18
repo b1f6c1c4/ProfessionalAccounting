@@ -32,6 +32,7 @@ internal class AuthIdentitySerializer : BaseSerializer<AuthIdentity>
         var aid = new AuthIdentity
         {
             ID = bsonReader.ReadBinaryData("_id", ref read),
+            DisplayName = bsonReader.ReadString("displayName", ref read),
             CredentialId = bsonReader.ReadBinaryData("credentialId", ref read),
             PublicKey = bsonReader.ReadBinaryData("publicKey", ref read),
             SignCount = bsonReader.ReadUInt32("signCount", ref read),
@@ -46,6 +47,7 @@ internal class AuthIdentitySerializer : BaseSerializer<AuthIdentity>
     {
         bsonWriter.WriteStartDocument();
         bsonWriter.Write("_id", aid.ID);
+        bsonWriter.Write("displayName", aid.DisplayName);
         bsonWriter.Write("credentialId", aid.CredentialId);
         bsonWriter.Write("publicKey", aid.PublicKey);
         bsonWriter.Write("signCount", aid.SignCount);

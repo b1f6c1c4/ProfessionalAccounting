@@ -43,6 +43,8 @@ public class AuthIdentity
         }
     }
 
+    public string DisplayName { get; set; }
+
     public byte[] CredentialId { get; set; }
 
     public byte[] PublicKey { get; set; }

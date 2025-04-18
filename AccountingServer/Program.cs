@@ -88,6 +88,13 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
         response.Header["Cache-Control"] = "public, max-age=3600";
         return response;
     }
+    if (request.Method == "POST" && request.BaseUri.StartsWith("/invite/"))
+    {
+        if (await facade.RegisterCredentials(request.BaseUri.Substring(8), request.ReadToEnd()))
+            return new() { ResponseCode = 204 };
+        else
+            return new() { ResponseCode = 409 };
+    }
 
     string user;
     if (request.Header.ContainsKey("x-user"))

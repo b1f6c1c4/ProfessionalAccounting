@@ -69,13 +69,20 @@ public class Authentication
             });
     }
 
-    public async IAsyncEnumerable<string> CreateAttestationOptions()
+    public async IAsyncEnumerable<string> CreateAttestationOptions(string display)
     {
-        var aid = new AuthIdentity { ID = RandomNumberGenerator.GetBytes(48) };
+        if (string.IsNullOrWhiteSpace(display))
+            throw new ApplicationException("The displayName must not be empty");
+
+        var aid = new AuthIdentity
+            {
+                ID = RandomNumberGenerator.GetBytes(24),
+                DisplayName = display,
+            };
         var user = new Fido2User
             {
-                DisplayName = aid.StringID,
-                Name = aid.StringID,
+                DisplayName = display,
+                Name = display,
                 Id = aid.ID,
             };
 
@@ -101,8 +108,7 @@ public class Authentication
 
         aid.AttestationOptions = options.ToJson();
 
-        if (!await m_Db.Upsert(aid))
-            throw new ApplicationException("Upsert failed");
+        await m_Db.Upsert(aid);
 
         yield return $"AuthIdentity prepared for registration; use the following link:\n";
         yield return $"https://<host>:<port>/invite/{aid.StringID}\n";
@@ -123,19 +129,12 @@ public class Authentication
                         => (await m_Db.SelectAuthCredential(args.CredentialId)) == null,
                 });
 
-        if (credential.User.Id != aid.ID)
-        {
-            Console.WriteLine("ID not match");
-            return false;
-        }
-
         aid.AttestationOptions = null;
         aid.CredentialId = credential.Id;
         aid.PublicKey = credential.PublicKey;
         aid.SignCount = credential.SignCount;
 
-        if (!await m_Db.Upsert(aid))
-            throw new ApplicationException("Upsert failed");
+        await m_Db.Upsert(aid);
 
         m_PendingCredentials.Remove(aid.StringID);
 

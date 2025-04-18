@@ -113,9 +113,12 @@ public class Facade
                 return ListVersions().ToAsyncEnumerable();
             case "me":
                 return ListIdentity(session);
-            case "invite":
-                session.Identity.WillInvoke("invite");
-                return m_Auth.CreateAttestationOptions();
+        }
+
+        if (expr.Initial() == "invite")
+        {
+            session.Identity.WillInvoke("invite");
+            return m_Auth.CreateAttestationOptions(expr.Rest());
         }
 
         session.Identity.WillLogin(session.Client.User);
@@ -539,6 +542,9 @@ public class Facade
 
     public async ValueTask<string> GetAttestationOptions(string name)
         => (await m_Db.SelectAuth(new AuthIdentity { StringID = name }.ID))?.AttestationOptions;
+
+    public ValueTask<bool> RegisterCredentials(string name, string body)
+        => m_Auth.RegisterCredentials(new AuthIdentity { StringID = name }.ID, body);
 
     #endregion
 }
