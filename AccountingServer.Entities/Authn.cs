@@ -25,46 +25,48 @@ public abstract class Authn
 {
     public byte[] ID { get; set; }
 
+    public static byte[] FromBytes(string str)
+    {
+        var padded = str.Replace('-', '+').Replace('_', '/');
+
+        switch (padded.Length % 4)
+        {
+            case 2: padded += "=="; break;
+            case 3: padded += "="; break;
+        }
+
+        return Convert.FromBase64String(padded);
+    }
+
+
     public string StringID
     {
         get => Convert.ToBase64String(ID).Replace('+', '-').Replace('/', '_').TrimEnd('=');
-
-        set
-        {
-            var padded = value.Replace('-', '+').Replace('_', '/');
-
-            switch (padded.Length % 4)
-            {
-                case 2: padded += "=="; break;
-                case 3: padded += "="; break;
-            }
-
-            ID = Convert.FromBase64String(padded);
-        }
+        set => ID = FromBytes(value);
     }
 
-    public string IdentityName { get; set; }
+    public string IdentityName;
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime? CreatedAt;
 
-    public DateTime? LastUsedAt { get; set; }
+    public DateTime? LastUsedAt;
 }
 
 public class WebAuthn : Authn
 {
-    public string AttestationOptions { get; set; }
-    public byte[] CredentialId { get; set; }
-    public byte[] PublicKey { get; set; }
-    public uint? SignCount { get; set; }
-    public DateTime? InvitedAt { get; set; }
+    public string AttestationOptions;
+    public byte[] CredentialId;
+    public byte[] PublicKey;
+    public uint? SignCount;
+    public DateTime? InvitedAt;
 }
 
 public class CertAuthn : Authn
 {
-    public string Fingerprint { get; set; }
-    public string IssuerDN { get; set; }
-    public string SubjectDN { get; set; }
-    public string Serial { get; set; }
-    public DateTime? Start { get; set; }
-    public DateTime? End { get; set; }
+    public string Fingerprint;
+    public string IssuerDN;
+    public string SubjectDN;
+    public string Serial;
+    public string Start;
+    public string End;
 }

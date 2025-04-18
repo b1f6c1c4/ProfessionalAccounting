@@ -18,13 +18,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
-using System.IdentityModel.Tokens.Jwt;
 using System.Net;
-using System.Security.Claims;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Tokens;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell;
@@ -40,16 +39,12 @@ await foreach (var s in ConfigFilesManager.InitializeConfigFiles())
     Console.Write(s);
 Console.WriteLine("All config files loaded");
 
+var cookieRegex = new Regex(@"(?<=^;\s*)session=(?<session>).*(?=$|;)");
+
 var facade = new Facade();
 #if RELEASE
 facade.EnableTimer();
 #endif
-
-var handler = new JwtSecurityTokenHandler();
-var jwtCred = new SigningCredentials(
-    new SymmetricSecurityKey(Convert.FromBase64String(facade.GetAuthConfig().JwtSecret)),
-    SecurityAlgorithms.HmacSha256);
-
 var server = new HttpServer(IPAddress.Any, 30000);
 server.OnHttpRequest += Server_OnHttpRequest;
 server.Start();
@@ -66,42 +61,12 @@ async IAsyncEnumerable<string> ServeInviteHTML(string userHandle)
 
 async IAsyncEnumerable<string> ServeLoginHTML()
 {
-    var ao = await facade.GetAssertionOptions();
+    var ao = await facade.CreateChallenge();
     await foreach (var s in ResourceHelper.ReadResource("Resources.login.html", typeof(Program)))
         yield return s;
 
     yield return ao;
     yield return "\n  </script>\n</body>\n</html>\n";
-}
-
-HttpResponse IssueJwt(HttpRequest request, Authn aid)
-{
-    if (aid == null)
-        return new()
-            {
-                ResponseCode = 302,
-                Header = new()
-                    {
-                    }
-            };
-    var res = handler.CreateEncodedJwt(
-            request.Header["host"],
-            request.Header["referer"],
-            new(new[] { new Claim(ClaimTypes.Actor, aid.StringID) }),
-            DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
-            DateTime.Now.AddDays(1),
-            DateTime.Now,
-            jwtCred,
-            null);
-    return new()
-        {
-            ResponseCode = 302,
-            Header = new()
-                {
-                    { "Set-Cookie", $"jwt={res}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=3600" },
-                    { "Location", "/" },
-                },
-        };
 }
 
 async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
@@ -138,7 +103,7 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     }
     if (request.Method == "POST" && request.BaseUri.StartsWith("/invite/"))
     {
-        if (await facade.RegisterCredentials(request.BaseUri.Substring(8), request.ReadToEnd()))
+        if (await facade.RegisterWebAuthn(request.BaseUri.Substring(8), request.ReadToEnd()))
             return new() { ResponseCode = 204 };
         else
             return new() { ResponseCode = 409 };
@@ -150,7 +115,23 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
         return response;
     }
     if (request.Method == "POST" && request.BaseUri == "/login")
-        return IssueJwt(request, await facade.VerifyAssertionResponse(request.ReadToEnd()));
+    {
+        var session = await facade.VerifyLogin(request.ReadToEnd());
+        if (session == null)
+            return new() { ResponseCode = 401 };
+
+        var cookie = $"session={session.Key}; HttpOnly; Secure; SameSite=Strict; Path=/; Expires={session.MaxExpiresAt:r};";
+        return new()
+            {
+                ResponseCode = 302,
+                Header = new()
+                {
+                    { "Set-Cookie", cookie },
+                    { "Location", "/" },
+                },
+            };
+    }
+
 
     string user;
     if (request.Header.ContainsKey("x-user"))
@@ -161,13 +142,15 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
         return new() { ResponseCode = 401 };
 
     string assume = null;
-    var idp = new IdPEntry();
     request.Header.TryGetValue("x-assume-identity", out assume);
-    request.Header.TryGetValue("x-ssl-subject", out idp.Subject);
-    request.Header.TryGetValue("x-ssl-cn", out idp.CN);
-    request.Header.TryGetValue("x-ssl-issuer", out idp.Issuer);
-    request.Header.TryGetValue("x-ssl-serial", out idp.Serial);
-    request.Header.TryGetValue("x-ssl-fingerprint", out idp.Fingerprint);
+
+    var ca = new CertAuthn();
+    request.Header.TryGetValue("x-ssl-fingerprint", out ca.Fingerprint);
+    request.Header.TryGetValue("x-ssl-subjectdn", out ca.SubjectDN);
+    request.Header.TryGetValue("x-ssl-issuerdn", out ca.IssuerDN);
+    request.Header.TryGetValue("x-ssl-serial", out ca.Serial);
+    request.Header.TryGetValue("x-ssl-start", out ca.Start);
+    request.Header.TryGetValue("x-ssl-end", out ca.End);
 
     if (!request.Header.ContainsKey("X-ClientDateTime".ToLowerInvariant()) ||
         !DateTimeParser.TryParse(request.Header["X-ClientDateTime".ToLowerInvariant()], out var dt))
@@ -181,7 +164,10 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     if (request.Header.ContainsKey("x-serializer"))
         spec = request.Header["x-serializer"];
 
-    var ctx = facade.CreateSession(user, dt, idp, assume, spec, limit);
+    string key = null;
+    if (request.Header.ContainsKey("cookie"))
+        key = cookieRegex.Match(request.Header["cookie"])?.Captures?[0].Value;
+    var ctx = await facade.AuthnCtx(user, dt, key, ca, assume, spec, limit);
 
     if (request.Method == "GET")
         switch (request.BaseUri)

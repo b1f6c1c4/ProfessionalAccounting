@@ -50,13 +50,16 @@ public class Facade
 
     private readonly ExchangeShell m_ExchangeShell;
 
-    private readonly Authentication m_Auth;
+    private readonly SessionManager m_SessionManager;
+
+    private readonly AuthnManager m_Auth;
 
     public Facade(string uri = null, string db = null)
     {
         m_Db = new(uri, db);
         m_AccountingShell = new();
         m_ExchangeShell = new();
+        m_SessionManager = new(m_Db);
         m_Auth = new(m_Db);
         m_Composer =
             new()
@@ -71,11 +74,28 @@ public class Facade
                 };
     }
 
-    public Context CreateSession(string user, DateTime dt, IdPEntry idp,
+    public Context AuthnCtx(string user, DateTime dt, Identity id,
+            string assume = null, string spec = null, int limit = 0)
+        => new(m_Db, user, dt, id.Assume(assume), id, null, null, spec, limit);
+
+    public async ValueTask<Context> AuthnCtx(string user, DateTime dt,
+            string sessionKey = null, CertAuthn cert = null,
             string assume = null, string spec = null, int limit = 0)
     {
-        var id = ACLManager.Authenticate(idp, assume);
-        return new(m_Db, user, dt, id.Assume(assume), id, spec, limit);
+        var session = m_SessionManager.AccessSession(sessionKey);
+        var ca = await m_Db.SelectCertAuthn(cert.Fingerprint);
+        if (ca != null)
+        {
+            ca.LastUsedAt = DateTime.UtcNow;
+            await m_Db.Update(ca);
+        }
+
+        var creds = new List<Authn> { session?.Authn, ca };
+#if DEBUG
+        creds.Add(new CertAuthn { IdentityName = "tester" });
+#endif
+        var id = ACLManager.Authenticate(creds, assume);
+        return new(m_Db, user, dt, id.Assume(assume), id, session, ca ?? cert, spec, limit);
     }
 
     /// <summary>
@@ -113,13 +133,12 @@ public class Facade
                 return ListVersions().ToAsyncEnumerable();
             case "me":
                 return ListIdentity(ctx);
+            case "save-cert":
+                return SaveCert(ctx);
         }
 
         if (expr.Initial() == "invite")
-        {
-            ctx.Identity.WillInvoke("invite");
-            return m_Auth.CreateAttestationOptions(expr.Rest());
-        }
+            return Invite(ctx, expr.Rest());
 
         ctx.Identity.WillLogin(ctx.Client.User);
         switch (ParsingF.Optional(ref expr, "time ", "slow "))
@@ -135,6 +154,31 @@ public class Facade
             default:
                 return ExecuteNormal(ctx, expr, null);
         }
+    }
+
+    private async IAsyncEnumerable<string> Invite(Context ctx, string name)
+    {
+        ctx.Identity.WillInvoke("invite");
+        var aid = await m_Auth.InviteWebAuthn(name);
+        yield return $"Invitation created, please visit the following link:\n";
+        var cfg = AuthnManager.Config;
+        yield return $"https://{cfg.ServerDomain}:{cfg.ServerPort}/invite/{aid.StringID}\n";
+    }
+
+    private async IAsyncEnumerable<string> SaveCert(Context ctx)
+    {
+        if (ctx.Certificate == null || string.IsNullOrEmpty(ctx.Certificate.Fingerprint))
+            throw new ApplicationException("No certifiacte present");
+
+        ctx.Identity.WillInvoke("save-cert");
+        if (ctx.Identity != ctx.TrueIdentity)
+            ctx.TrueIdentity.WillInvoke("save-cert-assume");
+
+        ctx.Certificate.IdentityName = ctx.Identity.Name;
+        await m_Auth.RegisterCert(ctx.Certificate);
+
+        yield return $"Certificate saved for identity {ctx.Identity.Name.AsId()}, it can now authenticate\n";
+        yield return $"using certificate {ctx.Certificate.Fingerprint}\n";
     }
 
     private async IAsyncEnumerable<string> ExecuteProfile(Context ctx, string expr, int slow)
@@ -217,6 +261,38 @@ public class Facade
 
     private static async IAsyncEnumerable<string> ListIdentity(Context ctx)
     {
+        if (ctx.Session != null)
+        {
+            yield return "WebAuthn accepted\n";
+            yield return $"WebAuthn Authn ID: {ctx.Session.Authn.StringID}\n";
+            yield return $"WebAuthn InvitedAt: {ctx.Session.Authn.InvitedAt:s}\n";
+            yield return $"WebAuthn CreatedAt: {ctx.Session.Authn.CreatedAt:s}\n";
+            yield return $"WebAuthn LastUsedAt: {ctx.Session.Authn.LastUsedAt:s}\n";
+            yield return $"Session CreatedAt: {ctx.Session.CreatedAt}";
+            yield return $"Session ExpiresAt: {ctx.Session.ExpiresAt}";
+            yield return $"Session MaxExpiresAt: {ctx.Session.MaxExpiresAt}";
+        }
+
+        if (ctx.Certificate != null)
+        {
+            if (ctx.Certificate.ID != null)
+            {
+                yield return "Client certificate accepted\n";
+                yield return $"Certificate Authn ID: {ctx.Certificate.StringID}\n";
+                yield return $"Certificate CreatedAt: {ctx.Certificate.CreatedAt:s}\n";
+                yield return $"Certificate LastUsedAt: {ctx.Certificate.LastUsedAt:s}\n";
+            }
+            else
+                yield return "Client certificate acknowledge but not accepted\n";
+
+            yield return $"Certificate Fingerprint: {ctx.Certificate.Fingerprint}\n";
+            yield return $"Certificate SubjectDN: {ctx.Certificate.SubjectDN:s}\n";
+            yield return $"Certificate IssuerND: {ctx.Certificate.IssuerDN:s}\n";
+            yield return $"Certificate Serial: {ctx.Certificate.Serial:s}\n";
+            yield return $"Certificate Valid not Before: {ctx.Certificate.Start:s}\n";
+            yield return $"Certificate Valid not After: {ctx.Certificate.End:s}\n";
+        }
+
         yield return $"Authenticated Identity: {ctx.TrueIdentity.Name.AsId()}\n";
 
         if (ctx.TrueIdentity.P.AllAssumes == null)
@@ -540,19 +616,23 @@ public class Facade
 
     #region Authentication
 
-    public AuthConfig GetAuthConfig() => Authentication.Config;
+    public async ValueTask<string> GetAttestationOptions(string userHandle)
+        => (await m_Db.SelectAuth(Authn.FromBytes(userHandle)) as WebAuthn)?.AttestationOptions;
 
-    public async ValueTask<string> GetAttestationOptions(string name)
-        => (await m_Db.SelectAuth(new Authn { StringID = name }.ID))?.AttestationOptions;
+    public ValueTask<bool> RegisterWebAuthn(string userHandle, string body)
+        => m_Auth.RegisterWebAuthn(Authn.FromBytes(userHandle), body);
 
-    public ValueTask<bool> RegisterCredentials(string name, string body)
-        => m_Auth.RegisterCredentials(new Authn { StringID = name }.ID, body);
+    public async ValueTask<string> CreateChallenge()
+        => m_Auth.CreateChallenge();
 
-    public async ValueTask<string> GetAssertionOptions()
-        => m_Auth.CreateAssertionOptions();
+    public async ValueTask<Session> VerifyLogin(string body)
+    {
+        var aid = await m_Auth.VerifyResponse(body);
+        if (aid == null)
+            return null;
 
-    public ValueTask<Authn> VerifyAssertionResponse(string body)
-        => m_Auth.VerifyAssertionResponse(body);
+        return m_SessionManager.CreateSession(aid);
+    }
 
     #endregion
 }

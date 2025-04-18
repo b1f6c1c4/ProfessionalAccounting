@@ -60,10 +60,10 @@ internal class AuthnSerializer : BaseSerializer<Authn>
                         LastUsedAt = used,
                         IssuerDN = bsonReader.ReadString("issuer", ref read),
                         SubjectDN = bsonReader.ReadString("subject", ref read),
-                        Serial = bsonReader.ReadString("Serial", ref read),
-                        Fingerprint = bsonReader.ReadString("Fingerprint", ref read),
-                        Start = bsonReader.ReadDateTime("start", ref read),
-                        End = bsonReader.ReadDateTime("end", ref read),
+                        Serial = bsonReader.ReadString("serial", ref read),
+                        Fingerprint = bsonReader.ReadString("fingerprint", ref read),
+                        Start = bsonReader.ReadString("start", ref read),
+                        End = bsonReader.ReadString("end", ref read),
                     };
                 break;
             default:

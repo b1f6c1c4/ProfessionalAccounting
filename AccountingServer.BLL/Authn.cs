@@ -39,10 +39,16 @@ public class WebAuthnConfig
 {
     public string ServerDomain;
 
+    public string ServerPort;
+
     public string ServerName;
 
     [XmlElement("Origin")]
     public List<string> Origins;
+
+    public TimeSpan SessionExpire;
+
+    public TimeSpan SessionMax;
 }
 
 public class AuthnManager
@@ -52,6 +58,8 @@ public class AuthnManager
 
     static AuthnManager()
         => Cfg.RegisterType<WebAuthnConfig>("Authn");
+
+    public static WebAuthnConfig Config => Cfg.Get<WebAuthnConfig>();
 
     private DbSession m_Db;
 
@@ -68,7 +76,7 @@ public class AuthnManager
             });
     }
 
-    public async ValueTask<Authn> InviteWebAuthn(string name)
+    public async ValueTask<WebAuthn> InviteWebAuthn(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ApplicationException("Identity name must not be empty");
@@ -170,7 +178,7 @@ public class AuthnManager
         return options.ToJson();
     }
 
-    public async ValueTask<Authn> VerifyResponse(string assertion)
+    public async ValueTask<WebAuthn> VerifyResponse(string assertion)
     {
         var ar = JsonSerializer.Deserialize<AuthenticatorAssertionRawResponse>(assertion);
         if (ar == null)

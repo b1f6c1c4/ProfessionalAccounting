@@ -105,9 +105,6 @@ public class Identity : Role
 {
     [XmlAttribute("disabled")]
     public bool Disabled { get; set; }
-
-    [XmlIgnore]
-    public Authn AuthnSource { get; set; }
 }
 
 [Flags]
@@ -296,8 +293,9 @@ public static class ACLManager
 
         var set = new HashSet<string>();
         foreach (var aid in aids)
-            if (acl.IdentityMatrix.TryGetValue(aid.IdentityName, out var ix) && !ix.Disabled)
-                set.Add(aid.IdentityName);
+            if (aid != null && !string.IsNullOrEmpty(aid.IdentityName))
+                if (acl.IdentityMatrix.TryGetValue(aid.IdentityName, out var ix) && !ix.Disabled)
+                    set.Add(aid.IdentityName);
 
         if (set.Count == 0)
             throw new ApplicationException("Credential accepted, but no identity matches your credential");
