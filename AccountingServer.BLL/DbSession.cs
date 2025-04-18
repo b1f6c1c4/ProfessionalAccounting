@@ -278,14 +278,20 @@ public class DbSession : IHistoricalExchange
         return Db.Upsert(entity);
     }
 
-    public ValueTask<AuthIdentity> SelectAuth(byte[] id)
+    public ValueTask<Authn> SelectAuth(byte[] id)
         => Db.SelectAuth(id);
 
-    public ValueTask<AuthIdentity> SelectAuthCredential(byte[] id)
-        => Db.SelectAuthCredential(id);
+    public ValueTask<WebAuthn> SelectWebAuthn(byte[] credentialId)
+        => Db.SelectWebAuthn(credentialId);
 
-    public ValueTask<bool> Upsert(AuthIdentity entity)
-        => Db.Upsert(entity);
+    public ValueTask<CertAuthn> SelectCertAuthn(string fingerprint)
+        => Db.SelectCertAuthn(fingerprint);
+
+    public ValueTask Insert(Authn aid)
+        => Db.Insert(aid);
+
+    public ValueTask<bool> Update(Authn aid)
+        => Db.Update(aid);
 
     public ValueTask<bool> StartProfiler(int slow)
         => Db.StartProfiler(slow);

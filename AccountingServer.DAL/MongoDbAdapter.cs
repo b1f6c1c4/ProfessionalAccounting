@@ -77,7 +77,7 @@ internal class MongoDbAdapter : IDbAdapter
         BsonSerializer.RegisterSerializer(new AmortizationSerializer());
         BsonSerializer.RegisterSerializer(new AmortItemSerializer());
         BsonSerializer.RegisterSerializer(new BalanceSerializer());
-        BsonSerializer.RegisterSerializer(new AuthIdentitySerializer());
+        BsonSerializer.RegisterSerializer(new AuthnSerializer());
         BsonSerializer.RegisterSerializer(new ExchangeSerializer());
 
         var year = new BsonDocument
@@ -180,7 +180,7 @@ internal class MongoDbAdapter : IDbAdapter
         m_Assets = m_Db.GetCollection<Asset>("asset");
         m_Amortizations = m_Db.GetCollection<Amortization>("amortization");
         m_Records = m_Db.GetCollection<ExchangeRecord>("exchangeRecord");
-        m_Auths = m_Db.GetCollection<AuthIdentity>("authIdentity");
+        m_Auths = m_Db.GetCollection<Authn>("authIdentity");
         m_Profile = m_Db.GetCollection<BsonDocument>("system.profile");
     }
 
@@ -254,7 +254,7 @@ internal class MongoDbAdapter : IDbAdapter
     /// <summary>
     ///     身份认证凭证集合
     /// </summary>
-    private readonly IMongoCollection<AuthIdentity> m_Auths;
+    private readonly IMongoCollection<Authn> m_Auths;
 
     /// <summary>
     ///     性能分析集合
@@ -618,21 +618,35 @@ internal class MongoDbAdapter : IDbAdapter
 
     #region Authentication
 
-    public async ValueTask<AuthIdentity> SelectAuth(byte[] id)
-        => (await m_Auths.Find(Builders<AuthIdentity>.Filter.Eq("_id", id))
+    public async ValueTask<Authn> SelectAuth(byte[] id)
+        => (await m_Auths.Find(Builders<Authn>.Filter.Eq("_id", id))
                 .ToCursorAsync()).SingleOrDefault();
 
-    public async ValueTask<AuthIdentity> SelectAuthCredential(byte[] id)
-        => (await m_Auths.Find(Builders<AuthIdentity>.Filter.Eq("credentialId", id))
-                .ToCursorAsync()).SingleOrDefault();
+    public async ValueTask<WebAuthn> SelectWebAuthn(byte[] credentialId)
+        => (await m_Auths.Find(Builders<Authn>.Filter.Eq("credentialId", credentialId)
+                    & Builders<Authn>.Filter.Eq("type", "webauthn")).Limit(2)
+                .ToCursorAsync()).SingleOrDefault() as WebAuthn;
 
-    public async ValueTask<bool> Upsert(AuthIdentity entity)
+    public async ValueTask<CertAuthn> SelectCertAuthn(string fingerprint)
+        => (await m_Auths.Find(Builders<Authn>.Filter.Eq("fingerprint", fingerprint)
+                    & Builders<Authn>.Filter.Eq("type", "cert")).Limit(1)
+                .ToCursorAsync()).SingleOrDefault() as CertAuthn;
+
+    public async ValueTask Insert(Authn entity)
+    {
+        if (entity.ID == null)
+            throw new ApplicationException("Authn ID missing");
+
+        await m_Auths.InsertOneAsync(entity);
+    }
+
+    public async ValueTask<bool> Update(Authn entity)
     {
         var res = await m_Auths.ReplaceOneAsync(
-            Builders<AuthIdentity>.Filter.Eq("_id", entity.ID),
+            Builders<Authn>.Filter.Eq("_id", entity.ID),
             entity,
-            new ReplaceOptions { IsUpsert = true });
-        return res.ModifiedCount <= 1;
+            new ReplaceOptions { IsUpsert = false });
+        return res.ModifiedCount == 1;
     }
 
     #endregion

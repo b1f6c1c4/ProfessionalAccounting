@@ -225,11 +225,15 @@ public interface IDbAdapter
 
     #region Authentication
 
-    ValueTask<AuthIdentity> SelectAuth(byte[] id);
+    ValueTask<Authn> SelectAuth(byte[] id);
 
-    ValueTask<AuthIdentity> SelectAuthCredential(byte[] id);
+    ValueTask<WebAuthn> SelectWebAuthn(byte[] credentialId);
 
-    ValueTask<bool> Upsert(AuthIdentity aid);
+    ValueTask<CertAuthn> SelectCertAuthn(string fingerprint);
+
+    ValueTask Insert(Authn aid);
+
+    ValueTask<bool> Update(Authn aid);
 
     #endregion
 

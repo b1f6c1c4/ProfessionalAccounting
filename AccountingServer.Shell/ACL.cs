@@ -103,34 +103,11 @@ public struct ACLQuery<TAtom> where TAtom : class
 [Serializable]
 public class Identity : Role
 {
-    [XmlElement("IdP")]
-    public IdentityProvider IdP { get; set; }
-}
+    [XmlAttribute("disabled")]
+    public bool Disabled { get; set; }
 
-[Serializable]
-public class IdPEntry
-{
-    [XmlElement("Subject")]
-    public string Subject;
-
-    [XmlElement("CN")]
-    public string CN;
-
-    [XmlElement("Issuer")]
-    public string Issuer;
-
-    [XmlElement("Serial")]
-    public string Serial;
-
-    [XmlElement("Fingerprint")]
-    public string Fingerprint;
-}
-
-[Serializable]
-public class IdentityProvider : IdPEntry
-{
-    [XmlElement("OR")]
-    public List<IdPEntry> ORs { get; set; }
+    [XmlIgnore]
+    public Authn AuthnSource { get; set; }
 }
 
 [Flags]
@@ -305,71 +282,40 @@ public static class ACLManager
         => id0 != null && (pred(id0) || id0.Inherits.Any((nm) => Recursive(pred,
                         Cfg.Get<ACL>().Roles.SingleOrDefault((id) => id.Name == nm))));
 
-    public static bool IsMatch(IdentityProvider login, IdPEntry idp)
-    {
-        if (login == null)
-            return false;
-
-        bool Compare(string a, string b)
-        {
-            if (a == null)
-                return true;
-
-            if (a == "")
-                return string.IsNullOrWhiteSpace(b);
-
-            return a.Equals(b, StringComparison.Ordinal);
-        }
-
-        bool Compares(IdPEntry tmpl)
-        {
-            if (!Compare(tmpl.Subject, idp.Subject)) return false;
-            if (!Compare(tmpl.CN, idp.CN)) return false;
-            if (!Compare(tmpl.Issuer, idp.Issuer)) return false;
-            if (!Compare(tmpl.Serial, idp.Serial)) return false;
-            if (!Compare(tmpl.Fingerprint, idp.Fingerprint)) return false;
-            return true;
-        }
-
-        if (!Compares(login))
-            return false;
-
-        if (login.ORs != null && login.ORs.Count > 0)
-            return login.ORs.Any(Compares);
-
-        return true;
-    }
-
-    public static Identity Authenticate(IdPEntry idp, string req = null)
+    public static Identity Authenticate(IEnumerable<Authn> aids, string req = null)
     {
         var acl = Cfg.Get<ACL>();
         if (acl.IdentityMatrix == null)
         {
             var dict = new Dictionary<string, Identity>();
-            foreach (var id in acl.Identities)
-                dict.Add(id.Name, id);
+            foreach (var ix in acl.Identities)
+                dict.Add(ix.Name, ix);
 
             acl.IdentityMatrix = dict;
         }
 
-        var lst = acl.Identities.Where((id) => IsMatch(id.IdP, idp)).ToList();
-        if (lst.Count == 0)
-            throw new ApplicationException("Authentication failure: no identity matches your credential");
+        var set = new HashSet<string>();
+        foreach (var aid in aids)
+            if (acl.IdentityMatrix.TryGetValue(aid.IdentityName, out var ix) && !ix.Disabled)
+                set.Add(aid.IdentityName);
 
-        if (lst.Count > 1)
+        if (set.Count == 0)
+            throw new ApplicationException("Credential accepted, but no identity matches your credential");
+
+        if (set.Count > 1)
         {
-            var tmp = lst.Where((id) => id.Name == req).ToList();
-            if (tmp.Count != 1)
+            if (req != null && set.Contains(req))
+                set = new() { req };
+            else
             {
-                var nms = string.Join(", ", lst.Select(static (id) => id.Name));
+                var nms = string.Join(", ", set);
                 throw new ApplicationException($"Authentication failure: multiple identities: {nms}");
             }
-            else
-                lst = tmp;
         }
 
-        PrepareRole(lst[0]);
-        return lst[0];
+        var id = acl.IdentityMatrix[set.Single()];
+        PrepareRole(id);
+        return id;
     }
 
     public static Identity Assume(this Identity id0, string req)

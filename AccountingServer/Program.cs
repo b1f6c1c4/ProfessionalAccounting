@@ -74,8 +74,16 @@ async IAsyncEnumerable<string> ServeLoginHTML()
     yield return "\n  </script>\n</body>\n</html>\n";
 }
 
-async IAsyncEnumerable<string> IssueJwt(HttpRequest request, AuthIdentity aid)
+HttpResponse IssueJwt(HttpRequest request, Authn aid)
 {
+    if (aid == null)
+        return new()
+            {
+                ResponseCode = 302,
+                Header = new()
+                    {
+                    }
+            };
     var res = handler.CreateEncodedJwt(
             request.Header["host"],
             request.Header["referer"],
@@ -85,7 +93,15 @@ async IAsyncEnumerable<string> IssueJwt(HttpRequest request, AuthIdentity aid)
             DateTime.Now,
             jwtCred,
             null);
-    yield return $"Bearer {res}";
+    return new()
+        {
+            ResponseCode = 302,
+            Header = new()
+                {
+                    { "Set-Cookie", $"jwt={res}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=3600" },
+                    { "Location", "/" },
+                },
+        };
 }
 
 async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
@@ -130,17 +146,11 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     if (request.Method == "GET" && request.BaseUri == "/login")
     {
         var response = GenerateHttpResponse(ServeLoginHTML(), "text/html");
-        response.Header["Cache-Control"] = "public, max-age=3600";
+        response.Header["Cache-Control"] = "no-store";
         return response;
     }
     if (request.Method == "POST" && request.BaseUri == "/login")
-    {
-        var aid = await facade.VerifyAssertionResponse(request.ReadToEnd());
-        if (aid == null)
-            return new() { ResponseCode = 409 };
-
-        return GenerateHttpResponse(IssueJwt(request, aid), "text/plain");
-    }
+        return IssueJwt(request, await facade.VerifyAssertionResponse(request.ReadToEnd()));
 
     string user;
     if (request.Header.ContainsKey("x-user"))

@@ -27,16 +27,15 @@ using System.Xml;
 using System.Xml.Serialization;
 using Fido2NetLib;
 using Fido2NetLib.Objects;
-using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 
-namespace AccountingServer.Shell;
+namespace AccountingServer.BLL;
 
 [Serializable]
-[XmlRoot("Authentication")]
-public class AuthConfig
+[XmlRoot("WebAuthn")]
+public class WebAuthnConfig
 {
     public string ServerDomain;
 
@@ -44,27 +43,23 @@ public class AuthConfig
 
     [XmlElement("Origin")]
     public List<string> Origins;
-
-    public string JwtSecret;
 }
 
-public class Authentication
+public class AuthnManager
 {
     private static Dictionary<string, CredentialCreateOptions> m_PendingCredentials = new();
     private static Dictionary<string, AssertionOptions> m_PendingAssertions = new();
 
-    static Authentication()
-        => Cfg.RegisterType<AuthConfig>("Authn");
+    static AuthnManager()
+        => Cfg.RegisterType<WebAuthnConfig>("Authn");
 
     private DbSession m_Db;
 
-    public Authentication(DbSession db) => m_Db = db;
+    public AuthnManager(DbSession db) => m_Db = db;
 
-    public static AuthConfig Config => Cfg.Get<AuthConfig>();
-
-    private Fido2 Make()
+    private Fido2 F()
     {
-        var cfg = Cfg.Get<AuthConfig>();
+        var cfg = Cfg.Get<WebAuthnConfig>();
         return new Fido2(new Fido2Configuration
             {
                 ServerDomain = cfg.ServerDomain,
@@ -73,26 +68,25 @@ public class Authentication
             });
     }
 
-    public async IAsyncEnumerable<string> CreateAttestationOptions(string display)
+    public async ValueTask<Authn> InviteWebAuthn(string name)
     {
-        if (string.IsNullOrWhiteSpace(display))
-            throw new ApplicationException("The displayName must not be empty");
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ApplicationException("Identity name must not be empty");
 
-        var aid = new AuthIdentity
+        var aid = new WebAuthn
             {
                 ID = RandomNumberGenerator.GetBytes(24),
-                DisplayName = display,
-            };
-        var user = new Fido2User
-            {
-                DisplayName = display,
-                Name = display,
-                Id = aid.ID,
+                IdentityName = name,
             };
 
-        var options = Make().RequestNewCredential(new()
+        var options = F().RequestNewCredential(new()
             {
-                User = user,
+                User = new()
+                    {
+                        DisplayName = name,
+                        Name = name,
+                        Id = aid.ID,
+                    },
                 ExcludeCredentials = new List<PublicKeyCredentialDescriptor>(),
                 AuthenticatorSelection = new()
                     {
@@ -112,15 +106,21 @@ public class Authentication
 
         aid.AttestationOptions = options.ToJson();
 
-        await m_Db.Upsert(aid);
+        await m_Db.Insert(aid);
 
-        yield return $"AuthIdentity prepared for registration; use the following link:\n";
-        yield return $"https://<host>:<port>/invite/{aid.StringID}\n";
+        return aid;
     }
 
-    public async ValueTask<bool> RegisterCredentials(byte[] name, string attestation)
+    public async ValueTask RegisterCert(CertAuthn ca)
     {
-        var aid = await m_Db.SelectAuth(name);
+        ca.ID = RandomNumberGenerator.GetBytes(24);
+        ca.CreatedAt = DateTime.UtcNow;
+        await m_Db.Insert(ca);
+    }
+
+    public async ValueTask<bool> RegisterWebAuthn(byte[] name, string attestation)
+    {
+        var aid = (await m_Db.SelectAuth(name)) as WebAuthn;
         if (aid == null)
             throw new ApplicationException("No AuthIdentity found");
 
@@ -131,12 +131,12 @@ public class Authentication
         if (!m_PendingCredentials.TryGetValue(aid.StringID, out var options))
             throw new ApplicationException("No pending credential found");
 
-        var credential = await Make().MakeNewCredentialAsync(new()
+        var credential = await F().MakeNewCredentialAsync(new()
                 {
                     AttestationResponse = ar,
                     OriginalOptions = options,
                     IsCredentialIdUniqueToUserCallback = async (args, _)
-                        => (await m_Db.SelectAuthCredential(args.CredentialId)) == null,
+                        => (await m_Db.SelectWebAuthn(args.CredentialId)) == null,
                 });
 
         aid.AttestationOptions = null;
@@ -144,17 +144,17 @@ public class Authentication
         aid.PublicKey = credential.PublicKey;
         aid.SignCount = credential.SignCount;
 
-        if (!await m_Db.Upsert(aid))
-            throw new ApplicationException("Upsert failed");
+        if (!await m_Db.Update(aid))
+            throw new ApplicationException("Update failed");
 
         m_PendingCredentials.Remove(aid.StringID);
 
         return true;
     }
 
-    public string CreateAssertionOptions()
+    public string CreateChallenge()
     {
-        var options = Make().GetAssertionOptions(new()
+        var options = F().GetAssertionOptions(new()
             {
                 AllowedCredentials = new List<PublicKeyCredentialDescriptor>(),
                 UserVerification = UserVerificationRequirement.Discouraged,
@@ -170,7 +170,7 @@ public class Authentication
         return options.ToJson();
     }
 
-    public async ValueTask<AuthIdentity> VerifyAssertionResponse(string assertion)
+    public async ValueTask<Authn> VerifyResponse(string assertion)
     {
         var ar = JsonSerializer.Deserialize<AuthenticatorAssertionRawResponse>(assertion);
         if (ar == null)
@@ -186,11 +186,11 @@ public class Authentication
 
         m_PendingAssertions.Remove(key);
 
-        var aid = await m_Db.SelectAuthCredential(ar.Id);
+        var aid = await m_Db.SelectWebAuthn(ar.Id);
         if (aid == null)
             throw new ApplicationException("No AuthIdentity found");
 
-        var res = await Make().MakeAssertionAsync(new()
+        var res = await F().MakeAssertionAsync(new()
                 {
                     AssertionResponse = ar,
                     OriginalOptions = options,
@@ -201,8 +201,8 @@ public class Authentication
                 });
 
         aid.SignCount = res.SignCount;
-        if (!await m_Db.Upsert(aid))
-            throw new ApplicationException("Upsert failed");
+        if (!await m_Db.Update(aid))
+            throw new ApplicationException("Update failed");
 
         return aid;
     }

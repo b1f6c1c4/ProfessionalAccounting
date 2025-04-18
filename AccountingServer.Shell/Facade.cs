@@ -543,15 +543,15 @@ public class Facade
     public AuthConfig GetAuthConfig() => Authentication.Config;
 
     public async ValueTask<string> GetAttestationOptions(string name)
-        => (await m_Db.SelectAuth(new AuthIdentity { StringID = name }.ID))?.AttestationOptions;
+        => (await m_Db.SelectAuth(new Authn { StringID = name }.ID))?.AttestationOptions;
 
     public ValueTask<bool> RegisterCredentials(string name, string body)
-        => m_Auth.RegisterCredentials(new AuthIdentity { StringID = name }.ID, body);
+        => m_Auth.RegisterCredentials(new Authn { StringID = name }.ID, body);
 
     public async ValueTask<string> GetAssertionOptions()
         => m_Auth.CreateAssertionOptions();
 
-    public ValueTask<AuthIdentity> VerifyAssertionResponse(string body)
+    public ValueTask<Authn> VerifyAssertionResponse(string body)
         => m_Auth.VerifyAssertionResponse(body);
 
     #endregion

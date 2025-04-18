@@ -21,7 +21,7 @@ using System.Text;
 
 namespace AccountingServer.Entities;
 
-public class AuthIdentity
+public abstract class Authn
 {
     public byte[] ID { get; set; }
 
@@ -43,13 +43,28 @@ public class AuthIdentity
         }
     }
 
-    public string DisplayName { get; set; }
+    public string IdentityName { get; set; }
 
-    public byte[] CredentialId { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
-    public byte[] PublicKey { get; set; }
+    public DateTime? LastUsedAt { get; set; }
+}
 
-    public uint? SignCount { get; set; }
-
+public class WebAuthn : Authn
+{
     public string AttestationOptions { get; set; }
+    public byte[] CredentialId { get; set; }
+    public byte[] PublicKey { get; set; }
+    public uint? SignCount { get; set; }
+    public DateTime? InvitedAt { get; set; }
+}
+
+public class CertAuthn : Authn
+{
+    public string Fingerprint { get; set; }
+    public string IssuerDN { get; set; }
+    public string SubjectDN { get; set; }
+    public string Serial { get; set; }
+    public DateTime? Start { get; set; }
+    public DateTime? End { get; set; }
 }
