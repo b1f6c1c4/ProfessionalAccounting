@@ -19,8 +19,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
 using AccountingServer.Entities;
 using AccountingServer.Entities.Util;
 using AccountingServer.Shell;
@@ -40,6 +44,12 @@ var facade = new Facade();
 #if RELEASE
 facade.EnableTimer();
 #endif
+
+var handler = new JwtSecurityTokenHandler();
+var jwtCred = new SigningCredentials(
+    new SymmetricSecurityKey(Convert.FromBase64String(facade.GetAuthConfig().JwtSecret)),
+    SecurityAlgorithms.HmacSha256);
+
 var server = new HttpServer(IPAddress.Any, 30000);
 server.OnHttpRequest += Server_OnHttpRequest;
 server.Start();
@@ -47,13 +57,35 @@ server.Start();
 async IAsyncEnumerable<string> ServeInviteHTML(string userHandle)
 {
     var ao = await facade.GetAttestationOptions(userHandle);
-
     await foreach (var s in ResourceHelper.ReadResource("Resources.invite.html", typeof(Program)))
         yield return s;
 
     yield return ao;
-
     yield return "\n  </script>\n</body>\n</html>\n";
+}
+
+async IAsyncEnumerable<string> ServeLoginHTML()
+{
+    var ao = await facade.GetAssertionOptions();
+    await foreach (var s in ResourceHelper.ReadResource("Resources.login.html", typeof(Program)))
+        yield return s;
+
+    yield return ao;
+    yield return "\n  </script>\n</body>\n</html>\n";
+}
+
+async IAsyncEnumerable<string> IssueJwt(HttpRequest request, AuthIdentity aid)
+{
+    var res = handler.CreateEncodedJwt(
+            request.Header["host"],
+            request.Header["referer"],
+            new(new[] { new Claim(ClaimTypes.Actor, aid.StringID) }),
+            DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
+            DateTime.Now.AddDays(1),
+            DateTime.Now,
+            jwtCred,
+            null);
+    yield return $"Bearer {res}";
 }
 
 async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
@@ -94,6 +126,20 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
             return new() { ResponseCode = 204 };
         else
             return new() { ResponseCode = 409 };
+    }
+    if (request.Method == "GET" && request.BaseUri == "/login")
+    {
+        var response = GenerateHttpResponse(ServeLoginHTML(), "text/html");
+        response.Header["Cache-Control"] = "public, max-age=3600";
+        return response;
+    }
+    if (request.Method == "POST" && request.BaseUri == "/login")
+    {
+        var aid = await facade.VerifyAssertionResponse(request.ReadToEnd());
+        if (aid == null)
+            return new() { ResponseCode = 409 };
+
+        return GenerateHttpResponse(IssueJwt(request, aid), "text/plain");
     }
 
     string user;

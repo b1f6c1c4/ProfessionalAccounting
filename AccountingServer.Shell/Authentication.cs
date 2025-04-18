@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -50,6 +51,7 @@ public class AuthConfig
 public class Authentication
 {
     private static Dictionary<string, CredentialCreateOptions> m_PendingCredentials = new();
+    private static Dictionary<string, AssertionOptions> m_PendingAssertions = new();
 
     static Authentication()
         => Cfg.RegisterType<AuthConfig>("Authn");
@@ -57,6 +59,8 @@ public class Authentication
     private DbSession m_Db;
 
     public Authentication(DbSession db) => m_Db = db;
+
+    public static AuthConfig Config => Cfg.Get<AuthConfig>();
 
     private Fido2 Make()
     {
@@ -96,7 +100,7 @@ public class Authentication
                         UserVerification = UserVerificationRequirement.Required,
                     },
                 AttestationPreference = AttestationConveyancePreference.None,
-                Extensions = new AuthenticationExtensionsClientInputs
+                Extensions = new()
                     {
                         Extensions = true,
                         UserVerificationMethod = true,
@@ -118,13 +122,19 @@ public class Authentication
     {
         var aid = await m_Db.SelectAuth(name);
         if (aid == null)
-            return false;
+            throw new ApplicationException("No AuthIdentity found");
 
-        var ar = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(attestation)!;
+        var ar = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(attestation);
+        if (ar == null)
+            throw new ApplicationException("Invalid json AuthenticatorAttestationRawResponse");
+
+        if (!m_PendingCredentials.TryGetValue(aid.StringID, out var options))
+            throw new ApplicationException("No pending credential found");
+
         var credential = await Make().MakeNewCredentialAsync(new()
                 {
                     AttestationResponse = ar,
-                    OriginalOptions = m_PendingCredentials[aid.StringID],
+                    OriginalOptions = options,
                     IsCredentialIdUniqueToUserCallback = async (args, _)
                         => (await m_Db.SelectAuthCredential(args.CredentialId)) == null,
                 });
@@ -134,10 +144,66 @@ public class Authentication
         aid.PublicKey = credential.PublicKey;
         aid.SignCount = credential.SignCount;
 
-        await m_Db.Upsert(aid);
+        if (!await m_Db.Upsert(aid))
+            throw new ApplicationException("Upsert failed");
 
         m_PendingCredentials.Remove(aid.StringID);
 
         return true;
+    }
+
+    public string CreateAssertionOptions()
+    {
+        var options = Make().GetAssertionOptions(new()
+            {
+                AllowedCredentials = new List<PublicKeyCredentialDescriptor>(),
+                UserVerification = UserVerificationRequirement.Discouraged,
+                Extensions = new()
+                    {
+                        Extensions = true,
+                        UserVerificationMethod = true,
+                    },
+            });
+
+        m_PendingAssertions[new string(options.Challenge.Select(b => (char)b).ToArray())] = options;
+
+        return options.ToJson();
+    }
+
+    public async ValueTask<AuthIdentity> VerifyAssertionResponse(string assertion)
+    {
+        var ar = JsonSerializer.Deserialize<AuthenticatorAssertionRawResponse>(assertion);
+        if (ar == null)
+            throw new ApplicationException("Invalid json AuthenticatorAssertionRawResponse");
+
+        var response = JsonSerializer.Deserialize<AuthenticatorResponse>(ar.Response.ClientDataJson);
+        if (response == null)
+            throw new ApplicationException("Invalid json AuthenticatorResponse");
+
+        var key = new string(response.Challenge.Select(b => (char)b).ToArray());
+        if (!m_PendingAssertions.TryGetValue(key, out var options))
+            throw new ApplicationException("No pending assertion found");
+
+        m_PendingAssertions.Remove(key);
+
+        var aid = await m_Db.SelectAuthCredential(ar.Id);
+        if (aid == null)
+            throw new ApplicationException("No AuthIdentity found");
+
+        var res = await Make().MakeAssertionAsync(new()
+                {
+                    AssertionResponse = ar,
+                    OriginalOptions = options,
+                    StoredPublicKey = aid.PublicKey,
+                    StoredSignatureCounter = aid.SignCount!.Value,
+                    IsUserHandleOwnerOfCredentialIdCallback = (args, _)
+                        => Task.FromResult(aid.CredentialId.SequenceEqual(args.CredentialId)),
+                });
+
+        aid.SignCount = res.SignCount;
+        if (!await m_Db.Upsert(aid))
+            throw new ApplicationException("Upsert failed");
+
+        return aid;
     }
 }
