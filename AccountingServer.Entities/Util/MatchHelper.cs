@@ -288,7 +288,7 @@ public static class MatchHelper
     /// <param name="atomPredictor">原子检索式成立条件</param>
     /// <returns>是否成立</returns>
     public static bool IsMatch<TAtom>(IQueryCompounded<TAtom> query, Func<TAtom, bool> atomPredictor)
-        where TAtom : class => query?.Accept(new MatchHelperVisitor<TAtom>(atomPredictor)) ?? true;
+        where TAtom : class => query?.Accept(new MatchHelperVisitor<TAtom>(atomPredictor)) ?? false;
 
     /// <summary>
     ///     获取记账凭证细目映射检索式中的实际细目检索式

@@ -13,9 +13,9 @@ public class Session
             Identity id = null, Identity tid = null, string spec = null, int limit = 0)
     {
         Accountant = new(db, user, dt ?? DateTime.UtcNow.Date) { Limit = limit };
-        Serializer = new SerializerFactory(Client).GetSerializer(spec);
         Identity = id;
         TrueIdentity = tid;
+        Serializer = new SerializerFactory(Client, Identity).GetSerializer(spec);
     }
 
     /// <summary>
@@ -42,4 +42,19 @@ public class Session
     ///     客户端真实身份
     /// </summary>
     public Identity TrueIdentity { get; }
+}
+
+public interface IIdentityDependable
+{
+    Identity Identity { set; }
+}
+
+public static class IdentityHelper
+{
+    public static T Assign<T>(this T value, Identity identity) where T : IIdentityDependable
+    {
+        if (value is { })
+            value.Identity = identity;
+        return value;
+    }
 }

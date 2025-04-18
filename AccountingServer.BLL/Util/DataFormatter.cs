@@ -74,6 +74,14 @@ public static class DataFormatter
     }
 
     /// <summary>
+    ///     格式化身份
+    /// </summary>
+    /// <param name="value">身份</param>
+    /// <returns>格式化后的身份</returns>
+    public static string AsId(this string value)
+        => $"<<{value}>>";
+
+    /// <summary>
     ///     格式化用户
     /// </summary>
     /// <param name="value">用户</param>

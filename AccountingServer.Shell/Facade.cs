@@ -208,23 +208,31 @@ public class Facade
 
     private static async IAsyncEnumerable<string> ListIdentity(Session session)
     {
-        yield return $"Authenticated Identity: {session.TrueIdentity.Name.Quotation('"')}\n";
+        yield return $"Authenticated Identity: {session.TrueIdentity.Name.AsId()}\n";
 
         if (session.TrueIdentity.P.AllAssumes == null)
             yield return "Assumable Identies: *\n";
         else
         {
-            var assumes = session.TrueIdentity.P.AllAssumes.Select(static (s) => s.Quotation('"'));
+            var assumes = session.TrueIdentity.P.AllAssumes.Select(static (s) => s.AsId());
             yield return $"Assumable Identies: {string.Join(", ", assumes)}\n";
         }
 
-        yield return $"Assume Identity: {session.Identity.Name.Quotation('"')}\n";
+        yield return $"Assume Identity: {session.Identity.Name.AsId()}\n";
+
+        if (session.Identity.P.AllKnowns == null)
+            yield return "Known Identies: *\n";
+        else
+        {
+            var knowns = session.Identity.P.AllKnowns.Select(static (s) => s.AsId());
+            yield return $"Known Identies: {string.Join(", ", knowns)}\n";
+        }
 
         if (session.Identity.P.AllRoles == null)
             yield return "Associated Roles: *\n";
         else
         {
-            var roles = session.Identity.P.AllRoles.Select(static (r) => r.Name.Quotation('"'));
+            var roles = session.Identity.P.AllRoles.Select(static (r) => r.Name.AsId());
             yield return $"Associated Roles: {string.Join(", ", roles)}\n";
         }
 

@@ -71,6 +71,7 @@ public class VoucherTest
                                 IdP = new(),
                                 Users = new() { "*" },
                                 Assumes = new(),
+                                Knowns = new(),
                                 Inherits = new(),
                                 Grants = new()
                                     {

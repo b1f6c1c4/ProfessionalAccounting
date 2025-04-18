@@ -6,9 +6,13 @@ namespace AccountingServer.Shell.Serializer;
 internal class SerializerFactory
 {
     private readonly Client m_Client;
+    private readonly Identity m_Identity;
 
-    public SerializerFactory(Client client)
-        => m_Client = client;
+    public SerializerFactory(Client client, Identity id)
+    {
+        m_Client = client;
+        m_Identity = id;
+    }
 
     /// <summary>
     ///     从表示器代号寻找表示器
@@ -42,6 +46,9 @@ internal class SerializerFactory
         // ReSharper disable once SuspiciousTypeConversion.Global
         if (serializer is IClientDependable cd)
             cd.Client = m_Client;
+        // ReSharper disable once SuspiciousTypeConversion.Global
+        if (serializer is IIdentityDependable id)
+            id.Identity = m_Identity;
         return serializer;
     }
 }

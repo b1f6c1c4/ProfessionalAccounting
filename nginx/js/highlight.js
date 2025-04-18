@@ -23,8 +23,11 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
   const AccountingHighlightRules = function() {
     this.$rules = {
       start: [{
+        token: ['keyword.operator.identity', 'markup.bold.identity'],
+        regex: /<<[^>]+>>/,
+      }, {
         token: 'comment',
-        regex: /\/\/.*$/,
+        regex: /\/\/(?:[^<]|<$|<[^<])*/,
       }, {
         token: 'string.interpolated',
         regex: /\^[0-9a-f]+\^/,
@@ -75,8 +78,14 @@ define('ace/mode/accounting_highlight_rules', function(require, exports, module)
         defaultToken : 'text',
       }],
       obj: [{
+        token: ['keyword.control.identity', 'markup.bold.rw'],
+        regex: /<<<[^>]+>>>/,
+      }, {
+        token: 'keyword.operator.identity',
+        regex: /<<[^>]+>>/,
+      }, {
         token: 'comment',
-        regex: /\/\/.*$/,
+        regex: /\/\/(?:[^<]|<$|<[^<])*/,
       }, {
         token: 'string.interpolated',
         regex: /\^[0-9a-f]+\^/,

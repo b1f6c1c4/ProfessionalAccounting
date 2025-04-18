@@ -40,7 +40,10 @@ public class ACL
     public List<Role> Roles { get; set; }
 
     [XmlIgnore]
-    internal Dictionary<string, Role> Matrix { get; set; }
+    internal Dictionary<string, Identity> IdentityMatrix { get; set; }
+
+    [XmlIgnore]
+    internal Dictionary<string, Role> RoleMatrix { get; set; }
 }
 
 [Serializable]
@@ -57,6 +60,9 @@ public class Role
 
     [XmlElement("Assume")]
     public List<string> Assumes { get; set; }
+
+    [XmlElement("Known")]
+    public List<string> Knowns { get; set; }
 
     [XmlElement("Grant")]
     public List<Permission> Grants { get; set; }
@@ -78,6 +84,7 @@ public class Permissions
     public HashSet<Role> AllRoles { get; internal set; }
     public HashSet<string> AllUsers { get; internal set; }
     public HashSet<string> AllAssumes { get; internal set; }
+    public HashSet<string> AllKnowns { get; internal set; }
     public List<string> GrantInvokes { get; internal set; }
     public ACLQuery<IDetailQueryAtom> View { get; internal set; }
     public ACLQuery<IDetailQueryAtom> Edit { get; internal set; }
@@ -177,15 +184,15 @@ public static class ACLManager
     public static Role GetRole(string name)
     {
         var acl = Cfg.Get<ACL>();
-        if (acl.Matrix == null)
+        if (acl.RoleMatrix == null)
         {
             var dict = new Dictionary<string, Role>();
             foreach (var role in acl.Roles)
                 dict.Add(role.Name, role);
 
-            acl.Matrix = dict;
+            acl.RoleMatrix = dict;
         }
-        var id = acl.Matrix[name];
+        var id = acl.RoleMatrix[name];
         PrepareRole(id);
         return id;
     }
@@ -196,7 +203,7 @@ public static class ACLManager
     public static void PrepareRole(Role id)
     {
         if (id.P == Stub)
-            throw new ApplicationException($"Loop detected processing {id.Name.Quotation('"')} in ACL.xml");
+            throw new ApplicationException($"Loop detected processing {id.Name.AsId()} in ACL.xml");
 
         if (id.P != null)
             return;
@@ -207,8 +214,18 @@ public static class ACLManager
         p.AllRoles = new();
         p.AllUsers = new(id.Users);
         p.AllAssumes = new(id.Assumes);
+        p.AllKnowns = new(id.Knowns);
         p.GrantInvokes = id.Grants.Where(static (p) => p.Action.HasFlag(Verb.Invoke))
             .Select(static (p) => p.Query).ToList();
+
+        void Merge(HashSet<string> a, HashSet<string> b)
+        {
+            if (b == null)
+                a.Add("*");
+            else
+                foreach (var v in b)
+                    a.Add(v);
+        }
 
         foreach (var nm in id.Inherits)
         {
@@ -217,17 +234,16 @@ public static class ACLManager
             p.GrantInvokes.AddRange(role.P.GrantInvokes);
             foreach (var v in role.P.AllRoles)
                 p.AllRoles.Add(v);
-            if (role.P.AllUsers != null)
-                foreach (var v in role.P.AllUsers)
-                    p.AllUsers.Add(v);
-            if (role.P.AllAssumes != null)
-                foreach (var v in role.P.AllAssumes)
-                    p.AllAssumes.Add(v);
+            Merge(p.AllUsers, role.P.AllUsers);
+            Merge(p.AllAssumes, role.P.AllAssumes);
+            Merge(p.AllKnowns, role.P.AllKnowns);
         }
         if (p.AllUsers.Contains("*"))
             p.AllUsers = null;
         if (p.AllAssumes.Contains("*"))
             p.AllAssumes = null;
+        if (p.AllKnowns.Contains("*"))
+            p.AllKnowns = null;
 
         bool ComputeB(Verb f)
             => Recursive((id) =>
@@ -326,7 +342,17 @@ public static class ACLManager
 
     public static Identity Authenticate(IdPEntry idp, string req = null)
     {
-        var lst = Cfg.Get<ACL>().Identities.Where((id) => IsMatch(id.IdP, idp)).ToList();
+        var acl = Cfg.Get<ACL>();
+        if (acl.IdentityMatrix == null)
+        {
+            var dict = new Dictionary<string, Identity>();
+            foreach (var id in acl.Identities)
+                dict.Add(id.Name, id);
+
+            acl.IdentityMatrix = dict;
+        }
+
+        var lst = acl.Identities.Where((id) => IsMatch(id.IdP, idp)).ToList();
         if (lst.Count == 0)
             throw new ApplicationException("Authentication failure: no identity matches your credential");
 
@@ -352,15 +378,14 @@ public static class ACLManager
             return id0;
 
         if (id0 == null)
-            throw new ApplicationException($"Assume identity of {req.Quotation('"')} denied for unknown identity");
+            throw new ApplicationException($"Assume identity of {req.AsId()} denied for unknown identity");
 
-        var nm = id0.Name.Quotation('"');
         if (id0.P.AllAssumes != null && !id0.P.AllAssumes.Contains(req))
-            throw new ApplicationException($"Assume identity of {req.Quotation('"')} denied for identity {nm}");
+            throw new ApplicationException($"Assume identity of {req.AsId()} denied for identity {id0.Name.AsId()}");
 
         var res = Cfg.Get<ACL>().Identities.SingleOrDefault((id) => id.Name == req);
         if (res == null)
-            throw new ApplicationException($"Assume identity of {req.Quotation('"')} granted, but does not exist");
+            throw new ApplicationException($"Assume identity of {req.AsId()} granted, but does not exist");
 
         PrepareRole(res);
         return res;
@@ -372,7 +397,7 @@ public static class ACLManager
     public static void WillLogin(this Identity id0, string user)
     {
         if (!CanLogin(id0, user))
-            throw new ApplicationException($"Login of {user} denied for identity {id0.Name.Quotation('"')}");
+            throw new ApplicationException($"Login of {user} denied for identity {id0.Name.AsId()}");
     }
 
     public static bool CanInvoke(this Identity id0, string term)
@@ -384,7 +409,7 @@ public static class ACLManager
     public static void WillInvoke(this Identity id0, string term)
     {
         if (!CanInvoke(id0, term))
-            throw new ApplicationException($"Access to \"{term}\" denied for identity {id0.Name.Quotation('"')}");
+            throw new ApplicationException($"Access to \"{term}\" denied for identity {id0.Name.AsId()}");
     }
 
     public static bool CanRead(this Identity id, Voucher v)
@@ -393,26 +418,31 @@ public static class ACLManager
     public static bool CanWrite(this Identity id, Voucher v)
         => v == null || v.IsMatch(id.P.Voucher.Query) && v.Details.All((d) => d.IsMatch(id.P.Edit.Query));
 
+    public static bool CanRead(this Identity id, VoucherDetail d)
+        => d.IsMatch(id.P.View.Query);
+
+    public static bool CanWrite(this Identity id, VoucherDetail d)
+        => d.IsMatch(id.P.Edit.Query);
+
     public static void WillWrite(this Identity id, Voucher v, bool userInput = false)
     {
         if (v == null)
             return;
 
-        var nm = id.Name.Quotation('"');
-
         if (v.Details.GroupBy(static (d) => d.Currency).Any(static (g) =>
                     Math.Abs(g.Sum(static (d) => d.Fund!.Value)) >= VoucherDetail.Tolerance) && !id.P.Imba)
-            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity {nm}\n" +
+            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity {id.Name.AsId()}\n" +
                     "Reason: Debit/Credit imbalance");
 
         if (Math.Abs(v.Details.Where(static (d) => d.Title == 3998)
                     .Sum(static (d) => d.Fund!.Value)) >= VoucherDetail.Tolerance && !id.P.Imba)
-            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity {nm}\n" +
+            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity {id.Name.AsId()}\n" +
                     "Reason: T3998 imbalance");
 
         if (!v.IsMatch(id.P.Voucher.Query))
-            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity {nm}\n" +
-                    "Reason: You are not authorized to do anything on such a voucher");
+            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity {id.Name.AsId()}\n" +
+                    (userInput ? "Reason: You are not authorized to make such a voucher"
+                     : "Reason: You are not authorized to edit that voucher"));
 
         var noEdit = false;
         var noView = false;
@@ -432,7 +462,7 @@ public static class ACLManager
             return;
 
         var sb = new StringBuilder();
-        sb.Append($"Write to {v.ID.Quotation('^')} denied for identity {nm}\n");
+        sb.Append($"Write to {v.ID.Quotation('^')} denied for identity {id.Name.AsId()}\n");
         if (userInput)
             sb.Append("Reason: attempting to write to unauthorized accounts\n");
         else
@@ -459,10 +489,8 @@ public static class ACLManager
         if (a == null)
             return;
 
-        var nm = id.Name.Quotation('"');
-
         if (!id.CanAccess(a))
-            throw new ApplicationException($"Access to {a.ID} denied for identity {nm}");
+            throw new ApplicationException($"Access to {a.ID} denied for identity {id.Name.AsId()}");
     }
 
     public static bool CanAccess(this Identity id, Amortization a)
@@ -473,10 +501,8 @@ public static class ACLManager
         if (a == null)
             return;
 
-        var nm = id.Name.Quotation('"');
-
         if (!id.CanAccess(a))
-            throw new ApplicationException($"Access to {a.ID} denied for identity {nm}");
+            throw new ApplicationException($"Access to {a.ID} denied for identity {id.Name.AsId()}");
     }
 
     private static IQueryCompounded<TAtom> I<TAtom>(bool redact, IQueryCompounded<TAtom> a, ACLQuery<TAtom> q)
@@ -520,5 +546,79 @@ public static class ACLManager
                 Redacted = true,
                 Details = lst,
             };
+    }
+
+    private static IEnumerable<Identity> GetKnowns(this Identity id)
+    {
+        var mat = Cfg.Get<ACL>().IdentityMatrix;
+        if (id.P.AllKnowns == null)
+        {
+            foreach (var (k, ix) in mat)
+            {
+                PrepareRole(ix);
+                yield return ix;
+            }
+        }
+        else
+        {
+            foreach (var k in id.P.AllKnowns)
+                if (mat.TryGetValue(k, out var ix))
+                {
+                    PrepareRole(ix);
+                    yield return ix;
+                }
+        }
+    }
+
+    /// <summary>
+    ///     If <c>v == null</c>, list all identities known to <c>id</c> that can R/W <c>d</c>;
+    ///     If <c>v != null</c>, list all identities known to <c>id</c> that cannot R <c>d</c>;
+    /// </summary>
+    public static IEnumerable<(Identity, bool)> Audit(this Identity id, VoucherDetail d, Voucher v)
+    {
+        var mat = Cfg.Get<ACL>().IdentityMatrix;
+        foreach (var ix in GetKnowns(id))
+        {
+            if (ix == id)
+                continue;
+
+            if (v == null)
+            {
+                if (ix.CanRead(d))
+                    yield return (ix, ix.CanWrite(d) && (v == null || ix.CanWrite(v)));
+
+                continue;
+            }
+
+            if (!ix.CanRead(v))
+                continue;
+
+            if (!ix.CanRead(d))
+                yield return (ix, false);
+        }
+    }
+
+    public static IEnumerable<(Identity, bool)> Audit(this Identity id, Voucher v)
+    {
+        var mat = Cfg.Get<ACL>().IdentityMatrix;
+        foreach (var ix in GetKnowns(id))
+            if (ix != id && ix.CanRead(v))
+                yield return (ix, ix.CanWrite(v));
+    }
+
+    public static IEnumerable<Identity> Audit(this Identity id, Asset a)
+    {
+        var mat = Cfg.Get<ACL>().IdentityMatrix;
+        foreach (var ix in GetKnowns(id))
+            if (ix != id && ix.CanAccess(a))
+                yield return ix;
+    }
+
+    public static IEnumerable<Identity> Audit(this Identity id, Amortization a)
+    {
+        var mat = Cfg.Get<ACL>().IdentityMatrix;
+        foreach (var ix in GetKnowns(id))
+            if (ix != id && ix.CanAccess(a))
+                yield return ix;
     }
 }

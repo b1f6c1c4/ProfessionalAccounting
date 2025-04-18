@@ -33,11 +33,13 @@ namespace AccountingServer.Shell.Serializer;
 /// <summary>
 ///     实体表达式
 /// </summary>
-public class ExprSerializer : IClientDependable, IEntitySerializer
+public class ExprSerializer : IClientDependable, IIdentityDependable, IEntitySerializer
 {
     private const string TheToken = "new Voucher {";
 
     public Client Client { private get; set; }
+
+    public Identity Identity { private get; set; }
 
     /// <inheritdoc />
     public string PresentVoucher(Voucher voucher)
@@ -55,7 +57,18 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
         }
         else
         {
-            sb.Append($"{voucher.ID?.Quotation('^')}\n");
+            sb.Append($"{voucher.ID?.Quotation('^')}");
+            if (Identity != null)
+            {
+                var lst = Identity.Audit(voucher).ToList();
+                if (lst.Any())
+                {
+                    sb.Append(" //");
+                    foreach (var (id, ed) in lst)
+                        sb.Append(ed ? $" <{id.Name.AsId()}>" : $" {id.Name.AsId()}");
+                }
+            }
+            sb.Append("\n");
             if (voucher.Date.HasValue || inject == null)
                 sb.Append($"{voucher.Date.AsDate()}\n");
             if (voucher.Remark != null)
@@ -70,7 +83,7 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
                 sb.Append("[[REDACTED]]\n");
 
             foreach (var d in voucher.Details)
-                sb.Append(PresentVoucherDetail(d));
+                sb.Append(PresentVoucherDetail(d, voucher));
         }
 
         sb.Append('}');
@@ -79,13 +92,30 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
 
     /// <inheritdoc />
     public string PresentVoucherDetail(VoucherDetail detail)
+        => PresentVoucherDetail(detail, null);
+
+    private string PresentVoucherDetail(VoucherDetail detail, Voucher v)
     {
         var sb = new StringBuilder();
         var t = TitleManager.GetTitleName(detail.Title);
         sb.Append(
             detail.SubTitle.HasValue
-                ? $"// {t}-{TitleManager.GetTitleName(detail.Title, detail.SubTitle)}\n"
-                : $"// {t}\n");
+                ? $"// {t}-{TitleManager.GetTitleName(detail.Title, detail.SubTitle)}"
+                : $"// {t}");
+        if (Identity != null)
+        {
+            var res = Identity.Audit(detail, v).ToList();
+            if (res.Any())
+            {
+                if (v == null)
+                    sb.Append(" -- Access:");
+                else
+                    sb.Append(" -- Denied:");
+                foreach (var (id, ed) in res)
+                    sb.Append(ed ? $" <{id.Name.AsId()}>" : $" {id.Name.AsId()}");
+            }
+        }
+        sb.Append("\n");
         if (Client == null || detail.User != Client.User)
             sb.Append($"{detail.User.AsUser()} ");
         if (detail.Currency != BaseCurrency.Now)
@@ -102,7 +132,7 @@ public class ExprSerializer : IClientDependable, IEntitySerializer
 
     /// <inheritdoc />
     public string PresentVoucherDetail(VoucherDetailR detail)
-        => $"{detail.Voucher.Date.AsDate()} {PresentVoucherDetail((VoucherDetail)detail)}";
+        => $"{detail.Voucher.Date.AsDate()} {PresentVoucherDetail(detail, detail.Voucher)}";
 
     /// <inheritdoc />
     public Voucher ParseVoucher(string expr)
