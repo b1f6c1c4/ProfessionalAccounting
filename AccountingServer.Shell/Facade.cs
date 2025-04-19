@@ -83,7 +83,7 @@ public class Facade
             string assume = null, string spec = null, int limit = 0)
     {
         var session = m_SessionManager.AccessSession(sessionKey);
-        var ca = await m_Db.SelectCertAuthn(cert.Fingerprint);
+        var ca = await m_Db.SelectCertAuthn(cert?.Fingerprint);
         if (ca != null)
         {
             ca.LastUsedAt = DateTime.UtcNow;
@@ -268,9 +268,9 @@ public class Facade
             yield return $"WebAuthn InvitedAt: {ctx.Session.Authn.InvitedAt:s}\n";
             yield return $"WebAuthn CreatedAt: {ctx.Session.Authn.CreatedAt:s}\n";
             yield return $"WebAuthn LastUsedAt: {ctx.Session.Authn.LastUsedAt:s}\n";
-            yield return $"Session CreatedAt: {ctx.Session.CreatedAt}";
-            yield return $"Session ExpiresAt: {ctx.Session.ExpiresAt}";
-            yield return $"Session MaxExpiresAt: {ctx.Session.MaxExpiresAt}";
+            yield return $"Session CreatedAt: {ctx.Session.CreatedAt:s}\n";
+            yield return $"Session ExpiresAt: {ctx.Session.ExpiresAt:s}\n";
+            yield return $"Session MaxExpiresAt: {ctx.Session.MaxExpiresAt:s}\n";
         }
 
         if (ctx.Certificate != null)
@@ -283,14 +283,14 @@ public class Facade
                 yield return $"Certificate LastUsedAt: {ctx.Certificate.LastUsedAt:s}\n";
             }
             else
-                yield return "Client certificate acknowledge but not accepted\n";
+                yield return "Client certificate acknowledged but not accepted\n";
 
             yield return $"Certificate Fingerprint: {ctx.Certificate.Fingerprint}\n";
-            yield return $"Certificate SubjectDN: {ctx.Certificate.SubjectDN:s}\n";
-            yield return $"Certificate IssuerND: {ctx.Certificate.IssuerDN:s}\n";
-            yield return $"Certificate Serial: {ctx.Certificate.Serial:s}\n";
-            yield return $"Certificate Valid not Before: {ctx.Certificate.Start:s}\n";
-            yield return $"Certificate Valid not After: {ctx.Certificate.End:s}\n";
+            yield return $"Certificate SubjectDN: {ctx.Certificate.SubjectDN}\n";
+            yield return $"Certificate IssuerND: {ctx.Certificate.IssuerDN}\n";
+            yield return $"Certificate Serial: {ctx.Certificate.Serial}\n";
+            yield return $"Certificate Valid not Before: {ctx.Certificate.Start}\n";
+            yield return $"Certificate Valid not After: {ctx.Certificate.End}\n";
         }
 
         yield return $"Authenticated Identity: {ctx.TrueIdentity.Name.AsId()}\n";

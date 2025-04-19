@@ -83,8 +83,8 @@ internal class AuthnSerializer : BaseSerializer<Authn>
         bsonWriter.Write("lastUsedAt", aid.LastUsedAt);
         if (aid is WebAuthn wa)
         {
-            bsonWriter.Write("attestationOptions", wa.AttestationOptions);
             bsonWriter.Write("type", "webauthn");
+            bsonWriter.Write("attestationOptions", wa.AttestationOptions);
             bsonWriter.Write("credentialId", wa.CredentialId);
             bsonWriter.Write("publicKey", wa.PublicKey);
             bsonWriter.Write("signCount", wa.SignCount);

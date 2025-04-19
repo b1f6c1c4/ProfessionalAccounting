@@ -113,6 +113,7 @@ public class AuthnManager
         m_PendingCredentials[aid.StringID] = options;
 
         aid.AttestationOptions = options.ToJson();
+        aid.InvitedAt = DateTime.UtcNow;
 
         await m_Db.Insert(aid);
 
@@ -147,6 +148,7 @@ public class AuthnManager
                         => (await m_Db.SelectWebAuthn(args.CredentialId)) == null,
                 });
 
+        aid.CreatedAt = DateTime.UtcNow;
         aid.AttestationOptions = null;
         aid.CredentialId = credential.Id;
         aid.PublicKey = credential.PublicKey;
@@ -208,6 +210,7 @@ public class AuthnManager
                         => Task.FromResult(aid.CredentialId.SequenceEqual(args.CredentialId)),
                 });
 
+        aid.LastUsedAt = DateTime.UtcNow;
         aid.SignCount = res.SignCount;
         if (!await m_Db.Update(aid))
             throw new ApplicationException("Update failed");

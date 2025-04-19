@@ -39,7 +39,7 @@ await foreach (var s in ConfigFilesManager.InitializeConfigFiles())
     Console.Write(s);
 Console.WriteLine("All config files loaded");
 
-var cookieRegex = new Regex(@"(?<=^;\s*)session=(?<session>).*(?=$|;)");
+var cookieRegex = new Regex(@"(?<=^|;\s*)session=(.*)(?=$|;)");
 
 var facade = new Facade();
 #if RELEASE
@@ -144,14 +144,6 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     string assume = null;
     request.Header.TryGetValue("x-assume-identity", out assume);
 
-    var ca = new CertAuthn();
-    request.Header.TryGetValue("x-ssl-fingerprint", out ca.Fingerprint);
-    request.Header.TryGetValue("x-ssl-subjectdn", out ca.SubjectDN);
-    request.Header.TryGetValue("x-ssl-issuerdn", out ca.IssuerDN);
-    request.Header.TryGetValue("x-ssl-serial", out ca.Serial);
-    request.Header.TryGetValue("x-ssl-start", out ca.Start);
-    request.Header.TryGetValue("x-ssl-end", out ca.End);
-
     if (!request.Header.ContainsKey("X-ClientDateTime".ToLowerInvariant()) ||
         !DateTimeParser.TryParse(request.Header["X-ClientDateTime".ToLowerInvariant()], out var dt))
         return new() { ResponseCode = 400 };
@@ -164,10 +156,34 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     if (request.Header.ContainsKey("x-serializer"))
         spec = request.Header["x-serializer"];
 
-    string key = null;
+    var cert = new CertAuthn();
+    request.Header.TryGetValue("x-ssl-fingerprint", out cert.Fingerprint);
+    request.Header.TryGetValue("x-ssl-subjectdn", out cert.SubjectDN);
+    request.Header.TryGetValue("x-ssl-issuerdn", out cert.IssuerDN);
+    request.Header.TryGetValue("x-ssl-serial", out cert.Serial);
+    request.Header.TryGetValue("x-ssl-start", out cert.Start);
+    request.Header.TryGetValue("x-ssl-end", out cert.End);
+    if (string.IsNullOrEmpty(cert.Fingerprint))
+        cert = null;
+
+    string sessionKey = null;
     if (request.Header.ContainsKey("cookie"))
-        key = cookieRegex.Match(request.Header["cookie"])?.Captures?[0].Value;
-    var ctx = await facade.AuthnCtx(user, dt, key, ca, assume, spec, limit);
+    {
+        var match = cookieRegex.Match(request.Header["cookie"]);
+        if (match.Success)
+            sessionKey = match.Groups[1].Value;
+    }
+
+    Context ctx;
+    try
+    {
+        ctx = await facade.AuthnCtx(user, dt, sessionKey, cert, assume, spec, limit);
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine(e);
+        return GenerateHttpResponse(e.ToString(), "text/plain; charset=utf-8");
+    }
 
     if (request.Method == "GET")
         switch (request.BaseUri)

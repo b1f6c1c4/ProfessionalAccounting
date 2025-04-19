@@ -20,9 +20,11 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Threading;
+using AccountingServer.BLL;
+using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
 
-namespace AccountingServer.BLL;
+namespace AccountingServer.Shell;
 
 public class Session
 {
@@ -77,7 +79,7 @@ public class SessionManager : IDisposable
         lock (m_Lock)
             m_Sessions[key] = session;
 
-        Console.WriteLine($"{now:s}: session created for {aid.StringID}/{aid.IdentityName}");
+        Console.WriteLine($"{now:s}: session created for {aid.IdentityName.AsId()} / {aid.StringID}");
 
         return session;
     }
