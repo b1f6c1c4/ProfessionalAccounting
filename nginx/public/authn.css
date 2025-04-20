@@ -16,20 +16,42 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+:root {
+  --a: calc(0.3 * min(100vw, 30em, 100vh));
+}
+
+* {
+  padding: 0;
+  margin: 0;
+}
+
+p {
+  margin: 0.3em 0;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.2em;
+}
+
+main {
+  width: calc(min(100vw, 30em, 100vh));
+  margin: 0 auto;
+  text-align: center;
+}
+
 @keyframes gapPulse {
   0% { gap: 0.5em; }
   50% { gap: 0.1em; }
   100% { gap: 0.5em; }
 }
-@keyframes logoPulse {
-  0%, 100% { transform: scale(1.0); }
-  50% { transform: scale(1.02); }
-}
 
 .btn > img {
+  width: var(--a);
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  animation: logoPulse 3s infinite ease-in-out;
 }
 
 .btn > img:hover {
@@ -68,25 +90,9 @@
     opacity: 1;
 }
 
-
-* {
-  padding: 0;
-  margin: 0;
-}
-
-p {
-  margin: 0.3em 0;
-}
-
-main {
-  width: calc(min(100vw, 30em));
-  margin: 0 auto;
-  text-align: center;
-}
-
 main.err {
   text-align: left;
-  white-space: pre;
+  white-space: pre-wrap;
   font-family: Monospace;
 }
 
@@ -98,7 +104,10 @@ main.err > p {
   max-height: 0;
   overflow: hidden;
   transition: max-height 1s ease-in-out;
+  transition: padding-top 1s ease-in-out;
+  transition: padding-bottom 1s ease-in-out;
   margin: 0.3em 0;
+  padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -106,7 +115,8 @@ main.err > p {
 }
 
 .action.show {
-  max-height: calc(0.3 * min(100vw, 30em));
+  max-height: var(--a);
+  padding: calc(0.1 * var(--a)) 0;
 }
 
 .action > span {
@@ -121,10 +131,6 @@ main.err > p {
   text-align: left;
 }
 
-img {
-  width: calc(0.3 * min(100vw, 30em));
-}
-
 ul, ol {
   margin: 0 auto;
   width: fit-content;
@@ -133,4 +139,9 @@ ul, ol {
 
 h1 {
   text-transform: uppercase;
+}
+
+#domain {
+  font-family: Monospace;
+  font-weight: 200;
 }

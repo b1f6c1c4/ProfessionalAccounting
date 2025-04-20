@@ -27,6 +27,11 @@
     <link rel="stylesheet" href="/public/authn.css">
   </head>
   <body>
+    <main>
+      <h2>Authenticate for <strong id="domain"></strong></h2>
+      <p>To get started, just click the logo below.</p>
+      <h4>Note: This site is invitation-only; you must contact the admin for registration.</h4>
+    </main>
     <div class="action">
       <span>→</span>
       <div class="btn">
@@ -35,12 +40,8 @@
       </div>
       <span>←</span>
     </div>
-    <main>
-      <h1>Authenticate for <strong id="domain"></strong><h1>
-      <p>To get started, just click the logo above.</p>
-      <h3>Note: This site is invitation-only; you must contact the admin for registration.</h3>
-    </main>
 
-    <script src="/js/authn.js"></script>
+    <script src="/public/authn.js"></script>
     <script>wrap(login, 'Failed to login:')</script>
-    <script type="application/json" id="ssr">
+  </body>
+</html>

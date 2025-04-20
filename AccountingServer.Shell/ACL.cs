@@ -291,14 +291,25 @@ public static class ACLManager
             acl.IdentityMatrix = dict;
         }
 
+        var str = new List<string>();
         var set = new HashSet<string>();
         foreach (var aid in aids)
             if (aid != null && !string.IsNullOrEmpty(aid.IdentityName))
+            {
+                if (aid is WebAuthn wa)
+                    str.Add($"WebAuthn[{wa.StringID}]");
+                else if (aid is CertAuthn ca)
+                    str.Add($"Cert[{ca.Fingerprint}]");
                 if (acl.IdentityMatrix.TryGetValue(aid.IdentityName, out var ix) && !ix.Disabled)
                     set.Add(aid.IdentityName);
+            }
 
+        if (str.Count == 0 && set.Count == 0)
+            throw new ApplicationException("No valid credential present");
+
+        var creds = string.Join(", ", set);
         if (set.Count == 0)
-            throw new ApplicationException("Credential accepted, but no identity matches your credential");
+            throw new ApplicationException($"Credential {creds} accepted, but no identity matches your credential");
 
         if (set.Count > 1)
         {
@@ -307,7 +318,7 @@ public static class ACLManager
             else
             {
                 var nms = string.Join(", ", set);
-                throw new ApplicationException($"Authentication failure: multiple identities: {nms}");
+                throw new ApplicationException($"Multiple identities {nms} matches {creds}");
             }
         }
 

@@ -99,6 +99,10 @@ public partial class Facade
             case "":
             case " ":
                 return HelloWorld();
+            case "error now":
+                throw new ApplicationException("An example exception");
+            case "error":
+                return HelloWorld(true);
             case "T":
                 return ListTitles().ToAsyncEnumerable();
             case "?":
@@ -193,6 +197,10 @@ public partial class Facade
             case "":
             case " ":
                 return HelloWorld();
+            case "error now":
+                throw new ApplicationException("An example exception");
+            case "error":
+                return HelloWorld(true);
             case "T":
                 return ListTitles().ToAsyncEnumerable();
             case "?":
@@ -257,7 +265,7 @@ public partial class Facade
                 return $"{nm.Name}@{nm.Version}@{iv}\n";
             }).OrderBy(static s => s);
 
-    private static async IAsyncEnumerable<string> HelloWorld()
+    private static async IAsyncEnumerable<string> HelloWorld(bool error = false)
     {
         const string str = "Hello, World!\n";
         foreach (var ch in str)
@@ -265,6 +273,8 @@ public partial class Facade
             await Task.Delay(250);
             yield return $"{ch}";
         }
+        if (error)
+            throw new ApplicationException("An example exception -- you should've seen the hello world!");
     }
 
     #endregion

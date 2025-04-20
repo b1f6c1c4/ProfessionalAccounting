@@ -49,6 +49,31 @@ var server = new HttpServer(IPAddress.Any, 30000);
 server.OnHttpRequest += Server_OnHttpRequest;
 server.Start();
 
+async IAsyncEnumerable<string> AuthnError(Exception e)
+{
+    yield return $@"Authentication failed:
+{e}
+
+You need to login/authenticate by EITHER:
+a) refreshing the page; OR
+b) visit https://{facade.Server}/login\n\n";
+    yield return @"Alternatively, you may avoid the hassle by using a client certificate:
+1. `openssl ecparam -name prime256v1 -genkey -noout -out client.key`
+2. `openssl req -new -key client.key -out client.csr -subj ""/CN=______/C=US""`
+    Be sure to replace ______ with your name, which should be known to the site manager
+3. Submit the file `client.csr` to the site manager for processing.
+    You should be given a `client.crt` or `client.pem` file.
+4. `openssl pkcs12 -export -inkey client.key -in client.crt -out client.p12 -legacy`
+    You'll be prompted to set a password for the .p12 file.
+5. Install the `client.p12` on your devices:
+    macOS: Double-click the .p12 → opens Keychain Access; Import to login keychain
+    Windows: Double-click .p12 → Certificate Import Wizard; Follow prompts → install to Current User store
+    iOS: Email or AirDrop the .p12; Tap the file → install → follow prompts to enter passcode and password
+    Android: Transfer .p12 to phone; Go to: Settings → Security → Encryption & credentials → Install a certificate;
+             Choose user credential, select file, enter password
+";
+}
+
 async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
 {
 #if DEBUG
@@ -116,11 +141,10 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
         var cookie = $"session={session.Key}; HttpOnly; Secure; SameSite=Strict; Path=/; Expires={session.MaxExpiresAt:r};";
         return new()
             {
-                ResponseCode = 302,
+                ResponseCode = 204,
                 Header = new()
                 {
                     { "Set-Cookie", cookie },
-                    { "Location", "/" },
                 },
             };
     }
@@ -173,8 +197,11 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     }
     catch (Exception e)
     {
-        Console.WriteLine(e);
-        return GenerateHttpResponse(e.ToString(), "text/plain; charset=utf-8");
+        request.ReadToEnd(); // don't touch -- dark magic
+        var response = GenerateHttpResponse(AuthnError(e), "text/plain; charset=utf-8");
+        response.ResponseCode = 401;
+        response.Header["Set-Cookie"] = $"session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0;";
+        return response;
     }
 
     if (request.Method == "GET")

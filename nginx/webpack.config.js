@@ -45,6 +45,8 @@ const plugins = [
         patterns: [
             { from: 'index-desktop.html', to: '.' },
             { from: 'index-mobile.html', to: '.' },
+            { from: 'invite.html', to: '.' },
+            { from: 'login.html', to: '.' },
             { from: 'src/index.css', to: '.' },
             { from: 'src/taobao.css', to: '.' },
             { from: 'art/', to: '.' },

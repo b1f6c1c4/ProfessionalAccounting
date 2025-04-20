@@ -66,9 +66,6 @@ public partial class Facade
         }
 
         var creds = new List<Authn> { session?.Authn, ca };
-#if DEBUG
-        creds.Add(new CertAuthn { IdentityName = "tester" });
-#endif
         var id = ACLManager.Authenticate(creds, assume);
         return new(m_Db, user, dt, id.Assume(assume), id, session, ca ?? cert, spec, limit);
     }
