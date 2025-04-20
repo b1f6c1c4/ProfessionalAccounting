@@ -29,9 +29,10 @@ function b64url(o) {
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-function getSSR() {
-  const j = document.getElementById('ssr').textContent;
-  const obj = JSON.parse(j);
+const wait = (t) => new Promise((resolve) => setTimeout(resolve, t));
+let publicKey;
+
+function assignOptions(obj) {
   obj.challenge = a64url(obj.challenge);
   if (typeof obj.user === 'object')
     obj.user.id = a64url(obj.user.id);
@@ -45,37 +46,52 @@ function getSSR() {
       cred.id = a64url(cred.id);
     });
   }
-  return obj;
+  publicKey = obj;
 }
 
-async function register(userHandle) {
-  const credential = await navigator.credentials.create({ publicKey: getSSR() });
-  const res = await fetch(`/invite/${userHandle}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      id: credential.id,
-      rawId: b64url(credential.rawId),
-      type: credential.type,
-      extensions: credential.getClientExtensionResults(),
-      response: {
-        attestationObject: b64url(credential.response.attestationObject),
-        clientDataJSON: b64url(credential.response.clientDataJSON),
-        transports: credential.response.getTransports(),
-      },
-    }),
-  });
-
-  if (res.ok) {
-    window.location.href = '/login';
-  } else {
-    return res.text();
+async function register() {
+  const userHandle = new URLSearchParams(window.location.search).get('q');
+  if (!userHandle) {
+    throw new Error('Invalid URL');
   }
+  const resp = await fetch(`/authn/at/${userHandle}`, { method: 'POST' });
+  if (!resp.ok) {
+    throw new Error(`HTTP/${resp.status} ${resp.statusText}:\n${await resp.text()}`);
+  }
+  assignOptions(await resp.json());
+  return async () => {
+    const credential = await navigator.credentials.create({ publicKey });
+    const res = await fetch(`/authn/at?q=${userHandle}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: credential.id,
+        rawId: b64url(credential.rawId),
+        type: credential.type,
+        extensions: credential.getClientExtensionResults(),
+        response: {
+          attestationObject: b64url(credential.response.attestationObject),
+          clientDataJSON: b64url(credential.response.clientDataJSON),
+          transports: credential.response.getTransports(),
+        },
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to register:\n' + resp.text());
+    }
+    window.location.href = '/login';
+  };
 }
 
 async function login() {
-  const credential = await navigator.credentials.get({ publicKey: getSSR() });
-  const res = await fetch('/login', {
+  const resp = await fetch(`/authn/as`, { method: 'POST' });
+  if (!resp.ok) {
+    throw new Error(`HTTP/${resp.status} ${resp.statusText}:\n${await resp.text()}`);
+  }
+  assignOptions(await resp.json());
+  const credential = await navigator.credentials.get({ publicKey });
+  const res = await fetch('/authn/as/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -99,16 +115,27 @@ async function login() {
   }
 }
 
-function wrap(f) {
-  return async () => {
-    let txt;
+function wrap(f, errText) {
+  window.onload = async () => {
+    const main = document.querySelector('main');
+    const showErr = (err) => {
+      main.classList.add('err');
+      const h = document.createElement('p');
+      h.innerText = errText;
+      main.innerText = err;
+      if (main.childNodes.length) {
+        main.insertBefore(h, main.childNodes[0]);
+      } else {
+        main.appendChild(h);
+      }
+    };
     try {
-      txt = await f(window.location.pathname.split('/').pop());
+      const [func, _] = await Promise.all([ f(), wait(3000) ]);
+      document.querySelector('.action').classList.add('show');
+      document.querySelector('.action > .btn')
+        .addEventListener('click', func().catch(showErr));
     } catch (err) {
-      console.error(err);
-      txt = err.message;
+      showErr(err);
     }
-    document.getElementById('err').style.visibility = 'visible';
-    document.getElementById('res').innerText = txt;
   };
 }

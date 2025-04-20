@@ -107,6 +107,12 @@ public class SessionManager : IDisposable
         return null;
     }
 
+    public void DiscardSession(Session session)
+    {
+        lock (m_Lock)
+            m_Sessions.Remove(session.Key);
+    }
+
     public void CleanupSessions(object _)
     {
         lock (m_Lock)
@@ -125,5 +131,4 @@ public class SessionManager : IDisposable
                 m_Sessions.Remove(key);
         }
     }
-
 }

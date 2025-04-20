@@ -49,33 +49,22 @@ var server = new HttpServer(IPAddress.Any, 30000);
 server.OnHttpRequest += Server_OnHttpRequest;
 server.Start();
 
-async IAsyncEnumerable<string> ServeInviteHTML(string userHandle)
-{
-    var ao = await facade.GetAttestationOptions(userHandle);
-    await foreach (var s in ResourceHelper.ReadResource("Resources.invite.html", typeof(Program)))
-        yield return s;
-
-    yield return ao;
-    yield return "\n  </script>\n</body>\n</html>\n";
-}
-
-async IAsyncEnumerable<string> ServeLoginHTML()
-{
-    var ao = await facade.CreateChallenge();
-    await foreach (var s in ResourceHelper.ReadResource("Resources.login.html", typeof(Program)))
-        yield return s;
-
-    yield return ao;
-    yield return "\n  </script>\n</body>\n</html>\n";
-}
-
 async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
 {
 #if DEBUG
-    var fn = Path.Combine(
-        Path.Combine(xwd, "../../../../nginx/dist"),
-        (request.BaseUri == "/" ? "/index-desktop.html" : request.BaseUri).TrimStart('/'));
     if (request.Method == "GET")
+    {
+        var fn = Path.Combine(xwd, "../../../../nginx/dist");
+        if (request.BaseUri == "/")
+            fn = Path.Combine(fn, "/index-desktop.html");
+        else if (request.BaseUri == "/invite")
+            fn = Path.Combine(fn, "/invite.html");
+        else if (request.BaseUri == "/login")
+            fn = Path.Combine(fn, "/login.html");
+        else
+            fn = Path.Combine(fn, request.BaseUri);
+
+        fn = fn.TrimStart('/');
         if (File.Exists(fn))
             return GenerateHttpResponse(File.OpenRead(fn), fn.Split(".")[^1] switch
                 {
@@ -90,32 +79,36 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
                     "webmanifest" => "application/manifest+json",
                     _ => "application/octet-stream",
                 });
+    }
 
     if (request.BaseUri.StartsWith("/api", StringComparison.Ordinal))
         request.BaseUri = request.BaseUri[4..];
 #endif
 
-    if (request.Method == "GET" && request.BaseUri.StartsWith("/invite/"))
+    if (request.Method == "POST" && request.BaseUri == "/authn/at")
     {
-        var response = GenerateHttpResponse(ServeInviteHTML(request.BaseUri.Substring(8)), "text/html");
-        response.Header["Cache-Control"] = "public, max-age=3600";
-        return response;
-    }
-    if (request.Method == "POST" && request.BaseUri.StartsWith("/invite/"))
-    {
-        if (await facade.RegisterWebAuthn(request.BaseUri.Substring(8), request.ReadToEnd()))
-            return new() { ResponseCode = 204 };
-        else
+        if (!request.Header.TryGetValue("content-type", out var ty) || string.IsNullOrEmpty(ty))
+        {
+            var response = GenerateHttpResponse(await facade.GetATChallenge(request.Parameters["q"]));
+            response.Header["X-ServerName"] = facade.ServerName;
+            return response;
+        }
+
+        if (!await facade.RegisterWebAuthn(request.BaseUri.Substring(8), request.ReadToEnd()))
             return new() { ResponseCode = 409 };
+
+        return new() { ResponseCode = 204 };
     }
-    if (request.Method == "GET" && request.BaseUri == "/login")
+
+    if (request.Method == "POST" && request.BaseUri == "/authn/as")
     {
-        var response = GenerateHttpResponse(ServeLoginHTML(), "text/html");
-        response.Header["Cache-Control"] = "no-store";
-        return response;
-    }
-    if (request.Method == "POST" && request.BaseUri == "/login")
-    {
+        if (!request.Header.TryGetValue("content-type", out var ty) || string.IsNullOrEmpty(ty))
+        {
+            var response = GenerateHttpResponse(await facade.CreateLogin());
+            response.Header["X-ServerName"] = facade.ServerName;
+            return response;
+        }
+
         var session = await facade.VerifyLogin(request.ReadToEnd());
         if (session == null)
             return new() { ResponseCode = 401 };
@@ -131,7 +124,6 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
                 },
             };
     }
-
 
     string user;
     if (request.Header.ContainsKey("x-user"))

@@ -1,0 +1,136 @@
+/* Copyright (C) 2020-2025 b1f6c1c4
+ *
+ * This file is part of ProfessionalAccounting.
+ *
+ * ProfessionalAccounting is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, version 3.
+ *
+ * ProfessionalAccounting is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with ProfessionalAccounting.  If not, see
+ * <https://www.gnu.org/licenses/>.
+ */
+
+@keyframes gapPulse {
+  0% { gap: 0.5em; }
+  50% { gap: 0.1em; }
+  100% { gap: 0.5em; }
+}
+@keyframes logoPulse {
+  0%, 100% { transform: scale(1.0); }
+  50% { transform: scale(1.02); }
+}
+
+.btn > img {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: logoPulse 3s infinite ease-in-out;
+}
+
+.btn > img:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn {
+  position: relative;
+  display: inline-block;
+}
+
+.btn > span {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 5px;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  opacity: 0;
+  z-index: 10;
+}
+
+.btn:hover > img {
+  transform: scale(1.04);
+  animation: none;
+}
+
+.btn:hover > span {
+    opacity: 1;
+}
+
+
+* {
+  padding: 0;
+  margin: 0;
+}
+
+p {
+  margin: 0.3em 0;
+}
+
+main {
+  width: calc(min(100vw, 30em));
+  margin: 0 auto;
+  text-align: center;
+}
+
+main.err {
+  text-align: left;
+  white-space: pre;
+  font-family: Monospace;
+}
+
+main.err > p {
+  font-weight: bold;
+}
+
+.action {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 1s ease-in-out;
+  margin: 0.3em 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: gapPulse 3s infinite ease-in-out;
+}
+
+.action.show {
+  max-height: calc(0.3 * min(100vw, 30em));
+}
+
+.action > span {
+  flex: 1;
+}
+
+.action > span:first-child {
+  text-align: right;
+}
+
+.action > span:last-child {
+  text-align: left;
+}
+
+img {
+  width: calc(0.3 * min(100vw, 30em));
+}
+
+ul, ol {
+  margin: 0 auto;
+  width: fit-content;
+  text-align: left;
+}
+
+h1 {
+  text-transform: uppercase;
+}

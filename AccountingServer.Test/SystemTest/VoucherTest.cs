@@ -86,7 +86,7 @@ public class VoucherTest
             });
 
         m_Facade = new(db: "accounting-test");
-        m_Ctx = m_Facade.AuthnCtx("b1", DateTime.UtcNow.Date, new Identity());
+        m_Ctx = m_Facade.CreateCtx("b1", DateTime.UtcNow.Date, new Identity());
 
         var res = m_Facade.ExecuteVoucherUpsert(m_Ctx, "new Voucher { Ub2 T123401 whatever / aaa huh 10 }").AsTask()
             .Result;

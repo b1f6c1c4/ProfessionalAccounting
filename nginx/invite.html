@@ -1,0 +1,77 @@
+<!--
+    Copyright (C) 2025 b1f6c1c4
+
+    This file is part of ProfessionalAccounting.
+
+    ProfessionalAccounting is free software: you can redistribute it and/or
+    modify it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, version 3.
+
+    ProfessionalAccounting is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+    for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with ProfessionalAccounting.  If not, see
+    <https://www.gnu.org/licenses/>.
+-->
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta content="ie=edge" http-equiv="x-ua-compatible">
+    <title>Invitation for Registering -- ProfessionalAccounting</title>
+    <link rel="stylesheet" href="/public/authn.css">
+  </head>
+  <body>
+    <div class="action">
+      <span>Accept →</span>
+      <div class="btn">
+        <img src="/android-chrome-512x512.png">
+        <span>Register</span>
+      </div>
+      <span>← Invitation</span>
+    </div>
+    <main>
+      <h1>You've Been Invited!</h1>
+      <p>You've been invited to join the accounting platform at <strong id="domain"></strong>.</p>
+      <p>To get started, just click the logo above. Your browser will walk you through a few quick steps.</p>
+      <p><strong>Don't worry</strong> - it's safe and easy. You won't need to remember a password!</p>
+      <h2>What Happens When You Click?</h2>
+      <p>Clicking the button will create something called a <strong>WebAuthn Resident Key</strong> on your device. This
+        is a special kind of login method that's more secure than a password.</p>
+      <p>You might be asked to:</p>
+      <ul>
+        <li>Use your fingerprint or face recognition</li>
+        <li>Enter your device PIN</li>
+        <li>Tap a security key (if you have one)</li>
+      </ul>
+      <p>This helps make sure it's really you logging in - and keeps your account safe from hackers.</p>
+      <h2>So, What is WebAuthn?</h2>
+      <p><strong>WebAuthn</strong> is short for "Web Authentication." It's a new, high-security way to log in without
+        using passwords. Instead, it uses your device's built-in security — like Face ID, fingerprint, or a security
+        key.</p>
+      <p>Why it's awesome:</p>
+      <ul>
+        <li>No password to remember or get stolen</li>
+        <li>Super quick logins after setup</li>
+        <li>Much safer than traditional logins</li>
+      </ul>
+      <h2>Want to Learn More?</h2>
+      <p>Check out these beginner-friendly guides:</p>
+      <ul>
+        <li><a href="https://webauthn.guide/" target="_blank" rel="noopener noreferrer">WebAuthn Guide</a> – simple overview with examples</li>
+        <li><a href="https://fidoalliance.org/fido2/" target="_blank" rel="noopener noreferrer">What is FIDO2?</a> – the tech behind WebAuthn</li>
+      </ul>
+      <p>If you're ready, click the button and follow the instructions. You'll be set up in just a minute!</p>
+      <noscript><p>You must enable JavaScript + WebAuthn to accept the invitation.</p></noscript>
+      <p>To accept the invitation, click the logo above and follow the prompts of your browser.</p>
+      <p>This will create a WebAuthn <em>Resident Key</em> on your authenticator.</p>
+    </main>
+
+    <script src="/js/authn.js"></script>
+    <script>wrap(register, 'Failed to process your invitation:')</script>
+    <script type="application/json" id="ssr">

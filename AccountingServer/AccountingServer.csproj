@@ -25,10 +25,6 @@
         <None Update=".dockerignore">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Remove="Resources\invite.html" />
-        <EmbeddedResource Include="Resources\invite.html" />
-        <None Remove="Resources\login.html" />
-        <EmbeddedResource Include="Resources\login.html" />
     </ItemGroup>
 
 </Project>

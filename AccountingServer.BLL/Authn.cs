@@ -39,7 +39,7 @@ public class WebAuthnConfig
 {
     public string ServerDomain;
 
-    public string ServerPort;
+    public int ServerPort;
 
     public string ServerName;
 
@@ -162,7 +162,7 @@ public class AuthnManager
         return true;
     }
 
-    public string CreateChallenge()
+    public string CreateLogin()
     {
         var options = F().GetAssertionOptions(new()
             {
