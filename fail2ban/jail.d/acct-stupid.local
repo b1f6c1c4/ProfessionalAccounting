@@ -1,0 +1,8 @@
+[acct-stupid]
+enabled = true
+filter = acct-stupid
+logpath = /data/accounting/nginx-log/access.log
+maxretry = 2
+findtime = 300
+bantime = 86400
+backend = auto

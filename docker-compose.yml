@@ -11,6 +11,7 @@ services:
       - /data/accounting/certs:/opt/accounting/certs:ro
       - /data/accounting/nginx-cache:/var/cache/nginx
       - /data/accounting/nginx-pid:/var/run
+      - /data/accounting/nginx-log:/var/log/nginx
     depends_on:
       - server
     networks:

@@ -1,0 +1,8 @@
+[acct-4xx]
+enabled = true
+filter = acct-4xx
+logpath = /data/accounting/nginx-log/access.log
+maxretry = 100
+findtime = 300
+bantime = 3600
+backend = auto
