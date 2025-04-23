@@ -12,9 +12,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MongoDB.Bson" Version="2.29.0" />
-        <PackageReference Include="MongoDB.Driver" Version="2.29.0" />
-        <PackageReference Include="MongoDB.Driver.Core" Version="2.29.0" />
+        <PackageReference Include="MongoDB.Bson" Version="3.3.0" />
+        <PackageReference Include="MongoDB.Driver" Version="3.3.0" />
         <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     </ItemGroup>
 

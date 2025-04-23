@@ -163,6 +163,14 @@ public interface IDbAdapter
     /// <returns>是否成功</returns>
     ValueTask<bool> Upsert(Asset entity);
 
+    /// <summary>
+    ///     添加或替换多个资产
+    ///     <para>若无编号，则添加新编号</para>
+    /// </summary>
+    /// <param name="entities">新资产</param>
+    /// <returns>成功个数</returns>
+    ValueTask<long> Upsert(IEnumerable<Asset> entities);
+
     #endregion
 
     #region Amortization
@@ -202,6 +210,14 @@ public interface IDbAdapter
     /// <param name="entity">新摊销</param>
     /// <returns>是否成功</returns>
     ValueTask<bool> Upsert(Amortization entity);
+
+    /// <summary>
+    ///     添加或替换多个摊销
+    ///     <para>若无编号，则添加新编号</para>
+    /// </summary>
+    /// <param name="entities">新摊销</param>
+    /// <returns>成功个数</returns>
+    ValueTask<long> Upsert(IEnumerable<Amortization> entities);
 
     #endregion
 

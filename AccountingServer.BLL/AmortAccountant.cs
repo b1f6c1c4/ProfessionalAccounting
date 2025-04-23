@@ -82,6 +82,8 @@ internal class AmortAccountant : DistributedAccountant
     /// <param name="amort">摊销</param>
     public static Amortization InternalRegular(Amortization amort)
     {
+        if (amort == null)
+            return null;
         if (amort.Remark == Amortization.IgnoranceMark)
             return amort;
         if (!amort.Date.HasValue ||

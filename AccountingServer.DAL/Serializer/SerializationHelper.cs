@@ -179,7 +179,13 @@ internal static class SerializationHelper
     /// <param name="read">字段名缓存</param>
     /// <returns>读取结果</returns>
     public static Guid? ReadGuid(this IBsonReader bsonReader, string expected, ref string read)
-        => ReadStruct(bsonReader, expected, ref read, () => bsonReader.ReadBinaryData().AsGuid);
+        => ReadStruct(bsonReader, expected, ref read, () => {
+                var d = bsonReader.ReadBinaryData();
+                if (d.SubType == BsonBinarySubType.UuidLegacy)
+                    return d.ToGuid(GuidRepresentation.CSharpLegacy);
+
+                return d.ToGuid(GuidRepresentation.Standard);
+            });
 
     /// <summary>
     ///     安全地读入<c>DateTime</c>类型的字段
@@ -384,5 +390,5 @@ internal static class SerializationHelper
     ///     <c>Guid</c>
     /// </param>
     /// <returns>Bson对象</returns>
-    public static BsonBinaryData ToBsonValue(this Guid id) => new(id, GuidRepresentation.CSharpLegacy);
+    public static BsonBinaryData ToBsonValue(this Guid id) => new(id, GuidRepresentation.Standard);
 }

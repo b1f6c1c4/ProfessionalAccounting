@@ -28,6 +28,7 @@ using AccountingServer.Entities.Util;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using static AccountingServer.DAL.MongoDbNative;
 
@@ -79,6 +80,7 @@ internal class MongoDbAdapter : IDbAdapter
         BsonSerializer.RegisterSerializer(new BalanceSerializer());
         BsonSerializer.RegisterSerializer(new AuthnSerializer());
         BsonSerializer.RegisterSerializer(new ExchangeSerializer());
+        BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
 
         var year = new BsonDocument
             {
@@ -208,10 +210,17 @@ internal class MongoDbAdapter : IDbAdapter
             if (idProvider.FillId(collection, entity))
                 ops.Add(new InsertOneModel<T>(entity));
             else
-                ops.Add(new ReplaceOneModel<T>(Builders<T>.Filter.Eq("_id", idProvider.GetId(entity)), entity)
-                    {
-                        IsUpsert = true,
-                    });
+            {
+                var id = idProvider.GetId(entity);
+                FilterDefinition<T> fd;
+                if (id is Guid g)
+                    fd = Builders<T>.Filter.Eq("_id", new BsonBinaryData(g, GuidRepresentation.Standard));
+                else
+                    fd = Builders<T>.Filter.Eq("_id", id);
+
+                ops.Add(new ReplaceOneModel<T>(fd, entity) { IsUpsert = true });
+            }
+
         if (ops.Count == 0)
             return 0L;
 
@@ -532,14 +541,11 @@ internal class MongoDbAdapter : IDbAdapter
     }
 
     /// <inheritdoc />
-    public async ValueTask<bool> Upsert(Asset entity)
-    {
-        var res = await m_Assets.ReplaceOneAsync(
-            Builders<Asset>.Filter.Eq("_id", entity.ID),
-            entity,
-            new ReplaceOptions { IsUpsert = true });
-        return res.ModifiedCount <= 1;
-    }
+    public ValueTask<bool> Upsert(Asset entity) => Upsert(m_Assets, entity, new AssetSerializer());
+
+    /// <inheritdoc />
+    public ValueTask<long> Upsert(IEnumerable<Asset> entities)
+        => Upsert(m_Assets, entities, new AssetSerializer());
 
     /// <inheritdoc />
     public async ValueTask<long> DeleteAssets(IQueryCompounded<IDistributedQueryAtom> filter)
@@ -569,14 +575,11 @@ internal class MongoDbAdapter : IDbAdapter
     }
 
     /// <inheritdoc />
-    public async ValueTask<bool> Upsert(Amortization entity)
-    {
-        var res = await m_Amortizations.ReplaceOneAsync(
-            Builders<Amortization>.Filter.Eq("_id", entity.ID),
-            entity,
-            new ReplaceOptions { IsUpsert = true });
-        return res.ModifiedCount <= 1;
-    }
+    public ValueTask<bool> Upsert(Amortization entity) => Upsert(m_Amortizations, entity, new AmortizationSerializer());
+
+    /// <inheritdoc />
+    public ValueTask<long> Upsert(IEnumerable<Amortization> entities)
+        => Upsert(m_Amortizations, entities, new AmortizationSerializer());
 
     /// <inheritdoc />
     public async ValueTask<long> DeleteAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)

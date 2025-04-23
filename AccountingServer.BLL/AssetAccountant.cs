@@ -46,6 +46,8 @@ internal class AssetAccountant : DistributedAccountant
     /// <returns>资产</returns>
     public static Asset InternalRegular(Asset asset)
     {
+        if (asset == null)
+            return null;
         if (asset.Remark == Asset.IgnoranceMark)
             return asset;
         if (!asset.Date.HasValue ||

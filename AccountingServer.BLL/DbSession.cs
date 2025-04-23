@@ -234,8 +234,8 @@ public class DbSession : IHistoricalExchange
         return entity;
     }
 
-    public ValueTask<Asset> SelectAsset(Guid id)
-        => Db.SelectAsset(id);
+    public async ValueTask<Asset> SelectAsset(Guid? id)
+        => id.HasValue ? await Db.SelectAsset(id.Value) : null;
 
     public IAsyncEnumerable<Asset> SelectAssets(IQueryCompounded<IDistributedQueryAtom> filter)
         => filter == null ? E<Asset>() : Db.SelectAssets(filter);
@@ -254,8 +254,11 @@ public class DbSession : IHistoricalExchange
     public ValueTask<bool> Upsert(Asset entity)
         => Db.Upsert(entity);
 
-    public ValueTask<Amortization> SelectAmortization(Guid id)
-        => Db.SelectAmortization(id);
+    public ValueTask<long> Upsert(IEnumerable<Asset> entities)
+        => Db.Upsert(entities);
+
+    public async ValueTask<Amortization> SelectAmortization(Guid? id)
+        => id.HasValue ? await Db.SelectAmortization(id.Value) : null;
 
     public IAsyncEnumerable<Amortization> SelectAmortizations(IQueryCompounded<IDistributedQueryAtom> filter)
         => filter == null ? E<Amortization>() : Db.SelectAmortizations(filter);
@@ -277,6 +280,12 @@ public class DbSession : IHistoricalExchange
 
         return Db.Upsert(entity);
     }
+
+    public ValueTask<long> Upsert(IEnumerable<Amortization> entities)
+        => Db.Upsert(entities.Select(static (entity) => {
+                    Regularize(entity.Template);
+                    return entity;
+                }));
 
     public ValueTask<Authn> SelectAuth(byte[] id)
         => Db.SelectAuth(id);

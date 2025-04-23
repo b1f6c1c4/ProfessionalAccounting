@@ -160,7 +160,7 @@ public class Accountant : IHistoricalExchange
     #region Asset
 
     public async ValueTask<Asset> SelectAssetAsync(Guid? id)
-        => id.HasValue ? AssetAccountant.InternalRegular(await m_Db.SelectAsset(id.Value)) : null;
+        => AssetAccountant.InternalRegular(await m_Db.SelectAsset(id));
 
     public IAsyncEnumerable<Asset> SelectAssetsAsync(IQueryCompounded<IDistributedQueryAtom> filter)
         => m_Db.SelectAssets(filter).Select(AssetAccountant.InternalRegular);
@@ -173,6 +173,9 @@ public class Accountant : IHistoricalExchange
 
     public ValueTask<bool> UpsertAsync(Asset entity)
         => m_Db.Upsert(entity);
+
+    public ValueTask<long> UpsertAsync(IEnumerable<Asset> entities)
+        => m_Db.Upsert(entities);
 
     public IEnumerable<Voucher> RegisterVouchers(Asset asset, DateFilter rng,
         IQueryCompounded<IVoucherQueryAtom> query)
@@ -189,7 +192,7 @@ public class Accountant : IHistoricalExchange
     #region Amort
 
     public async ValueTask<Amortization> SelectAmortizationAsync(Guid? id)
-        => id.HasValue ? AmortAccountant.InternalRegular(await m_Db.SelectAmortization(id.Value)) : null;
+        => AmortAccountant.InternalRegular(await m_Db.SelectAmortization(id));
 
     public IAsyncEnumerable<Amortization> SelectAmortizationsAsync(IQueryCompounded<IDistributedQueryAtom> filter)
         => m_Db.SelectAmortizations(filter).Select(AmortAccountant.InternalRegular);
@@ -202,6 +205,9 @@ public class Accountant : IHistoricalExchange
 
     public ValueTask<bool> UpsertAsync(Amortization entity)
         => m_Db.Upsert(entity);
+
+    public ValueTask<long> UpsertAsync(IEnumerable<Amortization> entities)
+        => m_Db.Upsert(entities);
 
     public IAsyncEnumerable<Voucher> RegisterVouchers(Amortization amort, DateFilter rng,
         IQueryCompounded<IVoucherQueryAtom> query)

@@ -149,10 +149,24 @@ internal class CheckShell : IShellComponent
     private async IAsyncEnumerable<string> UpsertCheck(Context ctx)
     {
         ctx.Identity.WillInvoke("chk-3");
-        yield return "Reading...\n";
-        var lst = await ctx.Accountant.RunVoucherQueryAsync("U A").ToListAsync();
-        yield return $"Read {lst.Count} vouchers, writing...\n";
-        await ctx.Accountant.UpsertAsync(lst);
+        {
+            yield return "Reading vouchers...\n";
+            var lst = await ctx.Accountant.SelectVouchersAsync(VoucherQueryUnconstrained.Instance).ToListAsync();
+            yield return $"Read {lst.Count} vouchers, writing...\n";
+            await ctx.Accountant.UpsertAsync(lst);
+        }
+        {
+            yield return "Reading assets...\n";
+            var lst = await ctx.Accountant.SelectAssetsAsync(DistributedQueryUnconstrained.Instance).ToListAsync();
+            yield return $"Read {lst.Count} assets, writing...\n";
+            await ctx.Accountant.UpsertAsync(lst);
+        }
+        {
+            yield return "Reading amorts...\n";
+            var lst = await ctx.Accountant.SelectAmortizationsAsync(DistributedQueryUnconstrained.Instance).ToListAsync();
+            yield return $"Read {lst.Count} amorts, writing...\n";
+            await ctx.Accountant.UpsertAsync(lst);
+        }
         yield return "Written\n";
     }
 
