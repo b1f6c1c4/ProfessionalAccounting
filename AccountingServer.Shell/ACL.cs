@@ -98,6 +98,13 @@ public struct ACLQuery<TAtom> where TAtom : class
     internal IQueryCompounded<TAtom> Reject { get; set; }
     public IQueryCompounded<TAtom> Query { get; internal set; } // used for actual filteration
     public IQueryCompounded<TAtom> Grant { get; internal set; } // visible to non-reflect users
+
+    internal ACLQuery(IQueryCompounded<TAtom> o)
+    {
+        Reject = null;
+        Query = o;
+        Grant = o;
+    }
 }
 
 [Serializable]
@@ -105,6 +112,30 @@ public class Identity : Role
 {
     [XmlAttribute("disabled")]
     public bool Disabled { get; set; }
+
+    public static Identity Unlimited { get; } = new()
+        {
+            Name = null,
+            Inherits = new(),
+            Grants = new() { new() { Action = Verb.Invoke, Query = "" } },
+            Denies = new(),
+            Rejects = new(),
+            P = new()
+                {
+                    Imba = true,
+                    Reflect = true,
+                    AllRoles = new(),
+                    AllUsers = null,
+                    AllAssumes = null,
+                    AllKnowns = new(),
+                    GrantInvokes = new() { "" },
+                    View = new(DetailQueryUnconstrained.Instance),
+                    Edit = new(DetailQueryUnconstrained.Instance),
+                    Voucher = new(VoucherQueryUnconstrained.Instance),
+                    Asset = new(DistributedQueryUnconstrained.Instance),
+                    Amort = new(DistributedQueryUnconstrained.Instance),
+                },
+        };
 }
 
 [Flags]

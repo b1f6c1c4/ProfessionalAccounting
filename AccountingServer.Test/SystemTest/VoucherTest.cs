@@ -62,28 +62,9 @@ public class VoucherTest
 
         Cfg.Assign(new Abbreviations { Abbrs = new() { new() { Abbr = "aaa", Title = 5678, Editable = false } } });
 
-        var id = new Identity
-            {
-                Name = "1",
-                Users = new() { "*" },
-                Assumes = new(),
-                Knowns = new(),
-                Inherits = new(),
-                Grants = new()
-                    {
-                        new() { Action = Verb.Edit, Query = "U" },
-                        new() { Action = Verb.Imbalance },
-                        new() { Action = Verb.Invoke, Query = "" },
-                        new() { Action = Verb.Voucher, Query = "{U A}" },
-                    },
-                Denies = new(),
-                Rejects = new(),
-            };
-        Cfg.Assign(new ACL { Identities = new() { id } });
-        ACLManager.Authenticate(new[] { new CertAuthn { IdentityName = "1" } });
-
         m_Facade = new(db: "accounting-test");
-        m_Ctx = m_Facade.CreateCtx("b1", DateTime.UtcNow.Date, id);
+        Cfg.Assign(new ACL());
+        m_Ctx = m_Facade.CreateCtx("b1", DateTime.UtcNow.Date, Identity.Unlimited);
 
         var res = m_Facade.ExecuteVoucherUpsert(m_Ctx, "new Voucher { Ub2 T123401 whatever / aaa huh 10 }").AsTask()
             .Result;
