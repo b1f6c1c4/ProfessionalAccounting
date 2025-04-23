@@ -39,6 +39,13 @@ await foreach (var s in ConfigFilesManager.InitializeConfigFiles())
     Console.Write(s);
 Console.WriteLine("All config files loaded");
 
+var authAux = new List<Authn>();
+if (args.Length >= 2 && args[0] == "--identity")
+{
+    authAux.Add(new() { IdentityName = args[1] });
+    Console.WriteLine($"WARNING: default identity {args[1]} specified");
+}
+
 var cookieRegex = new Regex(@"(?<=^|;\s*)session=(.*)(?=$|;)");
 
 var facade = new Facade();
@@ -81,15 +88,14 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     {
         var fn = Path.Combine(xwd, "../../../../nginx/dist");
         if (request.BaseUri == "/")
-            fn = Path.Combine(fn, "/index-desktop.html");
+            fn = Path.Combine(fn, "index-desktop.html");
         else if (request.BaseUri == "/invite")
-            fn = Path.Combine(fn, "/invite.html");
+            fn = Path.Combine(fn, "invite.html");
         else if (request.BaseUri == "/login")
-            fn = Path.Combine(fn, "/login.html");
+            fn = Path.Combine(fn, "login.html");
         else
-            fn = Path.Combine(fn, request.BaseUri);
+            fn = Path.Combine(fn, request.BaseUri.TrimStart('/'));
 
-        fn = fn.TrimStart('/');
         if (File.Exists(fn))
             return GenerateHttpResponse(File.OpenRead(fn), fn.Split(".")[^1] switch
                 {
@@ -193,7 +199,7 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     Context ctx;
     try
     {
-        ctx = await facade.AuthnCtx(user, dt, sessionKey, cert, assume, spec, limit);
+        ctx = await facade.AuthnCtx(user, dt, sessionKey, cert, assume, spec, limit, authAux);
     }
     catch (Exception e)
     {

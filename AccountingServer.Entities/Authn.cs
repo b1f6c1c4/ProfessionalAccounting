@@ -21,7 +21,7 @@ using System.Text;
 
 namespace AccountingServer.Entities;
 
-public abstract class Authn
+public class Authn
 {
     public byte[] ID { get; set; }
 

@@ -182,8 +182,16 @@ internal class MongoDbAdapter : IDbAdapter
         m_Assets = m_Db.GetCollection<Asset>("asset");
         m_Amortizations = m_Db.GetCollection<Amortization>("amortization");
         m_Records = m_Db.GetCollection<ExchangeRecord>("exchangeRecord");
-        m_Auths = m_Db.GetCollection<Authn>("authIdentity");
+        m_Auths = m_Db.GetCollection<Authn>("authn");
         m_Profile = m_Db.GetCollection<BsonDocument>("system.profile");
+
+        m_Auths.Indexes.CreateOne(new CreateIndexModel<Authn>(
+                Builders<Authn>.IndexKeys.Ascending("fingerprint"),
+                new CreateIndexOptions<Authn>
+                    {
+                        Unique = true,
+                        PartialFilterExpression = Builders<Authn>.Filter.Eq("type", "cert")
+                    }));
     }
 
     private static async ValueTask<bool> Upsert<T, TId>(IMongoCollection<T> collection, T entity,

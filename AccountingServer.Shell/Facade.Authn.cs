@@ -55,7 +55,7 @@ public partial class Facade
 
     public async ValueTask<Context> AuthnCtx(string user, DateTime dt,
             string sessionKey = null, CertAuthn cert = null,
-            string assume = null, string spec = null, int limit = 0)
+            string assume = null, string spec = null, int limit = 0, IEnumerable<Authn> aux = null)
     {
         var session = m_SessionManager.AccessSession(sessionKey);
         var ca = await m_Db.SelectCertAuthn(cert?.Fingerprint);
@@ -66,6 +66,8 @@ public partial class Facade
         }
 
         var creds = new List<Authn> { session?.Authn, ca };
+        if (aux != null)
+            creds.AddRange(aux);
         var id = ACLManager.Authenticate(creds, assume);
         return new(m_Db, user, dt, id.Assume(assume), id, session, ca ?? cert, spec, limit);
     }

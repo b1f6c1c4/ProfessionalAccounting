@@ -274,7 +274,7 @@ public static class MatchHelper
         if (!dist.Date.Within(query.Range))
             return false;
 
-        return false;
+        return true;
     }
 
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
