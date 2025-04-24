@@ -39,11 +39,23 @@ await foreach (var s in ConfigFilesManager.InitializeConfigFiles())
     Console.Write(s);
 Console.WriteLine("All config files loaded");
 
-var authAux = new List<Authn>();
-if (args.Length >= 2 && args[0] == "--identity")
+var legacyAuth = false;
+if (args.Length >= 1 && args[0] == "--legacyAuth")
 {
-    authAux.Add(new() { IdentityName = args[1] });
-    Console.WriteLine($"WARNING: default identity {args[1]} specified");
+    Console.WriteLine(@"NOTICE: Legacy auth flow:
+Certificate => Known identity => RBAC
+Certificate => No identity => [[Unlimited resource accesses]]
+WebAuthn    => Known identity => RBAC
+Neither     => Authentication error");
+    legacyAuth = true;
+}
+else
+{
+    Console.WriteLine(@"NOTICE: Modern auth flow:
+Certificate => Known identity => RBAC
+Certificate => No identity => Authentication error
+WebAuthn    => Known identity => RBAC
+Neither     => Authentication error");
 }
 
 var cookieRegex = new Regex(@"(?<=^|;\s*)session=(.*)(?=$|;)");
@@ -56,31 +68,6 @@ var server = new HttpServer(IPAddress.Any, 30000);
 server.OnHttpRequest += Server_OnHttpRequest;
 server.Start();
 
-async IAsyncEnumerable<string> AuthnError(Exception e)
-{
-    yield return $@"Authentication failed:
-{e}
-
-You need to login/authenticate by EITHER:
-a) refreshing the page; OR
-b) visit https://{facade.Server}/login\n\n";
-    yield return @"Alternatively, you may avoid the hassle by using a client certificate:
-1. `openssl ecparam -name prime256v1 -genkey -noout -out client.key`
-2. `openssl req -new -key client.key -out client.csr -subj ""/CN=______/C=US""`
-    Be sure to replace ______ with your name, which should be known to the site manager
-3. Submit the file `client.csr` to the site manager for processing.
-    You should be given a `client.crt` or `client.pem` file.
-4. `openssl pkcs12 -export -inkey client.key -in client.crt -out client.p12 -legacy`
-    You'll be prompted to set a password for the .p12 file.
-5. Install the `client.p12` on your devices:
-    macOS: Double-click the .p12 → opens Keychain Access; Import to login keychain
-    Windows: Double-click .p12 → Certificate Import Wizard; Follow prompts → install to Current User store
-    iOS: Email or AirDrop the .p12; Tap the file → install → follow prompts to enter passcode and password
-    Android: Transfer .p12 to phone; Go to: Settings → Security → Encryption & credentials → Install a certificate;
-             Choose user credential, select file, enter password
-";
-}
-
 async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
 {
 #if DEBUG
@@ -91,8 +78,6 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
             fn = Path.Combine(fn, "index-desktop.html");
         else if (request.BaseUri == "/invite")
             fn = Path.Combine(fn, "invite.html");
-        else if (request.BaseUri == "/login")
-            fn = Path.Combine(fn, "login.html");
         else
             fn = Path.Combine(fn, request.BaseUri.TrimStart('/'));
 
@@ -111,16 +96,14 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
                     _ => "application/octet-stream",
                 });
     }
-
-    if (request.BaseUri.StartsWith("/api", StringComparison.Ordinal))
-        request.BaseUri = request.BaseUri[4..];
 #endif
 
     if (request.Method == "POST" && request.BaseUri == "/authn/at")
     {
         if (!request.Header.TryGetValue("content-type", out var ty) || string.IsNullOrEmpty(ty))
         {
-            var response = GenerateHttpResponse(await facade.GetATChallenge(request.Parameters["q"]));
+            var response = GenerateHttpResponse(
+                    await facade.GetATChallenge(request.Parameters["q"]), "application/json");
             response.Header["X-ServerName"] = facade.ServerName;
             return response;
         }
@@ -128,14 +111,14 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
         if (!await facade.RegisterWebAuthn(request.BaseUri.Substring(8), request.ReadToEnd()))
             return new() { ResponseCode = 409 };
 
-        return new() { ResponseCode = 204 };
+        return new() { ResponseCode = 201 };
     }
 
     if (request.Method == "POST" && request.BaseUri == "/authn/as")
     {
         if (!request.Header.TryGetValue("content-type", out var ty) || string.IsNullOrEmpty(ty))
         {
-            var response = GenerateHttpResponse(await facade.CreateLogin());
+            var response = GenerateHttpResponse(await facade.CreateLogin(), "application/json");
             response.Header["X-ServerName"] = facade.ServerName;
             return response;
         }
@@ -144,39 +127,30 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
         if (session == null)
             return new() { ResponseCode = 401 };
 
-        var cookie = $"session={session.Key}; HttpOnly; Secure; SameSite=Strict; Path=/; Expires={session.MaxExpiresAt:r};";
-        return new()
-            {
-                ResponseCode = 204,
-                Header = new()
-                {
-                    { "Set-Cookie", cookie },
-                },
-            };
+        var cookie = $"session={session.Key}; HttpOnly; Secure; SameSite=Strict; Path=/api; Expires={session.MaxExpiresAt:r};";
+        return new() { ResponseCode = 204, Header = new() { { "Set-Cookie", cookie } } };
     }
 
-    string user;
-    if (request.Header.ContainsKey("x-user"))
-        user = request.Header["x-user"];
-    else
-        return new() { ResponseCode = 400 };
+    if (!request.BaseUri.StartsWith("/api/", StringComparison.InvariantCulture))
+        return new() { ResponseCode = 404 };
+
+    var user = request.Parameters?["u"];
     if (string.IsNullOrEmpty(user))
-        return new() { ResponseCode = 401 };
+        return new() { ResponseCode = 400 };
+
+    var dt = DateTime.UtcNow.Date;
+    if (request.Header.ContainsKey("x-clientdatetime"))
+        DateTimeParser.TryParse(request.Header["x-clientdatetime"], out dt);
+
+    var limit = 0;
+    var limitS = request.Parameters?["limit"];
+    if (limitS != null)
+        int.TryParse(limitS, out limit);
 
     string assume = null;
     request.Header.TryGetValue("x-assume-identity", out assume);
 
-    if (!request.Header.ContainsKey("X-ClientDateTime".ToLowerInvariant()) ||
-        !DateTimeParser.TryParse(request.Header["X-ClientDateTime".ToLowerInvariant()], out var dt))
-        return new() { ResponseCode = 400 };
-
-    var limit = 0;
-    if (request.Header.ContainsKey("x-limit") && !int.TryParse(request.Header["x-limit"], out limit))
-        return new() { ResponseCode = 400 };
-
-    string spec = null;
-    if (request.Header.ContainsKey("x-serializer"))
-        spec = request.Header["x-serializer"];
+    var spec = request.Parameters?["spec"];
 
     var cert = new CertAuthn();
     request.Header.TryGetValue("x-ssl-fingerprint", out cert.Fingerprint);
@@ -199,91 +173,84 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     Context ctx;
     try
     {
-        ctx = await facade.AuthnCtx(user, dt, sessionKey, cert, assume, spec, limit, authAux);
+        ctx = await facade.AuthnCtx(user, dt, sessionKey, cert, assume, spec, limit, legacyAuth);
     }
     catch (Exception e)
     {
         request.ReadToEnd(); // don't touch -- dark magic
-        var response = GenerateHttpResponse(AuthnError(e), "text/plain; charset=utf-8");
+        var response = GenerateHttpResponse(e.ToString());
         response.ResponseCode = 401;
         response.Header["Set-Cookie"] = $"session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0;";
         return response;
     }
 
-    if (request.Method == "GET")
+    try
+    {
         switch (request.BaseUri)
         {
-            case "/emptyVoucher":
-                {
-                    var response = GenerateHttpResponse(facade.EmptyVoucher(ctx), "text/plain; charset=utf-8");
-                    response.Header["Cache-Control"] = "public, max-age=86400";
-                    response.Header["Vary"] = "X-Serializer, X-Limit";
-                    return response;
-                }
-            case "/safe":
+            case "/api/execute":
+                if (request.Method == "GET")
                 {
                     var expr = request.Parameters?["q"];
                     var res = facade.SafeExecute(ctx, expr);
-                    var response = GenerateHttpResponse(res, "text/plain; charset=utf-8");
-                    response.Header["Cache-Control"] = "public, max-age=30";
-                    response.Header["Vary"] = "X-User, X-Serializer, X-ClientDateTime, X-Limit";
+                    var response = GenerateHttpResponse(res);
+                    response.Header["Cache-Control"] = "private, max-age=60";
+                    response.Header["Vary"] = "X-Serializer, X-Limit";
                     return response;
                 }
+                else if (request.Method == "POST")
+                {
+                    var expr = request.ReadToEnd();
+                    var res = facade.Execute(ctx, expr);
+                    return GenerateHttpResponse(res);
+                }
+                else
+                    return new() { ResponseCode = 405 };
+            case "/api/voucher":
+                if (request.Method == "GET")
+                {
+                    var response = GenerateHttpResponse(facade.EmptyVoucher(ctx));
+                    response.Header["Cache-Control"] = "public, max-age=86400";
+                    response.Header["Vary"] = "X-Serializer";
+                    return response;
+                }
+                return await CRUD(facade.ExecuteVoucherUpsert, facade.ExecuteVoucherRemoval);
+            case "/api/asset":
+                return await CRUD(facade.ExecuteAssetUpsert, facade.ExecuteAssetRemoval);
+            case "/api/amort":
+                return await CRUD(facade.ExecuteAmortUpsert, facade.ExecuteAmortRemoval);
             default:
                 return new() { ResponseCode = 404 };
         }
-
-    if (request.Method != "POST")
-        return new() { ResponseCode = 405 };
-
-    switch (request.BaseUri)
+    }
+    catch (AccessDeniedException ade)
     {
-        case "/execute":
-            {
-                var expr = request.ReadToEnd();
-                var res = facade.Execute(ctx, expr);
-                return GenerateHttpResponse(res, "text/plain; charset=utf-8");
-            }
+        request.ReadToEnd(); // don't touch -- dark magic
+        var response = GenerateHttpResponse(ade.ToString());
+        response.ResponseCode = 403;
+        return response;
+    }
 
-        case "/voucherUpsert":
-            {
-                var code = request.ReadToEnd();
-                var res = await facade.ExecuteVoucherUpsert(ctx, code);
-                return GenerateHttpResponse(res, "text/plain; charset=utf-8");
-            }
-        case "/voucherRemoval":
-            {
-                var code = request.ReadToEnd();
-                var res = await facade.ExecuteVoucherRemoval(ctx, code);
-                return new() { ResponseCode = res ? 204 : 404 };
-            }
-
-        case "/assetUpsert":
-            {
-                var code = request.ReadToEnd();
-                var res = await facade.ExecuteAssetUpsert(ctx, code);
-                return GenerateHttpResponse(res, "text/plain; charset=utf-8");
-            }
-        case "/assetRemoval":
-            {
-                var code = request.ReadToEnd();
-                var res = await facade.ExecuteAssetRemoval(ctx, code);
-                return new() { ResponseCode = res ? 204 : 404 };
-            }
-
-        case "/amortUpsert":
-            {
-                var code = request.ReadToEnd();
-                var res = await facade.ExecuteAmortUpsert(ctx, code);
-                return GenerateHttpResponse(res, "text/plain; charset=utf-8");
-            }
-        case "/amortRemoval":
-            {
-                var code = request.ReadToEnd();
-                var res = await facade.ExecuteAmortRemoval(ctx, code);
-                return new() { ResponseCode = res ? 204 : 404 };
-            }
-        default:
-            return new() { ResponseCode = 404 };
+    async ValueTask<HttpResponse> CRUD(
+            Func<Context, string, ValueTask<string>> upsert,
+            Func<Context, string, ValueTask<bool>> removal)
+    {
+        switch (request.Method)
+        {
+            case "POST":
+                {
+                    var code = request.ReadToEnd();
+                    var res = await upsert(ctx, code);
+                    return GenerateHttpResponse(res);
+                }
+            case "DELETE":
+                {
+                    var code = request.ReadToEnd();
+                    var res = await removal(ctx, code);
+                    return new() { ResponseCode = res ? 204 : 404 };
+                }
+            default:
+                return new() { ResponseCode = 405 };
+        }
     }
 }

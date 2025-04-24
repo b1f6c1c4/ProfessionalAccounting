@@ -89,7 +89,7 @@ public class HttpServer
             }
             catch (Exception e)
             {
-                response = HttpUtil.GenerateHttpResponse(e.ToString(), "text/plain; charset=utf-8");
+                response = HttpUtil.GenerateHttpResponse(e.ToString());
                 response.ResponseCode = 500;
             }
 

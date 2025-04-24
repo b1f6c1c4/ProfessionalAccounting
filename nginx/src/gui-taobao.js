@@ -31,14 +31,13 @@ const headers = () => {
     const ld = new Date(+d - 1000*60*d.getTimezoneOffset());
     const ldt = ld.toISOString().replace(/Z$/, '');
     return {
-        'X-User': user,
         'X-ClientDateTime': ldt,
     };
 };
 
 // Helper function to make API calls with proper headers
 function apiCallSafe(q, options) {
-    return apiCall(`/safe?q=${encodeURIComponent(q)}`, options);
+    return apiCall(`/safe?q=${encodeURIComponent(q)}&u=${user}`, options);
 }
 async function apiCall(url, options = {}) {
     options.headers = {
@@ -437,11 +436,9 @@ async function handleSave() {
     paymentMethodsDatalist.innerHTML = getOptionHtml(predefinedPaymentMethods, true);
     categoriesDatalist.innerHTML = getOptionHtml(predefinedCategories, true);
     try {
-        previewTextarea.value = await apiCall('/voucherUpsert', {
+        previewTextarea.value = await apiCall(`/voucher?u=${user}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain'
-            },
+            headers: { 'Content-Type': 'text/plain' },
             body: getVoucher(),
         });
         setIsSaved(true);
@@ -454,11 +451,9 @@ saveBtn.addEventListener('click', handleSave);
 // Handle Rescind button click
 async function handleRescind() {
     try {
-        await apiCall('/voucherRemoval', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain'
-            },
+        await apiCall(`/voucher?u=${user}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'text/plain' },
             body: getVoucher(),
         });
         isSaved = false;

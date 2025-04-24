@@ -56,19 +56,18 @@ const assume = (u) => {
   updateUA();
 };
 
-const send = (method, url, spec, body) => {
+const send = (method, url, body, params) => {
   const d = new Date();
   const ld = new Date(+d - 1000*60*d.getTimezoneOffset());
   const ldt = ld.toISOString().replace(/Z$/, '');
+  const up = new URLSearchParams(params);
+  up.set('u', theUser);
   const headers = {
     'Content-Type': 'text/plain',
-    'X-User': theUser,
     'X-Assume-Identity': theAssume ?? '',
     'X-ClientDateTime': ldt,
   };
-  if (spec)
-    headers['X-Serializer'] = spec;
-  return fetch(url, { method, body, headers });
+  return fetch(`${url}?${up}`, { method, body, headers });
 };
 
 const fancyxhr = (cb) => async (...args) => {
@@ -95,7 +94,7 @@ const xhr = async (...args) => {
 
 const execute = (cmd, cb) => {
   if (cmd === '') {
-    return xhr('GET', '/api/emptyVoucher');
+    return xhr('GET', '/api/voucher');
   }
   if (cmd === '??') {
     const t = `客户端帮助文档
@@ -103,8 +102,8 @@ const execute = (cmd, cb) => {
 特殊命令：
 ?                           显示控制台帮助文档
 ??                          显示此客户端帮助文档
-entity  <记账主体>          选择记账主体
-login   <记账主体>          选择记账主体
+login                       认证当前身份，不改变默认记账主体
+login   <记账主体>          认证当前身份并选择记账主体
 assume  <身份>              代入其它身份（限系统管理员使用）
 
 以其他方式显示记账凭证：
@@ -161,7 +160,7 @@ Ctrl+Alt+Enter              执行需要上传内容的命令，如$stmt$等
   const expr = m ? m[2] : cmd;
   const spec = m ? m[1] : null;
 
-  return (cb ? fancyxhr(cb) : xhr)('POST', '/api/execute', spec, expr);
+  return (cb ? fancyxhr(cb) : xhr)('POST', '/api/execute', expr, { spec });
 };
 
 const sanitize = (raw) => {
@@ -185,7 +184,7 @@ const upsert = (raw) => {
   if (!type) {
     return Promise.reject('Type not found');
   }
-  return xhr('POST', `/api/${type}Upsert`, null, str);
+  return xhr('POST', `/api/${type}`, null, str);
 };
 
 const remove = (raw) => {
@@ -193,5 +192,5 @@ const remove = (raw) => {
   if (!type) {
     return Promise.reject('Type not found');
   }
-  return xhr('POST', `/api/${type}Removal`, null, str);
+  return xhr('DELETE', `/api/${type}`, null, str);
 };

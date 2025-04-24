@@ -55,7 +55,8 @@ public partial class Facade
 
     public async ValueTask<Context> AuthnCtx(string user, DateTime dt,
             string sessionKey = null, CertAuthn cert = null,
-            string assume = null, string spec = null, int limit = 0, IEnumerable<Authn> aux = null)
+            string assume = null, string spec = null, int limit = 0,
+            bool legacyAuth = false)
     {
         var session = m_SessionManager.AccessSession(sessionKey);
         var ca = await m_Db.SelectCertAuthn(cert?.Fingerprint);
@@ -65,10 +66,18 @@ public partial class Facade
             await m_Db.Update(ca);
         }
 
-        var creds = new List<Authn> { session?.Authn, ca };
-        if (aux != null)
-            creds.AddRange(aux);
-        var id = ACLManager.Authenticate(creds, assume);
+        Identity id;
+        try
+        {
+            id = ACLManager.Authenticate(new Authn[]{ session?.Authn, ca }, assume);
+        }
+        catch
+        {
+            if (legacyAuth && cert?.Fingerprint != null)
+                id = Identity.Unlimited;
+            else
+                throw;
+        }
         return new(m_Db, user, dt, id.Assume(assume), id, session, ca ?? cert, spec, limit);
     }
 
@@ -107,56 +116,64 @@ public partial class Facade
 
     private static async IAsyncEnumerable<string> ListIdentity(Context ctx)
     {
+        yield return $"Authenticated Identity: {ctx.TrueIdentity.Name.AsId()}\n";
+        if (ctx.Identity != ctx.TrueIdentity)
+            yield return $"Assume Identity: {ctx.Identity.Name.AsId()}\n";
+
+        yield return $"Selected Entity: {ctx.Client.User.AsUser()}\n\n";
+
+        yield return "---- Authn details ----\n";
         if (ctx.Session != null)
         {
             yield return "WebAuthn accepted\n";
-            yield return $"WebAuthn Authn ID: {ctx.Session.Authn.StringID}\n";
-            yield return $"WebAuthn InvitedAt: {ctx.Session.Authn.InvitedAt:s}\n";
-            yield return $"WebAuthn CreatedAt: {ctx.Session.Authn.CreatedAt:s}\n";
-            yield return $"WebAuthn LastUsedAt: {ctx.Session.Authn.LastUsedAt:s}\n";
-            yield return $"Session CreatedAt: {ctx.Session.CreatedAt:s}\n";
-            yield return $"Session ExpiresAt: {ctx.Session.ExpiresAt:s}\n";
-            yield return $"Session MaxExpiresAt: {ctx.Session.MaxExpiresAt:s}\n";
+            yield return $"\tWebAuthn Authn ID: {ctx.Session.Authn.StringID}\n";
+            yield return $"\tWebAuthn InvitedAt: {ctx.Session.Authn.InvitedAt:s}\n";
+            yield return $"\tWebAuthn CreatedAt: {ctx.Session.Authn.CreatedAt:s}\n";
+            yield return $"\tWebAuthn LastUsedAt: {ctx.Session.Authn.LastUsedAt:s}\n";
+            yield return $"\tSession CreatedAt: {ctx.Session.CreatedAt:s}\n";
+            yield return $"\tSession ExpiresAt: {ctx.Session.ExpiresAt:s}\n";
+            yield return $"\tSession MaxExpiresAt: {ctx.Session.MaxExpiresAt:s}\n";
         }
+        else
+            yield return "No WebAuthn credential present\n";
 
         if (ctx.Certificate != null)
         {
             if (ctx.Certificate.ID != null)
             {
                 yield return "Client certificate accepted\n";
-                yield return $"Certificate Authn ID: {ctx.Certificate.StringID}\n";
-                yield return $"Certificate CreatedAt: {ctx.Certificate.CreatedAt:s}\n";
-                yield return $"Certificate LastUsedAt: {ctx.Certificate.LastUsedAt:s}\n";
+                yield return $"\tCertificate Authn ID: {ctx.Certificate.StringID}\n";
+                yield return $"\tCertificate CreatedAt: {ctx.Certificate.CreatedAt:s}\n";
+                yield return $"\tCertificate LastUsedAt: {ctx.Certificate.LastUsedAt:s}\n";
             }
             else
                 yield return "Client certificate acknowledged but not accepted\n";
 
-            yield return $"Certificate Fingerprint: {ctx.Certificate.Fingerprint}\n";
-            yield return $"Certificate SubjectDN: {ctx.Certificate.SubjectDN}\n";
-            yield return $"Certificate IssuerND: {ctx.Certificate.IssuerDN}\n";
-            yield return $"Certificate Serial: {ctx.Certificate.Serial}\n";
-            yield return $"Certificate Valid not Before: {ctx.Certificate.Start}\n";
-            yield return $"Certificate Valid not After: {ctx.Certificate.End}\n";
+            yield return $"\tCertificate Fingerprint: {ctx.Certificate.Fingerprint}\n";
+            yield return $"\tCertificate SubjectDN: {ctx.Certificate.SubjectDN}\n";
+            yield return $"\tCertificate IssuerND: {ctx.Certificate.IssuerDN}\n";
+            yield return $"\tCertificate Serial: {ctx.Certificate.Serial}\n";
+            yield return $"\tCertificate Valid not Before: {ctx.Certificate.Start}\n";
+            yield return $"\tCertificate Valid not After: {ctx.Certificate.End}\n";
         }
+        else
+            yield return "No client certificate present\n";
 
-        yield return $"Authenticated Identity: {ctx.TrueIdentity.Name.AsId()}\n";
-
+        yield return "---- RBAC details ----\n";
         if (ctx.TrueIdentity.P.AllAssumes == null)
-            yield return "Assumable Identies: *\n";
+            yield return "Assumable Identities: *\n";
         else
         {
             var assumes = ctx.TrueIdentity.P.AllAssumes.Select(static (s) => s.AsId());
-            yield return $"Assumable Identies: {string.Join(", ", assumes)}\n";
+            yield return $"Assumable Identities: {string.Join(", ", assumes)}\n";
         }
 
-        yield return $"Assume Identity: {ctx.Identity.Name.AsId()}\n";
-
         if (ctx.Identity.P.AllKnowns == null)
-            yield return "Known Identies: *\n";
+            yield return "Known Identities: *\n";
         else
         {
             var knowns = ctx.Identity.P.AllKnowns.Select(static (s) => s.AsId());
-            yield return $"Known Identies: {string.Join(", ", knowns)}\n";
+            yield return $"Known Identities: {string.Join(", ", knowns)}\n";
         }
 
         if (ctx.Identity.P.AllRoles == null)
@@ -174,13 +191,6 @@ public partial class Facade
             var users = ctx.Identity.P.AllUsers.Select(static (s) => s.AsUser());
             yield return $"Associated Entities: {string.Join(", ", users)}\n";
         }
-
-        if (ctx.Identity.CanLogin(ctx.Client.User))
-            yield return $"Selected Entity: {ctx.Client.User.AsUser()}\n";
-        else
-            yield return $"!!Access to {ctx.Client.User.AsUser()} denied, try `entity` + one of the above!!\n";
-
-        yield return $"Current Date: {ctx.Client.Today.AsDate()}\n";
 
         yield return $"Allowable View: {Synth(ctx.Identity.P.View.Grant)}\n";
         yield return $"Allowable Edit: {Synth(ctx.Identity.P.Edit.Grant)}\n";
@@ -202,5 +212,9 @@ public partial class Facade
             yield return $"Full Asset: {Synth(ctx.Identity.P.Asset.Query)}\n";
             yield return $"Full Amort: {Synth(ctx.Identity.P.Amort.Query)}\n";
         }
+
+        yield return $"Current Date: {ctx.Client.Today.AsDate()}\n";
+        if (!ctx.Identity.CanLogin(ctx.Client.User))
+            throw new AccessDeniedException($"Default-entity {ctx.Client.User.AsUser()} denied\n";
     }
 }

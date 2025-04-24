@@ -21,82 +21,89 @@ import dayjs from 'dayjs';
 
 const instance = axios.create({
     baseURL: process.env.API_URL ?? '/api',
-    method: 'POST',
     responseType: 'text',
-});
-
-const createHeaders = (user) => ({
-    'X-ClientDateTime': dayjs().format(),
-    'X-User': user,
-    'X-Limit': 10,
 });
 
 export async function safeApi(expr, user) {
     const { data, headers } = await instance.request({
         method: 'GET',
         url: '/safe',
-        params: { q: expr },
-        headers: createHeaders(user),
+        params: { q: expr, limit: 10, u: user },
+        headers: { 'X-ClientDateTime': dayjs().format() },
     });
     return { data };
 }
 
 export async function executeApi(expr, user) {
     const { data, headers } = await instance.request({
+        method: 'POST',
         url: '/execute',
         data: expr,
-        headers: createHeaders(user),
+        params: { limit: 10, u: user },
+        headers: { 'X-ClientDateTime': dayjs().format() },
     });
     return { data };
 }
 
 export async function voucherUpsertApi(code, user) {
     const { data } = await instance.request({
-        url: '/voucherUpsert',
+        method: 'POST',
+        url: '/voucher',
         data: code,
-        headers: createHeaders(user),
+        params: { limit: 10, u: user },
+        headers: { 'X-ClientDateTime': dayjs().format() },
     });
     return { data };
 }
 
 export async function voucherRemovalApi(code, user) {
     await instance.request({
-        url: '/voucherRemoval',
+        method: 'DELETE',
+        url: '/voucher',
         data: code,
-        headers: createHeaders(user),
+        params: { limit: 10, u: user },
+        headers: { 'X-ClientDateTime': dayjs().format() },
     });
 }
 
 export async function assetUpsertApi(code, user) {
     const { data } = await instance.request({
-        url: '/assetUpsert',
+        method: 'POST',
+        url: '/asset',
         data: code,
-        headers: createHeaders(user),
+        params: { limit: 10, u: user },
+        headers: { 'X-ClientDateTime': dayjs().format() },
     });
     return { data };
 }
 
 export async function assetRemovalApi(code, user) {
     await instance.request({
-        url: '/assetRemoval',
+        method: 'DELETE',
+        url: '/asset',
         data: code,
-        headers: createHeaders(user),
+        params: { limit: 10, u: user },
+        headers: { 'X-ClientDateTime': dayjs().format() },
     });
 }
 
 export async function amortUpsertApi(code, user) {
     const { data } = await instance.request({
-        url: '/amortUpsert',
+        method: 'POST',
+        url: '/amort',
         data: code,
-        headers: createHeaders(user),
+        params: { limit: 10, u: user },
+        headers: { 'X-ClientDateTime': dayjs().format() },
     });
     return { data };
 }
 
 export async function amortRemovalApi(code, user) {
     await instance.request({
-        url: '/amortRemoval',
+        method: 'DELETE',
+        url: '/amort',
         data: code,
-        headers: createHeaders(user),
+        params: { limit: 10, u: user },
+        headers: { 'X-ClientDateTime': dayjs().format() },
     });
 }

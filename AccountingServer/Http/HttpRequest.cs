@@ -34,4 +34,5 @@ public class HttpRequest
     public Dictionary<string, string> Parameters { get; set; }
     public Dictionary<string, string> Header { get; set; }
     public Stream RequestStream { get; set; }
+    internal bool RTEDone;
 }

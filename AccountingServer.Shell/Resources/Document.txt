@@ -272,3 +272,21 @@ version                     显示程序版本
 $...$ ...                   调用插件
 ?$...$                      显示插件文档
 ?$$                         列出所有插件
+
+
+Setup a client certificate:
+
+1. `openssl ecparam -name prime256v1 -genkey -noout -out client.key`
+2. `openssl req -new -key client.key -out client.csr -subj ""/CN=______/C=US""`
+    Be sure to replace ______ with your name, which should be known to the site manager
+3. Submit the file `client.csr` to the site manager for processing.
+    You should be given a `client.crt` or `client.pem` file.
+4. `openssl pkcs12 -export -inkey client.key -in client.crt -out client.p12 -legacy`
+    You'll be prompted to set a password for the .p12 file.
+5. Install the `client.p12` on your devices:
+    macOS: Double-click the .p12 → opens Keychain Access; Import to login keychain
+    Windows: Double-click .p12 → Certificate Import Wizard; Follow prompts → install to Current User store
+    iOS: Email or AirDrop the .p12; Tap the file → install → follow prompts to enter passcode and password
+    Android: Transfer .p12 to phone; Go to: Settings → Security → Encryption & credentials → Install a certificate;
+             Choose user credential, select file, enter password
+6. Authenticate as usual, and then type "save-cert" command.

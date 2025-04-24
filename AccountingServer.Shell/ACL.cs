@@ -364,14 +364,14 @@ public static class ACLManager
             return id0;
 
         if (id0 == null)
-            throw new ApplicationException($"Assume identity of {req.AsId()} denied for unknown identity");
+            throw new AccessDeniedException($"Assume identity of {req.AsId()} denied for unknown identity");
 
         if (id0.P.AllAssumes != null && !id0.P.AllAssumes.Contains(req))
-            throw new ApplicationException($"Assume identity of {req.AsId()} denied for identity {id0.Name.AsId()}");
+            throw new AccessDeniedException($"Assume identity of {req.AsId()} denied for identity {id0.Name.AsId()}");
 
         var res = Cfg.Get<ACL>().Identities.SingleOrDefault((id) => id.Name == req);
         if (res == null)
-            throw new ApplicationException($"Assume identity of {req.AsId()} granted, but does not exist");
+            throw new AccessDeniedException($"Assume identity of {req.AsId()} granted, but does not exist");
 
         PrepareRole(res);
         return res;
@@ -383,7 +383,7 @@ public static class ACLManager
     public static void WillLogin(this Identity id0, string user)
     {
         if (!CanLogin(id0, user))
-            throw new ApplicationException($"Login of {user} denied for identity {id0.Name.AsId()}");
+            throw new AccessDeniedException($"Login of {user} denied for identity {id0.Name.AsId()}");
     }
 
     public static bool CanInvoke(this Identity id0, string term)
@@ -395,7 +395,7 @@ public static class ACLManager
     public static void WillInvoke(this Identity id0, string term)
     {
         if (!CanInvoke(id0, term))
-            throw new ApplicationException($"Access to \"{term}\" denied for identity {id0.Name.AsId()}");
+            throw new AccessDeniedException($"Access to \"{term}\" denied for identity {id0.Name.AsId()}");
     }
 
     public static bool CanRead(this Identity id, Voucher v)
@@ -417,16 +417,16 @@ public static class ACLManager
 
         if (v.Details.GroupBy(static (d) => d.Currency).Any(static (g) =>
                     Math.Abs(g.Sum(static (d) => d.Fund!.Value)) >= VoucherDetail.Tolerance) && !id.P.Imba)
-            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity {id.Name.AsId()}\n" +
+            throw new AccessDeniedException($"Write to {v.ID.Quotation('^')} denied for identity {id.Name.AsId()}\n" +
                     "Reason: Debit/Credit imbalance");
 
         if (Math.Abs(v.Details.Where(static (d) => d.Title == 3998)
                     .Sum(static (d) => d.Fund!.Value)) >= VoucherDetail.Tolerance && !id.P.Imba)
-            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity {id.Name.AsId()}\n" +
+            throw new AccessDeniedException($"Write to {v.ID.Quotation('^')} denied for identity {id.Name.AsId()}\n" +
                     "Reason: T3998 imbalance");
 
         if (!v.IsMatch(id.P.Voucher.Query))
-            throw new ApplicationException($"Write to {v.ID.Quotation('^')} denied for identity {id.Name.AsId()}\n" +
+            throw new AccessDeniedException($"Write to {v.ID.Quotation('^')} denied for identity {id.Name.AsId()}\n" +
                     (userInput ? "Reason: You are not authorized to make such a voucher"
                      : "Reason: You are not authorized to edit that voucher"));
 
@@ -464,7 +464,7 @@ public static class ACLManager
         } else if (noView)
             sb.Append("... and you are not even authorized to view these details!\n");
 
-        throw new ApplicationException(sb.ToString());
+        throw new AccessDeniedException(sb.ToString());
     }
 
     public static bool CanAccess(this Identity id, Asset a)
@@ -476,7 +476,7 @@ public static class ACLManager
             return;
 
         if (!id.CanAccess(a))
-            throw new ApplicationException($"Access to {a.ID} denied for identity {id.Name.AsId()}");
+            throw new AccessDeniedException($"Access to {a.ID} denied for identity {id.Name.AsId()}");
     }
 
     public static bool CanAccess(this Identity id, Amortization a)
@@ -488,7 +488,7 @@ public static class ACLManager
             return;
 
         if (!id.CanAccess(a))
-            throw new ApplicationException($"Access to {a.ID} denied for identity {id.Name.AsId()}");
+            throw new AccessDeniedException($"Access to {a.ID} denied for identity {id.Name.AsId()}");
     }
 
     private static IQueryCompounded<TAtom> I<TAtom>(bool redact, IQueryCompounded<TAtom> a, ACLQuery<TAtom> q)
@@ -607,4 +607,9 @@ public static class ACLManager
             if (ix != id && ix.CanAccess(a))
                 yield return ix;
     }
+}
+
+public class AccessDeniedException : Exception
+{
+    public AccessDeniedException(string message) : base(message) { }
 }

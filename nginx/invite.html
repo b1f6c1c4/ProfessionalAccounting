@@ -72,7 +72,31 @@
       <p>This will create a WebAuthn <em>Resident Key</em> on your authenticator.</p>
     </main>
 
-    <script src="/public/authn.js"></script>
-    <script>wrap(register, 'Failed to process your invitation:')</script>
+    <script src="/js/authn.js"></script>
+    <script>
+      window.onload = async () => {
+        const wait = (t) => new Promise((resolve) => setTimeout(resolve, t));
+        const main = document.querySelector('main');
+        const showErr = (err) => {
+          main.classList.add('err');
+          const h = document.createElement('p');
+          h.innerText = 'Failed to process your invitation:';
+          main.innerText = err;
+          if (main.childNodes.length) {
+            main.insertBefore(h, main.childNodes[0]);
+          } else {
+            main.appendChild(h);
+          }
+        };
+        try {
+          const [func, _] = await Promise.all([ acceptInvitation(), wait(800) ]);
+          document.querySelector('.action').classList.add('show');
+          document.querySelector('.action > .btn')
+            .addEventListener('click', () => func().catch(showErr));
+        } catch (err) {
+          showErr(err);
+        }
+      };
+    </script>
   </body>
 </html>

@@ -29,9 +29,6 @@ function b64url(o) {
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-const wait = (t) => new Promise((resolve) => setTimeout(resolve, t));
-let publicKey;
-
 async function assignOptions(resp) {
   document.getElementById('domain').innerText = resp.headers.get('X-ServerName');
   const obj = await resp.json();
@@ -48,10 +45,10 @@ async function assignOptions(resp) {
       cred.id = a64url(cred.id);
     });
   }
-  publicKey = obj;
+  return obj;
 }
 
-async function register() {
+async function acceptInvitation() {
   const userHandle = new URLSearchParams(window.location.search).get('q');
   if (!userHandle) {
     throw new Error('Invalid URL');
@@ -60,7 +57,7 @@ async function register() {
   if (!resp.ok) {
     throw new Error(`HTTP/${resp.status} ${resp.statusText}:\n${await resp.text()}`);
   }
-  await assignOptions(resp);
+  const publicKey = await assignOptions(resp);
   return async () => {
     const credential = await navigator.credentials.create({ publicKey });
     const res = await fetch(`/authn/at?q=${userHandle}`, {
@@ -80,7 +77,7 @@ async function register() {
     });
 
     if (!res.ok) {
-      throw new Error('Failed to register:\n' + resp.text());
+      throw new Error(`HTTP/${res.status} ${res.statusText}:\n${await res.text()}`);
     }
     window.location.href = '/login';
   };
@@ -91,54 +88,26 @@ async function login() {
   if (!resp.ok) {
     throw new Error(`HTTP/${resp.status} ${resp.statusText}:\n${await resp.text()}`);
   }
-  await assignOptions(resp);
-  return async () => {
-    const credential = await navigator.credentials.get({ publicKey });
-    const res = await fetch('/authn/as', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: credential.id,
-        rawId: b64url(credential.rawId),
-        type: credential.type,
-        extensions: credential.getClientExtensionResults(),
-        response: {
-          authenticatorData: b64url(credential.response.authenticatorData),
-          clientDataJSON: b64url(credential.response.clientDataJSON),
-          userHandle: b64url(credential.response.userHandle),
-          signature: b64url(credential.response.signature),
-        },
-      }),
-    });
+  const publicKey = await assignOptions(resp);
+  const credential = await navigator.credentials.get({ publicKey });
+  const res = await fetch('/authn/as', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      id: credential.id,
+      rawId: b64url(credential.rawId),
+      type: credential.type,
+      extensions: credential.getClientExtensionResults(),
+      response: {
+        authenticatorData: b64url(credential.response.authenticatorData),
+        clientDataJSON: b64url(credential.response.clientDataJSON),
+        userHandle: b64url(credential.response.userHandle),
+        signature: b64url(credential.response.signature),
+      },
+    }),
+  });
 
-    if (!res.ok) {
-      throw new Error(`HTTP/${res.status} ${res.statusText}:\n${await res.text()}`);
-    }
-    window.location.href = '/';
+  if (!res.ok) {
+    throw new Error(`HTTP/${res.status} ${res.statusText}:\n${await res.text()}`);
   }
-}
-
-function wrap(f, errText) {
-  window.onload = async () => {
-    const main = document.querySelector('main');
-    const showErr = (err) => {
-      main.classList.add('err');
-      const h = document.createElement('p');
-      h.innerText = errText;
-      main.innerText = err;
-      if (main.childNodes.length) {
-        main.insertBefore(h, main.childNodes[0]);
-      } else {
-        main.appendChild(h);
-      }
-    };
-    try {
-      const [func, _] = await Promise.all([ f(), wait(800) ]);
-      document.querySelector('.action').classList.add('show');
-      document.querySelector('.action > .btn')
-        .addEventListener('click', () => func().catch(showErr));
-    } catch (err) {
-      showErr(err);
-    }
-  };
 }

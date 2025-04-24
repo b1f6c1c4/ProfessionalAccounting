@@ -29,6 +29,9 @@ public static class HttpUtil
 {
     public static string ReadToEnd(this HttpRequest request, int maxLength = 1048576)
     {
+        if (request.RTEDone)
+            return null;
+
         if (!request.Header.ContainsKey("content-length"))
             return null;
 
@@ -45,10 +48,11 @@ public static class HttpUtil
             offset += r;
         }
 
+        request.RTEDone = true;
         return Encoding.UTF8.GetString(buff);
     }
 
-    public static HttpResponse GenerateHttpResponse(string str, string contentType = "application/json")
+    public static HttpResponse GenerateHttpResponse(string str, string contentType = "text/plain; charset=utf-8")
     {
         var stream = new MemoryStream();
         var sw = new StreamWriter(stream);
@@ -57,7 +61,7 @@ public static class HttpUtil
         return GenerateHttpResponse(stream, contentType);
     }
 
-    public static HttpResponse GenerateHttpResponse(Stream stream, string contentType = "application/json")
+    public static HttpResponse GenerateHttpResponse(Stream stream, string contentType)
     {
         stream.Position = 0;
         return new()
@@ -74,7 +78,7 @@ public static class HttpUtil
     }
 
     public static HttpResponse GenerateHttpResponse(IAsyncEnumerable<string> iae,
-        string contentType = "application/json")
+            string contentType = "text/plain; charset=utf-8")
         => new()
             {
                 ResponseCode = 200,
