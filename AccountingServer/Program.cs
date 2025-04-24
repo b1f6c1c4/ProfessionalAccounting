@@ -161,15 +161,19 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     string spec = null;
     request.Parameters?.TryGetValue("spec", out spec);
 
-    var cert = new CertAuthn();
-    request.Header.TryGetValue("x-ssl-fingerprint", out cert.Fingerprint);
-    request.Header.TryGetValue("x-ssl-subjectdn", out cert.SubjectDN);
-    request.Header.TryGetValue("x-ssl-issuerdn", out cert.IssuerDN);
-    request.Header.TryGetValue("x-ssl-serial", out cert.Serial);
-    request.Header.TryGetValue("x-ssl-start", out cert.Start);
-    request.Header.TryGetValue("x-ssl-end", out cert.End);
-    if (string.IsNullOrEmpty(cert.Fingerprint))
-        cert = null;
+    request.Header.TryGetValue("x-ssl-verify", out var verify);
+    CertAuthn cert = null;
+    if (verify == "SUCCESS") {
+        cert = new CertAuthn();
+        request.Header.TryGetValue("x-ssl-fingerprint", out cert.Fingerprint);
+        request.Header.TryGetValue("x-ssl-subjectdn", out cert.SubjectDN);
+        request.Header.TryGetValue("x-ssl-issuerdn", out cert.IssuerDN);
+        request.Header.TryGetValue("x-ssl-serial", out cert.Serial);
+        request.Header.TryGetValue("x-ssl-start", out cert.Start);
+        request.Header.TryGetValue("x-ssl-end", out cert.End);
+        if (string.IsNullOrEmpty(cert.Fingerprint))
+            cert = null;
+    }
 
     string sessionKey = null;
     if (request.Header.ContainsKey("cookie"))

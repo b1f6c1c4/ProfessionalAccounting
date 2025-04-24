@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WebAuthn>
+  <ServerDomain>example.com</ServerDomain>
+  <ServerPort>443</ServerPort>
+  <ServerName>ProfessionalAccounting</ServerName>
+  <Origin>https://example.com/</Origin>
+  <JwtSecret>s3cret</JwtSecret>
+  <SessionExpire>PT15M</SessionExpire>
+  <SessionMax>PT8H</SessionMax>
+</WebAuthn>

@@ -110,7 +110,7 @@ public partial class Facade
         ctx.Certificate.IdentityName = ctx.Identity.Name;
         await m_Auth.RegisterCert(ctx.Certificate);
 
-        yield return $"Certificate saved for identity {ctx.Identity.Name.AsId()}, it can now authenticate\n";
+        yield return $"Certificate saved for identity {ctx.Identity.Name.AsId()}, you can now authenticate\n";
         yield return $"using certificate {ctx.Certificate.Fingerprint}\n";
     }
 
@@ -157,7 +157,7 @@ public partial class Facade
 
             yield return $"\tFingerprint: {ctx.Certificate.Fingerprint}\n";
             yield return $"\tSubjectDN: {ctx.Certificate.SubjectDN}\n";
-            yield return $"\tIssuerND: {ctx.Certificate.IssuerDN}\n";
+            yield return $"\tIssuerDN: {ctx.Certificate.IssuerDN}\n";
             yield return $"\tSerial: {ctx.Certificate.Serial}\n";
             yield return $"\tValid not Before: {ctx.Certificate.Start}\n";
             yield return $"\tValid not After: {ctx.Certificate.End}\n";
