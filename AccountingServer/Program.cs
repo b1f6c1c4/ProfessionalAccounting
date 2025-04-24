@@ -71,6 +71,7 @@ server.Start();
 async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
 {
 #if DEBUG
+    Console.WriteLine($"{request.Method} {request.Uri}");
     if (request.Method == "GET")
     {
         var fn = Path.Combine(xwd, "../../../../nginx/dist");
@@ -98,8 +99,11 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     }
 #endif
 
-    if (request.Method == "POST" && request.BaseUri == "/authn/at")
+    if (request.BaseUri == "/authn/at")
     {
+        if (request.Method != "POST")
+            return new() { ResponseCode = 405 };
+
         if (!request.Header.TryGetValue("content-type", out var ty) || string.IsNullOrEmpty(ty))
         {
             var response = GenerateHttpResponse(
@@ -114,8 +118,11 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
         return new() { ResponseCode = 201 };
     }
 
-    if (request.Method == "POST" && request.BaseUri == "/authn/as")
+    if (request.BaseUri == "/authn/as")
     {
+        if (request.Method != "POST")
+            return new() { ResponseCode = 405 };
+
         if (!request.Header.TryGetValue("content-type", out var ty) || string.IsNullOrEmpty(ty))
         {
             var response = GenerateHttpResponse(await facade.CreateLogin(), "application/json");
@@ -134,7 +141,8 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     if (!request.BaseUri.StartsWith("/api/", StringComparison.InvariantCulture))
         return new() { ResponseCode = 404 };
 
-    var user = request.Parameters?["u"];
+    string user = null;
+    request.Parameters?.TryGetValue("u", out user);
     if (string.IsNullOrEmpty(user))
         return new() { ResponseCode = 400 };
 
@@ -143,14 +151,15 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
         DateTimeParser.TryParse(request.Header["x-clientdatetime"], out dt);
 
     var limit = 0;
-    var limitS = request.Parameters?["limit"];
-    if (limitS != null)
+    string limitS = null;
+    if (request.Parameters?.TryGetValue("u", out limitS) == true)
         int.TryParse(limitS, out limit);
 
     string assume = null;
     request.Header.TryGetValue("x-assume-identity", out assume);
 
-    var spec = request.Parameters?["spec"];
+    string spec = null;
+    request.Parameters?.TryGetValue("spec", out spec);
 
     var cert = new CertAuthn();
     request.Header.TryGetValue("x-ssl-fingerprint", out cert.Fingerprint);
@@ -226,7 +235,7 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     catch (AccessDeniedException ade)
     {
         request.ReadToEnd(); // don't touch -- dark magic
-        var response = GenerateHttpResponse(ade.ToString());
+        var response = GenerateHttpResponse(ade.Message);
         response.ResponseCode = 403;
         return response;
     }

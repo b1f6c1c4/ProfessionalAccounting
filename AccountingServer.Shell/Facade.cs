@@ -117,7 +117,9 @@ public partial class Facade
             case "version":
                 return ListVersions().ToAsyncEnumerable();
             case "me":
-                return ListIdentity(ctx);
+                return ListIdentity(ctx, false);
+            case "me-brief":
+                return ListIdentity(ctx, true);
             case "logout":
                 return Logout(ctx);
             case "save-cert":
@@ -208,7 +210,9 @@ public partial class Facade
             case "version":
                 return ListVersions().ToAsyncEnumerable();
             case "me":
-                return ListIdentity(ctx);
+                return ListIdentity(ctx, false);
+            case "me-brief":
+                return ListIdentity(ctx, true);
         }
 
         ctx.Identity.WillLogin(ctx.Client.User);

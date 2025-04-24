@@ -39,10 +39,24 @@ const updateUA = () => {
 };
 updateUA();
 
-const login = (u) => {
+const login = async (u) => {
   theUser = u;
   updateUA();
-  window.localStorage.setItem('user', u);
+  window.localStorage.setItem('user', theUser);
+  let resp = await send('GET', '/api/execute', undefined, { q: 'me-brief' });
+  if (resp.status === 401) {
+    const old = `----Server Response:----\nHTTP 401 Unauthorized\n${await resp.text()}`;
+    try {
+      await invokeAuthentication();
+    } catch (e) {
+      throw `${old}\n----During authentication:----\n${e}`;
+    }
+    resp = await send('GET', '/api/execute', undefined, { q: 'me-brief' });
+  }
+  if (!resp.ok) {
+    throw `HTTP ${resp.status}\n${await resp.text()}`;
+  }
+  return resp.text();
 };
 
 const assume = (u) => {
@@ -71,9 +85,18 @@ const send = (method, url, body, params) => {
 };
 
 const fancyxhr = (cb) => async (...args) => {
-  const resp = await send(...args);
+  let resp = await send(...args);
+  if (resp.status === 401) {
+    const old = `----Server Response:----\nHTTP 401 Unauthorized\n${await resp.text()}`;
+    try {
+      await invokeAuthentication();
+    } catch (e) {
+      return cb(undefined, `${old}\n----During authentication:----\n${e}`);
+    }
+    resp = await send(...args);
+  }
   if (!resp.ok) {
-    cb(undefined, 'HTTP ' + resp.status + '\n' + await resp.text());
+    cb(undefined, `HTTP ${resp.status}\n${await resp.text()}`);
   } else {
     const decoder = new TextDecoderStream();
     resp.body.pipeTo(decoder.writable);
@@ -84,9 +107,17 @@ const fancyxhr = (cb) => async (...args) => {
 };
 
 const xhr = async (...args) => {
-  const resp = await send(...args);
+  let resp = await send(...args);
+  if (resp.status === 401) {
+    const old = `----Server Response:----\nHTTP 401 Unauthorized\n${await resp.text()}`;
+    try {
+      await invokeAuthentication();
+    } catch (e) {
+      throw `${old}\n----During authentication:----\n${e}`;
+    }
+  }
   if (!resp.ok) {
-    throw 'HTTP ' + resp.status + '\n' + await resp.text();
+    throw `HTTP ${resp.status}\n${await resp.text()}`;
   } else {
     return resp.text();
   }
@@ -140,12 +171,13 @@ Ctrl+Alt+Enter              执行需要上传内容的命令，如$stmt$等
     else return Promise.resolve(t);
   }
 
-  const matchL = cmd.match(/^(?:entity|login) (.*)$/);
+  const matchL = cmd.match(/^login(?:\s+(.*))?$/);
   if (matchL) {
-    login(matchL[1]);
-    const t = `Login as ${theUser}`;
-    if (cb) return cb(t, undefined, true);
-    else return Promise.resolve(t);
+    const p = login(matchL[1] ?? theUser);
+    if (cb) return p.then(
+      (res) => cb('' + res, undefined, true),
+      (err) => cb(undefined, `${err}`, true));
+    else return p;
   }
 
   const matchA = cmd.match(/^assume(?: (.*))?$/);
@@ -158,9 +190,8 @@ Ctrl+Alt+Enter              执行需要上传内容的命令，如$stmt$等
 
   const m = cmd.match(/^([a-z](?:[^-]|-[^-]|---)+)--(.*)$/);
   const expr = m ? m[2] : cmd;
-  const spec = m ? m[1] : null;
 
-  return (cb ? fancyxhr(cb) : xhr)('POST', '/api/execute', expr, { spec });
+  return (cb ? fancyxhr(cb) : xhr)('POST', '/api/execute', expr, m ? { spec: m[1] } : undefined);
 };
 
 const sanitize = (raw) => {
@@ -184,7 +215,7 @@ const upsert = (raw) => {
   if (!type) {
     return Promise.reject('Type not found');
   }
-  return xhr('POST', `/api/${type}`, null, str);
+  return xhr('POST', `/api/${type}`, str);
 };
 
 const remove = (raw) => {
@@ -192,5 +223,5 @@ const remove = (raw) => {
   if (!type) {
     return Promise.reject('Type not found');
   }
-  return xhr('DELETE', `/api/${type}`, null, str);
+  return xhr('DELETE', `/api/${type}`, str);
 };

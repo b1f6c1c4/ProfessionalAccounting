@@ -114,22 +114,28 @@ public partial class Facade
         yield return $"using certificate {ctx.Certificate.Fingerprint}\n";
     }
 
-    private static async IAsyncEnumerable<string> ListIdentity(Context ctx)
+    private static async IAsyncEnumerable<string> ListIdentity(Context ctx, bool brief)
     {
         yield return $"Authenticated Identity: {ctx.TrueIdentity.Name.AsId()}\n";
         if (ctx.Identity != ctx.TrueIdentity)
             yield return $"Assume Identity: {ctx.Identity.Name.AsId()}\n";
 
+        if (brief && !ctx.Identity.CanLogin(ctx.Client.User))
+            throw new AccessDeniedException($"Selected entity {ctx.Client.User.AsUser()} denied\n");
+
         yield return $"Selected Entity: {ctx.Client.User.AsUser()}\n\n";
+
+        if (brief)
+            yield break;
 
         yield return "---- Authn details ----\n";
         if (ctx.Session != null)
         {
             yield return "WebAuthn accepted\n";
-            yield return $"\tWebAuthn Authn ID: {ctx.Session.Authn.StringID}\n";
-            yield return $"\tWebAuthn InvitedAt: {ctx.Session.Authn.InvitedAt:s}\n";
-            yield return $"\tWebAuthn CreatedAt: {ctx.Session.Authn.CreatedAt:s}\n";
-            yield return $"\tWebAuthn LastUsedAt: {ctx.Session.Authn.LastUsedAt:s}\n";
+            yield return $"\tAuthn ID: {ctx.Session.Authn.StringID}\n";
+            yield return $"\tInvitedAt: {ctx.Session.Authn.InvitedAt:s}\n";
+            yield return $"\tCreatedAt: {ctx.Session.Authn.CreatedAt:s}\n";
+            yield return $"\tLastUsedAt: {ctx.Session.Authn.LastUsedAt:s}\n";
             yield return $"\tSession CreatedAt: {ctx.Session.CreatedAt:s}\n";
             yield return $"\tSession ExpiresAt: {ctx.Session.ExpiresAt:s}\n";
             yield return $"\tSession MaxExpiresAt: {ctx.Session.MaxExpiresAt:s}\n";
@@ -142,19 +148,19 @@ public partial class Facade
             if (ctx.Certificate.ID != null)
             {
                 yield return "Client certificate accepted\n";
-                yield return $"\tCertificate Authn ID: {ctx.Certificate.StringID}\n";
-                yield return $"\tCertificate CreatedAt: {ctx.Certificate.CreatedAt:s}\n";
-                yield return $"\tCertificate LastUsedAt: {ctx.Certificate.LastUsedAt:s}\n";
+                yield return $"\tAuthn ID: {ctx.Certificate.StringID}\n";
+                yield return $"\tCreatedAt: {ctx.Certificate.CreatedAt:s}\n";
+                yield return $"\tLastUsedAt: {ctx.Certificate.LastUsedAt:s}\n";
             }
             else
                 yield return "Client certificate acknowledged but not accepted\n";
 
-            yield return $"\tCertificate Fingerprint: {ctx.Certificate.Fingerprint}\n";
-            yield return $"\tCertificate SubjectDN: {ctx.Certificate.SubjectDN}\n";
-            yield return $"\tCertificate IssuerND: {ctx.Certificate.IssuerDN}\n";
-            yield return $"\tCertificate Serial: {ctx.Certificate.Serial}\n";
-            yield return $"\tCertificate Valid not Before: {ctx.Certificate.Start}\n";
-            yield return $"\tCertificate Valid not After: {ctx.Certificate.End}\n";
+            yield return $"\tFingerprint: {ctx.Certificate.Fingerprint}\n";
+            yield return $"\tSubjectDN: {ctx.Certificate.SubjectDN}\n";
+            yield return $"\tIssuerND: {ctx.Certificate.IssuerDN}\n";
+            yield return $"\tSerial: {ctx.Certificate.Serial}\n";
+            yield return $"\tValid not Before: {ctx.Certificate.Start}\n";
+            yield return $"\tValid not After: {ctx.Certificate.End}\n";
         }
         else
             yield return "No client certificate present\n";
@@ -192,29 +198,30 @@ public partial class Facade
             yield return $"Associated Entities: {string.Join(", ", users)}\n";
         }
 
-        yield return $"Allowable View: {Synth(ctx.Identity.P.View.Grant)}\n";
-        yield return $"Allowable Edit: {Synth(ctx.Identity.P.Edit.Grant)}\n";
-        yield return $"Allowable Voucher: {Synth(ctx.Identity.P.Voucher.Grant)}\n";
-        yield return $"Allowable Asset: {Synth(ctx.Identity.P.Asset.Grant)}\n";
-        yield return $"Allowable Amort: {Synth(ctx.Identity.P.Amort.Grant)}\n";
+        yield return "Allowable Permissions:\n";
+        yield return $"\tView: {Synth(ctx.Identity.P.View.Grant)}\n";
+        yield return $"\tEdit: {Synth(ctx.Identity.P.Edit.Grant)}\n";
+        yield return $"\tVoucher: {Synth(ctx.Identity.P.Voucher.Grant)}\n";
+        yield return $"\tAsset: {Synth(ctx.Identity.P.Asset.Grant)}\n";
+        yield return $"\tAmort: {Synth(ctx.Identity.P.Amort.Grant)}\n";
 
         var invokes = ctx.Identity.P.GrantInvokes.Select(static (r) => r.Quotation('"'));
-        yield return $"Allowable Invokes: {string.Join(", ", invokes)}\n";
+        yield return $"\tInvokes: {string.Join(", ", invokes)}\n";
 
         yield return $"Debit/Credit Imbalance: {(ctx.Identity.P.Imba ? "Granted" : "Denied")}\n";
         yield return $"Reflect on Denies: {(ctx.Identity.P.Reflect ? "Granted" : "Denied")}\n";
 
         if (ctx.Identity.P.Reflect)
         {
-            yield return $"Full View: {Synth(ctx.Identity.P.View.Query)}\n";
-            yield return $"Full Edit: {Synth(ctx.Identity.P.Edit.Query)}\n";
-            yield return $"Full Voucher: {Synth(ctx.Identity.P.Voucher.Query)}\n";
-            yield return $"Full Asset: {Synth(ctx.Identity.P.Asset.Query)}\n";
-            yield return $"Full Amort: {Synth(ctx.Identity.P.Amort.Query)}\n";
+            yield return "Full Permissions:\n";
+            yield return $"\tView: {Synth(ctx.Identity.P.View.Query)}\n";
+            yield return $"\tEdit: {Synth(ctx.Identity.P.Edit.Query)}\n";
+            yield return $"\tVoucher: {Synth(ctx.Identity.P.Voucher.Query)}\n";
+            yield return $"\tAsset: {Synth(ctx.Identity.P.Asset.Query)}\n";
+            yield return $"\tAmort: {Synth(ctx.Identity.P.Amort.Query)}\n";
         }
 
-        yield return $"Current Date: {ctx.Client.Today.AsDate()}\n";
-        if (!ctx.Identity.CanLogin(ctx.Client.User))
-            throw new AccessDeniedException($"Default-entity {ctx.Client.User.AsUser()} denied\n";
+        yield return $"Client Date: {ctx.Client.Today:s}\n";
+        yield return $"Server Date: {DateTime.UtcNow:s}\n";
     }
 }

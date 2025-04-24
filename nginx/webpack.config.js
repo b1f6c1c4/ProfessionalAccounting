@@ -46,6 +46,8 @@ const plugins = [
             { from: 'index-desktop.html', to: '.' },
             { from: 'index-mobile.html', to: '.' },
             { from: 'invite.html', to: '.' },
+            { from: 'src/authn.css', to: '.' },
+            { from: 'src/errors.css', to: '.' },
             { from: 'src/index.css', to: '.' },
             { from: 'src/taobao.css', to: '.' },
             { from: 'art/', to: '.' },

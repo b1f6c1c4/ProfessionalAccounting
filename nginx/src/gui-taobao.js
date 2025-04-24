@@ -37,7 +37,7 @@ const headers = () => {
 
 // Helper function to make API calls with proper headers
 function apiCallSafe(q, options) {
-    return apiCall(`/safe?q=${encodeURIComponent(q)}&u=${user}`, options);
+    return apiCall(`/execute?q=${encodeURIComponent(q)}&u=${user}`, options);
 }
 async function apiCall(url, options = {}) {
     options.headers = {

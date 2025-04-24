@@ -30,7 +30,8 @@ function b64url(o) {
 }
 
 async function assignOptions(resp) {
-  document.getElementById('domain').innerText = resp.headers.get('X-ServerName');
+  const elem = document.getElementById('domain');
+  if (elem) elem.innerText = resp.headers.get('X-ServerName');
   const obj = await resp.json();
   obj.challenge = a64url(obj.challenge);
   if (typeof obj.user === 'object')
@@ -83,7 +84,7 @@ async function acceptInvitation() {
   };
 }
 
-async function login() {
+async function invokeAuthentication() {
   const resp = await fetch(`/authn/as`, { method: 'POST' });
   if (!resp.ok) {
     throw new Error(`HTTP/${resp.status} ${resp.statusText}:\n${await resp.text()}`);

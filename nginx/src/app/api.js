@@ -27,7 +27,7 @@ const instance = axios.create({
 export async function safeApi(expr, user) {
     const { data, headers } = await instance.request({
         method: 'GET',
-        url: '/safe',
+        url: '/execute',
         params: { q: expr, limit: 10, u: user },
         headers: { 'X-ClientDateTime': dayjs().format() },
     });
