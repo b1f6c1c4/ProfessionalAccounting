@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Put this file at /data/backup-mongo
+
 set -eux
 
 rm -rf /data/accounting/backup/{accounting,config.d}

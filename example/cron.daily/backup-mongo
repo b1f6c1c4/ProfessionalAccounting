@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo "$(date -Ins) backup-mongo started" >>/data/backup.log
+bash /data/backup-mongo >>/data/backup.log 2>&1
+echo "$(date -Ins) backup-mongo ended" >>/data/backup.log

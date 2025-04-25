@@ -10,47 +10,58 @@
 
 - [Double-entry bookkeeping](https://en.wikipedia.org/wiki/Double-entry_bookkeeping)
 - Client/Server architecture
-- DSL (Domain Specfic Langauge) for CRUD
-- Backend
-    - Monolithic architecture, business logic `C# 10.0`编写
-    - Uses MongoDB as the database
-    - Compiled on the `.NET 8.0` platform
-    - Uses nginx as a reverse proxy, supports TLSv1.3、HTTP/3
-    - Deployed using Docker
-- Frontend
-    - Uses Redux for state management
-    - Uses p5.js for UI rendering
-    - Uses webpack for bundling
+    - TLSv1.3, HTTP/3, WebAuthn + mTLS
+    - Containerized, nginx + monolithic .NET 8.0 + MongoDB
+- Frontends:
+    - A CLI portal for everyday tasks
+        - Customized DSL (Domain Specfic Langauge) for easy CRUD
+    - A GUI portal for splitting bills
+    - A GUI portal for travel expenditures
+    - A GUI portal for taobao orders
 
 ### 功能 Functionalities
 
-- Fast entry of common vouchers [常见记账凭证的快速录入](AccountingServer.Shell/Serializer/AbbrSerializer.cs)
-- Fast entry of split bill expenses [AA制消费的快速录入](AccountingServer.Shell/Serializer/DiscountSerializer.cs)
-- Multi-currency accounting, even within a single voucher [多币种记账](AccountingServer.Entities/Voucher.cs#L153-L157)（支持一张记账凭证多个币种共存）
-- Exchange rate inquiry / conversion [汇率查询与自动转换](AccountingServer.BLL/Util/Exchange.cs)（在分类汇总时可按本位币显示外币）
-- Multi-entities, transferring money to each other [多记账主体互相转账](AccountingServer.Entities/Voucher.cs#L147-L151)（支持一张记账凭证多个记账主体共存）
-- TLSv1.3 certificate-based authentication [基于TLSv1.3客户端证书的身份认证](nginx/proxy.nginx.conf)
-- Fine-grained identity/role-based authorization [基于身份和角色的细粒度鉴权](AccountingServer.BLL/Util/ACL.cs)
-- Mutable accounting base currency [记账本位币变动](AccountingServer.Shell/Carry/BaseCurrencyShell.cs)（所有者权益币种变动）
-- Fixed asset management [固定资产管理](AccountingServer.Shell/AssetShell.cs)（购置登记、折旧、贬值与处置）
-- Automatic amortization [自动摊销](AccountingServer.Shell/AmortizationShell.cs)
-- Monthly / annually revenue carrying [期末结转](AccountingServer.Shell/Carry/CarryShell.cs)
-- JSON/CSV import / export [导入/导出](AccountingServer.Shell/Serializer)
-- Joint property and cash flow for spouses / partners [（妻妻）共同财产现金流分析](AccountingServer.Shell/Plugins/Coupling)
-- Cheque management [支票管理](AccountingServer.Shell/Plugins/Cheque)
-- Interest calulation of debt [利息收入与费用计算](AccountingServer.Shell/Plugins/Interest)
-- Investment return calculation [投资收益率计算](AccountingServer.Shell/Plugins/YieldRate)
-- Interest calculation of deposit [活期存款利息计算](AccountingServer.Shell/Plugins/BankBalance)
-- Cash flow forecasting [现金流预估](AccountingServer.Shell/Plugins/CashFlow)
-- Entry of foreign currency transactions on credit cards [信用卡外币交易入账](AccountingServer.Shell/Plugins/CreditCardConvert)
-- Credit card statement reconciliation [信用卡对账](AccountingServer.Shell/Plugins/Statement)
-- Spreadsheet reconciliation & statistics [表格对账统计](AccountingServer.Shell/Plugins/SpreadSheet)
+- Security 安全性：
+    - TLSv1.3 end-to-end encryption [基于TLSv1.3的数据传输保护](nginx/proxy.nginx.conf)
+    - TLSv1.3 certificate-based authentication [基于TLSv1.3客户端证书的身份认证](nginx/h3.nginx.conf)
+    - **WebAuthn**-based authentication [基于WebAuthn/FIDO2的客户端身份认证](nginx/js/authn.js)
+    - Fine-grained role-based access control (**RBAC**) [细粒度RBAC鉴权](AccountingServer.BLL/Util/ACL.cs)
+    - Backup scripts [备份脚本](tools/backup-mongo)
+- Usability 易用性：
+    - Fast entry of common vouchers [常见记账凭证的快速录入](AccountingServer.Shell/Serializer/AbbrSerializer.cs)
+    - Fast entry of split bill expenses [AA制消费的快速录入](AccountingServer.Shell/Serializer/DiscountSerializer.cs)
+    - Mobile-friendly user interface [移动端优化的用户界面](nginx/index-mobile.html)
+    - **Credit card statement reconciliation** [信用卡对账](AccountingServer.Shell/Plugins/Statement)
+- Flexibility 灵活性：
+    - **Multi-currencies** accounting, even within a single voucher [多币种记账](AccountingServer.Entities/Voucher.cs#L153-L157)（支持一张记账凭证多个币种共存）
+    - **Multi-entities**, transferring money to each other [多记账主体互相转账](AccountingServer.Entities/Voucher.cs#L147-L151)（支持一张记账凭证多个记账主体共存）
+    - Exchange rate inquiry / conversion [汇率查询与自动转换](AccountingServer.BLL/Util/Exchange.cs)（在分类汇总时可按本位币显示外币）
+    - Mutable accounting base currency [记账本位币变动](AccountingServer.Shell/Carry/BaseCurrencyShell.cs)（所有者权益币种变动）
+- Complicance 合规性：
+    - Monthly / annually revenue carrying [期末结转](AccountingServer.Shell/Carry/CarryShell.cs)
+    - **Fixed & intangible asset management** [固定/无形资产管理](AccountingServer.Shell/AssetShell.cs)（购置登记、折旧、贬值与处置）
+    - Automatic amortization [自动摊销](AccountingServer.Shell/AmortizationShell.cs)
+    - Cheque management [支票管理](AccountingServer.Shell/Plugins/Cheque)
+    - Entry of foreign currency transactions on credit cards [信用卡外币交易入账](AccountingServer.Shell/Plugins/CreditCardConvert)
+    - Inventory and shares management [库存管理、股份管理](AccountingServer.Shell/Facade.cs)
+- Reporting and Analytics 报表和数据分析：
+    - Configurable **pivot tables** [数据透视表](AccountingServer.Shell/Plugins/Pivot)
+    - Configurable **spreadsheets** reconciliation & statistics [表格对账统计](AccountingServer.Shell/Plugins/SpreadSheet)
+    - Cash flow forecasting [现金流预估](AccountingServer.Shell/Plugins/CashFlow)
+    - Joint account cash flow analysis [共同财产现金流分析](AccountingServer.Shell/Plugins/Coupling)
+    - Interest calulation of debt [利息收入与费用计算](AccountingServer.Shell/Plugins/Interest)
+    - Investment return calculation [投资收益率计算](AccountingServer.Shell/Plugins/YieldRate)
+    - Interest calculation of deposit [活期存款利息计算](AccountingServer.Shell/Plugins/BankBalance)
+- Extensibility 可扩展性：
+    - [RESTful API](AccountingServer/Program.cs)
+    - Plugin system [插件系统](AccountingServer.Shell/Plugins)
+    - JSON/CSV import / export [导入/导出](AccountingServer.Shell/Serializer)
 
 ## 安装与配置
 
 本项目提供两种部署方式：
-1. 本地/内网调试（无TLS，无客户端认证，无可靠数据存储）
-1. 网络部署（TLS，客户端证书，MongoDB Atlas数据库后端）
+1. 本地/内网调试（无TLS，无认证，无鉴权，本地数据存储）
+1. 网络部署（TLS，客户端证书/WebAuthn认证，RBAC鉴权，MongoDB Atlas数据库后端）
 
 ### 准备
 
@@ -81,6 +92,8 @@
     - `Carry.xml` - 期末结转规则
     - `Exchange.xml` - 汇率查询API（[fixer.io](https://fixer.io)、[CoinMarketCap](https://coinmartketcap.com)）的配置
 1. 修改可选的配置文件：
+    - `Authn.xml` - WebAuthn配置
+    - `ACL.xml` - RBAC鉴权
     - `Abbr.xml` - 登记新记账凭证时使用的缩写列表
     - `Cash.xml` - 现金流插件相关配置
     - `Composite.xml` - 常用检索式列表
@@ -250,14 +263,3 @@
 
 本项目以GNU AGPL v3.0协议开源。
 This project is licensed under **GNU AGPL v3.0** only. (AGPL-3.0-only).
-
-注解：（请参阅协议原文，以下解释没有法律效力）
-
-- 若个人开发者采用客户端证书的方式将端口保护起来，阻止自己以外的其他任何人访问，
-  这种行为不算“making available to the public”，也不构成协议中的
-  “propagate/convey/remote network interaction”，
-  因此将**不受GNU AGPL v3.0协议的限制**。
-- 但是若个人开发者不采用任何方式保护端口，其他人将有可能通过网络与该软件交互
-  （“remote network interaction”），这种行为就算作“convey”了。
-  这种情况下该行为**受到GNU AGPL v3.0协议的限制**，必须提供与后端程序的**版本一致**、**完整的**源代码。
-

@@ -27,7 +27,7 @@ There are two ways to get the source code:
 1) You can obtain the source code from the website your are currently browsing.
    This will be the exactly same version that is used to compile the binaries.
 
-   <protocol>://<host>:<port>/archive.tar.xz
+   ${window.location.origin}/archive.tar.xz
 
 2) You can obtain the source code from GitHub. However, this may NOT be the
    exactly same version.
