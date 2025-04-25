@@ -22,13 +22,13 @@
   },
   "homepage": "https://github.com/b1f6c1c4/ProfessionalAccounting#readme",
   "devDependencies": {
-    "copy-webpack-plugin": "^12.0.0",
+    "copy-webpack-plugin": "^13.0.0",
     "htm": "^3.1.1",
-    "html-webpack-plugin": "^5.5.0",
-    "webpack": "^5.76.0",
-    "webpack-bundle-analyzer": "^4.5.0",
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^4.7.3"
+    "html-webpack-plugin": "^5.6.3",
+    "webpack": "^5.99.7",
+    "webpack-bundle-analyzer": "^4.10.2",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.1"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.1.0",
