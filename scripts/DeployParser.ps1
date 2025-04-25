@@ -1,13 +1,13 @@
 $ErrorActionPreference = "Stop"
 
-cp AccountingServer.QueryGeneration/obj/Gen/net8.0/Query.tokens AccountingServer.BLL/Parsing/
-cp AccountingServer.QueryGeneration/obj/Gen/net8.0/QueryLexer.cs AccountingServer.BLL/Parsing/
-cp AccountingServer.QueryGeneration/obj/Gen/net8.0/QueryLexer.tokens AccountingServer.BLL/Parsing/
-cp AccountingServer.QueryGeneration/obj/Gen/net8.0/QueryParser.cs AccountingServer.BLL/Parsing/
-cp AccountingServer.QueryGeneration/obj/Gen/net8.0/Subtotal.tokens AccountingServer.BLL/Parsing/
-cp AccountingServer.QueryGeneration/obj/Gen/net8.0/SubtotalLexer.cs AccountingServer.BLL/Parsing/
-cp AccountingServer.QueryGeneration/obj/Gen/net8.0/SubtotalLexer.tokens AccountingServer.BLL/Parsing/
-cp AccountingServer.QueryGeneration/obj/Gen/net8.0/SubtotalParser.cs AccountingServer.BLL/Parsing/
+cp AccountingServer.QueryGeneration/obj/Gen/net9.0/Query.tokens AccountingServer.BLL/Parsing/
+cp AccountingServer.QueryGeneration/obj/Gen/net9.0/QueryLexer.cs AccountingServer.BLL/Parsing/
+cp AccountingServer.QueryGeneration/obj/Gen/net9.0/QueryLexer.tokens AccountingServer.BLL/Parsing/
+cp AccountingServer.QueryGeneration/obj/Gen/net9.0/QueryParser.cs AccountingServer.BLL/Parsing/
+cp AccountingServer.QueryGeneration/obj/Gen/net9.0/Subtotal.tokens AccountingServer.BLL/Parsing/
+cp AccountingServer.QueryGeneration/obj/Gen/net9.0/SubtotalLexer.cs AccountingServer.BLL/Parsing/
+cp AccountingServer.QueryGeneration/obj/Gen/net9.0/SubtotalLexer.tokens AccountingServer.BLL/Parsing/
+cp AccountingServer.QueryGeneration/obj/Gen/net9.0/SubtotalParser.cs AccountingServer.BLL/Parsing/
 
 sed '-i.bak' 's/^public partial class Query/internal partial class Query/' `
     AccountingServer.BLL/Parsing/QueryLexer.cs `

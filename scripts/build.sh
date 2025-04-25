@@ -10,7 +10,7 @@ set -eux
     &
 
 dotnet build -c Release
-(cd AccountingServer/bin/Release/net8.0 \
+(cd AccountingServer/bin/Release/net9.0 \
     && docker build -t b1f6c1c4/accounting-backend:latest .)
 
 wait

@@ -11,7 +11,7 @@
 - [Double-entry bookkeeping](https://en.wikipedia.org/wiki/Double-entry_bookkeeping)
 - Client/Server architecture
     - TLSv1.3, HTTP/3, WebAuthn + mTLS
-    - Containerized, nginx + monolithic .NET 8.0 + MongoDB
+    - Containerized, nginx + monolithic .NET 9.0 + MongoDB
 - Frontends:
     - A CLI portal for everyday tasks
         - Customized DSL (Domain Specfic Langauge) for easy CRUD
@@ -223,7 +223,7 @@
 #### 在Linux上构建开发环境
 
 1. 请先安装以下工具：
-    - [.NET 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
+    - [.NET 9.0](https://dotnet.microsoft.com/download/dotnet/9.0)
     - [JetBrains Rider](https://www.jetbrains.com/rider/)
     - [Docker](https://www.docker.com/)
 1. 启动测试数据库：
@@ -237,7 +237,7 @@
 #### 在Windows上构建开发环境
 
 1. 请先安装以下工具：
-    - [.NET 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
+    - [.NET 9.0](https://dotnet.microsoft.com/download/dotnet/9.0)
     - [Visual Studio](https://visualstudio.microsoft.com/)
     - [Mongo DB](https://www.mongodb.com/)
 1. 启动测试数据库：在`services.msc`中启动`MongoDB`服务。
