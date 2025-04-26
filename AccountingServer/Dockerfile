@@ -4,4 +4,5 @@ WORKDIR /opt/accounting
 COPY . .
 
 ENV DOTNET_EnableDiagnostics=0
-CMD ["dotnet", "AccountingServer.dll"]
+ENTRYPOINT ["dotnet", "AccountingServer.dll"]
+CMD []

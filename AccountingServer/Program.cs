@@ -39,28 +39,38 @@ await foreach (var s in ConfigFilesManager.InitializeConfigFiles())
     Console.Write(s);
 Console.WriteLine("All config files loaded");
 
+var facade = new Facade();
+
 var legacyAuth = false;
-if (args.Length >= 1 && args[0] == "--legacyAuth")
+if (args.Length == 0)
+{
+    Console.WriteLine("Info: WebAuthn & certificate authentication enabled");
+}
+else if (args.Length == 1 && args[0] == "--legacyAuth")
 {
     Console.WriteLine(@"NOTICE: Legacy auth flow:
-Certificate => Known identity => RBAC
-Certificate => No identity => [[Unlimited resource accesses]]
-WebAuthn    => Known identity => RBAC
-Neither     => Authentication error");
+Valid certificates signed by CA that have no associated identity
+will have [[UNLIMITED resource accesses]]!
+
+NOT recommended for public-facing instances");
     legacyAuth = true;
+}
+else if (args.Length == 2 && args[0] == "--invite")
+{
+    var ctx = facade.CreateCtx(null, DateTime.UtcNow.Date, Identity.Unlimited);
+    await foreach (var s in facade.Invite(ctx, args[1]))
+        Console.Write(s);
+
+    return 0;
 }
 else
 {
-    Console.WriteLine(@"NOTICE: Modern auth flow:
-Certificate => Known identity => RBAC
-Certificate => No identity => Authentication error
-WebAuthn    => Known identity => RBAC
-Neither     => Authentication error");
+    Console.WriteLine("Invalid command line arguments");
+    return 1;
 }
 
 var cookieRegex = new Regex(@"(?<=^|;\s*)session=(.*)(?=$|;)");
 
-var facade = new Facade();
 #if RELEASE
 facade.EnableTimer();
 #endif
@@ -267,3 +277,5 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
         }
     }
 }
+
+return 0;

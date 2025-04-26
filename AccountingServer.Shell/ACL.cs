@@ -33,6 +33,9 @@ namespace AccountingServer.Shell;
 [XmlRoot("ACL")]
 public class ACL
 {
+    [XmlElement("Unlimited")]
+    public UnlimitedConfig Unlimited { get; set; }
+
     [XmlElement("Identity")]
     public List<Identity> Identities { get; set; }
 
@@ -44,6 +47,18 @@ public class ACL
 
     [XmlIgnore]
     internal Dictionary<string, Role> RoleMatrix { get; set; }
+}
+
+[Serializable]
+public class UnlimitedConfig
+{
+    [XmlAttribute("name")]
+    public string Name { get; set; }
+
+    [XmlText]
+    public string Text;
+
+    public bool Enabled => Text == "Enabled" && !string.IsNullOrEmpty(Name);
 }
 
 [Serializable]
@@ -327,6 +342,8 @@ public static class ACLManager
         foreach (var aid in aids)
             if (aid != null && !string.IsNullOrEmpty(aid.IdentityName))
             {
+                if (acl.Unlimited?.Enabled == true && acl.Unlimited.Name == aid.IdentityName)
+                    return Identity.Unlimited;
                 if (aid is WebAuthn wa)
                     str.Add($"WebAuthn[{wa.StringID}]");
                 else if (aid is CertAuthn ca)

@@ -277,7 +277,7 @@ $...$ ...                   调用插件
 Setup a client certificate:
 
 1. `openssl ecparam -name prime256v1 -genkey -noout -out client.key`
-2. `openssl req -new -key client.key -out client.csr -subj ""/CN=______/C=US""`
+2. `openssl req -new -key client.key -out client.csr -subj "/CN=______/C=US"`
     Be sure to replace ______ with your name, which should be known to the site manager
 3. Submit the file `client.csr` to the site manager for processing.
     You should be given a `client.crt` or `client.pem` file.

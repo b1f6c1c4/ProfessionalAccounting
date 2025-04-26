@@ -8,6 +8,7 @@ services:
     volumes:
       - nginx-cache:/var/cache/nginx
       - nginx-pid:/var/run
+    command: --legacyAuth
     depends_on:
       - server
     networks:

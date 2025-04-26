@@ -141,6 +141,7 @@ internal class ExchangeShell : IShellComponent
         {
             Task.WhenAll((await ctx.Accountant.RunGroupedQueryAsync("U - U Revenue - U Expense !C"))
                 .Items.Cast<ISubtotalCurrency>()
+                .Where(static grpC => !grpC.Currency.EndsWith('#'))
                 .Concat((await ctx.Accountant.RunGroupedQueryAsync("U Revenue + U Expense 0 !C"))
                     .Items.Cast<ISubtotalCurrency>())
                 .Select(grpC =>

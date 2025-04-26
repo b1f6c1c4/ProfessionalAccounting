@@ -60,8 +60,8 @@
 ## 安装与配置
 
 本项目提供两种部署方式：
-1. 本地/内网调试（无TLS，无认证，无鉴权，本地数据存储）
-1. 网络部署（TLS，客户端证书/WebAuthn认证，RBAC鉴权，MongoDB Atlas数据库后端）
+1. 本地/内网调试（无TLS加密，无认证，无鉴权，本地数据存储）
+1. 网络部署（TLS加密，客户端证书/WebAuthn认证，RBAC鉴权，MongoDB Atlas数据库后端）
 
 ### 准备
 
@@ -100,43 +100,39 @@
     - `Util.xml` - 快速登记记账凭证插件的配置
     - `SpreadSheet.xml` - 表格形式对账插件的配置
 
-### 配置服务器和客户端x509证书（仅限网络部署）
+### 配置数据库（仅限网络部署）
+
+1. 注册 [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register)
+1. 创建数据库实例并配置X509认证
+    - 将connection string（以`mongodb+srv://`开头）保存到`/data/accounting/atlas/url`
+    - 将证书保存到`/data/accounting/atlas/cert.pem`
+
+### 配置TLS参数（仅限网络部署）
 
 1. 将服务器证书和私钥（`server.crt`，`server.key`）放在服务器的`/data/accounting/certs`目录下
-    1. 如果你没有服务器证书，推荐使用 [acme.sh](https://github.com/acmesh-official/acme.sh/wiki/%E8%AF%B4%E6%98%8E) 来免费获得一个
+    - 如果你没有服务器证书，推荐使用 [acme.sh](https://github.com/acmesh-official/acme.sh/wiki/%E8%AF%B4%E6%98%8E) 来免费获得一个
+    - 注意：WebAuthn只有在服务器证书有效的时候才能进行，所以一旦你的服务器证书失效，所有用户都将无法登录！
 1. 在服务器上创建dhparams：
     ```bash
     openssl dhparam -out /data/accounting/certs/dhparam.pem 2048
     ```
-1. 创建自签名的客户端证书和私钥：
-   （注意：如果客户端机器未安装`openssl`，则在服务器上创建客户端的证书和私钥，并把加密后的私钥`client.p12`传回客户端）
-    1. **在客户端机器上**创建证书和私钥：
-    ```bash
-    openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.crt -days 1825 -nodes
-    chmod 0400 key.pem
-    ```
-    1. 将证书上传服务器：
-    ```bash
-    scp ./cert.crt <server>:/data/accounting/certs/client.crt
-    ```
-    1. 将证书和私钥封装成`.p12`格式，删除原来的`.pem`文件：
-    （这一步的目的是方便在客户端上安装证书）
-    ```bash
-    openssl pkcs12 -export -inkey key.pem -in cert.crt -out client.p12 && rm -f key.pem
-    ```
-1. 在客户端上安装证书：
-    1. 恕不赘述，请自行Google `install p12 certificate on XXX`（`XXX`=Linux/FreeBSD/Windows/MacOS/iOS/iPadOS/...）
+1. 配置客户端证书CA
+    - 若并不打算启用客户端证书（仅采用基于WebAuthn的身份验证流程），则执行以下命令骗过nginx：
+        ```bash
+        openssl req -newkey rsa:512 -x509 -days 1 -nodes -out /data/accounting/certs/client.crt -keyout /dev/null -subj "/CN=dummy"
+        ```
+    - 若打算使用基于客户端证书的身份验证流程，则请自行检索如何设立并维护CA
 
 ### 启动、停止
 
-直接使用docker-compose启动，将在18080端口侦听请求：
+直接使用docker-compose启动：
 
-- 本地部署：
+- 本地部署：访问[http://localhost:18080/](http://localhost:18080/)
     ```bash
     docker compose -f docker-compose.local.yml up -d   # start
     docker compose down     # stop
     ```
-- 网络部署：
+- 网络部署：访问`https://<your-domain>:18080/`
     ```bash
     docker compose up -d    # start
     docker compose down     # stop
@@ -206,6 +202,9 @@
 - 关于分类汇总检索式（DSL）的具体语法，可以在命令框中输入`?`命令调出帮助文档
 
 ## 开发
+
+- `./scripts/build.sh` - 构建各个组件
+- `./scripts/upload.sh` - 上传至Docker Hub
 
 ### 项目文件结构
 

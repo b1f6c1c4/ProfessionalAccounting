@@ -81,7 +81,7 @@ public partial class Facade
         return new(m_Db, user, dt, id.Assume(assume), id, session, ca ?? cert, spec, limit);
     }
 
-    private async IAsyncEnumerable<string> Invite(Context ctx, string name)
+    public async IAsyncEnumerable<string> Invite(Context ctx, string name)
     {
         ctx.Identity.WillInvoke("invite");
         var aid = await m_Auth.InviteWebAuthn(name);
