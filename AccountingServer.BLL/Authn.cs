@@ -133,7 +133,7 @@ public class AuthnManager
         await m_Db.Insert(ca);
     }
 
-    public async ValueTask<bool> RegisterWebAuthn(byte[] name, string attestation)
+    public async ValueTask RegisterWebAuthn(byte[] name, string attestation)
     {
         var aid = (await m_Db.SelectAuth(name)) as WebAuthn;
         if (aid == null)
@@ -142,11 +142,9 @@ public class AuthnManager
         if (aid.AttestationOptions == null)
             throw new ApplicationException("This invitation link has already been used");
 
-        if (aid.InvitedAt + Cfg.Get<WebAuthnConfig>().InviteExpire < DateTime.UtcNow)
-        {
-            await m_Db.DeleteAuth(name);
-            throw new ApplicationException("The invitation link has expired");
-        }
+        aid.ExpiresAt = aid.InvitedAt + Cfg.Get<WebAuthnConfig>().InviteExpire;
+        if (aid.ExpiresAt < DateTime.UtcNow)
+            throw new ApplicationException($"The invitation link has expired at {aid.ExpiresAt:s} UTC");
 
         var ar = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(attestation);
         if (ar == null)
@@ -173,8 +171,6 @@ public class AuthnManager
 
         if (!await m_Db.Update(aid))
             throw new ApplicationException("Update failed");
-
-        return true;
     }
 
     public string CreateLogin()

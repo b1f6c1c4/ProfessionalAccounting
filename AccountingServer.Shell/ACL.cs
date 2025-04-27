@@ -194,10 +194,15 @@ public class Permission
     public string Query { get; set; }
 }
 
-public static class ACLManager
+public static class RbacManager
 {
-    static ACLManager()
+    static RbacManager()
         => Cfg.RegisterType<ACL>("ACL");
+
+    public static string UnlimitedName
+        => Cfg.Get<ACL>().Unlimited?.Enabled == true ? Cfg.Get<ACL>().Unlimited.Name : null;
+
+    public static IEnumerable<Identity> Identities => Cfg.Get<ACL>().IdentityMatrix.Values;
 
     private static Permissions Stub = new();
 
@@ -355,9 +360,9 @@ public static class ACLManager
         if (str.Count == 0 && set.Count == 0)
             throw new ApplicationException("No valid credential present");
 
-        var creds = string.Join(", ", set);
+        var strs = string.Join(", ", str);
         if (set.Count == 0)
-            throw new ApplicationException($"Credential {creds} accepted, but no identity matches your credential");
+            throw new ApplicationException($"Credential {strs} accepted, but no identity matches your credential");
 
         if (set.Count > 1)
         {
@@ -366,7 +371,7 @@ public static class ACLManager
             else
             {
                 var nms = string.Join(", ", set);
-                throw new ApplicationException($"Multiple identities {nms} matches {creds}");
+                throw new ApplicationException($"Multiple identities {nms} matches {strs}");
             }
         }
 

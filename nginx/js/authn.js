@@ -80,7 +80,7 @@ async function acceptInvitation() {
     if (!res.ok) {
       throw new Error(`HTTP/${res.status} ${res.statusText}:\n${await res.text()}`);
     }
-    window.location.href = '/login';
+    window.location.href = '/';
   };
 }
 

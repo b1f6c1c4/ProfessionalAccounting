@@ -48,9 +48,10 @@ internal class AuthnShell : IShellComponent
             {
                 "" => ListIdentity(ctx, false),
                 "invite" => Invite(ctx, expr.Rest().Trim()),
+                "ids" => ListIdentites(ctx),
                 "list" => ListAuthn(ctx, expr.Rest().Trim()),
                 "cert" => SaveCert(ctx, expr.Rest().Trim()),
-                "rm" => null,
+                "rm" => RemoveAuthn(ctx, expr.Rest().Trim()),
                 _ => throw new InvalidOperationException("表达式无效"),
             };
     }
@@ -65,24 +66,28 @@ internal class AuthnShell : IShellComponent
             yield return $"Assume Identity: {ctx.Identity.Name.AsId()}\n";
 
         if (brief && !ctx.Identity.CanLogin(ctx.Client.User))
-            throw new AccessDeniedException($"Selected entity {ctx.Client.User.AsUser()} denied\n");
+            throw new AccessDeniedException($"Selected entity {ctx.Client.User.AsUser()} denied");
 
-        yield return $"Selected Entity: {ctx.Client.User.AsUser()}\n\n";
+        yield return $"Selected Entity: {ctx.Client.User.AsUser()}\n";
 
         if (brief)
             yield break;
 
-        yield return "---- Authn details ----\n";
+        yield return "\n---- Date & Time ----\n";
+        yield return $"Client Date: {ctx.Client.Today.AsDate()}\n";
+        yield return $"Server Date: {DateTime.UtcNow:yyyy-MM-ddTHH:mm:ss.sssZ}\n";
+
+        yield return "\n---- Authn details ----\n";
         if (ctx.Session != null)
         {
             yield return "WebAuthn accepted\n";
             yield return $"\tAuthn ID: {ctx.Session.Authn.StringID}\n";
-            yield return $"\tInvitedAt: {ctx.Session.Authn.InvitedAt:s}\n";
-            yield return $"\tCreatedAt: {ctx.Session.Authn.CreatedAt:s}\n";
-            yield return $"\tLastUsedAt: {ctx.Session.Authn.LastUsedAt:s}\n";
-            yield return $"\tSession CreatedAt: {ctx.Session.CreatedAt:s}\n";
-            yield return $"\tSession ExpiresAt: {ctx.Session.ExpiresAt:s}\n";
-            yield return $"\tSession MaxExpiresAt: {ctx.Session.MaxExpiresAt:s}\n";
+            yield return $"\tInvitedAt: {ctx.Session.Authn.InvitedAt:yyyy-MM-ddTHH:mm:ss.sssZ}\n";
+            yield return $"\tCreatedAt: {ctx.Session.Authn.CreatedAt:yyyy-MM-ddTHH:mm:ss.sssZ}\n";
+            yield return $"\tLastUsedAt: {ctx.Session.Authn.LastUsedAt:yyyy-MM-ddTHH:mm:ss.sssZ}\n";
+            yield return $"\tSession CreatedAt: {ctx.Session.CreatedAt:yyyy-MM-ddTHH:mm:ss.sssZ}\n";
+            yield return $"\tSession ExpiresAt: {ctx.Session.ExpiresAt:yyyy-MM-ddTHH:mm:ss.sssZ}\n";
+            yield return $"\tSession MaxExpiresAt: {ctx.Session.MaxExpiresAt:yyyy-MM-ddTHH:mm:ss.sssZ}\n";
         }
         else
             yield return "No WebAuthn credential present\n";
@@ -109,7 +114,7 @@ internal class AuthnShell : IShellComponent
         else
             yield return "No client certificate present\n";
 
-        yield return "---- RBAC details ----\n";
+        yield return "\n---- RBAC details ----\n";
         if (ctx.TrueIdentity.P.AllAssumes == null)
             yield return "Assumable Identities: *\n";
         else
@@ -164,9 +169,6 @@ internal class AuthnShell : IShellComponent
             yield return $"\tAsset: {Synth(ctx.Identity.P.Asset.Query)}\n";
             yield return $"\tAmort: {Synth(ctx.Identity.P.Amort.Query)}\n";
         }
-
-        yield return $"Client Date: {ctx.Client.Today:s}\n";
-        yield return $"Server Date: {DateTime.UtcNow:s}\n";
     }
 
     public async IAsyncEnumerable<string> Invite(Context ctx, string id)
@@ -175,7 +177,21 @@ internal class AuthnShell : IShellComponent
         var aid = await Mgr.InviteWebAuthn(id);
         yield return $"Invitation created, please visit the following link:\n";
         yield return $"https://{AuthnManager.Server}/invite?q={aid.StringID}\n";
-        yield return $"This link will exire at {aid.ExpiresAt:s} UTC time.\n";
+        yield return $"This link will expire at {aid.ExpiresAt:s} UTC time.\n";
+    }
+
+    public async IAsyncEnumerable<string> ListIdentites(Context ctx)
+    {
+        ctx.Identity.WillInvoke("an-ids");
+
+        if (RbacManager.UnlimitedName != null)
+            yield return $"{((string)null).AsId()} (aka. {RbacManager.UnlimitedName.AsId()})\n";
+
+        foreach (var id in RbacManager.Identities)
+            if (id.Disabled)
+                yield return $"{id.Name.AsId()} (disabled)\n";
+            else
+                yield return $"{id.Name.AsId()}\n";
     }
 
     public async IAsyncEnumerable<string> ListAuthn(Context ctx, string id)
@@ -195,28 +211,36 @@ internal class AuthnShell : IShellComponent
             id = ctx.Identity.Name;
         }
 
-        yield return $"Authentication methods for {id.AsId()}:\n";
+        yield return $"Authentication methods for {id.AsId()}:\n\n";
+
+        if (id == null) // unlimited
+            id = RbacManager.UnlimitedName;
+
         await foreach (var aid in m_Db.SelectAuths(id))
         {
             if (aid is WebAuthn wa)
             {
-                yield return $"{aid.StringID} WebAuthn (created at {aid.CreatedAt:s}; last used at {aid.LastUsedAt:s})\n";
+                yield return $"{aid.StringID} WebAuthn\n";
                 if (wa.AttestationOptions != null)
                 {
-                    yield return $"\tPending invitation since {wa.InvitedAt:s}";
+                    yield return $"\tPending invitation since {wa.InvitedAt:yyyy-MM-ddTHH:mm:ss.sssZ}\n\n";
                     continue;
                 }
 
-                yield return $"\tCredential Id = {wa.CredentialId}\n";
-                yield return $"\tBackup {(wa.IsBackupEligible ? "" : "NOT")} eligible;";
-                yield return $"Is {(wa.IsBackedUp ? "" : "NOT")} backed up\n";
+                yield return $"\tCreated at {aid.CreatedAt:yyyy-MM-ddTHH:mm:ss.sssZ}; ";
+                yield return $"Last used at {aid.LastUsedAt:yyyy-MM-ddTHH:mm:ss.sssZ}\n";
+                yield return $"\tCredentialId = {Authn.FromBytes(wa.CredentialId)}\n";
+                yield return $"\tBackup: {(wa.IsBackupEligible ? "" : "in")}eligible, ";
+                yield return $"{(wa.IsBackedUp ? "" : "not")} backed up\n";
                 yield return $"\tAttestation format: {wa.AttestationFormat}\n";
                 yield return $"\tTransports: {string.Join(" ", wa.Transports)}\n\n";
                 continue;
             }
             if (aid is CertAuthn ca)
             {
-                yield return $"{aid.StringID} CertAuthn (created at {aid.CreatedAt:s}; last used at {aid.LastUsedAt:s})\n";
+                yield return $"{aid.StringID} CertAuthn\n";
+                yield return $"\tCreated at {aid.CreatedAt:yyyy-MM-ddTHH:mm:ss.sssZ}; ";
+                yield return $"Last used at {aid.LastUsedAt:yyyy-MM-ddTHH:mm:ss.sssZ}\n";
                 yield return $"\tFingerprint: {ctx.Certificate.Fingerprint}\n";
                 yield return $"\tSubjectDN: {ctx.Certificate.SubjectDN}\n";
                 yield return $"\tIssuerDN: {ctx.Certificate.IssuerDN}\n";
@@ -225,7 +249,9 @@ internal class AuthnShell : IShellComponent
                 yield return $"\tValid not After: {ctx.Certificate.End}\n\n";
                 continue;
             }
-            yield return $"{aid.StringID} Unknown (created at {aid.CreatedAt:s}; last used at {aid.LastUsedAt:s})\n\n";
+            yield return $"{aid.StringID} Unknown\n\n";
+            yield return $"\tCreated at {aid.CreatedAt:yyyy-MM-ddTHH:mm:ss.sssZ}; ";
+            yield return $"Last used at {aid.LastUsedAt:yyyy-MM-ddTHH:mm:ss.sssZ}\n";
         }
     }
 
@@ -255,5 +281,26 @@ internal class AuthnShell : IShellComponent
         yield return $"Certificate saved for identity {ctx.Identity.Name.AsId()}, you can now authenticate\n";
         yield return $"using certificate {ctx.Certificate.Fingerprint}\n";
         yield return $"Auth: {ctx.Certificate.ID}\n";
+    }
+
+    private async IAsyncEnumerable<string> RemoveAuthn(Context ctx, string sid)
+    {
+        if (string.IsNullOrWhiteSpace(sid))
+            yield return "An ID is required; find it by an-list\n";
+
+        var id = Authn.ToBytes(id);
+        var aid = await m_Db.SelectAuth(sid);
+        if (aid == null)
+            yield return "No such AuthIdentity for removal\n";
+
+        if (aid.IdentityName == ctx.TrueIdentity.Name)
+            ctx.TrueIdentity.WillInvoke("an-rm-self");
+        else
+            ctx.TrueIdentity.WillInvoke("an-rm-other");
+
+        if (!await m_Db.DeleteAuth(id))
+            throw new ApplicationException("Delete failed");
+
+        yield return $"AuthIdentity {sid} removed\n";
     }
 }

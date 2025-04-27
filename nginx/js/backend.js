@@ -43,7 +43,7 @@ const login = async (u) => {
   theUser = u;
   updateUA();
   window.localStorage.setItem('user', theUser);
-  let resp = await send('GET', '/api/execute', undefined, { q: 'me-brief' });
+  let resp = await send('GET', '/api/execute', undefined, { q: 'me' });
   if (resp.status === 401) {
     const old = `----Server Response:----\nHTTP 401 Unauthorized\n${await resp.text()}`;
     try {
@@ -51,7 +51,7 @@ const login = async (u) => {
     } catch (e) {
       throw `${old}\n----During authentication:----\n${e}`;
     }
-    resp = await send('GET', '/api/execute', undefined, { q: 'me-brief' });
+    resp = await send('GET', '/api/execute', undefined, { q: 'me' });
   }
   if (!resp.ok) {
     throw `HTTP ${resp.status}\n${await resp.text()}`;
@@ -115,6 +115,7 @@ const xhr = async (...args) => {
     } catch (e) {
       throw `${old}\n----During authentication:----\n${e}`;
     }
+    resp = await send(...args);
   }
   if (!resp.ok) {
     throw `HTTP ${resp.status}\n${await resp.text()}`;

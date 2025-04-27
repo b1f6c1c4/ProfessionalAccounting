@@ -26,7 +26,7 @@ public class Authn
 {
     public byte[] ID { get; set; }
 
-    public static byte[] FromBytes(string str)
+    public static byte[] ToBytes(string str)
     {
         var padded = str.Replace('-', '+').Replace('_', '/');
 
@@ -39,12 +39,10 @@ public class Authn
         return Convert.FromBase64String(padded);
     }
 
+    public static string FromBytes(byte[] b)
+        => Convert.ToBase64String(b).Replace('+', '-').Replace('/', '_').TrimEnd('=');
 
-    public string StringID
-    {
-        get => Convert.ToBase64String(ID).Replace('+', '-').Replace('/', '_').TrimEnd('=');
-        set => ID = FromBytes(value);
-    }
+    public string StringID { get => FromBytes(ID); set => ID = ToBytes(value); }
 
     public string IdentityName;
 

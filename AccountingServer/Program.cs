@@ -121,15 +121,42 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
 
         if (!request.Header.TryGetValue("content-type", out var ty) || string.IsNullOrEmpty(ty))
         {
-            var response = GenerateHttpResponse(await facade.GetATChallenge(uh), "application/json");
-            response.Header["X-ServerName"] = facade.ServerName;
+            var aid = await facade.GetATChallenge(uh);
+            HttpResponse response;
+            if (aid == null)
+            {
+                response = GenerateHttpResponse("No such invitation");
+                response.ResponseCode = 404;
+            }
+            else if (aid.AttestationOptions == null)
+            {
+                response = GenerateHttpResponse($"The invitation link has been used at {aid.CreatedAt:s} UTC");
+                response.ResponseCode = 409;
+            }
+            else if (aid.ExpiresAt < DateTime.UtcNow)
+            {
+                response = GenerateHttpResponse($"The invitation link has expired at {aid.ExpiresAt:s} UTC");
+                response.ResponseCode = 410;
+            }
+            else
+            {
+                response = GenerateHttpResponse(aid.AttestationOptions, "application/json");
+                response.Header["X-ServerName"] = facade.ServerName;
+            }
             return response;
         }
 
-        if (!await facade.RegisterWebAuthn(uh, request.ReadToEnd()))
-            return new() { ResponseCode = 409 };
-
-        return new() { ResponseCode = 201 };
+        try
+        {
+            await facade.RegisterWebAuthn(uh, request.ReadToEnd());
+            return new() { ResponseCode = 201 };
+        }
+        catch (Exception e)
+        {
+            var response = GenerateHttpResponse(e.ToString());
+            response.ResponseCode = 409;
+            return response;
+        }
     }
 
     if (request.BaseUri == "/authn/as")

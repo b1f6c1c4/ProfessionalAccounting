@@ -393,11 +393,15 @@ public class Facade
 
     public string ServerName => AuthnManager.Config.ServerName;
 
-    public async ValueTask<string> GetATChallenge(string userHandle)
-        => (await m_Db.SelectAuth(Authn.FromBytes(userHandle)) as WebAuthn)?.AttestationOptions;
+    public async ValueTask<WebAuthn> GetATChallenge(string userHandle)
+    {
+        var wa = await m_Db.SelectAuth(Authn.ToBytes(userHandle)) as WebAuthn;
+        wa.ExpiresAt = wa.InvitedAt + Cfg.Get<WebAuthnConfig>().InviteExpire;
+        return wa;
+    }
 
-    public ValueTask<bool> RegisterWebAuthn(string userHandle, string body)
-        => m_AuthnShell.Mgr.RegisterWebAuthn(Authn.FromBytes(userHandle), body);
+    public ValueTask RegisterWebAuthn(string userHandle, string body)
+        => m_AuthnShell.Mgr.RegisterWebAuthn(Authn.ToBytes(userHandle), body);
 
     public async ValueTask<string> CreateLogin()
         => m_AuthnShell.Mgr.CreateLogin();
@@ -427,7 +431,7 @@ public class Facade
         Identity id;
         try
         {
-            id = ACLManager.Authenticate(new Authn[]{ session?.Authn, ca }, assume);
+            id = RbacManager.Authenticate(new Authn[]{ session?.Authn, ca }, assume);
         }
         catch
         {

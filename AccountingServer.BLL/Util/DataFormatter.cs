@@ -79,7 +79,7 @@ public static class DataFormatter
     /// <param name="value">身份</param>
     /// <returns>格式化后的身份</returns>
     public static string AsId(this string value)
-        => $"<<{value}>>";
+        => value == null ? "<<UNLIMITED>>" : $"<<{value}>>";
 
     /// <summary>
     ///     格式化用户

@@ -192,6 +192,7 @@ internal class MongoDbAdapter : IDbAdapter
                     {
                         Unique = true,
                         PartialFilterExpression = Builders<Authn>.Filter.Eq("type", "webauthn")
+                            & Builders<Authn>.Filter.Eq("attestation", BsonNull.Value)
                     }));
         m_Auths.Indexes.CreateOne(new CreateIndexModel<Authn>(
                 Builders<Authn>.IndexKeys.Ascending("fingerprint"),
