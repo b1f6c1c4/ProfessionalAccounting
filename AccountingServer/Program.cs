@@ -114,15 +114,19 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
         if (request.Method != "POST")
             return new() { ResponseCode = 405 };
 
+        string uh = null;
+        request.Parameters?.TryGetValue("q", out uh);
+        if (string.IsNullOrEmpty(uh))
+            return new() { ResponseCode = 400 };
+
         if (!request.Header.TryGetValue("content-type", out var ty) || string.IsNullOrEmpty(ty))
         {
-            var response = GenerateHttpResponse(
-                    await facade.GetATChallenge(request.Parameters["q"]), "application/json");
+            var response = GenerateHttpResponse(await facade.GetATChallenge(uh), "application/json");
             response.Header["X-ServerName"] = facade.ServerName;
             return response;
         }
 
-        if (!await facade.RegisterWebAuthn(request.BaseUri.Substring(8), request.ReadToEnd()))
+        if (!await facade.RegisterWebAuthn(uh, request.ReadToEnd()))
             return new() { ResponseCode = 409 };
 
         return new() { ResponseCode = 201 };

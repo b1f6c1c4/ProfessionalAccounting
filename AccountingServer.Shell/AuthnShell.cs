@@ -1,4 +1,4 @@
-/* Copyright (C) 2020-2025 b1f6c1c4
+/* Copyright (C) 2025 b1f6c1c4
  *
  * This file is part of ProfessionalAccounting.
  *
@@ -23,98 +23,42 @@ using System.Threading.Tasks;
 using AccountingServer.BLL;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
+using AccountingServer.Shell.Util;
 using static AccountingServer.BLL.Parsing.Synthesizer;
 
 namespace AccountingServer.Shell;
 
-public partial class Facade
+internal class AuthnShell : IShellComponent
 {
-    public string ServerName => AuthnManager.Config.ServerName;
+    private readonly DbSession m_Db;
 
-    public string Server => AuthnManager.Config.ServerPort == 443
-        ? AuthnManager.Config.ServerDomain
-        : $"{AuthnManager.Config.ServerDomain}:{AuthnManager.Config.ServerPort}";
+    public readonly AuthnManager Mgr;
 
-    public async ValueTask<string> GetATChallenge(string userHandle)
-        => (await m_Db.SelectAuth(Authn.FromBytes(userHandle)) as WebAuthn)?.AttestationOptions;
-
-    public ValueTask<bool> RegisterWebAuthn(string userHandle, string body)
-        => m_Auth.RegisterWebAuthn(Authn.FromBytes(userHandle), body);
-
-    public async ValueTask<string> CreateLogin()
-        => m_Auth.CreateLogin();
-
-    public async ValueTask<Session> VerifyLogin(string body)
+    public AuthnShell(DbSession db)
     {
-        var aid = await m_Auth.VerifyResponse(body);
-        if (aid == null)
-            return null;
-
-        return m_SessionManager.CreateSession(aid);
+        m_Db = db;
+        Mgr = new(m_Db);
     }
 
-    public async ValueTask<Context> AuthnCtx(string user, DateTime dt,
-            string sessionKey = null, CertAuthn cert = null,
-            string assume = null, string spec = null, int limit = 0,
-            bool legacyAuth = false)
+    /// <inheritdoc />
+    public IAsyncEnumerable<string> Execute(string expr, Context ctx, string term)
     {
-        var session = m_SessionManager.AccessSession(sessionKey);
-        var ca = await m_Db.SelectCertAuthn(cert?.Fingerprint);
-        if (ca != null)
-        {
-            ca.LastUsedAt = DateTime.UtcNow;
-            await m_Db.Update(ca);
-        }
-
-        Identity id;
-        try
-        {
-            id = ACLManager.Authenticate(new Authn[]{ session?.Authn, ca }, assume);
-        }
-        catch
-        {
-            if (legacyAuth && cert?.Fingerprint != null)
-                id = Identity.Unlimited;
-            else
-                throw;
-        }
-        return new(m_Db, user, dt, id.Assume(assume), id, session, ca ?? cert, spec, limit);
+        expr = expr.Rest();
+        return expr.Initial() switch
+            {
+                "" => ListIdentity(ctx, false),
+                "invite" => Invite(ctx, expr.Rest().Trim()),
+                "list" => ListAuthn(ctx, expr.Rest().Trim()),
+                "cert" => SaveCert(ctx, expr.Rest().Trim()),
+                "rm" => null,
+                _ => throw new InvalidOperationException("表达式无效"),
+            };
     }
 
-    public async IAsyncEnumerable<string> Invite(Context ctx, string name)
-    {
-        ctx.Identity.WillInvoke("invite");
-        var aid = await m_Auth.InviteWebAuthn(name);
-        yield return $"Invitation created, please visit the following link:\n";
-        yield return $"https://{Server}/invite?q={aid.StringID}\n";
-    }
+    /// <inheritdoc />
+    public bool IsExecutable(string expr) => expr.Initial() == "an";
 
-    private async IAsyncEnumerable<string> Logout(Context ctx)
-    {
-        if (ctx.Session == null)
-            yield return "No active session -- you've never login\n";
-
-        m_SessionManager.DiscardSession(ctx.Session);
-        yield return "Session discarded";
-    }
-
-    private async IAsyncEnumerable<string> SaveCert(Context ctx)
-    {
-        if (ctx.Certificate == null || string.IsNullOrEmpty(ctx.Certificate.Fingerprint))
-            throw new ApplicationException("No certifiacte present");
-
-        ctx.Identity.WillInvoke("save-cert");
-        if (ctx.Identity != ctx.TrueIdentity)
-            ctx.TrueIdentity.WillInvoke("save-cert-assume");
-
-        ctx.Certificate.IdentityName = ctx.Identity.Name;
-        await m_Auth.RegisterCert(ctx.Certificate);
-
-        yield return $"Certificate saved for identity {ctx.Identity.Name.AsId()}, you can now authenticate\n";
-        yield return $"using certificate {ctx.Certificate.Fingerprint}\n";
-    }
-
-    private static async IAsyncEnumerable<string> ListIdentity(Context ctx, bool brief)
+    public static async IAsyncEnumerable<string> ListIdentity(Context ctx, bool brief)
     {
         yield return $"Authenticated Identity: {ctx.TrueIdentity.Name.AsId()}\n";
         if (ctx.Identity != ctx.TrueIdentity)
@@ -223,5 +167,93 @@ public partial class Facade
 
         yield return $"Client Date: {ctx.Client.Today:s}\n";
         yield return $"Server Date: {DateTime.UtcNow:s}\n";
+    }
+
+    public async IAsyncEnumerable<string> Invite(Context ctx, string id)
+    {
+        ctx.Identity.WillInvoke("invite");
+        var aid = await Mgr.InviteWebAuthn(id);
+        yield return $"Invitation created, please visit the following link:\n";
+        yield return $"https://{AuthnManager.Server}/invite?q={aid.StringID}\n";
+        yield return $"This link will exire at {aid.ExpiresAt:s} UTC time.\n";
+    }
+
+    public async IAsyncEnumerable<string> ListAuthn(Context ctx, string id)
+    {
+        if (!string.IsNullOrEmpty(id))
+        {
+            ctx.TrueIdentity.WillInvoke("an-list-other");
+        }
+        else if (ctx.Identity == ctx.TrueIdentity)
+        {
+            ctx.TrueIdentity.WillInvoke("an-list-self");
+            id = ctx.TrueIdentity.Name;
+        }
+        else
+        {
+            ctx.TrueIdentity.WillInvoke("an-list-other");
+            id = ctx.Identity.Name;
+        }
+
+        yield return $"Authentication methods for {id.AsId()}:\n";
+        await foreach (var aid in m_Db.SelectAuths(id))
+        {
+            if (aid is WebAuthn wa)
+            {
+                yield return $"{aid.StringID} WebAuthn (created at {aid.CreatedAt:s}; last used at {aid.LastUsedAt:s})\n";
+                if (wa.AttestationOptions != null)
+                {
+                    yield return $"\tPending invitation since {wa.InvitedAt:s}";
+                    continue;
+                }
+
+                yield return $"\tCredential Id = {wa.CredentialId}\n";
+                yield return $"\tBackup {(wa.IsBackupEligible ? "" : "NOT")} eligible;";
+                yield return $"Is {(wa.IsBackedUp ? "" : "NOT")} backed up\n";
+                yield return $"\tAttestation format: {wa.AttestationFormat}\n";
+                yield return $"\tTransports: {string.Join(" ", wa.Transports)}\n\n";
+                continue;
+            }
+            if (aid is CertAuthn ca)
+            {
+                yield return $"{aid.StringID} CertAuthn (created at {aid.CreatedAt:s}; last used at {aid.LastUsedAt:s})\n";
+                yield return $"\tFingerprint: {ctx.Certificate.Fingerprint}\n";
+                yield return $"\tSubjectDN: {ctx.Certificate.SubjectDN}\n";
+                yield return $"\tIssuerDN: {ctx.Certificate.IssuerDN}\n";
+                yield return $"\tSerial: {ctx.Certificate.Serial}\n";
+                yield return $"\tValid not Before: {ctx.Certificate.Start}\n";
+                yield return $"\tValid not After: {ctx.Certificate.End}\n\n";
+                continue;
+            }
+            yield return $"{aid.StringID} Unknown (created at {aid.CreatedAt:s}; last used at {aid.LastUsedAt:s})\n\n";
+        }
+    }
+
+    private async IAsyncEnumerable<string> SaveCert(Context ctx, string id)
+    {
+        if (ctx.Certificate == null || string.IsNullOrEmpty(ctx.Certificate.Fingerprint))
+            throw new ApplicationException("No certifiacte present");
+
+        if (!string.IsNullOrEmpty(id))
+        {
+            ctx.TrueIdentity.WillInvoke("an-cert-other");
+            ctx.Certificate.IdentityName = id;
+        }
+        else if (ctx.Identity == ctx.TrueIdentity)
+        {
+            ctx.TrueIdentity.WillInvoke("an-cert-self");
+            ctx.Certificate.IdentityName = ctx.TrueIdentity.Name;
+        }
+        else
+        {
+            ctx.TrueIdentity.WillInvoke("an-cert-other");
+            ctx.Certificate.IdentityName = ctx.Identity.Name;
+        }
+
+        await Mgr.RegisterCert(ctx.Certificate);
+
+        yield return $"Certificate saved for identity {ctx.Identity.Name.AsId()}, you can now authenticate\n";
+        yield return $"using certificate {ctx.Certificate.Fingerprint}\n";
+        yield return $"Auth: {ctx.Certificate.ID}\n";
     }
 }

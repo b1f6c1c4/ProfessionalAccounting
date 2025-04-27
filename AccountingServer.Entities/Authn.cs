@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace AccountingServer.Entities;
@@ -55,10 +56,18 @@ public class Authn
 public class WebAuthn : Authn
 {
     public string AttestationOptions;
+
     public byte[] CredentialId;
     public byte[] PublicKey;
     public uint? SignCount;
     public DateTime? InvitedAt;
+
+    // some additional information
+    public bool IsBackupEligible, IsBackedUp;
+    public string AttestationFormat;
+    public List<string> Transports;
+
+    public DateTime? ExpiresAt; // not stored in db
 }
 
 public class CertAuthn : Authn

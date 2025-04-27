@@ -243,6 +243,10 @@ public interface IDbAdapter
 
     ValueTask<Authn> SelectAuth(byte[] id);
 
+    IAsyncEnumerable<Authn> SelectAuths(string identityName);
+
+    ValueTask<bool> DeleteAuth(byte[] id);
+
     ValueTask<WebAuthn> SelectWebAuthn(byte[] credentialId);
 
     ValueTask<CertAuthn> SelectCertAuthn(string fingerprint);

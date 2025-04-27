@@ -36,7 +36,7 @@ namespace AccountingServer.Shell;
 /// <summary>
 ///     表达式解释器
 /// </summary>
-public partial class Facade
+public class Facade
 {
     private readonly AccountingShell m_AccountingShell;
 
@@ -49,17 +49,17 @@ public partial class Facade
 
     private readonly ExchangeShell m_ExchangeShell;
 
-    private readonly SessionManager m_SessionManager;
+    private readonly AuthnShell m_AuthnShell;
 
-    private readonly AuthnManager m_Auth;
+    private readonly SessionManager m_SessionManager;
 
     public Facade(string uri = null, string db = null)
     {
         m_Db = new(uri, db);
         m_AccountingShell = new();
         m_ExchangeShell = new();
+        m_AuthnShell = new(m_Db);
         m_SessionManager = new(m_Db);
-        m_Auth = new(m_Db);
         m_Composer =
             new()
                 {
@@ -69,6 +69,7 @@ public partial class Facade
                     new AssetShell(),
                     new AmortizationShell(),
                     new PluginShell(),
+                    m_AuthnShell,
                     m_AccountingShell,
                 };
     }
@@ -117,17 +118,10 @@ public partial class Facade
             case "version":
                 return ListVersions().ToAsyncEnumerable();
             case "me":
-                return ListIdentity(ctx, false);
-            case "me-brief":
-                return ListIdentity(ctx, true);
+                return AuthnShell.ListIdentity(ctx, true);
             case "logout":
                 return Logout(ctx);
-            case "save-cert":
-                return SaveCert(ctx);
         }
-
-        if (expr.Initial() == "invite")
-            return Invite(ctx, expr.Rest());
 
         ctx.Identity.WillLogin(ctx.Client.User);
         switch (ParsingF.Optional(ref expr, "time ", "slow "))
@@ -210,9 +204,7 @@ public partial class Facade
             case "version":
                 return ListVersions().ToAsyncEnumerable();
             case "me":
-                return ListIdentity(ctx, false);
-            case "me-brief":
-                return ListIdentity(ctx, true);
+                return AuthnShell.ListIdentity(ctx, true);
         }
 
         ctx.Identity.WillLogin(ctx.Client.User);
@@ -394,6 +386,70 @@ public partial class Facade
         ctx.Identity.WillAccess(await ctx.Accountant.SelectAmortizationAsync(amort.ID.Value));
         return await ctx.Accountant.DeleteAmortizationAsync(amort.ID.Value);
     }
+
+    #endregion
+
+    #region Authn
+
+    public string ServerName => AuthnManager.Config.ServerName;
+
+    public async ValueTask<string> GetATChallenge(string userHandle)
+        => (await m_Db.SelectAuth(Authn.FromBytes(userHandle)) as WebAuthn)?.AttestationOptions;
+
+    public ValueTask<bool> RegisterWebAuthn(string userHandle, string body)
+        => m_AuthnShell.Mgr.RegisterWebAuthn(Authn.FromBytes(userHandle), body);
+
+    public async ValueTask<string> CreateLogin()
+        => m_AuthnShell.Mgr.CreateLogin();
+
+    public async ValueTask<Session> VerifyLogin(string body)
+    {
+        var aid = await m_AuthnShell.Mgr.VerifyResponse(body);
+        if (aid == null)
+            return null;
+
+        return m_SessionManager.CreateSession(aid);
+    }
+
+    public async ValueTask<Context> AuthnCtx(string user, DateTime dt,
+            string sessionKey = null, CertAuthn cert = null,
+            string assume = null, string spec = null, int limit = 0,
+            bool legacyAuth = false)
+    {
+        var session = m_SessionManager.AccessSession(sessionKey);
+        var ca = await m_Db.SelectCertAuthn(cert?.Fingerprint);
+        if (ca != null)
+        {
+            ca.LastUsedAt = DateTime.UtcNow;
+            await m_Db.Update(ca);
+        }
+
+        Identity id;
+        try
+        {
+            id = ACLManager.Authenticate(new Authn[]{ session?.Authn, ca }, assume);
+        }
+        catch
+        {
+            if (legacyAuth && cert?.Fingerprint != null)
+                id = Identity.Unlimited;
+            else
+                throw;
+        }
+        return new(m_Db, user, dt, id.Assume(assume), id, session, ca ?? cert, spec, limit);
+    }
+
+    private async IAsyncEnumerable<string> Logout(Context ctx)
+    {
+        if (ctx.Session == null)
+            yield return "No active session -- you've never login\n";
+
+        m_SessionManager.DiscardSession(ctx.Session);
+        yield return "Session discarded";
+    }
+
+    public IAsyncEnumerable<string> Invite(Context ctx, string id)
+        => m_AuthnShell.Invite(ctx, id);
 
     #endregion
 }

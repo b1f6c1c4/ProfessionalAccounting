@@ -4,6 +4,8 @@
   <ServerPort>443</ServerPort>
   <ServerName>ProfessionalAccounting</ServerName>
   <Origin>https://example.com/</Origin>
+  <InviteExpire>PT1H</InviteExpire>
+  <LoginExpire>PT2M</LoginExpire>
   <SessionExpire>PT15M</SessionExpire>
   <SessionMax>PT8H</SessionMax>
 </WebAuthn>

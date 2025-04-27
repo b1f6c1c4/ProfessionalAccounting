@@ -44,11 +44,15 @@ internal class AuthnSerializer : BaseSerializer<Authn>
                         IdentityName = name,
                         CreatedAt = created,
                         LastUsedAt = used,
-                        AttestationOptions = bsonReader.ReadString("attestationOptions", ref read),
+                        AttestationOptions = bsonReader.ReadString("attestation", ref read),
                         CredentialId = bsonReader.ReadBinaryData("credentialId", ref read),
                         PublicKey = bsonReader.ReadBinaryData("publicKey", ref read),
                         SignCount = bsonReader.ReadUInt32("signCount", ref read),
                         InvitedAt = bsonReader.ReadDateTime("invitedAt", ref read),
+                        IsBackupEligible = bsonReader.ReadBoolean("backupEligible", ref read),
+                        IsBackedUp = bsonReader.ReadBoolean("backedUp", ref read),
+                        AttestationFormat = bsonReader.ReadString("format", ref read),
+                        Transports = bsonReader.ReadArray("transports", ref read, (ib) => ib.ReadString()),
                     };
                 break;
             case "cert":
@@ -84,11 +88,21 @@ internal class AuthnSerializer : BaseSerializer<Authn>
         if (aid is WebAuthn wa)
         {
             bsonWriter.Write("type", "webauthn");
-            bsonWriter.Write("attestationOptions", wa.AttestationOptions);
+            bsonWriter.Write("attestation", wa.AttestationOptions);
             bsonWriter.Write("credentialId", wa.CredentialId);
             bsonWriter.Write("publicKey", wa.PublicKey);
             bsonWriter.Write("signCount", wa.SignCount);
             bsonWriter.Write("invitedAt", wa.InvitedAt);
+            bsonWriter.Write("backupEligible", wa.IsBackupEligible);
+            bsonWriter.Write("backedUp", wa.IsBackedUp);
+            bsonWriter.Write("format", wa.AttestationFormat);
+            if (wa.Transports != null && wa.Transports.Count > 0)
+            {
+                bsonWriter.WriteStartArray("transports");
+                foreach (var t in wa.Transports)
+                    bsonWriter.WriteString(t);
+                bsonWriter.WriteEndArray();
+            }
         }
         else if (aid is CertAuthn ca)
         {

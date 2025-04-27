@@ -64,6 +64,14 @@ internal static class MongoDbNative
     /// <returns>Bson查询</returns>
     public static FilterDefinition<T> GetNQuery<T>(Guid? id) =>
         Builders<T>.Filter.Eq<BsonValue>("_id", id.HasValue ? id.Value.ToBsonValue() : BsonNull.Value);
+
+    /// <summary>
+    ///     按编号查询<c>BinData</c>
+    /// </summary>
+    /// <param name="id">编号</param>
+    /// <returns>Bson查询</returns>
+    public static FilterDefinition<T> GetNQuery<T>(byte[] id) =>
+        Builders<T>.Filter.Eq<BsonValue>("_id", id != null ? new BsonBinaryData(id) : BsonNull.Value);
 }
 
 internal abstract class MongoDbNativeVisitor<T, TAtom> : IQueryVisitor<TAtom, FilterDefinition<T>>

@@ -46,6 +46,10 @@ public class WebAuthnConfig
     [XmlElement("Origin")]
     public List<string> Origins;
 
+    public TimeSpan InviteExpire;
+
+    public TimeSpan LoginExpire;
+
     public TimeSpan SessionExpire;
 
     public TimeSpan SessionMax;
@@ -53,13 +57,16 @@ public class WebAuthnConfig
 
 public class AuthnManager
 {
-    private static Dictionary<string, CredentialCreateOptions> m_PendingCredentials = new();
-    private static Dictionary<string, AssertionOptions> m_PendingAssertions = new();
+    private static Dictionary<string, (AssertionOptions, DateTime)> m_PendingAssertions = new();
 
     static AuthnManager()
         => Cfg.RegisterType<WebAuthnConfig>("Authn");
 
     public static WebAuthnConfig Config => Cfg.Get<WebAuthnConfig>();
+
+    public static string Server => Config.ServerPort == 443
+        ? Config.ServerDomain
+        : $"{Config.ServerDomain}:{Config.ServerPort}";
 
     private DbSession m_Db;
 
@@ -91,7 +98,7 @@ public class AuthnManager
             {
                 User = new()
                     {
-                        DisplayName = name,
+                        DisplayName = $"{aid.StringID} for {name.AsId()}",
                         Name = name,
                         Id = aid.ID,
                     },
@@ -110,10 +117,9 @@ public class AuthnManager
                     },
             });
 
-        m_PendingCredentials[aid.StringID] = options;
-
         aid.AttestationOptions = options.ToJson();
         aid.InvitedAt = DateTime.UtcNow;
+        aid.ExpiresAt = aid.InvitedAt + Cfg.Get<WebAuthnConfig>().InviteExpire;
 
         await m_Db.Insert(aid);
 
@@ -133,13 +139,20 @@ public class AuthnManager
         if (aid == null)
             throw new ApplicationException("No AuthIdentity found");
 
+        if (aid.AttestationOptions == null)
+            throw new ApplicationException("This invitation link has already been used");
+
+        if (aid.InvitedAt + Cfg.Get<WebAuthnConfig>().InviteExpire < DateTime.UtcNow)
+        {
+            await m_Db.DeleteAuth(name);
+            throw new ApplicationException("The invitation link has expired");
+        }
+
         var ar = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(attestation);
         if (ar == null)
             throw new ApplicationException("Invalid json AuthenticatorAttestationRawResponse");
 
-        if (!m_PendingCredentials.TryGetValue(aid.StringID, out var options))
-            throw new ApplicationException("No pending credential found");
-
+        var options = CredentialCreateOptions.FromJson(aid.AttestationOptions);
         var credential = await F().MakeNewCredentialAsync(new()
                 {
                     AttestationResponse = ar,
@@ -153,11 +166,13 @@ public class AuthnManager
         aid.CredentialId = credential.Id;
         aid.PublicKey = credential.PublicKey;
         aid.SignCount = credential.SignCount;
+        aid.IsBackupEligible = credential.IsBackupEligible;
+        aid.IsBackedUp = credential.IsBackedUp;
+        aid.AttestationFormat = credential.AttestationFormat;
+        aid.Transports = credential.Transports.Select(static t => t.ToEnumMemberValue()).ToList();
 
         if (!await m_Db.Update(aid))
             throw new ApplicationException("Update failed");
-
-        m_PendingCredentials.Remove(aid.StringID);
 
         return true;
     }
@@ -175,7 +190,7 @@ public class AuthnManager
                     },
             });
 
-        m_PendingAssertions[new string(options.Challenge.Select(b => (char)b).ToArray())] = options;
+        m_PendingAssertions[new string(options.Challenge.Select(b => (char)b).ToArray())] = (options, DateTime.UtcNow);
 
         return options.ToJson();
     }
@@ -191,10 +206,13 @@ public class AuthnManager
             throw new ApplicationException("Invalid json AuthenticatorResponse");
 
         var key = new string(response.Challenge.Select(b => (char)b).ToArray());
-        if (!m_PendingAssertions.TryGetValue(key, out var options))
+        if (!m_PendingAssertions.TryGetValue(key, out var tuple))
             throw new ApplicationException("No pending assertion found");
 
         m_PendingAssertions.Remove(key);
+
+        if (tuple.Item2 + Cfg.Get<WebAuthnConfig>().LoginExpire < DateTime.UtcNow)
+            throw new ApplicationException("The login has expired");
 
         var aid = await m_Db.SelectWebAuthn(ar.Id);
         if (aid == null)
@@ -203,7 +221,7 @@ public class AuthnManager
         var res = await F().MakeAssertionAsync(new()
                 {
                     AssertionResponse = ar,
-                    OriginalOptions = options,
+                    OriginalOptions = tuple.Item1,
                     StoredPublicKey = aid.PublicKey,
                     StoredSignatureCounter = aid.SignCount!.Value,
                     IsUserHandleOwnerOfCredentialIdCallback = (args, _)

@@ -13,4 +13,4 @@ docker run --rm -it \
     -e MONGO_CERT=/opt/accounting/atlas/cert.pem \
     -v /data/accounting/atlas:/opt/accounting/atlas:ro \
     -v /data/accounting/config.d:/opt/accounting/config.d:ro \
-    b1f6c1c4/accounting-backend "invite $1"
+    b1f6c1c4/accounting-backend --invite "$1"

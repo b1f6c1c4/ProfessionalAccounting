@@ -290,6 +290,12 @@ public class DbSession : IHistoricalExchange
     public ValueTask<Authn> SelectAuth(byte[] id)
         => Db.SelectAuth(id);
 
+    public IAsyncEnumerable<Authn> SelectAuths(string identityName)
+        => Db.SelectAuths(identityName);
+
+    public ValueTask<bool> DeleteAuth(byte[] id)
+        => Db.DeleteAuth(id);
+
     public ValueTask<WebAuthn> SelectWebAuthn(byte[] credentialId)
         => Db.SelectWebAuthn(credentialId);
 

@@ -185,6 +185,14 @@ internal class MongoDbAdapter : IDbAdapter
         m_Auths = m_Db.GetCollection<Authn>("authn");
         m_Profile = m_Db.GetCollection<BsonDocument>("system.profile");
 
+        m_Auths.Indexes.CreateOne(Builders<Authn>.IndexKeys.Ascending("identityName"));
+        m_Auths.Indexes.CreateOne(new CreateIndexModel<Authn>(
+                Builders<Authn>.IndexKeys.Ascending("credentialId"),
+                new CreateIndexOptions<Authn>
+                    {
+                        Unique = true,
+                        PartialFilterExpression = Builders<Authn>.Filter.Eq("type", "webauthn")
+                    }));
         m_Auths.Indexes.CreateOne(new CreateIndexModel<Authn>(
                 Builders<Authn>.IndexKeys.Ascending("fingerprint"),
                 new CreateIndexOptions<Authn>
@@ -632,6 +640,16 @@ internal class MongoDbAdapter : IDbAdapter
     public async ValueTask<Authn> SelectAuth(byte[] id)
         => (await m_Auths.Find(Builders<Authn>.Filter.Eq("_id", id))
                 .ToCursorAsync()).SingleOrDefault();
+
+    public IAsyncEnumerable<Authn> SelectAuths(string identityName) =>
+        m_Auths.Find(Builders<Authn>.Filter.Eq("identityName", identityName))
+            .ToAsyncEnumerable();
+
+    public async ValueTask<bool> DeleteAuth(byte[] id)
+    {
+        var res = await m_Auths.DeleteOneAsync(GetNQuery<Authn>(id));
+        return res.DeletedCount == 1;
+    }
 
     public async ValueTask<WebAuthn> SelectWebAuthn(byte[] credentialId)
         => (await m_Auths.Find(Builders<Authn>.Filter.Eq("credentialId", credentialId)

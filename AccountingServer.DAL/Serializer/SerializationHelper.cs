@@ -213,6 +213,16 @@ internal static class SerializationHelper
         => ReadClass(bsonReader, expected, ref read, () => bsonReader.ReadBinaryData().AsByteArray);
 
     /// <summary>
+    ///     安全地读入<c>bool</c>类型的字段
+    /// </summary>
+    /// <param name="bsonReader">Bson读取器</param>
+    /// <param name="expected">字段名</param>
+    /// <param name="read">字段名缓存</param>
+    /// <returns>读取结果</returns>
+    public static bool ReadBoolean(this IBsonReader bsonReader, string expected, ref string read)
+        => ReadStruct(bsonReader, expected, ref read, () => bsonReader.ReadBoolean()) == true;
+
+    /// <summary>
     ///     安全地读入<c>null</c>类型的字段
     /// </summary>
     /// <param name="bsonReader">Bson读取器</param>
@@ -381,6 +391,19 @@ internal static class SerializationHelper
             bsonWriter.WriteString(name, value);
         else if (force)
             bsonWriter.WriteNull(name);
+    }
+
+    /// <summary>
+    ///     安全地写入<c>bool</c>类型的字段
+    /// </summary>
+    /// <param name="bsonWriter">Bson读取器</param>
+    /// <param name="name">字段名</param>
+    /// <param name="value">字段值</param>
+    /// <param name="force">是否强制写入<c>false</c>值</param>
+    public static void Write(this IBsonWriter bsonWriter, string name, bool value, bool force = false)
+    {
+        if (value || force)
+            bsonWriter.WriteBoolean(name, value);
     }
 
     /// <summary>
