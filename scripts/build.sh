@@ -16,7 +16,7 @@ git archive --format=tar HEAD | xz > nginx/archive.tar.xz
 rm -rf nginx/dist
 npm run --prefix nginx build
 
-docker buildx build --load -t b1f6c1c4/accounting-frontend nginx &
-docker buildx build --load -t b1f6c1c4/accounting-frontend:local -f Dockerfile.local nginx &
+docker buildx build --load -t b1f6c1c4/accounting-frontend nginx
+docker buildx build --load -t b1f6c1c4/accounting-frontend:local -f nginx/Dockerfile.local nginx
 
 wait

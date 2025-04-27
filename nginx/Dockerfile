@@ -1,4 +1,4 @@
-FROM patrikjuvonen/docker-nginx-http3
+FROM nginx:stable-alpine
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY proxy.nginx.conf /etc/nginx/conf.d/

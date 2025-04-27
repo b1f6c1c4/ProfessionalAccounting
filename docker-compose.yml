@@ -3,6 +3,7 @@ services:
   nginx:
     image: b1f6c1c4/accounting-frontend
     restart: on-failure:3
+    read_only: true
     ports:
       - "18080:18080/tcp"
       - "18080:18080/udp"
