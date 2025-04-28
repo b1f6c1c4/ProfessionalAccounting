@@ -124,7 +124,7 @@ const xhr = async (...args) => {
   }
 };
 
-const execute = (cmd, cb) => {
+const execute = ([cmd, ext], cb) => {
   if (cmd === '') {
     return xhr('GET', '/api/voucher');
   }
@@ -190,16 +190,15 @@ Ctrl+Alt+Enter              执行需要上传内容的命令，如$stmt$等
     else return Promise.resolve(t);
   }
 
-  let expr = cmd;
-  const obj = {};
+  const obj = { q: cmd };
   const m = cmd.match(/^(sudo\s+)?(?:([a-z](?:[^-]|-[^-]|---)+)--)?(.*)$/);
   if (m) {
     if (m[1]) obj.id = 'admin';
     if (m[2]) obj.spec = m[2];
-    expr = m[3];
+    obj.q = m[3];
   }
 
-  return (cb ? fancyxhr(cb) : xhr)('POST', '/api/execute', expr, obj);
+  return (cb ? fancyxhr(cb) : xhr)('POST', '/api/execute', ext, obj);
 };
 
 const sanitize = (raw) => {

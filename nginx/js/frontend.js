@@ -120,7 +120,7 @@ const indicateError = (err, { end }) => {
 
 const doCreate = () => {
   freeze(true);
-  execute('').then((res) => {
+  execute(['', '']).then((res) => {
     finalize(res, true, true);
     editor.renderer.scrollCursorIntoView();
     editor.selection.setSelectionRange({
@@ -202,9 +202,8 @@ const doRemoveAll = async () => {
 const doUpload = () => {
   const command = cmdLine.getValue();
   const text = editor.getValue();
-  const combined = command + '\n' + text;
   freeze(true);
-  execute(combined).then((res) => {
+  execute([command, text]).then((res) => {
     finalize(res, true, false);
     editor.focus();
     editor.renderer.scrollCursorIntoView();
@@ -222,7 +221,7 @@ const doExecuteFactory = (app) => () => {
   }
   freeze(true);
   let first = true;
-  execute(command, (res, err, done) => {
+  execute([command, ''], (res, err, done) => {
     if (err) {
       finalize(err, false, app);
       editor.renderer.scrollCursorIntoView();

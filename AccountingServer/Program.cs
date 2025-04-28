@@ -254,8 +254,9 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
                 }
                 else if (request.Method == "POST")
                 {
-                    var expr = request.ReadToEnd();
-                    var res = facade.Execute(ctx, expr);
+                    var expr = request.Parameters?["q"];
+                    var expr1 = request.ReadToEnd();
+                    var res = facade.Execute(ctx, string.IsNullOrEmpty(expr1) ? expr : $"{expr}\n{expr1}");
                     return GenerateHttpResponse(res);
                 }
                 else

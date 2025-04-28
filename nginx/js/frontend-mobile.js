@@ -114,7 +114,7 @@ const indicateError = (err, { st, ed }) => {
 const doCreate = () => {
   console.log('doCreate');
   freeze(true);
-  execute('').then((res) => {
+  execute(['', '']).then((res) => {
     finalize(res, true, true);
     // editor.renderer.scrollCursorIntoView();
   }).catch((err) => {
@@ -193,9 +193,8 @@ const doUpload = () => {
   console.log('doUpload');
   const command = cmdLine.value;
   const text = editor.value;
-  const combined = command + '\n' + text;
   freeze(true);
-  execute(combined).then((res) => {
+  execute([command, text]).then((res) => {
     finalize(res, true, false);
     editor.focus();
     // editor.renderer.scrollCursorIntoView();
@@ -213,7 +212,7 @@ const doExecuteFactory = (app) => () => {
     return;
   }
   freeze(true);
-  execute(command).then((res) => {
+  execute([command, '']).then((res) => {
     finalize(res, true, app);
     editor.focus();
     // editor.renderer.scrollCursorIntoView();
