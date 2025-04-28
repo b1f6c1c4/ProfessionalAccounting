@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using AccountingServer.BLL.Util;
 using AccountingServer.Entities;
@@ -100,7 +101,7 @@ public class Permissions
     public HashSet<string> AllUsers { get; internal set; }
     public HashSet<string> AllAssumes { get; internal set; }
     public HashSet<string> AllKnowns { get; internal set; }
-    public List<string> GrantInvokes { get; internal set; }
+    public ACLQueryBase<Regex> Invoke { get; internal set; }
     public ACLQuery<IDetailQueryAtom> View { get; internal set; }
     public ACLQuery<IDetailQueryAtom> Edit { get; internal set; }
     public ACLQuery<IVoucherQueryAtom> Voucher { get; internal set; }
@@ -108,11 +109,17 @@ public class Permissions
     public ACLQuery<IDistributedQueryAtom> Amort { get; internal set; }
 }
 
-public struct ACLQuery<TAtom> where TAtom : class
+public class ACLQueryBase<T>
 {
-    internal IQueryCompounded<TAtom> Reject { get; set; }
-    public IQueryCompounded<TAtom> Query { get; internal set; } // used for actual filteration
-    public IQueryCompounded<TAtom> Grant { get; internal set; } // visible to non-reflect users
+    internal T Reject { get; set; }
+    public T Query { get; internal set; } // used for actual filteration
+    public T Grant { get; internal set; } // visible to non-reflect users
+}
+
+public class ACLQuery<TAtom> : ACLQueryBase<IQueryCompounded<TAtom>>
+    where TAtom : class
+{
+    internal ACLQuery() { }
 
     internal ACLQuery(IQueryCompounded<TAtom> o)
     {
@@ -132,7 +139,7 @@ public class Identity : Role
         {
             Name = null,
             Inherits = new(),
-            Grants = new() { new() { Action = Verb.Invoke, Query = "" } },
+            Grants = new(),
             Denies = new(),
             Rejects = new(),
             P = new()
@@ -143,7 +150,7 @@ public class Identity : Role
                     AllUsers = null,
                     AllAssumes = null,
                     AllKnowns = new(),
-                    GrantInvokes = new() { "" },
+                    Invoke = new() { Reject = new(@"(?!)"), Query = new(@".*"), Grant = new(@".*") },
                     View = new(DetailQueryUnconstrained.Instance),
                     Edit = new(DetailQueryUnconstrained.Instance),
                     Voucher = new(VoucherQueryUnconstrained.Instance),
@@ -240,8 +247,6 @@ public static class RbacManager
         p.AllUsers = new(id.Users);
         p.AllAssumes = new(id.Assumes);
         p.AllKnowns = new(id.Knowns);
-        p.GrantInvokes = id.Grants.Where(static (p) => p.Action.HasFlag(Verb.Invoke))
-            .Select(static (p) => p.Query).ToList();
 
         void Merge(HashSet<string> a, HashSet<string> b)
         {
@@ -256,7 +261,6 @@ public static class RbacManager
         {
             var role = GetRole(nm);
             p.AllRoles.Add(role);
-            p.GrantInvokes.AddRange(role.P.GrantInvokes);
             foreach (var v in role.P.AllRoles)
                 p.AllRoles.Add(v);
             Merge(p.AllUsers, role.P.AllUsers);
@@ -270,6 +274,10 @@ public static class RbacManager
         if (p.AllKnowns.Contains("*"))
             p.AllKnowns = null;
 
+        bool Recursive(Predicate<Role> pred, Role id0)
+            => id0 != null && (pred(id0) || id0.Inherits.Any((nm) => Recursive(pred,
+                            Cfg.Get<ACL>().Roles.SingleOrDefault((id) => id.Name == nm))));
+
         bool ComputeB(Verb f)
             => Recursive((id) =>
                 id.Grants.Any((p) => p.Action.HasFlag(f))
@@ -277,6 +285,41 @@ public static class RbacManager
             && !Recursive((id) => id.Rejects.Any((p) => p.Action.Flags(f)), id);
         p.Imba = ComputeB(Verb.Imbalance);
         p.Reflect = ComputeB(Verb.Reflect);
+
+        string J(IEnumerable<string> lst)
+        {
+            var res = string.Join("|", lst);
+            return res == "" ? null : res;
+        }
+
+        {
+            var grants = id.Grants
+                .Where(static (p) => p.Action.HasFlag(Verb.Invoke))
+                .Select(static (p) => @$"^(?:{p.Query})$");
+            var queryAndGrants = J(id.Inherits.Select(static (nm) => GetRole(nm).P.Invoke.Query?.ToString())
+                    .Where(static (q) => q != null)
+                    .Concat(grants));
+            var allGrants = J(id.Inherits.Select(static (nm) => GetRole(nm).P.Invoke.Grant?.ToString())
+                    .Where(static (q) => q != null)
+                    .Concat(grants));
+            var denies = id.Denies
+                .Where(static (p) => p.Action.Flags(Verb.Invoke))
+                .Select(static (p) => @$"^(?:{p.Query})$");
+            var allRejects = id.Inherits.Select(static (nm) => GetRole(nm).P.Invoke.Reject?.ToString())
+                .Where(static (q) => q != null)
+                .Concat(id.Rejects
+                        .Where(static (p) => p.Action.Flags(Verb.Invoke))
+                        .Select(static (p) => @$"^(?:{p.Query})$"));
+            var rej = J(allRejects);
+            var rd = J(allRejects.Concat(denies));
+            p.Invoke = new()
+                {
+                    Grant = allGrants == null ? null : new(allGrants),
+                    Reject = rej == null ? null : new(rej),
+                    Query = queryAndGrants == null ? null : rd == null
+                        ? new(queryAndGrants) : new(@$"^(?!{rd})(?:{queryAndGrants})$"),
+                };
+        }
 
         ACLQuery<T> Compute<T>(Verb f, Func<Permission, IQueryCompounded<T>> proj, Func<Role, ACLQuery<T>> proj2)
             where T : class
@@ -325,10 +368,6 @@ public static class RbacManager
         else
             Console.WriteLine($"Prepared role {id.Name}");
     }
-
-    private static bool Recursive(Predicate<Role> pred, Role id0)
-        => id0 != null && (pred(id0) || id0.Inherits.Any((nm) => Recursive(pred,
-                        Cfg.Get<ACL>().Roles.SingleOrDefault((id) => id.Name == nm))));
 
     public static Identity Authenticate(IEnumerable<Authn> aids, string req = null)
     {
@@ -399,25 +438,22 @@ public static class RbacManager
         return res;
     }
 
-    public static bool CanLogin(this Identity id0, string user)
-        => id0.P.AllUsers == null || id0.P.AllUsers.Contains(user);
+    public static bool CanLogin(this Identity id, string user)
+        => id.P.AllUsers == null || id.P.AllUsers.Contains(user);
 
-    public static void WillLogin(this Identity id0, string user)
+    public static void WillLogin(this Identity id, string user)
     {
-        if (!CanLogin(id0, user))
-            throw new AccessDeniedException($"Login of {user} denied for identity {id0.Name.AsId()}");
+        if (!CanLogin(id, user))
+            throw new AccessDeniedException($"Login of {user} denied for identity {id.Name.AsId()}");
     }
 
-    public static bool CanInvoke(this Identity id0, string term)
-        => id0 != null && Recursive((id) =>
-                id.Grants.Any((p) => p.Action.HasFlag(Verb.Invoke) && term.StartsWith(p.Query ?? "", StringComparison.Ordinal))
-                && !id.Denies.Any((p) => p.Action.Flags(Verb.Invoke) && term.StartsWith(p.Query ?? "", StringComparison.Ordinal)), id0)
-            && !Recursive((id) => id.Rejects.Any((p) => p.Action.Flags(Verb.Invoke) && term.StartsWith(p.Query ?? "", StringComparison.Ordinal)), id0);
+    public static bool CanInvoke(this Identity id, string term)
+        => id != null && id.P.Invoke.Query?.IsMatch(term) == true;
 
-    public static void WillInvoke(this Identity id0, string term)
+    public static void WillInvoke(this Identity id, string term)
     {
-        if (!CanInvoke(id0, term))
-            throw new AccessDeniedException($"Access to \"{term}\" denied for identity {id0.Name.AsId()}");
+        if (!CanInvoke(id, term))
+            throw new AccessDeniedException($"Invocation of \"{term}\" denied for identity {id.Name.AsId()}");
     }
 
     public static bool CanRead(this Identity id, Voucher v)

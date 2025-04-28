@@ -148,14 +148,12 @@ internal class AuthnShell : IShellComponent
         }
 
         yield return "Allowable Permissions:\n";
+        yield return $"\tInvoke: {ctx.Identity.P.Invoke.Grant}\n";
         yield return $"\tView: {Synth(ctx.Identity.P.View.Grant)}\n";
         yield return $"\tEdit: {Synth(ctx.Identity.P.Edit.Grant)}\n";
         yield return $"\tVoucher: {Synth(ctx.Identity.P.Voucher.Grant)}\n";
         yield return $"\tAsset: {Synth(ctx.Identity.P.Asset.Grant)}\n";
         yield return $"\tAmort: {Synth(ctx.Identity.P.Amort.Grant)}\n";
-
-        var invokes = ctx.Identity.P.GrantInvokes.Select(static (r) => r.Quotation('"'));
-        yield return $"\tInvokes: {string.Join(", ", invokes)}\n";
 
         yield return $"Debit/Credit Imbalance: {(ctx.Identity.P.Imba ? "Granted" : "Denied")}\n";
         yield return $"Reflect on Denies: {(ctx.Identity.P.Reflect ? "Granted" : "Denied")}\n";
@@ -163,6 +161,7 @@ internal class AuthnShell : IShellComponent
         if (ctx.Identity.P.Reflect)
         {
             yield return "Full Permissions:\n";
+            yield return $"\tInvoke: {ctx.Identity.P.Invoke.Query}\n";
             yield return $"\tView: {Synth(ctx.Identity.P.View.Query)}\n";
             yield return $"\tEdit: {Synth(ctx.Identity.P.Edit.Query)}\n";
             yield return $"\tVoucher: {Synth(ctx.Identity.P.Voucher.Query)}\n";
@@ -286,12 +285,18 @@ internal class AuthnShell : IShellComponent
     private async IAsyncEnumerable<string> RemoveAuthn(Context ctx, string sid)
     {
         if (string.IsNullOrWhiteSpace(sid))
+        {
             yield return "An ID is required; find it by an-list\n";
+            yield break;
+        }
 
-        var id = Authn.ToBytes(id);
-        var aid = await m_Db.SelectAuth(sid);
+        var id = Authn.ToBytes(sid);
+        var aid = await m_Db.SelectAuth(id);
         if (aid == null)
+        {
             yield return "No such AuthIdentity for removal\n";
+            yield break;
+        }
 
         if (aid.IdentityName == ctx.TrueIdentity.Name)
             ctx.TrueIdentity.WillInvoke("an-rm-self");

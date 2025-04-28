@@ -75,10 +75,10 @@ const send = (method, url, body, params) => {
   const ld = new Date(+d - 1000*60*d.getTimezoneOffset());
   const ldt = ld.toISOString().replace(/Z$/, '');
   const up = new URLSearchParams(params);
-  up.set('u', theUser);
+  !up.has('u') && up.set('u', theUser);
+  !up.has('id') && theAssume && up.set('id', theAssume);
   const headers = {
     'Content-Type': 'text/plain',
-    'X-Assume-Identity': theAssume ?? '',
     'X-ClientDateTime': ldt,
   };
   return fetch(`${url}?${up}`, { method, body, headers });
@@ -137,6 +137,7 @@ const execute = (cmd, cb) => {
 login                       认证当前身份，不改变默认记账主体
 login   <记账主体>          认证当前身份并选择记账主体
 assume  <身份>              代入其它身份（限系统管理员使用）
+sudo ...                    临时提权至admin（限系统管理员使用）
 
 以其他方式显示记账凭证：
 csharp -- ...               使用C#序列化器显示记账凭证
@@ -189,10 +190,16 @@ Ctrl+Alt+Enter              执行需要上传内容的命令，如$stmt$等
     else return Promise.resolve(t);
   }
 
-  const m = cmd.match(/^([a-z](?:[^-]|-[^-]|---)+)--(.*)$/);
-  const expr = m ? m[2] : cmd;
+  let expr = cmd;
+  const obj = {};
+  const m = cmd.match(/^(sudo\s+)?(?:([a-z](?:[^-]|-[^-]|---)+)--)?(.*)$/);
+  if (m) {
+    if (m[1]) obj.id = 'admin';
+    if (m[2]) obj.spec = m[2];
+    expr = m[3];
+  }
 
-  return (cb ? fancyxhr(cb) : xhr)('POST', '/api/execute', expr, m ? { spec: m[1] } : undefined);
+  return (cb ? fancyxhr(cb) : xhr)('POST', '/api/execute', expr, obj);
 };
 
 const sanitize = (raw) => {

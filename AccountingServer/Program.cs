@@ -197,7 +197,7 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
         int.TryParse(limitS, out limit);
 
     string assume = null;
-    request.Header.TryGetValue("x-assume-identity", out assume);
+    request.Parameters?.TryGetValue("id", out assume);
 
     string spec = null;
     request.Parameters?.TryGetValue("spec", out spec);
