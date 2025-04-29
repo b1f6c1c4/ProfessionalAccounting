@@ -134,8 +134,17 @@ internal class Coupling : PluginBase
 
         await foreach (var couple in GetCouples(ctx, configCouple.User, rng, aux))
         {
-            var (typeC, nameC) = configCouple.Parse(couple.Creditor);
-            var (typeD, nameD) = configCouple.Parse(couple.Debitor);
+            CashCategory typeC, typeD;
+            string nameC, nameD;
+            try
+            {
+                (typeC, nameC) = configCouple.Parse(couple.Creditor);
+                (typeD, nameD) = configCouple.Parse(couple.Debitor);
+            }
+            catch (Exception e)
+            {
+                throw new ApplicationException($"When parsing {couple.Voucher.ID.Quotation('^')}:", e);
+            }
             Semantics ty;
             string nm;
             switch (typeC, typeD)

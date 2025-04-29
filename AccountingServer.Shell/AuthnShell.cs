@@ -232,7 +232,9 @@ internal class AuthnShell : IShellComponent
                 yield return $"\tBackup: {(wa.IsBackupEligible ? "" : "in")}eligible, ";
                 yield return $"{(wa.IsBackedUp ? "" : "not")} backed up\n";
                 yield return $"\tAttestation format: {wa.AttestationFormat}\n";
-                yield return $"\tTransports: {string.Join(" ", wa.Transports)}\n\n";
+                if (wa.Transports != null)
+                    yield return $"\tTransports: {string.Join(" ", wa.Transports)}\n\n";
+
                 continue;
             }
             if (aid is CertAuthn ca)
