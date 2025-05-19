@@ -107,7 +107,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
 
         var d = (double?)0D;
         var t = (double?)0D;
-        var reg = new Regex(@"(?<dt>[dt])(?<num>\.[0-9]+|[0-9]+(?:\.[0-9]+)?|null)");
+        var reg = new Regex(@"(?<dt>[dt])(?<num>\.[0-9]+|[0-9]+(?:\.[0-9]+)?|null|/)");
         while (true)
         {
             var res = Parsing.Token(ref expr, false, reg.IsMatch);
@@ -115,7 +115,8 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
                 break;
 
             var m = reg.Match(res);
-            var num = m.Groups["num"].Value == "null" ? (double?)null : Convert.ToDouble(m.Groups["num"].Value);
+            var num = m.Groups["num"].Value == "null" || m.Groups["num"].Value == "/"
+                ? (double?)null : Convert.ToDouble(m.Groups["num"].Value);
             if (m.Groups["dt"].Value == "d")
                 d += num;
             else // if (m.Groups["dt"].Value == "t")
@@ -134,7 +135,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
         VoucherDetail vd;
         var exprS = new AbbrSerializer { Client = Client };
         while ((vd = exprS.ParseVoucherDetail(ref expr)) != null)
-            resLst.Add(vd);
+            resLst.AddRange(vd);
 
         // Don't use Enumerable.Sum, it ignores null values
         var actualVals = resLst.Aggregate((double?)0D, static (s, dd) => s + dd.Fund);
@@ -198,13 +199,23 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
         return new() { Type = VoucherType.Ordinary, Date = date, Remark = vremark, Details = resLst };
     }
 
-    private VoucherDetail ParseVoucherDetail(string currency, ref string expr, List<string> guids)
+    private IEnumerable<VoucherDetail> ParseVoucherDetail(string currency, ref string expr, List<string> guids)
     {
         var lst = new List<string>();
 
         Parsing.TrimStartComment(ref expr);
-        var user = Parsing.Token(ref expr, false, static t => t.StartsWith("U", StringComparison.Ordinal))
-            .ParseUserSpec(Client);
+        var users = new List<string>();
+        while (true)
+        {
+            var user = Parsing.Token(ref expr, false, static t => t.StartsWith("U", StringComparison.Ordinal));
+            if (user == null)
+                break;
+
+            users.Add(user.ParseUserSpec(Client));
+        }
+        if (users.Count == 0)
+            users.Add(Client.User);
+
         var title = Parsing.Title(ref expr);
         if (title == null)
             if (!AlternativeTitle(ref expr, lst, ref title))
@@ -242,7 +253,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
             remark = Guid.NewGuid().ToString().ToUpperInvariant();
 
 
-        return new()
+        return users.Select(user => new VoucherDetail
             {
                 User = user,
                 Currency = currency,
@@ -250,7 +261,7 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
                 SubTitle = title.SubTitle,
                 Content = string.IsNullOrEmpty(content) ? null : content,
                 Remark = string.IsNullOrEmpty(remark) ? null : remark,
-            };
+            });
     }
 
     private List<Item> ParseItem(string currency, ref string expr, List<string> guids)
@@ -260,11 +271,12 @@ public class DiscountSerializer : IClientDependable, IEntitySerializer
         while (true)
         {
             var actual = Parsing.Optional(ref expr, "!");
-            var vd = ParseVoucherDetail(currency, ref expr, guids);
-            if (vd == null)
+            var vds = ParseVoucherDetail(currency, ref expr, guids);
+            if (vds == null)
                 break;
 
-            lst.Add((vd, actual));
+            foreach (var vd in vds)
+                lst.Add((vd, actual));
         }
 
         if (ParsingF.Token(ref expr, false, static s => s == ":") == null)

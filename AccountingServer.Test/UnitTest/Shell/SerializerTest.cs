@@ -296,6 +296,39 @@ tnull
     }
 
     [Fact]
+    public void CompactDiscountTest()
+    {
+        var voucher = Serializer.ParseVoucher(
+            @"new Voucher {
+! @jpy
+Ua Ub T1001 +
+! Uc Ud T1002 : 444 ;
+d/
+
+@jpy T1001 -400
+}");
+        Assert.Equal(
+            new()
+                {
+                    Date = m_Client.Today,
+                    Type = VoucherType.Ordinary,
+                    Details = new()
+                        {
+                            new() { User = "b1", Currency = "JPY", Title = 1001, Fund = -400 },
+                            new() { User = "a", Currency = "JPY", Title = 1001, Fund = 111 },
+                            new() { User = "b", Currency = "JPY", Title = 1001, Fund = 111 },
+                            new() { User = "c", Currency = "JPY", Title = 1002, Fund = 100 },
+                            new() { User = "d", Currency = "JPY", Title = 1002, Fund = 100 },
+                            new() { User = "a", Currency = "JPY", Title = 6603, Fund = -11 },
+                            new() { User = "b", Currency = "JPY", Title = 6603, Fund = -11 },
+                        },
+                },
+            voucher,
+            new VoucherEqualityComparer());
+    }
+
+
+    [Fact]
     public void MultUserDiscountTest()
     {
         var voucher = Serializer.ParseVoucher(
