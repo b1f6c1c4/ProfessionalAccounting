@@ -237,7 +237,7 @@ internal class Coupling : PluginBase
     private static IAsyncEnumerable<Couple> GetCouples(Context ctx, string user, DateFilter rng,
         IQueryCompounded<IDetailQueryAtom> dq)
     {
-        var vq0 = Parsing.VoucherQuery($"{user.AsUser()} {rng.AsDateRange()}", ctx.Client);
+        var vq0 = Parsing.VoucherQuery($"{user.AsUser()} T3998 {rng.AsDateRange()}", ctx.Client);
         var vq = dq == null
             ? vq0
             : new IntersectQueries<IVoucherQueryAtom>(vq0, new SimpleVoucherQuery { DetailFilter = dq, Range = rng });

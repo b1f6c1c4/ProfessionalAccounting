@@ -193,7 +193,7 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
 
     var limit = 0;
     string limitS = null;
-    if (request.Parameters?.TryGetValue("u", out limitS) == true)
+    if (request.Parameters?.TryGetValue("limit", out limitS) == true)
         int.TryParse(limitS, out limit);
 
     string assume = null;
