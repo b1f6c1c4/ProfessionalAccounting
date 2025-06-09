@@ -4,9 +4,6 @@ services:
     image: b1f6c1c4/accounting-frontend
     restart: on-failure:3
     read_only: true
-    ports:
-      - "18080:18080/tcp"
-      - "18080:18080/udp"
     volumes:
       - /data/accounting/certs:/opt/accounting/certs:ro
       - /data/accounting/nginx-cache:/var/cache/nginx
@@ -14,8 +11,9 @@ services:
       - /data/accounting/nginx-log:/var/log/nginx
     depends_on:
       - server
-    networks:
-      - prod
+    extra_hosts:
+      - "server:127.0.0.1"
+    network_mode: host
 
   server:
     image: b1f6c1c4/accounting-backend
@@ -27,6 +25,8 @@ services:
     volumes:
       - /data/accounting/atlas:/opt/accounting/atlas:ro
       - /data/accounting/config.d:/opt/accounting/config.d:ro
+    ports:
+      - "127.0.0.1:30000:30000"
     networks:
       - prod
 
