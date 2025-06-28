@@ -51,6 +51,7 @@ public class Statement : PluginBase
         if (ParsingF.Optional(ref expr, "mark"))
         {
             var nm = ParsingF.Token(ref expr);
+            ctx.Identity.WillInvoke($"$stmt$ {nm}");
             var tgt = Cfg.Get<StmtTargets>().Targets.Single(t => t.Name == nm);
             var parsed = new CsvParser(tgt.Reversed);
             var filt = ParsingF.DetailQuery(tgt.Query, ctx.Client);
@@ -63,7 +64,6 @@ public class Statement : PluginBase
 
             parsed.Parse(ref csv);
             var sb = new StringBuilder();
-            ctx.Identity.WillInvoke($"$stmt$ {nm}");
             await RunMark(ctx, sb, filt, parsed, marker);
             yield return sb.ToString();
 
@@ -73,11 +73,11 @@ public class Statement : PluginBase
         if (ParsingF.Optional(ref expr, "unmark"))
         {
             var nm = ParsingF.Token(ref expr);
+            ctx.Identity.WillInvoke($"$stmt$ {nm}");
             var tgt = Cfg.Get<StmtTargets>().Targets.Single(t => t.Name == nm);
             var filt = ParsingF.DetailQuery(tgt.Query, ctx.Client);
             ParsingF.Eof(expr);
             var sb = new StringBuilder();
-            ctx.Identity.WillInvoke($"$stmt$ {nm}");
             await RunUnmark(ctx, sb, filt);
             yield return sb.ToString();
 
@@ -87,11 +87,11 @@ public class Statement : PluginBase
         if (ParsingF.Optional(ref expr, "check"))
         {
             var nm = ParsingF.Token(ref expr);
+            ctx.Identity.WillInvoke($"$stmt$ {nm}");
             var tgt = Cfg.Get<StmtTargets>().Targets.Single(t => t.Name == nm);
             var filt = ParsingF.DetailQuery(tgt.Query, ctx.Client);
             ParsingF.Eof(expr);
             var sb = new StringBuilder();
-            ctx.Identity.WillInvoke($"$stmt$ {nm}");
             await RunCheck(ctx, sb, filt, tgt);
             yield return sb.ToString();
 
@@ -118,6 +118,7 @@ public class Statement : PluginBase
 
         {
             var nm = ParsingF.Token(ref expr);
+            ctx.Identity.WillInvoke($"$stmt$ {nm}");
             var tgt = Cfg.Get<StmtTargets>().Targets.Single(t => t.Name == nm);
             var parsed = new CsvParser(tgt.Reversed);
             var filt = ParsingF.DetailQuery(tgt.Query, ctx.Client);
@@ -142,7 +143,6 @@ public class Statement : PluginBase
                     new SimpleDetailQuery { Filter = new() { Remark = "" } }));
             var sb = new StringBuilder();
             sb.AppendLine($"{parsed.Items.Count} parsed");
-            ctx.Identity.WillInvoke($"$stmt$ {nm}");
             await using var vir = ctx.Accountant.Virtualize();
             await RunUnmark(ctx, sb, markerFilt);
             if (await RunMark(ctx, sb, nullFilt, parsed, marker)

@@ -177,7 +177,8 @@ public class DbSession : IHistoricalExchange
         => query == null || query.VoucherQuery == null ? E<Balance>() : Db.SelectVouchersGrouped(query, limit);
 
     public virtual IAsyncEnumerable<Balance> SelectVoucherDetailsGrouped(IGroupedQuery query, int limit)
-        => query == null || query.VoucherEmitQuery == null ? E<Balance>() : Db.SelectVoucherDetailsGrouped(query, limit);
+        => query == null || query.VoucherEmitQuery == null || query.VoucherEmitQuery.VoucherQuery == null ? E<Balance>()
+            : Db.SelectVoucherDetailsGrouped(query, limit);
 
     public virtual IAsyncEnumerable<(Voucher, string, string, double)> SelectUnbalancedVouchers(
         IQueryCompounded<IVoucherQueryAtom> query)
