@@ -46,6 +46,7 @@ internal class SpreadSheet : PluginBase
         var filter = Parsing.VoucherQuery(ref expr, ctx.Client);
         Parsing.Eof(expr);
 
+        ctx.Identity.WillInvoke($"$ss$ {abbr}");
         var cols = Cfg.Get<SheetTemplates>().Templates.Single(t => t.Name == abbr).Columns;
         var sum = new Dictionary<string, double[]>();
         var queries = cols.Select(col => ParsingF.PureDetailQuery(col.Query, ctx.Client)).ToList();
