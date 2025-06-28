@@ -206,14 +206,18 @@ public class DbSession : IHistoricalExchange
 
     public static double? Regularize(double? fund)
     {
-        const double coercionTolerance = 1e-12;
+        const double coercionTolerance4 = 1e-12;
+        const double coercionTolerance5 = 1e-9;
 
         if (!fund.HasValue)
             return null;
 
-        var t = Math.Round(fund.Value, -(int)Math.Log10(VoucherDetail.Tolerance));
-        var c = Math.Round(fund.Value, -(int)Math.Log10(coercionTolerance));
-        return Math.Abs(t - c) < coercionTolerance / 10 ? t : fund;
+        var t4 = Math.Round(fund.Value, -(int)Math.Log10(VoucherDetail.Tolerance));
+        var c4 = Math.Round(fund.Value, -(int)Math.Log10(coercionTolerance4));
+        var t5 = Math.Round(fund.Value, -(int)Math.Log10(1e-4));
+        var c5 = Math.Round(fund.Value, -(int)Math.Log10(coercionTolerance5));
+        return Math.Abs(t4 - c4) < coercionTolerance4 / 10 ? t4 :
+            Math.Abs(t5 - c5) < coercionTolerance5 / 10 ? t5 : fund;
     }
 
     public static Voucher Regularize(Voucher entity)
