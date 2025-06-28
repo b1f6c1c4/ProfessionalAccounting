@@ -418,7 +418,7 @@ public class Facade
     public async ValueTask<Context> AuthnCtx(string user, DateTime dt,
             string sessionKey = null, CertAuthn cert = null,
             string assume = null, string spec = null, int limit = 0,
-            bool legacyAuth = false)
+            bool unlimited = false)
     {
         var session = m_SessionManager.AccessSession(sessionKey);
         var ca = await m_Db.SelectCertAuthn(cert?.Fingerprint);
@@ -435,7 +435,7 @@ public class Facade
         }
         catch
         {
-            if (legacyAuth && cert?.Fingerprint != null)
+            if (unlimited)
                 id = Identity.Unlimited;
             else
                 throw;

@@ -41,19 +41,17 @@ Console.WriteLine("All config files loaded");
 
 var facade = new Facade();
 
-var legacyAuth = false;
+var unlimited = false;
+string assumedIdentity = null;
 if (args.Length == 0)
 {
     Console.WriteLine("Info: WebAuthn & certificate authentication enabled");
 }
-else if (args.Length == 1 && args[0] == "--legacyAuth")
+else if (args.Length == 1 && args[0] == "--unlimited")
 {
-    Console.WriteLine(@"NOTICE: Legacy auth flow:
-Valid certificates signed by CA that have no associated identity
-will have [[UNLIMITED resource accesses]]!
-
-NOT recommended for public-facing instances");
-    legacyAuth = true;
+    Console.WriteLine(@"WARNING: Authentication BYPASSED!
+ALL unauthenticated connections have [[UNLIMITED resource accesses]]!");
+    unlimited = true;
 }
 else if (args.Length == 2 && args[0] == "--invite")
 {
@@ -227,7 +225,7 @@ async ValueTask<HttpResponse> Server_OnHttpRequest(HttpRequest request)
     Context ctx;
     try
     {
-        ctx = await facade.AuthnCtx(user, dt, sessionKey, cert, assume, spec, limit, legacyAuth);
+        ctx = await facade.AuthnCtx(user, dt, sessionKey, cert, assume, spec, limit, unlimited);
     }
     catch (Exception e)
     {
