@@ -289,6 +289,20 @@ public class Statement : PluginBase
     {
         var incidents = new List<Incident>();
 
+        int OverlapTolerance(string f, string t)
+        {
+            try
+            {
+                return tgt.Overlaps.SingleOrDefault(p =>
+                        (f == null ? string.IsNullOrEmpty(p.From) : p.From == f) &&
+                        (t == null ? string.IsNullOrEmpty(p.To) : p.To == t))?.Tolerance ?? 1;
+            }
+            catch (InvalidOperationException)
+            {
+                throw new ApplicationException($"Multiple <Overlap> exists for {tgt.Name}");
+            }
+        }
+
         // Obtain period range (both inclusive)
         string lbs = null, ubs = null;
         var reg = new Regex(@"^20[1-2][0-9](?:0[1-9]|1[0-2])$");
@@ -387,7 +401,7 @@ public class Statement : PluginBase
                 var (period0, _, _) = rngs[j - 1];
                 var ubd0 = lst[ubi0.Value].Item2;
                 var d = (int)(ubd0 - lbd1).TotalDays;
-                var tol = tgt.Overlaps.SingleOrDefault(p => p.From == period0 && p.To == period1)?.Tolerance ?? 1;
+                var tol = OverlapTolerance(period0, period1);
                 if (d > tol)
                     yield return new(IncidentType.OverlapTooMuch,
                             lbi1.Value, ubi0.Value, new OverlapSpec { From = period0, To = period1, Tolerance = d });
@@ -443,7 +457,7 @@ public class Statement : PluginBase
                         //        <==>
                         // ~~~1111  11     2
                         var days = (int)(ubd1 - d).TotalDays;
-                        var tol = tgt.Overlaps.SingleOrDefault(p => p.From == period1 && string.IsNullOrEmpty(p.To))?.Tolerance ?? 1;
+                        var tol = OverlapTolerance(period1, null);
                         if (days > tol)
                             yield return new(
                                         j == rngs.Count - 1 ? IncidentType.FinalOverlap : IncidentType.OverlapTooMuch,
@@ -462,7 +476,7 @@ public class Statement : PluginBase
                         //       <==>
                         // 0     11  1111~~~~
                         var days = (int)(d - lbd1).TotalDays;
-                        var tol = tgt.Overlaps.SingleOrDefault(p => string.IsNullOrEmpty(p.From) && p.To == period1)?.Tolerance ?? 1;
+                        var tol = OverlapTolerance(null, period1);
                         if (days > tol)
                             yield return new(
                                     IncidentType.OverlapTooMuch, lbi1.Value, i, new OverlapSpec { To = period1, Tolerance = days });
@@ -481,7 +495,15 @@ public class Statement : PluginBase
             var lbd = lst[lbi!.Value].Item2;
             var ubd = lst[ubi!.Value].Item2;
             var d = (int)(ubd - lbd).TotalDays + 1; // both inclusive
-            var tol = tgt.Lengths.SingleOrDefault(p => p.Period == period)?.Tolerance ?? 1;
+            int tol;
+            try
+            {
+                tol = tgt.Lengths.SingleOrDefault(p => p.Period == period)?.Tolerance ?? 1;
+            }
+            catch (InvalidOperationException)
+            {
+                throw new ApplicationException($"Multiple <Length period=\"{period}\"> exists for {tgt.Name}");
+            }
             if (d > 31 + tol)
                 yield return new(IncidentType.PeriodTooLong, lbi.Value, ubi.Value, new LengthSpec { Period = period, Tolerance = d - 31 });
         }
