@@ -198,10 +198,10 @@ internal class Pivot : PluginBase
                     => Math.Max(h.CLength(), txt.Max(StringFormatter.CLength)));
             yield return $"{fit("", wh)} {string.Join(" ", headers.Zip(wt, fitL))}\n";
             for (var i = 0; i < mgr.Width; i++)
-                yield return $"{fitL(mgr.Header[i].ToString(), wh)} {string.Join("\t",
+                yield return $"{fitL(mgr.Header[i].ToString(), wh)} {string.Join(" ",
                       texts.Zip(wt, (txt, w) => fit(txt[i], w)))}\n";
         }
-        else // if (!transpose && fitting)
+        else if (!transpose && fitting)
         {
             var wh = headers.Max(StringFormatter.CLength);
             var wt = mgr.Header.Select((p, i) =>
