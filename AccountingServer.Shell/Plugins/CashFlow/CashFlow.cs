@@ -144,6 +144,17 @@ internal class CashFlow : PluginBase
         }
     }
 
+    private DateTime NextDay(Context ctx, int day, DateTime? reference = null)
+    {
+        var d = reference ?? ctx.Client.Today;
+        var targetDayOfWeek = day % 7;
+        var currentDayOfWeek = (int)d.DayOfWeek;
+        return currentDayOfWeek == targetDayOfWeek
+            ? d.AddDays(7)
+            : d.AddDays((targetDayOfWeek - currentDayOfWeek + 7) % 7);
+    }
+
+
     private DateTime NextDate(Context ctx, int day, DateTime? reference = null, bool inclusive = false)
     {
         var d = reference ?? ctx.Client.Today;
@@ -206,6 +217,19 @@ internal class CashFlow : PluginBase
                             continue;
 
                         yield return (d, mn.Fund);
+                    }
+
+                    break;
+
+                case WeeklyItem wn:
+                    for (var d = NextDay(ctx, wn.Day); d <= until; d = NextDay(ctx, wn.Day, d))
+                    {
+                        if (wn.Since != default && d < wn.Since)
+                            continue;
+                        if (wn.Till != default && d > wn.Till)
+                            continue;
+
+                        yield return (d, wn.Fund);
                     }
 
                     break;

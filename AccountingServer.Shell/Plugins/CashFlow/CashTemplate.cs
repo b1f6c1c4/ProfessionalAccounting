@@ -36,6 +36,7 @@ public class CashAccount
     [XmlArrayItem("OnceItem", typeof(OnceItem))]
     [XmlArrayItem("OnceQueryItem", typeof(OnceQueryItem))]
     [XmlArrayItem("MonthlyItem", typeof(MonthlyItem))]
+    [XmlArrayItem("WeeklyItem", typeof(WeeklyItem))]
     [XmlArrayItem("SimpleCreditCard", typeof(SimpleCreditCard))]
     [XmlArrayItem("ComplexCreditCard", typeof(ComplexCreditCard))]
     public List<CashFlowItem> Items;
@@ -78,6 +79,22 @@ public class OnceQueryItem : CashFlowItem
 
 [Serializable]
 public class MonthlyItem : CashFlowItem
+{
+    [XmlAttribute("day")]
+    public int Day { get; set; }
+
+    [XmlAttribute("since")]
+    public DateTime Since { get; set; }
+
+    [XmlAttribute("till")]
+    public DateTime Till { get; set; }
+
+    [XmlAttribute("fund")]
+    public double Fund { get; set; }
+}
+
+[Serializable]
+public class WeeklyItem : CashFlowItem
 {
     [XmlAttribute("day")]
     public int Day { get; set; }
